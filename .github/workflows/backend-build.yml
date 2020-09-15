@@ -1,0 +1,19 @@
+name: Build Backend
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to Registry
+        run: echo ${{ secrets.REG_PASS }} | docker login ${{ secrets.REG_HOST }} -u ${{ secrets.REG_USER }} --password-stdin
+      - name: Build backend image
+        run: docker build . -t ${{ secrets.REG_HOST }}/comp90018/backend:latest
+        working-directory: ./backend
+      - name: Push backend image
+        run: docker push ${{ secrets.REG_HOST }}/comp90018/backend:latest

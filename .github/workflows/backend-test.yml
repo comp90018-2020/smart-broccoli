@@ -1,0 +1,39 @@
+name: Test Backend
+
+on:
+  push:
+    branches:
+      - backend
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: node:14-alpine
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: comp90018
+          POSTGRES_DB: comp90018
+          POSTGRES_PASSWORD: foo
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: yarn
+        working-directory: ./backend
+
+      - name: Run test
+        run: yarn test
+        working-directory: ./backend
+        env:
+          POSTGRES_USER: comp90018
+          POSTGRES_DB: comp90018
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_PASSWORD: foo
+          TOKEN_SECRET: foo

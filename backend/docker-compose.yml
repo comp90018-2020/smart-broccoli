@@ -1,0 +1,32 @@
+version: '3'
+services:
+  web:
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST
+      - TOKEN_SECRET
+    volumes:
+      - ./data/uploads:/app/uploads
+    links:
+      - postgresql
+    depends_on:
+      - postgresql
+    restart: always
+  postgresql:
+    image: "postgres:13-alpine"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data
+    restart: always

@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "lib": [
+          "es2019",
+          "dom"
+        ],
+        "target": "es2020",
+        "esModuleInterop": true,
+        "noImplicitAny": true,
+        "removeComments": false,
+        "sourceMap": true,
+        "outDir": "build",
+        "baseUrl": "./",
+        "incremental": true,
+        "paths": {
+          "*": ["*", "models/*", "helpers/*", "controllers/*"],
+        }
+    },
+    "include": [
+        "**/*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+    ]
+}

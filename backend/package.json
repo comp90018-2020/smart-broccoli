@@ -1,0 +1,46 @@
+{
+  "name": "fuzzy-broccoli",
+  "version": "1.0.0",
+  "description": "COMP90018 Assignment 2",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "devstart": "yarn build && node build/server.js",
+    "build": "tsc && yarn patch-swagger && cp package.json yarn.lock build/",
+    "patch-swagger": "sed -i 's|https://petstore.swagger.io/v2/swagger.json|swagger.json|' node_modules/swagger-ui-dist/index.html",
+    "prettier": "prettier --tab-width 4 *.ts '**/*.ts' --write",
+    "test": "yarn build && PORT=5000 mocha build/tests/index.js --exit"
+  },
+  "author": "w01/10-4",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-validator": "^6.6.1",
+    "helmet": "^4.1.1",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.3.3",
+    "sequelize": "^6.3.5",
+    "swagger-jsdoc": "^4.0.0",
+    "swagger-ui-dist": "^3.33.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.12",
+    "@types/express": "^4.17.8",
+    "@types/express-validator": "^3.0.0",
+    "@types/helmet": "^0.0.48",
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/mocha": "^8.0.3",
+    "@types/sequelize": "^4.28.9",
+    "@types/supertest": "^2.0.10",
+    "@types/swagger-jsdoc": "^3.0.2",
+    "@types/swagger-ui-dist": "^3.30.0",
+    "@typescript-eslint/eslint-plugin": "^4.1.1",
+    "@typescript-eslint/eslint-plugin-tslint": "^4.1.1",
+    "@typescript-eslint/parser": "^4.1.1",
+    "chai": "^4.2.0",
+    "dotenv": "^8.2.0",
+    "mocha": "^8.1.3",
+    "supertest": "^4.0.2",
+    "typescript": "^4.0.2"
+  }
+}

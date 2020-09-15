@@ -1,0 +1,14 @@
+.prettierc
+node_modules/
+.nyc*
+.prettierrc
+.dockerignore
+.env
+.env.sample
+docker-compose.yml
+tmp/
+data/
+coverage/
+dist/
+uploads/
+package-lock.json
