@@ -9,7 +9,7 @@ const register = async (info: any) => {
 // Login as user
 const registerAndLogin = async (info: any) => {
     await register(info);
-    const res = await AuthController.login(info.username, info.password);
+    const res = await AuthController.login(info.email, info.password);
     return res.token;
 };
 

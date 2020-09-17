@@ -17,12 +17,9 @@ const router = Router();
  *     NewUser:
  *       type: object
  *       required:
- *         - username
  *         - password
  *         - email
  *       properties:
- *         username:
- *           type: string
  *         password:
  *           type: string
  *         email:
@@ -30,7 +27,6 @@ const router = Router();
  *         name:
  *           type: string
  *       example:
- *         username: foo
  *         password: foobarbaz
  *         email: foo@foo.foo
  *         name: Foo Bar
@@ -44,7 +40,6 @@ const router = Router();
  *               format: int64
  *         - example:
  *             id: 1
- *             username: foo
  *             password: foobarbaz
  *             email: foo@foo.foo
  *             name: Foo Bar
@@ -75,9 +70,8 @@ router.post(
     "/register",
     [
         body("email").isEmail().normalizeEmail().trim(),
-        body("username").notEmpty().trim(),
         body("password").isLength({ min: 8 }),
-        body("name").trim(),
+        body("name").notEmpty().trim(),
     ],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
@@ -106,13 +100,13 @@ router.post(
  *         application/json:
  *           schema:
  *             properties:
- *               username:
+ *               email:
  *                 type: string
  *               password:
  *                 type: string
  *             required:
- *               - username
- *               -  password
+ *               - email
+ *               - password
  *     responses:
  *       '200':
  *         description: user
@@ -125,12 +119,12 @@ router.post(
  */
 router.post(
     "/login",
-    [body("username").notEmpty().trim(), body("password").isLength({ min: 8 })],
+    [body("email").notEmpty().trim(), body("password").isLength({ min: 8 })],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { username, password } = req.body;
-            const token = await login(username, password);
+            const { email, password } = req.body;
+            const token = await login(email, password);
             return res.json({ token: token.token });
         } catch (err) {
             return next(err);

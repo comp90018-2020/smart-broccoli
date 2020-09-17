@@ -5,9 +5,9 @@ import { jwtSign } from "../helpers/jwt";
 
 // User registration
 export const register = async (info: any) => {
-    const { username, password, email, name } = info;
+    const { password, email, name } = info;
     try {
-        return await User.create({ username, password, email, name });
+        return await User.create({ password, email, name });
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
@@ -26,19 +26,19 @@ export const register = async (info: any) => {
 };
 
 // Login
-export const login = async (username: string, password: string) => {
+export const login = async (email: string, password: string) => {
     // Find user
     const user = await User.scope().findOne({
-        where: { [Op.or]: [{ username }, { email: username }] },
+        where: { email },
     });
     if (!user) {
-        const err = new ErrorStatus("Incorrect username/password", 401);
+        const err = new ErrorStatus("Incorrect email/password", 401);
         throw err;
     }
 
     // Verify password
     if (!(await user.verifyPassword(password))) {
-        const err = new ErrorStatus("Incorrect username/password", 401);
+        const err = new ErrorStatus("Incorrect email/password", 401);
         throw err;
     }
 

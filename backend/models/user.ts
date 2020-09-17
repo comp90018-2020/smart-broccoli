@@ -8,7 +8,6 @@ const schema = {
         primaryKey: true,
         autoIncrement: true,
     },
-    username: { type: Sequelize.STRING, allowNull: false },
     password: { type: Sequelize.STRING, allowNull: false },
     email: { type: Sequelize.STRING, allowNull: false },
     name: { type: Sequelize.STRING, allowNull: true },
@@ -16,7 +15,6 @@ const schema = {
 
 interface UserAttributes {
     id?: number;
-    username: string;
     password: string;
     email: string;
     name?: string;
@@ -30,7 +28,6 @@ const KEYLEN = 64;
 
 class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
     public id!: number;
-    public username!: string;
     public password!: string;
     public email!: string;
     public name: string;
@@ -45,13 +42,7 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
                 attributes: { exclude: ["password"] },
             },
             indexes: [
-                // Ensure that usernames are unique
-                {
-                    name: "unique_username",
-                    unique: true,
-                    // @ts-ignore
-                    fields: [sequelize.fn("lower", sequelize.col("username"))],
-                },
+                // Ensure that emails are unique
                 {
                     name: "unique_email",
                     unique: true,
