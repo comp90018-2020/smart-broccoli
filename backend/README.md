@@ -1,7 +1,7 @@
 # Backend
 ![Build Backend](https://github.com/comp90018-2020/fuzzy-broccoli/workflows/Build%20Backend/badge.svg)
-Backend server for app
 
+Backend server for app
 Note: portions of code have been adapted from [COMP30022-Russia/COMP30022\_Server](https://github.com/COMP30022-Russia/COMP30022_Server)
 
 ## Installation
@@ -11,7 +11,7 @@ Note: portions of code have been adapted from [COMP30022-Russia/COMP30022\_Serve
 
 ## Environment variables
 |Name|Default value|Description|
-|---|---|---|
+|:---|:---|:---|
 |POSTGRES\_USER|comp90018|Postgres username|
 |POSTGRES\_PASSWORD|(null)|Postgres password|
 |POSTGRES\_DB|comp90018|Postgres database|
