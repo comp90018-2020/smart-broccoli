@@ -25,11 +25,10 @@ jobs:
 
       - name: Cache
         uses: actions/cache@v2
-        working-directory: ./backend
         with:
           path: |
-            node_modules/
-          key: ${{runner.os}}--${{ hashFiles('yarn.lock') }}
+            **/node_modules/
+          key: ${{runner.os}}--${{ hashFiles('**/yarn.lock') }}
 
       - name: Install dependencies
         run: yarn
