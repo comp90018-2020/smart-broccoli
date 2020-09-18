@@ -45,7 +45,7 @@ const swaggerSpec: any = swaggerJSDoc(options);
 // Serve JSDoc and Swagger UI
 app.get("/swagger.json", (req, res) => {
     // Add security at top level
-    swaggerSpec['security'] = [{ bearerAuth: [] }];
+    swaggerSpec["security"] = [{ bearerAuth: [] }];
     res.json(swaggerSpec);
 });
 app.get(["/", "/index.html"], (req, res, next) => {

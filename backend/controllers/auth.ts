@@ -1,5 +1,4 @@
 import { User, Token } from "../models";
-import { Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
 import { jwtSign } from "../helpers/jwt";
 
@@ -32,13 +31,13 @@ export const login = async (email: string, password: string) => {
         where: { email },
     });
     if (!user) {
-        const err = new ErrorStatus("Incorrect email/password", 401);
+        const err = new ErrorStatus("Incorrect email/password", 403);
         throw err;
     }
 
     // Verify password
     if (!(await user.verifyPassword(password))) {
-        const err = new ErrorStatus("Incorrect email/password", 401);
+        const err = new ErrorStatus("Incorrect email/password", 403);
         throw err;
     }
 

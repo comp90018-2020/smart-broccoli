@@ -19,6 +19,7 @@ const router = Router();
  *       required:
  *         - password
  *         - email
+ *         - name
  *       properties:
  *         password:
  *           type: string
@@ -70,7 +71,7 @@ const router = Router();
 router.post(
     "/register",
     [
-        body("email").isEmail().normalizeEmail().trim(),
+        body("email").isEmail().normalizeEmail(),
         body("password").isLength({ min: 8 }),
         body("name").notEmpty().trim(),
     ],
@@ -121,7 +122,10 @@ router.post(
  */
 router.post(
     "/login",
-    [body("email").notEmpty().trim(), body("password").isLength({ min: 8 })],
+    [
+        body("email").isEmail().normalizeEmail(),
+        body("password").isLength({ min: 8 }),
+    ],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {

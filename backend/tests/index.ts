@@ -7,5 +7,6 @@ before(async () => {
 
 // Import tests
 import "./auth.test";
+import "./user.test";
 
 export default app;

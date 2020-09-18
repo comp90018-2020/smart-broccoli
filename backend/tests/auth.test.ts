@@ -48,7 +48,7 @@ describe("Authentication", () => {
         const res = await agent
             .post("/auth/login")
             .send({ email: USER.email, password: "abcdefgh" });
-        expect(res.status).to.equal(401);
+        expect(res.status).to.equal(403);
     });
 
     it("Session without token", async () => {
