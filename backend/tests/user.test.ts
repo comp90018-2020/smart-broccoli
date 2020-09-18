@@ -3,8 +3,6 @@ import { expect } from "chai";
 import app from "./index";
 import rebuild from "./rebuild";
 import { registerAndLogin } from "./helpers";
-import { User } from "models";
-import xPermittedCrossDomainPolicies from "helmet/dist/middlewares/x-permitted-cross-domain-policies";
 
 describe("Authentication", () => {
     beforeEach(async () => {
