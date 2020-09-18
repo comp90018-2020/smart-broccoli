@@ -11,6 +11,16 @@ const schema = {
     password: { type: Sequelize.STRING, allowNull: false },
     email: { type: Sequelize.STRING, allowNull: false },
     name: { type: Sequelize.STRING, allowNull: true },
+    picture: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+            model: {
+                tableName: "Pictures",
+            },
+            key: "id",
+        },
+    },
 };
 
 interface UserAttributes {
@@ -27,11 +37,12 @@ const ALGORITHM = "sha512";
 const KEYLEN = 64;
 
 class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
-    public id!: number;
     public password!: string;
     public email!: string;
     public name: string;
+    public picture: number;
 
+    public readonly id!: number;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 
@@ -78,7 +89,7 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
         });
     }
 
-    verifyPassword = async function (password: string): Promise<boolean> {
+    verifyPassword = function (password: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             const salt = this.password.split(":")[0];
             crypto.pbkdf2(

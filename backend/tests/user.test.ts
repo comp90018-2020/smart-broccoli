@@ -3,6 +3,7 @@ import { expect } from "chai";
 import app from "./index";
 import rebuild from "./rebuild";
 import { registerAndLogin } from "./helpers";
+import { readFileSync } from "fs";
 
 describe("Authentication", () => {
     beforeEach(async () => {
@@ -61,5 +62,18 @@ describe("Authentication", () => {
             .post("/auth/login")
             .send({ email: USER.email, password: "aaaaaaaa" });
         expect(loginFailure.status).equal(403);
+    });
+
+    it("Upload profile picture", async () => {
+        const agent = supertest(app);
+        const token = await registerAndLogin(USER);
+
+        const res = await agent
+            .put("/user/profile/picture")
+            .attach("avatar", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${token}`);
+        expect(res.status).to.equal(200);
     });
 });

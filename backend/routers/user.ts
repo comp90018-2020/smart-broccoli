@@ -1,7 +1,10 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { body, param } from "express-validator";
-import { updateProfile } from "../controllers/user";
+import { body } from "express-validator";
+import CustomStorage, { profileImageProcessor } from "../helpers/upload";
+import multer, { MulterError } from "multer";
+import { updateProfile, updateProfilePicture } from "../controllers/user";
 import validate from "./middleware/validate";
+import ErrorStatus from "../helpers/error";
 
 /**
  * @swagger
@@ -57,6 +60,40 @@ router.patch(
     }
 );
 
-router.put("/profile/picture");
+// Multer options
+const upload = multer({
+    storage: new CustomStorage({
+        directoryPrefix: "profile",
+        imageProcessor: profileImageProcessor,
+    }),
+    limits: {
+        files: 1,
+        fileSize: 10 * 1024 * 1024, // 10MB
+    },
+});
+
+router.put(
+    "/profile/picture",
+    (req: Request, res: Response, next: NextFunction) => {
+        const avatarUpload = upload.single("avatar");
+
+        // @ts-ignore
+        avatarUpload(req, res, (err: MulterError) => {
+            if (err instanceof multer.MulterError) {
+                res.status(400);
+                return next(err);
+            }
+            if (err) {
+                return next(err);
+            }
+            return next();
+        });
+    },
+    async (req: Request, res: Response, next: NextFunction) => {
+        // Save picture information to DB
+        await updateProfilePicture(req.user.id, req.file);
+        return res.sendStatus(200);
+    }
+);
 
 export default router;

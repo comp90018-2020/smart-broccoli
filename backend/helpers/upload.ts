@@ -9,7 +9,7 @@ export default class CustomStorage implements multer.StorageEngine {
     private destination: string;
     private imageProcessor: (path: string) => Promise<void>;
 
-    constructor(opts?: {
+    constructor(opts: {
         directoryPrefix: string;
         imageProcessor: (path: string) => Promise<void>;
     }) {
@@ -19,9 +19,13 @@ export default class CustomStorage implements multer.StorageEngine {
         if (!opts.directoryPrefix) {
             throw new Error("Bad destination");
         }
-        this.destination = `${process.cwd()}/uploads/${opts.directoryPrefix}`;
+        this.destination = path.join(
+            process.cwd(),
+            "uploads",
+            opts.directoryPrefix
+        );
         if (!fs.existsSync(this.destination)) {
-            fs.mkdirSync(this.destination);
+            fs.mkdirSync(this.destination, { recursive: true });
         }
     }
 
@@ -56,7 +60,7 @@ export default class CustomStorage implements multer.StorageEngine {
                         await this.imageProcessor(filePath);
                         cb(undefined, {
                             destination: dest,
-                            filename: filename,
+                            filename,
                             path: filePath,
                             size: outStream.bytesWritten,
                         });
@@ -104,6 +108,6 @@ const profileImageProcessor = async (filePath: string) => {
             withoutEnlargement: true,
         })
         .jpeg({ quality: 100 })
-        .toFile(`${filePath}_thumb`);
+        .toFile(`${filePath}.thumb`);
 };
 export { profileImageProcessor };

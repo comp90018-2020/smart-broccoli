@@ -11,10 +11,6 @@ const schema = {
         primaryKey: true,
         autoIncrement: true,
     },
-    userId: {
-        type: Sequelize.INTEGER,
-        secondaryKey: true,
-    },
     token: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -43,11 +39,11 @@ interface TokenAttributes {
 
 export default class Token extends Sequelize.Model<TokenAttributes>
     implements TokenAttributes {
-    public id!: number;
     public token!: string;
     public scope!: string;
     public revoked!: boolean;
 
+    public readonly id!: number;
     public readonly User?: User;
     public readonly userId!: number;
     public readonly createdAt!: Date;
