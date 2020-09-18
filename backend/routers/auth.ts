@@ -50,6 +50,7 @@ const router = Router();
  * /auth/register:
  *   post:
  *     description: Create new user
+ *     security: []
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -92,6 +93,7 @@ router.post(
  * /auth/login:
  *   post:
  *     description: User login
+ *     security: []
  *     tags:
  *       - Authentication
  *     requestBody:

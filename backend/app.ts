@@ -40,10 +40,12 @@ const options = {
     },
     apis: ["./routers/*.js", "./routers/*.ts"],
 };
-const swaggerSpec = swaggerJSDoc(options);
+const swaggerSpec: any = swaggerJSDoc(options);
 
 // Serve JSDoc and Swagger UI
 app.get("/swagger.json", (req, res) => {
+    // Add security at top level
+    swaggerSpec['security'] = [{ bearerAuth: [] }];
     res.json(swaggerSpec);
 });
 app.get(["/", "/index.html"], (req, res, next) => {
