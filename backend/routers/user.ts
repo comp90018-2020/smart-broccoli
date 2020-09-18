@@ -59,10 +59,4 @@ router.patch(
 
 router.put("/profile/picture");
 
-router.get(
-    "/:userId",
-    [param("userId").isInt()],
-    (req: Request, res: Response, next: NextFunction) => {}
-);
-
 export default router;
