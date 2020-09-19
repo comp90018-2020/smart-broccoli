@@ -7,7 +7,6 @@ import Token from "./token";
 import Picture from "./picture";
 import Quiz from "./quiz";
 import Question from "./question";
-import QuestionOption from "./question_option";
 
 // Initiate sequelize instance
 const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
@@ -25,7 +24,6 @@ const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
 Picture.initialise(sequelize);
 User.initialise(sequelize);
 Token.initialise(sequelize);
-QuestionOption.initialise(sequelize);
 Question.initialise(sequelize);
 Quiz.initialise(sequelize);
 
@@ -38,8 +36,6 @@ User.belongsTo(Picture, {
     onDelete: "set null",
 });
 
-// Question has QuestionOptions
-Question.hasMany(QuestionOption, { as: "options", foreignKey: "questionId" });
 // Quiz has many questions
 Quiz.hasMany(Question, {
     as: "questions",
@@ -54,4 +50,4 @@ User.hasMany(Quiz, {
 });
 
 export default sequelize;
-export { User, Token, Question, Quiz, QuestionOption };
+export { User, Token, Question, Quiz };

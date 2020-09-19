@@ -10,23 +10,46 @@ const schema = {
         type: Sequelize.STRING,
         allowNULL: true,
     },
+    type: {
+        type: Sequelize.ENUM("choice", "truefalse"),
+        allowNull: false,
+    },
+    tf: {
+        type: Sequelize.BOOLEAN,
+        allowNULL: true,
+    },
+    options: {
+        type: Sequelize.JSONB,
+        allowNULL: true,
+    },
     timeLimit: {
         type: Sequelize.INTEGER,
         allowNULL: true,
     },
 };
 
+export interface OptionAttributes {
+    correct: boolean;
+    text: string;
+}
+
 interface QuestionAttributes {
     id?: number;
+    quizId: number;
     text?: string;
     timeLimit?: number;
-    quizId: number;
+    type: string;
+    tf?: boolean;
+    options?: OptionAttributes[];
 }
 
 export default class Question extends Sequelize.Model<QuestionAttributes>
     implements QuestionAttributes {
     public text?: string;
     public timeLimit?: number;
+    public type!: string;
+    public tf?: boolean;
+    public options?: OptionAttributes[];
 
     public readonly id!: number;
     public readonly quizId: number;

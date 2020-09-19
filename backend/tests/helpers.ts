@@ -1,23 +1,28 @@
 import * as AuthController from "../controllers/auth";
+import * as QuizController from "../controllers/quiz";
 
 // Register as creator
-const register = async (info: any) => {
+export const register = async (info: any) => {
     const user = await AuthController.register(info);
     return user;
 };
 
 // Login as creator
-const registerAndLogin = async (info: any) => {
-    await register(info);
+export const registerAndLogin = async (info: any) => {
+    const user = await register(info);
     const res = await AuthController.login(info.email, info.password);
-    return res.token;
+    return { token: res.token, id: user.id };
 };
 
 // Join
-const join = async () => {
+export const join = async () => {
     await join();
     const token = await AuthController.join();
     return token.token;
 };
 
-export { register, registerAndLogin, join };
+// Create quiz
+export const createQuiz = async (userId: number) => {
+    const quiz = await QuizController.createQuiz(userId);
+    return quiz;
+};
