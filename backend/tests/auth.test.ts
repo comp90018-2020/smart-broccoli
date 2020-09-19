@@ -22,6 +22,8 @@ describe("Authentication", () => {
         expect(res.body).to.have.property("id");
         expect(res.body).to.have.property("email");
         expect(res.body).to.have.property("name");
+        expect(res.body).to.have.property("role");
+        expect(res.body.role).to.equal("creator");
     });
 
     it("Register duplicate", async () => {
@@ -78,6 +80,25 @@ describe("Authentication", () => {
         expect(res.body).to.have.property("id");
         expect(res.body).to.have.property("email");
         expect(res.body).to.have.property("name");
+        expect(res.body).to.have.property("role");
+    });
+
+    it("Join and retrieve session", async () => {
+        const agent = supertest(app);
+
+        // Join
+        const joinRes = await agent.post("/auth/join");
+        expect(joinRes.body).to.have.property("token");
+        const token = joinRes.body.token;
+
+        // Check session
+        const res = await agent
+            .get("/auth/session")
+            .set("Authorization", `Bearer ${token}`)
+            .send();
+        expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("role");
+        expect(res.body.role).to.equal("user");
     });
 
     it("Logout", async () => {

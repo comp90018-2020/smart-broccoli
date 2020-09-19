@@ -8,9 +8,10 @@ const schema = {
         primaryKey: true,
         autoIncrement: true,
     },
-    password: { type: Sequelize.STRING, allowNull: false },
-    email: { type: Sequelize.STRING, allowNull: false },
+    password: { type: Sequelize.STRING, allowNull: true },
+    email: { type: Sequelize.STRING, allowNull: true },
     name: { type: Sequelize.STRING, allowNull: true },
+    role: { type: Sequelize.ENUM("creator", "user"), allowNull: false },
     picture: {
         type: Sequelize.INTEGER,
         allowNull: true,
@@ -25,9 +26,17 @@ const schema = {
 
 interface UserAttributes {
     id?: number;
-    password: string;
-    email: string;
+
+    // Must have role
+    role: string;
+
+    // Creator attributes
+    password?: string;
+    email?: string;
+
+    // User attributes
     name?: string;
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -37,10 +46,11 @@ const ALGORITHM = "sha512";
 const KEYLEN = 64;
 
 class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
-    public password!: string;
-    public email!: string;
-    public name: string;
-    public picture: number;
+    public password?: string;
+    public email?: string;
+    public name?: string;
+    public picture?: number;
+    public role: string;
 
     public readonly id!: number;
     public readonly createdAt!: Date;
@@ -64,6 +74,8 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
             hooks: {
                 // Hash password before creation
                 beforeCreate: async (user: any) => {
+                    if (user.role !== "creator") return;
+
                     try {
                         const hash = await hashPassword(user.password);
                         user.password = hash;
@@ -72,7 +84,7 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
                     }
                 },
                 // Hash password before update
-                beforeUpdate: async (user: any) => {
+                beforeUpdate: async function (user: any) {
                     // If password is not changed
                     if (!user.password) {
                         return;

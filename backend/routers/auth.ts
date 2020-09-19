@@ -1,4 +1,4 @@
-import { login, logout, register } from "../controllers/auth";
+import { join, login, logout, register } from "../controllers/auth";
 import { Request, Response, NextFunction, Router } from "express";
 import { body } from "express-validator";
 import { auth } from "./middleware/auth";
@@ -39,18 +39,21 @@ const router = Router();
  *             id:
  *               type: integer
  *               format: int64
+ *             role:
+ *               type: string
  *         - example:
  *             id: 1
  *             password: foobarbaz
  *             email: foo@foo.foo
  *             name: Foo Bar
+ *             role: creator
  */
 
 /**
  * @swagger
  * /auth/register:
  *   post:
- *     description: Create new user
+ *     description: Register creator account
  *     security: []
  *     tags:
  *       - Authentication
@@ -91,9 +94,52 @@ router.post(
 
 /**
  * @swagger
+ * /auth/join:
+ *   post:
+ *     description: Join as user
+ *     security: []
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required:
+ *               - email
+ *               - password
+ *     responses:
+ *       '200':
+ *         description: user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               properties:
+ *                 token:
+ *                   type: string
+ */
+router.post(
+    "/join",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const token = await join();
+            return res.json({ token: token.token });
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
  * /auth/login:
  *   post:
- *     description: User login
+ *     description: Login creator account
  *     security: []
  *     tags:
  *       - Authentication

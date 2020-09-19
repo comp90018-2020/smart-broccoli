@@ -2,11 +2,11 @@ import { User, Token } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign } from "../helpers/jwt";
 
-// User registration
+// Creator registration
 export const register = async (info: any) => {
     const { password, email, name } = info;
     try {
-        return await User.create({ password, email, name });
+        return await User.create({ password, email, name, role: "creator" });
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
@@ -22,6 +22,20 @@ export const register = async (info: any) => {
         }
         throw err;
     }
+};
+
+// Join
+export const join = async () => {
+    // Create user
+    const user = await User.create({ role: "user" });
+
+    // Generate and add token
+    const token = await jwtSign({ id: user.id }, process.env.TOKEN_SECRET);
+    return await Token.create({
+        scope: "auth",
+        token,
+        userId: user.id,
+    });
 };
 
 // Login
