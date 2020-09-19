@@ -3,6 +3,7 @@ name: Fuzzy Broccoli
 on:
   push:
     branches:
+      - '*'
       - '!backend*'
 
 jobs:
