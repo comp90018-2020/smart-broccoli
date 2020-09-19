@@ -76,4 +76,27 @@ describe("Authentication", () => {
             .set("Authorization", `Bearer ${token}`);
         expect(res.status).to.equal(200);
     });
+
+    it("Get profile picture", async () => {
+        const agent = supertest(app);
+        const token = await registerAndLogin(USER);
+
+        await agent
+            .put("/user/profile/picture")
+            .attach("avatar", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${token}`);
+        await agent
+            .put("/user/profile/picture")
+            .attach("avatar", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${token}`);
+
+        const res = await agent
+            .get("/user/profile/picture")
+            .set("Authorization", `Bearer ${token}`);
+        expect(res.status).to.equal(200);
+    });
 });

@@ -27,5 +27,10 @@ Token.initialise(sequelize);
 User.hasMany(Token, { as: "tokens", foreignKey: "userId" });
 Token.belongsTo(User, { foreignKey: "userId" });
 
+User.belongsTo(Picture, {
+    foreignKey: "pictureId",
+    onDelete: "set null",
+});
+
 export default sequelize;
 export { User, Token };

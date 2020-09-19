@@ -6,26 +6,22 @@ import sharp from "sharp";
 import { Request } from "express";
 
 export default class CustomStorage implements multer.StorageEngine {
-    private destination: string;
+    private directory: string;
     private imageProcessor: (path: string) => Promise<void>;
 
     constructor(opts: {
-        directoryPrefix: string;
+        directorySuffix: string;
         imageProcessor: (path: string) => Promise<void>;
     }) {
         this.imageProcessor = opts.imageProcessor;
 
         // Create directory if not exists
-        if (!opts.directoryPrefix) {
+        if (!opts.directorySuffix) {
             throw new Error("Bad destination");
         }
-        this.destination = path.join(
-            process.cwd(),
-            "uploads",
-            opts.directoryPrefix
-        );
-        if (!fs.existsSync(this.destination)) {
-            fs.mkdirSync(this.destination, { recursive: true });
+        this.directory = `uploads/${opts.directorySuffix}`;
+        if (!fs.existsSync(this.directory)) {
+            fs.mkdirSync(this.directory, { recursive: true });
         }
     }
 
@@ -44,13 +40,10 @@ export default class CustomStorage implements multer.StorageEngine {
         file: Express.Multer.File,
         cb: (error?: any, info?: Partial<Express.Multer.File>) => void
     ) {
-        // Get dest
-        const dest = this.destination;
-
         this.getFilename()
             .then((filename: string) => {
                 // Write file
-                const filePath = path.join(dest, filename);
+                const filePath = path.join(this.directory, filename);
                 const outStream = fs.createWriteStream(filePath);
                 file.stream.pipe(outStream);
 
@@ -59,9 +52,8 @@ export default class CustomStorage implements multer.StorageEngine {
                     try {
                         await this.imageProcessor(filePath);
                         cb(undefined, {
-                            destination: dest,
                             filename,
-                            path: filePath,
+                            destination: `${this.directory}/${filename}`,
                             size: outStream.bytesWritten,
                         });
                     } catch (err) {
@@ -107,7 +99,7 @@ const profileImageProcessor = async (filePath: string) => {
             fit: "contain",
             withoutEnlargement: true,
         })
-        .jpeg({ quality: 100 })
+        .png({ quality: 100 })
         .toFile(`${filePath}.thumb`);
 };
 export { profileImageProcessor };

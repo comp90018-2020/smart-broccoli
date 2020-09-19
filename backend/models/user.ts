@@ -12,15 +12,9 @@ const schema = {
     email: { type: Sequelize.STRING, allowNull: true },
     name: { type: Sequelize.STRING, allowNull: true },
     role: { type: Sequelize.ENUM("creator", "user"), allowNull: false },
-    picture: {
+    pictureId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        references: {
-            model: {
-                tableName: "Pictures",
-            },
-            key: "id",
-        },
     },
 };
 
@@ -49,8 +43,8 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
     public password?: string;
     public email?: string;
     public name?: string;
-    public picture?: number;
     public role: string;
+    public pictureId?: number;
 
     public readonly id!: number;
     public readonly createdAt!: Date;

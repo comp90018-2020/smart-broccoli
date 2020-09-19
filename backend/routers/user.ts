@@ -2,8 +2,13 @@ import { Router, Request, Response, NextFunction } from "express";
 import { body } from "express-validator";
 import CustomStorage, { profileImageProcessor } from "../helpers/upload";
 import multer, { MulterError } from "multer";
-import { updateProfile, updateProfilePicture } from "../controllers/user";
+import {
+    getProfilePicture,
+    updateProfile,
+    updateProfilePicture,
+} from "../controllers/user";
 import validate from "./middleware/validate";
+import fs from "fs";
 import ErrorStatus from "../helpers/error";
 
 /**
@@ -35,7 +40,7 @@ const router = Router();
  *               name:
  *                 type: string
  *     responses:
- *       '201':
+ *       '200':
  *         description: User
  *         content:
  *           application/json:
@@ -63,7 +68,7 @@ router.patch(
 // Multer options
 const upload = multer({
     storage: new CustomStorage({
-        directoryPrefix: "profile",
+        directorySuffix: "profile",
         imageProcessor: profileImageProcessor,
     }),
     limits: {
@@ -72,6 +77,27 @@ const upload = multer({
     },
 });
 
+/**
+ * @swagger
+ * /user/profile/picture:
+ *   patch:
+ *     description: Update user information, fields optionally required
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       '200':
+ *         description: OK
+ */
 router.put(
     "/profile/picture",
     (req: Request, res: Response, next: NextFunction) => {
@@ -95,5 +121,42 @@ router.put(
         return res.sendStatus(200);
     }
 );
+
+/**
+ * @swagger
+ * /user/profile/picture:
+ *   get:
+ *     description: Get user profile picture
+ *     tags:
+ *       - User
+ *     responses:
+ *       '200':
+ *         description: OK
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         image/png:
+ *           schema:
+ *             type: string
+ *             format: binary
+ */
+router.get("/profile/picture", async (req: Request, res, next) => {
+    try {
+        const picture = await getProfilePicture(req.user.pictureId);
+        if (!picture) {
+            const err = new ErrorStatus("Picture not found", 404);
+            throw err;
+        }
+
+        // Set content header
+        res.setHeader("Content-Type", "image/png");
+
+        // Read and serve
+        const file = fs.readFileSync(`${picture.destination}.thumb`);
+        res.end(file, "binary");
+    } catch (err) {
+        throw err;
+    }
+});
 
 export default router;

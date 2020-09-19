@@ -1,6 +1,6 @@
 import ErrorStatus from "../helpers/error";
 import { User } from "../models";
-import { deletePicture, insertPicture } from "./picture";
+import { deletePicture, getPictureById, insertPicture } from "./picture";
 
 // Update user profile info
 const updateProfile = async (id: number, info: any) => {
@@ -39,14 +39,19 @@ const updateProfilePicture = async (id: number, file: any) => {
     const user = await User.findByPk(id);
 
     // Delete the old picture
-    if (user.picture) {
-        await deletePicture(user.picture);
+    if (user.pictureId) {
+        await deletePicture(user.pictureId);
     }
     // Insert the new picture
     const picture = await insertPicture(file);
     // Set user picture
-    user.picture = picture.id;
+    user.pictureId = picture.id;
     return await user.save();
 };
 
-export { updateProfile, updateProfilePicture };
+// Get profile picture
+const getProfilePicture = async (pictureId: number) => {
+    return await getPictureById(pictureId);
+};
+
+export { updateProfile, updateProfilePicture, getProfilePicture };

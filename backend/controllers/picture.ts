@@ -2,7 +2,12 @@ import fs from "fs";
 import Picture from "../models/picture";
 import path from "path";
 
-// Function for deleting a picture
+// Get picture by Id
+const getPictureById = async (pictureId: number) => {
+    return await Picture.findByPk(pictureId);
+};
+
+// Delete picture by Id
 const deletePicture = async (pictureId: number) => {
     // Find, delete and destroy from DB
     const picture = await Picture.findByPk(pictureId);
@@ -35,4 +40,4 @@ const deletePictureFromDisk = (filePath: string) => {
     );
 };
 
-export { insertPicture, deletePicture };
+export { insertPicture, deletePicture, getPictureById };

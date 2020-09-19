@@ -24,7 +24,7 @@ export const register = async (info: any) => {
     }
 };
 
-// Join
+// Join as regular user
 export const join = async () => {
     // Create user
     const user = await User.create({ role: "user" });
@@ -57,7 +57,6 @@ export const login = async (email: string, password: string) => {
 
     // Generate and add token
     const token = await jwtSign({ id: user.id }, process.env.TOKEN_SECRET);
-
     return await Token.create({
         scope: "auth",
         token,
