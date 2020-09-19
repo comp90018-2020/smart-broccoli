@@ -8,15 +8,15 @@ const schema = {
     },
     destination: {
         type: Sequelize.STRING,
-        required: true,
+        allowNULL: false,
     },
     filename: {
         type: Sequelize.STRING,
-        required: true,
+        allowNULL: false,
     },
     mimetype: {
         type: Sequelize.STRING,
-        required: true,
+        allowNULL: false,
     },
 };
 
