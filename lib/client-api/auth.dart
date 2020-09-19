@@ -5,6 +5,18 @@ import '../models/user.dart';
 
 const AUTH_URL = 'https://fuzzybroccoli.com/auth';
 
+class AuthToken {
+  String value;
+
+  AuthToken({this.value});
+
+  factory AuthToken.fromJson(Map<String, dynamic> json) {
+    return AuthToken(value: json['token']);
+  }
+}
+
+class AuthException implements Exception {}
+
 Future<RegisteredUser> register(
     String email, String password, String name, String username) async {
   // construct request body based on whether a username is supplied
@@ -39,5 +51,21 @@ Future<RegisteredUser> register(
     throw RegistrationConflictException(List());
   } else {
     throw RegistrationException();
+  }
+}
+
+Future<AuthToken> login(String email, String password) async {
+  // send request
+  final http.Response res = await http.post(AUTH_URL + "/register",
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{'email': email, 'password': password}));
+
+  // inspect response and return AuthToken
+  if (res.statusCode == 200) {
+    return AuthToken.fromJson(json.decode(res.body));
+  } else {
+    throw AuthException();
   }
 }
