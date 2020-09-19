@@ -100,19 +100,6 @@ router.post(
  *     security: []
  *     tags:
  *       - Authentication
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *             required:
- *               - email
- *               - password
  *     responses:
  *       '200':
  *         description: user
