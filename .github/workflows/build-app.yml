@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build APK
+    name: Test and Build
     runs-on: ubuntu-latest
 
     steps:
@@ -24,10 +24,13 @@ jobs:
     - run: flutter pub get
     - run: flutter analyze
     - run: flutter test
+
     - run: flutter build apk
+      if: github.ref == 'refs/heads/master'
 
     - name: Save artifacts
       uses: actions/upload-artifact@v1
+      if: github.ref == 'refs/heads/master'
       with:
         name: apk
         path: build/app/outputs/apk/release/app-release.apk
