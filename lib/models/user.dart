@@ -1,7 +1,7 @@
-abstract class User {}
+enum Role { CREATOR, USER }
 
 /// User with login credientials (lecturer, coordinator)
-class RegisteredUser extends User {
+class RegisteredUser {
   int id;
   String email;
   String name;
@@ -23,4 +23,4 @@ class RegistrationConflictException implements RegistrationException {
 }
 
 /// User without login credentials (student)
-class ParticipantUser extends User {}
+class ParticipantUser {}

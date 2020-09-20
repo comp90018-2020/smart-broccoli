@@ -11,7 +11,7 @@ class AuthenticatedRequestHandler {
       AuthenticatedRequestHandler._internal();
 
   AuthToken _token;
-  User _user;
+  Role _role;
 
   Map<String, String> _headers = <String, String>{
     'Content-Type': 'application/json; charset=UTF-8'
@@ -48,8 +48,8 @@ class AuthenticatedRequestHandler {
     // todo: serialisation
   }
 
-  set user(User user) {
-    this._user = user;
+  set role(Role role) {
+    this._role = role;
     // todo: serialisation
   }
 }
