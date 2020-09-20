@@ -103,18 +103,17 @@ Future<RegisteredUser> register(
   }
 }
 
-Future<AuthToken> login(String email, String password) async {
-  // send request
+Future<bool> login(String email, String password) async {
   final http.Response res = await http.post(AUTH_URL + "/register",
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, String>{'email': email, 'password': password}));
 
-  // inspect response and return AuthToken
   if (res.statusCode == 200) {
-    return AuthToken.fromJson(json.decode(res.body));
-  } else {
-    throw AuthException();
+    AuthToken token = AuthToken.fromJson(json.decode(res.body));
+    AuthenticatedRequestHandler().token = token;
+    return true;
   }
+  return false;
 }
