@@ -65,32 +65,18 @@ class AuthToken {
 }
 
 Future<RegisteredUser> register(
-    String email, String password, String name, String username) async {
-  // construct request body based on whether a username is supplied
-  String body;
-  if (username == null) {
-    body = jsonEncode(<String, String>{
-      'email': email,
-      'password': password,
-      'name': name,
-    });
-  } else {
-    body = jsonEncode(<String, String>{
-      'username': username,
-      'email': email,
-      'password': password,
-      'name': name,
-    });
-  }
-
+    String email, String password, String name) async {
   // send request
   final http.Response res = await http.post(AUTH_URL + "/register",
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: body);
+      body: jsonEncode(<String, String>{
+        'email': email,
+        'password': password,
+        'name': name,
+      }));
 
-  // inspect response and return RegisteredUser
   if (res.statusCode == 201) {
     return RegisteredUser.fromJson(json.decode(res.body));
   } else if (res.statusCode == 409) {

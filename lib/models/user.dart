@@ -5,16 +5,12 @@ class RegisteredUser extends User {
   int id;
   String email;
   String name;
-  String username;
 
-  RegisteredUser({this.id, this.email, this.name, this.username});
+  RegisteredUser({this.id, this.email, this.name});
 
   factory RegisteredUser.fromJson(Map<String, dynamic> json) {
     return RegisteredUser(
-        id: json['id'],
-        email: json['email'],
-        name: json['name'],
-        username: json.containsKey('username') ? json['username'] : null);
+        id: json['id'], email: json['email'], name: json['name']);
   }
 }
 
