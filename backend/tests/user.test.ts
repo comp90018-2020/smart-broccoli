@@ -18,10 +18,10 @@ describe("Authentication", () => {
 
     it("Get profile", async () => {
         const agent = supertest(app);
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
         const res = await agent
             .get("/user/profile")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `Bearer ${user.token}`)
             .send();
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("id");
