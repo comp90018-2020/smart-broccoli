@@ -5,6 +5,55 @@ import '../models/user.dart';
 
 const AUTH_URL = 'https://fuzzybroccoli.com/auth';
 
+/// Singleton class for making requests requiring authorisation
+class AuthenticatedRequestHandler {
+  static final AuthenticatedRequestHandler _instance =
+      AuthenticatedRequestHandler._internal();
+
+  AuthToken _token;
+  User _user;
+
+  Map<String, String> _headers = <String, String>{
+    'Content-Type': 'application/json; charset=UTF-8'
+  };
+
+  factory AuthenticatedRequestHandler() {
+    // todo: deserialisation
+    return _instance;
+  }
+
+  Future<bool> sessionIsValid() async {
+    final http.Response res =
+        await http.post(AUTH_URL + "/session", headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    });
+    if (res.statusCode == 200) return true;
+    return false;
+  }
+
+  Future<bool> logout() async {
+    final http.Response res =
+        await http.post(AUTH_URL + "/logout", headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    });
+    if (res.statusCode == 200) return true;
+    return false;
+  }
+
+  AuthenticatedRequestHandler._internal();
+
+  set token(AuthToken token) {
+    this._token = token;
+    // todo: headers
+    // todo: serialisation
+  }
+
+  set user(User user) {
+    this._user = user;
+    // todo: serialisation
+  }
+}
+
 class AuthToken {
   String value;
 
