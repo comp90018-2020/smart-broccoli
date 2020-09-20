@@ -9,6 +9,7 @@ import {
     updateQuiz,
     getQuizCreator,
     getQuiz,
+    getAllQuiz,
 } from "../controllers/quiz";
 import { param, body } from "express-validator";
 import validate from "./middleware/validate";
@@ -155,7 +156,7 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
  */
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        return res.json(await getQuiz(req.user.id, Number(req.params.quizId)));
+        return res.json(await getAllQuiz(req.user.id));
     } catch (err) {
         return next(err);
     }
