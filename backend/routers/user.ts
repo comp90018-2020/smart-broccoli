@@ -80,7 +80,7 @@ const upload = multer({
 /**
  * @swagger
  * /user/profile/picture:
- *   patch:
+ *   put:
  *     description: Update user information, fields optionally required
  *     tags:
  *       - User
