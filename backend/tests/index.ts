@@ -20,8 +20,8 @@ before(async () => {
 });
 
 // Import tests
-// import "./auth.test";
-// import "./user.test";
+import "./auth.test";
+import "./user.test";
 import "./quiz.test";
 
 export default app;

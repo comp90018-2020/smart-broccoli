@@ -22,7 +22,7 @@ export const join = async () => {
 };
 
 // Create quiz
-export const createQuiz = async (userId: number) => {
-    const quiz = await QuizController.createQuiz(userId);
-    return quiz;
-};
+export const createQuiz = QuizController.createQuiz;
+
+// Add question
+export const addQuestion = QuizController.addQuestion;

@@ -12,7 +12,7 @@ export const createQuiz = async (userId: number) => {
 // Get quiz
 export const getQuiz = async (quizId: number) => {
     const quiz = await Quiz.findByPk(quizId, {
-        include: ["Quiz", "QuizOption"],
+        include: ["Quiz"],
     });
     if (!quiz) {
         const err = new ErrorStatus("Quiz not found", 404);
@@ -56,7 +56,7 @@ export const deleteQuiz = async (userId: number, quizId: number) => {
 };
 
 // Parse question options
-const parseOptions = (options: any): OptionAttributes[] => {
+const checkOptions = (options: any): OptionAttributes[] => {
     if (!Array.isArray(options)) {
         const err = new ErrorStatus("Options is not array", 400);
         throw err;
@@ -71,35 +71,33 @@ const parseOptions = (options: any): OptionAttributes[] => {
 
 // Parses question info
 interface QuestionInfo {
-    text: string;
+    text?: string;
     type: string;
     timeLimit?: number;
     tf?: boolean;
     options?: OptionAttributes[];
 }
-const parseQuestionInfo = (info: any): QuestionInfo => {
-    const { text, type, options, tf, timeLimit } = info;
+const checkQuestionInfo = (info: any): QuestionInfo => {
     const values: QuestionInfo = {
-        text,
-        type,
+        type: info.type,
+        text: info.text,
+        timeLimit: Number(info.timeLimit) >= 5 ? Number(info.timeLimit) : null,
     };
-    // Time limit
-    if (timeLimit && timeLimit > 0) {
-        values.timeLimit = timeLimit;
-    } else {
-        values.timeLimit = null;
-    }
-    // True/false questions
+
+    const { type, options, tf } = info;
     if (type === "truefalse") {
-        if (!values.tf) {
+        // True/false questions
+        if (typeof tf != "boolean") {
             const err = new ErrorStatus("tf not specified", 400);
             throw err;
         }
         values.tf = tf;
-    }
-    // Multiple choice
-    if (type === "choice") {
-        values.options = parseOptions(options);
+    } else if (type === "choice") {
+        // Multiple choice
+        values.options = checkOptions(options);
+    } else {
+        const err = new ErrorStatus("Unknown type", 400);
+        throw err;
     }
     return values;
 };
@@ -112,7 +110,7 @@ export const addQuestion = async (
 ) => {
     await getAndCheckPermissions(userId, quizId);
     const question = await Question.create({
-        ...parseQuestionInfo(info),
+        ...checkQuestionInfo(info),
         quizId,
     });
     return question;
@@ -127,7 +125,7 @@ export const updateQuestion = async (
 ) => {
     // Check input
     await getAndCheckPermissions(userId, quizId);
-    const questionInfo = parseQuestionInfo(info);
+    const questionInfo = checkQuestionInfo(info);
 
     // Update and return
     const updated = await Question.update(
@@ -144,4 +142,23 @@ export const updateQuestion = async (
         throw err;
     }
     return updated[1][0];
+};
+
+// Delete question
+export const deleteQuestion = async (
+    userId: number,
+    quizId: number,
+    questionId: number
+) => {
+    await getAndCheckPermissions(userId, quizId);
+    const deleted = await Question.destroy({
+        where: {
+            id: questionId,
+            quizId,
+        },
+    });
+    if (deleted == 0) {
+        const err = new ErrorStatus("Bad Request", 400);
+        throw err;
+    }
 };
