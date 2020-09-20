@@ -104,7 +104,7 @@ Future<RegisteredUser> register(
 }
 
 Future<bool> login(String email, String password) async {
-  final http.Response res = await http.post(AUTH_URL + "/register",
+  final http.Response res = await http.post(AUTH_URL + "/login",
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
