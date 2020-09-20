@@ -92,7 +92,7 @@ const parseQuestionInfo = (info: any): QuestionInfo => {
     // True/false questions
     if (type === "truefalse") {
         if (!values.tf) {
-            const err = new ErrorStatus('tf not specified', 400);
+            const err = new ErrorStatus("tf not specified", 400);
             throw err;
         }
         values.tf = tf;

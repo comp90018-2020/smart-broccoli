@@ -25,6 +25,8 @@ describe("Authentication", () => {
             .send();
         expect(res.status).to.equal(201);
         expect(res.body).to.have.property("id");
+        expect(res.body).to.have.property("title");
+        expect(res.body).to.have.property("description");
     });
 
     it("Update quiz attributes", async () => {
