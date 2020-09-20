@@ -349,7 +349,7 @@ router.delete(
             );
             return res.sendStatus(200);
         } catch (err) {
-            throw err;
+            return next(err);
         }
     }
 );
