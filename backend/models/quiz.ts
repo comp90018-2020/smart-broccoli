@@ -1,6 +1,6 @@
 import Sequelize from "sequelize";
 
-const schema = {
+const schema: Sequelize.ModelAttributes = {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -8,11 +8,11 @@ const schema = {
     },
     title: {
         type: Sequelize.STRING,
-        allowNULL: true,
+        allowNull: true,
     },
     description: {
         type: Sequelize.STRING,
-        allowNULL: true,
+        allowNull: true,
     },
 };
 

@@ -1,6 +1,6 @@
 import Sequelize from "sequelize";
 
-const schema = {
+const schema: Sequelize.ModelAttributes = {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -8,7 +8,7 @@ const schema = {
     },
     text: {
         type: Sequelize.STRING,
-        allowNULL: true,
+        allowNull: true,
     },
     type: {
         type: Sequelize.ENUM("choice", "truefalse"),
@@ -16,15 +16,15 @@ const schema = {
     },
     tf: {
         type: Sequelize.BOOLEAN,
-        allowNULL: true,
+        allowNull: true,
     },
     options: {
         type: Sequelize.JSONB,
-        allowNULL: true,
+        allowNull: true,
     },
     timeLimit: {
         type: Sequelize.INTEGER,
-        allowNULL: true,
+        allowNull: true,
     },
 };
 
