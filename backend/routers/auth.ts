@@ -175,19 +175,15 @@ router.post(
  * @swagger
  * /auth/session:
  *   get:
- *     description: Validate session & Get user info
+ *     description: Validate session
  *     tags:
  *       - Authentication
  *     responses:
  *       '200':
- *         description: user
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
+ *         description: OK
  */
 router.get("/session", auth, (req: Request, res) => {
-    return res.json(req.user);
+    return res.sendStatus(200);
 });
 
 /**

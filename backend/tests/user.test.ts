@@ -16,6 +16,20 @@ describe("Authentication", () => {
         name: "a",
     };
 
+    it("Get profile", async () => {
+        const agent = supertest(app);
+        const token = await registerAndLogin(USER);
+        const res = await agent
+            .get("/user/profile")
+            .set("Authorization", `Bearer ${token}`)
+            .send();
+        expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("id");
+        expect(res.body).to.have.property("email");
+        expect(res.body).to.have.property("name");
+        expect(res.body).to.have.property("role");
+    });
+
     it("Update profile", async () => {
         const agent = supertest(app);
         const token = await registerAndLogin(USER);

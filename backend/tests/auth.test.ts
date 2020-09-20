@@ -77,10 +77,6 @@ describe("Authentication", () => {
             .set("Authorization", `Bearer ${token}`)
             .send();
         expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("id");
-        expect(res.body).to.have.property("email");
-        expect(res.body).to.have.property("name");
-        expect(res.body).to.have.property("role");
     });
 
     it("Join and retrieve session", async () => {
@@ -97,8 +93,6 @@ describe("Authentication", () => {
             .set("Authorization", `Bearer ${token}`)
             .send();
         expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("role");
-        expect(res.body.role).to.equal("user");
     });
 
     it("Logout", async () => {

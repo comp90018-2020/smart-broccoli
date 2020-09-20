@@ -159,4 +159,23 @@ router.get("/profile/picture", async (req: Request, res, next) => {
     }
 });
 
+/**
+ * @swagger
+ * /user/profile:
+ *   get:
+ *     description: Get user profile
+ *     tags:
+ *       - User
+ *     responses:
+ *       '200':
+ *         description: user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ */
+router.get("/profile", (req: Request, res) => {
+    return res.json(req.user);
+});
+
 export default router;
