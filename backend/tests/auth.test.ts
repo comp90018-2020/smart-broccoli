@@ -71,10 +71,10 @@ describe("Authentication", () => {
 
     it("Session with token", async () => {
         const agent = supertest(app);
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
         const res = await agent
             .get("/auth/session")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `Bearer ${user.token}`)
             .send();
         expect(res.status).to.equal(200);
     });
@@ -97,16 +97,16 @@ describe("Authentication", () => {
 
     it("Logout", async () => {
         const agent = supertest(app);
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
         const res = await agent
             .post("/auth/logout")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `Bearer ${user.token}`)
             .send();
         expect(res.status).to.equal(200);
 
         const session = await agent
             .get("/auth/session")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `Bearer ${user.token}`)
             .send();
         expect(session.status).to.equal(403);
     });
