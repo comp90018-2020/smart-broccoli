@@ -118,6 +118,11 @@ router.put(
     async (req: Request, res: Response, next: NextFunction) => {
         // Save picture information to DB
         try {
+            if (!req.file) {
+                const err = new Error("File not received");
+                res.status(400);
+                return next(err);
+            }
             await updateProfilePicture(req.user.id, req.file);
             return res.sendStatus(200);
         } catch (err) {
