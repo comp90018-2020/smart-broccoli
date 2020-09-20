@@ -7,9 +7,12 @@ import {
     deleteQuiz,
     updateQuestion,
     updateQuiz,
+    getQuizCreator,
+    getQuiz,
 } from "../controllers/quiz";
 import { param, body } from "express-validator";
 import validate from "./middleware/validate";
+import { Quiz } from "models";
 
 /**
  * @swagger
@@ -71,8 +74,15 @@ import validate from "./middleware/validate";
  */
 const router = Router();
 
+// Extend req.user
+declare module "express" {
+    export interface Request {
+        quiz?: Quiz;
+    }
+}
+
 // Checks whether user is a creator
-export const creatorCheck = (
+export const creatorRoleCheck = (
     req: Request,
     res: Response,
     next: NextFunction
@@ -82,6 +92,20 @@ export const creatorCheck = (
         return next(err);
     }
     return next();
+};
+
+// Check whether user is creator of quiz
+export const isQuizCreator = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        req.quiz = await getQuizCreator(req.user.id, Number(req.params.quizId));
+        return next();
+    } catch (err) {
+        return next(err);
+    }
 };
 
 /**
@@ -109,6 +133,71 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
         return next(err);
     }
 });
+
+/**
+ * @swagger
+ *
+ * /quiz:
+ *   get:
+ *     summary: Get quiz created by user
+ *     tags:
+ *       - Quiz
+ *     responses:
+ *       '200':
+ *         description: Quiz created by user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 $ref: '#/components/schemas/Quiz'
+ */
+router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        return res.json(await getQuiz(req.user.id, Number(req.params.quizId)));
+    } catch (err) {
+        return next(err);
+    }
+});
+
+/**
+ * @swagger
+ *
+ * /quiz/{quizId}:
+ *   get:
+ *     summary: Get quiz
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Quiz ID
+ *     responses:
+ *       '200':
+ *         description: Specified quiz
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Quiz'
+ */
+router.get(
+    "/:quizId",
+    [param("quizId").isInt()],
+    validate,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            return res.json(
+                await getQuiz(req.user.id, Number(req.params.quizId))
+            );
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
 
 /**
  * @swagger
@@ -151,13 +240,10 @@ router.patch(
         body("title").optional().isString(),
     ],
     validate,
+    isQuizCreator,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const quiz = await updateQuiz(
-                req.user.id,
-                Number(req.params.quizId),
-                req.body
-            );
+            const quiz = await updateQuiz(req.quiz, req.body);
             return res.json(quiz);
         } catch (err) {
             return next(err);
@@ -188,9 +274,10 @@ router.delete(
     "/:quizId",
     [param("quizId").isInt()],
     validate,
+    isQuizCreator,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await deleteQuiz(req.user.id, Number(req.params.quizId));
+            await deleteQuiz(Number(req.params.quizId));
             return res.sendStatus(200);
         } catch (err) {
             return next(err);
@@ -240,10 +327,10 @@ router.post(
     "/:quizId/question",
     [...questionValidator, param("quizId").isInt()],
     validate,
+    isQuizCreator,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const question = await addQuestion(
-                req.user.id,
                 Number(req.params.quizId),
                 req.body
             );
@@ -297,10 +384,10 @@ router.put(
         param("questionId").isInt(),
     ],
     validate,
+    isQuizCreator,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const question = await updateQuestion(
-                req.user.id,
                 Number(req.params.quizId),
                 Number(req.params.questionId),
                 req.body
@@ -340,10 +427,10 @@ router.delete(
     "/:quizId/question/:questionId",
     [param("quizId").isInt(), param("questionId").isInt()],
     validate,
+    isQuizCreator,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             await deleteQuestion(
-                req.user.id,
                 Number(req.params.quizId),
                 Number(req.params.questionId)
             );

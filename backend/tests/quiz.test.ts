@@ -102,7 +102,7 @@ describe("Authentication", () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
         const quiz = await createQuiz(user.id);
-        const question = await addQuestion(user.id, quiz.id, QUESTION_CHOICE);
+        const question = await addQuestion(quiz.id, QUESTION_CHOICE);
 
         // Slightly modified
         const modified = {
@@ -121,11 +121,44 @@ describe("Authentication", () => {
         expect(res.body.options).to.deep.equal(modified.options);
     });
 
+    it("Get quiz", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const quiz = await createQuiz(user.id);
+        await addQuestion(quiz.id, QUESTION_CHOICE);
+
+        const res = await agent
+            .get(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("id");
+        expect(res.body).to.have.property("questions");
+        expect(res.body.questions).to.have.lengthOf(1);
+        expect(res.body.questions[0]).to.have.property("options");
+        expect(res.body.questions[0].options).to.deep.equal(
+            QUESTION_CHOICE.options
+        );
+    });
+
+    it("Get all quiz", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const quiz = await createQuiz(user.id);
+        await addQuestion(quiz.id, QUESTION_CHOICE);
+
+        const res = await agent
+            .get(`/quiz`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(res.status).to.equal(200);
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(1);
+    });
+
     it("Delete question", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
         const quiz = await createQuiz(user.id);
-        const question = await addQuestion(user.id, quiz.id, QUESTION_CHOICE);
+        const question = await addQuestion(quiz.id, QUESTION_CHOICE);
 
         const res = await agent
             .delete(`/quiz/${quiz.id}/question/${question.id}`)
@@ -137,7 +170,7 @@ describe("Authentication", () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
         const quiz = await createQuiz(user.id);
-        await addQuestion(user.id, quiz.id, QUESTION_TF);
+        await addQuestion(quiz.id, QUESTION_TF);
 
         const res = await agent
             .delete(`/quiz/${quiz.id}`)

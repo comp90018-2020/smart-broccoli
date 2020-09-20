@@ -1,3 +1,4 @@
+import { FindOptions, NonNullFindOptions } from "sequelize/types";
 import ErrorStatus from "../helpers/error";
 import { Quiz, Question } from "../models";
 import { OptionAttributes } from "../models/question";
@@ -9,21 +10,27 @@ export const createQuiz = async (userId: number) => {
     });
 };
 
-// Get quiz
-export const getQuiz = async (quizId: number) => {
-    const quiz = await Quiz.findByPk(quizId, {
-        include: ["Quiz"],
+// Get all quiz
+export const getAllQuiz = async (userId: number) => {
+    const quiz = await Quiz.findAll({
+        where: { userId },
+        include: ["questions"],
     });
-    if (!quiz) {
-        const err = new ErrorStatus("Quiz not found", 404);
-        throw err;
-    }
     return quiz;
 };
 
+// Get quiz
+export const getQuiz = async (userId: number, quizId: number) => {
+    return await getQuizCreator(userId, quizId, { include: ["questions"] });
+};
+
 // Check quiz and check permissions
-const getAndCheckPermissions = async (userId: number, quizId: number) => {
-    const quiz = await Quiz.findByPk(quizId);
+export const getQuizCreator = async (
+    userId: number,
+    quizId: number,
+    options?: FindOptions
+) => {
+    const quiz = await Quiz.findByPk(quizId, options);
     if (!quiz) {
         const err = new ErrorStatus("Quiz not found", 404);
         throw err;
@@ -36,9 +43,7 @@ const getAndCheckPermissions = async (userId: number, quizId: number) => {
 };
 
 // Update quiz attributes
-export const updateQuiz = async (userId: number, quizId: number, info: any) => {
-    const quiz = await getAndCheckPermissions(userId, quizId);
-
+export const updateQuiz = async (quiz: Quiz, info: any) => {
     // Make updates
     if (info.title) {
         quiz.title = info.title;
@@ -48,9 +53,7 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
 };
 
 // Delete quiz
-export const deleteQuiz = async (userId: number, quizId: number) => {
-    // Check user permissions
-    await getAndCheckPermissions(userId, quizId);
+export const deleteQuiz = async (quizId: number) => {
     // Now destroy the quiz
     return await Quiz.destroy({ where: { id: quizId } });
 };
@@ -103,12 +106,7 @@ const checkQuestionInfo = (info: any): QuestionInfo => {
 };
 
 // Add question
-export const addQuestion = async (
-    userId: number,
-    quizId: number,
-    info: any
-) => {
-    await getAndCheckPermissions(userId, quizId);
+export const addQuestion = async (quizId: number, info: any) => {
     const question = await Question.create({
         ...checkQuestionInfo(info),
         quizId,
@@ -118,13 +116,11 @@ export const addQuestion = async (
 
 // Update question
 export const updateQuestion = async (
-    userId: number,
     quizId: number,
     questionId: number,
     info: any
 ) => {
     // Check input
-    await getAndCheckPermissions(userId, quizId);
     const questionInfo = checkQuestionInfo(info);
 
     // Update and return
@@ -145,12 +141,7 @@ export const updateQuestion = async (
 };
 
 // Delete question
-export const deleteQuestion = async (
-    userId: number,
-    quizId: number,
-    questionId: number
-) => {
-    await getAndCheckPermissions(userId, quizId);
+export const deleteQuestion = async (quizId: number, questionId: number) => {
     const deleted = await Question.destroy({
         where: {
             id: questionId,
