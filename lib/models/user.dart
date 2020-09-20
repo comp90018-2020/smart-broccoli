@@ -1,5 +1,7 @@
+abstract class User {}
+
 /// User with login credientials (lecturer, coordinator)
-class RegisteredUser {
+class RegisteredUser extends User {
   int id;
   String email;
   String name;
@@ -25,4 +27,4 @@ class RegistrationConflictException implements RegistrationException {
 }
 
 /// User without login credentials (student)
-class ParticipantUser {}
+class ParticipantUser extends User {}
