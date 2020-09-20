@@ -15,7 +15,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 # Install production dependencies
-RUN yarn install --production --frozen-lockfile && yarn cache clean && yarn patch-swagger
+RUN yarn install --production --frozen-lockfile && yarn cache clean
 
 # Add user
 # RUN adduser -D comp90018
