@@ -2,7 +2,7 @@ import Sequelize from "sequelize";
 import crypto from "crypto";
 
 // Schema
-const schema = {
+const schema: Sequelize.ModelAttributes = {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,

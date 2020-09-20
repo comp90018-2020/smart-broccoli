@@ -5,7 +5,7 @@ import User from "./user";
 // Considerations made:
 // https://stackoverflow.com/questions/42763146
 
-const schema = {
+const schema: Sequelize.ModelAttributes = {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -17,11 +17,11 @@ const schema = {
     },
     scope: {
         type: Sequelize.STRING,
-        allowNULL: false,
+        allowNull: false,
     },
     revoked: {
         type: Sequelize.BOOLEAN,
-        allowNULL: false,
+        allowNull: false,
         defaultValue: false,
     },
 };
