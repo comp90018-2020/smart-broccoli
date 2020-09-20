@@ -64,8 +64,6 @@ class AuthToken {
   }
 }
 
-class AuthException implements Exception {}
-
 Future<RegisteredUser> register(
     String email, String password, String name, String username) async {
   // construct request body based on whether a username is supplied
