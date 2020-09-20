@@ -117,8 +117,12 @@ router.put(
     },
     async (req: Request, res: Response, next: NextFunction) => {
         // Save picture information to DB
-        await updateProfilePicture(req.user.id, req.file);
-        return res.sendStatus(200);
+        try {
+            await updateProfilePicture(req.user.id, req.file);
+            return res.sendStatus(200);
+        } catch (err) {
+            return next(err);
+        }
     }
 );
 
@@ -155,7 +159,7 @@ router.get("/profile/picture", async (req: Request, res, next) => {
         const file = fs.readFileSync(`${picture.destination}.thumb`);
         res.end(file, "binary");
     } catch (err) {
-        throw err;
+        return next(err);
     }
 });
 
