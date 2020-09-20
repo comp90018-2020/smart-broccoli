@@ -1,16 +1,23 @@
 import * as AuthController from "../controllers/auth";
 
-// Register user
+// Register as creator
 const register = async (info: any) => {
     const user = await AuthController.register(info);
     return user;
 };
 
-// Login as user
+// Login as creator
 const registerAndLogin = async (info: any) => {
     await register(info);
-    const res = await AuthController.login(info.username, info.password);
+    const res = await AuthController.login(info.email, info.password);
     return res.token;
 };
 
-export { register, registerAndLogin };
+// Join
+const join = async () => {
+    await join();
+    const token = await AuthController.join();
+    return token.token;
+};
+
+export { register, registerAndLogin, join };

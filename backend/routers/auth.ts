@@ -1,4 +1,4 @@
-import { login, logout, register } from "../controllers/auth";
+import { join, login, logout, register } from "../controllers/auth";
 import { Request, Response, NextFunction, Router } from "express";
 import { body } from "express-validator";
 import { auth } from "./middleware/auth";
@@ -17,12 +17,10 @@ const router = Router();
  *     NewUser:
  *       type: object
  *       required:
- *         - username
  *         - password
  *         - email
+ *         - name
  *       properties:
- *         username:
- *           type: string
  *         password:
  *           type: string
  *         email:
@@ -30,7 +28,6 @@ const router = Router();
  *         name:
  *           type: string
  *       example:
- *         username: foo
  *         password: foobarbaz
  *         email: foo@foo.foo
  *         name: Foo Bar
@@ -42,19 +39,22 @@ const router = Router();
  *             id:
  *               type: integer
  *               format: int64
+ *             role:
+ *               type: string
  *         - example:
  *             id: 1
- *             username: foo
  *             password: foobarbaz
  *             email: foo@foo.foo
  *             name: Foo Bar
+ *             role: creator
  */
 
 /**
  * @swagger
  * /auth/register:
  *   post:
- *     description: Create new user
+ *     description: Register creator account
+ *     security: []
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -74,10 +74,9 @@ const router = Router();
 router.post(
     "/register",
     [
-        body("email").isEmail().normalizeEmail().trim(),
-        body("username").notEmpty().trim(),
+        body("email").isEmail().normalizeEmail(),
         body("password").isLength({ min: 8 }),
-        body("name").trim(),
+        body("name").notEmpty().trim(),
     ],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
@@ -95,9 +94,40 @@ router.post(
 
 /**
  * @swagger
+ * /auth/join:
+ *   post:
+ *     description: Join as user
+ *     security: []
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       '200':
+ *         description: user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               properties:
+ *                 token:
+ *                   type: string
+ */
+router.post(
+    "/join",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const token = await join();
+            return res.json({ token: token.token });
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
  * /auth/login:
  *   post:
- *     description: User login
+ *     description: Login creator account
+ *     security: []
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -106,13 +136,13 @@ router.post(
  *         application/json:
  *           schema:
  *             properties:
- *               username:
+ *               email:
  *                 type: string
  *               password:
  *                 type: string
  *             required:
- *               - username
- *               -  password
+ *               - email
+ *               - password
  *     responses:
  *       '200':
  *         description: user
@@ -125,12 +155,15 @@ router.post(
  */
 router.post(
     "/login",
-    [body("username").notEmpty().trim(), body("password").isLength({ min: 8 })],
+    [
+        body("email").isEmail().normalizeEmail(),
+        body("password").isLength({ min: 8 }),
+    ],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { username, password } = req.body;
-            const token = await login(username, password);
+            const { email, password } = req.body;
+            const token = await login(email, password);
             return res.json({ token: token.token });
         } catch (err) {
             return next(err);
@@ -142,19 +175,15 @@ router.post(
  * @swagger
  * /auth/session:
  *   get:
- *     description: Validate session & Get user info
+ *     description: Validate session
  *     tags:
  *       - Authentication
  *     responses:
  *       '200':
- *         description: user
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
+ *         description: OK
  */
 router.get("/session", auth, (req: Request, res) => {
-    return res.json(req.user);
+    return res.sendStatus(200);
 });
 
 /**

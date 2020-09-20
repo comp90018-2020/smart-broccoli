@@ -1,5 +1,7 @@
 import { Router } from "express";
-import auth from "./auth";
+import authRouter from "./auth";
+import { auth } from "./middleware/auth";
+import userRouter from "./user";
 
 const router = Router();
 
@@ -14,6 +16,9 @@ const router = Router();
  *       bearerFormat: JWT
  */
 
-router.use("/auth", auth);
+// Authentication
+router.use("/auth", authRouter);
+// User
+router.use("/user", auth, userRouter);
 
 export default router;

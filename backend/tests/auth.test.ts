@@ -10,9 +10,8 @@ describe("Authentication", () => {
     });
 
     const USER = {
-        username: "a",
-        password: "aaaaaaaa",
         email: "a@a.com",
+        password: "aaaaaaaa",
         name: "a",
     };
 
@@ -21,9 +20,10 @@ describe("Authentication", () => {
         const res = await agent.post("/auth/register").send(USER);
         expect(res.status).to.equal(201);
         expect(res.body).to.have.property("id");
-        expect(res.body).to.have.property("username");
         expect(res.body).to.have.property("email");
         expect(res.body).to.have.property("name");
+        expect(res.body).to.have.property("role");
+        expect(res.body.role).to.equal("creator");
     });
 
     it("Register duplicate", async () => {
@@ -39,7 +39,7 @@ describe("Authentication", () => {
         await agent.post("/auth/register").send(USER);
         const res = await agent
             .post("/auth/login")
-            .send({ username: USER.username, password: USER.password });
+            .send({ email: USER.email, password: USER.password });
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("token");
     });
@@ -49,8 +49,8 @@ describe("Authentication", () => {
         await agent.post("/auth/register").send(USER);
         const res = await agent
             .post("/auth/login")
-            .send({ username: USER.username, password: "abcdefgh" });
-        expect(res.status).to.equal(401);
+            .send({ email: USER.email, password: "abcdefgh" });
+        expect(res.status).to.equal(403);
     });
 
     it("Session without token", async () => {
@@ -77,10 +77,22 @@ describe("Authentication", () => {
             .set("Authorization", `Bearer ${token}`)
             .send();
         expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("id");
-        expect(res.body).to.have.property("username");
-        expect(res.body).to.have.property("email");
-        expect(res.body).to.have.property("name");
+    });
+
+    it("Join and retrieve session", async () => {
+        const agent = supertest(app);
+
+        // Join
+        const joinRes = await agent.post("/auth/join");
+        expect(joinRes.body).to.have.property("token");
+        const token = joinRes.body.token;
+
+        // Check session
+        const res = await agent
+            .get("/auth/session")
+            .set("Authorization", `Bearer ${token}`)
+            .send();
+        expect(res.status).to.equal(200);
     });
 
     it("Logout", async () => {
