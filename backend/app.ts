@@ -5,6 +5,8 @@ import router from "./routers";
 import ErrorStatus from "helpers/error";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-dist";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 
@@ -38,11 +40,39 @@ const options = {
     },
     apis: ["./routers/*.js", "./routers/*.ts"],
 };
-const swaggerSpec = swaggerJSDoc(options);
+const swaggerSpec: any = swaggerJSDoc(options);
 
 // Serve JSDoc and Swagger UI
 app.get("/swagger.json", (req, res) => {
+    // Add security at top level
+    swaggerSpec["security"] = [{ bearerAuth: [] }];
     res.json(swaggerSpec);
+});
+app.get(["/", "/index.html"], (req, res, next) => {
+    fs.readFile(
+        path.join(swaggerUI.getAbsoluteFSPath(), "index.html"),
+        (err, data) => {
+            if (err) return next(err);
+            res.send(
+                data
+                    .toString()
+                    .replace(
+                        "https://petstore.swagger.io/v2/swagger.json",
+                        "swagger.json"
+                    )
+            );
+        }
+    );
+});
+app.get("/swagger-ui.css", (req, res, next) => {
+    fs.readFile(
+        path.join(swaggerUI.getAbsoluteFSPath(), "swagger-ui.css"),
+        (err, data) => {
+            if (err) return next(err);
+            res.contentType("swagger-ui.css");
+            res.send(data + ".download-url-wrapper{display: none !important;}");
+        }
+    );
 });
 app.use(express.static(swaggerUI.getAbsoluteFSPath()));
 

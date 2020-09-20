@@ -2,24 +2,35 @@ import Sequelize from "sequelize";
 import crypto from "crypto";
 
 // Schema
-const schema = {
+const schema: Sequelize.ModelAttributes = {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
-    username: { type: Sequelize.STRING, allowNull: false },
-    password: { type: Sequelize.STRING, allowNull: false },
-    email: { type: Sequelize.STRING, allowNull: false },
+    password: { type: Sequelize.STRING, allowNull: true },
+    email: { type: Sequelize.STRING, allowNull: true },
     name: { type: Sequelize.STRING, allowNull: true },
+    role: { type: Sequelize.ENUM("creator", "user"), allowNull: false },
+    pictureId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+    },
 };
 
 interface UserAttributes {
     id?: number;
-    username: string;
-    password: string;
-    email: string;
+
+    // Must have role
+    role: string;
+
+    // Creator attributes
+    password?: string;
+    email?: string;
+
+    // User attributes
     name?: string;
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -29,12 +40,13 @@ const ALGORITHM = "sha512";
 const KEYLEN = 64;
 
 class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
-    public id!: number;
-    public username!: string;
-    public password!: string;
-    public email!: string;
-    public name: string;
+    public password?: string;
+    public email?: string;
+    public name?: string;
+    public role: string;
+    public pictureId?: number;
 
+    public readonly id!: number;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 
@@ -45,13 +57,7 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
                 attributes: { exclude: ["password"] },
             },
             indexes: [
-                // Ensure that usernames are unique
-                {
-                    name: "unique_username",
-                    unique: true,
-                    // @ts-ignore
-                    fields: [sequelize.fn("lower", sequelize.col("username"))],
-                },
+                // Ensure that emails are unique
                 {
                     name: "unique_email",
                     unique: true,
@@ -62,6 +68,8 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
             hooks: {
                 // Hash password before creation
                 beforeCreate: async (user: any) => {
+                    if (user.role !== "creator") return;
+
                     try {
                         const hash = await hashPassword(user.password);
                         user.password = hash;
@@ -70,7 +78,7 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
                     }
                 },
                 // Hash password before update
-                beforeUpdate: async (user: any) => {
+                beforeUpdate: async function (user: any) {
                     // If password is not changed
                     if (!user.password) {
                         return;
@@ -87,7 +95,7 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
         });
     }
 
-    verifyPassword = async function (password: string): Promise<boolean> {
+    verifyPassword = function (password: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             const salt = this.password.split(":")[0];
             crypto.pbkdf2(

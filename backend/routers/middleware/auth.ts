@@ -40,6 +40,10 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
             const err = new ErrorStatus("Token revoked or missing", 403);
             throw err;
         }
+        if (!tokenLookup.User) {
+            const err = new ErrorStatus("Bad token", 500);
+            throw err;
+        }
 
         req.user = tokenLookup.User;
         req.token = token;
