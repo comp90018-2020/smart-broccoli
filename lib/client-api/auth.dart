@@ -1,68 +1,83 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:json_annotation/json_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 
-const AUTH_URL = 'https://fuzzybroccoli.com/auth';
+part 'auth.g.dart';
+
+const AUTH_URL = 'http://fuzzybroccoli.com/auth';
 
 /// Singleton class for making requests requiring authorisation
+@JsonSerializable()
 class AuthenticatedRequestHandler {
-  static final AuthenticatedRequestHandler _instance =
-      AuthenticatedRequestHandler._internal();
+  static AuthenticatedRequestHandler _instance;
 
-  AuthToken _token;
-  Role _role;
+  AuthToken token;
+  Role role;
 
-  Map<String, String> _headers = <String, String>{
-    'Content-Type': 'application/json; charset=UTF-8'
-  };
+  static Future<AuthenticatedRequestHandler> getInstance() async {
+    if (_instance != null) return _instance;
 
-  factory AuthenticatedRequestHandler() {
-    // todo: deserialisation
-    return _instance;
+    final prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey('AuthenticatedRequestHandler'))
+      return AuthenticatedRequestHandler(null, null);
+
+    return AuthenticatedRequestHandler.fromJson(
+        json.decode(prefs.getString('AuthenticatedRequestHandler')));
+  }
+
+  Future<void> serialise() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('AuthenticatedRequestHandler', json.encode(this.toJson()));
   }
 
   Future<bool> sessionIsValid() async {
     final http.Response res =
-        await http.post(AUTH_URL + "/session", headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    });
+        await http.post(AUTH_URL + "/session", headers: _headers);
     if (res.statusCode == 200) return true;
     return false;
   }
 
   Future<bool> logout() async {
     final http.Response res =
-        await http.post(AUTH_URL + "/logout", headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    });
-    if (res.statusCode == 200) return true;
+        await http.post(AUTH_URL + "/logout", headers: _headers);
+    if (res.statusCode == 200) {
+      token = null;
+      role = null;
+      return true;
+    }
     return false;
   }
 
-  AuthenticatedRequestHandler._internal();
+  AuthenticatedRequestHandler(this.token, this.role);
 
-  set token(AuthToken token) {
-    this._token = token;
-    // todo: headers
-    // todo: serialisation
-  }
+  factory AuthenticatedRequestHandler.fromJson(Map<String, dynamic> json) =>
+      _$AuthenticatedRequestHandlerFromJson(json);
 
-  set role(Role role) {
-    this._role = role;
-    // todo: serialisation
+  Map<String, dynamic> toJson() => _$AuthenticatedRequestHandlerToJson(this);
+
+  Map<String, String> get _headers {
+    if (token == null) throw MissingTokenException();
+    return <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer ${token.value}'
+    };
   }
 }
 
+@JsonSerializable()
 class AuthToken {
   String value;
 
-  AuthToken({this.value});
+  AuthToken(this.value);
 
-  factory AuthToken.fromJson(Map<String, dynamic> json) {
-    return AuthToken(value: json['token']);
-  }
+  factory AuthToken.fromJson(Map<String, dynamic> json) =>
+      _$AuthTokenFromJson(json);
 }
+
+class MissingTokenException implements Exception {}
 
 Future<RegisteredUser> register(
     String email, String password, String name) async {
@@ -96,7 +111,10 @@ Future<bool> login(String email, String password) async {
 
   if (res.statusCode == 200) {
     AuthToken token = AuthToken.fromJson(json.decode(res.body));
-    AuthenticatedRequestHandler().token = token;
+    AuthenticatedRequestHandler reqHandler =
+        await AuthenticatedRequestHandler.getInstance();
+    reqHandler.token = token;
+    reqHandler.serialise();
     return true;
   }
   return false;
