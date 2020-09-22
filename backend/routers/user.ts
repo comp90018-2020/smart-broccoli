@@ -24,7 +24,7 @@ const router = Router();
  * @swagger
  * /user/profile:
  *   patch:
- *     description: Update user information, fields optionally required
+ *     summary: Update profile user information
  *     tags:
  *       - User
  *     requestBody:
@@ -81,7 +81,7 @@ const upload = multer({
  * @swagger
  * /user/profile/picture:
  *   put:
- *     description: Update user information, fields optionally required
+ *     summary: Update user profile picture
  *     tags:
  *       - User
  *     requestBody:
@@ -135,7 +135,7 @@ router.put(
  * @swagger
  * /user/profile/picture:
  *   get:
- *     description: Get user profile picture
+ *     summary: Get user profile picture
  *     tags:
  *       - User
  *     responses:
@@ -172,7 +172,7 @@ router.get("/profile/picture", async (req: Request, res, next) => {
  * @swagger
  * /user/profile:
  *   get:
- *     description: Get user profile
+ *     summary: Get user profile
  *     tags:
  *       - User
  *     responses:
