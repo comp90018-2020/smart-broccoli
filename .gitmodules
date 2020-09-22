@@ -1,3 +1,0 @@
-[submodule "inject.dart"]
-	path = inject.dart
-	url = https://github.com/google/inject.dart
