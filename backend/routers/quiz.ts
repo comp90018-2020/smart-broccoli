@@ -114,7 +114,7 @@ export const isQuizCreator = async (
  *
  * /quiz:
  *   post:
- *     description: Create quiz
+ *     summary: Create quiz
  *     tags:
  *       - Quiz
  *     responses:
@@ -205,7 +205,7 @@ router.get(
  *
  * /quiz/{quizId}:
  *   patch:
- *     description: Update quiz
+ *     summary: Update quiz
  *     tags:
  *       - Quiz
  *     parameters:
@@ -257,7 +257,7 @@ router.patch(
  *
  * /quiz/{quizId}:
  *   delete:
- *     description: Delete quiz
+ *     summary: Delete quiz
  *     tags:
  *       - Quiz
  *     parameters:
