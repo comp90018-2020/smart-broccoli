@@ -7,12 +7,9 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
-import 'client-api/api_base.dart';
-import 'client-api/auth/auth_api.dart';
-import 'client-api/auth/auth.dart';
+import 'client-api/auth.dart';
 import 'repository.dart';
-import 'client-api/user/user_api.dart';
-import 'client-api/user/user.dart';
+import 'client-api/user.dart';
 
 /// adds generated dependencies
 /// to the provided [GetIt] instance
@@ -25,12 +22,9 @@ GetIt $initGetIt(
   final gh = GetItHelper(get, environment, environmentFilter);
 
   // Eager singletons must be registered in the right order
-  gh.singleton<ApiBase>(ApiBase());
-  gh.singleton<AuthApi>(AuthApi());
-  gh.singletonAsync<AuthService>(() => AuthService.create(get<AuthApi>()));
+  gh.singletonAsync<AuthService>(() => AuthService.create());
   gh.singletonWithDependencies<Repository>(() => Repository(get<AuthService>()),
       dependsOn: [AuthService]);
-  gh.singleton<UserApi>(UserApi(get<ApiBase>()));
-  gh.singleton<UserService>(UserService(get<UserApi>()));
+  gh.singleton<UserService>(UserService(get<AuthService>()));
   return get;
 }

@@ -1,4 +1,4 @@
-import 'package:fuzzy_broccoli/client-api/auth/auth.dart';
+import './client-api/auth.dart';
 import 'package:injectable/injectable.dart';
 
 @Singleton(dependsOn: [AuthService])
