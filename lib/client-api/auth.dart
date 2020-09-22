@@ -21,13 +21,30 @@ class AuthModel {
     return AuthModel(token);
   }
 
+  bool inSession() {
+    return _token != null;
+  }
+
+  Future<bool> join() async {
+    final http.Response res =
+        await http.post("$AUTH_URL/join", headers: ApiBase.headers());
+
+    if (res.statusCode == 200) {
+      String token = json.decode(res.body)['token'];
+      this._token = token;
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString("token", token);
+      return true;
+    } else {
+      return null;
+    }
+  }
+
   Future<RegisteredUser> register(
       String email, String password, String name) async {
     // send request
     final http.Response res = await http.post("$AUTH_URL/register",
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
+        headers: ApiBase.headers(),
         body: jsonEncode(<String, String>{
           'email': email,
           'password': password,
@@ -46,9 +63,7 @@ class AuthModel {
 
   Future<bool> login(String email, String password) async {
     final http.Response res = await http.post("$AUTH_URL/login",
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
+        headers: ApiBase.headers(),
         body:
             jsonEncode(<String, String>{'email': email, 'password': password}));
 
@@ -64,13 +79,14 @@ class AuthModel {
   }
 
   Future<bool> sessionIsValid() async {
-    final http.Response res = await ApiBase.get("/session", authToken: token);
+    final http.Response res =
+        await http.get("/session", headers: ApiBase.headers(authToken: token));
     return res.statusCode == 200;
   }
 
   Future<bool> logout() async {
-    final http.Response res =
-        await ApiBase.post(AUTH_URL + "/logout", authToken: token);
+    final http.Response res = await http.post(AUTH_URL + "/logout",
+        headers: ApiBase.headers(authToken: token));
     if (res.statusCode == 200) {
       _token = '';
       return true;
