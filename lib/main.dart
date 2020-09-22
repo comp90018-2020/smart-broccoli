@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fuzzy_broccoli/client-api/api_base.dart';
-import 'package:fuzzy_broccoli/client-api/auth/auth.dart';
-import 'package:fuzzy_broccoli/client-api/auth/auth_api.dart';
 import './home.dart';
 import './get_it.dart';
 
