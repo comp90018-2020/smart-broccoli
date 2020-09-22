@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import '../models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -6,8 +5,7 @@ import 'dart:convert';
 import './api_base.dart';
 
 /// Singleton class for making requests requiring authorisation
-@singleton
-class AuthService {
+class AuthModel {
   static const AUTH_URL = ApiBase.BASE_URL + '/auth';
 
   String _token = '';
@@ -15,13 +13,12 @@ class AuthService {
     return _token;
   }
 
-  AuthService(this._token);
+  AuthModel(this._token);
 
-  @factoryMethod
-  static Future<AuthService> create() async {
+  static Future<AuthModel> create() async {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token");
-    return AuthService(token);
+    return AuthModel(token);
   }
 
   Future<RegisteredUser> register(

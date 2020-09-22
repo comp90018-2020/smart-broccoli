@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:fuzzy_broccoli/client-api/auth.dart';
+import 'package:fuzzy_broccoli/client-api/user.dart';
 import './home.dart';
-import './get_it.dart';
+import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  configureDependencies();
-  getIt.allReady().then((_) {
-    runApp(MyApp());
-  });
+
+  AuthModel authModel = await AuthModel.create();
+  UserModel userModel = UserModel(authModel);
+
+  runApp(MultiProvider(
+    child: MyApp(),
+    providers: [
+      Provider(create: (context) => userModel),
+      Provider(create: (context) => authModel)
+    ],
+  ));
 }
 
 class MyApp extends StatelessWidget {

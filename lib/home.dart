@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fuzzy_broccoli/repository.dart';
-import './get_it.dart';
+import 'package:fuzzy_broccoli/client-api/auth.dart';
+import 'package:provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -54,9 +54,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(getIt<Repository>().authService.token == null
-                ? 'null'
-                : getIt<Repository>().authService.token == null),
+            Consumer<AuthModel>(
+              builder: (context, auth, child) {
+                return Text("token: ${auth.token}");
+              },
+            ),
             Text(
               'You have pushed the button this many times:',
             ),

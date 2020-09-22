@@ -1,15 +1,13 @@
 import 'package:fuzzy_broccoli/client-api/api_base.dart';
 import 'package:fuzzy_broccoli/client-api/auth.dart';
-import 'package:injectable/injectable.dart';
 import '../models/user.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-@singleton
-class UserService {
-  AuthService _authService;
+class UserModel {
+  AuthModel _authService;
 
-  UserService(this._authService);
+  UserModel(this._authService);
 
   Future<RegisteredUser> getUser() async {
     http.Response response =
