@@ -21,8 +21,7 @@ class UserModel {
       return RegisteredUser.fromJson(jsonDecode(response.body));
     else if (response.statusCode == 401)
       throw UnauthorisedRequestException();
-    else if (response.statusCode == 403)
-      throw ForbiddenRequestException();
+    else if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to get user: unknown error occurred');
   }
 
@@ -40,8 +39,7 @@ class UserModel {
       return RegisteredUser.fromJson(jsonDecode(response.body));
     else if (response.statusCode == 401)
       throw UnauthorisedRequestException();
-    else if (response.statusCode == 403)
-      throw ForbiddenRequestException();
+    else if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to update user: unknown error occurred');
   }
 
@@ -59,5 +57,20 @@ class UserModel {
       // user has no profile pic
       return null;
     throw Exception('Unable to get user profile pic: unknown error occurred');
+  }
+
+  Future<void> setProfilePic(Uint8List bytes) async {
+    final http.MultipartRequest request =
+        http.MultipartRequest('PUT', Uri.parse('$USER_URL/profile/picture'))
+          ..files.add(http.MultipartFile.fromBytes('avatar', bytes));
+
+    final http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200)
+      return;
+    else if (response.statusCode == 401)
+      throw UnauthorisedRequestException();
+    else if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to set user profile pic: unknown error occurred');
   }
 }
