@@ -18,12 +18,13 @@ class UserModel {
   }
 
   Future<RegisteredUser> updateUser({email, password, name}) async {
-    Map<String, dynamic> body = {};
+    Map<String, String> body = {};
     if (email != null) body['email'] = email;
     if (password != null) body['password'] = password;
     if (name != null) body['name'] = name;
     final http.Response response = await http.patch('$USER_URL/profile',
-        headers: ApiBase.headers(authToken: _authModel.token), body: body);
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: jsonEncode(body));
     return RegisteredUser.fromJson(jsonDecode(response.body));
   }
 
