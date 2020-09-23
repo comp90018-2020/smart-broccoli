@@ -1,8 +1,10 @@
-import 'package:fuzzy_broccoli/client-api/api_base.dart';
-import 'package:fuzzy_broccoli/client-api/auth.dart';
-import '../models/user.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../models/user.dart';
+import 'api_base.dart';
+import 'auth.dart';
 
 class UserModel {
   AuthModel _authModel;

@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fuzzy_broccoli/client-api/key_value.dart';
+
+import 'key_value.dart';
 
 /// Key value store implemented using shared preferences
 class SharedPrefsKeyValueStore implements KeyValueStore {
