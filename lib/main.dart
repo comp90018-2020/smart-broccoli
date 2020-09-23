@@ -11,7 +11,7 @@ void main() async {
 
   SharedPrefsKeyValueStore keyValueSharedStorage =
       await SharedPrefsKeyValueStore.create();
-  AuthModel authModel = await AuthModel.create(keyValueSharedStorage);
+  AuthModel authModel = AuthModel(keyValueSharedStorage);
   UserModel userModel = UserModel(authModel);
 
   runApp(MultiProvider(

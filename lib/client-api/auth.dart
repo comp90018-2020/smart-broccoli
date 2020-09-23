@@ -17,11 +17,8 @@ class AuthModel {
   }
 
   /// Constructor for internal use only
-  AuthModel._internal(this._keyValueStore, this._token);
-
-  static Future<AuthModel> create(KeyValueStore keyValueStore) async {
-    String token = keyValueStore.getString("token");
-    return AuthModel._internal(keyValueStore, token);
+  AuthModel(this._keyValueStore) {
+    _token = _keyValueStore.getString("token");
   }
 
   bool inSession() {
