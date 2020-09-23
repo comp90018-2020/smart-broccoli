@@ -10,7 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   SharedPrefsKeyValueStore keyValueSharedStorage =
-      await SharedPrefsKeyValueStore.initialise();
+      await SharedPrefsKeyValueStore.create();
   AuthModel authModel = await AuthModel.create(keyValueSharedStorage);
   UserModel userModel = UserModel(authModel);
 
