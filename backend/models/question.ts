@@ -26,6 +26,10 @@ const schema: Sequelize.ModelAttributes = {
         type: Sequelize.INTEGER,
         allowNull: true,
     },
+    pictureId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+    },
 };
 
 export interface OptionAttributes {
@@ -41,6 +45,7 @@ interface QuestionAttributes {
     type: string;
     tf?: boolean;
     options?: OptionAttributes[];
+    pictureId?: number;
 }
 
 export default class Question extends Sequelize.Model<QuestionAttributes>
@@ -50,6 +55,7 @@ export default class Question extends Sequelize.Model<QuestionAttributes>
     public type!: string;
     public tf?: boolean;
     public options?: OptionAttributes[];
+    public pictureId?: number;
 
     public readonly id!: number;
     public readonly quizId: number;

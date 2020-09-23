@@ -60,6 +60,10 @@ app.get(["/", "/index.html"], (req, res, next) => {
                         "https://petstore.swagger.io/v2/swagger.json",
                         "swagger.json"
                     )
+                    .replace(
+                        "<title>Swagger UI</title>",
+                        "<title>Fuzzy Broccoli</title>"
+                    )
             );
         }
     );
@@ -82,7 +86,7 @@ app.use(router);
 // 404 handler
 app.use((req, res, next) => {
     res.status(404);
-    return res.send();
+    return res.send({ message: "Route not found" });
 });
 
 // Error handler

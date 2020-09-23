@@ -2,6 +2,7 @@ import { FindOptions, NonNullFindOptions } from "sequelize/types";
 import ErrorStatus from "../helpers/error";
 import { Quiz, Question } from "../models";
 import { OptionAttributes } from "../models/question";
+import { deletePicture, getPictureById, insertPicture } from "./picture";
 
 // Create quiz
 export const createQuiz = async (userId: number) => {
@@ -152,4 +153,50 @@ export const deleteQuestion = async (quizId: number, questionId: number) => {
         const err = new ErrorStatus("Bad Request", 400);
         throw err;
     }
+};
+
+// Update question picture
+export const updateQuestionPicture = async (
+    quizId: number,
+    questionId: number,
+    file: any
+) => {
+    const question = await Question.findOne({
+        where: {
+            quizId,
+            id: questionId,
+        },
+    });
+    if (!question) {
+        const err = new ErrorStatus("Cannot found question", 404);
+        throw err;
+    }
+
+    // Delete the old picture
+    if (question.pictureId) {
+        await deletePicture(question.pictureId);
+    }
+    // Insert the new picture
+    const picture = await insertPicture(file);
+    // Set user picture
+    question.pictureId = picture.id;
+    return await question.save();
+};
+
+// Get question picture
+export const getQuestionPicture = async (
+    quizId: number,
+    questionId: number
+) => {
+    const question = await Question.findOne({
+        where: {
+            quizId,
+            id: questionId,
+        },
+    });
+    if (!question) {
+        const err = new ErrorStatus("Cannot found question", 404);
+        throw err;
+    }
+    return await getPictureById(question.pictureId);
 };

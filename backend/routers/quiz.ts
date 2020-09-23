@@ -10,10 +10,15 @@ import {
     getQuizCreator,
     getQuiz,
     getAllQuiz,
+    updateQuestionPicture,
+    getQuestionPicture,
 } from "../controllers/quiz";
 import { param, body } from "express-validator";
 import validate from "./middleware/validate";
 import { Quiz } from "models";
+import multer from "multer";
+import fs from "fs";
+import CustomStorage, { questionPictureProcessor } from "../helpers/upload";
 
 /**
  * @swagger
@@ -436,6 +441,149 @@ router.delete(
                 Number(req.params.questionId)
             );
             return res.sendStatus(200);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+// Multer options
+const upload = multer({
+    storage: new CustomStorage({
+        directorySuffix: "question",
+        imageProcessor: questionPictureProcessor,
+    }),
+    limits: {
+        files: 1,
+        fileSize: 10 * 1024 * 1024, // 10MB
+    },
+});
+
+/**
+ * @swagger
+ * /quiz/{quizId}/question/{questionId}/picture:
+ *   put:
+ *     summary: Update question picture
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Quiz ID
+ *       - in: path
+ *         name: questionId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Question ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       '200':
+ *         description: OK
+ */
+router.put(
+    "/:quizId/question/:questionId/picture",
+    validate,
+    isQuizCreator,
+    (req: Request, res: Response, next: NextFunction) => {
+        const pictureUpload = upload.single("picture");
+
+        // @ts-ignore
+        pictureUpload(req, res, (err: MulterError) => {
+            if (err instanceof multer.MulterError) {
+                res.status(400);
+                return next(err);
+            }
+            if (err) {
+                return next(err);
+            }
+            return next();
+        });
+    },
+    async (req: Request, res: Response, next: NextFunction) => {
+        // Save picture information to DB
+        try {
+            if (!req.file) {
+                const err = new Error("File not received");
+                res.status(400);
+                return next(err);
+            }
+            await updateQuestionPicture(
+                Number(req.params.quizId),
+                Number(req.params.questionId),
+                req.file
+            );
+            return res.sendStatus(200);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /quiz/{quizId}/question/{questionId}/picture:
+ *   get:
+ *     summary: Get question picture
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Quiz ID
+ *       - in: path
+ *         name: questionId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Question ID
+ *     responses:
+ *       '200':
+ *         description: OK
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         image/png:
+ *           schema:
+ *             type: string
+ *             format: binary
+ */
+router.get(
+    "/:quizId/question/:questionId/picture",
+    validate,
+    isQuizCreator,
+    async (req: Request, res, next) => {
+        try {
+            const picture = await getQuestionPicture(
+                Number(req.params.quizId),
+                Number(req.params.questionId)
+            );
+            if (!picture) {
+                const err = new ErrorStatus("Picture not found", 404);
+                throw err;
+            }
+
+            // Set content header
+            res.setHeader("Content-Type", "image/png");
+
+            // Read and serve
+            const file = fs.readFileSync(`${picture.destination}.thumb`);
+            res.end(file, "binary");
         } catch (err) {
             return next(err);
         }

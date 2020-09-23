@@ -102,4 +102,20 @@ const profileImageProcessor = async (filePath: string) => {
         .png({ quality: 100 })
         .toFile(`${filePath}.thumb`);
 };
-export { profileImageProcessor };
+
+// Processes question pictures
+const questionPictureProcessor = async (filePath: string) => {
+    sharp.cache(false);
+    const buf = await sharp(filePath).toBuffer();
+
+    // Resize to 128x128
+    await sharp(buf)
+        .resize(128, 128, {
+            fit: "contain",
+            withoutEnlargement: true,
+        })
+        .png({ quality: 100 })
+        .toFile(`${filePath}.thumb`);
+};
+
+export { profileImageProcessor, questionPictureProcessor };

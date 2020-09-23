@@ -4,6 +4,7 @@ import app from "./index";
 import rebuild from "./rebuild";
 import { registerAndLogin, createQuiz } from "./helpers";
 import { addQuestion } from "../controllers/quiz";
+import { readFileSync } from "fs";
 
 describe("Authentication", () => {
     beforeEach(async () => {
@@ -176,6 +177,32 @@ describe("Authentication", () => {
             .delete(`/quiz/${quiz.id}`)
             .set("Authorization", `Bearer ${user.token}`)
             .send();
+        expect(res.status).to.equal(200);
+    });
+
+    it("Quiz question picture", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const quiz = await createQuiz(user.id);
+        const question = await addQuestion(quiz.id, QUESTION_TF);
+
+        await agent
+            .put(`/quiz/${quiz.id}/question/${question.id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${user.token}`);
+        const pictureRes = await agent
+            .put(`/quiz/${quiz.id}/question/${question.id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(pictureRes.status).to.equal(200);
+
+        const res = await agent
+            .get(`/quiz/${quiz.id}/question/${question.id}/picture`)
+            .set("Authorization", `Bearer ${user.token}`);
         expect(res.status).to.equal(200);
     });
 });
