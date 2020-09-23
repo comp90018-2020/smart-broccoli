@@ -1,7 +1,7 @@
 /// Class providing the base URL and headers for requests to the backend server
 /// This class is not for direct use by the UI.
 class ApiBase {
-  static const String BASE_URL = 'http://localhost:3000';
+  static const String BASE_URL = 'https://fuzzybroccoli.com';
 
   /// Return headers used for HTTP requests to the backend server.
   /// Calling `headers()` returns the default headers:
