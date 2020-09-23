@@ -16,7 +16,7 @@ class _LoggedState extends State<Logged> {
   void logout() {
     Provider.of<AuthModel>(context, listen: false).logout().then((s) {
       if (s) {
-        Navigator.of(context).pushNamed('/');
+        Navigator.of(context).pushReplacementNamed('/');
       }
     });
   }

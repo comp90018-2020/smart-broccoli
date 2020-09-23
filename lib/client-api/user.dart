@@ -5,14 +5,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class UserModel {
-  AuthModel _authService;
+  AuthModel _authModel;
   static const USER_URL = ApiBase.BASE_URL + '/user';
 
-  UserModel(this._authService);
+  UserModel(this._authModel);
 
   Future<RegisteredUser> getUser() async {
     http.Response response = await http.get('$USER_URL/profile',
-        headers: ApiBase.headers(authToken: _authService.token));
+        headers: ApiBase.headers(authToken: _authModel.token));
     print(response.body);
     return RegisteredUser.fromJson(jsonDecode(response.body));
   }

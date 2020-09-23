@@ -1,24 +1,26 @@
-import '../models/user.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fuzzy_broccoli/client-api/key_value.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import '../models/user.dart';
 import './api_base.dart';
 
 /// Singleton class for making requests requiring authorisation
 class AuthModel {
   static const AUTH_URL = ApiBase.BASE_URL + '/auth';
 
+  KeyValueStore _keyValueStore;
+
   String _token = '';
   String get token {
     return _token;
   }
 
-  AuthModel(this._token);
+  AuthModel(this._keyValueStore, this._token);
 
-  static Future<AuthModel> create() async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token");
-    return AuthModel(token);
+  static Future<AuthModel> create(KeyValueStore keyValueStore) async {
+    String token = keyValueStore.getString("token");
+    return AuthModel(keyValueStore, token);
   }
 
   bool inSession() {
@@ -32,8 +34,7 @@ class AuthModel {
     if (res.statusCode == 200) {
       String token = json.decode(res.body)['token'];
       this._token = token;
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString("token", token);
+      _keyValueStore.setString("token", token);
       return true;
     } else {
       return null;
@@ -69,8 +70,7 @@ class AuthModel {
 
     if (res.statusCode == 200) {
       String token = json.decode(res.body)['token'];
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString("token", token);
+      _keyValueStore.setString("token", token);
       return true;
     } else {
       // todo
@@ -89,6 +89,7 @@ class AuthModel {
         headers: ApiBase.headers(authToken: token));
     if (res.statusCode == 200) {
       _token = '';
+      _keyValueStore.clear();
       return true;
     }
     return false;

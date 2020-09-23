@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuzzy_broccoli/client-api/auth.dart';
+import 'package:fuzzy_broccoli/client-api/key_value_shared_storage.dart';
 import 'package:fuzzy_broccoli/client-api/user.dart';
 import 'logged.dart';
 import 'unlogged.dart';
@@ -8,7 +9,9 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  AuthModel authModel = await AuthModel.create();
+  KeyValueSharedStorage keyValueSharedStorage =
+      await KeyValueSharedStorage.initialise();
+  AuthModel authModel = await AuthModel.create(keyValueSharedStorage);
   UserModel userModel = UserModel(authModel);
 
   runApp(MultiProvider(
