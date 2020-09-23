@@ -43,11 +43,4 @@ class UserModel {
       throw ForbiddenRequestException();
     throw Exception('Unable to update user: unknown error occurred');
   }
-
-  Future<int> getUserId() async {
-    RegisteredUser user = await getUser();
-    print(user);
-    print(user.id);
-    return user.id;
-  }
 }
