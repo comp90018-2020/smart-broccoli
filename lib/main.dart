@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fuzzy_broccoli/client-api/auth.dart';
-import 'package:fuzzy_broccoli/client-api/shared_prefs_key_value.dart';
-import 'package:fuzzy_broccoli/client-api/user.dart';
+import 'package:provider/provider.dart';
+
+import 'client_api.dart';
 import 'logged.dart';
 import 'unlogged.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fuzzy_broccoli/client-api/auth.dart';
 import 'package:provider/provider.dart';
+
+import 'client_api.dart';
 
 class Unlogged extends StatefulWidget {
   Unlogged({Key key, this.title}) : super(key: key);
