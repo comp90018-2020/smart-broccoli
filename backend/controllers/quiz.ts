@@ -22,11 +22,13 @@ export const getAllQuiz = async (userId: number) => {
 
 // Get quiz
 export const getQuiz = async (userId: number, quizId: number) => {
-    return await getQuizCreator(userId, quizId, { include: ["questions"] });
+    return await getQuizAndVerifyCreator(userId, quizId, {
+        include: ["questions"],
+    });
 };
 
 // Check quiz and check permissions
-export const getQuizCreator = async (
+export const getQuizAndVerifyCreator = async (
     userId: number,
     quizId: number,
     options?: FindOptions

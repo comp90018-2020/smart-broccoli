@@ -7,7 +7,7 @@ import {
     deleteQuiz,
     updateQuestion,
     updateQuiz,
-    getQuizCreator,
+    getQuizAndVerifyCreator,
     getQuiz,
     getAllQuiz,
     updateQuestionPicture,
@@ -107,7 +107,10 @@ export const isQuizCreator = async (
     next: NextFunction
 ) => {
     try {
-        req.quiz = await getQuizCreator(req.user.id, Number(req.params.quizId));
+        req.quiz = await getQuizAndVerifyCreator(
+            req.user.id,
+            Number(req.params.quizId)
+        );
         return next();
     } catch (err) {
         return next(err);
