@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -42,5 +43,21 @@ class UserModel {
     else if (response.statusCode == 403)
       throw ForbiddenRequestException();
     throw Exception('Unable to update user: unknown error occurred');
+  }
+
+  Future<Uint8List> getProfilePic() async {
+    final http.Response response = await http.get('$USER_URL/profile/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200)
+      return response.bodyBytes;
+    else if (response.statusCode == 401)
+      throw UnauthorisedRequestException();
+    else if (response.statusCode == 403)
+      throw ForbiddenRequestException();
+    else if (response.statusCode == 404)
+      // user has no profile pic
+      return null;
+    throw Exception('Unable to get user profile pic: unknown error occurred');
   }
 }
