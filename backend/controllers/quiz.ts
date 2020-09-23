@@ -50,6 +50,8 @@ export const updateQuiz = async (quiz: Quiz, info: any) => {
     // Make updates
     if (info.title) {
         quiz.title = info.title;
+    }
+    if (info.description) {
         quiz.description = info.description;
     }
     return await quiz.save();

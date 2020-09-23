@@ -42,6 +42,11 @@ Quiz.hasMany(Question, {
     foreignKey: "quizId",
     onDelete: "cascade",
 });
+// Question has picture
+Question.belongsTo(Picture, {
+    foreignKey: "pictureId",
+    onDelete: "set null",
+});
 // User has many quizzes
 User.hasMany(Quiz, {
     as: "quizzes",

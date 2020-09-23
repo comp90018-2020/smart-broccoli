@@ -25,11 +25,7 @@ const schema: Sequelize.ModelAttributes = {
     timeLimit: {
         type: Sequelize.INTEGER,
         allowNull: true,
-    },
-    pictureId: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-    },
+    }
 };
 
 export interface OptionAttributes {
