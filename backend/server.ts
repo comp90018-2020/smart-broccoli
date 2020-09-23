@@ -3,6 +3,8 @@ import "./env";
 import http from "http";
 import app from "./app";
 import sequelize from "./models";
+import socket from 'socket.io';
+import io from './game/index';
 
 if (!process.env.TOKEN_SECRET) {
     console.error("TOKEN_SECRET not set, exiting...");
@@ -30,6 +32,9 @@ export default (async () => {
         console.error(err);
         process.exit(1);
     }
+
+    // socket.io server
+    io(socket(server));
 
     // Listen on provided port, on all network interfaces
     server.listen(port);
@@ -64,4 +69,4 @@ function onListening() {
     console.log(`Express listening on ${bind}`);
 }
 
-export { app };
+export { app, io };
