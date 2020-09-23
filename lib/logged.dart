@@ -36,8 +36,9 @@ class _LoggedState extends State<Logged> {
                 builder: (context, snapshot) {
                   return Text('User Id: ' + snapshot.data.toString());
                 },
-                future:
-                    Provider.of<UserModel>(context, listen: false).getUserId()),
+                future: Provider.of<UserModel>(context, listen: false)
+                    .getUser()
+                    .then((user) => user.id)),
             FlatButton(child: Text('Logout as user'), onPressed: logout)
           ],
         ),
