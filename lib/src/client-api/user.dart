@@ -15,8 +15,14 @@ class UserModel {
   Future<RegisteredUser> getUser() async {
     http.Response response = await http.get('$USER_URL/profile',
         headers: ApiBase.headers(authToken: _authModel.token));
-    print(response.body);
-    return RegisteredUser.fromJson(jsonDecode(response.body));
+
+    if (response.statusCode == 200)
+      return RegisteredUser.fromJson(jsonDecode(response.body));
+    else if (response.statusCode == 401)
+      throw UnauthorisedRequestException();
+    else if (response.statusCode == 403)
+      throw ForbiddenRequestException();
+    throw Exception('Unable to get user: unknown error occurred');
   }
 
   Future<RegisteredUser> updateUser({email, password, name}) async {
@@ -24,10 +30,18 @@ class UserModel {
     if (email != null) body['email'] = email;
     if (password != null) body['password'] = password;
     if (name != null) body['name'] = name;
+
     final http.Response response = await http.patch('$USER_URL/profile',
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(body));
-    return RegisteredUser.fromJson(jsonDecode(response.body));
+
+    if (response.statusCode == 200)
+      return RegisteredUser.fromJson(jsonDecode(response.body));
+    else if (response.statusCode == 401)
+      throw UnauthorisedRequestException();
+    else if (response.statusCode == 403)
+      throw ForbiddenRequestException();
+    throw Exception('Unable to update user: unknown error occurred');
   }
 
   Future<int> getUserId() async {

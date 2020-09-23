@@ -32,3 +32,7 @@ class ApiBase {
     };
   }
 }
+
+class UnauthorisedRequestException implements Exception {}
+
+class ForbiddenRequestException implements Exception {}
