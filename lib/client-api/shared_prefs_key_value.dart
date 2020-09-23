@@ -1,15 +1,16 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fuzzy_broccoli/client-api/key_value.dart';
 
-// Key value store implemented using shared preferences
-class KeyValueSharedStorage implements KeyValueStore {
+/// Key value store implemented using shared preferences
+class SharedPrefsKeyValueStore implements KeyValueStore {
   SharedPreferences _sharedPreferences;
 
-  KeyValueSharedStorage(this._sharedPreferences);
+  /// Constructor for internal use only
+  SharedPrefsKeyValueStore._internal(this._sharedPreferences);
 
-  static Future<KeyValueSharedStorage> initialise() async {
+  static Future<SharedPrefsKeyValueStore> initialise() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
-    return KeyValueSharedStorage(_prefs);
+    return SharedPrefsKeyValueStore._internal(_prefs);
   }
 
   Future<bool> setString(Object key, String value) {
