@@ -42,7 +42,6 @@ class AuthModel {
 
   Future<RegisteredUser> register(
       String email, String password, String name) async {
-    // send request
     final http.Response res = await http.post("$AUTH_URL/register",
         headers: ApiBase.headers(),
         body: jsonEncode(<String, String>{
@@ -51,14 +50,12 @@ class AuthModel {
           'name': name,
         }));
 
-    if (res.statusCode == 201) {
+    if (res.statusCode == 201)
       return RegisteredUser.fromJson(json.decode(res.body));
-    } else if (res.statusCode == 409) {
-      // todo: specify which registration params are causing conflict
-      throw RegistrationConflictException(List());
-    } else {
+    else if (res.statusCode == 409)
+      throw RegistrationConflictException();
+    else
       throw RegistrationException();
-    }
   }
 
   Future<bool> login(String email, String password) async {

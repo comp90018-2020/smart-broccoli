@@ -16,11 +16,8 @@ class RegisteredUser {
 
 class RegistrationException implements Exception {}
 
-/// Exception thrown when a user cannot be registered due to conflict(s)
-class RegistrationConflictException implements RegistrationException {
-  List<String> conflicts;
-  RegistrationConflictException(this.conflicts);
-}
+/// Exception thrown when attempting to register with an already registered email
+class RegistrationConflictException implements RegistrationException {}
 
 /// User without login credentials (student)
 class ParticipantUser {}
