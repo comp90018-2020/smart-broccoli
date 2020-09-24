@@ -11,7 +11,7 @@ const schema: Sequelize.ModelAttributes = {
     password: { type: Sequelize.STRING, allowNull: true },
     email: { type: Sequelize.STRING, allowNull: true },
     name: { type: Sequelize.STRING, allowNull: true },
-    role: { type: Sequelize.ENUM("creator", "user"), allowNull: false },
+    role: { type: Sequelize.ENUM("participant", "user"), allowNull: false },
     pictureId: {
         type: Sequelize.INTEGER,
         allowNull: true,
@@ -24,11 +24,11 @@ interface UserAttributes {
     // Must have role
     role: string;
 
-    // Creator attributes
+    // User attributes
     password?: string;
     email?: string;
 
-    // User attributes
+    // Participant attributes
     name?: string;
 
     createdAt?: Date;
@@ -68,7 +68,7 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
             hooks: {
                 // Hash password before creation
                 beforeCreate: async (user: any) => {
-                    if (user.role !== "creator") return;
+                    if (user.role !== "user") return;
 
                     try {
                         const hash = await hashPassword(user.password);

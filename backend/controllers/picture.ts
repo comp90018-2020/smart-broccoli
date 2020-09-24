@@ -2,12 +2,18 @@ import fs from "fs";
 import Picture from "../models/picture";
 import path from "path";
 
-// Get picture by Id
+/**
+ * Get picture by ID.
+ * @param pictureId
+ */
 const getPictureById = async (pictureId: number) => {
     return await Picture.findByPk(pictureId);
 };
 
-// Delete picture by Id
+/**
+ * Delete picture by ID.
+ * @param pictureId
+ */
 const deletePicture = async (pictureId: number) => {
     // Find, delete and destroy from DB
     const picture = await Picture.findByPk(pictureId);
@@ -15,7 +21,10 @@ const deletePicture = async (pictureId: number) => {
     await picture.destroy();
 };
 
-// Insert a picture
+/**
+ * Insert a picture into db.
+ * @param file Metadata about file
+ */
 const insertPicture = async (file: any) => {
     return await Picture.create({
         destination: file.destination,
@@ -24,7 +33,10 @@ const insertPicture = async (file: any) => {
     });
 };
 
-// Helper function to delete pictures and derivatives from disk
+/**
+ * Deletes a file from disk.
+ * @param filePath Path of file
+ */
 const deletePictureFromDisk = (filePath: string) => {
     const dirname = path.dirname(filePath);
     const files = fs.readdirSync(dirname, "ascii");

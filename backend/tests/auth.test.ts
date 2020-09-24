@@ -23,7 +23,7 @@ describe("Authentication", () => {
         expect(res.body).to.have.property("email");
         expect(res.body).to.have.property("name");
         expect(res.body).to.have.property("role");
-        expect(res.body.role).to.equal("creator");
+        expect(res.body.role).to.equal("user");
     });
 
     it("Register duplicate", async () => {
@@ -93,6 +93,27 @@ describe("Authentication", () => {
             .set("Authorization", `Bearer ${token}`)
             .send();
         expect(res.status).to.equal(200);
+    });
+
+    it("Join and promote", async () => {
+        const agent = supertest(app);
+
+        // Join
+        const joinRes = await agent.post("/auth/join");
+        expect(joinRes.body).to.have.property("token");
+        const token = joinRes.body.token;
+
+        // Promote
+        const res = await agent
+            .post("/auth/promote")
+            .set("Authorization", `Bearer ${token}`)
+            .send(USER);
+        expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("id");
+        expect(res.body).to.have.property("email");
+        expect(res.body).to.have.property("name");
+        expect(res.body).to.have.property("role");
+        expect(res.body.role).to.equal("user");
     });
 
     it("Logout", async () => {
