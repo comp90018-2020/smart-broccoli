@@ -9,19 +9,23 @@ class SharedPrefsKeyValueStore implements KeyValueStore {
   /// Constructor for internal use only
   SharedPrefsKeyValueStore._internal(this._sharedPreferences);
 
+  /// Constructor for external use
   static Future<SharedPrefsKeyValueStore> create() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     return SharedPrefsKeyValueStore._internal(_prefs);
   }
 
+  @override
   Future<bool> setString(Object key, String value) {
     return _sharedPreferences.setString(key, value);
   }
 
+  @override
   String getString(String key) {
     return _sharedPreferences.getString(key);
   }
 
+  @override
   Future<bool> clear() {
     return _sharedPreferences.clear();
   }

@@ -8,6 +8,7 @@ import 'key_value.dart';
 class NullKeyValueStore implements KeyValueStore {
   String _token = Platform.environment['TOKEN'];
 
+  /// Constructor for external use
   NullKeyValueStore();
 
   @override
