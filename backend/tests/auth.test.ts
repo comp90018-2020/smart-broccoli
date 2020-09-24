@@ -114,6 +114,12 @@ describe("Authentication", () => {
         expect(res.body).to.have.property("name");
         expect(res.body).to.have.property("role");
         expect(res.body.role).to.equal("user");
+
+        // Ensure that new password can be used
+        const loginRes = await agent
+            .post("/auth/login")
+            .send({ email: USER.email, password: USER.password });
+        expect(loginRes.status).to.equal(200);
     });
 
     it("Logout", async () => {
