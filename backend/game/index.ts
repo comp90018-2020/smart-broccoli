@@ -1,7 +1,9 @@
 import { io } from 'server';
 import { Server, Namespace } from 'socket.io';
+import { Quiz } from './quiz';
 
 let namespace: Namespace;
+const quiz = new Quiz();
 
 export default (socketIO: Server) => {
     socketIO.use(async (socket, next) => {
@@ -9,11 +11,16 @@ export default (socketIO: Server) => {
         console.log('connected');
 
         // Emit an event to client
-        socket.emit('message', 'hi');
+        socket.emit('message', JSON.stringify({"serverTs": Date.now()}));
 
-        // User send
-        socket.on('message', (message: string) => {
-            console.log(`user said ${message}`);
+        socket.on('quiz', (content: string) => {
+            let ret: boolean;
+            let response: string;
+            [ret, response] = quiz.handle(content);
+            socket.emit('quiz', response);
+            if (!ret) {
+                socket.disconnect();
+            }
         });
 
         return next();
