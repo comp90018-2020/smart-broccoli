@@ -1,7 +1,7 @@
-import Sequelize from "sequelize";
+import Sequelize, { Optional } from "sequelize";
 import crypto from "crypto";
 
-// Schema
+// Represents users
 const schema: Sequelize.ModelAttributes = {
     id: {
         type: Sequelize.INTEGER,
@@ -19,7 +19,7 @@ const schema: Sequelize.ModelAttributes = {
 };
 
 interface UserAttributes {
-    id?: number;
+    id: number;
 
     // Must have role
     role: string;
@@ -31,15 +31,18 @@ interface UserAttributes {
     // Participant attributes
     name?: string;
 
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }
+interface UserCreationAttributes
+    extends Optional<UserAttributes, "id" | "createdAt" | "updatedAt"> {}
 
 const ITERATIONS = 100000;
 const ALGORITHM = "sha512";
 const KEYLEN = 64;
 
-class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
+class User extends Sequelize.Model<UserAttributes, UserCreationAttributes>
+    implements UserAttributes {
     public password?: string;
     public email?: string;
     public name?: string;

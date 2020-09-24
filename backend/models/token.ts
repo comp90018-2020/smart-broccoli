@@ -1,10 +1,9 @@
-import Sequelize from "sequelize";
+import Sequelize, { Optional } from "sequelize";
 import User from "./user";
 
 // Stores tokens
 // Considerations made:
 // https://stackoverflow.com/questions/42763146
-
 const schema: Sequelize.ModelAttributes = {
     id: {
         type: Sequelize.INTEGER,
@@ -27,17 +26,20 @@ const schema: Sequelize.ModelAttributes = {
 };
 
 interface TokenAttributes {
-    id?: number;
+    id: number;
     userId: number;
     token: string;
     scope: string;
     revoked?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt: Date;
+    updatedAt: Date;
     User?: User;
 }
+interface TokenCreationAttributes
+    extends Optional<TokenAttributes, "id" | "createdAt" | "updatedAt"> {}
 
-export default class Token extends Sequelize.Model<TokenAttributes>
+export default class Token
+    extends Sequelize.Model<TokenAttributes, TokenCreationAttributes>
     implements TokenAttributes {
     public token!: string;
     public scope!: string;
