@@ -148,15 +148,23 @@ export const isQuizCreator = async (
  *             schema:
  *               $ref: '#/components/schemas/Quiz'
  */
-router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const quiz = await createQuiz(req.user.id, req.body);
-        res.status(201);
-        return res.json({ ...quiz.toJSON(), questions: [] });
-    } catch (err) {
-        return next(err);
+router.post(
+    "/",
+    [
+        body("description").optional().isString(),
+        body("title").optional().isString(),
+    ],
+    validate,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const quiz = await createQuiz(req.user.id, req.body);
+            res.status(201);
+            return res.json({ ...quiz.toJSON(), questions: [] });
+        } catch (err) {
+            return next(err);
+        }
     }
-});
+);
 
 /**
  * @swagger
