@@ -1,3 +1,4 @@
+import { json } from 'sequelize';
 import { io } from 'server';
 import { Server, Namespace } from 'socket.io';
 import { Quiz } from './quiz';
@@ -13,14 +14,9 @@ export default (socketIO: Server) => {
         // Emit an event to client
         socket.emit('message', JSON.stringify({"serverTs": Date.now()}));
 
-        socket.on('quiz', (content: string) => {
-            let ret: boolean;
-            let response: string;
-            [ret, response] = quiz.handle(content);
-            socket.emit('quiz', response);
-            if (!ret) {
-                socket.disconnect();
-            }
+        socket.on('joinQuiz', (content: any) => {
+            console.log(socket.handshake);
+
         });
 
         return next();
