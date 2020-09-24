@@ -5,6 +5,8 @@ import Sequelize from "sequelize";
 import User from "./user";
 import Token from "./token";
 import Picture from "./picture";
+import Group from "./group";
+import UserGroup from "./user_group";
 
 // Initiate sequelize instance
 const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
@@ -22,6 +24,8 @@ const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
 Picture.initialise(sequelize);
 User.initialise(sequelize);
 Token.initialise(sequelize);
+UserGroup.initialise(sequelize);
+Group.initialise(sequelize);
 
 // User has many tokens
 User.hasMany(Token, { as: "tokens", foreignKey: "userId" });
@@ -33,4 +37,4 @@ User.belongsTo(Picture, {
 });
 
 export default sequelize;
-export { User, Token };
+export { User, Token, UserGroup, Group };
