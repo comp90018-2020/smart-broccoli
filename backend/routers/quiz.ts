@@ -35,6 +35,11 @@ import CustomStorage, { questionPictureProcessor } from "../helpers/upload";
  *           type: string
  *         description:
  *           type: string
+ *         questions:
+ *           type: array
+ *           items:
+ *             type: object
+ *             $ref: '#/components/schemas/Question'
  *       example:
  *         title: Quiz title
  *         description: A description about quiz
@@ -52,6 +57,7 @@ import CustomStorage, { questionPictureProcessor } from "../helpers/upload";
  *             id: 1
  *             title: Quiz title
  *             description: A description about quiz
+ *             questions: []
  *     NewQuestion:
  *       type: object
  *       required:
