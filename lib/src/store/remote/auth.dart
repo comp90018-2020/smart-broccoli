@@ -76,8 +76,7 @@ class AuthModel {
         body:
             jsonEncode(<String, String>{'email': email, 'password': password}));
 
-    if (res.statusCode != 200)
-      throw LoginFailedException();
+    if (res.statusCode != 200) throw LoginFailedException();
 
     String token = json.decode(res.body)['token'];
     _keyValueStore.setString('token', token);
