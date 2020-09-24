@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../models/user.dart';
-import 'api_base.dart';
 import '../local/key_value.dart';
+import 'api_base.dart';
 
 /// Singleton class for making requests requiring authorisation
 class AuthModel {
@@ -26,18 +26,16 @@ class AuthModel {
     return _token != null;
   }
 
-  Future<bool> join() async {
+  Future<void> join() async {
     final http.Response res =
         await http.post('$AUTH_URL/join', headers: ApiBase.headers());
 
-    if (res.statusCode == 200) {
-      String token = json.decode(res.body)['token'];
-      this._token = token;
-      _keyValueStore.setString('token', token);
-      return true;
-    } else {
-      return null;
-    }
+    if (res.statusCode != 200)
+      throw Exception('Unable to register participant user with server');
+
+    String token = json.decode(res.body)['token'];
+    this._token = token;
+    _keyValueStore.setString('token', token);
   }
 
   Future<RegisteredUser> register(

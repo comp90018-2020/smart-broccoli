@@ -14,11 +14,13 @@ class Unlogged extends StatefulWidget {
 
 class _UnloggedState extends State<Unlogged> {
   void login() {
-    Provider.of<AuthModel>(context, listen: false).join().then((s) {
-      if (s) {
-        Navigator.of(context).pushReplacementNamed('/home');
-      }
-    });
+    try {
+      Provider.of<AuthModel>(context, listen: false).join().then((_) {
+          Navigator.of(context).pushReplacementNamed('/home');
+      });
+    } catch(e) {
+      // TODO: show dialog
+    }
   }
 
   @override
