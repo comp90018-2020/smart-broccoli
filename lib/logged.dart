@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'client_api.dart';
+import 'server.dart';
 
 class Logged extends StatefulWidget {
   Logged({Key key, this.title}) : super(key: key);

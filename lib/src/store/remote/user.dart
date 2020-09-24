@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-import '../models/user.dart';
+import '../../models/user.dart';
 import 'api_base.dart';
 import 'auth.dart';
 

@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../models/user.dart';
+import '../../models/user.dart';
 import 'api_base.dart';
-import 'key_value.dart';
+import '../local/key_value.dart';
 
 /// Singleton class for making requests requiring authorisation
 class AuthModel {
