@@ -12,14 +12,17 @@ class Quiz {
         return true;
     }
 
-    handle(content: string): [boolean, string] {
-        const contentJson = JSON.parse(content);
+    /**
+     * 
+     * @param content Json string from client
+     */
+    handle(content: any): [boolean, string] {
         let ret = false;
         let response:{[key: string]: any} = {'success':false};
-        if (this.isTokenValid(contentJson.token)){
-            if (this.isCodeValid(contentJson.code)){
+        if (this.isTokenValid(content.token)){
+            if (this.isCodeValid(content.code)){
                 ret = true;
-                response.msg = "You have joined in " + contentJson.quizId;
+                response.msg = "You have joined in " + content.quizId;
                 response.success = true;
             }else{
                 response.err ="Invalid code" 
@@ -28,7 +31,7 @@ class Quiz {
         }else{
             response.err ="Invalid token" 
         }
-        return [false, JSON.stringify(response)];
+        return [ret, JSON.stringify(response)];
     }
 }
 
