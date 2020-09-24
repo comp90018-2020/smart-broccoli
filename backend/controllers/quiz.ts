@@ -5,10 +5,15 @@ import { OptionAttributes } from "../models/question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 
 // Create quiz
-export const createQuiz = async (userId: number) => {
-    return await Quiz.create({
-        userId,
-    });
+export const createQuiz = async (userId: number, info: any) => {
+    const quiz = new Quiz({ userId });
+    if (info.title) {
+        quiz.title = info.title;
+    }
+    if (info.description) {
+        quiz.description = info.description;
+    }
+    return await quiz.save();
 };
 
 // Get all quiz

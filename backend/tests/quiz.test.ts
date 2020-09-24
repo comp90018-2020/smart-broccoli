@@ -11,6 +11,10 @@ describe("Authentication", () => {
         await rebuild();
     });
 
+    const QUIZ = {
+        title: "Quiz title",
+        description: "Quiz description",
+    };
     const USER = {
         email: "a@a.com",
         password: "aaaaaaaa",
@@ -53,7 +57,7 @@ describe("Authentication", () => {
     it("Update quiz attributes", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id);
+        const quiz = await createQuiz(user.id, QUIZ);
 
         const res = await agent
             .patch(`/quiz/${quiz.id}`)
@@ -67,7 +71,7 @@ describe("Authentication", () => {
     it("Add truefalse question", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id);
+        const quiz = await createQuiz(user.id, QUIZ);
 
         const res = await agent
             .post(`/quiz/${quiz.id}/question`)
@@ -85,7 +89,7 @@ describe("Authentication", () => {
     it("Add choice question", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id);
+        const quiz = await createQuiz(user.id, QUIZ);
 
         const res = await agent
             .post(`/quiz/${quiz.id}/question`)
@@ -102,7 +106,7 @@ describe("Authentication", () => {
     it("Update choice question", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id);
+        const quiz = await createQuiz(user.id, QUIZ);
         const question = await addQuestion(quiz.id, QUESTION_CHOICE);
 
         // Slightly modified
@@ -125,7 +129,7 @@ describe("Authentication", () => {
     it("Get quiz", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id);
+        const quiz = await createQuiz(user.id, QUIZ);
         await addQuestion(quiz.id, QUESTION_CHOICE);
 
         const res = await agent
@@ -144,7 +148,7 @@ describe("Authentication", () => {
     it("Get all quiz", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id);
+        const quiz = await createQuiz(user.id, QUIZ);
         await addQuestion(quiz.id, QUESTION_CHOICE);
 
         const res = await agent
@@ -158,7 +162,7 @@ describe("Authentication", () => {
     it("Delete question", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id);
+        const quiz = await createQuiz(user.id, QUIZ);
         const question = await addQuestion(quiz.id, QUESTION_CHOICE);
 
         const res = await agent
@@ -170,7 +174,7 @@ describe("Authentication", () => {
     it("Delete quiz", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id);
+        const quiz = await createQuiz(user.id, QUIZ);
         await addQuestion(quiz.id, QUESTION_TF);
 
         const res = await agent
@@ -183,7 +187,7 @@ describe("Authentication", () => {
     it("Quiz question picture", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id);
+        const quiz = await createQuiz(user.id, QUIZ);
         const question = await addQuestion(quiz.id, QUESTION_TF);
 
         await agent

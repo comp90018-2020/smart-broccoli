@@ -28,21 +28,30 @@ import CustomStorage, { questionPictureProcessor } from "../helpers/upload";
  *     description: Quiz routes
  * components:
  *   schemas:
- *     Quiz:
+ *     NewQuiz:
  *       type: object
- *       required:
- *         - id
  *       properties:
- *         id:
- *           type: number
  *         title:
  *           type: string
  *         description:
  *           type: string
  *       example:
- *         id: 1
  *         title: Quiz title
  *         description: A description about quiz
+ *     Quiz:
+ *       allOf:
+ *         - $ref: '#/components/schemas/NewQuiz'
+ *         - type: object
+ *           required:
+ *             - id
+ *           properties:
+ *             id:
+ *               type: integer
+ *               format: int64
+ *           example:
+ *             id: 1
+ *             title: Quiz title
+ *             description: A description about quiz
  *     NewQuestion:
  *       type: object
  *       required:
@@ -125,6 +134,12 @@ export const isQuizCreator = async (
  *     summary: Create quiz
  *     tags:
  *       - Quiz
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/NewQuiz'
  *     responses:
  *       '200':
  *         description: Created Quiz
@@ -135,7 +150,7 @@ export const isQuizCreator = async (
  */
 router.post("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const quiz = await createQuiz(req.user.id);
+        const quiz = await createQuiz(req.user.id, req.body);
         res.status(201);
         return res.json({ ...quiz.toJSON(), questions: [] });
     } catch (err) {
