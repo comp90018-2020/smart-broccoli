@@ -1,5 +1,3 @@
-import 'package:fuzzy_broccoli/models.dart';
-
 enum Role { CREATOR, USER }
 
 /// User with login credientials (lecturer, coordinator)
