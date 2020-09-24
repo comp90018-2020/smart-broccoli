@@ -31,7 +31,7 @@ class AuthModel {
         await http.post('$AUTH_URL/join', headers: ApiBase.headers());
 
     if (res.statusCode != 200)
-      throw Exception('Unable to register participant user with server');
+      throw ParticipantJoinException();
 
     String token = json.decode(res.body)['token'];
     this._token = token;
@@ -63,7 +63,7 @@ class AuthModel {
             jsonEncode(<String, String>{'email': email, 'password': password}));
 
     if (res.statusCode != 200)
-      throw Exception('Login unsuccessful');
+      throw LoginFailedException();
 
     String token = json.decode(res.body)['token'];
     _keyValueStore.setString('token', token);

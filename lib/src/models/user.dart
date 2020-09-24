@@ -1,3 +1,5 @@
+import 'package:fuzzy_broccoli/models.dart';
+
 enum Role { CREATOR, USER }
 
 /// User with login credientials (lecturer, coordinator)
@@ -17,7 +19,13 @@ class RegisteredUser {
 class RegistrationException implements Exception {}
 
 /// Exception thrown when attempting to register with an already registered email
-class RegistrationConflictException implements RegistrationException {}
+class RegistrationConflictException extends RegistrationException {}
+
+/// Exception thrown when login is unsuccessful
+class LoginFailedException implements Exception {}
 
 /// User without login credentials (student)
 class ParticipantUser {}
+
+/// Exception thrown when a participant user failed to register with the server
+class ParticipantJoinException extends RegistrationException {}
