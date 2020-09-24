@@ -8,7 +8,7 @@ const schema: Sequelize.ModelAttributes = {
         autoIncrement: true,
     },
     type: {
-        type: Sequelize.ENUM("creator", "member"),
+        type: Sequelize.ENUM("owner", "member"),
         defaultValue: "member",
         allowNull: false,
     },
@@ -16,21 +16,24 @@ const schema: Sequelize.ModelAttributes = {
 
 interface UserGroupAttributes {
     id: number;
-    type?: string;
+    type: string;
+    userId: number;
+    groupId: number;
 }
 interface UserGroupCreationAttributes
     extends Optional<UserGroupAttributes, "id"> {}
-interface UserGroupInstance
-    extends Sequelize.Model<UserGroupAttributes, UserGroupCreationAttributes>,
-        UserGroupAttributes {}
 
 export default class UserGroup
     extends Sequelize.Model<UserGroupAttributes, UserGroupCreationAttributes>
     implements UserGroupAttributes {
     public readonly id!: number;
-    public readonly type?: string;
+    public type: string;
+    public readonly userId: number;
+    public readonly groupId: number;
 
     static initialise(sequelize: Sequelize.Sequelize) {
-        return sequelize.define<UserGroupInstance>("UserGroup", schema);
+        return super.init.call(this, schema, {
+            sequelize,
+        });
     }
 }

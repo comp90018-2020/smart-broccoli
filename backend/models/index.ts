@@ -30,11 +30,14 @@ Group.initialise(sequelize);
 // User has many tokens
 User.hasMany(Token, { as: "tokens", foreignKey: "userId" });
 Token.belongsTo(User, { foreignKey: "userId" });
-
+// User has picture
 User.belongsTo(Picture, {
     foreignKey: "pictureId",
     onDelete: "set null",
 });
+
+Group.belongsToMany(User, { through: typeof UserGroup });
+User.belongsToMany(Group, { through: typeof UserGroup });
 
 export default sequelize;
 export { User, Token, UserGroup, Group };

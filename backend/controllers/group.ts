@@ -7,41 +7,30 @@ import { Group, UserGroup } from "../models";
  * @param info Group information
  */
 const createGroup = async (userId: number, info: any) => {
-    const group = new Group({ ownerId: userId });
+    // Create new group
+    const group = new Group({});
     if (info.name) {
         group.name = info.name;
     }
-    group.code = randomCode(6);
-    return await group.save();
+    await group.save();
+
+    // Add association
+    const userGroup = new UserGroup({
+        userId,
+        groupId: group.id,
+        type: "owner",
+    });
 };
 
 const joinGroup = async (code: string) => {
     // Find
     const group = await Group.findOne({
-        where: { code },
+        where: {},
     });
     if (!group) {
         const err = new ErrorStatus("Group not found", 404);
         throw err;
     }
-};
-
-// Charset for random generation
-const CHARSET =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-
-/**
- * Generate random code of specified length based on charset.
- * @param length a number
- */
-const randomCode = (length: number) => {
-    return Array(length)
-        .map(() => {
-            return CHARSET[
-                Math.floor(Math.random() * Math.floor(CHARSET.length))
-            ];
-        })
-        .join("");
 };
 
 /**
@@ -61,18 +50,9 @@ const getGroupAndVerifyCreator = async (userId: number, groupId: number) => {
     }
 
     // If owner is not correct
-    if (group.ownerId != userId) {
-        const err = new ErrorStatus("User has no access", 403);
-        throw err;
-    }
+    // if (group.ownerId != userId) {
+    //     const err = new ErrorStatus("User has no access", 403);
+    //     throw err;
+    // }
     return group;
-};
-
-/**
- * Regenerate and save code of specified group.
- * @param group
- */
-const regenerateCode = async (group: Group) => {
-    group.code = randomCode(6);
-    return await group.save();
 };
