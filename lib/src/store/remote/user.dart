@@ -7,12 +7,21 @@ import '../../models/user.dart';
 import 'api_base.dart';
 import 'auth.dart';
 
+/// Class for making user profile requests
+/// For all methods in this class:
+/// `UnauthorisedRequestException` is thrown if the user is not logged in.
+/// `ForbiddenRequestException` is thrown if the user is logged in but not
+/// authorised to make the request.
 class UserModel {
-  AuthModel _authModel;
   static const USER_URL = ApiBase.BASE_URL + '/user';
 
+  /// AuthModel object used to obtain token for requests
+  AuthModel _authModel;
+
+  /// Constructor for external use
   UserModel(this._authModel);
 
+  /// Return a `RegisteredUser` object corresponding to the logged-in user.
   Future<RegisteredUser> getUser() async {
     http.Response response = await http.get('$USER_URL/profile',
         headers: ApiBase.headers(authToken: _authModel.token));
@@ -25,6 +34,12 @@ class UserModel {
     throw Exception('Unable to get user: unknown error occurred');
   }
 
+  /// Update the profile of the logged-in user.
+  /// This method is to be invoked with only the parameters to be updated.
+  /// For example, if only the email and name are to be updated:
+  /// ```
+  /// updateUser(email: 'new@email.com', name: 'New Name');
+  /// ```
   Future<RegisteredUser> updateUser({email, password, name}) async {
     Map<String, String> body = {};
     if (email != null) body['email'] = email;
@@ -43,6 +58,7 @@ class UserModel {
     throw Exception('Unable to update user: unknown error occurred');
   }
 
+  /// Get the profile picture of the logged-in user as a list of bytes.
   Future<Uint8List> getProfilePic() async {
     final http.Response response = await http.get('$USER_URL/profile/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
@@ -59,6 +75,8 @@ class UserModel {
     throw Exception('Unable to get user profile pic: unknown error occurred');
   }
 
+  /// Set the profile pic of the logged-in user.
+  /// This method takes the image as a list of bytes.
   Future<void> setProfilePic(Uint8List bytes) async {
     final http.MultipartRequest request =
         http.MultipartRequest('PUT', Uri.parse('$USER_URL/profile/picture'))
