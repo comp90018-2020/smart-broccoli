@@ -56,20 +56,17 @@ class AuthModel {
       throw RegistrationException();
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<void> login(String email, String password) async {
     final http.Response res = await http.post('$AUTH_URL/login',
         headers: ApiBase.headers(),
         body:
             jsonEncode(<String, String>{'email': email, 'password': password}));
 
-    if (res.statusCode == 200) {
-      String token = json.decode(res.body)['token'];
-      _keyValueStore.setString('token', token);
-      return true;
-    } else {
-      // todo
-      return null;
-    }
+    if (res.statusCode != 200)
+      throw Exception('Login unsuccessful');
+
+    String token = json.decode(res.body)['token'];
+    _keyValueStore.setString('token', token);
   }
 
   Future<bool> sessionIsValid() async {
