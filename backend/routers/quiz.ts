@@ -177,12 +177,12 @@ router.post(
  *
  * /quiz:
  *   get:
- *     summary: Get quiz created by user
+ *     summary: Get quizzes created by user
  *     tags:
  *       - Quiz
  *     responses:
  *       '200':
- *         description: Quiz created by user
+ *         description: Quizzes created by user
  *         content:
  *           application/json:
  *             schema:
@@ -264,7 +264,7 @@ router.get(
  *                 type: string
  *     responses:
  *       '200':
- *         description: Created Quiz
+ *         description: Updated quiz
  *         content:
  *           application/json:
  *             schema:
