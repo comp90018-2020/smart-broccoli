@@ -16,9 +16,9 @@ class _UnloggedState extends State<Unlogged> {
   void login() {
     try {
       Provider.of<AuthModel>(context, listen: false).join().then((_) {
-          Navigator.of(context).pushReplacementNamed('/home');
+        Navigator.of(context).pushReplacementNamed('/home');
       });
-    } catch(e) {
+    } catch (e) {
       // TODO: show dialog
     }
   }

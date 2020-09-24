@@ -39,8 +39,7 @@ class AuthModel {
     final http.Response res =
         await http.post('$AUTH_URL/join', headers: ApiBase.headers());
 
-    if (res.statusCode != 200)
-      throw ParticipantJoinException();
+    if (res.statusCode != 200) throw ParticipantJoinException();
 
     String token = json.decode(res.body)['token'];
     this._token = token;
