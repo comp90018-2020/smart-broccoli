@@ -6,26 +6,35 @@ import '../../models/user.dart';
 import '../local/key_value.dart';
 import 'api_base.dart';
 
-/// Singleton class for making requests requiring authorisation
+/// Class for making auth requests
 class AuthModel {
   static const AUTH_URL = ApiBase.BASE_URL + '/auth';
 
+  /// Object implementing the KeyValueStore interface for local caching
   KeyValueStore _keyValueStore;
 
+  /// Token used for the authorization header where required
   String _token = '';
   String get token {
     return _token;
   }
 
-  /// Constructor for internal use only
+  /// Constructor for external use
   AuthModel(this._keyValueStore) {
     _token = _keyValueStore.getString('token');
   }
 
+  /// Return `true` if the user has logged in.
+  /// Caveat: The token may be revoked; this method only checks that the user
+  /// has previously logged without subsequently logging out.
+  /// To validate the session, use `sessionIsValid`.
   bool inSession() {
     return _token != null;
   }
 
+  /// Join as an unregistered (i.e. participant, student) user.
+  /// `ParticipantJoinException` is thrown if the server cannot fulfil the
+  /// participant join.
   Future<void> join() async {
     final http.Response res =
         await http.post('$AUTH_URL/join', headers: ApiBase.headers());
@@ -38,6 +47,10 @@ class AuthModel {
     _keyValueStore.setString('token', token);
   }
 
+  /// Register a user with login details.
+  /// `RegistrationConflictException` is thrown if the email is already in use.
+  /// `RegistrationException` is thrown if the user cannot be registered due to
+  /// a different reason.
   Future<RegisteredUser> register(
       String email, String password, String name) async {
     final http.Response res = await http.post('$AUTH_URL/register',
@@ -56,6 +69,8 @@ class AuthModel {
       throw RegistrationException();
   }
 
+  /// Authenticate a registered user.
+  /// `LoginFailedException` is thrown if the login is unsuccessful.
   Future<void> login(String email, String password) async {
     final http.Response res = await http.post('$AUTH_URL/login',
         headers: ApiBase.headers(),
@@ -69,12 +84,17 @@ class AuthModel {
     _keyValueStore.setString('token', token);
   }
 
+  /// Validate the session with the server.
+  /// Return `true` if the token is valid and unrevoked.
   Future<bool> sessionIsValid() async {
     final http.Response res =
         await http.get('/session', headers: ApiBase.headers(authToken: token));
     return res.statusCode == 200;
   }
 
+  /// Invalidate the session.
+  /// Clear the cache and request the server to revoke the token.
+  /// Return `true` if successful.
   Future<bool> logout() async {
     final http.Response res = await http.post(AUTH_URL + '/logout',
         headers: ApiBase.headers(authToken: token));
