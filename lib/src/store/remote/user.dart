@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:fuzzy_broccoli/models.dart';
 import 'package:http/http.dart' as http;
 
-import '../../models/user.dart';
 import 'api_base.dart';
 import 'auth.dart';
 

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
+import 'package:fuzzy_broccoli/cache.dart';
+import 'package:fuzzy_broccoli/models.dart';
 import 'package:http/http.dart' as http;
 
-import '../../models/user.dart';
-import '../local/key_value.dart';
 import 'api_base.dart';
 
 /// Class for making auth requests
