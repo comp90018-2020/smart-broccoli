@@ -1,4 +1,6 @@
+import { Group } from "models";
 import Sequelize, { Optional } from "sequelize";
+import User from "./user";
 
 // User/Group associations
 const schema: Sequelize.ModelAttributes = {
@@ -7,7 +9,7 @@ const schema: Sequelize.ModelAttributes = {
         primaryKey: true,
         autoIncrement: true,
     },
-    type: {
+    role: {
         type: Sequelize.ENUM("owner", "member"),
         defaultValue: "member",
         allowNull: false,
@@ -16,9 +18,11 @@ const schema: Sequelize.ModelAttributes = {
 
 interface UserGroupAttributes {
     id: number;
-    type: string;
+    role: string;
     userId: number;
     groupId: number;
+    Group?: Group;
+    User?: User;
 }
 interface UserGroupCreationAttributes
     extends Optional<UserGroupAttributes, "id"> {}
@@ -27,9 +31,12 @@ export default class UserGroup
     extends Sequelize.Model<UserGroupAttributes, UserGroupCreationAttributes>
     implements UserGroupAttributes {
     public readonly id!: number;
-    public type: string;
+    public role: string;
     public readonly userId: number;
     public readonly groupId: number;
+
+    public Group?: Group;
+    public User?: User;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {

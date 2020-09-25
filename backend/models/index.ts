@@ -24,8 +24,8 @@ const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
 Picture.initialise(sequelize);
 User.initialise(sequelize);
 Token.initialise(sequelize);
-UserGroup.initialise(sequelize);
 Group.initialise(sequelize);
+UserGroup.initialise(sequelize);
 
 // User has many tokens
 User.hasMany(Token, { as: "tokens", foreignKey: "userId" });
@@ -36,8 +36,10 @@ User.belongsTo(Picture, {
     onDelete: "set null",
 });
 
-Group.belongsToMany(User, { through: typeof UserGroup });
-User.belongsToMany(Group, { through: typeof UserGroup });
+// @ts-ignore
+Group.belongsToMany(User, { through: UserGroup, foreignKey: "groupId" });
+// @ts-ignore
+User.belongsToMany(Group, { through: UserGroup, foreignKey: "userId" });
 
 export default sequelize;
 export { User, Token, UserGroup, Group };
