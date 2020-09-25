@@ -2,10 +2,14 @@ import ErrorStatus from "../helpers/error";
 import { User } from "../models";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 
-// Update user profile info
-const updateProfile = async (id: number, info: any) => {
+/**
+ * Update user profile information.
+ * @param userId
+ * @param info Info to update
+ */
+const updateProfile = async (userId: number, info: any) => {
     // Find user and update relevant fields
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(userId);
     if (info.email) {
         user.email = info.email;
     }
@@ -34,9 +38,13 @@ const updateProfile = async (id: number, info: any) => {
     }
 };
 
-// Update profile picture
-const updateProfilePicture = async (id: number, file: any) => {
-    const user = await User.findByPk(id);
+/**
+ * Update profile picture.
+ * @param userId
+ * @param file File attributes
+ */
+const updateProfilePicture = async (userId: number, file: any) => {
+    const user = await User.findByPk(userId);
 
     // Delete the old picture
     if (user.pictureId) {
@@ -49,7 +57,11 @@ const updateProfilePicture = async (id: number, file: any) => {
     return await user.save();
 };
 
-// Get profile picture
+/**
+ * Get profile picture.
+ * Authorization is handled by caller.
+ * @param pictureId ID of picture
+ */
 const getProfilePicture = async (pictureId: number) => {
     return await getPictureById(pictureId);
 };

@@ -18,10 +18,10 @@ describe("Authentication", () => {
 
     it("Get profile", async () => {
         const agent = supertest(app);
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
         const res = await agent
             .get("/user/profile")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `Bearer ${user.token}`)
             .send();
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("id");
@@ -32,12 +32,12 @@ describe("Authentication", () => {
 
     it("Update profile", async () => {
         const agent = supertest(app);
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
 
         const UPDATE = { email: "b@b.com", name: "b" };
         const res = await agent
             .patch("/user/profile")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `Bearer ${user.token}`)
             .send(UPDATE);
         expect(res.body).to.have.property("id");
         expect(res.body.email).to.equal(UPDATE.email);
@@ -47,24 +47,24 @@ describe("Authentication", () => {
     it("Update profile common email", async () => {
         const agent = supertest(app);
         await registerAndLogin({ ...USER, email: "b@b.com" });
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
 
         const UPDATE = { email: "b@b.com", name: "b" };
         const res = await agent
             .patch("/user/profile")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `Bearer ${user.token}`)
             .send(UPDATE);
         expect(res.status).to.equal(409);
     });
 
     it("Update profile password", async () => {
         const agent = supertest(app);
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
 
         const UPDATE = { password: "abcdefgh" };
         await agent
             .patch("/user/profile")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `Bearer ${user.token}`)
             .send(UPDATE);
 
         const loginSuccess = await agent
@@ -80,37 +80,37 @@ describe("Authentication", () => {
 
     it("Upload profile picture", async () => {
         const agent = supertest(app);
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
 
         const res = await agent
             .put("/user/profile/picture")
             .attach("avatar", readFileSync(`${__dirname}/assets/yc.png`), {
                 filename: "yc.png",
             })
-            .set("Authorization", `Bearer ${token}`);
+            .set("Authorization", `Bearer ${user.token}`);
         expect(res.status).to.equal(200);
     });
 
     it("Get profile picture", async () => {
         const agent = supertest(app);
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
 
         await agent
             .put("/user/profile/picture")
             .attach("avatar", readFileSync(`${__dirname}/assets/yc.png`), {
                 filename: "yc.png",
             })
-            .set("Authorization", `Bearer ${token}`);
+            .set("Authorization", `Bearer ${user.token}`);
         await agent
             .put("/user/profile/picture")
             .attach("avatar", readFileSync(`${__dirname}/assets/yc.png`), {
                 filename: "yc.png",
             })
-            .set("Authorization", `Bearer ${token}`);
+            .set("Authorization", `Bearer ${user.token}`);
 
         const res = await agent
             .get("/user/profile/picture")
-            .set("Authorization", `Bearer ${token}`);
+            .set("Authorization", `Bearer ${user.token}`);
         expect(res.status).to.equal(200);
     });
 });
