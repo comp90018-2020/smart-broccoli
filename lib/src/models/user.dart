@@ -1,17 +1,25 @@
-enum Role { CREATOR, USER }
-
-/// User with login credientials (lecturer, coordinator)
-class RegisteredUser {
+abstract class User {
   int id;
   String email;
   String name;
 
-  RegisteredUser({this.id, this.email, this.name});
+  User(this.id, this.email, this.name);
+}
 
-  factory RegisteredUser.fromJson(Map<String, dynamic> json) {
-    return RegisteredUser(
-        id: json['id'], email: json['email'], name: json['name']);
-  }
+/// User with login credientials (lecturer, coordinator)
+class RegisteredUser extends User {
+  RegisteredUser(int id, String email, String name) : super(id, email, name);
+
+  factory RegisteredUser.fromJson(Map<String, dynamic> json) =>
+      RegisteredUser(json['id'], json['email'], json['name']);
+}
+
+/// User without login credentials (student)
+class ParticipantUser extends User {
+  ParticipantUser(int id, {String email, String name}) : super(id, email, name);
+
+  factory ParticipantUser.fromJson(Map<String, dynamic> json) =>
+      ParticipantUser(json['id'], email: json['email'], name: json['name']);
 }
 
 class RegistrationException implements Exception {}
@@ -21,9 +29,6 @@ class RegistrationConflictException extends RegistrationException {}
 
 /// Exception thrown when login is unsuccessful
 class LoginFailedException implements Exception {}
-
-/// User without login credentials (student)
-class ParticipantUser {}
 
 /// Exception thrown when a participant user failed to register with the server
 class ParticipantJoinException extends RegistrationException {}
