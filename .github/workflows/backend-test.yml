@@ -5,6 +5,7 @@ on:
     branches:
       - 'backend*'
       - master
+  workflow_dispatch
 
 jobs:
   test:
