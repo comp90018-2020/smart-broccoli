@@ -153,6 +153,7 @@ describe("Authentication", () => {
                 password: "aaaaaaaa",
             });
         expect(updateRes.status).to.equal(200);
+        expect(updateRes.body).to.not.have.property('password');
 
         const loginRes = await agent
             .post("/auth/login")
