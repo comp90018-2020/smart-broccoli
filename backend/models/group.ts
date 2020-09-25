@@ -22,8 +22,8 @@ const schema: Sequelize.ModelAttributes = {
 interface GroupAttributes {
     id?: number;
     name: string;
-    userGroups?: UserGroup[];
     Users?: User[];
+    UserGroup?: UserGroup;
 }
 interface GroupCreationAttributes extends Optional<GroupAttributes, "id"> {}
 
@@ -31,9 +31,9 @@ export default class Group
     extends Sequelize.Model<GroupAttributes, GroupCreationAttributes>
     implements GroupAttributes {
     public readonly id!: number;
-    public readonly userGroups?: UserGroup[];
     public name: string;
     public Users?: User[];
+    public UserGroup?: UserGroup;
 
     public getUsers!: BelongsToManyGetAssociationsMixin<User>;
 

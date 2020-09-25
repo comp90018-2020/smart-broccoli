@@ -1,5 +1,9 @@
-import Sequelize, { Optional } from "sequelize";
+import Sequelize, {
+    BelongsToManyGetAssociationsMixin,
+    Optional,
+} from "sequelize";
 import crypto from "crypto";
+import { Group, UserGroup } from "models";
 
 // Represents users
 const schema: Sequelize.ModelAttributes = {
@@ -33,6 +37,7 @@ interface UserAttributes {
 
     createdAt: Date;
     updatedAt: Date;
+    UserGroup?: UserGroup;
 }
 interface UserCreationAttributes
     extends Optional<UserAttributes, "id" | "createdAt" | "updatedAt"> {}
@@ -52,6 +57,9 @@ class User extends Sequelize.Model<UserAttributes, UserCreationAttributes>
     public readonly id!: number;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
+    public UserGroup?: UserGroup;
+
+    public getGroups!: BelongsToManyGetAssociationsMixin<Group>;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {
