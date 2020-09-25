@@ -21,26 +21,27 @@ class UserModel {
   /// Constructor for external use
   UserModel(this._authModel);
 
-  /// Return a `RegisteredUser` object corresponding to the logged-in user.
-  Future<RegisteredUser> getUser() async {
+  /// Return a `RegisteredUser` or `ParticipantUser` object corresponding to
+  /// the logged-in or joined user.
+  Future<User> getUser() async {
     http.Response response = await http.get('$USER_URL/profile',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200)
-      return RegisteredUser.fromJson(jsonDecode(response.body));
+      return _userFromJson(response.body);
     else if (response.statusCode == 401)
       throw UnauthorisedRequestException();
     else if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to get user: unknown error occurred');
   }
 
-  /// Update the profile of the logged-in user.
+  /// Update the profile of the logged-in/joined user.
   /// This method is to be invoked with only the parameters to be updated.
   /// For example, if only the email and name are to be updated:
   /// ```
   /// updateUser(email: 'new@email.com', name: 'New Name');
   /// ```
-  Future<RegisteredUser> updateUser({email, password, name}) async {
+  Future<User> updateUser({email, password, name}) async {
     Map<String, String> body = {};
     if (email != null) body['email'] = email;
     if (password != null) body['password'] = password;
@@ -51,7 +52,7 @@ class UserModel {
         body: jsonEncode(body));
 
     if (response.statusCode == 200)
-      return RegisteredUser.fromJson(jsonDecode(response.body));
+      return _userFromJson(response.body);
     else if (response.statusCode == 401)
       throw UnauthorisedRequestException();
     else if (response.statusCode == 403) throw ForbiddenRequestException();
@@ -90,5 +91,12 @@ class UserModel {
       throw UnauthorisedRequestException();
     else if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to set user profile pic: unknown error occurred');
+  }
+
+  User _userFromJson(String json) {
+    Map<String, String> jsonMap = jsonDecode(json);
+    return jsonMap['role'] == 'participant'
+        ? ParticipantUser.fromJson(jsonMap)
+        : RegisteredUser.fromJson(jsonMap);
   }
 }
