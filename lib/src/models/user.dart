@@ -30,5 +30,9 @@ class RegistrationConflictException extends RegistrationException {}
 /// Exception thrown when login is unsuccessful
 class LoginFailedException implements Exception {}
 
-/// Exception thrown when a participant user failed to register with the server
+/// Exception thrown when a participant user fails to register with the server
 class ParticipantJoinException extends RegistrationException {}
+
+/// Exception thrown when a user cannot be promoted to a registered user
+/// (e.g. the user is already registered)
+class ParticipantPromotionException extends RegistrationException {}

@@ -24,9 +24,9 @@ class AuthModel {
     _token = _keyValueStore.getString('token');
   }
 
-  /// Return `true` if the user has logged in.
+  /// Return `true` if the user has logged in or joined as a participant.
   /// Caveat: The token may be revoked; this method only checks that the user
-  /// has previously logged without subsequently logging out.
+  /// has previously logged in/joined without subsequently logging out.
   /// To validate the session, use `sessionIsValid`.
   bool inSession() {
     return _token != null;
@@ -66,6 +66,28 @@ class AuthModel {
       throw RegistrationConflictException();
     else
       throw RegistrationException();
+  }
+
+  /// Promote a participant user to a registered user.
+  /// `RegistrationConflictException` is thrown if the email is already in use.
+  /// `ParticipantPromotionException` is thrown if the user cannot be registered
+  /// due to a different reason.
+  Future<RegisteredUser> promote(
+      String email, String password, String name) async {
+    final http.Response res = await http.post('$AUTH_URL/promote',
+        headers: ApiBase.headers(),
+        body: jsonEncode(<String, String>{
+          'email': email,
+          'password': password,
+          'name': name,
+        }));
+
+    if (res.statusCode == 200)
+      return RegisteredUser.fromJson(json.decode(res.body));
+    else if (res.statusCode == 409)
+      throw RegistrationConflictException();
+    else
+      throw ParticipantPromotionException();
   }
 
   /// Authenticate a registered user.
