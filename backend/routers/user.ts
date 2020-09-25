@@ -58,6 +58,8 @@ router.patch(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = await updateProfile(req.user.id, req.body);
+            const userJSON: any = user.toJSON();
+            delete userJSON["password"];
             return res.json(user);
         } catch (err) {
             return next(err);

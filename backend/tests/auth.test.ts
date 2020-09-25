@@ -137,4 +137,26 @@ describe("Authentication", () => {
             .send();
         expect(session.status).to.equal(403);
     });
+
+    it("Attempt login as participant", async () => {
+        const agent = supertest(app);
+
+        const joinRes = await agent.post("/auth/join");
+        expect(joinRes.body).to.have.property("token");
+        const token = joinRes.body.token;
+
+        const updateRes = await agent
+            .patch("/user/profile")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+                email: "a@b.com",
+                password: "aaaaaaaa",
+            });
+        expect(updateRes.status).to.equal(200);
+
+        const loginRes = await agent
+            .post("/auth/login")
+            .send({ email: "a@b.com", password: "aaaaaaaa" });
+        expect(loginRes.status).to.equal(403);
+    });
 });

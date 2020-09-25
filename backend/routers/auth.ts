@@ -9,6 +9,7 @@ import { Request, Response, NextFunction, Router } from "express";
 import { body } from "express-validator";
 import { auth } from "./middleware/auth";
 import validate from "./middleware/validate";
+import { updateProfile } from "controllers/user";
 const router = Router();
 
 /**

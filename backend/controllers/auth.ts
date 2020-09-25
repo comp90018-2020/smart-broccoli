@@ -51,7 +51,7 @@ export const join = async () => {
 export const login = async (email: string, password: string) => {
     // Find user
     const user = await User.scope().findOne({
-        where: { email },
+        where: { email, role: "user" },
     });
     if (!user) {
         const err = new ErrorStatus("Incorrect email/password", 403);
@@ -102,5 +102,21 @@ export const promoteParticipant = async (userId: number, info: any) => {
     user.role = "user";
     user.email = info.email;
     user.name = info.name;
-    return await user.save();
+    try {
+        return await user.save();
+    } catch (err) {
+        if (err.parent.code === "23505") {
+            const param = err.parent.constraint.split("_")[1];
+            const payload = [
+                {
+                    msg: "Uniqueness constraint failure",
+                    location: "body",
+                    param,
+                },
+            ];
+            const e = new ErrorStatus(err.message, 409, payload);
+            throw e;
+        }
+        throw err;
+    }
 };
