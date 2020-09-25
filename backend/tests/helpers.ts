@@ -10,7 +10,7 @@ const register = async (info: any) => {
 const registerAndLogin = async (info: any) => {
     await register(info);
     const res = await AuthController.login(info.email, info.password);
-    return res.token;
+    return { id: res.id, token: res.token };
 };
 
 // Join
