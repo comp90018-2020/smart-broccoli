@@ -133,7 +133,6 @@ router.post(
  * /auth/promote:
  *   post:
  *     summary: Promote participant to user
- *     security: []
  *     tags:
  *       - Authentication
  *     requestBody:
