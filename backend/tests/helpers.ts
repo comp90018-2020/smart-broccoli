@@ -1,4 +1,5 @@
 import * as AuthController from "../controllers/auth";
+import * as GroupController from "../controllers/group";
 
 // Register as user
 const register = async (info: any) => {
@@ -20,4 +21,9 @@ const join = async () => {
     return token.token;
 };
 
-export { register, registerAndLogin, join };
+// Create group
+const createGroup = async (userId: number, name: string) => {
+    return await GroupController.createGroup(userId, name);
+};
+
+export { register, registerAndLogin, join, createGroup };

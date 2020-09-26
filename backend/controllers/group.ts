@@ -227,7 +227,10 @@ export const deleteMember = async (groupId: number, userId: number) => {
  * @param group
  */
 export const updateGroup = async (group: Group, name: string) => {
-    group.name = name;
+    if (name) {
+        group.name = name;
+    }
+
     try {
         return await group.save();
     } catch (err) {

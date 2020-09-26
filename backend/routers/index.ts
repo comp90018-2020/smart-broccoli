@@ -3,7 +3,6 @@ import authRouter from "./auth";
 import { auth } from "./middleware/auth";
 import userRouter from "./user";
 import groupRouter from "./group";
-import { assertUserRole } from "./middleware/user";
 
 const router = Router();
 
@@ -23,6 +22,6 @@ router.use("/auth", authRouter);
 // User
 router.use("/user", auth, userRouter);
 // Group
-router.use("/group", auth, assertUserRole, groupRouter);
+router.use("/group", auth, groupRouter);
 
 export default router;
