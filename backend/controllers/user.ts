@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import { User, UserGroup } from "../models";
+import { User, UserGroup, Picture } from "../models";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 
 /**
@@ -116,7 +116,13 @@ export const getUserProfilePicture = async (
     userId: number
 ) => {
     if (await canAccessProfile(currentUserId, userId)) {
-        return await getProfilePicture(userId);
+        // @ts-ignore Model problems
+        const user = await User.findByPk(userId, { include: [Picture] });
+        if (!user.Picture) {
+            const err = new ErrorStatus("Profile picture not found", 404);
+            throw err;
+        }
+        return user.Picture;
     }
     const err = new ErrorStatus("Cannot access resource", 403);
     throw err;
