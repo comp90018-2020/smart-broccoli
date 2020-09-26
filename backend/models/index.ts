@@ -7,6 +7,8 @@ import Token from "./token";
 import Picture from "./picture";
 import Quiz from "./quiz";
 import Question from "./question";
+import Group from "./group";
+import UserGroup from "./user_group";
 
 // Initiate sequelize instance
 const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
@@ -26,6 +28,8 @@ User.initialise(sequelize);
 Token.initialise(sequelize);
 Question.initialise(sequelize);
 Quiz.initialise(sequelize);
+Group.initialise(sequelize);
+UserGroup.initialise(sequelize);
 
 // User has many tokens
 User.hasMany(Token, { as: "tokens", foreignKey: "userId" });
@@ -47,12 +51,12 @@ Question.belongsTo(Picture, {
     foreignKey: "pictureId",
     onDelete: "set null",
 });
-// User has many quizzes
-User.hasMany(Quiz, {
-    as: "quizzes",
-    foreignKey: "userId",
-    onDelete: "cascade",
-});
+
+// Users and groups are associated
+// @ts-ignore
+Group.belongsToMany(User, { through: UserGroup, foreignKey: "groupId" });
+// @ts-ignore
+User.belongsToMany(Group, { through: UserGroup, foreignKey: "userId" });
 
 export default sequelize;
-export { User, Token, Question, Quiz };
+export { User, Token, UserGroup, Group, Question, Quiz };

@@ -1,4 +1,10 @@
-import { join, login, logout, register } from "../controllers/auth";
+import {
+    join,
+    login,
+    logout,
+    promoteParticipant,
+    register,
+} from "../controllers/auth";
 import { Request, Response, NextFunction, Router } from "express";
 import { body } from "express-validator";
 import { auth } from "./middleware/auth";
@@ -46,7 +52,7 @@ const router = Router();
  *             password: foobarbaz
  *             email: foo@foo.foo
  *             name: Foo Bar
- *             role: creator
+ *             role: user
  */
 
 /**
@@ -116,6 +122,48 @@ router.post(
         try {
             const token = await join();
             return res.json({ token: token.token });
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /auth/promote:
+ *   post:
+ *     summary: Promote participant to user
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/NewUser'
+ *     responses:
+ *       '200':
+ *         description: User
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ */
+router.post(
+    "/promote",
+    [
+        body("email").isEmail().normalizeEmail(),
+        body("password").isLength({ min: 8 }),
+        body("name").notEmpty().trim(),
+    ],
+    validate,
+    auth,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = await promoteParticipant(req.user.id, req.body);
+            const userJSON: any = user.toJSON();
+            delete userJSON["password"];
+            return res.json(userJSON);
         } catch (err) {
             return next(err);
         }

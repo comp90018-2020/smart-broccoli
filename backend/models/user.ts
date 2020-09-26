@@ -1,7 +1,11 @@
-import Sequelize from "sequelize";
+import Sequelize, {
+    BelongsToManyGetAssociationsMixin,
+    Optional,
+} from "sequelize";
 import crypto from "crypto";
+import { Group, UserGroup } from "models";
 
-// Schema
+// Represents users
 const schema: Sequelize.ModelAttributes = {
     id: {
         type: Sequelize.INTEGER,
@@ -11,7 +15,7 @@ const schema: Sequelize.ModelAttributes = {
     password: { type: Sequelize.STRING, allowNull: true },
     email: { type: Sequelize.STRING, allowNull: true },
     name: { type: Sequelize.STRING, allowNull: true },
-    role: { type: Sequelize.ENUM("creator", "user"), allowNull: false },
+    role: { type: Sequelize.ENUM("participant", "user"), allowNull: false },
     pictureId: {
         type: Sequelize.INTEGER,
         allowNull: true,
@@ -19,27 +23,31 @@ const schema: Sequelize.ModelAttributes = {
 };
 
 interface UserAttributes {
-    id?: number;
+    id: number;
 
     // Must have role
     role: string;
 
-    // Creator attributes
+    // User attributes
     password?: string;
     email?: string;
 
-    // User attributes
+    // Participant attributes
     name?: string;
 
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    UserGroup?: UserGroup;
 }
+interface UserCreationAttributes
+    extends Optional<UserAttributes, "id" | "createdAt" | "updatedAt"> {}
 
 const ITERATIONS = 100000;
 const ALGORITHM = "sha512";
 const KEYLEN = 64;
 
-class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
+class User extends Sequelize.Model<UserAttributes, UserCreationAttributes>
+    implements UserAttributes {
     public password?: string;
     public email?: string;
     public name?: string;
@@ -49,6 +57,9 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
     public readonly id!: number;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
+    public UserGroup?: UserGroup;
+
+    public getGroups!: BelongsToManyGetAssociationsMixin<Group>;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {
@@ -68,7 +79,7 @@ class User extends Sequelize.Model<UserAttributes> implements UserAttributes {
             hooks: {
                 // Hash password before creation
                 beforeCreate: async (user: any) => {
-                    if (user.role !== "creator") return;
+                    if (user.role !== "user") return;
 
                     try {
                         const hash = await hashPassword(user.password);

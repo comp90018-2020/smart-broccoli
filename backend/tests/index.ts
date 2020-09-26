@@ -24,5 +24,6 @@ before(async () => {
 import "./auth.test";
 import "./user.test";
 import "./quiz.test";
+import "./group.test";
 
 export default app;

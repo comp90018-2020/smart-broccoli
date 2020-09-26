@@ -23,7 +23,7 @@ describe("Authentication", () => {
         expect(res.body).to.have.property("email");
         expect(res.body).to.have.property("name");
         expect(res.body).to.have.property("role");
-        expect(res.body.role).to.equal("creator");
+        expect(res.body.role).to.equal("user");
     });
 
     it("Register duplicate", async () => {
@@ -61,10 +61,10 @@ describe("Authentication", () => {
 
     it("Session with incorrect token", async () => {
         const agent = supertest(app);
-        const token = await registerAndLogin(USER);
+        const user = await registerAndLogin(USER);
         const res = await agent
             .get("/auth/session")
-            .set("Authorization", `Bearer ${token}a`)
+            .set("Authorization", `Bearer ${user.token}a`)
             .send();
         expect(res.status).to.equal(403);
     });
@@ -95,6 +95,33 @@ describe("Authentication", () => {
         expect(res.status).to.equal(200);
     });
 
+    it("Join and promote", async () => {
+        const agent = supertest(app);
+
+        // Join
+        const joinRes = await agent.post("/auth/join");
+        expect(joinRes.body).to.have.property("token");
+        const token = joinRes.body.token;
+
+        // Promote
+        const res = await agent
+            .post("/auth/promote")
+            .set("Authorization", `Bearer ${token}`)
+            .send(USER);
+        expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("id");
+        expect(res.body).to.have.property("email");
+        expect(res.body).to.have.property("name");
+        expect(res.body).to.have.property("role");
+        expect(res.body.role).to.equal("user");
+
+        // Ensure that new password can be used
+        const loginRes = await agent
+            .post("/auth/login")
+            .send({ email: USER.email, password: USER.password });
+        expect(loginRes.status).to.equal(200);
+    });
+
     it("Logout", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
@@ -109,5 +136,28 @@ describe("Authentication", () => {
             .set("Authorization", `Bearer ${user.token}`)
             .send();
         expect(session.status).to.equal(403);
+    });
+
+    it("Attempt login as participant", async () => {
+        const agent = supertest(app);
+
+        const joinRes = await agent.post("/auth/join");
+        expect(joinRes.body).to.have.property("token");
+        const token = joinRes.body.token;
+
+        const updateRes = await agent
+            .patch("/user/profile")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+                email: "a@b.com",
+                password: "aaaaaaaa",
+            });
+        expect(updateRes.status).to.equal(200);
+        expect(updateRes.body).to.not.have.property("password");
+
+        const loginRes = await agent
+            .post("/auth/login")
+            .send({ email: "a@b.com", password: "aaaaaaaa" });
+        expect(loginRes.status).to.equal(403);
     });
 });

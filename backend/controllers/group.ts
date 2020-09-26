@@ -1,0 +1,356 @@
+import { Op } from "sequelize";
+import ErrorStatus from "../helpers/error";
+import { Group, User, UserGroup } from "../models";
+
+/**
+ * Create default group for user.
+ * @param user User object
+ */
+export const createDefaultGroup = async (user: User) => {
+    const nameCheck = await Group.count({
+        where: { name: { [Op.iLike]: user.name } },
+    });
+    if (nameCheck === 0) {
+        return await createGroup(user.id, user.name, true);
+    }
+
+    const emailPrefix = user.email.split("@")[0];
+    const emailPrefixCheck = await Group.count({
+        where: { name: { [Op.iLike]: emailPrefix } },
+    });
+    if (emailPrefixCheck === 0) {
+        return await createGroup(user.id, emailPrefix, true);
+    }
+
+    const emailCheck = await Group.count({
+        where: { name: { [Op.iLike]: user.email } },
+    });
+    if (emailCheck === 0) {
+        return await createGroup(user.id, user.email, true);
+    }
+};
+
+/**
+ * Get groups of user.
+ * @param userId ID of user
+ */
+export const getGroups = async (userId: number) => {
+    // Get user's groups
+    const user = await User.findByPk(userId);
+    const groups = await user.getGroups({
+        attributes: ["id", "name", "createdAt", "updatedAt"],
+    });
+
+    // Add role
+    return groups.map((group) => {
+        // @ts-ignore
+        const { UserGroup, ...rest } = group.toJSON();
+        return { ...rest, role: group.UserGroup.role };
+    });
+};
+
+/**
+ * Get group by ID.
+ * @param userId
+ * @param groupId
+ */
+export const getGroup = async (userId: number, groupId: number) => {
+    // Get group and associated users
+    // TODO: quiz, quiz sessions
+    const group = await Group.findByPk(groupId, {
+        // @ts-ignore
+        include: {
+            model: User,
+            required: true,
+            attributes: ["id", "updatedAt", "name"],
+        },
+    });
+    if (!group.Users.find((user) => user.id === userId)) {
+        const err = new ErrorStatus("User not part of group", 403);
+        throw err;
+    }
+    return {
+        ...group.toJSON(),
+        Users: group.Users.map((user) => {
+            // @ts-ignore
+            const { UserGroup, ...rest } = user.toJSON();
+            return { ...rest, role: user.UserGroup.role };
+        }),
+    };
+};
+
+/**
+ * Create group
+ * @param userId
+ * @param info Group information
+ */
+export const createGroup = async (
+    userId: number,
+    name: string,
+    defaultGroup: boolean = false
+) => {
+    // Create new group
+    const group = new Group({
+        name,
+        defaultGroup,
+    });
+    try {
+        await group.save();
+        await regenerateCode(group);
+    } catch (err) {
+        if (err.parent.code === "23505") {
+            const param = err.parent.constraint.split("_")[1];
+            const payload = [
+                {
+                    msg: "Uniqueness constraint failure",
+                    location: "body",
+                    param,
+                },
+            ];
+            const e = new ErrorStatus(err.message, 409, payload);
+            throw e;
+        }
+        throw err;
+    }
+
+    // Add association
+    await UserGroup.create({
+        userId,
+        groupId: group.id,
+        role: "owner",
+    });
+    return group;
+};
+
+/**
+ * Join a group as a participant.
+ * @param name Name of group
+ */
+export const joinGroup = async (
+    userId: number,
+    opts: { name?: string; code?: string }
+) => {
+    // Name or code
+    let query = {};
+    if (opts.name) {
+        query = { name: { [Op.iLike]: opts.name } };
+    } else if (opts.code) {
+        query = { code: { [Op.iLike]: opts.code } };
+    } else {
+        const err = new ErrorStatus("No name or code provided", 400);
+        throw err;
+    }
+
+    // Find group
+    const group = await Group.findOne({
+        where: query,
+        // Include user
+        include: [
+            {
+                // @ts-ignore Typing error
+                // Model instantiation was derived from:
+                // https://sequelize.org/master/manual/typescript.html
+                model: User,
+                where: { id: userId },
+                required: false,
+            },
+        ],
+    });
+    if (!group) {
+        const err = new ErrorStatus("Group not found", 404);
+        throw err;
+    }
+
+    // Already part of group?
+    if (group.Users.length > 0) {
+        const err = new ErrorStatus("Already member of group", 404);
+        throw err;
+    }
+
+    // Create association
+    await UserGroup.create({
+        userId,
+        groupId: group.id,
+        role: "member",
+    });
+
+    const groupJSON: any = group.toJSON();
+    groupJSON.role = "member";
+    delete groupJSON["Users"];
+    return groupJSON;
+};
+
+const CHARSET =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+/**
+ * Generates codes to specified length.
+ * @param length
+ */
+const generateCode = (length: number) => {
+    return Array(length)
+        .map(
+            () =>
+                CHARSET[Math.floor(Math.random() * Math.floor(CHARSET.length))]
+        )
+        .join();
+};
+
+/**
+ * Regenerate code.
+ * @param groupId
+ */
+export const regenerateCode = async (group: Group) => {
+    let attempt = 0;
+
+    // Regenerate until good
+    while (true) {
+        try {
+            group.code = generateCode(6);
+            await group.save();
+            const groupJSON: any = group.toJSON();
+            groupJSON.role = "owner";
+            delete groupJSON["Users"];
+            return groupJSON;
+        } catch (err) {
+            // continue
+            attempt += 1;
+            if (attempt > 5) {
+                // group may no longer exist
+                return null;
+            }
+        }
+    }
+};
+
+/**
+ * Get group by id and verify that user is creator.
+ * @param userId
+ * @param groupId
+ * @param role Role of user
+ */
+export const getGroupAndVerifyRole = async (
+    userId: number,
+    groupId: number,
+    role: string
+) => {
+    const group = await Group.findOne({
+        where: {
+            id: groupId,
+            [Op.or]:
+                role === "owner"
+                    ? // Is owner
+                      [{ "$Users.UserGroup.role$": "owner" }]
+                    : // Owners are members also
+                      [
+                          { "$Users.UserGroup.role$": "owner" },
+                          { "$Users.UserGroup.role$": "member" },
+                      ],
+        },
+        include: [
+            {
+                // @ts-ignore Typing errors due to model
+                model: User,
+                where: {
+                    id: userId,
+                },
+                attributes: ["id"],
+                required: true,
+            },
+        ],
+    });
+
+    if (!group) {
+        const err = new ErrorStatus(
+            "User does not have privileges to access specified group",
+            403
+        );
+        throw err;
+    }
+    return group;
+};
+
+/**
+ * Leave specified group.
+ * @param groupId
+ * @param userId Caller's user ID
+ */
+export const leaveGroup = async (groupId: number, userId: number) => {
+    // Non-optimised checking
+    const userGroup = await UserGroup.findAll({
+        where: { groupId, role: "owner" },
+    });
+    if (userGroup.length === 1 && userGroup[0].userId === userId) {
+        const err = new ErrorStatus("Last owner of group cannot leave", 400);
+        throw err;
+    }
+
+    // Destroy association
+    const res = await UserGroup.destroy({
+        where: {
+            groupId,
+            userId,
+        },
+    });
+    if (res != 1) {
+        const err = new ErrorStatus("Cannot leave group", 400);
+        throw err;
+    }
+};
+
+/**
+ * Delete member.
+ * @param groupId
+ * @param userId ID of member to delete
+ */
+export const deleteMember = async (groupId: number, userId: number) => {
+    const res = await UserGroup.destroy({
+        where: {
+            groupId,
+            userId,
+        },
+    });
+    if (res != 1) {
+        const err = new ErrorStatus("Cannot delete member", 400);
+        throw err;
+    }
+};
+
+/**
+ * Update group.
+ * @param group
+ */
+export const updateGroup = async (group: Group, name: string) => {
+    if (name) {
+        group.name = name;
+    }
+
+    try {
+        await group.save();
+        const groupJSON: any = group.toJSON();
+        delete groupJSON["Users"];
+        return groupJSON;
+    } catch (err) {
+        if (err.parent.code === "23505") {
+            const param = err.parent.constraint.split("_")[1];
+            const payload = [
+                {
+                    msg: "Uniqueness constraint failure",
+                    location: "body",
+                    param,
+                },
+            ];
+            const e = new ErrorStatus(err.message, 409, payload);
+            throw e;
+        }
+        throw err;
+    }
+};
+
+/**
+ * Delete group by ID.
+ * @param groupId
+ */
+export const deleteGroup = async (groupId: number) => {
+    await Group.destroy({ where: { id: groupId } });
+};

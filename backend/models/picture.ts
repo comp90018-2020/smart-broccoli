@@ -1,5 +1,6 @@
-import Sequelize from "sequelize";
+import Sequelize, { Optional } from "sequelize";
 
+// Represents pictures that are stored locally
 const schema: Sequelize.ModelAttributes = {
     id: {
         type: Sequelize.INTEGER,
@@ -21,13 +22,15 @@ const schema: Sequelize.ModelAttributes = {
 };
 
 interface PictureAttributes {
-    id?: number;
+    id: number;
     filename: string;
     destination: string;
     mimetype: string;
 }
+interface PictureCreationAttributes extends Optional<PictureAttributes, "id"> {}
 
-export default class Picture extends Sequelize.Model<PictureAttributes>
+export default class Picture
+    extends Sequelize.Model<PictureAttributes, PictureCreationAttributes>
     implements PictureAttributes {
     public readonly id!: number;
     public readonly filename!: string;

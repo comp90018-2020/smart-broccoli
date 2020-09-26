@@ -2,16 +2,19 @@ import * as AuthController from "../controllers/auth";
 import * as QuizController from "../controllers/quiz";
 
 // Register as creator
+import * as GroupController from "../controllers/group";
+
+// Register as user
 export const register = async (info: any) => {
     const user = await AuthController.register(info);
     return user;
 };
 
-// Login as creator
+// Login as user
 export const registerAndLogin = async (info: any) => {
-    const user = await register(info);
+    await register(info);
     const res = await AuthController.login(info.email, info.password);
-    return { token: res.token, id: user.id };
+    return { id: res.userId, token: res.token };
 };
 
 // Join
@@ -26,3 +29,9 @@ export const createQuiz = QuizController.createQuiz;
 
 // Add question
 export const addQuestion = QuizController.addQuestion;
+
+// Create group
+export const createGroup = GroupController.createGroup;
+
+// Join group
+export const joinGroup = GroupController.joinGroup;

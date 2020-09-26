@@ -1,11 +1,16 @@
+import { Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import { User } from "../models";
+import { User, UserGroup } from "../models";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 
-// Update user profile info
-const updateProfile = async (id: number, info: any) => {
+/**
+ * Update user profile information.
+ * @param userId
+ * @param info Info to update
+ */
+export const updateProfile = async (userId: number, info: any) => {
     // Find user and update relevant fields
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(userId);
     if (info.email) {
         user.email = info.email;
     }
@@ -34,9 +39,13 @@ const updateProfile = async (id: number, info: any) => {
     }
 };
 
-// Update profile picture
-const updateProfilePicture = async (id: number, file: any) => {
-    const user = await User.findByPk(id);
+/**
+ * Update profile picture.
+ * @param userId
+ * @param file File attributes
+ */
+export const updateProfilePicture = async (userId: number, file: any) => {
+    const user = await User.findByPk(userId);
 
     // Delete the old picture
     if (user.pictureId) {
@@ -49,9 +58,66 @@ const updateProfilePicture = async (id: number, file: any) => {
     return await user.save();
 };
 
-// Get profile picture
-const getProfilePicture = async (pictureId: number) => {
-    return await getPictureById(pictureId);
+/**
+ * Get profile picture.
+ * Authorization is handled by caller.
+ * @param pictureId ID of picture
+ */
+export const getProfilePicture = async (pictureId: number) => {
+    const picture = await getPictureById(pictureId);
+    if (!picture) {
+        const err = new ErrorStatus("Picture not found", 404);
+        throw err;
+    }
+    return picture;
 };
 
-export { updateProfile, updateProfilePicture, getProfilePicture };
+/**
+ * Can current user access target user's profile?
+ * @param currentUserId ID of current user
+ * @param userId ID of target user
+ */
+const canAccessProfile = async (currentUserId: number, userId: number) => {
+    // Find common groups
+    const userGroups = await UserGroup.findAll({ where: { userId } });
+    const sharedGroups = await UserGroup.findAll({
+        where: {
+            userId: currentUserId,
+            [Op.or]: userGroups.map((userGroups) => {
+                return { groupId: userGroups.groupId };
+            }),
+        },
+    });
+    return sharedGroups.length > 0;
+};
+
+/**
+ * Get profile of user.
+ * @param currentUserId ID of current user
+ * @param userId ID of target user
+ */
+export const getUserProfile = async (currentUserId: number, userId: number) => {
+    if (await canAccessProfile(currentUserId, userId)) {
+        return await User.findByPk(userId, {
+            attributes: ["id", "name", "updatedAt"],
+        });
+    }
+    const err = new ErrorStatus("Cannot access resource", 403);
+    throw err;
+};
+
+/**
+ * Get profile picture of other users.
+ * @param currentUserId ID of current user
+ * @param userId ID of target user
+ */
+export const getUserProfilePicture = async (
+    currentUserId: number,
+    userId: number
+) => {
+    if (await canAccessProfile(currentUserId, userId)) {
+        return await getProfilePicture(userId);
+    }
+    const err = new ErrorStatus("Cannot access resource", 403);
+    throw err;
+};

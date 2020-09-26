@@ -2,7 +2,8 @@ import { Router } from "express";
 import { auth } from "./middleware/auth";
 import authRouter from "./auth";
 import userRouter from "./user";
-import quizRouter, { creatorRoleCheck } from "./quiz";
+import groupRouter from "./group";
+import quizRouter from './quiz';
 
 const router = Router();
 
@@ -22,6 +23,8 @@ router.use("/auth", authRouter);
 // User
 router.use("/user", auth, userRouter);
 // Quiz
-router.use("/quiz", auth, creatorRoleCheck, quizRouter);
+router.use("/quiz", auth, quizRouter);
+// Group
+router.use("/group", auth, groupRouter);
 
 export default router;
