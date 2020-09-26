@@ -334,7 +334,7 @@ router.post(
 /**
  * @swagger
  * /group/{groupId}/leave:
- *   get:
+ *   post:
  *     summary: Leave group
  *     tags:
  *       - Group
@@ -364,8 +364,8 @@ router.post(
 
 /**
  * @swagger
- * /group/{groupId}/kick:
- *   get:
+ * /group/{groupId}/member/kick:
+ *   post:
  *     summary: Kick member from group
  *     tags:
  *       - Group
