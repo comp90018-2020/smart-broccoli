@@ -6,46 +6,40 @@ import { Group, User, UserGroup } from "../models";
  * Create default group for user.
  * @param user User object
  */
-export const createDefaultGroup = async (user: User) => {
-    const nameCheck = await Group.count({
-        where: { name: { [Op.iLike]: user.name } },
-    });
-    if (nameCheck === 0) {
-        return await createGroup(user.id, user.name, true);
-    }
-
-    const emailPrefix = user.email.split("@")[0];
-    const emailPrefixCheck = await Group.count({
-        where: { name: { [Op.iLike]: emailPrefix } },
-    });
-    if (emailPrefixCheck === 0) {
-        return await createGroup(user.id, emailPrefix, true);
-    }
-
-    const emailCheck = await Group.count({
-        where: { name: { [Op.iLike]: user.email } },
-    });
-    if (emailCheck === 0) {
-        return await createGroup(user.id, user.email, true);
-    }
+export const createDefaultGroup = async (userId: number) => {
+    return await createGroup(userId, null, true);
 };
 
 /**
  * Get groups of user.
- * @param userId ID of user
+ * @param user
  */
-export const getGroups = async (userId: number) => {
-    // Get user's groups
-    const user = await User.findByPk(userId);
+export const getGroups = async (user: User) => {
+    // Get groups
     const groups = await user.getGroups({
-        attributes: ["id", "name", "createdAt", "updatedAt"],
+        attributes: ["id", "name", "createdAt", "updatedAt", "defaultGroup"],
+        include: [
+            {
+                //@ts-ignore
+                model: User,
+
+                where: { "$Users.UserGroup.role$": "owner" },
+                attributes: ["name"],
+                required: true,
+            },
+        ],
     });
 
-    // Add role
     return groups.map((group) => {
         // @ts-ignore
-        const { UserGroup, ...rest } = group.toJSON();
-        return { ...rest, role: group.UserGroup.role };
+        const { UserGroup, Users, ...rest } = group.toJSON();
+        return {
+            ...rest,
+            // Include owner's username if default group
+            name: group.defaultGroup ? group.Users[0].name : group.name,
+            // Add role
+            role: group.UserGroup.role,
+        };
     });
 };
 
@@ -71,6 +65,9 @@ export const getGroup = async (userId: number, groupId: number) => {
     }
     return {
         ...group.toJSON(),
+        name: group.defaultGroup
+            ? group.Users.find((user) => user.role === "owner").name
+            : group.name,
         Users: group.Users.map((user) => {
             // @ts-ignore
             const { UserGroup, ...rest } = user.toJSON();
@@ -90,12 +87,16 @@ export const createGroup = async (
     defaultGroup: boolean = false
 ) => {
     // Create new group
-    const group = new Group({
+    let group = new Group({
         name,
         defaultGroup,
     });
+
     try {
-        await group.save();
+        // Save group
+        group = await group.save();
+
+        // Generate first code
         await regenerateCode(group);
     } catch (err) {
         if (err.parent.code === "23505") {
@@ -276,6 +277,7 @@ export const getGroupAndVerifyRole = async (
  * @param userId Caller's user ID
  */
 export const leaveGroup = async (groupId: number, userId: number) => {
+    // Possible future expansion: manager/owner promotions
     // Non-optimised checking
     const userGroup = await UserGroup.findAll({
         where: { groupId, role: "owner" },
@@ -308,6 +310,7 @@ export const deleteMember = async (groupId: number, userId: number) => {
         where: {
             groupId,
             userId,
+            role: "member",
         },
     });
     if (res != 1) {
@@ -321,7 +324,7 @@ export const deleteMember = async (groupId: number, userId: number) => {
  * @param group
  */
 export const updateGroup = async (group: Group, name: string) => {
-    if (name) {
+    if (name && !group.defaultGroup) {
         group.name = name;
     }
 
@@ -352,5 +355,5 @@ export const updateGroup = async (group: Group, name: string) => {
  * @param groupId
  */
 export const deleteGroup = async (groupId: number) => {
-    await Group.destroy({ where: { id: groupId } });
+    await Group.destroy({ where: { id: groupId, defaultGroup: false } });
 };

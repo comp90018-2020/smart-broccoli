@@ -34,6 +34,10 @@ import validate from "./middleware/validate";
  *           type: number
  *         name:
  *           type: string
+ *         defaultGroup:
+ *           type: boolean
+ *         code:
+ *           type: string
  *     GroupExtended:
  *       type: object
  *       allOf:
@@ -198,7 +202,7 @@ router.patch(
  */
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const groups = await getGroups(req.user.id);
+        const groups = await getGroups(req.user);
         return res.json(groups);
     } catch (err) {
         return next(err);

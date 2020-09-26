@@ -32,6 +32,7 @@ describe("Group", () => {
             .get("/group")
             .set("Authorization", `Bearer ${user.token}`)
             .send();
+        console.log(getRes.body);
         expect(getRes.status).to.equal(200);
         expect(getRes.body).to.have.lengthOf(2);
         expect(getRes.body[1]).to.have.property("role");
