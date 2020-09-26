@@ -10,9 +10,9 @@ describe("Group", () => {
     });
 
     const USER = {
-        email: "a@a.com",
+        email: "abc@a.com",
         password: "aaaaaaaa",
-        name: "a",
+        name: "abc",
     };
 
     it("Create and get group", async () => {
@@ -33,9 +33,9 @@ describe("Group", () => {
             .set("Authorization", `Bearer ${user.token}`)
             .send();
         expect(getRes.status).to.equal(200);
-        expect(getRes.body).to.have.lengthOf(1);
-        expect(getRes.body[0]).to.have.property("role");
-        expect(getRes.body[0].role).to.equal("owner");
+        expect(getRes.body).to.have.lengthOf(2);
+        expect(getRes.body[1]).to.have.property("role");
+        expect(getRes.body[1].role).to.equal("owner");
 
         const getGroupRes = await agent
             .get(`/group/${createRes.body.id}`)
@@ -65,13 +65,13 @@ describe("Group", () => {
         const agent = supertest(app);
         const user1 = await registerAndLogin(USER);
         const user2 = await registerAndLogin({ ...USER, email: "a@b.com" });
-        const group = await createGroup(user1.id, "a");
+        const group = await createGroup(user1.id, "test");
 
         // Join
         const joinRes = await agent
             .post(`/group/join`)
             .set("Authorization", `Bearer ${user2.token}`)
-            .send({ name: "a" });
+            .send({ name: "test" });
         expect(joinRes.status).to.equal(200);
         expect(joinRes.body).to.have.property("id");
         expect(joinRes.body.Users);
@@ -97,10 +97,10 @@ describe("Group", () => {
         const agent = supertest(app);
         const user1 = await registerAndLogin(USER);
         const user2 = await registerAndLogin({ ...USER, email: "a@b.com" });
-        const group = await createGroup(user1.id, "a");
+        const group = await createGroup(user1.id, "test");
 
         // Join
-        await joinGroup(user2.id, "a");
+        await joinGroup(user2.id, "test");
 
         // Bad kick
         const badRes = await agent
@@ -121,10 +121,10 @@ describe("Group", () => {
 
         const user1 = await registerAndLogin(USER);
         const user2 = await registerAndLogin({ ...USER, email: "a@b.com" });
-        const group = await createGroup(user1.id, "a");
+        const group = await createGroup(user1.id, "test");
 
         // Join
-        await joinGroup(user2.id, "a");
+        await joinGroup(user2.id, "test");
 
         // Delete
         const res = await agent
@@ -138,7 +138,7 @@ describe("Group", () => {
 
         const user1 = await registerAndLogin(USER);
         const user2 = await registerAndLogin({ ...USER, email: "a@b.com" });
-        await createGroup(user1.id, "a");
+        await createGroup(user1.id, "test");
 
         // Before join
         const failRes = await agent
@@ -147,7 +147,7 @@ describe("Group", () => {
         expect(failRes.status).to.equal(403);
 
         // Join
-        await joinGroup(user2.id, "a");
+        await joinGroup(user2.id, "test");
 
         // After join
         const res = await agent

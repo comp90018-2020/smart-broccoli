@@ -3,6 +3,34 @@ import ErrorStatus from "../helpers/error";
 import { Group, User, UserGroup } from "../models";
 
 /**
+ * Create default group for user.
+ * @param user User object
+ */
+export const createDefaultGroup = async (user: User) => {
+    const nameCheck = await Group.count({
+        where: { name: { [Op.iLike]: user.name } },
+    });
+    if (nameCheck === 0) {
+        return await createGroup(user.id, user.name, true);
+    }
+
+    const emailPrefix = user.email.split("@")[0];
+    const emailPrefixCheck = await Group.count({
+        where: { name: { [Op.iLike]: emailPrefix } },
+    });
+    if (emailPrefixCheck === 0) {
+        return await createGroup(user.id, emailPrefix, true);
+    }
+
+    const emailCheck = await Group.count({
+        where: { name: { [Op.iLike]: user.email } },
+    });
+    if (emailCheck === 0) {
+        return await createGroup(user.id, user.email, true);
+    }
+};
+
+/**
  * Get groups of user.
  * @param userId ID of user
  */
@@ -56,10 +84,15 @@ export const getGroup = async (userId: number, groupId: number) => {
  * @param userId
  * @param info Group information
  */
-export const createGroup = async (userId: number, name: string) => {
+export const createGroup = async (
+    userId: number,
+    name: string,
+    defaultGroup: boolean = false
+) => {
     // Create new group
     const group = new Group({
         name,
+        defaultGroup,
     });
     try {
         await group.save();
