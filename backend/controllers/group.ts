@@ -355,5 +355,7 @@ export const updateGroup = async (group: Group, name: string) => {
  * @param groupId
  */
 export const deleteGroup = async (groupId: number) => {
-    await Group.destroy({ where: { id: groupId, defaultGroup: false } });
+    const res = await Group.destroy({ where: { id: groupId, defaultGroup: false } });
+    if (res != 1)
+        throw new ErrorStatus("Cannot delete group", 400);
 };
