@@ -67,4 +67,8 @@ Group.belongsToMany(User, { through: UserGroup, foreignKey: "groupId" });
 User.belongsToMany(Group, { through: UserGroup, foreignKey: "userId" });
 
 export default sequelize;
+<<<<<<< HEAD
 export { User, Token, UserGroup, Group, Question, Quiz, Picture };
+=======
+export { User, Token, UserGroup, Group, Picture };
+>>>>>>> backend-group

@@ -11,7 +11,7 @@ export const register = async (info: any) => {
     const { password, email, name } = info;
     try {
         const user = await User.create({ password, email, name, role: "user" });
-        await createDefaultGroup(user);
+        await createDefaultGroup(user.id);
         return user;
     } catch (err) {
         if (err.parent.code === "23505") {
@@ -107,7 +107,7 @@ export const promoteParticipant = async (userId: number, info: any) => {
     user.name = info.name;
     try {
         await user.save();
-        await createDefaultGroup(user);
+        await createDefaultGroup(user.id);
         return user;
     } catch (err) {
         if (err.parent.code === "23505") {

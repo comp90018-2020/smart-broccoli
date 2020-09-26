@@ -16,7 +16,7 @@ const schema: Sequelize.ModelAttributes = {
     },
     name: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     defaultGroup: {
         type: Sequelize.BOOLEAN,
@@ -31,7 +31,7 @@ const schema: Sequelize.ModelAttributes = {
 
 interface GroupAttributes {
     id?: number;
-    name: string;
+    name?: string;
     defaultGroup: boolean;
     code: string;
     Users?: User[];
@@ -44,7 +44,7 @@ export default class Group
     extends Sequelize.Model<GroupAttributes, GroupCreationAttributes>
     implements GroupAttributes {
     public readonly id!: number;
-    public name: string;
+    public name?: string;
     public readonly defaultGroup: boolean;
     public code: string;
     public Users?: User[];
