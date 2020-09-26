@@ -9,6 +9,7 @@ import {
     getGroups,
     joinGroup,
     leaveGroup,
+    regenerateCode,
     updateGroup,
 } from "../controllers/group";
 import { Group } from "../models";
@@ -275,11 +276,50 @@ router.get(
  */
 router.post(
     "/join",
-    [body("name").isString()],
+    [body("name").optional().isString(), body("code").optional().isString()],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const group = await joinGroup(req.user.id, req.body.name);
+            const group = await joinGroup(req.user.id, {
+                name: req.body.name,
+                code: req.body.code,
+            });
+            return res.json(group);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /group/{groupId}/code:
+ *   post:
+ *     summary: Regenerate code
+ *     tags:
+ *       - Group
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GroupBrief'
+ */
+router.post(
+    "/:groupId/code",
+    [param("groupId").isInt()],
+    validate,
+    verifyRole("owner"),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const group = await regenerateCode(req.group);
             return res.json(group);
         } catch (err) {
             return next(err);

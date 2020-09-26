@@ -96,6 +96,7 @@ export const createGroup = async (
     });
     try {
         await group.save();
+        await regenerateCode(group);
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
@@ -125,12 +126,24 @@ export const createGroup = async (
  * Join a group as a participant.
  * @param name Name of group
  */
-export const joinGroup = async (userId: number, name: string) => {
+export const joinGroup = async (
+    userId: number,
+    opts: { name?: string; code?: string }
+) => {
+    // Name or code
+    let query = {};
+    if (opts.name) {
+        query = { name: { [Op.iLike]: opts.name } };
+    } else if (opts.code) {
+        query = { code: { [Op.iLike]: opts.code } };
+    } else {
+        const err = new ErrorStatus("No name or code provided", 400);
+        throw err;
+    }
+
     // Find group
     const group = await Group.findOne({
-        where: {
-            name: name.toLowerCase(),
-        },
+        where: query,
         // Include user
         include: [
             {
@@ -165,6 +178,49 @@ export const joinGroup = async (userId: number, name: string) => {
     groupJSON.role = "member";
     delete groupJSON["Users"];
     return groupJSON;
+};
+
+const CHARSET =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+/**
+ * Generates codes to specified length.
+ * @param length
+ */
+const generateCode = (length: number) => {
+    return Array(length)
+        .map(
+            () =>
+                CHARSET[Math.floor(Math.random() * Math.floor(CHARSET.length))]
+        )
+        .join();
+};
+
+/**
+ * Regenerate code.
+ * @param groupId
+ */
+export const regenerateCode = async (group: Group) => {
+    let attempt = 0;
+
+    // Regenerate until good
+    while (true) {
+        try {
+            group.code = generateCode(6);
+            await group.save();
+            const groupJSON: any = group.toJSON();
+            groupJSON.role = "owner";
+            delete groupJSON["Users"];
+            return groupJSON;
+        } catch (err) {
+            // continue
+            attempt += 1;
+            if (attempt > 5) {
+                // group may no longer exist
+                return null;
+            }
+        }
+    }
 };
 
 /**

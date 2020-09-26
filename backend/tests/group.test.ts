@@ -100,7 +100,7 @@ describe("Group", () => {
         const group = await createGroup(user1.id, "test");
 
         // Join
-        await joinGroup(user2.id, "test");
+        await joinGroup(user2.id, { name: "test" });
 
         // Bad kick
         const badRes = await agent
@@ -124,7 +124,7 @@ describe("Group", () => {
         const group = await createGroup(user1.id, "test");
 
         // Join
-        await joinGroup(user2.id, "test");
+        await joinGroup(user2.id, { name: "test" });
 
         // Delete
         const res = await agent
@@ -147,7 +147,7 @@ describe("Group", () => {
         expect(failRes.status).to.equal(403);
 
         // Join
-        await joinGroup(user2.id, "test");
+        await joinGroup(user2.id, { name: "test" });
 
         // After join
         const res = await agent
