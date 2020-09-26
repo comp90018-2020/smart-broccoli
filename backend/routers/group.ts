@@ -165,9 +165,7 @@ router.patch(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const group = await updateGroup(req.group, req.body.name);
-            const groupJSON: any = group.toJSON();
-            delete groupJSON["Users"];
-            return res.json(groupJSON);
+            return res.json(group);
         } catch (err) {
             return next(err);
         }
@@ -282,10 +280,7 @@ router.post(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const group = await joinGroup(req.user.id, req.body.name);
-            const groupJSON: any = group.toJSON();
-            delete groupJSON["Users"];
-            groupJSON.role = "member";
-            return res.json(groupJSON);
+            return res.json(group);
         } catch (err) {
             return next(err);
         }

@@ -160,7 +160,11 @@ export const joinGroup = async (userId: number, name: string) => {
         groupId: group.id,
         role: "member",
     });
-    return group;
+
+    const groupJSON: any = group.toJSON();
+    groupJSON.role = "member";
+    delete groupJSON["Users"];
+    return groupJSON;
 };
 
 /**
@@ -266,7 +270,10 @@ export const updateGroup = async (group: Group, name: string) => {
     }
 
     try {
-        return await group.save();
+        await group.save();
+        const groupJSON: any = group.toJSON();
+        delete groupJSON["Users"];
+        return groupJSON;
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
