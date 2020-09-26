@@ -32,6 +32,26 @@ import validate from "./middleware/validate";
  *           type: number
  *         name:
  *           type: string
+ *     GroupExtended:
+ *       type: object
+ *       allOf:
+ *         - $ref: '#/components/schemas/GroupBrief'
+ *       properties:
+ *         Users:
+ *           type: array
+ *           items:
+ *             allOf:
+ *               - $ref: '#/components/schemas/UserBrief'
+ *     UserBrief:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: number
+ *         name:
+ *           type: string
+ *         role:
+ *           type: string
+ *           enum: [member, owner]
  */
 const router = Router();
 
@@ -148,6 +168,29 @@ router.patch(
     }
 );
 
+/**
+ * @swagger
+ * /group:
+ *   get:
+ *     summary: Get all groups
+ *     tags:
+ *       - Group
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 allOf:
+ *                   - $ref: '#/components/schemas/GroupBrief'
+ *                   - type: object
+ *                     properties:
+ *                       role:
+ *                         type: string
+ *                         enum: [owner, member]
+ */
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
         const groups = await getGroups(req.user.id);
@@ -157,6 +200,22 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     }
 });
 
+/**
+ * @swagger
+ * /group/{groupId}:
+ *   get:
+ *     summary: Get group by ID
+ *     tags:
+ *       - Group
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/GroupExtended'
+ */
 router.get(
     "/:groupId",
     [param("groupId").isInt()],

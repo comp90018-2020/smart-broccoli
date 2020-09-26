@@ -51,6 +51,7 @@ describe("Group", () => {
             .send();
         expect(getGroupRes.status).to.equal(200);
         expect(getGroupRes.body).to.have.property("Users");
+        console.log(getGroupRes.body);
     });
 
     it("Update group name", async () => {
