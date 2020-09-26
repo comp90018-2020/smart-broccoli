@@ -1,65 +1,141 @@
-import { FindOptions, NonNullFindOptions } from "sequelize/types";
+import { FindOptions } from "sequelize/types";
 import ErrorStatus from "../helpers/error";
-import { Quiz, Question } from "../models";
+import { Op } from "sequelize";
+import { Quiz, Question, UserGroup, Group } from "../models";
 import { OptionAttributes } from "../models/question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 
-// Create quiz
-export const createQuiz = async (userId: number, info: any) => {
-    const quiz = new Quiz({ userId });
-    if (info.title) {
-        quiz.title = info.title;
+const processQuestions = async (original: Question[], updated: any) => {
+
+};
+
+/**
+ * Create quiz.
+ * @param userId ID of creator
+ * @param info
+ */
+export const createQuiz = async (info: any) => {
+    // Create
+    const quiz = new Quiz({
+        groupId: info.groupId,
+        type: info.type,
+        title: info.title,
+    });
+    if (info.timeLimit) {
+        quiz.timeLimit = info.timeLimit;
     }
     if (info.description) {
         quiz.description = info.description;
     }
-    return await quiz.save();
+    await quiz.save();
+
+    // Save questions
+    const quizJSON: any = quiz.toJSON();
+    quizJSON.questions = await processQuestions([], info.questions);
+    return quizJSON;
 };
 
-// Get all quiz
-export const getAllQuiz = async (userId: number) => {
-    const quiz = await Quiz.findAll({
-        where: { userId },
-        include: ["questions"],
+// Update quiz attributes
+export const updateQuiz = async (quizId: number, info: any) => {
+    // Get quiz
+    const quiz = await Quiz.findByPk(quizId, {
+        // @ts-ignore
+        include: {
+            model: Question,
+            as: "questions",
+        },
     });
-    return quiz;
+    quiz.title = info.title;
+    quiz.type = info.type;
+    quiz.groupId = info.groupId;
+
+    // Make updates
+    if (info.timeLimit) {
+        quiz.timeLimit = info.timeLimit;
+    }
+    if (info.description) {
+        quiz.description = info.description;
+    }
+    await quiz.save();
+
+    // Save questions
+    const quizJSON: any = quiz.toJSON();
+    quizJSON.questions = await processQuestions(quiz.questions, info.questions);
+    return quizJSON;
+};
+
+/**
+ * Get all quiz that user has access to.
+ * @param userId
+ */
+export const getAllQuiz = async (userId: number) => {
+    // All groups and associated quiz where user is member
+    const userGroups = await UserGroup.findAll({
+        where: {
+            userId,
+        },
+    });
+
+    // Find all quizzes and return whether user is participant or owner
+    // TODO: live quiz
+    const quizzes = await Quiz.findAll({
+        where: { groupId: { [Op.or]: userGroups.map((g) => g.groupId) } },
+    });
+    return quizzes.map((quiz) => {
+        return {
+            ...quiz,
+            role: userGroups.find((g) => g.id === quiz.groupId).role,
+        };
+    });
 };
 
 // Get quiz
 export const getQuiz = async (userId: number, quizId: number) => {
-    return await getQuizAndVerifyCreator(userId, quizId, {
+    const { quiz, role } = await getQuizAndRole(userId, quizId, {
         include: ["questions"],
     });
+    const quizJSON = {
+        ...quiz.toJSON(),
+        questions: quiz.questions.map((question) => {
+            const questionJSON: any = question.toJSON();
+            // If member or participant, erase answer
+            if (role === "member" || role === "participant") {
+                delete questionJSON["correct"];
+                delete questionJSON["tf"];
+            }
+            return questionJSON;
+        }),
+    };
+    return quizJSON;
 };
 
 // Check quiz and check permissions
-export const getQuizAndVerifyCreator = async (
+export const getQuizAndRole = async (
     userId: number,
     quizId: number,
     options?: FindOptions
 ) => {
+    // Get quiz
     const quiz = await Quiz.findByPk(quizId, options);
     if (!quiz) {
         const err = new ErrorStatus("Quiz not found", 404);
         throw err;
     }
-    if (quiz.userId != userId) {
-        const err = new ErrorStatus("Permission denied", 403);
-        throw err;
-    }
-    return quiz;
-};
 
-// Update quiz attributes
-export const updateQuiz = async (quiz: Quiz, info: any) => {
-    // Make updates
-    if (info.title) {
-        quiz.title = info.title;
+    // Check whether user has priviledges
+    const membership = await UserGroup.findOne({
+        where: {
+            userId,
+            groupId: quiz.groupId,
+        },
+    });
+    if (membership) {
+        return { quiz, role: membership.role };
     }
-    if (info.description) {
-        quiz.description = info.description;
-    }
-    return await quiz.save();
+
+    // TODO: quiz session
+    const err = new ErrorStatus("Unimplemented", 501);
+    throw err;
 };
 
 // Delete quiz
@@ -84,6 +160,8 @@ const checkOptions = (options: any): OptionAttributes[] => {
 
 // Parses question info
 interface QuestionInfo {
+    id?: number;
+    picture?: number;
     text?: string;
     type: string;
     timeLimit?: number;
@@ -116,7 +194,7 @@ const checkQuestionInfo = (info: any): QuestionInfo => {
 };
 
 // Add question
-export const addQuestion = async (quizId: number, info: any) => {
+const addQuestion = async (quizId: number, info: any) => {
     const question = await Question.create({
         ...checkQuestionInfo(info),
         quizId,
@@ -125,7 +203,7 @@ export const addQuestion = async (quizId: number, info: any) => {
 };
 
 // Update question
-export const updateQuestion = async (
+const updateQuestion = async (
     quizId: number,
     questionId: number,
     info: any
@@ -151,7 +229,7 @@ export const updateQuestion = async (
 };
 
 // Delete question
-export const deleteQuestion = async (quizId: number, questionId: number) => {
+const deleteQuestion = async (quizId: number, questionId: number) => {
     const deleted = await Question.destroy({
         where: {
             id: questionId,

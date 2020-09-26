@@ -1,6 +1,8 @@
-import { UserGroup } from "models";
+import { Quiz, UserGroup } from "models";
 import Sequelize, {
+    BelongsToGetAssociationMixin,
     BelongsToManyGetAssociationsMixin,
+    HasManyGetAssociationsMixin,
     Optional,
 } from "sequelize";
 import User from "./user";
@@ -49,6 +51,7 @@ export default class Group
     public UserGroup?: UserGroup;
 
     public getUsers!: BelongsToManyGetAssociationsMixin<User>;
+    public getQuizzes!: HasManyGetAssociationsMixin<Quiz>;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {

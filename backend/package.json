@@ -8,7 +8,7 @@
     "devstart": "yarn build && node build/server.js",
     "build": "tsc && cp package.json yarn.lock build/",
     "prettier": "prettier --tab-width 4 *.ts '**/*.ts' --write",
-    "test": "yarn build && cp -r tests/assets build/tests/assets && PORT=5000 mocha build/tests/index.js --exit"
+    "test": "yarn build && cp -r tests/assets build/tests/assets && PORT=5000 mocha build/tests/index.js --exit --timeout 10000"
   },
   "author": "w01/10-4",
   "license": "MIT",

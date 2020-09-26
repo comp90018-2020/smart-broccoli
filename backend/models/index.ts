@@ -49,7 +49,15 @@ Quiz.hasMany(Question, {
 // Question has picture
 Question.belongsTo(Picture, {
     foreignKey: "pictureId",
-    onDelete: "set null",
+    onDelete: "cascade",
+});
+// Quiz belongs to group
+Quiz.belongsTo(Group, {
+    foreignKey: "groupId",
+    onDelete: "cascade",
+});
+Group.hasMany(Quiz, {
+    foreignKey: "groupId",
 });
 
 // Users and groups are associated

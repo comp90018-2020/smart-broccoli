@@ -3,7 +3,7 @@ import { auth } from "./middleware/auth";
 import authRouter from "./auth";
 import userRouter from "./user";
 import groupRouter from "./group";
-import quizRouter from './quiz';
+import quizRouter from "./quiz";
 
 const router = Router();
 

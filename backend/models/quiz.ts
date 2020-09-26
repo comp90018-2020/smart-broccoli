@@ -1,3 +1,4 @@
+import { Question } from "models";
 import Sequelize from "sequelize";
 
 const schema: Sequelize.ModelAttributes = {
@@ -14,13 +15,25 @@ const schema: Sequelize.ModelAttributes = {
         type: Sequelize.STRING,
         allowNull: true,
     },
+    type: {
+        type: Sequelize.ENUM("live", "self paced"),
+        allowNull: false,
+    },
+    timeLimit: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 10,
+    },
 };
 
 interface QuizAttributes {
     id?: number;
-    userId: number;
     title?: string;
     description?: string;
+    groupId: number;
+    type: string;
+    timeLimit?: number;
+    questions?: Question[];
 }
 
 export default class Quiz extends Sequelize.Model<QuizAttributes>
@@ -29,7 +42,10 @@ export default class Quiz extends Sequelize.Model<QuizAttributes>
     public description: string;
 
     public readonly id!: number;
-    public readonly userId: number;
+    public groupId: number;
+    public type: string;
+    public timeLimit?: number;
+    public readonly questions?: Question[];
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {

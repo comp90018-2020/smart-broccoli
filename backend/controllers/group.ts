@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import { Group, User, UserGroup } from "../models";
+import { Group, Quiz, User, UserGroup } from "../models";
 
 /**
  * Create default group for user.
@@ -56,14 +56,19 @@ export const getGroups = async (userId: number) => {
  */
 export const getGroup = async (userId: number, groupId: number) => {
     // Get group and associated users
-    // TODO: quiz, quiz sessions
+    // TODO: quiz sessions
+    // @ts-ignore
     const group = await Group.findByPk(groupId, {
-        // @ts-ignore
-        include: {
-            model: User,
-            required: true,
-            attributes: ["id", "updatedAt", "name"],
-        },
+        include: [
+            {
+                model: User,
+                required: true,
+                attributes: ["id", "updatedAt", "name"],
+            },
+            {
+                model: Quiz,
+            },
+        ],
     });
     if (!group.Users.find((user) => user.id === userId)) {
         const err = new ErrorStatus("User not part of group", 403);

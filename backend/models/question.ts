@@ -22,10 +22,6 @@ const schema: Sequelize.ModelAttributes = {
         type: Sequelize.JSONB,
         allowNull: true,
     },
-    timeLimit: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-    },
 };
 
 export interface OptionAttributes {
@@ -37,7 +33,6 @@ interface QuestionAttributes {
     id?: number;
     quizId: number;
     text?: string;
-    timeLimit?: number;
     type: string;
     tf?: boolean;
     options?: OptionAttributes[];
@@ -47,7 +42,6 @@ interface QuestionAttributes {
 export default class Question extends Sequelize.Model<QuestionAttributes>
     implements QuestionAttributes {
     public text?: string;
-    public timeLimit?: number;
     public type!: string;
     public tf?: boolean;
     public options?: OptionAttributes[];
