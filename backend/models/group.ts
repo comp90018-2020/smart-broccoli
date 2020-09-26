@@ -25,6 +25,7 @@ const schema: Sequelize.ModelAttributes = {
     code: {
         type: Sequelize.STRING,
         allowNull: true,
+        defaultValue: null,
     },
 };
 
@@ -60,6 +61,12 @@ export default class Group
                     unique: true,
                     // @ts-ignore
                     fields: [sequelize.fn("lower", sequelize.col("name"))],
+                },
+                {
+                    name: "unique_code",
+                    unique: true,
+                    // @ts-ignore
+                    fields: [sequelize.fn("lower", sequelize.col("code"))],
                 },
             ],
         });

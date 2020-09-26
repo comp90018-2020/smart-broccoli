@@ -17,7 +17,14 @@ export const createDefaultGroup = async (userId: number) => {
 export const getGroups = async (user: User) => {
     // Get groups
     const groups = await user.getGroups({
-        attributes: ["id", "name", "createdAt", "updatedAt", "defaultGroup"],
+        attributes: [
+            "id",
+            "name",
+            "createdAt",
+            "updatedAt",
+            "defaultGroup",
+            "code",
+        ],
         include: [
             {
                 //@ts-ignore
@@ -136,7 +143,7 @@ export const joinGroup = async (
     if (opts.name) {
         query = { name: { [Op.iLike]: opts.name } };
     } else if (opts.code) {
-        query = { code: { [Op.iLike]: opts.code } };
+        query = { code: opts.code };
     } else {
         const err = new ErrorStatus("No name or code provided", 400);
         throw err;
@@ -189,12 +196,12 @@ const CHARSET =
  * @param length
  */
 const generateCode = (length: number) => {
-    return Array(length)
+    return [...Array(length)]
         .map(
             () =>
                 CHARSET[Math.floor(Math.random() * Math.floor(CHARSET.length))]
         )
-        .join();
+        .join("");
 };
 
 /**

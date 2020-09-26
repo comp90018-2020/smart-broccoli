@@ -32,7 +32,6 @@ describe("Group", () => {
             .get("/group")
             .set("Authorization", `Bearer ${user.token}`)
             .send();
-        console.log(getRes.body);
         expect(getRes.status).to.equal(200);
         expect(getRes.body).to.have.lengthOf(2);
         expect(getRes.body[1]).to.have.property("role");
@@ -60,6 +59,19 @@ describe("Group", () => {
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("name");
         expect(res.body.name).to.equal("b");
+    });
+
+    it("Regenerate code", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const group = await createGroup(user.id, "a");
+
+        const res = await agent
+            .post(`/group/${group.id}/code`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("code");
+        expect(res.body.code).to.not.equal(",,,,,,");
     });
 
     it("Join and leave group", async () => {
