@@ -127,6 +127,7 @@ export const joinGroup = async (userId: number, name: string) => {
         groupId: group.id,
         role: "member",
     });
+    return group;
 };
 
 /**

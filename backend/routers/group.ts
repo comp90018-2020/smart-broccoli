@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { body, param } from "express-validator";
 import {
     createGroup,
+    deleteGroup,
     deleteMember,
     getGroup,
     getGroupAndVerifyRole,
@@ -68,12 +69,17 @@ declare module "express" {
  */
 const verifyRole = (role: string) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        const group = await getGroupAndVerifyRole(
-            req.user.id,
-            Number(req.params.groupId),
-            role
-        );
-        req.group = group;
+        try {
+            const group = await getGroupAndVerifyRole(
+                req.user.id,
+                Number(req.params.groupId),
+                role
+            );
+            req.group = group;
+        } catch (err) {
+            return next(err);
+        }
+
         return next();
     };
 };
@@ -207,6 +213,12 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
  *     summary: Get group by ID
  *     tags:
  *       - Group
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
  *     responses:
  *       '200':
  *         description: OK
@@ -233,20 +245,70 @@ router.get(
     }
 );
 
+/**
+ * @swagger
+ * /group/join:
+ *   get:
+ *     summary: Join group by name
+ *     tags:
+ *       - Group
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             properties:
+ *               name:
+ *                 type: string
+ *             required:
+ *               - name
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/GroupBrief'
+ *               properties:
+ *                 role:
+ *                   type: string
+ *                   enum: [member, owner]
+ */
 router.post(
     "/join",
     [body("name").isString()],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await joinGroup(req.user.id, req.body.name);
-            return res.sendStatus(204);
+            const group = await joinGroup(req.user.id, req.body.name);
+            const groupJSON: any = group.toJSON();
+            delete groupJSON["Users"];
+            groupJSON.role = "member";
+            return res.json(groupJSON);
         } catch (err) {
             return next(err);
         }
     }
 );
 
+/**
+ * @swagger
+ * /group/{groupId}/leave:
+ *   get:
+ *     summary: Leave group
+ *     tags:
+ *       - Group
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       '204':
+ *         description: No Content
+ */
 router.post(
     "/:groupId/leave",
     [param("groupId").isInt()],
@@ -261,6 +323,33 @@ router.post(
     }
 );
 
+/**
+ * @swagger
+ * /group/{groupId}/kick:
+ *   get:
+ *     summary: Kick member from group
+ *     tags:
+ *       - Group
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             properties:
+ *               memberId:
+ *                 type: string
+ *             required:
+ *               - memberId
+ *     responses:
+ *       '204':
+ *         description: No Content
+ */
 router.post(
     "/:groupId/member/kick",
     [param("groupId").isInt(), body("memberId").isInt()],
@@ -269,6 +358,38 @@ router.post(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             await deleteMember(Number(req.params.groupId), req.body.memberId);
+            return res.sendStatus(204);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /group/{groupId}:
+ *   delete:
+ *     summary: Delete group
+ *     tags:
+ *       - Group
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       '204':
+ *         description: Deleted
+ */
+router.delete(
+    "/:groupId",
+    [param("groupId").isInt()],
+    validate,
+    verifyRole("owner"),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await deleteGroup(Number(req.group.id));
             return res.sendStatus(204);
         } catch (err) {
             return next(err);
