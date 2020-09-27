@@ -108,10 +108,10 @@ const questionPictureProcessor = async (filePath: string) => {
     sharp.cache(false);
     const buf = await sharp(filePath).toBuffer();
 
-    // Resize to 128x128
+    // Longest side to 1000
     await sharp(buf)
-        .resize(128, 128, {
-            fit: "contain",
+        .resize(1000, 1000, {
+            fit: "inside",
             withoutEnlargement: true,
         })
         .png({ quality: 100 })
