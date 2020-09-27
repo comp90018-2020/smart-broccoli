@@ -95,7 +95,7 @@ class GroupModel {
     throw Exception('Unable to update group: unknown error occurred');
   }
 
-    /// Delete the group with specified [id].
+  /// Delete the group with specified [id].
   Future<void> deleteGroup(int id) async {
     http.Response response = await http.delete('$GROUP_URL/$id',
         headers: ApiBase.headers(authToken: _authModel.token));
@@ -104,5 +104,20 @@ class GroupModel {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to delete group: unknown error occurred');
+  }
+
+  /// Refresh the unique token for the group with specified [id].
+  /// The existing token will be discarded and users will no longer be able to
+  /// join with it.
+  Future<Group> refreshToken(int id) async {
+    http.Response response = await http.post('$GROUP_URL/$id/code',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200)
+      return Group.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to refresh group token: unknown error occurred');
   }
 }
