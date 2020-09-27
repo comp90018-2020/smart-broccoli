@@ -33,6 +33,19 @@ class GroupModel {
     throw Exception('Unable to get groups: unknown error occurred');
   }
 
+  /// Get a group by specified [id].
+  Future<Group> getGroup(int id) async {
+    http.Response response = await http.get('$GROUP_URL/$id',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200)
+      return Group.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get specified group: unknown error occurred');
+  }
+
   /// Create a new group with a specified [name].
   Future<Group> createGroup(String name) async {
     http.Response response = await http.post(GROUP_URL,
