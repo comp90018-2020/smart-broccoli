@@ -172,17 +172,18 @@ router.post(
         body("title").isString(),
         body("timeLimit").optional().isInt(),
         body("groupId").isInt(),
-        body("questions.*.tf").optional().isBoolean(),
-        body("questions.*.type").isIn(["truefalse", "choice"]),
-        body("questions.*.options").optional().isArray(),
-        body("questions.*.text").optional().isString(),
+        body("type").isIn(["live", "self paced"]),
+        body("questions.*.tf").optional({ nullable: true }).isBoolean(),
+        body("questions.*.type").optional().isIn(["truefalse", "choice"]),
+        body("questions.*.options").optional({ nullable: true }).isArray(),
+        body("questions.*.text").optional({ nullable: true }).isString(),
     ],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const quiz = await createQuiz(req.user.id, req.body);
             res.status(201);
-            return res.json({ ...quiz.toJSON(), questions: [] });
+            return res.json(quiz);
         } catch (err) {
             return next(err);
         }
@@ -297,14 +298,16 @@ router.get(
 router.patch(
     "/:quizId",
     [
+        param("quizId").isInt(),
         body("description").optional().isString(),
         body("title").optional().isString(),
         body("timeLimit").optional().isInt(),
         body("groupId").optional().isInt(),
-        body("questions.*.tf").optional().isBoolean(),
-        body("questions.*.type").isIn(["truefalse", "choice"]),
-        body("questions.*.options").optional().isArray(),
-        body("questions.*.text").optional().isString(),
+        body("type").optional().isIn(["live", "self paced"]),
+        body("questions.*.tf").optional({ nullable: true }).isBoolean(),
+        body("questions.*.type").optional().isIn(["truefalse", "choice"]),
+        body("questions.*.options").optional({ nullable: true }).isArray(),
+        body("questions.*.text").optional({ nullable: true }).isString(),
     ],
     validate,
     checkQuizMembership("owner"),

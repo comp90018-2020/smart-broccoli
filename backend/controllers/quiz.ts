@@ -1,6 +1,6 @@
-import { FindOptions } from "sequelize/types";
+import { FindOptions, Transaction } from "sequelize/types";
 import ErrorStatus from "../helpers/error";
-import { Quiz, Question, UserGroup, Group, User } from "../models";
+import sequelize, { Quiz, Question, UserGroup, Group, User } from "../models";
 import {
     checkQuestionInfo,
     addQuestion,
@@ -18,7 +18,8 @@ import { getGroupAndVerifyRole } from "./group";
 const processQuestions = async (
     quizId: number,
     original: Question[],
-    updated: any[]
+    updated: any[],
+    transaction: Transaction
 ) => {
     // First parse updated into QuestionInfo[]
     const updatedQuestions = updated.map((q) => checkQuestionInfo(q));
@@ -32,18 +33,20 @@ const processQuestions = async (
     // Delete missing ids
     const deletedIds = originalIds.filter((id) => !updatedIds.includes(id));
     for (const id of deletedIds) {
-        await deleteQuestion(quizId, id);
+        await deleteQuestion(quizId, id, transaction);
     }
 
     let questions: Question[] = [];
     for (const question of updatedQuestions) {
         // Insert new questions (no id)
         if (!question.id) {
-            questions.push(await addQuestion(quizId, question));
+            questions.push(await addQuestion(quizId, question, transaction));
         }
         // If updated
         else if (originalIds.includes(question.id)) {
-            questions.push(await updateQuestion(quizId, question.id, question));
+            questions.push(
+                await updateQuestion(quizId, question.id, question, transaction)
+            );
         }
     }
     return questions;
@@ -73,16 +76,25 @@ export const createQuiz = async (userId: number, info: any) => {
     if (info.description) {
         quiz.description = info.description;
     }
-    await quiz.save();
 
-    // Save questions
-    const quizJSON: any = {
-        ...quiz.toJSON(),
-        questions: (
-            await processQuestions(quiz.id, [], info.questions)
-        ).map((q) => q.toJSON()),
-    };
-    return quizJSON;
+    const t = await sequelize.transaction();
+    try {
+        await quiz.save({ transaction: t });
+
+        // Save questions
+        const quizJSON: any = {
+            ...quiz.toJSON(),
+            questions: (
+                await processQuestions(quiz.id, [], info.questions, t)
+            ).map((q) => q.toJSON()),
+        };
+        await t.commit();
+
+        return quizJSON;
+    } catch (err) {
+        await t.rollback();
+        throw err;
+    }
 };
 
 /**
@@ -92,7 +104,7 @@ export const createQuiz = async (userId: number, info: any) => {
  */
 export const updateQuiz = async (userId: number, quizId: number, info: any) => {
     // Get quiz
-    const quiz = await Quiz.findByPk(quizId, {
+    const quiz: Quiz = await Quiz.findByPk(quizId, {
         // @ts-ignore
         include: {
             model: Question,
@@ -129,19 +141,27 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
         quiz.description = info.description;
     }
 
-    await quiz.save();
+    const t = await sequelize.transaction();
+    try {
+        await quiz.save({ transaction: t });
 
-    // Save questions
-    const quizJSON: any = quiz.toJSON();
-    if (info.questions) {
-        const updatedQuestions = await processQuestions(
-            quiz.id,
-            quiz.questions,
-            info.questions
-        );
-        quizJSON.questions = updatedQuestions.map((q) => q.toJSON());
+        // Save questions
+        const quizJSON: any = quiz.toJSON();
+        if (info.questions) {
+            const updatedQuestions = await processQuestions(
+                quiz.id,
+                quiz.questions,
+                info.questions,
+                t
+            );
+            quizJSON.questions = updatedQuestions.map((q) => q.toJSON());
+        }
+        await t.commit();
+        return quizJSON;
+    } catch (err) {
+        await t.rollback();
+        throw err;
     }
-    return quizJSON;
 };
 
 /**

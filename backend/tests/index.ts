@@ -21,9 +21,9 @@ before(async () => {
 });
 
 // Import tests
-import "./auth.test";
-import "./user.test";
+// import "./auth.test";
+// import "./user.test";
+// import "./group.test";
 import "./quiz.test";
-import "./group.test";
 
 export default app;

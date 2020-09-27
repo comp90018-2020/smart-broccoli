@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize/types";
 import ErrorStatus from "../helpers/error";
 import Question, { OptionAttributes } from "../models/question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
@@ -51,6 +52,13 @@ export const checkQuestionInfo = (info: any): QuestionInfo => {
     } else if (type === "choice") {
         // Multiple choice
         values.options = checkOptions(options);
+        if (values.options.length <= 1 || values.options.length > 4) {
+            const err = new ErrorStatus(
+                "Question should have between 2 and 4 options",
+                400
+            );
+            throw err;
+        }
     } else {
         const err = new ErrorStatus("Unknown type", 400);
         throw err;
@@ -63,11 +71,18 @@ export const checkQuestionInfo = (info: any): QuestionInfo => {
  * @param quizId
  * @param info Question info
  */
-export const addQuestion = async (quizId: number, info: QuestionInfo) => {
-    const question = await Question.create({
-        ...info,
-        quizId,
-    });
+export const addQuestion = async (
+    quizId: number,
+    info: QuestionInfo,
+    transaction?: Transaction
+) => {
+    const question = await Question.create(
+        {
+            ...info,
+            quizId,
+        },
+        { transaction }
+    );
     return question;
 };
 
@@ -80,12 +95,13 @@ export const addQuestion = async (quizId: number, info: QuestionInfo) => {
 export const updateQuestion = async (
     quizId: number,
     questionId: number,
-    info: QuestionInfo
+    info: QuestionInfo,
+    transaction: Transaction
 ) => {
     // Update and return
     const updated = await Question.update(
-        { ...info, quizId },
-        { where: { id: questionId, quizId }, returning: true }
+        { ...info },
+        { where: { id: questionId, quizId }, returning: true, transaction }
     );
     if (updated[0] == 0) {
         const err = new ErrorStatus("Question not found", 404);
@@ -104,12 +120,17 @@ export const updateQuestion = async (
  * @param quizId
  * @param questionId
  */
-export const deleteQuestion = async (quizId: number, questionId: number) => {
+export const deleteQuestion = async (
+    quizId: number,
+    questionId: number,
+    transaction: Transaction
+) => {
     const deleted = await Question.destroy({
         where: {
             id: questionId,
             quizId,
         },
+        transaction,
     });
     if (deleted == 0) {
         const err = new ErrorStatus("Bad Request", 400);
@@ -135,7 +156,7 @@ export const updateQuestionPicture = async (
         },
     });
     if (!question) {
-        const err = new ErrorStatus("Cannot found question", 404);
+        const err = new ErrorStatus("Cannot find question", 404);
         throw err;
     }
 
@@ -166,7 +187,7 @@ export const getQuestionPicture = async (
         },
     });
     if (!question) {
-        const err = new ErrorStatus("Cannot found question", 404);
+        const err = new ErrorStatus("Cannot find question", 404);
         throw err;
     }
     return await getPictureById(question.pictureId);
