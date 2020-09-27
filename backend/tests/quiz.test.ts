@@ -2,7 +2,7 @@ import supertest from "supertest";
 import { expect } from "chai";
 import app from "./index";
 import rebuild from "./rebuild";
-import { registerAndLogin, createQuiz } from "./helpers";
+import { registerAndLogin } from "./helpers";
 import { readFileSync } from "fs";
 
 describe("Authentication", () => {

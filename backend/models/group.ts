@@ -1,6 +1,5 @@
 import { Quiz, UserGroup } from "models";
 import Sequelize, {
-    BelongsToGetAssociationMixin,
     BelongsToManyGetAssociationsMixin,
     HasManyGetAssociationsMixin,
     Optional,

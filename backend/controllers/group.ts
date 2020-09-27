@@ -204,7 +204,7 @@ export const joinGroup = async (
 
     // Already part of group?
     if (group.Users.length > 0) {
-        const err = new ErrorStatus("Already member of group", 404);
+        const err = new ErrorStatus("Already member of group", 422);
         throw err;
     }
 
