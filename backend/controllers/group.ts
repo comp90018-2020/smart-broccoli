@@ -73,12 +73,14 @@ export const getGroup = async (userId: number, groupId: number) => {
         const err = new ErrorStatus("User not part of group", 403);
         throw err;
     }
-    console.log(group.Users[0].toJSON());
+
     return {
         ...group.toJSON(),
+        // Fix name of group for default groups
         name: group.defaultGroup
             ? group.Users.find((user) => user.UserGroup.role === "owner").name
             : group.name,
+        // User list
         Users: group.Users.map((user) => {
             // @ts-ignore
             const { UserGroup, ...rest } = user.toJSON();
