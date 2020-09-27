@@ -27,9 +27,6 @@ export const join = async () => {
 // Create quiz
 export const createQuiz = QuizController.createQuiz;
 
-// Add question
-export const addQuestion = QuizController.addQuestion;
-
 // Create group
 export const createGroup = GroupController.createGroup;
 

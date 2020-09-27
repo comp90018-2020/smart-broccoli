@@ -3,7 +3,6 @@ import { expect } from "chai";
 import app from "./index";
 import rebuild from "./rebuild";
 import { registerAndLogin, createQuiz } from "./helpers";
-import { addQuestion } from "../controllers/quiz";
 import { readFileSync } from "fs";
 
 describe("Authentication", () => {
@@ -11,15 +10,13 @@ describe("Authentication", () => {
         await rebuild();
     });
 
-    const QUIZ = {
-        title: "Quiz title",
-        description: "Quiz description",
-    };
     const USER = {
         email: "a@a.com",
         password: "aaaaaaaa",
         name: "a",
     };
+
+    // Quiz/question
     const QUESTION_TF = {
         text: "a question",
         type: "truefalse",
@@ -38,6 +35,11 @@ describe("Authentication", () => {
                 correct: true,
             },
         ],
+    };
+    const QUIZ = {
+        title: "Quiz title",
+        description: "Quiz description",
+        questions: [QUESTION_TF, QUESTION_CHOICE],
     };
 
     it("Create quiz", async () => {
@@ -103,29 +105,6 @@ describe("Authentication", () => {
         expect(res.body.options).to.deep.equal(QUESTION_CHOICE.options);
     });
 
-    it("Update choice question", async () => {
-        const agent = supertest(app);
-        const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id, QUIZ);
-        const question = await addQuestion(quiz.id, QUESTION_CHOICE);
-
-        // Slightly modified
-        const modified = {
-            ...QUESTION_CHOICE,
-            options: [
-                QUESTION_CHOICE.options[0],
-                { text: "ghi", correct: true },
-            ],
-        };
-        const res = await agent
-            .put(`/quiz/${quiz.id}/question/${question.id}`)
-            .set("Authorization", `Bearer ${user.token}`)
-            .send(modified);
-        expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("options");
-        expect(res.body.options).to.deep.equal(modified.options);
-    });
-
     it("Get quiz", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
@@ -159,23 +138,10 @@ describe("Authentication", () => {
         expect(res.body).to.have.lengthOf(1);
     });
 
-    it("Delete question", async () => {
-        const agent = supertest(app);
-        const user = await registerAndLogin(USER);
-        const quiz = await createQuiz(user.id, QUIZ);
-        const question = await addQuestion(quiz.id, QUESTION_CHOICE);
-
-        const res = await agent
-            .delete(`/quiz/${quiz.id}/question/${question.id}`)
-            .set("Authorization", `Bearer ${user.token}`);
-        expect(res.status).to.equal(200);
-    });
-
     it("Delete quiz", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
         const quiz = await createQuiz(user.id, QUIZ);
-        await addQuestion(quiz.id, QUESTION_TF);
 
         const res = await agent
             .delete(`/quiz/${quiz.id}`)

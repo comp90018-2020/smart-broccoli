@@ -1,12 +1,52 @@
 import { FindOptions } from "sequelize/types";
 import ErrorStatus from "../helpers/error";
-import { Op } from "sequelize";
-import { Quiz, Question, UserGroup, Group } from "../models";
-import { OptionAttributes } from "../models/question";
-import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { Quiz, Question, UserGroup, Group, User } from "../models";
+import {
+    checkQuestionInfo,
+    addQuestion,
+    deleteQuestion,
+    updateQuestion,
+} from "./question";
+import { getGroupAndVerifyRole } from "./group";
 
-const processQuestions = async (original: Question[], updated: any) => {
+/**
+ * Processes questions of a quiz (since we don't operate on questions directly).
+ * @param quizId
+ * @param original Original quiz questions
+ * @param updated Updated quiz questions
+ */
+const processQuestions = async (
+    quizId: number,
+    original: Question[],
+    updated: any[]
+) => {
+    // First parse updated into QuestionInfo[]
+    const updatedQuestions = updated.map((q) => checkQuestionInfo(q));
 
+    // Now get Ids
+    const originalIds = original.map((q) => q.id);
+    const updatedIds = updatedQuestions
+        .filter((q) => q.id !== undefined)
+        .map((q) => q.id);
+
+    // Delete missing ids
+    const deletedIds = originalIds.filter((id) => !updatedIds.includes(id));
+    for (const id of deletedIds) {
+        await deleteQuestion(quizId, id);
+    }
+
+    let questions: Question[] = [];
+    for (const question of updatedQuestions) {
+        // Insert new questions (no id)
+        if (!question.id) {
+            questions.push(await addQuestion(quizId, question));
+        }
+        // If updated
+        else if (originalIds.includes(question.id)) {
+            questions.push(await updateQuestion(quizId, question.id, question));
+        }
+    }
+    return questions;
 };
 
 /**
@@ -14,7 +54,10 @@ const processQuestions = async (original: Question[], updated: any) => {
  * @param userId ID of creator
  * @param info
  */
-export const createQuiz = async (info: any) => {
+export const createQuiz = async (userId: number, info: any) => {
+    // Ensure that creator is owner
+    await getGroupAndVerifyRole(userId, info.groupId, "owner");
+
     // Create
     const quiz = new Quiz({
         groupId: info.groupId,
@@ -30,13 +73,21 @@ export const createQuiz = async (info: any) => {
     await quiz.save();
 
     // Save questions
-    const quizJSON: any = quiz.toJSON();
-    quizJSON.questions = await processQuestions([], info.questions);
+    const quizJSON: any = {
+        ...quiz.toJSON(),
+        questions: (
+            await processQuestions(quiz.id, [], info.questions)
+        ).map((q) => q.toJSON()),
+    };
     return quizJSON;
 };
 
-// Update quiz attributes
-export const updateQuiz = async (quizId: number, info: any) => {
+/**
+ * Update quiz.
+ * @param quizId
+ * @param info
+ */
+export const updateQuiz = async (userId: number, quizId: number, info: any) => {
     // Get quiz
     const quiz = await Quiz.findByPk(quizId, {
         // @ts-ignore
@@ -45,11 +96,22 @@ export const updateQuiz = async (quizId: number, info: any) => {
             as: "questions",
         },
     });
-    quiz.title = info.title;
-    quiz.type = info.type;
-    quiz.groupId = info.groupId;
 
-    // Make updates
+    // Ensure that creator is owner
+    if (info.groupId && info.groupId !== quiz.groupId) {
+        await getGroupAndVerifyRole(userId, info.groupId, "owner");
+    }
+
+    // Updates
+    if (info.title) {
+        quiz.title = info.title;
+    }
+    if (info.type) {
+        quiz.type = info.type;
+    }
+    if (info.groupId) {
+        quiz.groupId = info.groupId;
+    }
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
     }
@@ -60,42 +122,53 @@ export const updateQuiz = async (quizId: number, info: any) => {
 
     // Save questions
     const quizJSON: any = quiz.toJSON();
-    quizJSON.questions = await processQuestions(quiz.questions, info.questions);
+    if (info.questions) {
+        const updatedQuestions = await processQuestions(
+            quiz.id,
+            quiz.questions,
+            info.questions
+        );
+        quizJSON.questions = updatedQuestions.map((q) => q.toJSON());
+    }
     return quizJSON;
 };
 
 /**
  * Get all quiz that user has access to.
- * @param userId
+ * @param User
  */
-export const getAllQuiz = async (userId: number) => {
+export const getAllQuiz = async (user: User) => {
     // All groups and associated quiz where user is member
-    const userGroups = await UserGroup.findAll({
-        where: {
-            userId,
-        },
+    // TODO: live quiz
+    const groups = await user.getGroups({
+        include: [
+            // @ts-ignore
+            { model: Quiz, required: false },
+        ],
     });
 
-    // Find all quizzes and return whether user is participant or owner
-    // TODO: live quiz
-    const quizzes = await Quiz.findAll({
-        where: { groupId: { [Op.or]: userGroups.map((g) => g.groupId) } },
-    });
-    return quizzes.map((quiz) => {
-        return {
-            ...quiz,
-            role: userGroups.find((g) => g.id === quiz.groupId).role,
-        };
-    });
+    console.log(groups);
+    return groups
+        .map((group) => {
+            return group.Quizzes.map((quiz) => {
+                return { ...quiz, role: "?" };
+            });
+        })
+        .flat();
 };
 
-// Get quiz
+/**
+ * Get quiz by ID.
+ * @param userId
+ * @param quizId
+ */
 export const getQuiz = async (userId: number, quizId: number) => {
     const { quiz, role } = await getQuizAndRole(userId, quizId, {
         include: ["questions"],
     });
     const quizJSON = {
         ...quiz.toJSON(),
+        role,
         questions: quiz.questions.map((question) => {
             const questionJSON: any = question.toJSON();
             // If member or participant, erase answer
@@ -109,7 +182,12 @@ export const getQuiz = async (userId: number, quizId: number) => {
     return quizJSON;
 };
 
-// Check quiz and check permissions
+/**
+ * Get quiz and permissions.
+ * @param userId
+ * @param quizId
+ * @param options FindOptions
+ */
 export const getQuizAndRole = async (
     userId: number,
     quizId: number,
@@ -142,148 +220,4 @@ export const getQuizAndRole = async (
 export const deleteQuiz = async (quizId: number) => {
     // Now destroy the quiz
     return await Quiz.destroy({ where: { id: quizId } });
-};
-
-// Parse question options
-const checkOptions = (options: any): OptionAttributes[] => {
-    if (!Array.isArray(options)) {
-        const err = new ErrorStatus("Options is not array", 400);
-        throw err;
-    }
-    return options.map((option) => {
-        return {
-            correct: option.correct ? true : false,
-            text: option.text ? option.text : "",
-        };
-    });
-};
-
-// Parses question info
-interface QuestionInfo {
-    id?: number;
-    picture?: number;
-    text?: string;
-    type: string;
-    timeLimit?: number;
-    tf?: boolean;
-    options?: OptionAttributes[];
-}
-const checkQuestionInfo = (info: any): QuestionInfo => {
-    const values: QuestionInfo = {
-        type: info.type,
-        text: info.text,
-        timeLimit: Number(info.timeLimit) >= 5 ? Number(info.timeLimit) : null,
-    };
-
-    const { type, options, tf } = info;
-    if (type === "truefalse") {
-        // True/false questions
-        if (typeof tf != "boolean") {
-            const err = new ErrorStatus("tf not specified", 400);
-            throw err;
-        }
-        values.tf = tf;
-    } else if (type === "choice") {
-        // Multiple choice
-        values.options = checkOptions(options);
-    } else {
-        const err = new ErrorStatus("Unknown type", 400);
-        throw err;
-    }
-    return values;
-};
-
-// Add question
-const addQuestion = async (quizId: number, info: any) => {
-    const question = await Question.create({
-        ...checkQuestionInfo(info),
-        quizId,
-    });
-    return question;
-};
-
-// Update question
-const updateQuestion = async (
-    quizId: number,
-    questionId: number,
-    info: any
-) => {
-    // Check input
-    const questionInfo = checkQuestionInfo(info);
-
-    // Update and return
-    const updated = await Question.update(
-        { ...questionInfo, quizId },
-        { where: { id: questionId, quizId }, returning: true }
-    );
-    if (updated[0] == 0) {
-        const err = new ErrorStatus("Question not found", 404);
-        throw err;
-    }
-    // Should not update more than 1 row
-    if (updated[0] > 1) {
-        const err = new ErrorStatus("Internal Server Error", 500);
-        throw err;
-    }
-    return updated[1][0];
-};
-
-// Delete question
-const deleteQuestion = async (quizId: number, questionId: number) => {
-    const deleted = await Question.destroy({
-        where: {
-            id: questionId,
-            quizId,
-        },
-    });
-    if (deleted == 0) {
-        const err = new ErrorStatus("Bad Request", 400);
-        throw err;
-    }
-};
-
-// Update question picture
-export const updateQuestionPicture = async (
-    quizId: number,
-    questionId: number,
-    file: any
-) => {
-    const question = await Question.findOne({
-        where: {
-            quizId,
-            id: questionId,
-        },
-    });
-    if (!question) {
-        const err = new ErrorStatus("Cannot found question", 404);
-        throw err;
-    }
-
-    // Delete the old picture
-    if (question.pictureId) {
-        await deletePicture(question.pictureId);
-    }
-    // Insert the new picture
-    const picture = await insertPicture(file);
-    // Set user picture
-    question.pictureId = picture.id;
-    return await question.save();
-};
-
-// Get question picture
-export const getQuestionPicture = async (
-    quizId: number,
-    questionId: number
-) => {
-    const question = await Question.findOne({
-        where: {
-            quizId,
-            id: questionId,
-        },
-    });
-    if (!question) {
-        const err = new ErrorStatus("Cannot found question", 404);
-        throw err;
-    }
-    return await getPictureById(question.pictureId);
 };
