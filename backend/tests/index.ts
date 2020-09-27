@@ -22,6 +22,6 @@ before(async () => {
 // Import tests
 import "./auth.test";
 import "./user.test";
-import CustomStorage from "helpers/upload";
+import "./group.test";
 
 export default app;

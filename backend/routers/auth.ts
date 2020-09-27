@@ -59,7 +59,7 @@ const router = Router();
  * @swagger
  * /auth/register:
  *   post:
- *     description: Register user account
+ *     summary: Register creator account
  *     security: []
  *     tags:
  *       - Authentication
@@ -102,7 +102,7 @@ router.post(
  * @swagger
  * /auth/join:
  *   post:
- *     description: Join as user
+ *     summary: Join as user
  *     security: []
  *     tags:
  *       - Authentication
@@ -133,7 +133,6 @@ router.post(
  * /auth/promote:
  *   post:
  *     summary: Promote participant to user
- *     security: []
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -175,7 +174,7 @@ router.post(
  * @swagger
  * /auth/login:
  *   post:
- *     description: Login to user account
+ *     summary: Login creator account
  *     security: []
  *     tags:
  *       - Authentication
@@ -224,7 +223,7 @@ router.post(
  * @swagger
  * /auth/session:
  *   get:
- *     description: Validate session
+ *     summary: Validate session
  *     tags:
  *       - Authentication
  *     responses:
@@ -239,7 +238,7 @@ router.get("/session", auth, (req: Request, res) => {
  * @swagger
  * /auth/logout:
  *   post:
- *     description: Logout (i.e. revoke token)
+ *     summary: Logout (i.e. revoke token)
  *     tags:
  *       - Authentication
  *     responses:

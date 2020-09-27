@@ -1,6 +1,7 @@
 import { User, Token } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign } from "../helpers/jwt";
+import { createDefaultGroup } from "./group";
 
 /**
  * User registration.
@@ -9,7 +10,9 @@ import { jwtSign } from "../helpers/jwt";
 export const register = async (info: any) => {
     const { password, email, name } = info;
     try {
-        return await User.create({ password, email, name, role: "user" });
+        const user = await User.create({ password, email, name, role: "user" });
+        await createDefaultGroup(user.id);
+        return user;
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
@@ -103,7 +106,9 @@ export const promoteParticipant = async (userId: number, info: any) => {
     user.email = info.email;
     user.name = info.name;
     try {
-        return await user.save();
+        await user.save();
+        await createDefaultGroup(user.id);
+        return user;
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
