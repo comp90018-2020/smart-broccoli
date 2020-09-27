@@ -141,4 +141,15 @@ class GroupModel {
     if (response.statusCode == 422) throw AlreadyInGroupException();
     throw Exception('Unable to join group: unknown error occurred');
   }
+
+  /// Leave a group with specified [id].
+  Future<void> leaveGroup(int id) async {
+    http.Response response = await http.post('$GROUP_URL/$id/leave',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 204) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to leave group: unknown error occurred');
+  }
 }
