@@ -338,7 +338,7 @@ router.patch(
  *         required: true
  *         description: Quiz ID
  *     responses:
- *       '200':
+ *       '204':
  *         description: Quiz deleted
  */
 router.delete(
@@ -349,7 +349,7 @@ router.delete(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             await deleteQuiz(Number(req.params.quizId));
-            return res.sendStatus(200);
+            return res.sendStatus(204);
         } catch (err) {
             return next(err);
         }
