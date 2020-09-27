@@ -120,4 +120,25 @@ class GroupModel {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to refresh group token: unknown error occurred');
   }
+
+  /// Join a group, either by specified [name] or [code].
+  Future<Group> joinGroup({String name, String code}) async {
+    if (name == null && code == null)
+      throw ArgumentError('`name` or `code` parameter must be specified');
+
+    Map<String, String> body = name != null ? {'name': name} : {'code': code};
+
+    http.Response response = await http.post('$GROUP_URL/join',
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: jsonEncode(body));
+
+    if (response.statusCode == 200)
+      return Group.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw GroupNotFoundException();
+    if (response.statusCode == 422) throw AlreadyInGroupException();
+    throw Exception('Unable to join group: unknown error occurred');
+  }
 }
