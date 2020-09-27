@@ -29,7 +29,6 @@ export const getGroups = async (user: User) => {
             {
                 //@ts-ignore
                 model: User,
-
                 where: { "$Users.UserGroup.role$": "owner" },
                 attributes: ["name"],
                 required: true,
@@ -66,14 +65,19 @@ export const getGroup = async (userId: number, groupId: number) => {
             attributes: ["id", "updatedAt", "name"],
         },
     });
+    if (!group) {
+        const err = new ErrorStatus("Group not found", 404);
+        throw err;
+    }
     if (!group.Users.find((user) => user.id === userId)) {
         const err = new ErrorStatus("User not part of group", 403);
         throw err;
     }
+    console.log(group.Users[0].toJSON());
     return {
         ...group.toJSON(),
         name: group.defaultGroup
-            ? group.Users.find((user) => user.role === "owner").name
+            ? group.Users.find((user) => user.UserGroup.role === "owner").name
             : group.name,
         Users: group.Users.map((user) => {
             // @ts-ignore
@@ -362,7 +366,8 @@ export const updateGroup = async (group: Group, name: string) => {
  * @param groupId
  */
 export const deleteGroup = async (groupId: number) => {
-    const res = await Group.destroy({ where: { id: groupId, defaultGroup: false } });
-    if (res != 1)
-        throw new ErrorStatus("Cannot delete group", 400);
+    const res = await Group.destroy({
+        where: { id: groupId, defaultGroup: false },
+    });
+    if (res != 1) throw new ErrorStatus("Cannot delete group", 400);
 };
