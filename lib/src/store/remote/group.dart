@@ -152,4 +152,16 @@ class GroupModel {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to leave group: unknown error occurred');
   }
+
+  /// Remove the member with [memberId] from the group with [groupId].
+  Future<void> kickMember(int groupId, int memberId) async {
+    http.Response response = await http.post('$GROUP_URL/$groupId/member/kick',
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: jsonEncode(<String, int>{'memberId': memberId}));
+
+    if (response.statusCode == 204) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to kick member: unknown error occurred');
+  }
 }
