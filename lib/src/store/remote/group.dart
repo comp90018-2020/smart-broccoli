@@ -19,14 +19,25 @@ class GroupModel {
 
   /// Return a list of all groups to which the authenticated user belongs
   /// (i.e. owns or has joined).
-  Future<List<Group>> getGroups() async {
+  /// If the optional parameter [fetchMembers] is `true`, each `Group`
+  /// object in the list will contain a non-null `members` field
+  /// (a list of the same format returned by `getMembers`).
+  Future<List<Group>> getGroups({bool fetchMembers = false}) async {
     http.Response response = await http.get(GROUP_URL,
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) {
-      return (json.decode(response.body) as List)
+      List groups = (json.decode(response.body) as List)
           .map((repr) => Group.fromJson(repr))
           .toList();
+      if (fetchMembers)
+        for (final Group group in groups)
+          try {
+            group.members = await getMembers(group.id);
+          } catch (err) {
+            continue;
+          }
+      return groups;
     }
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
@@ -35,12 +46,19 @@ class GroupModel {
   }
 
   /// Get a group by specified [id].
-  Future<Group> getGroup(int id) async {
+  /// If the optional parameter [fetchMembers] is `true`, each `Group`
+  /// object in the list will contain a non-null `members` field
+  /// (a list of the same format returned by `getMembers`).
+  Future<Group> getGroup(int id, {bool fetchMembers = false}) async {
     http.Response response = await http.get('$GROUP_URL/$id',
         headers: ApiBase.headers(authToken: _authModel.token));
 
-    if (response.statusCode == 200)
-      return Group.fromJson(json.decode(response.body));
+    if (response.statusCode == 200) {
+      Group group = Group.fromJson(json.decode(response.body));
+      if (fetchMembers)
+        group.members = await getMembers(group.id);
+      return group;
+    }
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
