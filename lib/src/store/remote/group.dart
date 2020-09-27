@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:fuzzy_broccoli/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:tuple/tuple.dart';
 
 import 'api_base.dart';
 import 'auth.dart';
@@ -44,6 +45,24 @@ class GroupModel {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to get specified group: unknown error occurred');
+  }
+
+  /// Return a list of (user, role) tuples, each corresponding to a member in
+  /// the group with specified [id].
+  Future<List<Tuple2<User, GroupRole>>> getMembers(int id) async {
+    http.Response response = await http.get('$GROUP_URL/$id/member',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200)
+      return (json.decode(response.body) as List)
+          .map((repr) => Tuple2(User.fromJson(repr),
+              repr['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER))
+          .toList();
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception(
+        'Unable to get members of specified group: unknown error occurred');
   }
 
   /// Create a new group with a specified [name].

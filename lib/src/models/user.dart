@@ -4,6 +4,9 @@ class User {
   String name;
 
   User(this.id, this.email, this.name);
+
+  factory User.fromJson(Map<String, dynamic> json) =>
+      User(json['id'], json['email'], json['name']);
 }
 
 /// User with login credientials (lecturer, coordinator)
