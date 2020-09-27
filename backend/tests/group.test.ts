@@ -19,19 +19,30 @@ describe("Group", () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
 
-        const getAllRes = await agent
+        // Get all groups
+        const getRes = await agent
             .get("/group")
             .set("Authorization", `Bearer ${user.token}`);
-        expect(getAllRes.status).to.equal(200);
-        expect(getAllRes.body).to.have.lengthOf(1);
-        expect(getAllRes.body[0]).to.have.property("role");
-        expect(getAllRes.body[0].role).to.equal("owner");
+        expect(getRes.status).to.equal(200);
+        expect(getRes.body).to.have.lengthOf(1);
+        expect(getRes.body[0]).to.have.property("role");
+        expect(getRes.body[0]).to.have.property("name");
+        expect(getRes.body[0]).to.have.property("defaultGroup");
+        expect(getRes.body[0].role).to.equal("owner");
+        expect(getRes.body[0].name).to.equal("abc");
+        expect(getRes.body[0].defaultGroup).to.equal(true);
 
+        // Get group
         const res = await agent
-            .get(`/group/${getAllRes.body[0].id}`)
+            .get(`/group/${getRes.body[0].id}`)
             .set("Authorization", `Bearer ${user.token}`);
-        console.log(res.body);
         expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("role");
+        expect(res.body).to.have.property("name");
+        expect(res.body).to.have.property("defaultGroup");
+        expect(res.body.role).to.equal("owner");
+        expect(res.body.name).to.equal("abc");
+        expect(res.body.defaultGroup).to.equal(true);
     });
 
     it("Create and get group", async () => {
@@ -60,7 +71,9 @@ describe("Group", () => {
             .set("Authorization", `Bearer ${user.token}`)
             .send();
         expect(getGroupRes.status).to.equal(200);
-        expect(getGroupRes.body).to.have.property("Users");
+        expect(getGroupRes.body).to.have.property("name");
+        expect(getGroupRes.body).to.have.property("role");
+        expect(getGroupRes.body.role).to.equal("owner");
     });
 
     it("Update group name", async () => {
@@ -109,13 +122,14 @@ describe("Group", () => {
 
         // Check members
         const groupRes = await agent
-            .get(`/group/${group.id}`)
+            .get(`/group/${group.id}/member`)
             .set("Authorization", `Bearer ${user1.token}`);
         expect(groupRes.status).to.equal(200);
-        expect(groupRes.body.Users).have.lengthOf(2);
-        expect(
-            groupRes.body.Users.map((m: any) => m.role).sort()
-        ).to.deep.equal(["member", "owner"]);
+        expect(groupRes.body).have.lengthOf(2);
+        expect(groupRes.body.map((m: any) => m.role).sort()).to.deep.equal([
+            "member",
+            "owner",
+        ]);
 
         // Leave
         const leaveRes = await agent

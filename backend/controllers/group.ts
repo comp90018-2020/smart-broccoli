@@ -50,13 +50,48 @@ export const getGroups = async (user: User) => {
 };
 
 /**
- * Get group by ID.
+ * Get group.
  * @param userId
  * @param groupId
  */
 export const getGroup = async (userId: number, groupId: number) => {
+    // Get group
+    const group = await Group.findByPk(groupId, {
+        include: [
+            {
+                // @ts-ignore Typing errors due to model
+                model: User,
+                where: {
+                    [Op.or]: [
+                        { id: userId },
+                        { "$Users.UserGroup.role$": "owner" },
+                    ],
+                },
+                attributes: ["id", "name"],
+                required: true,
+            },
+        ],
+    });
+
+    // Get role
+    const groupJSON: any = group.toJSON();
+    delete groupJSON["Users"];
+    return {
+        ...groupJSON,
+        role: group.Users.find((u) => u.id === userId).UserGroup.role,
+        name: group.defaultGroup
+            ? group.Users.find((u) => u.UserGroup.role === "owner").name
+            : group.name,
+    };
+};
+
+/**
+ * Get list of group members.
+ * @param userId
+ * @param groupId
+ */
+export const getGroupMembers = async (userId: number, groupId: number) => {
     // Get group and associated users
-    // TODO: quiz, quiz sessions
     const group = await Group.findByPk(groupId, {
         // @ts-ignore
         include: {
@@ -74,19 +109,11 @@ export const getGroup = async (userId: number, groupId: number) => {
         throw err;
     }
 
-    return {
-        ...group.toJSON(),
-        // Fix name of group for default groups
-        name: group.defaultGroup
-            ? group.Users.find((user) => user.UserGroup.role === "owner").name
-            : group.name,
-        // User list
-        Users: group.Users.map((user) => {
-            // @ts-ignore
-            const { UserGroup, ...rest } = user.toJSON();
-            return { ...rest, role: user.UserGroup.role };
-        }),
-    };
+    return group.Users.map((user) => {
+        // @ts-ignore
+        const { UserGroup, ...rest } = user.toJSON();
+        return { ...rest, role: user.UserGroup.role };
+    });
 };
 
 /**

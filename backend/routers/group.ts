@@ -6,6 +6,7 @@ import {
     deleteMember,
     getGroup,
     getGroupAndVerifyRole,
+    getGroupMembers,
     getGroups,
     joinGroup,
     leaveGroup,
@@ -38,16 +39,6 @@ import validate from "./middleware/validate";
  *           type: boolean
  *         code:
  *           type: string
- *     GroupExtended:
- *       type: object
- *       allOf:
- *         - $ref: '#/components/schemas/GroupBrief'
- *       properties:
- *         Users:
- *           type: array
- *           items:
- *             allOf:
- *               - $ref: '#/components/schemas/UserBrief'
  *     UserBrief:
  *       type: object
  *       properties:
@@ -358,6 +349,47 @@ router.post(
             return res.sendStatus(204);
         } catch (err) {
             return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /group/{groupId}/member:
+ *   get:
+ *     summary: Get group members
+ *     tags:
+ *       - Group
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 $ref: '#/components/schemas/UserBrief'
+ */
+router.get(
+    "/:groupId/member",
+    [param("groupId").isInt()],
+    validate,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const members = await getGroupMembers(
+                req.user.id,
+                Number(req.params.groupId)
+            );
+            return res.json(members);
+        } catch (err) {
+            throw next(err);
         }
     }
 );
