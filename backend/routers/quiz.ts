@@ -120,8 +120,14 @@ export const checkQuizMembership = (intendedRole: string) => {
                 req.user.id,
                 Number(req.params.quizId)
             );
-            // Owners are members
-            if (role === "owner" && intendedRole === "member") {
+            // Owners are members, members are participants
+            if (
+                role === "owner" &&
+                (intendedRole === "member" || intendedRole === "participant")
+            ) {
+                return next();
+            }
+            if (role === "member" && intendedRole === "participant") {
                 return next();
             }
             // No access
@@ -191,6 +197,13 @@ router.post(
  *     summary: Get quizzes accessible by user
  *     tags:
  *       - Quiz
+ *     parameters:
+ *       - in: query
+ *         name: managed
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *         description: Managed groups or as member/participant
  *     responses:
  *       '200':
  *         description: List of quizzes
@@ -204,7 +217,7 @@ router.post(
  */
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        return res.json(await getAllQuiz(req.user));
+        return res.json(await getAllQuiz(req.user, req.query));
     } catch (err) {
         return next(err);
     }
@@ -462,7 +475,7 @@ router.put(
 router.get(
     "/:quizId/question/:questionId/picture",
     validate,
-    checkQuizMembership("member"),
+    checkQuizMembership("participant"),
     async (req: Request, res, next) => {
         try {
             const picture = await getQuestionPicture(

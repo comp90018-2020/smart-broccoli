@@ -1,5 +1,5 @@
 import { Question } from "models";
-import Sequelize from "sequelize";
+import Sequelize, { Optional } from "sequelize";
 
 const schema: Sequelize.ModelAttributes = {
     id: {
@@ -10,6 +10,11 @@ const schema: Sequelize.ModelAttributes = {
     title: {
         type: Sequelize.STRING,
         allowNull: true,
+    },
+    active: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
     },
     description: {
         type: Sequelize.STRING,
@@ -32,11 +37,15 @@ interface QuizAttributes {
     description?: string;
     groupId: number;
     type: string;
+    active: boolean;
     timeLimit?: number;
     questions?: Question[];
 }
+interface QuizCreationAttributes
+    extends Optional<QuizAttributes, "id" | "active"> {}
 
-export default class Quiz extends Sequelize.Model<QuizAttributes>
+export default class Quiz
+    extends Sequelize.Model<QuizAttributes, QuizCreationAttributes>
     implements QuizAttributes {
     public title: string;
     public description: string;
@@ -44,6 +53,7 @@ export default class Quiz extends Sequelize.Model<QuizAttributes>
     public readonly id!: number;
     public groupId: number;
     public type: string;
+    public active: boolean;
     public timeLimit?: number;
     public readonly questions?: Question[];
 

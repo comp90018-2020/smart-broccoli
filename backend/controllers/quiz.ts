@@ -64,6 +64,9 @@ export const createQuiz = async (userId: number, info: any) => {
         type: info.type,
         title: info.title,
     });
+    if (info.active !== undefined && info.type !== "live") {
+        quiz.active = info.active;
+    }
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
     }
@@ -106,8 +109,15 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
     if (info.title) {
         quiz.title = info.title;
     }
+    if (info.active !== undefined) {
+        quiz.active = info.active;
+    }
     if (info.type) {
         quiz.type = info.type;
+    }
+    // Live quizzes should be automatically active (listed)
+    if (info.type === "live") {
+        quiz.active = true;
     }
     if (info.groupId) {
         quiz.groupId = info.groupId;
@@ -118,6 +128,7 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
     if (info.description) {
         quiz.description = info.description;
     }
+
     await quiz.save();
 
     // Save questions
@@ -137,21 +148,30 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
  * Get all quiz that user has access to.
  * @param User
  */
-export const getAllQuiz = async (user: User) => {
-    // All groups and associated quiz where user is member
-    // TODO: live quiz
+export const getAllQuiz = async (
+    user: User,
+    opts: { managed?: string | boolean } = {}
+) => {
+    // Managed group's quizzes or as member/participant?
+    const isManaged = opts.managed === true || opts.managed === "true";
+
+    // Get quizzes of user's groups
     const groups = await user.getGroups({
+        where: { "$Group.UserGroup.role$": isManaged ? "owner" : "member" },
         include: [
-            // @ts-ignore
-            { model: Quiz, required: false },
+            {
+                // @ts-ignore
+                model: Quiz,
+                required: false,
+                where: isManaged ? undefined : { active: true },
+            },
         ],
     });
 
-    console.log(groups);
     return groups
         .map((group) => {
             return group.Quizzes.map((quiz) => {
-                return { ...quiz, role: "?" };
+                return { ...quiz };
             });
         })
         .flat();
@@ -163,23 +183,43 @@ export const getAllQuiz = async (user: User) => {
  * @param quizId
  */
 export const getQuiz = async (userId: number, quizId: number) => {
-    const { quiz, role } = await getQuizAndRole(userId, quizId, {
+    const { quiz, role, state } = await getQuizAndRole(userId, quizId, {
         include: ["questions"],
     });
-    const quizJSON = {
-        ...quiz.toJSON(),
-        role,
-        questions: quiz.questions.map((question) => {
-            const questionJSON: any = question.toJSON();
-            // If member or participant, erase answer
-            if (role === "member" || role === "participant") {
-                delete questionJSON["correct"];
-                delete questionJSON["tf"];
-            }
-            return questionJSON;
-        }),
-    };
-    return quizJSON;
+
+    // Owner
+    if (role === "owner") {
+        return {
+            ...quiz.toJSON(),
+            questions: quiz.questions.map((q) => q.toJSON()),
+        };
+    }
+
+    // Questions
+    let questions: any = {};
+
+    // For participants/members
+    if (state === "active") {
+        // Quiz incomplete, but can view questions
+        questions = quiz.questions.map((question) => {
+            return {
+                ...question.toJSON,
+                tf: null,
+                options: question.options.map((opt) => {
+                    return {
+                        ...opt,
+                        correct: null,
+                    };
+                }),
+            };
+        });
+    } else if (state === "complete") {
+        // Quiz complete, can get answers again
+        questions = quiz.questions.map((question) => question.toJSON());
+    } else {
+        // Haven't started quiz, no access to questions
+        questions = null;
+    }
 };
 
 /**
@@ -207,8 +247,11 @@ export const getQuizAndRole = async (
             groupId: quiz.groupId,
         },
     });
+
+    // TODO: check whether user is participant of quiz
+
     if (membership) {
-        return { quiz, role: membership.role };
+        return { quiz, role: membership.role, state: "active" };
     }
 
     // TODO: quiz session
