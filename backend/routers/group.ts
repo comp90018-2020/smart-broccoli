@@ -251,8 +251,8 @@ router.get(
 /**
  * @swagger
  * /group/join:
- *   get:
- *     summary: Join group by name
+ *   post:
+ *     summary: Join group by name or code
  *     tags:
  *       - Group
  *     requestBody:
@@ -263,8 +263,8 @@ router.get(
  *             properties:
  *               name:
  *                 type: string
- *             required:
- *               - name
+ *               code:
+ *                 type: string
  *     responses:
  *       '200':
  *         description: OK
@@ -334,7 +334,7 @@ router.post(
 /**
  * @swagger
  * /group/{groupId}/leave:
- *   get:
+ *   post:
  *     summary: Leave group
  *     tags:
  *       - Group
@@ -364,8 +364,8 @@ router.post(
 
 /**
  * @swagger
- * /group/{groupId}/kick:
- *   get:
+ * /group/{groupId}/member/kick:
+ *   post:
  *     summary: Kick member from group
  *     tags:
  *       - Group

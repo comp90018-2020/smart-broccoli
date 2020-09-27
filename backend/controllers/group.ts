@@ -17,12 +17,18 @@ export const createDefaultGroup = async (userId: number) => {
 export const getGroups = async (user: User) => {
     // Get groups
     const groups = await user.getGroups({
-        attributes: ["id", "name", "createdAt", "updatedAt", "defaultGroup"],
+        attributes: [
+            "id",
+            "name",
+            "createdAt",
+            "updatedAt",
+            "defaultGroup",
+            "code",
+        ],
         include: [
             {
                 //@ts-ignore
                 model: User,
-
                 where: { "$Users.UserGroup.role$": "owner" },
                 attributes: ["name"],
                 required: true,
@@ -64,15 +70,22 @@ export const getGroup = async (userId: number, groupId: number) => {
             },
         ],
     });
+    if (!group) {
+        const err = new ErrorStatus("Group not found", 404);
+        throw err;
+    }
     if (!group.Users.find((user) => user.id === userId)) {
         const err = new ErrorStatus("User not part of group", 403);
         throw err;
     }
+
     return {
         ...group.toJSON(),
+        // Fix name of group for default groups
         name: group.defaultGroup
-            ? group.Users.find((user) => user.role === "owner").name
+            ? group.Users.find((user) => user.UserGroup.role === "owner").name
             : group.name,
+        // User list
         Users: group.Users.map((user) => {
             // @ts-ignore
             const { UserGroup, ...rest } = user.toJSON();
@@ -141,7 +154,7 @@ export const joinGroup = async (
     if (opts.name) {
         query = { name: { [Op.iLike]: opts.name } };
     } else if (opts.code) {
-        query = { code: { [Op.iLike]: opts.code } };
+        query = { code: opts.code };
     } else {
         const err = new ErrorStatus("No name or code provided", 400);
         throw err;
@@ -194,12 +207,12 @@ const CHARSET =
  * @param length
  */
 const generateCode = (length: number) => {
-    return Array(length)
+    return [...Array(length)]
         .map(
             () =>
                 CHARSET[Math.floor(Math.random() * Math.floor(CHARSET.length))]
         )
-        .join();
+        .join("");
 };
 
 /**
@@ -360,5 +373,8 @@ export const updateGroup = async (group: Group, name: string) => {
  * @param groupId
  */
 export const deleteGroup = async (groupId: number) => {
-    await Group.destroy({ where: { id: groupId, defaultGroup: false } });
+    const res = await Group.destroy({
+        where: { id: groupId, defaultGroup: false },
+    });
+    if (res != 1) throw new ErrorStatus("Cannot delete group", 400);
 };

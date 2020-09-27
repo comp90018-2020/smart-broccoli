@@ -15,6 +15,25 @@ describe("Group", () => {
         name: "abc",
     };
 
+    it("Get default group", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+
+        const getAllRes = await agent
+            .get("/group")
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(getAllRes.status).to.equal(200);
+        expect(getAllRes.body).to.have.lengthOf(1);
+        expect(getAllRes.body[0]).to.have.property("role");
+        expect(getAllRes.body[0].role).to.equal("owner");
+
+        const res = await agent
+            .get(`/group/${getAllRes.body[0].id}`)
+            .set("Authorization", `Bearer ${user.token}`);
+        console.log(res.body);
+        expect(res.status).to.equal(200);
+    });
+
     it("Create and get group", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
@@ -30,9 +49,7 @@ describe("Group", () => {
 
         const getRes = await agent
             .get("/group")
-            .set("Authorization", `Bearer ${user.token}`)
-            .send();
-        console.log(getRes.body);
+            .set("Authorization", `Bearer ${user.token}`);
         expect(getRes.status).to.equal(200);
         expect(getRes.body).to.have.lengthOf(2);
         expect(getRes.body[1]).to.have.property("role");
@@ -60,6 +77,19 @@ describe("Group", () => {
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("name");
         expect(res.body.name).to.equal("b");
+    });
+
+    it("Regenerate code", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const group = await createGroup(user.id, "a");
+
+        const res = await agent
+            .post(`/group/${group.id}/code`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("code");
+        expect(res.body.code).to.not.equal(",,,,,,");
     });
 
     it("Join and leave group", async () => {
