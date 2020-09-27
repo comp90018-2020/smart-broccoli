@@ -1,4 +1,4 @@
-abstract class User {
+class User {
   int id;
   String email;
   String name;

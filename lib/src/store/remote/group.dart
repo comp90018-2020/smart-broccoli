@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:fuzzy_broccoli/models.dart';
+import 'package:http/http.dart' as http;
+
 import 'api_base.dart';
 import 'auth.dart';
 
@@ -10,4 +15,21 @@ class GroupModel {
 
   /// Constructor for external use
   GroupModel(this._authModel);
+
+  /// Return a list of all groups to which the authenticated user belongs
+  /// (i.e. owns or has joined).
+  Future<List<Group>> getGroups() async {
+    http.Response response = await http.get(GROUP_URL,
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200) {
+      return (json.decode(response.body) as List)
+          .map((repr) => Group.fromJson(repr))
+          .toList();
+    }
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get groups: unknown error occurred');
+  }
 }
