@@ -26,3 +26,7 @@ class Group {
 /// Exception thrown when the server is unable to create a group due to the
 /// name already being in use.
 class GroupCreateException implements Exception {}
+
+/// Exception thrown when the server is unable to change a group name due to
+/// the new name already being in use.
+class GroupRenameException implements Exception {}
