@@ -1,6 +1,6 @@
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import { Group, User, UserGroup } from "../models";
+import sequelize, { Group, User, UserGroup } from "../models";
 
 /**
  * Create default group for user.
@@ -132,13 +132,29 @@ export const createGroup = async (
         defaultGroup,
     });
 
+    const t = await sequelize.transaction();
+
     try {
         // Save group
-        group = await group.save();
+        group = await group.save({ transaction: t });
 
         // Generate first code
-        await regenerateCode(group);
+        await regenerateCode(group, t);
+
+        // Add association
+        await UserGroup.create(
+            {
+                userId,
+                groupId: group.id,
+                role: "owner",
+            },
+            { transaction: t }
+        );
+
+        await t.commit();
     } catch (err) {
+        await t.rollback();
+
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
             const payload = [
@@ -154,12 +170,6 @@ export const createGroup = async (
         throw err;
     }
 
-    // Add association
-    await UserGroup.create({
-        userId,
-        groupId: group.id,
-        role: "owner",
-    });
     return group;
 };
 
@@ -241,14 +251,17 @@ const generateCode = (length: number) => {
  * Regenerate code.
  * @param groupId
  */
-export const regenerateCode = async (group: Group) => {
+export const regenerateCode = async (
+    group: Group,
+    transaction?: Transaction
+) => {
     let attempt = 0;
 
     // Regenerate until good
     while (true) {
         try {
             group.code = generateCode(6);
-            await group.save();
+            await group.save({ transaction });
             const groupJSON: any = group.toJSON();
             groupJSON.role = "owner";
             delete groupJSON["Users"];
