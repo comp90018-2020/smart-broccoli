@@ -22,3 +22,7 @@ class Group {
           code: json['code'],
           members: members);
 }
+
+/// Exception thrown when the server is unable to create a group due to the
+/// name already being in use.
+class GroupCreateException implements Exception {}
