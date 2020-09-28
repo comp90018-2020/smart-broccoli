@@ -9,7 +9,6 @@ import {
 } from "./question";
 import { getGroupAndVerifyRole } from "./group";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
-import { quizPictureProcessor } from "helpers/upload";
 
 /**
  * Processes questions of a quiz (since we don't operate on questions directly).
@@ -170,30 +169,31 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
  * Get all quiz that user has access to.
  * @param User
  */
-export const getAllQuiz = async (
-    user: User,
-    opts: { managed?: string | boolean } = {}
-) => {
-    // Managed group's quizzes or as member/participant?
-    const isManaged = opts.managed === true || opts.managed === "true";
+export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
+    // Unset if all
+    if (opts.role === "all") {
+        opts.role = undefined;
+    }
 
     // Get quizzes of user's groups
     const groups = await user.getGroups({
-        where: { "$UserGroup.role$": isManaged ? "owner" : "member" },
+        where: opts.role ? { "$UserGroup.role$": opts.role } : undefined,
         include: [
             {
                 // @ts-ignore
                 model: Quiz,
                 required: false,
-                where: isManaged ? undefined : { active: true },
             },
         ],
     });
 
     return groups
         .map((group) => {
-            return group.Quizzes.map((quiz) => {
-                return quiz.toJSON();
+            return group.Quizzes.filter((quiz) => {
+                // Members are not allowed to get non active quizzes
+                return !(!quiz.active && group.UserGroup.role === "member");
+            }).map((quiz) => {
+                return { ...quiz.toJSON(), role: group.UserGroup.role };
             });
         })
         .flat();

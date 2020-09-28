@@ -171,24 +171,32 @@ describe("Authentication", () => {
         await joinGroup(user1.id, { name: "bar" });
 
         // Take quiz
-        const res = await agent
-            .get(`/quiz`)
+        const ownedQuiz = await agent
+            .get(`/quiz?role=member`)
             .set("Authorization", `Bearer ${user1.token}`);
-        expect(res.status).to.equal(200);
-        expect(res.body).to.be.an("array");
-        expect(res.body).to.have.lengthOf(1);
-        expect(res.body[0]).to.have.property("id");
-        expect(res.body[0].id).to.equal(quiz2.id);
+        expect(ownedQuiz.status).to.equal(200);
+        expect(ownedQuiz.body).to.be.an("array");
+        expect(ownedQuiz.body).to.have.lengthOf(1);
+        expect(ownedQuiz.body[0]).to.have.property("id");
+        expect(ownedQuiz.body[0].id).to.equal(quiz2.id);
 
         // Managed
-        const managedRes = await agent
-            .get(`/quiz?managed=true`)
+        const managedQuiz = await agent
+            .get(`/quiz?role=owner`)
             .set("Authorization", `Bearer ${user1.token}`);
-        expect(managedRes.status).to.equal(200);
-        expect(managedRes.body).to.be.an("array");
-        expect(managedRes.body).to.have.lengthOf(1);
-        expect(managedRes.body[0]).to.have.property("id");
-        expect(managedRes.body[0].id).to.equal(quiz1.id);
+        expect(managedQuiz.status).to.equal(200);
+        expect(managedQuiz.body).to.be.an("array");
+        expect(managedQuiz.body).to.have.lengthOf(1);
+        expect(managedQuiz.body[0]).to.have.property("id");
+        expect(managedQuiz.body[0].id).to.equal(quiz1.id);
+
+        // All
+        const allQuiz = await agent
+            .get(`/quiz`)
+            .set("Authorization", `Bearer ${user1.token}`);
+        expect(allQuiz.status).to.equal(200);
+        expect(allQuiz.body).to.be.an("array");
+        expect(allQuiz.body).to.have.lengthOf(2);
     });
 
     it("Quiz picture", async () => {

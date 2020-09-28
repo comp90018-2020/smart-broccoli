@@ -2,7 +2,7 @@ import { Request, Response, NextFunction, Router } from "express";
 import multer from "multer";
 import fs from "fs";
 import ErrorStatus from "../helpers/error";
-import { param, body } from "express-validator";
+import { param, body, query } from "express-validator";
 import {
     createQuiz,
     deleteQuiz,
@@ -209,11 +209,12 @@ router.post(
  *       - Quiz
  *     parameters:
  *       - in: query
- *         name: managed
+ *         name: role
  *         schema:
- *           type: boolean
- *           default: false
- *         description: Managed groups or as member/participant
+ *           type: string
+ *           enum: [owner, member, all]
+ *           default: all
+ *         description: Role
  *     responses:
  *       '200':
  *         description: List of quizzes
@@ -225,13 +226,18 @@ router.post(
  *                 type: object
  *                 $ref: '#/components/schemas/Quiz'
  */
-router.get("/", async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        return res.json(await getAllQuiz(req.user, req.query));
-    } catch (err) {
-        return next(err);
+router.get(
+    "/",
+    [query("role").optional().isIn(["all", "owner", "member"])],
+    validate,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            return res.json(await getAllQuiz(req.user, req.query));
+        } catch (err) {
+            return next(err);
+        }
     }
-});
+);
 
 /**
  * @swagger
