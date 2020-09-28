@@ -35,21 +35,17 @@ class UserModel {
     throw Exception('Unable to get user: unknown error occurred');
   }
 
-  /// Update the profile of the logged-in/joined user.
-  /// This method is to be invoked with only the parameters to be updated.
-  /// For example, if only the email and name are to be updated:
-  /// ```
-  /// updateUser(email: 'new@email.com', name: 'New Name');
-  /// ```
-  Future<User> updateUser({email, password, name}) async {
-    Map<String, String> body = {};
-    if (email != null) body['email'] = email;
-    if (password != null) body['password'] = password;
-    if (name != null) body['name'] = name;
-
+  /// Synchronise changes to profile of the logged-in/joined user with server.
+  /// Return a `Quiz` object constructed from the server's response. All fields
+  /// should be equal in content except `password` (`null` in returned object).
+  ///
+  /// Usage:
+  /// [user] should be a `User` object obtained by `getUser`. Mutate the fields
+  /// to be updated (e.g. `email`, `name`, `password`) then invoke this method.
+  Future<User> updateUser(User user) async {
     final http.Response response = await http.patch('$USER_URL/profile',
         headers: ApiBase.headers(authToken: _authModel.token),
-        body: jsonEncode(body));
+        body: jsonEncode(user.toJson()));
 
     if (response.statusCode == 200)
       return _userFromJson(response.body);
