@@ -1,6 +1,6 @@
-import { FindOptions, Transaction } from "sequelize/types";
+import { FindOptions, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Quiz, Question, UserGroup, Group, User } from "../models";
+import sequelize, { Quiz, Question, UserGroup, User } from "../models";
 import {
     checkQuestionInfo,
     addQuestion,

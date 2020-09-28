@@ -1,7 +1,7 @@
 import fs from "fs";
 import Picture from "../models/picture";
 import path from "path";
-import { Transaction } from "sequelize/types";
+import { Transaction } from "sequelize";
 
 /**
  * Get picture by ID.

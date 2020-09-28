@@ -1,5 +1,5 @@
 import sequelize from "models";
-import { Transaction } from "sequelize/types";
+import { Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
 import Question, { OptionAttributes } from "../models/question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
