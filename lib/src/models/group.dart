@@ -4,23 +4,31 @@ import 'user.dart';
 
 enum GroupRole { OWNER, MEMBER }
 
+/// Class representing a study group/class
+/// Do not instantiate this class; it will be created for you and returned
+/// by methods in `GroupModel`.
 class Group {
-  int id;
-  String name;
-  bool defaultGroup;
-  String code;
+  int _id;
+  int get id => _id;
+  bool _defaultGroup;
+  bool get defaultGroup => _defaultGroup;
+  String _code;
+  String get code => _code;
 
+  String name;
+
+  /// Read-only list of members (with roles); mutating this list will have
+  /// no effect on the server
   List<Tuple2<User, GroupRole>> members;
 
-  Group(this.id, this.name,
-      {this.defaultGroup: false, this.code, this.members});
+  /// Constructor for internal use only
+  Group._internal(
+      this._id, this.name, this._defaultGroup, this._code, this.members);
 
   factory Group.fromJson(Map<String, dynamic> json,
           {List<Tuple2<User, GroupRole>> members}) =>
-      Group(json['id'], json['name'],
-          defaultGroup: json['defaultGroup'],
-          code: json['code'],
-          members: members);
+      Group._internal(json['id'], json['name'], json['defaultGroup'],
+          json['code'], members);
 }
 
 /// Exception thrown when the server is unable to create a group due to the

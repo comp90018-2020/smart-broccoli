@@ -19,9 +19,10 @@ class GroupModel {
 
   /// Return a list of all groups to which the authenticated user belongs
   /// (i.e. owns or has joined).
-  /// If the optional parameter [fetchMembers] is `true`, each `Group`
-  /// object in the list will contain a non-null `members` field
-  /// (a list of the same format returned by `getMembers`).
+  /// If the optional parameter [fetchMembers] is `true`, each `Group` object
+  /// in the list will contain a non-null `members` field (a list of the same
+  /// format returned by `getMembers`). Otherwise, the `members` field of each
+  /// group will be `null`.
   Future<List<Group>> getGroups({bool fetchMembers = false}) async {
     http.Response response = await http.get(GROUP_URL,
         headers: ApiBase.headers(authToken: _authModel.token));
@@ -46,17 +47,17 @@ class GroupModel {
   }
 
   /// Get a group by specified [id].
-  /// If the optional parameter [fetchMembers] is `true`, each `Group`
-  /// object in the list will contain a non-null `members` field
-  /// (a list of the same format returned by `getMembers`).
+  /// If the optional parameter [fetchMembers] is `true`, each `Group` object
+  /// in the list will contain a non-null `members` field (a list of the same
+  /// format returned by `getMembers`). Otherwise, the `members` field of each
+  /// group will be `null`.
   Future<Group> getGroup(int id, {bool fetchMembers = false}) async {
     http.Response response = await http.get('$GROUP_URL/$id',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) {
       Group group = Group.fromJson(json.decode(response.body));
-      if (fetchMembers)
-        group.members = await getMembers(group.id);
+      if (fetchMembers) group.members = await getMembers(group.id);
       return group;
     }
 
