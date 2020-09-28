@@ -10,7 +10,7 @@ class Quiz {
   bool isActive;
 
   int timeLimit;
-  List<Question> questions;
+  List<Question> questions = [];
 
   Quiz(this.id, this.title, this.groupId, this.type,
       {this.description, this.isActive, this.timeLimit, this.questions});
@@ -22,7 +22,24 @@ class Quiz {
       json['type'] == 'live' ? QuizType.LIVE : QuizType.SELF_PACED,
       description: json['description'],
       isActive: json['isActive'],
-      timeLimit: json['timeLimit']);
+      timeLimit: json['timeLimit'],
+      questions: (json['questions'] as List).map((question) =>
+          question['type'] == 'truefalse'
+              ? TFQuestion.fromJson(question)
+              : MCQuestion.fromJson(question)));
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'title': title,
+      'groupId': groupId,
+      'type': type == QuizType.LIVE ? 'live' : 'self paced',
+      'description': description,
+      'isActive': isActive,
+      'timeLimit': timeLimit,
+      'questions': questions.map((question) => question.toJson())
+    };
+  }
 }
 
 abstract class Question {
@@ -31,6 +48,10 @@ abstract class Question {
   int imgId;
 
   Question(this.id, this.text, this.imgId);
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{'id': id, 'text': text, 'imgId': imgId};
+  }
 }
 
 // True/false question
@@ -42,6 +63,13 @@ class TFQuestion extends Question {
 
   factory TFQuestion.fromJson(Map<String, dynamic> json) =>
       TFQuestion(json['id'], json['text'], json['imgid'], json['tf']);
+
+  Map<String, dynamic> toJson() {
+    Map map = super.toJson();
+    map['type'] = 'truefalse';
+    map['tf'] = answer;
+    return map;
+  }
 }
 
 // Multiple choice question
@@ -53,6 +81,13 @@ class MCQuestion extends Question {
 
   factory MCQuestion.fromJson(Map<String, dynamic> json) =>
       MCQuestion(json['id'], json['text'], json['imgid']);
+
+  Map<String, dynamic> toJson() {
+    Map map = super.toJson();
+    map['type'] = 'choice';
+    map['options'] = options.map((option) => option.toJson());
+    return map;
+  }
 }
 
 // Option for multiple choice question
@@ -64,4 +99,8 @@ class QuestionOption {
 
   factory QuestionOption.fromJson(Map<String, dynamic> json) =>
       QuestionOption(json['text'], json['correct']);
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{'text': text, 'correct': correct};
+  }
 }
