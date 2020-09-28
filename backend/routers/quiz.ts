@@ -196,6 +196,7 @@ router.post(
  * /quiz:
  *   get:
  *     summary: Get quizzes accessible by user
+ *     description: Quizzes are from associated user groups
  *     tags:
  *       - Quiz
  *     parameters:

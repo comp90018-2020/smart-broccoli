@@ -177,7 +177,7 @@ export const getAllQuiz = async (
 
     // Get quizzes of user's groups
     const groups = await user.getGroups({
-        where: { "$Group.UserGroup.role$": isManaged ? "owner" : "member" },
+        where: { "$UserGroup.role$": isManaged ? "owner" : "member" },
         include: [
             {
                 // @ts-ignore
@@ -191,7 +191,7 @@ export const getAllQuiz = async (
     return groups
         .map((group) => {
             return group.Quizzes.map((quiz) => {
-                return { ...quiz };
+                return quiz.toJSON();
             });
         })
         .flat();

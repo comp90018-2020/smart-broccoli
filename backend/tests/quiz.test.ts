@@ -156,19 +156,40 @@ describe("Authentication", () => {
         expect(memberRes.body.questions).to.equal(null);
     });
 
-    // it("Get all quiz", async () => {
-    //     const agent = supertest(app);
-    //     const user = await registerAndLogin(USER);
-    //     const quiz = await createQuiz(user.id, QUIZ);
-    //     await addQuestion(quiz.id, QUESTION_CHOICE);
+    it("Get all quiz", async () => {
+        const agent = supertest(app);
+        const user1 = await registerAndLogin(USER);
+        const user2 = await registerAndLogin({ ...USER, email: "b@b.foo" });
 
-    //     const res = await agent
-    //         .get(`/quiz`)
-    //         .set("Authorization", `Bearer ${user.token}`);
-    //     expect(res.status).to.equal(200);
-    //     expect(res.body).to.be.an("array");
-    //     expect(res.body).to.have.lengthOf(1);
-    // });
+        // Group 1 owned by user 1
+        const group1 = await createGroup(user1.id, "foo");
+        const quiz1 = await createQuiz(user1.id, group1.id, QUIZ);
+
+        // Group 2 owned by user 2 with user 1
+        const group2 = await createGroup(user2.id, "bar");
+        const quiz2 = await createQuiz(user2.id, group2.id, QUIZ);
+        await joinGroup(user1.id, { name: "bar" });
+
+        // Take quiz
+        const res = await agent
+            .get(`/quiz`)
+            .set("Authorization", `Bearer ${user1.token}`);
+        expect(res.status).to.equal(200);
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(1);
+        expect(res.body[0]).to.have.property("id");
+        expect(res.body[0].id).to.equal(quiz2.id);
+
+        // Managed
+        const managedRes = await agent
+            .get(`/quiz?managed=true`)
+            .set("Authorization", `Bearer ${user1.token}`);
+        expect(managedRes.status).to.equal(200);
+        expect(managedRes.body).to.be.an("array");
+        expect(managedRes.body).to.have.lengthOf(1);
+        expect(managedRes.body[0]).to.have.property("id");
+        expect(managedRes.body[0].id).to.equal(quiz1.id);
+    });
 
     it("Quiz question picture", async () => {
         const agent = supertest(app);
