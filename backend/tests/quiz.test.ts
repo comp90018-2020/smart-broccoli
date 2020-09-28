@@ -178,7 +178,7 @@ describe("Authentication", () => {
         expect(pictureRes.status).to.equal(200);
 
         // Now update quiz
-        const r = await agent
+        await agent
             .patch(`/quiz/${quiz.id}`)
             .set("Authorization", `Bearer ${user.token}`)
             .send({
@@ -207,7 +207,6 @@ describe("Authentication", () => {
         const res = await agent
             .get(`/quiz/${quiz.id}/question/${quiz.questions[1].id}/picture`)
             .set("Authorization", `Bearer ${user.token}`);
-        console.log(res.body);
         expect(res.status).to.equal(200);
     });
 });
