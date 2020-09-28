@@ -23,10 +23,11 @@ class Quiz {
       description: json['description'],
       isActive: json['isActive'],
       timeLimit: json['timeLimit'],
-      questions: (json['questions'] as List)?.map((question) =>
-          question['type'] == 'truefalse'
+      questions: (json['questions'] as List)
+          ?.map((question) => question['type'] == 'truefalse'
               ? TFQuestion.fromJson(question)
-              : MCQuestion.fromJson(question))?.toList());
+              : MCQuestion.fromJson(question))
+          ?.toList());
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
