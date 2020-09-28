@@ -428,7 +428,7 @@ const quizPictureUploadMiddleware = (
  *           schema:
  *             type: object
  *             properties:
- *               avatar:
+ *               picture:
  *                 type: string
  *                 format: binary
  *     responses:
@@ -532,7 +532,7 @@ router.get(
  *           schema:
  *             type: object
  *             properties:
- *               avatar:
+ *               picture:
  *                 type: string
  *                 format: binary
  *     responses:
