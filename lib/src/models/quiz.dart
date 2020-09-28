@@ -1,7 +1,15 @@
 enum QuizType { LIVE, SELF_PACED }
 
+/// Object representing a quiz
+/// Instances of this class are returned when fetching quizzes from the server.
+/// Additional instances of this class (i.e. not fetched from the server) are
+/// to be constructed when the user creates a new quiz. The new quiz can then be
+/// synchronised with the server by passing it to `QuizModel.createQuiz`.
 class Quiz {
-  int id;
+  /// ID of the quiz (for quizzes fetched from server only; not to be mutated)
+  int _id;
+  int get id => _id;
+
   String title;
   String description;
 
@@ -12,18 +20,23 @@ class Quiz {
   int timeLimit;
   List<Question> questions = [];
 
-  Quiz(this.id, this.title, this.groupId, this.type,
+  /// Construtor for use when user creates a new quiz
+  Quiz(this.title, this.groupId, this.type,
       {this.description, this.isActive, this.timeLimit, this.questions});
 
-  factory Quiz.fromJson(Map<String, dynamic> json) => Quiz(
+  /// Constructor for internal use only
+  Quiz._internal(this._id, this.title, this.groupId, this.type,
+      this.description, this.isActive, this.timeLimit, this.questions);
+
+  factory Quiz.fromJson(Map<String, dynamic> json) => Quiz._internal(
       json['id'],
       json['title'],
       json['groupId'],
       json['type'] == 'live' ? QuizType.LIVE : QuizType.SELF_PACED,
-      description: json['description'],
-      isActive: json['isActive'],
-      timeLimit: json['timeLimit'],
-      questions: (json['questions'] as List)
+      json['description'],
+      json['isActive'],
+      json['timeLimit'],
+      (json['questions'] as List)
           ?.map((question) => question['type'] == 'truefalse'
               ? TFQuestion.fromJson(question)
               : MCQuestion.fromJson(question))
