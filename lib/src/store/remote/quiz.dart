@@ -50,10 +50,13 @@ class QuizModel {
   }
 
   /// Synchronise an updated [quiz] with the server.
+  /// Return a `Quiz` object constructed from the server's response. All fields
+  /// should be equal in content.
+  ///
+  /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
   /// Mutate the fields to be updated (e.g. `title`, `questions`) then invoke
-  /// this method. Return a `Quiz` object constructed from the server's
-  /// response. All fields should be equal in content.
+  /// this method.
   Future<Quiz> updateQuiz(Quiz quiz) async {
     // serialise quiz and remove null values
     Map<String, dynamic> quizJson = quiz.toJson();
@@ -72,10 +75,12 @@ class QuizModel {
     throw Exception('Unable to update quiz: unknown error occurred');
   }
 
-  /// Upload a new [quiz] to the server
+  /// Upload a new [quiz] to the server.
+  /// Return a `Quiz` object constructed from the server's response.
+  ///
+  /// Usage:
   /// [quiz] should be a newly constructed `Quiz` object, not one obtained by
-  /// `getQuiz` or `getQuizzes`. Return a `Quiz` object constructed from the
-  /// server's response. The returned object will have a non-null `id`.
+  /// `getQuiz` or `getQuizzes`.  The returned object will have a non-null `id`.
   Future<Quiz> createQuiz(Quiz quiz) async {
     // serialise quiz and remove null values
     Map<String, dynamic> quizJson = quiz.toJson();
