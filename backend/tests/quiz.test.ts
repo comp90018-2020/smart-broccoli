@@ -2,9 +2,13 @@ import supertest from "supertest";
 import { expect } from "chai";
 import app from "./index";
 import rebuild from "./rebuild";
-import { createGroup, createQuiz, registerAndLogin } from "./helpers";
+import {
+    createGroup,
+    createQuiz,
+    registerAndLogin,
+    joinGroup,
+} from "./helpers";
 import { readFileSync } from "fs";
-import { exception } from "console";
 
 describe("Authentication", () => {
     beforeEach(async () => {
@@ -110,24 +114,47 @@ describe("Authentication", () => {
         expect(res.body.questions[1].options).to.have.lengthOf(3);
     });
 
-    // it("Get quiz", async () => {
-    //     const agent = supertest(app);
-    //     const user = await registerAndLogin(USER);
-    //     const quiz = await createQuiz(user.id, QUIZ);
-    //     await addQuestion(quiz.id, QUESTION_CHOICE);
+    it("Get quiz", async () => {
+        const agent = supertest(app);
+        const userAdmin = await registerAndLogin(USER);
+        const userMember = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const group = await createGroup(userAdmin.id, "foo");
+        const quiz = await createQuiz(userAdmin.id, group.id, QUIZ);
 
-    //     const res = await agent
-    //         .get(`/quiz/${quiz.id}`)
-    //         .set("Authorization", `Bearer ${user.token}`);
-    //     expect(res.status).to.equal(200);
-    //     expect(res.body).to.have.property("id");
-    //     expect(res.body).to.have.property("questions");
-    //     expect(res.body.questions).to.have.lengthOf(1);
-    //     expect(res.body.questions[0]).to.have.property("options");
-    //     expect(res.body.questions[0].options).to.deep.equal(
-    //         QUESTION_CHOICE.options
-    //     );
-    // });
+        // Admin
+        const res = await agent
+            .get(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${userAdmin.token}`);
+        expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("id");
+        expect(res.body).to.have.property("questions");
+        expect(res.body.questions).to.have.lengthOf(2);
+        expect(res.body.questions[1]).to.have.property("options");
+        expect(res.body.questions[1].options).to.deep.equal(
+            QUESTION_CHOICE.options
+        );
+
+        // Non-participant, non-member
+        const nonRes = await agent
+            .get(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(nonRes.status).to.equal(403);
+
+        // Member
+        await joinGroup(userMember.id, { name: "foo" });
+
+        // Member, quiz not active
+        const memberRes = await agent
+            .get(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(memberRes.status).to.equal(200);
+        expect(memberRes.body).to.have.property("id");
+        expect(memberRes.body).to.have.property("questions");
+        expect(memberRes.body.questions).to.equal(null);
+    });
 
     // it("Get all quiz", async () => {
     //     const agent = supertest(app);

@@ -207,19 +207,13 @@ export const getQuiz = async (userId: number, quizId: number) => {
         include: ["questions"],
     });
 
-    // Owner
-    if (role === "owner") {
-        return {
-            ...quiz.toJSON(),
-            questions: quiz.questions.map((q) => q.toJSON()),
-        };
-    }
-
     // Questions
     let questions: any = {};
 
-    // For participants/members
-    if (state === "active") {
+    if (role === "owner" || state === "complete") {
+        // Owners, members who completed quiz
+        questions = quiz.questions.map((q) => q.toJSON());
+    } else if (state === "active") {
         // Quiz incomplete, but can view questions
         questions = quiz.questions.map((question) => {
             return {
@@ -240,6 +234,11 @@ export const getQuiz = async (userId: number, quizId: number) => {
         // Haven't started quiz, no access to questions
         questions = null;
     }
+
+    return {
+        ...quiz.toJSON(),
+        questions,
+    };
 };
 
 /**
@@ -260,7 +259,7 @@ export const getQuizAndRole = async (
         throw err;
     }
 
-    // Check whether user has priviledges
+    // Check whether user has privileges
     const membership = await UserGroup.findOne({
         where: {
             userId,
@@ -268,14 +267,14 @@ export const getQuizAndRole = async (
         },
     });
 
-    // TODO: check whether user is participant of quiz
-
-    if (membership) {
-        return { quiz, role: membership.role, state: "active" };
-    }
+    // TODO: check whether user is participant of quiz (state)
 
     // TODO: quiz session
-    const err = new ErrorStatus("Unimplemented", 501);
+    if (membership) {
+        return { quiz, role: membership.role, state: "inactive" };
+    }
+
+    const err = new ErrorStatus("Quiz cannot be accessed", 403);
     throw err;
 };
 
