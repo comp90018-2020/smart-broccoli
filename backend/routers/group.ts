@@ -219,8 +219,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/GroupExtended'
+ *               $ref: '#/components/schemas/GroupBrief'
  */
 router.get(
     "/:groupId",

@@ -42,9 +42,9 @@ import CustomStorage, { quizPictureProcessor } from "../helpers/upload";
  *         description:
  *           type: string
  *         timeLimit:
- *           type: int64
+ *           type: integer
  *         groupId:
- *           type: int64
+ *           type: integer
  *         type:
  *           type: string
  *           enum:
@@ -474,13 +474,11 @@ router.put(
  *     responses:
  *       '200':
  *         description: OK
- *     requestBody:
- *       required: true
- *       content:
- *         image/png:
- *           schema:
- *             type: string
- *             format: binary
+ *         content:
+ *           image/png:
+ *             schema:
+ *               type: string
+ *               format: binary
  */
 router.get(
     "/:quizId/picture",
@@ -604,13 +602,11 @@ router.put(
  *     responses:
  *       '200':
  *         description: OK
- *     requestBody:
- *       required: true
- *       content:
- *         image/png:
- *           schema:
- *             type: string
- *             format: binary
+ *         content:
+ *           image/png:
+ *             schema:
+ *               type: string
+ *               format: binary
  */
 router.get(
     "/:quizId/question/:questionId/picture",
