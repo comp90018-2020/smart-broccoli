@@ -74,13 +74,16 @@ class TFQuestion extends Question {
 
 // Multiple choice question
 class MCQuestion extends Question {
-  List<QuestionOption> options;
+  List<QuestionOption> options = [];
 
   MCQuestion(int id, String text, int imgId, {this.options})
       : super(id, text, imgId);
 
   factory MCQuestion.fromJson(Map<String, dynamic> json) =>
-      MCQuestion(json['id'], json['text'], json['imgid']);
+      MCQuestion(json['id'], json['text'], json['imgid'],
+          options: (json['options'] as List)
+              .map((option) => QuestionOption.fromJson(option))
+              .toList());
 
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
