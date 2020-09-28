@@ -1,9 +1,15 @@
+/// Class representing a user
+/// Abstract class; not for instantiation.
 abstract class User {
-  int id;
+  int _id;
+  int get id => _id;
   String email;
   String name;
 
-  User(this.id, this.email, this.name);
+  User(this._id, this.email, this.name);
+
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{'id': id, 'email': email, 'name': name};
 }
 
 /// User with login credientials (lecturer, coordinator)
