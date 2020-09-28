@@ -1,3 +1,4 @@
+import sequelize from "models";
 import { Transaction } from "sequelize/types";
 import ErrorStatus from "../helpers/error";
 import Question, { OptionAttributes } from "../models/question";
@@ -72,9 +73,9 @@ export const checkQuestionInfo = (info: any): QuestionInfo => {
  * @param info Question info
  */
 export const addQuestion = async (
+    transaction: Transaction,
     quizId: number,
-    info: QuestionInfo,
-    transaction?: Transaction
+    info: QuestionInfo
 ) => {
     const question = await Question.create(
         {
@@ -93,10 +94,10 @@ export const addQuestion = async (
  * @param info Question info
  */
 export const updateQuestion = async (
+    transaction: Transaction,
     quizId: number,
     questionId: number,
-    info: QuestionInfo,
-    transaction: Transaction
+    info: QuestionInfo
 ) => {
     // Update and return
     const updated = await Question.update(
@@ -121,9 +122,9 @@ export const updateQuestion = async (
  * @param questionId
  */
 export const deleteQuestion = async (
+    transaction: Transaction,
     quizId: number,
-    questionId: number,
-    transaction: Transaction
+    questionId: number
 ) => {
     const deleted = await Question.destroy({
         where: {
@@ -160,15 +161,22 @@ export const updateQuestionPicture = async (
         throw err;
     }
 
-    // Delete the old picture
-    if (question.pictureId) {
-        await deletePicture(question.pictureId);
+    const transaction = await sequelize.transaction();
+    try {
+        // Delete the old picture
+        if (question.pictureId) {
+            await deletePicture(transaction, question.pictureId);
+        }
+        // Insert the new picture
+        const picture = await insertPicture(transaction, file);
+        // Set user picture
+        question.pictureId = picture.id;
+        await question.save({ transaction });
+        return question;
+    } catch (err) {
+        await transaction.rollback();
+        throw err;
     }
-    // Insert the new picture
-    const picture = await insertPicture(file);
-    // Set user picture
-    question.pictureId = picture.id;
-    return await question.save();
 };
 
 /**

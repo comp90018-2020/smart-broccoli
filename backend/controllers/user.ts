@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import { User, UserGroup, Picture } from "../models";
+import sequelize, { User, UserGroup, Picture } from "../models";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 
 /**
@@ -47,15 +47,24 @@ export const updateProfile = async (userId: number, info: any) => {
 export const updateProfilePicture = async (userId: number, file: any) => {
     const user = await User.findByPk(userId);
 
-    // Delete the old picture
-    if (user.pictureId) {
-        await deletePicture(user.pictureId);
+    const transaction = await sequelize.transaction();
+
+    try {
+        // Delete the old picture
+        if (user.pictureId) {
+            await deletePicture(transaction, user.pictureId);
+        }
+        // Insert the new picture
+        const picture = await insertPicture(transaction, file);
+        // Set user picture
+        user.pictureId = picture.id;
+        await user.save({ transaction });
+
+        await transaction.commit();
+    } catch (err) {
+        await transaction.rollback();
+        throw err;
     }
-    // Insert the new picture
-    const picture = await insertPicture(file);
-    // Set user picture
-    user.pictureId = picture.id;
-    return await user.save();
 };
 
 /**

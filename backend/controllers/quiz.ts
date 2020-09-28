@@ -16,10 +16,10 @@ import { getGroupAndVerifyRole } from "./group";
  * @param updated Updated quiz questions
  */
 const processQuestions = async (
+    transaction: Transaction,
     quizId: number,
     original: Question[],
-    updated: any[],
-    transaction: Transaction
+    updated: any[]
 ) => {
     // First parse updated into QuestionInfo[]
     const updatedQuestions = updated.map((q) => checkQuestionInfo(q));
@@ -33,19 +33,19 @@ const processQuestions = async (
     // Delete missing ids
     const deletedIds = originalIds.filter((id) => !updatedIds.includes(id));
     for (const id of deletedIds) {
-        await deleteQuestion(quizId, id, transaction);
+        await deleteQuestion(transaction, quizId, id);
     }
 
     let questions: Question[] = [];
     for (const question of updatedQuestions) {
         // Insert new questions (no id)
         if (!question.id) {
-            questions.push(await addQuestion(quizId, question, transaction));
+            questions.push(await addQuestion(transaction, quizId, question));
         }
         // If updated
         else if (originalIds.includes(question.id)) {
             questions.push(
-                await updateQuestion(quizId, question.id, question, transaction)
+                await updateQuestion(transaction, quizId, question.id, question)
             );
         }
     }
@@ -77,22 +77,22 @@ export const createQuiz = async (userId: number, info: any) => {
         quiz.description = info.description;
     }
 
-    const t = await sequelize.transaction();
+    const transaction = await sequelize.transaction();
     try {
-        await quiz.save({ transaction: t });
+        await quiz.save({ transaction: transaction });
 
         // Save questions
         const quizJSON: any = {
             ...quiz.toJSON(),
             questions: (
-                await processQuestions(quiz.id, [], info.questions, t)
+                await processQuestions(transaction, quiz.id, [], info.questions)
             ).map((q) => q.toJSON()),
         };
-        await t.commit();
+        await transaction.commit();
 
         return quizJSON;
     } catch (err) {
-        await t.rollback();
+        await transaction.rollback();
         throw err;
     }
 };
@@ -141,25 +141,25 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
         quiz.description = info.description;
     }
 
-    const t = await sequelize.transaction();
+    const transaction = await sequelize.transaction();
     try {
-        await quiz.save({ transaction: t });
+        await quiz.save({ transaction: transaction });
 
         // Save questions
         const quizJSON: any = quiz.toJSON();
         if (info.questions) {
             const updatedQuestions = await processQuestions(
+                transaction,
                 quiz.id,
                 quiz.questions,
-                info.questions,
-                t
+                info.questions
             );
             quizJSON.questions = updatedQuestions.map((q) => q.toJSON());
         }
-        await t.commit();
+        await transaction.commit();
         return quizJSON;
     } catch (err) {
-        await t.rollback();
+        await transaction.rollback();
         throw err;
     }
 };
