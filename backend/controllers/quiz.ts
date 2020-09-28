@@ -283,8 +283,17 @@ export const getQuizAndRole = async (
     throw err;
 };
 
-// Delete quiz
+/**
+ * Delete quiz.
+ * @param quizId
+ */
 export const deleteQuiz = async (quizId: number) => {
     // Now destroy the quiz
     return await Quiz.destroy({ where: { id: quizId } });
 };
+
+/**
+ * Get quiz picture.
+ * @param quizId
+ */
+export const getQuizPicture = async (quiz: Quiz) => {};

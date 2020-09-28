@@ -113,30 +113,36 @@ declare module "express" {
 }
 
 // Check whether user is creator of quiz
-export const checkQuizMembership = (intendedRole: string) => {
+export const checkQuizPermissions = (
+    intendedRole: string,
+    intendedState?: string
+) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { quiz, role } = await getQuizAndRole(
+            const { quiz, role, state } = await getQuizAndRole(
                 req.user.id,
                 Number(req.params.quizId)
             );
-            // Owners are members, members are participants
-            if (
-                role === "owner" &&
-                (intendedRole === "member" || intendedRole === "participant")
-            ) {
+            req.quiz = quiz;
+
+            // State of quiz relative to user
+            if (state && state !== intendedState && state !== "completed") {
+                const err = new ErrorStatus("Cannot access quiz resource", 403);
+                throw err;
+            }
+
+            // Owners have all privileges
+            if (role === "owner") {
                 return next();
             }
+            // Member are participants
             if (role === "member" && intendedRole === "participant") {
                 return next();
             }
+
             // No access
-            if (role != intendedRole) {
-                const err = new ErrorStatus("No access to quiz resource", 403);
-                throw err;
-            }
-            req.quiz = quiz;
-            return next();
+            const err = new ErrorStatus("No access to quiz resource", 403);
+            throw err;
         } catch (err) {
             return next(err);
         }
@@ -311,7 +317,7 @@ router.patch(
         body("questions.*.text").optional({ nullable: true }).isString(),
     ],
     validate,
-    checkQuizMembership("owner"),
+    checkQuizPermissions("owner"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const quiz = await updateQuiz(
@@ -349,7 +355,7 @@ router.delete(
     "/:quizId",
     [param("quizId").isInt()],
     validate,
-    checkQuizMembership("owner"),
+    checkQuizPermissions("owner"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             await deleteQuiz(Number(req.params.quizId));
@@ -409,7 +415,7 @@ const upload = multer({
 router.put(
     "/:quizId/question/:questionId/picture",
     validate,
-    checkQuizMembership("owner"),
+    checkQuizPermissions("owner"),
     (req: Request, res: Response, next: NextFunction) => {
         const pictureUpload = upload.single("picture");
 
@@ -479,7 +485,7 @@ router.put(
 router.get(
     "/:quizId/question/:questionId/picture",
     validate,
-    checkQuizMembership("participant"),
+    checkQuizPermissions("participant", "active"),
     async (req: Request, res, next) => {
         try {
             const picture = await getQuestionPicture(

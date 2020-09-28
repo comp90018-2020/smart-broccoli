@@ -1,6 +1,6 @@
 import { Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize from "../models";
+import sequelize, { Quiz } from "../models";
 import Question, { OptionAttributes } from "../models/question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 
