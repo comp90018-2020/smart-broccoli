@@ -1,20 +1,55 @@
-import { ContextHandlerImpl } from "express-validator/src/chain";
 import { jwtVerify } from "../helpers/jwt";
-class Quiz{
-    quiz : {[key:number] : any};
-    pos = -1;
-    constructor(quizId: number){
+
+class Question {
+    private id: number;
+    private type: string;
+    private text: string;
+    private timeLimit: number;
+    private tf: boolean;
+    private options: [{ "correct": boolean, "text": string }]
+
+
+    constructor(id: number, $type: string, $text: string, $timeLimit: number, $tf: boolean) {
+        this.id = id;
+        this.type = $type;
+        this.text = $text;
+        this.timeLimit = $timeLimit;
+        this.tf = $tf;
     }
-    loadQuiz(quizId : number){
-        this.quiz[1] = {};
-    }
-    next(){
-        return this.quiz[this.pos++];
-    }
-    
+
 
 }
-class LiveQuiz {
+class Quiz {
+    private id: number;
+    private pos = -1;
+
+    title: string;
+    description: string;
+    timeLimit: number;
+    groupId: number;
+    type: string;
+    questions: [Question];
+
+    constructor($id: number) {
+
+        // for test1
+        this.id = $id;
+        this.description = "descriptyion";
+        this.timeLimit = 15;
+        this.groupId = 1;
+        this.type = "live";
+        this.questions = [new Question(1, "", "", 1, false)];
+    }
+
+    loadQuiz(quizId: number) {
+    }
+    next() {
+        return this.questions[this.pos++];
+    }
+
+
+}
+export class LiveQuiz {
     // shaerd obj saves live quiz sess
     sess: {
         [key: number]: {
@@ -34,7 +69,7 @@ class LiveQuiz {
         // jwtVerify(socket.handshake.query.token, this.secret);
     }
 
-    loadQuiz(quizId: number){
+    loadQuiz(quizId: number) {
         return {}
     }
 
@@ -94,8 +129,8 @@ class LiveQuiz {
             // socket join in a room named ${quizId}
             socket.join(quizId);
             ret = { "res": "success" };
-        } else{
-            ret = { "res": "falied", "msg":"`${quizId} is not active: `${this.sess[quizId].status}``" };
+        } else {
+            ret = { "res": "falied", "msg": "`${quizId} is not active: `${this.sess[quizId].status}``" };
         }
 
         // response to the end
@@ -115,11 +150,11 @@ class LiveQuiz {
             ret = { "res": "success" };
             // broadcast to the room that quiz has been started
             socket.to(quizId).send(ret);
-            
+
             // broadcast to the room the first question
             this.nextQuestion(socket, content);
-        } else{
-            ret = { "res": "falied", "msg":"`${quizId} is not active: `${this.sess[quizId].status}``" };
+        } else {
+            ret = { "res": "falied", "msg": "`${quizId} is not active: `${this.sess[quizId].status}``" };
             socket.send(ret);
         }
     }
@@ -140,5 +175,3 @@ class LiveQuiz {
 
     }
 }
-
-export { LiveQuiz };
