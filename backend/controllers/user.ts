@@ -75,8 +75,7 @@ export const updateProfilePicture = async (userId: number, file: any) => {
 export const getProfilePicture = async (pictureId: number) => {
     const picture = await getPictureById(pictureId);
     if (!picture) {
-        const err = new ErrorStatus("Picture not found", 404);
-        throw err;
+        throw new ErrorStatus("Picture not found", 404);
     }
     return picture;
 };
@@ -111,8 +110,7 @@ export const getUserProfile = async (currentUserId: number, userId: number) => {
             attributes: ["id", "name", "updatedAt"],
         });
     }
-    const err = new ErrorStatus("Cannot access resource", 403);
-    throw err;
+    throw new ErrorStatus("Cannot access resource", 403);
 };
 
 /**
@@ -128,11 +126,9 @@ export const getUserProfilePicture = async (
         // @ts-ignore Model problems
         const user = await User.findByPk(userId, { include: [Picture] });
         if (!user.Picture) {
-            const err = new ErrorStatus("Profile picture not found", 404);
-            throw err;
+            throw new ErrorStatus("Profile picture not found", 404);
         }
         return user.Picture;
     }
-    const err = new ErrorStatus("Cannot access resource", 403);
-    throw err;
+    throw new ErrorStatus("Cannot access resource", 403);
 };

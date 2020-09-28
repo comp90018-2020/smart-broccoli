@@ -1,7 +1,10 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { body, param } from "express-validator";
-import CustomStorage, { profileImageProcessor } from "../helpers/upload";
+import fs from "fs";
 import multer, { MulterError } from "multer";
+import CustomStorage, { profileImageProcessor } from "../helpers/upload";
+import validate from "./middleware/validate";
+import ErrorStatus from "../helpers/error";
 import {
     getProfilePicture,
     updateProfile,
@@ -9,8 +12,6 @@ import {
     getUserProfile,
     getUserProfilePicture,
 } from "../controllers/user";
-import validate from "./middleware/validate";
-import fs from "fs";
 
 /**
  * @swagger
@@ -122,9 +123,7 @@ router.put(
         // Save picture information to DB
         try {
             if (!req.file) {
-                const err = new Error("File not received");
-                res.status(400);
-                return next(err);
+                return next(new ErrorStatus("File not received", 400));
             }
             await updateProfilePicture(req.user.id, req.file);
             return res.sendStatus(200);

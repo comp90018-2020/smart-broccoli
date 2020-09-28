@@ -1,5 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { body, param } from "express-validator";
+import { assertUserRole } from "./middleware/user";
+import validate from "./middleware/validate";
 import {
     createGroup,
     deleteGroup,
@@ -13,9 +15,6 @@ import {
     regenerateCode,
     updateGroup,
 } from "../controllers/group";
-import { Group } from "../models";
-import { assertUserRole } from "./middleware/user";
-import validate from "./middleware/validate";
 
 /**
  * @swagger
@@ -51,13 +50,6 @@ import validate from "./middleware/validate";
  *           enum: [member, owner]
  */
 const router = Router();
-
-// Extend req.user
-declare module "express" {
-    export interface Request {
-        group: Group;
-    }
-}
 
 /**
  * @swagger

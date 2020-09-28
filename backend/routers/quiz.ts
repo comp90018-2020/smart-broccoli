@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction, Router } from "express";
 import multer from "multer";
 import fs from "fs";
-import ErrorStatus from "../helpers/error";
 import { param, body, query } from "express-validator";
+import ErrorStatus from "../helpers/error";
+import validate from "./middleware/validate";
+import CustomStorage, { quizPictureProcessor } from "../helpers/upload";
 import {
     createQuiz,
     deleteQuiz,
@@ -16,9 +18,6 @@ import {
     updateQuestionPicture,
     getQuestionPicture,
 } from "../controllers/question";
-import validate from "./middleware/validate";
-import { Quiz } from "../models";
-import CustomStorage, { quizPictureProcessor } from "../helpers/upload";
 
 /**
  * @swagger
@@ -105,13 +104,6 @@ import CustomStorage, { quizPictureProcessor } from "../helpers/upload";
  *               format: int64
  */
 const router = Router();
-
-// Extend req.user
-declare module "express" {
-    export interface Request {
-        quiz?: Quiz;
-    }
-}
 
 /**
  * @swagger
@@ -404,9 +396,7 @@ router.put(
         // Save picture information to DB
         try {
             if (!req.file) {
-                const err = new Error("File not received");
-                res.status(400);
-                return next(err);
+                return next(new ErrorStatus("File not received", 400));
             }
             await updateQuizPicture(
                 req.user.id,
@@ -526,9 +516,7 @@ router.put(
         // Save picture information to DB
         try {
             if (!req.file) {
-                const err = new Error("File not received");
-                res.status(400);
-                return next(err);
+                return next(new ErrorStatus("File not received", 400));
             }
             await updateQuestionPicture(
                 req.user.id,
