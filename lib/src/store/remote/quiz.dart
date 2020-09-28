@@ -105,6 +105,19 @@ class QuizModel {
     throw Exception('Unable to delete quiz: unknown error occurred');
   }
 
+  /// Get the picture of the quiz with specified [id] as a list of bytes.
+  /// Return `null` if there is no picture.
+  Future<Uint8List> getQuizPicture(int id) async {
+    final http.Response response = await http.get('$QUIZ_URL/$id/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200) return response.bodyBytes;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) return null;
+    throw Exception('Unable to get user profile pic: unknown error occurred');
+  }
+
   /// Set the picture of the quiz with specified [id].
   /// This method takes the image as a list of bytes.
   Future<void> setQuizPicture(int id, Uint8List bytes) async {
@@ -119,6 +132,20 @@ class QuizModel {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuizNotFoundException();
     throw Exception('Unable to set user profile pic: unknown error occurred');
+  }
+
+  /// Get the picture of the quiz with specified [id] as a list of bytes.
+  /// Return `null` if there is no picture.
+  Future<Uint8List> getQuestionPicture(int quizId, int questionId) async {
+    final http.Response response = await http.get(
+        '$QUIZ_URL/$quizId/question/$questionId/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200) return response.bodyBytes;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) return null;
+    throw Exception('Unable to get user profile pic: unknown error occurred');
   }
 
   /// Set the picture of the specified [questionId] in the quiz with specified
