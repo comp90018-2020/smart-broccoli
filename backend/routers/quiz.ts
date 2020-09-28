@@ -9,7 +9,6 @@ import {
     updateQuiz,
     getQuiz,
     getAllQuiz,
-    getQuizAndRole,
     updateQuizPicture,
     getQuizPicture,
 } from "../controllers/quiz";
@@ -113,43 +112,6 @@ declare module "express" {
         quiz?: Quiz;
     }
 }
-
-// Check whether user is creator of quiz
-export const checkQuizPermissions = (
-    intendedRole: string,
-    intendedState?: string
-) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const { quiz, role, state } = await getQuizAndRole(
-                req.user.id,
-                Number(req.params.quizId)
-            );
-            req.quiz = quiz;
-
-            // State of quiz relative to user
-            if (state && state !== intendedState && state !== "completed") {
-                const err = new ErrorStatus("Cannot access quiz resource", 403);
-                throw err;
-            }
-
-            // Owners have all privileges
-            if (role === "owner") {
-                return next();
-            }
-            // Member are participants
-            if (role === "member" && intendedRole === "participant") {
-                return next();
-            }
-
-            // No access
-            const err = new ErrorStatus("No access to quiz resource", 403);
-            throw err;
-        } catch (err) {
-            return next(err);
-        }
-    };
-};
 
 /**
  * @swagger
@@ -325,7 +287,6 @@ router.patch(
         body("questions.*.text").optional({ nullable: true }).isString(),
     ],
     validate,
-    checkQuizPermissions("owner"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const quiz = await updateQuiz(
@@ -363,10 +324,9 @@ router.delete(
     "/:quizId",
     [param("quizId").isInt()],
     validate,
-    checkQuizPermissions("owner"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await deleteQuiz(Number(req.params.quizId));
+            await deleteQuiz(req.user.id, Number(req.params.quizId));
             return res.sendStatus(204);
         } catch (err) {
             return next(err);
@@ -439,7 +399,6 @@ router.put(
     "/:quizId/picture",
     [param("quizId").isInt()],
     validate,
-    checkQuizPermissions("owner"),
     quizPictureUploadMiddleware,
     async (req: Request, res: Response, next: NextFunction) => {
         // Save picture information to DB
@@ -449,7 +408,11 @@ router.put(
                 res.status(400);
                 return next(err);
             }
-            await updateQuizPicture(req.quiz, req.file);
+            await updateQuizPicture(
+                req.user.id,
+                Number(req.params.quizId),
+                req.file
+            );
             return res.sendStatus(200);
         } catch (err) {
             return next(err);
@@ -484,13 +447,14 @@ router.get(
     "/:quizId/picture",
     [param("quizId").isInt()],
     validate,
-    checkQuizPermissions("participant"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const picture = await getQuizPicture(req.quiz);
+            const picture = await getQuizPicture(
+                req.user.id,
+                Number(req.params.quizId)
+            );
             if (!picture) {
-                const err = new ErrorStatus("Picture not found", 404);
-                throw err;
+                throw new ErrorStatus("Picture not found", 404);
             }
 
             // Set content header
@@ -543,7 +507,6 @@ router.put(
     "/:quizId/question/:questionId/picture",
     [param("questionId").isInt(), param("quizId").isInt()],
     validate,
-    checkQuizPermissions("owner"),
     (req: Request, res: Response, next: NextFunction) => {
         const pictureUpload = upload.single("picture");
 
@@ -568,6 +531,7 @@ router.put(
                 return next(err);
             }
             await updateQuestionPicture(
+                req.user.id,
                 Number(req.params.quizId),
                 Number(req.params.questionId),
                 req.file
@@ -612,16 +576,15 @@ router.get(
     "/:quizId/question/:questionId/picture",
     [param("questionId").isInt(), param("quizId").isInt()],
     validate,
-    checkQuizPermissions("participant", "active"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const picture = await getQuestionPicture(
+                req.user.id,
                 Number(req.params.quizId),
                 Number(req.params.questionId)
             );
             if (!picture) {
-                const err = new ErrorStatus("Picture not found", 404);
-                throw err;
+                throw new ErrorStatus("Picture not found", 404);
             }
 
             // Set content header

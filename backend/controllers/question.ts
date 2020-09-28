@@ -3,6 +3,7 @@ import ErrorStatus from "../helpers/error";
 import sequelize, { Quiz } from "../models";
 import Question, { OptionAttributes } from "../models/question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { getQuizAndRole } from "./quiz";
 
 // Parses question info
 interface QuestionInfo {
@@ -15,13 +16,55 @@ interface QuestionInfo {
 }
 
 /**
+ * Processes questions of a quiz (since we don't operate on questions directly).
+ * @param quizId
+ * @param original Original quiz questions
+ * @param updated Updated quiz questions
+ */
+export const processQuestions = async (
+    transaction: Transaction,
+    quizId: number,
+    original: Question[],
+    updated: any[]
+) => {
+    // First parse updated into QuestionInfo[]
+    const updatedQuestions = updated.map((q) => checkQuestionInfo(q));
+
+    // Now get Ids
+    const originalIds = original.map((q) => q.id);
+    const updatedIds = updatedQuestions
+        .filter((q) => q.id !== undefined)
+        .map((q) => q.id);
+
+    // Delete missing ids
+    const deletedIds = originalIds.filter((id) => !updatedIds.includes(id));
+    for (const id of deletedIds) {
+        await deleteQuestion(transaction, quizId, id);
+    }
+
+    let questions: Question[] = [];
+    for (const question of updatedQuestions) {
+        // Insert new questions (no id)
+        if (!question.id) {
+            questions.push(await addQuestion(transaction, quizId, question));
+        }
+        // If updated
+        else if (originalIds.includes(question.id)) {
+            questions.push(
+                await updateQuestion(transaction, quizId, question.id, question)
+            );
+        }
+    }
+    return questions;
+};
+
+/**
  * Parse options array of question.
  * @param options Options array
  */
 const checkOptions = (options: any): OptionAttributes[] => {
     if (!Array.isArray(options)) {
-        const err = new ErrorStatus("Options is not array", 400);
-        throw err;
+        throw new ErrorStatus("Options is not array", 400);
     }
     return options.map((option) => {
         return {
@@ -35,7 +78,7 @@ const checkOptions = (options: any): OptionAttributes[] => {
  * Parses question info.
  * @param info Represents a question
  */
-export const checkQuestionInfo = (info: any): QuestionInfo => {
+const checkQuestionInfo = (info: any): QuestionInfo => {
     const values: QuestionInfo = {
         id: info.id,
         type: info.type,
@@ -46,23 +89,22 @@ export const checkQuestionInfo = (info: any): QuestionInfo => {
     if (type === "truefalse") {
         // True/false questions
         if (typeof tf != "boolean") {
-            const err = new ErrorStatus("tf not specified", 400);
-            throw err;
+            throw new ErrorStatus("tf not specified", 400);
         }
         values.tf = tf;
+        values.options = null;
     } else if (type === "choice") {
         // Multiple choice
         values.options = checkOptions(options);
+        values.tf = null;
         if (values.options.length <= 1 || values.options.length > 4) {
-            const err = new ErrorStatus(
+            throw new ErrorStatus(
                 "Question should have between 2 and 4 options",
                 400
             );
-            throw err;
         }
     } else {
-        const err = new ErrorStatus("Unknown type", 400);
-        throw err;
+        throw new ErrorStatus("Unknown type", 400);
     }
     return values;
 };
@@ -72,7 +114,7 @@ export const checkQuestionInfo = (info: any): QuestionInfo => {
  * @param quizId
  * @param info Question info
  */
-export const addQuestion = async (
+const addQuestion = async (
     transaction: Transaction,
     quizId: number,
     info: QuestionInfo
@@ -93,7 +135,7 @@ export const addQuestion = async (
  * @param questionId
  * @param info Question info
  */
-export const updateQuestion = async (
+const updateQuestion = async (
     transaction: Transaction,
     quizId: number,
     questionId: number,
@@ -105,13 +147,11 @@ export const updateQuestion = async (
         { where: { id: questionId, quizId }, returning: true, transaction }
     );
     if (updated[0] == 0) {
-        const err = new ErrorStatus("Question not found", 404);
-        throw err;
+        throw new ErrorStatus("Question not found", 404);
     }
     // Should not update more than 1 row
     if (updated[0] > 1) {
-        const err = new ErrorStatus("Internal Server Error", 500);
-        throw err;
+        throw new ErrorStatus("Internal Server Error", 500);
     }
     return updated[1][0];
 };
@@ -121,7 +161,7 @@ export const updateQuestion = async (
  * @param quizId
  * @param questionId
  */
-export const deleteQuestion = async (
+const deleteQuestion = async (
     transaction: Transaction,
     quizId: number,
     questionId: number
@@ -134,8 +174,7 @@ export const deleteQuestion = async (
         transaction,
     });
     if (deleted == 0) {
-        const err = new ErrorStatus("Bad Request", 400);
-        throw err;
+        throw new ErrorStatus("Bad Request", 400);
     }
 };
 
@@ -146,10 +185,17 @@ export const deleteQuestion = async (
  * @param file Metadata about file
  */
 export const updateQuestionPicture = async (
+    userId: number,
     quizId: number,
     questionId: number,
     file: any
 ) => {
+    // Ensure that user is owner
+    const { role } = await getQuizAndRole(userId, quizId);
+    if (role !== "owner") {
+        throw new ErrorStatus("Cannot update picture", 403);
+    }
+
     const question = await Question.findOne({
         where: {
             quizId,
@@ -157,8 +203,7 @@ export const updateQuestionPicture = async (
         },
     });
     if (!question) {
-        const err = new ErrorStatus("Cannot find question", 404);
-        throw err;
+        throw new ErrorStatus("Cannot find question", 404);
     }
 
     const transaction = await sequelize.transaction();
@@ -186,18 +231,24 @@ export const updateQuestionPicture = async (
  * @param questionId
  */
 export const getQuestionPicture = async (
+    userId: number,
     quizId: number,
     questionId: number
 ) => {
+    const { role, state } = await getQuizAndRole(userId, quizId);
+    if ((role === "member" || role === "participant") && state === "inactive") {
+        throw new ErrorStatus("Cannot access resource (yet)", 403);
+    }
+
     const question = await Question.findOne({
+        attributes: ["pictureId"],
         where: {
             quizId,
             id: questionId,
         },
     });
     if (!question) {
-        const err = new ErrorStatus("Cannot find question", 404);
-        throw err;
+        throw new ErrorStatus("Cannot find question", 404);
     }
     return await getPictureById(question.pictureId);
 };

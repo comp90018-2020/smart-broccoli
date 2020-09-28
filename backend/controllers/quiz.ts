@@ -1,57 +1,9 @@
 import { FindOptions, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Quiz, Question, UserGroup, User } from "../models";
-import {
-    checkQuestionInfo,
-    addQuestion,
-    deleteQuestion,
-    updateQuestion,
-} from "./question";
+import sequelize, { Quiz, Question, UserGroup, User, Picture } from "../models";
+import { processQuestions } from "./question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 import { assertGroupOwnership } from "./group";
-
-/**
- * Processes questions of a quiz (since we don't operate on questions directly).
- * @param quizId
- * @param original Original quiz questions
- * @param updated Updated quiz questions
- */
-const processQuestions = async (
-    transaction: Transaction,
-    quizId: number,
-    original: Question[],
-    updated: any[]
-) => {
-    // First parse updated into QuestionInfo[]
-    const updatedQuestions = updated.map((q) => checkQuestionInfo(q));
-
-    // Now get Ids
-    const originalIds = original.map((q) => q.id);
-    const updatedIds = updatedQuestions
-        .filter((q) => q.id !== undefined)
-        .map((q) => q.id);
-
-    // Delete missing ids
-    const deletedIds = originalIds.filter((id) => !updatedIds.includes(id));
-    for (const id of deletedIds) {
-        await deleteQuestion(transaction, quizId, id);
-    }
-
-    let questions: Question[] = [];
-    for (const question of updatedQuestions) {
-        // Insert new questions (no id)
-        if (!question.id) {
-            questions.push(await addQuestion(transaction, quizId, question));
-        }
-        // If updated
-        else if (originalIds.includes(question.id)) {
-            questions.push(
-                await updateQuestion(transaction, quizId, question.id, question)
-            );
-        }
-    }
-    return questions;
-};
 
 /**
  * Create quiz.
@@ -112,11 +64,12 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
             as: "questions",
         },
     });
-
-    // Ensure that creator is owner
-    if (info.groupId && info.groupId !== quiz.groupId) {
-        await assertGroupOwnership(userId, info.groupId);
+    if (!quiz) {
+        throw new ErrorStatus("Quiz not found", 404);
     }
+
+    // Ensure that creator is owner of group
+    await assertGroupOwnership(userId, quiz.groupId);
 
     // Updates
     if (info.title) {
@@ -257,8 +210,7 @@ export const getQuizAndRole = async (
     // Get quiz
     const quiz = await Quiz.findByPk(quizId, options);
     if (!quiz) {
-        const err = new ErrorStatus("Quiz not found", 404);
-        throw err;
+        throw new ErrorStatus("Quiz not found", 404);
     }
 
     // Check whether user has privileges
@@ -281,17 +233,21 @@ export const getQuizAndRole = async (
         return { quiz, role: membership.role, state: "inactive" };
     }
 
-    const err = new ErrorStatus("Quiz cannot be accessed", 403);
-    throw err;
+    throw new ErrorStatus("Quiz cannot be accessed", 403);
 };
 
 /**
  * Delete quiz.
  * @param quizId
  */
-export const deleteQuiz = async (quizId: number) => {
+export const deleteQuiz = async (userId: number, quizId: number) => {
+    const { quiz, role } = await getQuizAndRole(userId, quizId);
+    if (role !== "owner") {
+        throw new ErrorStatus("Cannot delete quiz", 403);
+    }
+
     // Now destroy the quiz
-    return await Quiz.destroy({ where: { id: quizId } });
+    await quiz.destroy();
 };
 
 /**
@@ -299,7 +255,17 @@ export const deleteQuiz = async (quizId: number) => {
  * @param quiz Quiz object
  * @param file Metadata about uploaded file
  */
-export const updateQuizPicture = async (quiz: Quiz, file: any) => {
+export const updateQuizPicture = async (
+    userId: number,
+    quizId: number,
+    file: any
+) => {
+    // Ensure that user is owner
+    const { quiz, role } = await getQuizAndRole(userId, quizId);
+    if (role !== "owner") {
+        throw new ErrorStatus("Cannot update picture", 403);
+    }
+
     const transaction = await sequelize.transaction();
     try {
         // Delete old picture
@@ -323,6 +289,8 @@ export const updateQuizPicture = async (quiz: Quiz, file: any) => {
  * Get quiz picture.
  * @param quiz Quiz object
  */
-export const getQuizPicture = async (quiz: Quiz) => {
+export const getQuizPicture = async (userId: number, quizId: number) => {
+    // Ensure that user can access quiz
+    const { quiz } = await getQuizAndRole(userId, quizId);
     return await getPictureById(quiz.pictureId);
 };
