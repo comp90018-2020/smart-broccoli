@@ -266,8 +266,9 @@ export const getQuizAndRole = async (
             groupId: quiz.groupId,
         },
     });
+
     // Quick return if owner
-    if (membership.role === "owner") {
+    if (membership && membership.role === "owner") {
         return { quiz, role: "owner", state: null };
     }
 

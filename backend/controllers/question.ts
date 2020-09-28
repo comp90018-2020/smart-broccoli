@@ -1,6 +1,6 @@
-import sequelize from "models";
 import { Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
+import sequelize from "../models";
 import Question, { OptionAttributes } from "../models/question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 
@@ -172,6 +172,7 @@ export const updateQuestionPicture = async (
         // Set user picture
         question.pictureId = picture.id;
         await question.save({ transaction });
+        await transaction.commit();
         return question;
     } catch (err) {
         await transaction.rollback();
