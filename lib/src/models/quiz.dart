@@ -56,27 +56,39 @@ class Quiz {
   }
 }
 
+/// Object representing a question in a quiz
+/// `Quiz` instances hold a list of this class.
+/// Abstract class; not for instantiation.
 abstract class Question {
-  int id;
+  int _id;
+  int get id => _id;
   String text;
   int imgId;
 
-  Question(this.id, this.text, this.imgId);
+  Question(this._id, this.text, this.imgId);
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{'id': id, 'text': text, 'imgId': imgId};
+    return <String, dynamic>{'id': _id, 'text': text, 'imgId': imgId};
   }
 }
 
-// True/false question
+/// Object representing a true/false question
+/// Instances of this class should be constructed when the user creates new
+/// true/false questions. To modify an existing true/false question, mutate
+/// the fields directly. The `Quiz` object holding the question must be
+/// synchronised with the server to finalise any changes.
 class TFQuestion extends Question {
   bool answer;
 
-  TFQuestion(int id, String text, int imgId, this.answer)
+  /// Constructor for use when user creates a new true/false question
+  TFQuestion(String text, this.answer, {int imgId}) : super(null, text, imgId);
+
+  /// Constructor for internal use only
+  TFQuestion._internal(int id, String text, int imgId, this.answer)
       : super(id, text, imgId);
 
   factory TFQuestion.fromJson(Map<String, dynamic> json) =>
-      TFQuestion(json['id'], json['text'], json['imgid'], json['tf']);
+      TFQuestion._internal(json['id'], json['text'], json['imgid'], json['tf']);
 
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
@@ -86,15 +98,23 @@ class TFQuestion extends Question {
   }
 }
 
-// Multiple choice question
+/// Object representing a multiple choice question
+/// Instances of this class should be constructed when the user creates new
+/// multiple choice questions. To modify an existing multiple choice question,
+/// mutate the fields directly. The `Quiz` object holding the question must be
+/// synchronised with the server to finalise any changes.
 class MCQuestion extends Question {
   List<QuestionOption> options = [];
 
-  MCQuestion(int id, String text, int imgId, {this.options})
+  /// Constructor for use when user creates a new multiple choice question
+  MCQuestion(String text, this.options, {int imgId}) : super(null, text, imgId);
+
+  /// Constructor for internal use only
+  MCQuestion._internal(int id, String text, int imgId, {this.options})
       : super(id, text, imgId);
 
   factory MCQuestion.fromJson(Map<String, dynamic> json) =>
-      MCQuestion(json['id'], json['text'], json['imgid'],
+      MCQuestion._internal(json['id'], json['text'], json['imgid'],
           options: (json['options'] as List)
               .map((option) => QuestionOption.fromJson(option))
               .toList());
