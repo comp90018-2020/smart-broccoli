@@ -1,5 +1,3 @@
-import 'package:fuzzy_broccoli/models.dart';
-
 enum QuizType { LIVE, SELF_PACED }
 
 class Quiz {
