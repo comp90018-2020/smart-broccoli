@@ -64,4 +64,26 @@ class QuizModel {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to update quiz: unknown error occurred');
   }
+
+  /// Upload a new [quiz] to the server
+  /// [quiz] should be a newly constructed `Quiz` object, not one obtained by
+  /// `getQuiz` or `getQuizzes`.
+  /// This method returns a `Quiz` object constructed from the server's
+  /// response. Apart from having an `id`, all fields should be identical.
+  Future<Quiz> createQuiz(Quiz quiz) async {
+    // serialise quiz and remove null values
+    Map<String, dynamic> quizJson = quiz.toJson();
+    quizJson.removeWhere((key, value) => value == null);
+
+    http.Response response = await http.post(QUIZ_URL,
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: jsonEncode(quizJson));
+
+    if (response.statusCode == 201)
+      return Quiz.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to create quiz: unknown error occurred');
+  }
 }
