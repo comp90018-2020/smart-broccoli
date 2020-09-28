@@ -47,8 +47,9 @@ class QuizModel {
   /// Synchronise an updated [quiz] with the server.
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
   /// Mutate the fields to be updated (e.g. `title`, `questions`) then invoke
-  /// this method.
-  Future<void> updateQuiz(Quiz quiz) async {
+  /// this method. Returns a `Quiz` object constructed from the server's
+  /// response. All fields should be equal in content.
+  Future<Quiz> updateQuiz(Quiz quiz) async {
     // serialise quiz and remove null values
     Map<String, dynamic> quizJson = quiz.toJson();
     quizJson.removeWhere((key, value) => value == null);
@@ -67,9 +68,8 @@ class QuizModel {
 
   /// Upload a new [quiz] to the server
   /// [quiz] should be a newly constructed `Quiz` object, not one obtained by
-  /// `getQuiz` or `getQuizzes`.
-  /// This method returns a `Quiz` object constructed from the server's
-  /// response. Apart from having an `id`, all fields should be identical.
+  /// `getQuiz` or `getQuizzes`. Returns a `Quiz` object constructed from the
+  /// server's response. The returned object will have a non-null `id`.
   Future<Quiz> createQuiz(Quiz quiz) async {
     // serialise quiz and remove null values
     Map<String, dynamic> quizJson = quiz.toJson();
