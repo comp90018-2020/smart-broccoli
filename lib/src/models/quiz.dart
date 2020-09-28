@@ -127,11 +127,16 @@ class MCQuestion extends Question {
   }
 }
 
-// Option for multiple choice question
+/// Object representing an option of a multiple choice question
+/// Instances of this class should be constructed when the user creates new
+/// multiple choice options. To modify an existing multiple choice option,
+/// mutate the fields directly. The `Quiz` object holding the multiple choice
+/// question must be synchronised with the server to finalise any changes.
 class QuestionOption {
   String text;
   bool correct;
 
+  /// Constructor for use when user creates a new multiple choice option
   QuestionOption(this.text, this.correct);
 
   factory QuestionOption.fromJson(Map<String, dynamic> json) =>
