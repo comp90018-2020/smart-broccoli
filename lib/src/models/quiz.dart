@@ -3,7 +3,7 @@ enum QuizType { LIVE, SELF_PACED }
 /// Object representing a quiz
 /// Instances of this class are returned when fetching quizzes from the server.
 /// Additional instances of this class (i.e. not fetched from the server) are
-/// to be constructed when the user creates a new quiz. The new quiz can then be
+/// to be constructed when the user creates a new quiz. A new quiz can be
 /// synchronised with the server by passing it to `QuizModel.createQuiz`.
 class Quiz {
   /// ID of the quiz (for quizzes fetched from server only; not to be mutated)
