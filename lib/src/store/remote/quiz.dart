@@ -17,6 +17,9 @@ class QuizModel {
   QuizModel(this._authModel);
 
   /// Return a list of all quizzes created by the authenticated user.
+  /// Caveat: The `questions` field of each quiz is NOT set (i.e. is `null`).
+  /// `getQuiz` must be invoked to retrieve the list of questions associated
+  /// with a quiz.
   Future<List<Quiz>> getQuizzes() async {
     http.Response response = await http.get(QUIZ_URL,
         headers: ApiBase.headers(authToken: _authModel.token));
