@@ -143,19 +143,6 @@ describe("Authentication", () => {
     //     expect(res.body).to.have.lengthOf(1);
     // });
 
-    it("Delete quiz", async () => {
-        const agent = supertest(app);
-        const user = await registerAndLogin(USER);
-        const group = await createGroup(user.id, "foo");
-        const quiz = await createQuiz(user.id, group.id, QUIZ);
-
-        const res = await agent
-            .delete(`/quiz/${quiz.id}`)
-            .set("Authorization", `Bearer ${user.token}`)
-            .send();
-        expect(res.status).to.equal(204);
-    });
-
     it("Quiz question picture", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
@@ -208,5 +195,18 @@ describe("Authentication", () => {
             .get(`/quiz/${quiz.id}/question/${quiz.questions[1].id}/picture`)
             .set("Authorization", `Bearer ${user.token}`);
         expect(res.status).to.equal(200);
+    });
+
+    it("Delete quiz", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const group = await createGroup(user.id, "foo");
+        const quiz = await createQuiz(user.id, group.id, QUIZ);
+
+        const res = await agent
+            .delete(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${user.token}`)
+            .send();
+        expect(res.status).to.equal(204);
     });
 });
