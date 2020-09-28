@@ -7,6 +7,9 @@ enum GroupRole { OWNER, MEMBER }
 /// Class representing a study group/class
 /// Do not instantiate this class; it will be created for you and returned
 /// by methods in `GroupModel`.
+/// The `name` field may be changed to update the group name. If doing so,
+/// pass the `Group` object to `GroupModel.updateGroup` to synchronise the
+/// change with the server. Do not change other fields.
 class Group {
   int _id;
   int get id => _id;

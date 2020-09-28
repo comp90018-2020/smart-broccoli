@@ -99,11 +99,17 @@ class GroupModel {
     throw Exception('Unable to create group: unknown error occurred');
   }
 
-  /// Update the [name] of the group with specified [id].
-  Future<Group> updateGroup(int id, String name) async {
-    http.Response response = await http.patch('$GROUP_URL/$id',
+  /// Synchronise an updated [group] with the server.
+  /// Return a `Quiz` object constructed from the server's response. All fields
+  /// should be equal in content.
+  ///
+  /// Usage:
+  /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
+  /// or `createGroup`. Mutate the `name` field then invoke this method.
+  Future<Group> updateGroup(Group group) async {
+    http.Response response = await http.patch('$GROUP_URL/${group.id}',
         headers: ApiBase.headers(authToken: _authModel.token),
-        body: jsonEncode(<String, String>{'name': name}));
+        body: jsonEncode(<String, String>{'name': group.name}));
 
     if (response.statusCode == 200)
       return Group.fromJson(json.decode(response.body));
