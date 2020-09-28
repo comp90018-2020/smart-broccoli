@@ -44,6 +44,7 @@ class QuizModel {
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
     throw Exception('Unable to get specified quiz: unknown error occurred');
   }
 
@@ -66,6 +67,7 @@ class QuizModel {
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
     throw Exception('Unable to update quiz: unknown error occurred');
   }
 
@@ -98,6 +100,7 @@ class QuizModel {
     if (response.statusCode == 204) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
     throw Exception('Unable to delete quiz: unknown error occurred');
   }
 }

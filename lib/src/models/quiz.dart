@@ -148,3 +148,6 @@ class QuestionOption {
     return <String, dynamic>{'text': text, 'correct': correct};
   }
 }
+
+/// Exception thrown when a quiz cannot be found by the server
+class QuizNotFoundException implements Exception {}
