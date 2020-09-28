@@ -38,7 +38,7 @@ class Quiz {
       'description': description,
       'isActive': isActive,
       'timeLimit': timeLimit,
-      'questions': questions.map((question) => question.toJson())
+      'questions': questions.map((question) => question.toJson()).toList()
     };
   }
 }
@@ -89,7 +89,7 @@ class MCQuestion extends Question {
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
     map['type'] = 'choice';
-    map['options'] = options.map((option) => option.toJson());
+    map['options'] = options.map((option) => option.toJson()).toList();
     return map;
   }
 }
