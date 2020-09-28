@@ -3,6 +3,50 @@ import ErrorStatus from "../helpers/error";
 import sequelize, { Group, User, UserGroup } from "../models";
 
 /**
+ * Get group of user.
+ * @param user User object
+ * @param groupId ID of target group
+ */
+const getGroupAndRole = async (user: User, groupId: number, role: string) => {
+    const groupQuery = await user.getGroups({
+        where: {
+            id: groupId,
+            [Op.or]:
+                role === "owner"
+                    ? // Is owner
+                      [{ "$UserGroup.role$": "owner" }]
+                    : // Owners are members also
+                      [
+                          { "$UserGroup.role$": "owner" },
+                          { "$UserGroup.role$": "member" },
+                      ],
+        },
+    });
+    if (groupQuery.length === 0) {
+        throw new ErrorStatus(
+            "User does not have privilege to access group resource",
+            403
+        );
+    }
+    return { group: groupQuery[0], role: groupQuery[0].UserGroup.role };
+};
+
+/**
+ * Ensure that user is group owner.
+ * @param userId
+ * @param groupId
+ */
+export const assertGroupOwnership = async (userId: number, groupId: number) => {
+    // Check whether caller is owner
+    const isOwner = await UserGroup.count({
+        where: { userId: userId, groupId, role: "owner" },
+    });
+    if (!isOwner) {
+        throw new ErrorStatus("Cannot perform group action", 403);
+    }
+};
+
+/**
  * Create default group for user.
  * @param user User object
  */
@@ -101,12 +145,10 @@ export const getGroupMembers = async (userId: number, groupId: number) => {
         },
     });
     if (!group) {
-        const err = new ErrorStatus("Group not found", 404);
-        throw err;
+        throw new ErrorStatus("Group not found", 404);
     }
     if (!group.Users.find((user) => user.id === userId)) {
-        const err = new ErrorStatus("User not part of group", 403);
-        throw err;
+        throw new ErrorStatus("User not part of group", 403);
     }
 
     return group.Users.map((user) => {
@@ -132,14 +174,13 @@ export const createGroup = async (
         defaultGroup,
     });
 
-    const t = await sequelize.transaction();
-
+    const transaction = await sequelize.transaction();
     try {
         // Save group
-        group = await group.save({ transaction: t });
+        group = await group.save({ transaction: transaction });
 
         // Generate first code
-        await regenerateCode(group, t);
+        await regenerateCodeHelper(group, transaction);
 
         // Add association
         await UserGroup.create(
@@ -148,12 +189,12 @@ export const createGroup = async (
                 groupId: group.id,
                 role: "owner",
             },
-            { transaction: t }
+            { transaction: transaction }
         );
 
-        await t.commit();
+        await transaction.commit();
     } catch (err) {
-        await t.rollback();
+        await transaction.rollback();
 
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
@@ -164,8 +205,7 @@ export const createGroup = async (
                     param,
                 },
             ];
-            const e = new ErrorStatus(err.message, 409, payload);
-            throw e;
+            throw new ErrorStatus(err.message, 409, payload);
         }
         throw err;
     }
@@ -188,8 +228,7 @@ export const joinGroup = async (
     } else if (opts.code) {
         query = { code: opts.code };
     } else {
-        const err = new ErrorStatus("No name or code provided", 400);
-        throw err;
+        throw new ErrorStatus("No name or code provided", 400);
     }
 
     // Find group
@@ -208,14 +247,12 @@ export const joinGroup = async (
         ],
     });
     if (!group) {
-        const err = new ErrorStatus("Group not found", 404);
-        throw err;
+        throw new ErrorStatus("Group not found", 404);
     }
 
     // Already part of group?
     if (group.Users.length > 0) {
-        const err = new ErrorStatus("Already member of group", 422);
-        throw err;
+        throw new ErrorStatus("Already member of group", 422);
     }
 
     // Create association
@@ -251,7 +288,7 @@ const generateCode = (length: number) => {
  * Regenerate code.
  * @param groupId
  */
-export const regenerateCode = async (
+const regenerateCodeHelper = async (
     group: Group,
     transaction?: Transaction
 ) => {
@@ -261,11 +298,7 @@ export const regenerateCode = async (
     while (true) {
         try {
             group.code = generateCode(6);
-            await group.save({ transaction });
-            const groupJSON: any = group.toJSON();
-            groupJSON.role = "owner";
-            delete groupJSON["Users"];
-            return groupJSON;
+            return await group.save({ transaction });
         } catch (err) {
             // continue
             attempt += 1;
@@ -278,50 +311,17 @@ export const regenerateCode = async (
 };
 
 /**
- * Get group by id and verify that user is creator.
- * @param userId
+ * Regenerate code helper.
+ * @param user User object
  * @param groupId
- * @param role Role of user
  */
-export const getGroupAndVerifyRole = async (
-    userId: number,
-    groupId: number,
-    role: string
-) => {
-    const group = await Group.findOne({
-        where: {
-            id: groupId,
-            [Op.or]:
-                role === "owner"
-                    ? // Is owner
-                      [{ "$Users.UserGroup.role$": "owner" }]
-                    : // Owners are members also
-                      [
-                          { "$Users.UserGroup.role$": "owner" },
-                          { "$Users.UserGroup.role$": "member" },
-                      ],
-        },
-        include: [
-            {
-                // @ts-ignore Typing errors due to model
-                model: User,
-                where: {
-                    id: userId,
-                },
-                attributes: ["id"],
-                required: true,
-            },
-        ],
-    });
-
-    if (!group) {
-        const err = new ErrorStatus(
-            "User does not have privileges to access specified group",
-            403
-        );
-        throw err;
-    }
-    return group;
+export const regenerateCode = async (user: User, groupId: number) => {
+    const { group } = await getGroupAndRole(user, groupId, "owner");
+    const groupUpdated = await regenerateCodeHelper(group);
+    const groupJSON: any = groupUpdated.toJSON();
+    groupJSON.role = "owner";
+    delete groupJSON["Users"];
+    return groupJSON;
 };
 
 /**
@@ -336,8 +336,7 @@ export const leaveGroup = async (groupId: number, userId: number) => {
         where: { groupId, role: "owner" },
     });
     if (userGroup.length === 1 && userGroup[0].userId === userId) {
-        const err = new ErrorStatus("Last owner of group cannot leave", 400);
-        throw err;
+        throw new ErrorStatus("Last owner of group cannot leave", 400);
     }
 
     // Destroy association
@@ -348,8 +347,7 @@ export const leaveGroup = async (groupId: number, userId: number) => {
         },
     });
     if (res != 1) {
-        const err = new ErrorStatus("Cannot leave group", 400);
-        throw err;
+        throw new ErrorStatus("Cannot leave group", 400);
     }
 };
 
@@ -358,7 +356,13 @@ export const leaveGroup = async (groupId: number, userId: number) => {
  * @param groupId
  * @param userId ID of member to delete
  */
-export const deleteMember = async (groupId: number, userId: number) => {
+export const deleteMember = async (
+    callerId: number,
+    groupId: number,
+    userId: number
+) => {
+    await assertGroupOwnership(callerId, groupId);
+
     const res = await UserGroup.destroy({
         where: {
             groupId,
@@ -367,8 +371,7 @@ export const deleteMember = async (groupId: number, userId: number) => {
         },
     });
     if (res != 1) {
-        const err = new ErrorStatus("Cannot delete member", 400);
-        throw err;
+        throw new ErrorStatus("Cannot delete member", 400);
     }
 };
 
@@ -376,7 +379,12 @@ export const deleteMember = async (groupId: number, userId: number) => {
  * Update group.
  * @param group
  */
-export const updateGroup = async (group: Group, name: string) => {
+export const updateGroup = async (
+    user: User,
+    groupId: number,
+    name: string
+) => {
+    const { group } = await getGroupAndRole(user, groupId, "owner");
     if (name && !group.defaultGroup) {
         group.name = name;
     }
@@ -396,8 +404,7 @@ export const updateGroup = async (group: Group, name: string) => {
                     param,
                 },
             ];
-            const e = new ErrorStatus(err.message, 409, payload);
-            throw e;
+            throw new ErrorStatus(err.message, 409, payload);
         }
         throw err;
     }
@@ -407,7 +414,11 @@ export const updateGroup = async (group: Group, name: string) => {
  * Delete group by ID.
  * @param groupId
  */
-export const deleteGroup = async (groupId: number) => {
+export const deleteGroup = async (userId: number, groupId: number) => {
+    // Check whether caller is owner
+    await assertGroupOwnership(userId, groupId);
+
+    // Destroy group
     const res = await Group.destroy({
         where: { id: groupId, defaultGroup: false },
     });
@@ -418,8 +429,9 @@ export const deleteGroup = async (groupId: number) => {
  * Get quizzes of group.
  * @param group Group that user is member of
  */
-export const getGroupQuizzes = async (group: Group) => {
-    const role = group.Users[0].UserGroup.role;
+export const getGroupQuizzes = async (user: User, groupId: number) => {
+    // Get group and role
+    const { group, role } = await getGroupAndRole(user, groupId, "member");
 
     // Only active quizzes for members
     const quizzes = await group.getQuizzes({

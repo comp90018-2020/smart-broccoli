@@ -7,8 +7,8 @@ import {
     deleteQuestion,
     updateQuestion,
 } from "./question";
-import { getGroupAndVerifyRole } from "./group";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { assertGroupOwnership } from "./group";
 
 /**
  * Processes questions of a quiz (since we don't operate on questions directly).
@@ -60,7 +60,7 @@ const processQuestions = async (
  */
 export const createQuiz = async (userId: number, info: any) => {
     // Ensure that creator is owner
-    await getGroupAndVerifyRole(userId, info.groupId, "owner");
+    await assertGroupOwnership(userId, info.groupId);
 
     // Create
     const quiz = new Quiz({
@@ -115,7 +115,7 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
 
     // Ensure that creator is owner
     if (info.groupId && info.groupId !== quiz.groupId) {
-        await getGroupAndVerifyRole(userId, info.groupId, "owner");
+        await assertGroupOwnership(userId, info.groupId);
     }
 
     // Updates
