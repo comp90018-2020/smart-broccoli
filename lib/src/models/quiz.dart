@@ -18,11 +18,13 @@ class Quiz {
   bool isActive;
 
   int timeLimit;
-  List<Question> questions = [];
+  List<Question> questions;
 
   /// Construtor for use when user creates a new quiz
   Quiz(this.title, this.groupId, this.type,
-      {this.description, this.isActive, this.timeLimit, this.questions});
+      {this.description, this.isActive, this.timeLimit, this.questions}) {
+    if (questions == null) questions = [];
+  }
 
   /// Constructor for internal use only
   Quiz._internal(this._id, this.title, this.groupId, this.type,
