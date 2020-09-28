@@ -30,4 +30,17 @@ class QuizModel {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to get quizzes: unknown error occurred');
   }
+
+  /// Return the quiz with specified [id].
+  Future<Quiz> getQuiz(int id) async {
+    http.Response response = await http.get('$QUIZ_URL/$id',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200)
+      return Quiz.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get specified quiz: unknown error occurred');
+  }
 }
