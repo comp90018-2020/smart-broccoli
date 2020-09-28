@@ -89,4 +89,15 @@ class QuizModel {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to create quiz: unknown error occurred');
   }
+
+  /// Delete the quiz with specified [id].
+  Future<void> deleteQuiz(int id) async {
+    http.Response response = await http.delete('$QUIZ_URL/$id',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 204) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to delete quiz: unknown error occurred');
+  }
 }
