@@ -14,7 +14,7 @@ before(async () => {
     // Remove upload directory
     await rmdir("uploads/");
     fs.mkdirSync("uploads/profile", { recursive: true });
-    fs.mkdirSync("uploads/question", { recursive: true });
+    fs.mkdirSync("uploads/quiz", { recursive: true });
 
     // Wait for server to start
     await server;

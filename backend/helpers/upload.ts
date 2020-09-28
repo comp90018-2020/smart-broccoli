@@ -104,7 +104,7 @@ const profileImageProcessor = async (filePath: string) => {
 };
 
 // Processes question pictures
-const questionPictureProcessor = async (filePath: string) => {
+const quizPictureProcessor = async (filePath: string) => {
     sharp.cache(false);
     const buf = await sharp(filePath).toBuffer();
 
@@ -118,4 +118,4 @@ const questionPictureProcessor = async (filePath: string) => {
         .toFile(`${filePath}.thumb`);
 };
 
-export { profileImageProcessor, questionPictureProcessor };
+export { profileImageProcessor, quizPictureProcessor };

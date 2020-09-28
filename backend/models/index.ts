@@ -40,6 +40,11 @@ User.belongsTo(Picture, {
     onDelete: "set null",
 });
 
+// Quiz has picture
+Quiz.belongsTo(Picture, {
+    foreignKey: "pictureId",
+    onDelete: "set null",
+});
 // Quiz has many questions
 Quiz.hasMany(Question, {
     as: "questions",

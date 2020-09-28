@@ -8,6 +8,8 @@ import {
     updateQuestion,
 } from "./question";
 import { getGroupAndVerifyRole } from "./group";
+import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { quizPictureProcessor } from "helpers/upload";
 
 /**
  * Processes questions of a quiz (since we don't operate on questions directly).
@@ -293,7 +295,34 @@ export const deleteQuiz = async (quizId: number) => {
 };
 
 /**
- * Get quiz picture.
- * @param quizId
+ * Update quiz picture.
+ * @param quiz Quiz object
+ * @param file Metadata about uploaded file
  */
-export const getQuizPicture = async (quiz: Quiz) => {};
+export const updateQuizPicture = async (quiz: Quiz, file: any) => {
+    const transaction = await sequelize.transaction();
+    try {
+        // Delete old picture
+        if (quiz.pictureId) {
+            await deletePicture(transaction, quiz.pictureId);
+        }
+        // Insert new picture
+        const picture = await insertPicture(transaction, file);
+        // Set picture
+        quiz.pictureId = picture.id;
+        await quiz.save({ transaction });
+
+        await transaction.commit();
+        return quiz;
+    } catch (err) {
+        await transaction.rollback();
+    }
+};
+
+/**
+ * Get quiz picture.
+ * @param quiz Quiz object
+ */
+export const getQuizPicture = async (quiz: Quiz) => {
+    return await getPictureById(quiz.pictureId);
+};

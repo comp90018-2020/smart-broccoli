@@ -38,6 +38,7 @@ interface QuizAttributes {
     groupId: number;
     type: string;
     active: boolean;
+    pictureId?: number;
     timeLimit?: number;
     questions?: Question[];
 }
@@ -55,6 +56,7 @@ export default class Quiz
     public type: string;
     public active: boolean;
     public timeLimit?: number;
+    public pictureId?: number;
     public readonly questions?: Question[];
 
     static initialise(sequelize: Sequelize.Sequelize) {

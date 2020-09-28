@@ -191,6 +191,34 @@ describe("Authentication", () => {
         expect(managedRes.body[0].id).to.equal(quiz1.id);
     });
 
+    it("Quiz picture", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const group = await createGroup(user.id, "foo");
+        const quiz = await createQuiz(user.id, group.id, QUIZ);
+
+        // Update twice
+        await agent
+            .put(`/quiz/${quiz.id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${user.token}`);
+        const pictureRes = await agent
+            .put(`/quiz/${quiz.id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(pictureRes.status).to.equal(200);
+
+        // Now get quiz picture
+        const res = await agent
+            .get(`/quiz/${quiz.id}/picture`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(res.status).to.equal(200);
+    });
+
     it("Quiz question picture", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);

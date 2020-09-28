@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction, Router } from "express";
+import multer from "multer";
+import fs from "fs";
 import ErrorStatus from "../helpers/error";
+import { param, body } from "express-validator";
 import {
     createQuiz,
     deleteQuiz,
@@ -7,17 +10,16 @@ import {
     getQuiz,
     getAllQuiz,
     getQuizAndRole,
+    updateQuizPicture,
+    getQuizPicture,
 } from "../controllers/quiz";
 import {
     updateQuestionPicture,
     getQuestionPicture,
 } from "../controllers/question";
-import { param, body } from "express-validator";
 import validate from "./middleware/validate";
-import { Quiz } from "models";
-import multer from "multer";
-import fs from "fs";
-import CustomStorage, { questionPictureProcessor } from "../helpers/upload";
+import { Quiz } from "../models";
+import CustomStorage, { quizPictureProcessor } from "../helpers/upload";
 
 /**
  * @swagger
@@ -369,14 +371,135 @@ router.delete(
 // Multer options
 const upload = multer({
     storage: new CustomStorage({
-        directorySuffix: "question",
-        imageProcessor: questionPictureProcessor,
+        directorySuffix: "quiz",
+        imageProcessor: quizPictureProcessor,
     }),
     limits: {
         files: 1,
         fileSize: 10 * 1024 * 1024, // 10MB
     },
 });
+
+// Upload middleware
+const quizPictureUploadMiddleware = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const pictureUpload = upload.single("picture");
+
+    // @ts-ignore
+    pictureUpload(req, res, (err: MulterError) => {
+        if (err instanceof multer.MulterError) {
+            res.status(400);
+            return next(err);
+        }
+        if (err) {
+            return next(err);
+        }
+        return next();
+    });
+};
+
+/**
+ * @swagger
+ * /quiz/{quizId}/picture:
+ *   put:
+ *     summary: Update quiz picture
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Quiz ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       '200':
+ *         description: OK
+ */
+router.put(
+    "/:quizId/picture",
+    [param("quizId").isInt()],
+    validate,
+    checkQuizPermissions("owner"),
+    quizPictureUploadMiddleware,
+    async (req: Request, res: Response, next: NextFunction) => {
+        // Save picture information to DB
+        try {
+            if (!req.file) {
+                const err = new Error("File not received");
+                res.status(400);
+                return next(err);
+            }
+            await updateQuizPicture(req.quiz, req.file);
+            return res.sendStatus(200);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /quiz/{quizId}/picture:
+ *   get:
+ *     summary: Get quiz picture
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Quiz ID
+ *     responses:
+ *       '200':
+ *         description: OK
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         image/png:
+ *           schema:
+ *             type: string
+ *             format: binary
+ */
+router.get(
+    "/:quizId/picture",
+    [param("quizId").isInt()],
+    validate,
+    checkQuizPermissions("participant"),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const picture = await getQuizPicture(req.quiz);
+            if (!picture) {
+                const err = new ErrorStatus("Picture not found", 404);
+                throw err;
+            }
+
+            // Set content header
+            res.setHeader("Content-Type", "image/png");
+
+            // Read and serve
+            const file = fs.readFileSync(`${picture.destination}.thumb`);
+            res.end(file, "binary");
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
 
 /**
  * @swagger
@@ -414,6 +537,7 @@ const upload = multer({
  */
 router.put(
     "/:quizId/question/:questionId/picture",
+    [param("questionId").isInt(), param("quizId").isInt()],
     validate,
     checkQuizPermissions("owner"),
     (req: Request, res: Response, next: NextFunction) => {
@@ -484,9 +608,10 @@ router.put(
  */
 router.get(
     "/:quizId/question/:questionId/picture",
+    [param("questionId").isInt(), param("quizId").isInt()],
     validate,
     checkQuizPermissions("participant", "active"),
-    async (req: Request, res, next) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
             const picture = await getQuestionPicture(
                 Number(req.params.quizId),
