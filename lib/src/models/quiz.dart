@@ -106,7 +106,7 @@ class TFQuestion extends Question {
 /// mutate the fields directly. The `Quiz` object holding the question must be
 /// synchronised with the server to finalise any changes.
 class MCQuestion extends Question {
-  List<QuestionOption> options = [];
+  List<QuestionOption> options;
 
   /// Constructor for use when user creates a new multiple choice question
   MCQuestion(String text, this.options, {int imgId}) : super(null, text, imgId);
