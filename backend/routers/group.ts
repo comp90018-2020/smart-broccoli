@@ -7,6 +7,7 @@ import {
     getGroup,
     getGroupAndVerifyRole,
     getGroupMembers,
+    getGroupQuizzes,
     getGroups,
     joinGroup,
     leaveGroup,
@@ -232,6 +233,45 @@ router.get(
                 Number(req.params.groupId)
             );
             return res.json(group);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /group/{groupId}:
+ *   get:
+ *     summary: Get quizzes of group
+ *     tags:
+ *       - Group
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 $ref: '#/components/schemas/Quiz'
+ */
+router.get(
+    "/:groupId/quiz",
+    [param("groupId").isInt()],
+    validate,
+    verifyRole("member"),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const quizzes = await getGroupQuizzes(req.group);
+            return res.json(quizzes);
         } catch (err) {
             return next(err);
         }

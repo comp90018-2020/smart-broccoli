@@ -199,6 +199,21 @@ describe("Authentication", () => {
         expect(allQuiz.body).to.have.lengthOf(2);
     });
 
+    it("Get quiz of group", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const group = await createGroup(user.id, "foo");
+        const quiz = await createQuiz(user.id, group.id, QUIZ);
+
+        const res = await agent
+            .get(`/group/${group.id}/quiz`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(1);
+        expect(res.body[0]).to.have.property("id");
+        expect(res.body[0].id).to.equal(quiz.id);
+    });
+
     it("Quiz picture", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);

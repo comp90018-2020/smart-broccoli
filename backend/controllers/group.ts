@@ -413,3 +413,17 @@ export const deleteGroup = async (groupId: number) => {
     });
     if (res != 1) throw new ErrorStatus("Cannot delete group", 400);
 };
+
+/**
+ * Get quizzes of group.
+ * @param group Group that user is member of
+ */
+export const getGroupQuizzes = async (group: Group) => {
+    const role = group.Users[0].UserGroup.role;
+
+    // Only active quizzes for members
+    const quizzes = await group.getQuizzes({
+        where: role === "owner" ? undefined : { active: true },
+    });
+    return quizzes;
+};
