@@ -1,3 +1,5 @@
+import 'package:fuzzy_broccoli/models.dart';
+
 enum QuizType { LIVE, SELF_PACED }
 
 class Quiz {
@@ -15,11 +17,14 @@ class Quiz {
   Quiz(this.id, this.title, this.groupId, this.type,
       {this.description, this.isActive, this.timeLimit, this.questions});
 
-  factory Quiz.fromJson(Map<String, dynamic> json) =>
-      Quiz(json['id'], json['title'], json['groupId'], json['type'],
-          description: json['description'],
-          isActive: json['isActive'],
-          timeLimit: json['timeLimit']);
+  factory Quiz.fromJson(Map<String, dynamic> json) => Quiz(
+      json['id'],
+      json['title'],
+      json['groupId'],
+      json['type'] == 'live' ? QuizType.LIVE : QuizType.SELF_PACED,
+      description: json['description'],
+      isActive: json['isActive'],
+      timeLimit: json['timeLimit']);
 }
 
 abstract class Question {
