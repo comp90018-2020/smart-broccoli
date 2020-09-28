@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:fuzzy_broccoli/models.dart';
 import 'package:http/http.dart' as http;
@@ -102,5 +103,38 @@ class QuizModel {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuizNotFoundException();
     throw Exception('Unable to delete quiz: unknown error occurred');
+  }
+
+  /// Set the picture of the quiz with specified [id].
+  /// This method takes the image as a list of bytes.
+  Future<void> setQuizPicture(int id, Uint8List bytes) async {
+    final http.MultipartRequest request =
+        http.MultipartRequest('PUT', Uri.parse('$QUIZ_URL/$id/picture'))
+          ..files.add(http.MultipartFile.fromBytes('picture', bytes));
+
+    final http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
+    throw Exception('Unable to set user profile pic: unknown error occurred');
+  }
+
+  /// Set the picture of the specified [questionId] in the quiz with specified
+  /// [quizId]. This method takes the image as a list of bytes.
+  Future<void> setQuestionPicture(
+      int quizId, int questionId, Uint8List bytes) async {
+    final http.MultipartRequest request = http.MultipartRequest(
+        'PUT', Uri.parse('$QUIZ_URL/$quizId/question/$questionId/picture'))
+      ..files.add(http.MultipartFile.fromBytes('picture', bytes));
+
+    final http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuestionNotFoundException();
+    throw Exception('Unable to set user profile pic: unknown error occurred');
   }
 }

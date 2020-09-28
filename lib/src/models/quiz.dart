@@ -151,3 +151,7 @@ class QuestionOption {
 
 /// Exception thrown when a quiz cannot be found by the server
 class QuizNotFoundException implements Exception {}
+
+/// Exception thrown when a question cannot be found by the server
+/// (thrown when setting a question picture)
+class QuestionNotFoundException implements Exception {}
