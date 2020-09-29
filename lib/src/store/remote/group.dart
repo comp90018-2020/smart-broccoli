@@ -171,9 +171,13 @@ class GroupModel {
     throw Exception('Unable to join group: unknown error occurred');
   }
 
-  /// Leave a group with specified [id].
-  Future<void> leaveGroup(int id) async {
-    http.Response response = await http.post('$GROUP_URL/$id/leave',
+  /// Leave a [group].
+  ///
+  /// Usage:
+  /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
+  /// or `createGroup`.
+  Future<void> leaveGroup(Group group) async {
+    http.Response response = await http.post('$GROUP_URL/${group.id}/leave',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 204) return;
