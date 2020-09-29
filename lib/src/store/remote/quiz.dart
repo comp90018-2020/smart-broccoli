@@ -115,17 +115,22 @@ class QuizModel {
     throw Exception('Unable to delete quiz: unknown error occurred');
   }
 
-  /// Get the picture of the quiz with specified [id] as a list of bytes.
+  /// Get the picture of a [quiz] as a list of bytes.
   /// Return `null` if there is no picture.
-  Future<Uint8List> getQuizPicture(int id) async {
-    final http.Response response = await http.get('$QUIZ_URL/$id/picture',
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  /// Mutate the fields to be updated (e.g. `title`, `questions`) then invoke
+  /// this method.
+  Future<Uint8List> getQuizPicture(Quiz quiz) async {
+    final http.Response response = await http.get('$QUIZ_URL/${quiz.id}/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) return response.bodyBytes;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) return null;
-    throw Exception('Unable to get user profile pic: unknown error occurred');
+    throw Exception('Unable to get quiz picture: unknown error occurred');
   }
 
   /// Set the picture of the quiz with specified [id].
