@@ -57,14 +57,12 @@ export const login = async (email: string, password: string) => {
         where: { email, role: "user" },
     });
     if (!user) {
-        const err = new ErrorStatus("Incorrect email/password", 403);
-        throw err;
+        throw new ErrorStatus("Incorrect email/password", 403);
     }
 
     // Verify password
     if (!(await user.verifyPassword(password))) {
-        const err = new ErrorStatus("Incorrect email/password", 403);
-        throw err;
+        throw new ErrorStatus("Incorrect email/password", 403);
     }
 
     // Generate and add token
@@ -93,12 +91,10 @@ export const logout = async (token: string) => {
 export const promoteParticipant = async (userId: number, info: any) => {
     const user = await User.findByPk(userId);
     if (!user) {
-        const err = new ErrorStatus("User not found", 404);
-        throw err;
+        throw new ErrorStatus("User not found", 404);
     }
     if (user.role === "user") {
-        const err = new ErrorStatus("User is already promoted", 400);
-        throw err;
+        throw new ErrorStatus("User is already promoted", 400);
     }
 
     user.password = info.password;

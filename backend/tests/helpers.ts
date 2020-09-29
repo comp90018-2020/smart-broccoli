@@ -1,5 +1,6 @@
 import * as AuthController from "../controllers/auth";
 import * as GroupController from "../controllers/group";
+import * as QuizController from "../controllers/quiz";
 
 // Register as user
 export const register = async (info: any) => {
@@ -26,3 +27,12 @@ export const createGroup = GroupController.createGroup;
 
 // Join group
 export const joinGroup = GroupController.joinGroup;
+
+// Create quiz
+export const createQuiz = async (
+    userId: number,
+    groupId: number,
+    quiz: any
+) => {
+    return await QuizController.createQuiz(userId, { ...quiz, groupId });
+};

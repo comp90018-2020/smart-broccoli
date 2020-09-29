@@ -49,7 +49,8 @@ const ITERATIONS = 100000;
 const ALGORITHM = "sha512";
 const KEYLEN = 64;
 
-class User extends Sequelize.Model<UserAttributes, UserCreationAttributes>
+class User
+    extends Sequelize.Model<UserAttributes, UserCreationAttributes>
     implements UserAttributes {
     public password?: string;
     public email?: string;

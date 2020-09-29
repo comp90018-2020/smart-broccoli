@@ -1,4 +1,4 @@
-import { UserGroup } from "models";
+import { Quiz, UserGroup } from "models";
 import Sequelize, {
     BelongsToManyGetAssociationsMixin,
     HasManyGetAssociationsMixin,
@@ -36,6 +36,7 @@ interface GroupAttributes {
     code: string;
     Users?: User[];
     UserGroup?: UserGroup;
+    Quizzes?: Quiz[];
 }
 interface GroupCreationAttributes
     extends Optional<GroupAttributes, "id" | "defaultGroup" | "code"> {}
@@ -49,8 +50,10 @@ export default class Group
     public code: string;
     public Users?: User[];
     public UserGroup?: UserGroup;
+    public Quizzes?: Quiz[];
 
     public getUsers!: BelongsToManyGetAssociationsMixin<User>;
+    public getQuizzes!: HasManyGetAssociationsMixin<Quiz>;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {
