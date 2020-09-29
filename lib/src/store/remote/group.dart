@@ -135,11 +135,16 @@ class GroupModel {
     throw Exception('Unable to delete group: unknown error occurred');
   }
 
-  /// Refresh the unique token for the group with specified [id].
+  /// Refresh the unique token for a [group].
+  /// Return a new `Group` object with an updated `code` field.
   /// The existing token will be discarded and users will no longer be able to
   /// join with it.
-  Future<Group> refreshToken(int id) async {
-    http.Response response = await http.post('$GROUP_URL/$id/code',
+  ///
+  /// Usage:
+  /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
+  /// or `createGroup`.
+  Future<Group> refreshToken(Group group) async {
+    http.Response response = await http.post('$GROUP_URL/${group.id}/code',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200)
