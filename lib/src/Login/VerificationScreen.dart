@@ -172,8 +172,8 @@ class _verficationScreen extends State<VerificationScreen>{
                 height: 50.0,
                 buttonColor: Colors.white,
                 child: RaisedButton(
-                  onPressed: _createAccountPressed, // TODO CHANGE
-                  child: Text("Create Account"),
+                  onPressed: _emailPressed, // TODO CHANGE
+                  child: Text("Send"),
                 ),
               ),
             ],
@@ -192,8 +192,8 @@ class _verficationScreen extends State<VerificationScreen>{
                 height: 50.0,
                 buttonColor: Colors.white,
                 child: RaisedButton(
-                  onPressed: _createAccountPressed, // TODO CHANGE
-                  child: Text("Create Account"),
+                  onPressed: _codePressed, // TODO CHANGE
+                  child: Text("Send Code"),
                 ),
               ),
             ],
@@ -212,8 +212,8 @@ class _verficationScreen extends State<VerificationScreen>{
                 height: 50.0,
                 buttonColor: Colors.white,
                 child: RaisedButton(
-                  onPressed: _createAccountPressed, // TODO CHANGE
-                  child: Text("Create Account"),
+                  onPressed: _passwordPressed, // TODO CHANGE
+                  child: Text("Reset Password"),
                 ),
               ),
             ],
@@ -223,8 +223,27 @@ class _verficationScreen extends State<VerificationScreen>{
     }
   }
 
+
   
   void _createAccountPressed() {
+  }
+
+  void _emailPressed() async {
+
+    setState(() {
+      _form = FormType.Code;
+    });
+  }
+
+  void _codePressed() async {
+
+    setState(() {
+      _form =_form = FormType.Password;
+    });
+  }
+
+  void _passwordPressed(){
+    print("transition time");
   }
 }
 

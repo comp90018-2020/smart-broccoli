@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'VerificationScreen.dart';
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -97,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     // Create a new Scaffold
     return new Scaffold(
-      backgroundColor: Color(0xFF00C853),
 
       body: new Container(
         // Background colour scheme controls
@@ -170,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildTextFields() {
     if(_form == FormType.login) {
       return new Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(35.0),
         child: new Column(
           children: <Widget>[
             new Container(
@@ -203,7 +204,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     else{
       return new Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(35.0),
         child: new Column(
           children: <Widget>[
             new Container(
@@ -299,7 +300,7 @@ class _LoginPageState extends State<LoginPage> {
     // TODO move to other place
     else {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0,50,0,0),
+        padding: const EdgeInsets.fromLTRB(0,20,0,0),
         child: new Container(
           child: new Column(
             children: <Widget>[
@@ -343,5 +344,9 @@ class _LoginPageState extends State<LoginPage> {
 
   void _passwordReset () {
     print("The user wants a password reset request sent to $_email");
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => VerificationScreen())
+    );
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:fuzzy_broccoli/src/cache.dart';
-import 'package:fuzzy_broccoli/src/models.dart';
+import 'package:fuzzy_broccoli/cache.dart';
+import 'package:fuzzy_broccoli/models.dart';
 import 'package:http/http.dart' as http;
 
 import 'api_base.dart';
