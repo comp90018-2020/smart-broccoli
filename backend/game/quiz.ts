@@ -1,52 +1,13 @@
 import { jwtVerify } from "../helpers/jwt";
+import Quiz from "../models/quiz";
+import Question from "../models/question";
 
-class Question {
-    private id: number;
-    private type: string;
-    private text: string;
-    private timeLimit: number;
-    private tf: boolean;
-    private options: [{ "correct": boolean, "text": string }]
-
-
-    constructor(id: number, $type: string, $text: string, $timeLimit: number, $tf: boolean) {
-        this.id = id;
-        this.type = $type;
-        this.text = $text;
-        this.timeLimit = $timeLimit;
-        this.tf = $tf;
-    }
-
-
-}
-class Quiz {
-    private id: number;
-    private pos = -1;
-
-    title: string;
-    description: string;
-    timeLimit: number;
-    groupId: number;
-    type: string;
-    questions: [Question];
-
-    constructor($id: number) {
-
-        // for test1
-        this.id = $id;
-        this.description = "descriptyion";
-        this.timeLimit = 15;
-        this.groupId = 1;
-        this.type = "live";
-        this.questions = [new Question(1, "", "", 1, false)];
-    }
+export class QuizIterator extends Quiz {
+    private pos = 0;
 
     loadQuiz(quizId: number) {
     }
-    next() {
-        return this.questions[this.pos++];
-    }
-
+    [Symbol.iterator]() { return super.questions.values() }
 
 }
 export class LiveQuiz {
@@ -59,7 +20,9 @@ export class LiveQuiz {
     secret: string = "aaa";
 
 
-    constructor() { }
+    constructor() { 
+        this.sess = {}
+    }
 
     /**
      *  Verify socket connection using jwt token 
@@ -77,11 +40,10 @@ export class LiveQuiz {
         // verify connection
         this.verifySocketConn(socket);
 
-        const quizId = content.quizId;
+        const quizId:number = content.quizId;
 
         // json resoonse  
         let ret: { [key: string]: string };
-        console.log(content);
         if (quizId in this.sess) {
             // quiz is in session
             if (this.sess[quizId].status == "inactive") {
@@ -94,7 +56,7 @@ export class LiveQuiz {
         } else {
             // quiz is not in session
             // init quiz in session and make the status be active
-            this.sess[quizId].status = "active";
+            this.sess[quizId] = {"status":"active"};
             ret = { "res": "success" }
         }
 
