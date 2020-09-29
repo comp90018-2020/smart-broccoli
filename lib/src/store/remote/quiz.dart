@@ -50,8 +50,8 @@ class QuizModel {
   }
 
   /// Synchronise an updated [quiz] with the server.
-  /// Return a `Quiz` object constructed from the server's response. All fields
-  /// should be equal in content.
+  /// Return a `Quiz` object constructed from the server's response (all fields
+  /// should be equal in content).
   ///
   /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
@@ -102,8 +102,6 @@ class QuizModel {
   ///
   /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
-  /// Mutate the fields to be updated (e.g. `title`, `questions`) then invoke
-  /// this method.
   Future<void> deleteQuiz(Quiz quiz) async {
     http.Response response = await http.delete('$QUIZ_URL/${quiz.id}',
         headers: ApiBase.headers(authToken: _authModel.token));
@@ -120,10 +118,9 @@ class QuizModel {
   ///
   /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
-  /// Mutate the fields to be updated (e.g. `title`, `questions`) then invoke
-  /// this method.
   Future<Uint8List> getQuizPicture(Quiz quiz) async {
-    final http.Response response = await http.get('$QUIZ_URL/${quiz.id}/picture',
+    final http.Response response = await http.get(
+        '$QUIZ_URL/${quiz.id}/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) return response.bodyBytes;
@@ -138,8 +135,6 @@ class QuizModel {
   ///
   /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
-  /// Mutate the fields to be updated (e.g. `title`, `questions`) then invoke
-  /// this method.
   Future<void> setQuizPicture(Quiz quiz, Uint8List bytes) async {
     final http.MultipartRequest request =
         http.MultipartRequest('PUT', Uri.parse('$QUIZ_URL/${quiz.id}/picture'))
