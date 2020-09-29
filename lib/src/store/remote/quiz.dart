@@ -153,29 +153,30 @@ class QuizModel {
   /// Return `null` if there is no picture.
   ///
   /// Usage:
-  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
-  /// [question] should be in the list `[quiz].questions`.
-  Future<Uint8List> getQuestionPicture(Quiz quiz, Question question) async {
+  /// [question] should be in the list `quiz.questions` where `quiz` is a `Quiz`
+  /// object obtained by `getQuiz` or `getQuizzes`.
+  Future<Uint8List> getQuestionPicture(Question question) async {
     final http.Response response = await http.get(
-        '$QUIZ_URL/${quiz.id}/question/${question.id}/picture',
+        '$QUIZ_URL/${question.quiz.id}/question/${question.id}/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) return response.bodyBytes;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) return null;
-    throw Exception('Unable to get user profile pic: unknown error occurred');
+    throw Exception('Unable to get question picture: unknown error occurred');
   }
 
   /// Set the picture of a [question].
   ///
   /// Usage:
-  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
-  /// [question] should be in the list `[quiz].questions`.
-  Future<void> setQuestionPicture(
-      Quiz quiz, Question question, Uint8List bytes) async {
-    final http.MultipartRequest request = http.MultipartRequest('PUT',
-        Uri.parse('$QUIZ_URL/${quiz.id}/question/${question.id}/picture'))
+  /// [question] should be in the list `quiz.questions` where `quiz` is a `Quiz`
+  /// object obtained by `getQuiz` or `getQuizzes`.
+  Future<void> setQuestionPicture(Question question, Uint8List bytes) async {
+    final http.MultipartRequest request = http.MultipartRequest(
+        'PUT',
+        Uri.parse(
+            '$QUIZ_URL/${question.quiz.id}/question/${question.id}/picture'))
       ..files.add(http.MultipartFile.fromBytes('picture', bytes));
 
     final http.StreamedResponse response = await request.send();
@@ -184,6 +185,6 @@ class QuizModel {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuestionNotFoundException();
-    throw Exception('Unable to set user profile pic: unknown error occurred');
+    throw Exception('Unable to set question picture: unknown error occurred');
   }
 }
