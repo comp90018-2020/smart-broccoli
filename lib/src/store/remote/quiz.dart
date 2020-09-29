@@ -98,9 +98,14 @@ class QuizModel {
     throw Exception('Unable to create quiz: unknown error occurred');
   }
 
-  /// Delete the quiz with specified [id].
-  Future<void> deleteQuiz(int id) async {
-    http.Response response = await http.delete('$QUIZ_URL/$id',
+  /// Delete a [quiz].
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  /// Mutate the fields to be updated (e.g. `title`, `questions`) then invoke
+  /// this method.
+  Future<void> deleteQuiz(Quiz quiz) async {
+    http.Response response = await http.delete('$QUIZ_URL/${quiz.id}',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 204) return;
