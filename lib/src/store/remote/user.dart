@@ -92,7 +92,7 @@ class UserModel {
   }
 
   User _userFromJson(String json) {
-    Map<String, String> jsonMap = jsonDecode(json);
+    Map<String, dynamic> jsonMap = jsonDecode(json);
     return jsonMap['role'] == 'participant'
         ? ParticipantUser.fromJson(jsonMap)
         : RegisteredUser.fromJson(jsonMap);
