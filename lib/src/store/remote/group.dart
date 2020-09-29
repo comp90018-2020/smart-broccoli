@@ -186,11 +186,15 @@ class GroupModel {
     throw Exception('Unable to leave group: unknown error occurred');
   }
 
-  /// Remove the member with [memberId] from the group with [groupId].
-  Future<void> kickMember(int groupId, int memberId) async {
-    http.Response response = await http.post('$GROUP_URL/$groupId/member/kick',
+  /// Remove a [member] from a [group].
+  ///
+  /// Usage:
+  /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
+  /// or `createGroup`.
+  Future<void> kickMember(Group group, User member) async {
+    http.Response response = await http.post('$GROUP_URL/${group.id}/member/kick',
         headers: ApiBase.headers(authToken: _authModel.token),
-        body: jsonEncode(<String, int>{'memberId': memberId}));
+        body: jsonEncode(<String, int>{'memberId': member.id}));
 
     if (response.statusCode == 204) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
