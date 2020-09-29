@@ -107,7 +107,8 @@ class GroupModel {
 
   /// Synchronise an updated [group] with the server.
   /// Return a `Quiz` object constructed from the server's response. All fields
-  /// should be equal in content.
+  /// except `members` should be equal in content. The `members` field will be
+  /// `null` in the returned object; use `getMembers` to set the field.
   ///
   /// Usage:
   /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
