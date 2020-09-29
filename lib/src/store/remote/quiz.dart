@@ -202,4 +202,20 @@ class QuizModel {
     if (response.statusCode == 404) throw QuestionNotFoundException();
     throw Exception('Unable to set question picture: unknown error occurred');
   }
+
+  /// Delete the picture of a [question].
+  ///
+  /// Usage:
+  /// [question] should be in the list `quiz.questions` where `quiz` is a `Quiz`
+  /// object obtained by `getQuiz` or `getQuizzes`.
+  Future<void> deleteQuestionPicture(Question question) async {
+    final http.Response response = await http.delete(
+        '$QUIZ_URL/${question.quiz.id}/question/${question.id}/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 204) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get question picture: unknown error occurred');
+  }
 }
