@@ -10,13 +10,11 @@ export const assertUserRole = async (
     next: NextFunction
 ) => {
     if (!req.user) {
-        const err = new Error("Role checking failure");
-        return next(err);
+        return next(new Error("Role checking failure"));
     }
 
     if (req.user.role !== "user") {
-        const err = new ErrorStatus("Route requires user role", 403);
-        return next(err);
+        return next(new ErrorStatus("Route requires user role", 403));
     }
 
     return next();

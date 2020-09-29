@@ -17,14 +17,12 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
     // Examine header
     const auth_header = req.header("authorization");
     if (!auth_header || !auth_header.toLocaleLowerCase().includes("bearer ")) {
-        const err = new ErrorStatus("Unauthorized", 401);
-        return next(err);
+        return next(new ErrorStatus("Unauthorized", 401));
     }
 
     const token = auth_header.split(" ")[1];
     if (!token) {
-        const err = new ErrorStatus("Unauthorized", 401);
-        return next(err);
+        return next(new ErrorStatus("Unauthorized", 401));
     }
 
     try {
@@ -37,12 +35,10 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
             include: ["User"],
         });
         if (!tokenLookup || tokenLookup.revoked) {
-            const err = new ErrorStatus("Token revoked or missing", 403);
-            throw err;
+            throw new ErrorStatus("Token revoked or missing", 403);
         }
         if (!tokenLookup.User) {
-            const err = new ErrorStatus("Bad token", 500);
-            throw err;
+            throw new ErrorStatus("Bad token", 500);
         }
 
         req.user = tokenLookup.User;

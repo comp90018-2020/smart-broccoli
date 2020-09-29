@@ -5,6 +5,8 @@ import Sequelize from "sequelize";
 import User from "./user";
 import Token from "./token";
 import Picture from "./picture";
+import Quiz from "./quiz";
+import Question from "./question";
 import Group from "./group";
 import UserGroup from "./user_group";
 
@@ -24,22 +26,50 @@ const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
 Picture.initialise(sequelize);
 User.initialise(sequelize);
 Token.initialise(sequelize);
+Question.initialise(sequelize);
+Quiz.initialise(sequelize);
 Group.initialise(sequelize);
 UserGroup.initialise(sequelize);
 
 // User has many tokens
 User.hasMany(Token, { as: "tokens", foreignKey: "userId" });
 Token.belongsTo(User, { foreignKey: "userId" });
-// User has picture
+// User has profile picture
 User.belongsTo(Picture, {
     foreignKey: "pictureId",
     onDelete: "set null",
 });
 
+// Quiz has picture
+Quiz.belongsTo(Picture, {
+    foreignKey: "pictureId",
+    onDelete: "set null",
+});
+// Quiz has many questions
+Quiz.hasMany(Question, {
+    as: "questions",
+    foreignKey: "quizId",
+    onDelete: "cascade",
+});
+// Question has picture
+Question.belongsTo(Picture, {
+    foreignKey: "pictureId",
+    onDelete: "set null",
+});
+// Quiz belongs to group
+Quiz.belongsTo(Group, {
+    foreignKey: "groupId",
+    onDelete: "cascade",
+});
+Group.hasMany(Quiz, {
+    foreignKey: "groupId",
+});
+
+// Users and groups are associated
 // @ts-ignore
 Group.belongsToMany(User, { through: UserGroup, foreignKey: "groupId" });
 // @ts-ignore
 User.belongsToMany(Group, { through: UserGroup, foreignKey: "userId" });
 
 export default sequelize;
-export { User, Token, UserGroup, Group, Picture };
+export { User, Token, UserGroup, Group, Question, Quiz, Picture };
