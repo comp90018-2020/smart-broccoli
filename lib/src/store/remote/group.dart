@@ -156,9 +156,12 @@ class GroupModel {
   }
 
   /// Join a group, either by specified [name] or [code].
-  /// Return a `Group` objet corresponding to the group joined.
-  /// Caveat: List of members is not fetched; `members` field will be `null`.
-  Future<Group> joinGroup({String name, String code}) async {
+  /// Return a `Group` object corresponding to the group joined.
+  /// If the optional parameter [fetchMembers] is `true`, each `Group` object
+  /// in the list will contain a non-null `members` field (a list of the same
+  /// format returned by `getMembers`). Otherwise, the `members` field of each
+  /// group will be `null`.
+  Future<Group> joinGroup({String name, String code, bool fetchMembers = false}) async {
     if (name == null && code == null)
       throw ArgumentError('`name` or `code` parameter must be specified');
 
@@ -168,8 +171,11 @@ class GroupModel {
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(body));
 
-    if (response.statusCode == 200)
-      return Group.fromJson(json.decode(response.body));
+    if (response.statusCode == 200) {
+      Group group = Group.fromJson(json.decode(response.body));
+      if (fetchMembers) group.members = await getMembers(group.id);
+      return group;
+    }
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
