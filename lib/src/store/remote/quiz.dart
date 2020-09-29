@@ -149,11 +149,15 @@ class QuizModel {
     throw Exception('Unable to set quiz picture: unknown error occurred');
   }
 
-  /// Get the picture of the quiz with specified [id] as a list of bytes.
+  /// Get the picture of a [question] as a list of bytes.
   /// Return `null` if there is no picture.
-  Future<Uint8List> getQuestionPicture(int quizId, int questionId) async {
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  /// [question] should be in the list `[quiz].questions`.
+  Future<Uint8List> getQuestionPicture(Quiz quiz, Question question) async {
     final http.Response response = await http.get(
-        '$QUIZ_URL/$quizId/question/$questionId/picture',
+        '$QUIZ_URL/${quiz.id}/question/${question.id}/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) return response.bodyBytes;
