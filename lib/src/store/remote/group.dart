@@ -156,6 +156,8 @@ class GroupModel {
   }
 
   /// Join a group, either by specified [name] or [code].
+  /// Return a `Group` objet corresponding to the group joined.
+  /// Caveat: List of members is not fetched; `members` field will be `null`.
   Future<Group> joinGroup({String name, String code}) async {
     if (name == null && code == null)
       throw ArgumentError('`name` or `code` parameter must be specified');
@@ -197,7 +199,8 @@ class GroupModel {
   /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
   /// or `createGroup`.
   Future<void> kickMember(Group group, User member) async {
-    http.Response response = await http.post('$GROUP_URL/${group.id}/member/kick',
+    http.Response response = await http.post(
+        '$GROUP_URL/${group.id}/member/kick',
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(<String, int>{'memberId': member.id}));
 
