@@ -52,7 +52,7 @@ export const updateProfilePicture = async (userId: number, file: any) => {
     try {
         // Delete the old picture
         if (user.pictureId) {
-            await deletePicture(transaction, user.pictureId);
+            await deletePicture(user.pictureId, transaction);
         }
         // Insert the new picture
         const picture = await insertPicture(transaction, file);
@@ -79,6 +79,13 @@ export const getProfilePicture = async (pictureId: number) => {
     }
     return picture;
 };
+
+/**
+ * Delete user's profile picture.
+ * Authorization handled by caller.
+ * @param pictureId ID of picture
+ */
+export const deleteProfilePicture = deletePicture;
 
 /**
  * Can current user access target user's profile?

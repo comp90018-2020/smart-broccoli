@@ -10,7 +10,7 @@ import {
 } from "./helpers";
 import { readFileSync } from "fs";
 
-describe("Authentication", () => {
+describe("Quiz", () => {
     beforeEach(async () => {
         await rebuild();
     });
@@ -242,6 +242,30 @@ describe("Authentication", () => {
         expect(res.status).to.equal(200);
     });
 
+    it("Delete quiz picture", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const group = await createGroup(user.id, "foo");
+        const quiz = await createQuiz(user.id, group.id, QUIZ);
+
+        await agent
+            .put(`/quiz/${quiz.id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${user.token}`);
+
+        const res = await agent
+            .delete(`/quiz/${quiz.id}/picture`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(res.status).to.equal(204);
+
+        const check = await agent
+            .get(`/quiz/${quiz.id}/picture`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(check.status).to.equal(404);
+    });
+
     it("Quiz question picture", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
@@ -294,6 +318,30 @@ describe("Authentication", () => {
             .get(`/quiz/${quiz.id}/question/${quiz.questions[1].id}/picture`)
             .set("Authorization", `Bearer ${user.token}`);
         expect(res.status).to.equal(200);
+    });
+
+    it("Delete question picture", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const group = await createGroup(user.id, "foo");
+        const quiz = await createQuiz(user.id, group.id, QUIZ);
+
+        await agent
+            .put(`/quiz/${quiz.id}/question/${quiz.questions[1].id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${user.token}`);
+
+        const res = await agent
+            .delete(`/quiz/${quiz.id}/question/${quiz.questions[1].id}/picture`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(res.status).to.equal(204);
+
+        const check = await agent
+            .get(`/quiz/${quiz.id}/question/${quiz.questions[1].id}/picture`)
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(check.status).to.equal(404);
     });
 
     it("Delete quiz", async () => {

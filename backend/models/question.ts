@@ -39,7 +39,8 @@ interface QuestionAttributes {
     pictureId?: number;
 }
 
-export default class Question extends Sequelize.Model<QuestionAttributes>
+export default class Question
+    extends Sequelize.Model<QuestionAttributes>
     implements QuestionAttributes {
     public text?: string;
     public type!: string;

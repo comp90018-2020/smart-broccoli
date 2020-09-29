@@ -210,7 +210,7 @@ export const updateQuestionPicture = async (
     try {
         // Delete the old picture
         if (question.pictureId) {
-            await deletePicture(transaction, question.pictureId);
+            await deletePicture(question.pictureId, transaction);
         }
         // Insert the new picture
         const picture = await insertPicture(transaction, file);
@@ -251,4 +251,35 @@ export const getQuestionPicture = async (
         throw new ErrorStatus("Cannot find question", 404);
     }
     return await getPictureById(question.pictureId);
+};
+
+/**
+ * Delete question picture.
+ * @param userId
+ * @param quizId
+ */
+export const deleteQuestionPicture = async (
+    userId: number,
+    quizId: number,
+    questionId: number
+) => {
+    // Ensure that user is owner
+    const { role } = await getQuizAndRole(userId, quizId);
+    if (role !== "owner") {
+        throw new ErrorStatus("Cannot update picture", 403);
+    }
+
+    // Get question
+    const question = await Question.findOne({
+        where: {
+            quizId,
+            id: questionId,
+        },
+        attributes: ["pictureId"],
+    });
+    if (!question) {
+        throw new ErrorStatus("Cannot find question", 404);
+    }
+
+    return await deletePicture(question.pictureId);
 };
