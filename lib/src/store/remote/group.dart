@@ -120,9 +120,13 @@ class GroupModel {
     throw Exception('Unable to update group: unknown error occurred');
   }
 
-  /// Delete the group with specified [id].
-  Future<void> deleteGroup(int id) async {
-    http.Response response = await http.delete('$GROUP_URL/$id',
+  /// Delete a [group].
+  ///
+  /// Usage:
+  /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
+  /// or `createGroup`.
+  Future<void> deleteGroup(Group group) async {
+    http.Response response = await http.delete('$GROUP_URL/${group.id}',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 204) return;
