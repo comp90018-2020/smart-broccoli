@@ -34,7 +34,7 @@ class GroupModel {
       if (fetchMembers)
         for (final Group group in groups)
           try {
-            group.members = await getMembers(group.id);
+            await getMembers(group);
           } catch (err) {
             continue;
           }
@@ -57,7 +57,7 @@ class GroupModel {
 
     if (response.statusCode == 200) {
       Group group = Group.fromJson(json.decode(response.body));
-      if (fetchMembers) group.members = await getMembers(group.id);
+      if (fetchMembers) await getMembers(group);
       return group;
     }
 
@@ -66,17 +66,23 @@ class GroupModel {
     throw Exception('Unable to get specified group: unknown error occurred');
   }
 
-  /// Return a list of (user, role) tuples, each corresponding to a member in
-  /// the group with specified [id].
-  Future<List<Tuple2<User, GroupRole>>> getMembers(int id) async {
-    http.Response response = await http.get('$GROUP_URL/$id/member',
+  /// Fetch the members of a [group] from the server and set the `members`
+  /// field of the object accordingly.
+  ///
+  /// Usage:
+  /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
+  /// or `createGroup`.
+  Future<void> getMembers(Group group) async {
+    http.Response response = await http.get('$GROUP_URL/${group.id}/member',
         headers: ApiBase.headers(authToken: _authModel.token));
 
-    if (response.statusCode == 200)
-      return (json.decode(response.body) as List)
+    if (response.statusCode == 200) {
+      group.members = (json.decode(response.body) as List)
           .map((repr) => Tuple2(User.fromJson(repr),
               repr['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER))
           .toList();
+      return;
+    }
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
@@ -161,7 +167,8 @@ class GroupModel {
   /// in the list will contain a non-null `members` field (a list of the same
   /// format returned by `getMembers`). Otherwise, the `members` field of each
   /// group will be `null`.
-  Future<Group> joinGroup({String name, String code, bool fetchMembers = false}) async {
+  Future<Group> joinGroup(
+      {String name, String code, bool fetchMembers = false}) async {
     if (name == null && code == null)
       throw ArgumentError('`name` or `code` parameter must be specified');
 
@@ -173,7 +180,7 @@ class GroupModel {
 
     if (response.statusCode == 200) {
       Group group = Group.fromJson(json.decode(response.body));
-      if (fetchMembers) group.members = await getMembers(group.id);
+      if (fetchMembers) await getMembers(group);
       return group;
     }
 
