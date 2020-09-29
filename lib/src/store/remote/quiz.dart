@@ -133,11 +133,16 @@ class QuizModel {
     throw Exception('Unable to get quiz picture: unknown error occurred');
   }
 
-  /// Set the picture of the quiz with specified [id].
+  /// Set the picture of a [quiz].
   /// This method takes the image as a list of bytes.
-  Future<void> setQuizPicture(int id, Uint8List bytes) async {
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  /// Mutate the fields to be updated (e.g. `title`, `questions`) then invoke
+  /// this method.
+  Future<void> setQuizPicture(Quiz quiz, Uint8List bytes) async {
     final http.MultipartRequest request =
-        http.MultipartRequest('PUT', Uri.parse('$QUIZ_URL/$id/picture'))
+        http.MultipartRequest('PUT', Uri.parse('$QUIZ_URL/${quiz.id}/picture'))
           ..files.add(http.MultipartFile.fromBytes('picture', bytes));
 
     final http.StreamedResponse response = await request.send();
@@ -146,7 +151,7 @@ class QuizModel {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuizNotFoundException();
-    throw Exception('Unable to set user profile pic: unknown error occurred');
+    throw Exception('Unable to set quiz picture: unknown error occurred');
   }
 
   /// Get the picture of the quiz with specified [id] as a list of bytes.
