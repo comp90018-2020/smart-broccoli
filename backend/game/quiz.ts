@@ -1,12 +1,21 @@
 import { jwtVerify } from "../helpers/jwt";
 import Quiz from "../models/quiz";
 import Question from "../models/question";
+import {getQuiz} from "../controllers/quiz"; 
 
 export class QuizIterator extends Quiz {
     private pos = 0;
 
     loadQuiz(quizId: number) {
     }
+
+    next(){
+        if (this.pos < this.questions.length)
+            return this.questions[this.pos++];
+        else
+            return false;
+    }
+
     [Symbol.iterator]() { return super.questions.values() }
 
 }
@@ -36,11 +45,13 @@ export class LiveQuiz {
         return {}
     }
 
-    activeQuiz(socket: SocketIO.Socket, content: any) {
+    async activeQuiz(socket: SocketIO.Socket, content: any) {
         // verify connection
         this.verifySocketConn(socket);
 
-        const quizId:number = content.quizId;
+        const quizId = content.quizId;
+        const userId = socket.handshake.query.userId;
+        console.log(userId)
 
         // json resoonse  
         let ret: { [key: string]: string };
@@ -56,7 +67,9 @@ export class LiveQuiz {
         } else {
             // quiz is not in session
             // init quiz in session and make the status be active
-            this.sess[quizId] = {"status":"active"};
+            const quizJson = await getQuiz(userId, Number(quizId))
+            console.log(this.sess);
+            this.sess[quizId] = {"status":"active", "quiz": new Quiz()};
             ret = { "res": "success" }
         }
 
@@ -72,7 +85,9 @@ export class LiveQuiz {
 
         // json resoonse  
         const ret = { "res": "success" };
-        this.sess[quizId].status = "active";
+        if (quizId in this.sess && "status" in this.sess[quizId]){
+            this.sess[quizId].status = "active";
+        }
 
         // response to the end
         socket.send(ret);
@@ -92,9 +107,10 @@ export class LiveQuiz {
             socket.join(quizId);
             ret = { "res": "success" };
         } else {
-            ret = { "res": "falied", "msg": "`${quizId} is not active: `${this.sess[quizId].status}``" };
+            ret = { "res": "falied", "msg": `${quizId} is not active` };
         }
 
+        console.log(this.sess)
         // response to the end
         socket.send(ret);
 
@@ -106,10 +122,28 @@ export class LiveQuiz {
 
         const quizId = content.quizId;
 
-        // json resoonse  
-        let ret: { [key: string]: string };
         if (quizId in this.sess && this.sess[quizId].status === 'active') {
-            ret = { "res": "success" };
+            const msg = {"action": 0, "msg": "Quiz starts" };
+            // broadcast to the room with msg that quiz has been started
+            socket.to(quizId).send(msg);
+
+            // broadcast to the room the first question
+            this.nextQuestion(socket, content);
+        } else {
+            const ret = { "res": "falied", "msg": "`${quizId} is not active: `${this.sess[quizId].status}``" };
+            socket.send(ret);
+        }
+    }
+
+    nextQuestion(socket: SocketIO.Socket, content: any) {
+        // verify connection
+        this.verifySocketConn(socket);
+        const quizId = content.quizId;
+        // json resoonse  
+        let ret: { [key: string]: any };
+
+        if (quizId in this.sess && this.sess[quizId].status === 'active') {
+            ret = {"action": 0, "msg": "Quiz starts" };
             // broadcast to the room that quiz has been started
             socket.to(quizId).send(ret);
 
@@ -125,15 +159,17 @@ export class LiveQuiz {
 
     }
 
-    nextQuestion(socket: SocketIO.Socket, content: any) {
+
+
+    releaseLeaderBoardQuiz(socket: SocketIO.Socket, content: any) {
 
     }
 
-    getLeaderBoardQuiz(socket: SocketIO.Socket) {
+    endQuiz(socket: SocketIO.Socket, content: any) {
 
     }
 
-    endQuiz(socket: SocketIO.Socket) {
+    getQuizStatus(socket: SocketIO.Socket, content: any) {
 
     }
 }
