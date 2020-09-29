@@ -270,7 +270,7 @@ export const updateQuizPicture = async (
     try {
         // Delete old picture
         if (quiz.pictureId) {
-            await deletePicture(transaction, quiz.pictureId);
+            await deletePicture(quiz.pictureId, transaction);
         }
         // Insert new picture
         const picture = await insertPicture(transaction, file);
@@ -293,4 +293,18 @@ export const getQuizPicture = async (userId: number, quizId: number) => {
     // Ensure that user can access quiz
     const { quiz } = await getQuizAndRole(userId, quizId);
     return await getPictureById(quiz.pictureId);
+};
+
+/**
+ * Delete quiz picture.
+ * @param userId
+ * @param quizId
+ */
+export const deleteQuizPicture = async (userId: number, quizId: number) => {
+    // Ensure that user is owner
+    const { quiz, role } = await getQuizAndRole(userId, quizId);
+    if (role !== "owner") {
+        throw new ErrorStatus("Cannot delete picture", 403);
+    }
+    return await deletePicture(quiz.pictureId);
 };

@@ -13,10 +13,12 @@ import {
     getAllQuiz,
     updateQuizPicture,
     getQuizPicture,
+    deleteQuizPicture,
 } from "../controllers/quiz";
 import {
     updateQuestionPicture,
     getQuestionPicture,
+    deleteQuestionPicture,
 } from "../controllers/question";
 
 /**
@@ -461,6 +463,38 @@ router.get(
 
 /**
  * @swagger
+ * /quiz/{quizId}/picture:
+ *   delete:
+ *     summary: Delete quiz picture
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Quiz ID
+ *     responses:
+ *       '204':
+ *         description: No content
+ */
+router.delete(
+    "/:quizId/picture",
+    [param("quizId").isInt()],
+    validate,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await deleteQuizPicture(req.user.id, Number(req.params.quizId));
+            return res.sendStatus(204);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
  * /quiz/{quizId}/question/{questionId}/picture:
  *   put:
  *     summary: Update question picture
@@ -581,6 +615,48 @@ router.get(
             // Read and serve
             const file = fs.readFileSync(`${picture.destination}.thumb`);
             res.end(file, "binary");
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /quiz/{quizId}/question/{questionId}/picture:
+ *   delete:
+ *     summary: Delete question picture
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Quiz ID
+ *       - in: path
+ *         name: questionId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Question ID
+ *     responses:
+ *       '204':
+ *         description: No content
+ */
+router.delete(
+    "/:quizId/question/:questionId/picture",
+    [param("quizId").isInt(), param("questionId").isInt()],
+    validate,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await deleteQuestionPicture(
+                req.user.id,
+                Number(req.params.quizId),
+                Number(req.params.questionId)
+            );
+            return res.sendStatus(204);
         } catch (err) {
             return next(err);
         }

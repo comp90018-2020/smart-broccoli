@@ -11,6 +11,7 @@ import {
     updateProfilePicture,
     getUserProfile,
     getUserProfilePicture,
+    deleteProfilePicture,
 } from "../controllers/user";
 
 /**
@@ -159,6 +160,26 @@ router.get("/profile/picture", async (req: Request, res, next) => {
         // Read and serve
         const file = fs.readFileSync(`${picture.destination}.thumb`);
         res.end(file, "binary");
+    } catch (err) {
+        return next(err);
+    }
+});
+
+/**
+ * @swagger
+ * /user/profile/picture:
+ *   delete:
+ *     summary: Delete profile picture
+ *     tags:
+ *       - User
+ *     responses:
+ *       '204':
+ *         description: No content
+ */
+router.delete("/profile/picture", async (req: Request, res, next) => {
+    try {
+        await deleteProfilePicture(req.user.pictureId);
+        return res.sendStatus(204);
     } catch (err) {
         return next(err);
     }
