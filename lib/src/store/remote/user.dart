@@ -89,6 +89,17 @@ class UserModel {
     throw Exception('Unable to set user profile pic: unknown error occurred');
   }
 
+  /// Delete the profile pic of the logged-in user.
+  Future<void> deleteProfilePic() async {
+    final http.Response response = await http.delete('$USER_URL/profile/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 204) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to delete user profile pic: unknown error occurred');
+  }
+
   User _userFromJson(String json) {
     Map<String, String> jsonMap = jsonDecode(json);
     return jsonMap['role'] == 'participant'
