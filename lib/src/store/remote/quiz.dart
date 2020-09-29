@@ -167,12 +167,15 @@ class QuizModel {
     throw Exception('Unable to get user profile pic: unknown error occurred');
   }
 
-  /// Set the picture of the specified [questionId] in the quiz with specified
-  /// [quizId]. This method takes the image as a list of bytes.
+  /// Set the picture of a [question].
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  /// [question] should be in the list `[quiz].questions`.
   Future<void> setQuestionPicture(
-      int quizId, int questionId, Uint8List bytes) async {
-    final http.MultipartRequest request = http.MultipartRequest(
-        'PUT', Uri.parse('$QUIZ_URL/$quizId/question/$questionId/picture'))
+      Quiz quiz, Question question, Uint8List bytes) async {
+    final http.MultipartRequest request = http.MultipartRequest('PUT',
+        Uri.parse('$QUIZ_URL/${quiz.id}/question/${question.id}/picture'))
       ..files.add(http.MultipartFile.fromBytes('picture', bytes));
 
     final http.StreamedResponse response = await request.send();
