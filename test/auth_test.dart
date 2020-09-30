@@ -154,4 +154,41 @@ main() async {
     expect(await am.sessionIsValid(), false);
     expect(am.inSession(), false);
   });
+
+  test('Logout (server notifies successful)', () async {
+    final http.Client client = MockClient();
+    Map<String, String> values = <String, String>{
+      "token": "asdfqwerty1234567890foobarbaz"
+    };
+    KeyValueStore kv = MainMemKeyValueStore(init: values);
+    AuthModel am = AuthModel(kv, mocker: client);
+    expect(am.inSession(), true);
+
+    when(client.post('${AuthModel.AUTH_URL}/logout',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response("", 200));
+
+    expect(await am.logout(), true);
+    expect(am.inSession(), false);
+  });
+
+  test('Logout (server notifies unsuccessful)', () async {
+    final http.Client client = MockClient();
+    Map<String, String> values = <String, String>{
+      "token": "asdfqwerty1234567890foobarbaz"
+    };
+    KeyValueStore kv = MainMemKeyValueStore(init: values);
+    AuthModel am = AuthModel(kv, mocker: client);
+    expect(am.inSession(), true);
+
+    when(client.post('${AuthModel.AUTH_URL}/logout',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "Token revoked or missing"}),
+            403));
+
+    expect(await am.logout(), false);
+    expect(am.inSession(), true);
+  });
 }
