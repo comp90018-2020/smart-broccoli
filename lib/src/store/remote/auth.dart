@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:fuzzy_broccoli/cache.dart';
 import 'package:fuzzy_broccoli/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 
 import 'api_base.dart';
 
@@ -11,7 +12,9 @@ class AuthModel {
   static const AUTH_URL = ApiBase.BASE_URL + '/auth';
 
   /// Object implementing the KeyValueStore interface for local caching
-  KeyValueStore _keyValueStore;
+  final KeyValueStore _keyValueStore;
+  /// HTTP client (mock client can be specified for testing)
+  http.Client _http;
 
   /// Token used for the authorization header where required
   String _token = '';
@@ -20,8 +23,9 @@ class AuthModel {
   }
 
   /// Constructor for external use
-  AuthModel(this._keyValueStore) {
+  AuthModel(this._keyValueStore, {http.Client mocker}) {
     _token = _keyValueStore.getString('token');
+    _http = mocker != null ? mocker : IOClient();
   }
 
   /// Return `true` if the user has logged in or joined as a participant.
@@ -37,7 +41,7 @@ class AuthModel {
   /// participant join.
   Future<void> join() async {
     final http.Response res =
-        await http.post('$AUTH_URL/join', headers: ApiBase.headers());
+        await _http.post('$AUTH_URL/join', headers: ApiBase.headers());
 
     if (res.statusCode != 200) throw ParticipantJoinException();
 
@@ -52,7 +56,7 @@ class AuthModel {
   /// a different reason.
   Future<RegisteredUser> register(
       String email, String password, String name) async {
-    final http.Response res = await http.post('$AUTH_URL/register',
+    final http.Response res = await _http.post('$AUTH_URL/register',
         headers: ApiBase.headers(),
         body: jsonEncode(<String, String>{
           'email': email,
@@ -74,7 +78,7 @@ class AuthModel {
   /// due to a different reason.
   Future<RegisteredUser> promote(
       String email, String password, String name) async {
-    final http.Response res = await http.post('$AUTH_URL/promote',
+    final http.Response res = await _http.post('$AUTH_URL/promote',
         headers: ApiBase.headers(),
         body: jsonEncode(<String, String>{
           'email': email,
@@ -93,7 +97,7 @@ class AuthModel {
   /// Authenticate a registered user.
   /// `LoginFailedException` is thrown if the login is unsuccessful.
   Future<void> login(String email, String password) async {
-    final http.Response res = await http.post('$AUTH_URL/login',
+    final http.Response res = await _http.post('$AUTH_URL/login',
         headers: ApiBase.headers(),
         body:
             jsonEncode(<String, String>{'email': email, 'password': password}));
@@ -108,7 +112,7 @@ class AuthModel {
   /// Return `true` if the token is valid and unrevoked.
   Future<bool> sessionIsValid() async {
     final http.Response res =
-        await http.get('/session', headers: ApiBase.headers(authToken: token));
+        await _http.get('/session', headers: ApiBase.headers(authToken: token));
     return res.statusCode == 200;
   }
 
@@ -116,7 +120,7 @@ class AuthModel {
   /// Clear the cache and request the server to revoke the token.
   /// Return `true` if successful.
   Future<bool> logout() async {
-    final http.Response res = await http.post(AUTH_URL + '/logout',
+    final http.Response res = await _http.post(AUTH_URL + '/logout',
         headers: ApiBase.headers(authToken: token));
     if (res.statusCode == 200) {
       _token = '';
