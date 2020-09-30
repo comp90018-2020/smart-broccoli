@@ -54,6 +54,7 @@ class UserModel {
     if (response.statusCode == 200) return _userFromJson(response.body);
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 409) throw RegistrationConflictException();
     throw Exception('Unable to update user: unknown error occurred');
   }
 
