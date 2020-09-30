@@ -65,6 +65,23 @@ main() async {
     expect(user.name, "Foo Bar");
   });
 
+  test('Get user profile (token revoked)', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    UserModel um = UserModel(am, mocker: client);
+
+    when(client.get('${UserModel.USER_URL}/profile',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "Token revoked or missing"}),
+            403));
+    expect(() async => await um.getUser(),
+        throwsA(isA<ForbiddenRequestException>()));
+  });
+
   test('Update user profile', () async {
     final http.Client client = MockClient();
     AuthModel am = AuthModel(
@@ -114,8 +131,8 @@ main() async {
               ]
             }),
             409));
-    expect(() async =>
-        await um.updateUser(
+    expect(
+        () async => await um.updateUser(
             RegisteredUser(1, "aharwood@unimelb.com", "Aaron Harwood")),
         throwsA(isA<RegistrationConflictException>()));
   });
