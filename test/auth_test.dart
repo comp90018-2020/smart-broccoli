@@ -134,4 +134,24 @@ main() async {
 
     expect(await am.sessionIsValid(), true);
   });
+
+  test('Invalid session', () async {
+    final http.Client client = MockClient();
+    Map<String, String> values = <String, String>{
+      "token": "asdfqwerty1234567890foobarbaz"
+    };
+    KeyValueStore kv = MainMemKeyValueStore(init: values);
+    AuthModel am = AuthModel(kv, mocker: client);
+    expect(am.inSession(), true);
+
+    when(client.get('${AuthModel.AUTH_URL}/session',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "Token revoked or missing"}),
+            403));
+
+    expect(await am.sessionIsValid(), false);
+    expect(am.inSession(), false);
+  });
 }

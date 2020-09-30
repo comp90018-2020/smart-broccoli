@@ -18,7 +18,7 @@ class AuthModel {
   http.Client _http;
 
   /// Token used for the authorization header where required
-  String _token = '';
+  String _token;
   String get token {
     return _token;
   }
@@ -112,9 +112,12 @@ class AuthModel {
   /// Validate the session with the server.
   /// Return `true` if the token is valid and unrevoked.
   Future<bool> sessionIsValid() async {
+    if (token == null) return false;
     final http.Response res = await _http.get('$AUTH_URL/session',
         headers: ApiBase.headers(authToken: token));
-    return res.statusCode == 200;
+    if (res.statusCode == 200) return true;
+    _token = null;
+    return false;
   }
 
   /// Invalidate the session.
@@ -124,7 +127,7 @@ class AuthModel {
     final http.Response res = await _http.post(AUTH_URL + '/logout',
         headers: ApiBase.headers(authToken: token));
     if (res.statusCode == 200) {
-      _token = '';
+      _token = null;
       _keyValueStore.clear();
       return true;
     }
