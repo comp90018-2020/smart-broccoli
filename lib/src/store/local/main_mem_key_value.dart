@@ -8,7 +8,7 @@ class MainMemKeyValueStore implements KeyValueStore {
 
   /// Constructor for external use
   /// Initial values may optionally be passed in with [init].
-  MainMemKeyValueStore({Map<String, dynamic> init}) {
+  MainMemKeyValueStore({Map<String, String> init}) {
     if (init != null) _map.addAll(init);
   }
 

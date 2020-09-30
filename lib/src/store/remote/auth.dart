@@ -13,6 +13,7 @@ class AuthModel {
 
   /// Object implementing the KeyValueStore interface for local caching
   final KeyValueStore _keyValueStore;
+
   /// HTTP client (mock client can be specified for testing)
   http.Client _http;
 
@@ -111,8 +112,8 @@ class AuthModel {
   /// Validate the session with the server.
   /// Return `true` if the token is valid and unrevoked.
   Future<bool> sessionIsValid() async {
-    final http.Response res =
-        await _http.get('/session', headers: ApiBase.headers(authToken: token));
+    final http.Response res = await _http.get('$AUTH_URL/session',
+        headers: ApiBase.headers(authToken: token));
     return res.statusCode == 200;
   }
 

@@ -118,4 +118,20 @@ main() async {
         throwsException);
     expect(am.inSession(), false);
   });
+
+  test('Valid session', () async {
+    final http.Client client = MockClient();
+    Map<String, String> values = <String, String>{
+      "token": "asdfqwerty1234567890foobarbaz"
+    };
+    KeyValueStore kv = MainMemKeyValueStore(init: values);
+    AuthModel am = AuthModel(kv, mocker: client);
+    expect(am.inSession(), true);
+
+    when(client.get('${AuthModel.AUTH_URL}/session',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response("", 200));
+
+    expect(await am.sessionIsValid(), true);
+  });
 }
