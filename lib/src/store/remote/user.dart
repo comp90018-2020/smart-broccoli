@@ -27,35 +27,27 @@ class UserModel {
     http.Response response = await http.get('$USER_URL/profile',
         headers: ApiBase.headers(authToken: _authModel.token));
 
-    if (response.statusCode == 200)
-      return _userFromJson(response.body);
-    else if (response.statusCode == 401)
-      throw UnauthorisedRequestException();
-    else if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 200) return _userFromJson(response.body);
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to get user: unknown error occurred');
   }
 
-  /// Update the profile of the logged-in/joined user.
-  /// This method is to be invoked with only the parameters to be updated.
-  /// For example, if only the email and name are to be updated:
-  /// ```
-  /// updateUser(email: 'new@email.com', name: 'New Name');
-  /// ```
-  Future<User> updateUser({email, password, name}) async {
-    Map<String, String> body = {};
-    if (email != null) body['email'] = email;
-    if (password != null) body['password'] = password;
-    if (name != null) body['name'] = name;
-
+  /// Synchronise changes to profile of the logged-in/joined user with server.
+  /// Return a `Quiz` object constructed from the server's response. All fields
+  /// should be equal in content except `password` (`null` in returned object).
+  ///
+  /// Usage:
+  /// [user] should be a `User` object obtained by `getUser`. Mutate the fields
+  /// to be updated (e.g. `email`, `name`, `password`) then invoke this method.
+  Future<User> updateUser(User user) async {
     final http.Response response = await http.patch('$USER_URL/profile',
         headers: ApiBase.headers(authToken: _authModel.token),
-        body: jsonEncode(body));
+        body: jsonEncode(user.toJson()));
 
-    if (response.statusCode == 200)
-      return _userFromJson(response.body);
-    else if (response.statusCode == 401)
-      throw UnauthorisedRequestException();
-    else if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 200) return _userFromJson(response.body);
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to update user: unknown error occurred');
   }
 
@@ -64,15 +56,10 @@ class UserModel {
     final http.Response response = await http.get('$USER_URL/profile/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
-    if (response.statusCode == 200)
-      return response.bodyBytes;
-    else if (response.statusCode == 401)
-      throw UnauthorisedRequestException();
-    else if (response.statusCode == 403)
-      throw ForbiddenRequestException();
-    else if (response.statusCode == 404)
-      // user has no profile pic
-      return null;
+    if (response.statusCode == 200) return response.bodyBytes;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) return null; // user has no profile pic
     throw Exception('Unable to get user profile pic: unknown error occurred');
   }
 
@@ -85,16 +72,27 @@ class UserModel {
 
     final http.StreamedResponse response = await request.send();
 
-    if (response.statusCode == 200)
-      return;
-    else if (response.statusCode == 401)
-      throw UnauthorisedRequestException();
-    else if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 200) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to set user profile pic: unknown error occurred');
   }
 
+  /// Delete the profile pic of the logged-in user.
+  Future<void> deleteProfilePic() async {
+    final http.Response response = await http.delete(
+        '$USER_URL/profile/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 204) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception(
+        'Unable to delete user profile pic: unknown error occurred');
+  }
+
   User _userFromJson(String json) {
-    Map<String, String> jsonMap = jsonDecode(json);
+    Map<String, dynamic> jsonMap = jsonDecode(json);
     return jsonMap['role'] == 'participant'
         ? ParticipantUser.fromJson(jsonMap)
         : RegisteredUser.fromJson(jsonMap);
