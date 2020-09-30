@@ -35,6 +35,30 @@ main() async {
     expect(user.name, "Foo Bar");
   });
 
+  test('Register user with email conflict', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+
+    when(client.post('${AuthModel.AUTH_URL}/register',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "message": "Validation error",
+              "errors": [
+                <String, dynamic>{
+                  "msg": "Uniqueness constraint failure",
+                  "location": "body",
+                  "param": "email"
+                }
+              ]
+            }),
+            409));
+
+    expect(
+        () async => await am.register("foo@bar.com", "helloworld", "Foo Bar"),
+        throwsException);
+  });
+
   test('Join', () async {
     final http.Client client = MockClient();
     AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
@@ -57,8 +81,7 @@ main() async {
     when(client.post('${AuthModel.AUTH_URL}/join',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
-            json.encode(
-                <String, dynamic>{"message": "An error occurred"}),
+            json.encode(<String, dynamic>{"message": "An error occurred"}),
             400));
 
     expect(() async => await am.join(), throwsException);
