@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fuzzy_broccoli/cache.dart';
@@ -62,5 +63,36 @@ main() async {
     expect(user.id, 1);
     expect(user.email, "foo@bar.com");
     expect(user.name, "Foo Bar");
+  });
+
+  test('Get profile picture (exists)', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    UserModel um = UserModel(am, mocker: client);
+
+    when(client.get('${UserModel.USER_URL}/profile/picture',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async =>
+            http.Response(Uint8List.fromList([1, 2, 3, 4, 5]).toString(), 200));
+    final pic = await um.getProfilePic();
+    expect(pic, isA<Uint8List>());
+  });
+
+  test('Get profile picture (does not exist)', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    UserModel um = UserModel(am, mocker: client);
+
+    when(client.get('${UserModel.USER_URL}/profile/picture',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{"message": "Picture not found"}),
+            404));
+    final pic = await um.getProfilePic();
+    expect(pic, null);
   });
 }
