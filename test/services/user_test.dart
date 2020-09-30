@@ -95,4 +95,32 @@ main() async {
     final pic = await um.getProfilePic();
     expect(pic, null);
   });
+
+  test('Delete profile picture', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    UserModel um = UserModel(am, mocker: client);
+
+    when(client.delete('${UserModel.USER_URL}/profile/picture',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response("", 204));
+    await um.deleteProfilePic();
+  });
+
+  test('Delete profile picture (server error)', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    UserModel um = UserModel(am, mocker: client);
+
+    when(client.delete('${UserModel.USER_URL}/profile/picture',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{"message": "Something went wrong"}),
+            500));
+    expect(() async => await um.deleteProfilePic(), throwsException);
+  });
 }
