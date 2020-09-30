@@ -87,4 +87,35 @@ main() async {
     expect(() async => await am.join(), throwsException);
     expect(am.inSession(), false);
   });
+
+  test('Login', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+
+    when(client.post('${AuthModel.AUTH_URL}/login',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"token": "asdfqwerty1234567890foobarbaz"}),
+            200));
+
+    await am.login("foo@bar.com", "helloworld");
+    expect(am.inSession(), true);
+  });
+
+  test('Login bad creds', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+
+    when(client.post('${AuthModel.AUTH_URL}/login',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "Incorrect email/password"}),
+            403));
+
+    expect(() async => await am.login("foo@bar.com", "wrongpassword"),
+        throwsException);
+    expect(am.inSession(), false);
+  });
 }

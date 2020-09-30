@@ -104,8 +104,8 @@ class AuthModel {
 
     if (res.statusCode != 200) throw LoginFailedException();
 
-    String token = json.decode(res.body)['token'];
-    _keyValueStore.setString('token', token);
+    _token = json.decode(res.body)['token'];
+    _keyValueStore.setString('token', _token);
   }
 
   /// Validate the session with the server.
