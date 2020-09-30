@@ -1,12 +1,13 @@
-/// Class representing a user
-/// Abstract class; not for instantiation.
-abstract class User {
+class User {
   int _id;
   int get id => _id;
   String email;
   String name;
 
   User(this._id, this.email, this.name);
+
+  factory User.fromJson(Map<String, dynamic> json) =>
+      User(json['id'], json['email'], json['name']);
 
   Map<String, dynamic> toJson() =>
       <String, dynamic>{'id': id, 'email': email, 'name': name};
