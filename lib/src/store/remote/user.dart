@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:fuzzy_broccoli/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 
 import 'api_base.dart';
 import 'auth.dart';
@@ -16,15 +17,20 @@ class UserModel {
   static const USER_URL = ApiBase.BASE_URL + '/user';
 
   /// AuthModel object used to obtain token for requests
-  AuthModel _authModel;
+  final AuthModel _authModel;
+
+  /// HTTP client (mock client can be specified for testing)
+  http.Client _http;
 
   /// Constructor for external use
-  UserModel(this._authModel);
+  UserModel(this._authModel, {http.Client mocker}) {
+    _http = mocker != null ? mocker : IOClient();
+  }
 
   /// Return a `RegisteredUser` or `ParticipantUser` object corresponding to
   /// the logged-in or joined user.
   Future<User> getUser() async {
-    http.Response response = await http.get('$USER_URL/profile',
+    http.Response response = await _http.get('$USER_URL/profile',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) return _userFromJson(response.body);
@@ -41,7 +47,7 @@ class UserModel {
   /// [user] should be a `User` object obtained by `getUser`. Mutate the fields
   /// to be updated (e.g. `email`, `name`, `password`) then invoke this method.
   Future<User> updateUser(User user) async {
-    final http.Response response = await http.patch('$USER_URL/profile',
+    final http.Response response = await _http.patch('$USER_URL/profile',
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(user.toJson()));
 
@@ -53,7 +59,7 @@ class UserModel {
 
   /// Get the profile picture of the logged-in user as a list of bytes.
   Future<Uint8List> getProfilePic() async {
-    final http.Response response = await http.get('$USER_URL/profile/picture',
+    final http.Response response = await _http.get('$USER_URL/profile/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) return response.bodyBytes;
@@ -80,7 +86,7 @@ class UserModel {
 
   /// Delete the profile pic of the logged-in user.
   Future<void> deleteProfilePic() async {
-    final http.Response response = await http.delete(
+    final http.Response response = await _http.delete(
         '$USER_URL/profile/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
