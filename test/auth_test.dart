@@ -34,4 +34,34 @@ main() async {
     expect(user.email, "foo@bar.com");
     expect(user.name, "Foo Bar");
   });
+
+  test('Join', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+
+    when(client.post('${AuthModel.AUTH_URL}/join',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"token": "asdfqwerty1234567890foobarbaz"}),
+            200));
+
+    await am.join();
+    expect(am.inSession(), true);
+  });
+
+  test('Join (server refusal)', () async {
+    final http.Client client = MockClient();
+    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+
+    when(client.post('${AuthModel.AUTH_URL}/join',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "An error occurred"}),
+            400));
+
+    expect(() async => await am.join(), throwsException);
+    expect(am.inSession(), false);
+  });
 }
