@@ -8,14 +8,14 @@ class MainMemKeyValueStore implements KeyValueStore {
 
   /// Constructor for external use
   /// Initial values may optionally be passed in with [init].
-  MainMemKeyValueStore({Map<String, String> init}) {
-    _map.addAll(init);
+  MainMemKeyValueStore({Map<String, dynamic> init}) {
+    if (init != null) _map.addAll(init);
   }
 
   @override
   Future<bool> clear() {
     _map.clear();
-    return Future.sync(() => true);
+    return Future.value(true);
   }
 
   @override
@@ -26,6 +26,6 @@ class MainMemKeyValueStore implements KeyValueStore {
   @override
   Future<bool> setString(Object key, String value) {
     _map[key] = value;
-    return Future.sync(() => true);
+    return Future.value(true);
   }
 }
