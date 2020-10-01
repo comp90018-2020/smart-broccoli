@@ -7,7 +7,6 @@ import 'package:http/io_client.dart';
 
 import 'api_base.dart';
 import 'auth.dart';
-import 'generic_request_exceptions.dart';
 
 /// Class for making user profile requests
 /// For all methods in this class:
