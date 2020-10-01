@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:fuzzy_broccoli/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:tuple/tuple.dart';
 
 import 'api_base.dart';
@@ -14,8 +15,13 @@ class GroupModel {
   /// AuthModel object used to obtain token for requests
   AuthModel _authModel;
 
+  /// HTTP client (mock client can be specified for testing)
+  http.Client _http;
+
   /// Constructor for external use
-  GroupModel(this._authModel);
+  GroupModel(this._authModel, {http.Client mocker}) {
+    _http = mocker != null ? mocker : IOClient();
+  }
 
   /// Return a list of all groups to which the authenticated user belongs
   /// (i.e. owns or has joined).
@@ -23,7 +29,7 @@ class GroupModel {
   /// in the returned list will contain a non-null `members` field. Otherwise,
   /// the `members` field of each group will be `null`.
   Future<List<Group>> getGroups({bool fetchMembers = false}) async {
-    http.Response response = await http.get(GROUP_URL,
+    http.Response response = await _http.get(GROUP_URL,
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) {
@@ -50,7 +56,7 @@ class GroupModel {
   /// object will contain a non-null `members` field. Otherwise, the `members`
   /// field will be `null`.
   Future<Group> getGroup(int id, {bool fetchMembers = false}) async {
-    http.Response response = await http.get('$GROUP_URL/$id',
+    http.Response response = await _http.get('$GROUP_URL/$id',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) {
@@ -71,7 +77,7 @@ class GroupModel {
   /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
   /// or `createGroup`.
   Future<void> getMembers(Group group) async {
-    http.Response response = await http.get('$GROUP_URL/${group.id}/member',
+    http.Response response = await _http.get('$GROUP_URL/${group.id}/member',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200) {
@@ -90,7 +96,7 @@ class GroupModel {
 
   /// Create a new group with a specified [name].
   Future<Group> createGroup(String name) async {
-    http.Response response = await http.post(GROUP_URL,
+    http.Response response = await _http.post(GROUP_URL,
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(<String, String>{'name': name}));
 
@@ -112,7 +118,7 @@ class GroupModel {
   /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
   /// or `createGroup`. Mutate the `name` field then invoke this method.
   Future<Group> updateGroup(Group group) async {
-    http.Response response = await http.patch('$GROUP_URL/${group.id}',
+    http.Response response = await _http.patch('$GROUP_URL/${group.id}',
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(<String, String>{'name': group.name}));
 
@@ -131,7 +137,7 @@ class GroupModel {
   /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
   /// or `createGroup`.
   Future<void> deleteGroup(Group group) async {
-    http.Response response = await http.delete('$GROUP_URL/${group.id}',
+    http.Response response = await _http.delete('$GROUP_URL/${group.id}',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 204) return;
@@ -149,7 +155,7 @@ class GroupModel {
   /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
   /// or `createGroup`.
   Future<Group> refreshCode(Group group) async {
-    http.Response response = await http.post('$GROUP_URL/${group.id}/code',
+    http.Response response = await _http.post('$GROUP_URL/${group.id}/code',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200)
@@ -172,7 +178,7 @@ class GroupModel {
 
     Map<String, String> body = name != null ? {'name': name} : {'code': code};
 
-    http.Response response = await http.post('$GROUP_URL/join',
+    http.Response response = await _http.post('$GROUP_URL/join',
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(body));
 
@@ -195,7 +201,7 @@ class GroupModel {
   /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
   /// or `createGroup`.
   Future<void> leaveGroup(Group group) async {
-    http.Response response = await http.post('$GROUP_URL/${group.id}/leave',
+    http.Response response = await _http.post('$GROUP_URL/${group.id}/leave',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 204) return;
@@ -210,7 +216,7 @@ class GroupModel {
   /// [group] should be a `Group` object obtained by `getGroup`, `getGroups`
   /// or `createGroup`.
   Future<void> kickMember(Group group, User member) async {
-    http.Response response = await http.post(
+    http.Response response = await _http.post(
         '$GROUP_URL/${group.id}/member/kick',
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(<String, int>{'memberId': member.id}));
