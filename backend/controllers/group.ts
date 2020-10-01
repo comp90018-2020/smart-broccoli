@@ -116,6 +116,9 @@ export const getGroup = async (userId: number, groupId: number) => {
             },
         ],
     });
+    if (!group) {
+        throw new ErrorStatus('Group cannot be accessed', 404);
+    }
 
     // Get role
     const groupJSON: any = group.toJSON();
