@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import 'api_base.dart';
 import 'auth.dart';
+import 'generic_request_exceptions.dart';
 
 /// Class for making quiz management requests
 class QuizModel {

@@ -6,6 +6,7 @@ import 'package:tuple/tuple.dart';
 
 import 'api_base.dart';
 import 'auth.dart';
+import 'generic_request_exceptions.dart';
 
 /// Class for making group management requests
 class GroupModel {
