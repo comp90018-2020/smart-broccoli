@@ -11,6 +11,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
 
+  // Whether password is visible
   bool _passwordVisible = false;
 
   @override
