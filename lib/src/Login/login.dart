@@ -11,6 +11,8 @@ class _LoginState extends State<Login> {
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
 
+  bool _passwordVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
@@ -27,17 +29,30 @@ class _LoginState extends State<Login> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    decoration: const InputDecoration(
+                        labelText: 'Email', prefixIcon: Icon(Icons.email)),
                   ),
                 ),
                 // Text field for password
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(labelText: 'Password'),
-                    obscureText: true,
-                  ),
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: Icon(Icons.lock),
+                          // https://stackoverflow.com/questions/49125064
+                          suffixIcon: IconButton(
+                            icon: Icon(_passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            onPressed: () {
+                              setState(() {
+                                _passwordVisible = !_passwordVisible;
+                              });
+                            },
+                          )),
+                      obscureText: !_passwordVisible),
                 ),
 
                 // Log in Button

@@ -49,7 +49,7 @@ class _RegisterState extends State<Register> {
                 child: SizedBox(
                     width: double.infinity,
                     child: RaisedButton(
-                      onPressed: _createAccountPressed, // TODO CHANGE
+                      onPressed: _createAccountPressed,
                       child: Text("CREATE ACCOUNT"),
                     )),
               ),
