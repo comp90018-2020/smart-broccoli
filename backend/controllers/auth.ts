@@ -1,6 +1,7 @@
 import { User, Token } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign } from "../helpers/jwt";
+import { createDefaultGroup } from "./group";
 
 /**
  * User registration.
@@ -9,7 +10,9 @@ import { jwtSign } from "../helpers/jwt";
 export const register = async (info: any) => {
     const { password, email, name } = info;
     try {
-        return await User.create({ password, email, name, role: "user" });
+        const user = await User.create({ password, email, name, role: "user" });
+        await createDefaultGroup(user.id);
+        return user;
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
@@ -54,14 +57,12 @@ export const login = async (email: string, password: string) => {
         where: { email, role: "user" },
     });
     if (!user) {
-        const err = new ErrorStatus("Incorrect email/password", 403);
-        throw err;
+        throw new ErrorStatus("Incorrect email/password", 403);
     }
 
     // Verify password
     if (!(await user.verifyPassword(password))) {
-        const err = new ErrorStatus("Incorrect email/password", 403);
-        throw err;
+        throw new ErrorStatus("Incorrect email/password", 403);
     }
 
     // Generate and add token
@@ -90,12 +91,10 @@ export const logout = async (token: string) => {
 export const promoteParticipant = async (userId: number, info: any) => {
     const user = await User.findByPk(userId);
     if (!user) {
-        const err = new ErrorStatus("User not found", 404);
-        throw err;
+        throw new ErrorStatus("User not found", 404);
     }
     if (user.role === "user") {
-        const err = new ErrorStatus("User is already promoted", 400);
-        throw err;
+        throw new ErrorStatus("User is already promoted", 400);
     }
 
     user.password = info.password;
@@ -103,7 +102,9 @@ export const promoteParticipant = async (userId: number, info: any) => {
     user.email = info.email;
     user.name = info.name;
     try {
-        return await user.save();
+        await user.save();
+        await createDefaultGroup(user.id);
+        return user;
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];

@@ -11,10 +11,12 @@ dependencies:
     sdk: flutter
   http: ^0.12.2
   shared_preferences: ^0.5.10
-  provider:
+  provider: null
+  tuple: ^1.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mockito: ^4.1.1
 
 flutter:
   uses-material-design: true
@@ -47,4 +49,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
-

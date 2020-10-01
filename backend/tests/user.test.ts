@@ -5,7 +5,7 @@ import rebuild from "./rebuild";
 import { registerAndLogin } from "./helpers";
 import { readFileSync } from "fs";
 
-describe("Authentication", () => {
+describe("User", () => {
     beforeEach(async () => {
         await rebuild();
     });
@@ -112,5 +112,27 @@ describe("Authentication", () => {
             .get("/user/profile/picture")
             .set("Authorization", `Bearer ${user.token}`);
         expect(res.status).to.equal(200);
+    });
+
+    it("Delete profile picture", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+
+        await agent
+            .put("/user/profile/picture")
+            .attach("avatar", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${user.token}`);
+
+        const res = await agent
+            .delete("/user/profile/picture")
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(res.status).to.equal(204);
+
+        const check = await agent
+            .get("/user/profile/picture")
+            .set("Authorization", `Bearer ${user.token}`);
+        expect(check.status).to.equal(404);
     });
 });

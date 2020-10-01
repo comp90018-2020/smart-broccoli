@@ -14,6 +14,7 @@ before(async () => {
     // Remove upload directory
     await rmdir("uploads/");
     fs.mkdirSync("uploads/profile", { recursive: true });
+    fs.mkdirSync("uploads/quiz", { recursive: true });
 
     // Wait for server to start
     await server;
@@ -22,6 +23,7 @@ before(async () => {
 // Import tests
 import "./auth.test";
 import "./user.test";
-import CustomStorage from "helpers/upload";
+import "./group.test";
+import "./quiz.test";
 
 export default app;

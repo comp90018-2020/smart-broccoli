@@ -1,6 +1,8 @@
 import fs from "fs";
 import Picture from "../models/picture";
 import path from "path";
+import { Transaction } from "sequelize";
+import ErrorStatus from "../helpers/error";
 
 /**
  * Get picture by ID.
@@ -14,23 +16,30 @@ const getPictureById = async (pictureId: number) => {
  * Delete picture by ID.
  * @param pictureId
  */
-const deletePicture = async (pictureId: number) => {
+const deletePicture = async (pictureId: number, transaction?: Transaction) => {
     // Find, delete and destroy from DB
     const picture = await Picture.findByPk(pictureId);
+    // Already deleted
+    if (!picture) {
+        return;
+    }
     await deletePictureFromDisk(picture.destination);
-    await picture.destroy();
+    await picture.destroy({ transaction });
 };
 
 /**
  * Insert a picture into db.
  * @param file Metadata about file
  */
-const insertPicture = async (file: any) => {
-    return await Picture.create({
-        destination: file.destination,
-        mimetype: file.mimetype,
-        filename: file.filename,
-    });
+const insertPicture = async (transaction: Transaction, file: any) => {
+    return await Picture.create(
+        {
+            destination: file.destination,
+            mimetype: file.mimetype,
+            filename: file.filename,
+        },
+        { transaction }
+    );
 };
 
 /**
