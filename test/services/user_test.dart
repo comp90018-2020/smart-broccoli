@@ -13,10 +13,10 @@ class MockClient extends Mock implements http.Client {}
 main() async {
   test('Get registered user profile', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(
+    final AuthModel am = AuthModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    UserModel um = UserModel(am, mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
 
     when(client.get('${UserModel.USER_URL}/profile',
             headers: anyNamed("headers")))
@@ -40,10 +40,10 @@ main() async {
 
   test('Get participant user profile', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(
+    final AuthModel am = AuthModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    UserModel um = UserModel(am, mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
 
     when(client.get('${UserModel.USER_URL}/profile',
             headers: anyNamed("headers")))
@@ -67,10 +67,10 @@ main() async {
 
   test('Get user profile (token revoked)', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(
+    final AuthModel am = AuthModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    UserModel um = UserModel(am, mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
 
     when(client.get('${UserModel.USER_URL}/profile',
             headers: anyNamed("headers")))
@@ -84,10 +84,10 @@ main() async {
 
   test('Update user profile', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(
+    final AuthModel am = AuthModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    UserModel um = UserModel(am, mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
 
     when(client.patch('${UserModel.USER_URL}/profile',
             headers: anyNamed("headers"), body: anyNamed("body")))
@@ -112,10 +112,10 @@ main() async {
 
   test('Update user profile (email conflict)', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(
+    final AuthModel am = AuthModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    UserModel um = UserModel(am, mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
 
     when(client.patch('${UserModel.USER_URL}/profile',
             headers: anyNamed("headers"), body: anyNamed("body")))
@@ -139,10 +139,10 @@ main() async {
 
   test('Get profile picture (exists)', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(
+    final AuthModel am = AuthModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    UserModel um = UserModel(am, mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
 
     when(client.get('${UserModel.USER_URL}/profile/picture',
             headers: anyNamed("headers")))
@@ -154,10 +154,10 @@ main() async {
 
   test('Get profile picture (does not exist)', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(
+    final AuthModel am = AuthModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    UserModel um = UserModel(am, mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
 
     when(client.get('${UserModel.USER_URL}/profile/picture',
             headers: anyNamed("headers")))
@@ -170,10 +170,10 @@ main() async {
 
   test('Delete profile picture', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(
+    final AuthModel am = AuthModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    UserModel um = UserModel(am, mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
 
     when(client.delete('${UserModel.USER_URL}/profile/picture',
             headers: anyNamed("headers")))
@@ -183,10 +183,10 @@ main() async {
 
   test('Delete profile picture (server error)', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(
+    final AuthModel am = AuthModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    UserModel um = UserModel(am, mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
 
     when(client.delete('${UserModel.USER_URL}/profile/picture',
             headers: anyNamed("headers")))
