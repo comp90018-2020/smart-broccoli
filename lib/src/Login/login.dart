@@ -11,46 +11,51 @@ class _LoginState extends State<Login> {
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
 
-  Widget _textFields() {
-    return new Column(
-      children: <Widget>[
-        // Text field for email
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: TextFormField(
-            controller: _emailController,
-            decoration: const InputDecoration(labelText: 'Email'),
-          ),
-        ),
-        // Text field for password
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: TextFormField(
-            controller: _passwordController,
-            decoration: const InputDecoration(labelText: 'Password'),
-            obscureText: true,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSubmission() {
-    return new Container(
-      // Column means one widget is on top of another
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      widthFactor: .75,
       child: Column(
-        children: <Widget>[
-          // Log in Button
-          RaisedButton(
-            onPressed: _loginPressed, // TODO CHANGE
-            child: const Text("Login"),
-          ),
+        children: [
+          Form(
+            child: Column(
+              children: [
+                // Text field for email
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                ),
+                // Text field for password
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: TextFormField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: true,
+                  ),
+                ),
+                // Log in Button
+                RaisedButton(
+                  onPressed: _loginPressed, // TODO CHANGE
+                  child: const Text("Login"),
+                ),
 
-          // More padding to prevent two buttons being too close
-          // Optional Forgot password button
-          FlatButton(
-            child: const Text('Forgot Password?'),
-            onPressed: _passwordReset,
+                // More padding to prevent two buttons being too close
+                // Optional Forgot password button
+                FlatButton(
+                  child: const Text(
+                    'Forgot Password?',
+                    style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: Colors.white),
+                  ),
+                  onPressed: _passwordReset,
+                )
+              ],
+            ),
           )
         ],
       ),
@@ -59,6 +64,7 @@ class _LoginState extends State<Login> {
 
   void _loginPressed() {
     print("Login pressed");
+    print("${_emailController.text} ${_passwordController.text}");
     /* Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => LoginPage2())
@@ -70,21 +76,5 @@ class _LoginState extends State<Login> {
         "The user wants a password reset request sent to $_emailController.text");
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => VerificationScreen()));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FractionallySizedBox(
-      widthFactor: .75,
-      child: Column(
-        children: [
-          Form(
-            child: Column(
-              children: [_textFields(), _buildSubmission()],
-            ),
-          )
-        ],
-      ),
-    );
   }
 }

@@ -21,7 +21,10 @@ class MyApp extends StatelessWidget {
           buttonColor: Color(0xFFFEC12D),
         ),
         textTheme: TextTheme(
-            subtitle1: TextStyle(fontSize: 14, color: Color(0xFFAEAEAE))),
+            subtitle1: TextStyle(
+          fontSize: 14,
+          // color: Color(0xFFAEAEAE)
+        )),
         inputDecorationTheme: InputDecorationTheme(
             contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             filled: true,
