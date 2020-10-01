@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './login.dart';
 import './register.dart';
+import '../shared/bubble_button.dart';
 
 /// Use : The Login Screen provides an interface to verify the user and log them
 /// into the application.
@@ -14,103 +15,85 @@ class LoginScreen extends StatefulWidget {
 ///
 enum FormType { login, register }
 
-class _LoginScreenState extends State<LoginScreen> {
-  // our default setting is to login, and we should switch to register when needed
-  FormType _form = FormType.login;
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
+  TabController _tabController;
 
-  void _formChangeToRegister() async {
-    setState(() {
-      _form = FormType.register;
-    });
-  }
-
-  void _formChangeToLogin() async {
-    setState(() {
-      _form = FormType.login;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: 2);
   }
 
   // Primary start up function
   @override
   Widget build(BuildContext context) {
-    Widget _login = Login();
-    Widget _register = Register();
+    Login login = Login();
+    Register register = Register();
 
     // Create a new Scaffold
     return new Scaffold(
-      body: new Container(
-        /// App body controls
-        /// Single scroll view to avoid keyboard overflow when typeing input
-        child: new SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              // Build title (logo/application name)
-              Container(
-                  height: 200,
-                  color: Colors.white,
-                  child: Center(
-                    child: Image(
-                        image:
-                            AssetImage('assets/images/Logo_Placeholder.png')),
+        body: SingleChildScrollView(
+            child: Column(children: <Widget>[
+      // Build title (logo/application name)
+      Container(
+          height: 200,
+          color: Colors.white,
+          child: Center(
+            child:
+                Image(image: AssetImage('assets/images/Logo_Placeholder.png')),
+          )),
+
+      // Body
+      FractionallySizedBox(
+          widthFactor: 0.7,
+          child: DefaultTabController(
+              length: 2,
+              child: Column(
+                children: [
+                  Container(
+                      child: TabBar(
+                    tabs: [
+                      new Tab(
+                        text: "LOGIN",
+                      ),
+                      new Tab(
+                        text: "SIGN UP",
+                      )
+                    ],
                   )),
-              // Padding
-              SizedBox(height: 40),
-              // Switch
-              // Functionality to switch between login and register
-              _buildSwitch(),
-              // Which form to show
-              Padding(
-                  padding: EdgeInsets.only(top: 30, bottom: 20),
-                  child: _form == FormType.login ? _login : _register)
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+                  SizedBox(
+                    height: 300,
+                    // Subtract the top
+                    child: TabBarView(
+                      children: [login, register],
+                    ),
+                  )
+                ],
+              ))
 
-  /// The switch button
-  Widget _buildSwitch() {
-    return new Container(
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-
-        /// NOTE: This is a placeholder button as I cannot find standard material
-        /// Components for a switch like button
-        /// In the future an animated class will be here to make the button look
-        /// Better, I'm not going to do it right now since learning animated
-        /// methods appears to be quite time consuming
-        /// TODO refactor in future iterations
-        children: <Widget>[
-          new Container(
-            width: 150,
-            height: 60,
-            child: RaisedButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              child: Text("Login"),
-              // color: Colors.lightGreen[300],
-              textColor: Colors.white,
-              onPressed: _formChangeToLogin,
-            ),
+          // child: Column(
+          //   children: [
+          //     Container(
+          //         child: TabBar(controller: _tabController, tabs: <Tab>[
+          //       new Tab(
+          //         text: "LOGIN",
+          //       ),
+          //       new Tab(
+          //         text: "SIGN UP",
+          //       )
+          //     ])),
+          //     TabBarView(controller: _tabController, children: [
+          //       Expanded(child: Login()),
+          //       Expanded(child: Register()),
+          //     ]),
+          //   ],
+          // ),
           ),
-          SizedBox(width: 10),
-          new Container(
-            width: 150,
-            height: 60,
-            child: RaisedButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              child: Text("Sign Up"),
-              // color: Colors.lightGreen[300],
-              textColor: Colors.white,
-              onPressed: _formChangeToRegister,
-            ),
-          ),
-        ],
-      ),
-    );
+    ])));
   }
 }
+
+// body: TabBarView(
+//   children: [Login(), Register()],
+// )),
