@@ -224,4 +224,46 @@ main() async {
     expect(() async => await gm.getGroup(44),
         throwsA(isA<GroupNotFoundException>()));
   });
+
+  test('Update group', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.patch('${GroupModel.GROUP_URL}/2',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "id": 2,
+              "name": "new",
+              "createdAt": "2020-01-01T00:00:00.000Z",
+              "updatedAt": "2020-01-01T00:00:00.000Z",
+              "defaultGroup": false,
+              "code": "BG1egA",
+              "role": "owner"
+            }),
+            200));
+
+    // pretend client obtained `g` was from `getGroup` or `getGroups`
+    Group g = Group.fromJson(<String, dynamic>{
+      "id": 2,
+      "name": "foo",
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "defaultGroup": false,
+      "code": "BG1egA",
+      "role": "owner"
+    });
+    // client updates name of group
+    g.name = "new";
+
+    final returned = await gm.updateGroup(g);
+    expect(returned, isA<Group>());
+    expect(returned.id, 2);
+    expect(returned.name, "new");
+    expect(returned.defaultGroup, false);
+    expect(returned.code, "BG1egA");
+  });
 }
