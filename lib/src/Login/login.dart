@@ -43,7 +43,7 @@ class _LoginState extends State<Login> {
           // Log in Button
           RaisedButton(
             onPressed: _loginPressed, // TODO CHANGE
-            child: const Text("Log In"),
+            child: const Text("Login"),
           ),
 
           // More padding to prevent two buttons being too close

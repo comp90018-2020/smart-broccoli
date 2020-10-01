@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 /// Transitions: Insert Email -> INsert Verification code -> Reset Password
 class VerificationScreen extends StatefulWidget {
   @override
-  _verficationScreen createState() => _verficationScreen();
+  _VerificationScreen createState() => _VerificationScreen();
 }
 
 // Boiler plat for Stateful Widgets
@@ -21,15 +21,18 @@ final TextEditingController _emailFilter = new TextEditingController();
 final TextEditingController _passwordFilter = new TextEditingController();
 final TextEditingController _codeFilter = new TextEditingController();
 
-String _email = "";
-String _code = "";
-String _password = "";
+class _VerificationScreen extends State<VerificationScreen> {
+  // ignore: unused_field
+  String _email = "";
+  // ignore: unused_field
+  String _code = "";
+  // ignore: unused_field
+  String _password = "";
 
-class _verficationScreen extends State<VerificationScreen> {
 // Starting form
   FormType _form = FormType.Email;
 
-  _verficationScreen() {
+  _VerificationScreen() {
     _emailFilter.addListener(_emailListen);
     _passwordFilter.addListener(_passwordListen);
     _codeFilter.addListener(_codeListen);
@@ -201,7 +204,7 @@ class _verficationScreen extends State<VerificationScreen> {
 
               new FlatButton(
                 child: new Text('Back'),
-                onPressed: _BacktoEmail,
+                onPressed: _backToEmail,
               )
             ],
           ),
@@ -235,10 +238,10 @@ class _verficationScreen extends State<VerificationScreen> {
     }
   }
 
-  // Methods for Logic
-  void _createAccountPressed() {}
+  // // Methods for Logic
+  // void _createAccountPressed() {}
 
-  void _BacktoEmail() async {
+  void _backToEmail() async {
     setState(() {
       _form = FormType.Email;
     });
