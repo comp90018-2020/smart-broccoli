@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
+import 'verification_screen.dart';
 
-import 'VerificationScreen.dart';
-
-
-class LoginPage extends StatefulWidget {
+/// Use : The Login Screen provides an interface to verify the user and log them
+/// into the application.
+/// Type : Stateful Widget
+/// Transitions: A form change from register to login and login to register
+class LoginScreen extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _LoginPageState();
+  State<StatefulWidget> createState() => new _LoginScreenState();
 }
 
-// Used for controlling whether the user is logging in or creating an account
-// Test code TODO move to relevant areas
+
+///
 enum FormType {
   login,
   register
 }
 
-// Test code please ignore for now
-// Used to read password/email inputs
-class _LoginPageState extends State<LoginPage> {
+class _LoginScreenState extends State<LoginScreen> {
 
+  // These classes are used to listen for input from the respective text boxes
   final TextEditingController _emailFilter = new TextEditingController();
   final TextEditingController _passwordFilter = new TextEditingController();
   final TextEditingController _confirmEmailFilter = new TextEditingController();
@@ -26,13 +27,16 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _userNameFilter = new TextEditingController();
 
 
-
+  // Starting string for the controllers above
   String _email = "";
   String _cfemail = "";
   String _password = "";
   String _cfpassword = "";
   String _usrname = "";
-  FormType _form = FormType.login; // our default setting is to login, and we should switch to creating an account when the user chooses to
+
+  // our default setting is to login, and we should switch to register when needed
+  FormType _form = FormType.login;
+
 
   _LoginPageState() {
     _emailFilter.addListener(_emailListen);
@@ -42,6 +46,7 @@ class _LoginPageState extends State<LoginPage> {
     _userNameFilter.addListener(_userNameListen);
   }
 
+  // Functions which listens for input from the text boxes
   void _userNameListen() {
     if (_userNameFilter.text.isEmpty) {
       _usrname = "";
@@ -66,7 +71,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
   void _emailListen() {
     if (_emailFilter.text.isEmpty) {
       _email = "";
@@ -83,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // Swap in between our two forms, registering and logging in
+  // Swap in between our two forms, logging in or creating an account
   void _formChange () async {
     setState(() {
       if (_form == FormType.register) {
@@ -94,6 +98,21 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  void _formChangeToRegister () async {
+    setState(() {
+
+      _form = FormType.register;
+    });
+  }
+
+  void _formChangeToLogin () async {
+    setState(() {
+
+        _form = FormType.login;
+      });
+  }
+
+
   // Primary start up function
   @override
   Widget build(BuildContext context) {
@@ -101,18 +120,20 @@ class _LoginPageState extends State<LoginPage> {
     return new Scaffold(
 
       body: new Container(
-        // Background colour scheme controls
-        // color: Colors.green,
-       // padding: EdgeInsets.all(16.0),
-        // App body controls
+        /// App body controls
+        /// Single scroll view to avoid keyboard overflow when typeing input
         child: new SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              // Title "UNI QUIZ"
+              // Build title
               _buildTitle(),
+              // Padding
               SizedBox(height: 20),
+              // Functionality to switch between login and register
               _buildSwitch(),
+              // Padding
               SizedBox(height: 20),
+               // Text fields
                _buildTextFields(),
               // Buttons for navigation
               _buildButtons(),
@@ -123,18 +144,16 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Creates the LOGO
+  /// The title widget defines the logo and
+  /// The application name
   Widget _buildTitle(){
     return new Column(
         children: <Widget>[
-
           new Container(
               height: 200,
               color: Colors.white,
               child: Center(
-
-                child: Text("Fuzzy Broccoli",style: TextStyle(height: 5, fontSize: 32,color: Colors.black),),
-
+                child:Image(image: AssetImage('assets/images/Logo_Placeholder.png')),
               )
           )
         ]
@@ -142,38 +161,62 @@ class _LoginPageState extends State<LoginPage> {
 
   }
 
+  /// The switch button
   Widget _buildSwitch(){
 
+
     return new Container(
-      child: new Column(
+
+      child: new Row(
+
+        mainAxisAlignment: MainAxisAlignment.center,
+        /// NOTE: This is a placeholder button as I cannot find standard material
+        /// Components for a switch like button
+        /// In the future an animated class will be here to make the button look
+        /// Better, I'm not going to do it right now since learning animated
+        /// methods appears to be quite time consuming
+        /// TODO refactor in future iterations
         children: <Widget>[
-          new Container(
-            child: new ButtonTheme(
-              minWidth: 200.0,
-              height: 50.0,
-              buttonColor: Colors.white,
-              child: RaisedButton(
-                onPressed: _formChange,
-              //  onPressed: _loginPressed, // TODO CHANGE
-                child: Text("Placeholder Switch"),
-              ),
+          new  Container(
+            width: 150,
+            height: 60,
+            child: RaisedButton(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0),),
+              child: Text("Login"),
+             // color: Colors.lightGreen[300],
+              textColor: Colors.white,
+              onPressed: _formChangeToLogin,
+            ),
+          ),
+          SizedBox(width: 10),
+          new  Container(
+            width: 150,
+            height: 60,
+            child: RaisedButton(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0),),
+              child: Text("Sign Up"),
+              // color: Colors.lightGreen[300],
+              textColor: Colors.white,
+              onPressed: _formChangeToRegister,
             ),
           ),
         ],
       ),
+
     );
 
   }
 
-  // Buttons and their data collection capabilties
-  // Test code please ignore
-  // TODO move to necessary locations later on
+  /// Buttons and their data collection capabilties
   Widget _buildTextFields() {
+
+    // If we are in the form login display this
     if(_form == FormType.login) {
       return new Container(
         padding: EdgeInsets.all(35.0),
         child: new Column(
           children: <Widget>[
+            // Text field for email
             new Container(
               child: new TextField(
                 controller: _emailFilter,
@@ -185,7 +228,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
+            // Padding between the two textboxes
             SizedBox(height: 20),
+            // Text field for password
             new Container(
               child: new TextField(
                 controller: _passwordFilter,
@@ -202,11 +247,14 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     }
+
+    // Otherwise we display this
     else{
       return new Container(
         padding: EdgeInsets.all(35.0),
         child: new Column(
           children: <Widget>[
+            // Text field for name
             new Container(
               child: new TextField(
                 controller: _userNameFilter,
@@ -216,10 +264,12 @@ class _LoginPageState extends State<LoginPage> {
                     fillColor: Colors.white,
                     labelText: 'Name'
                 ),
-                obscureText: true,
+                // obscureText: true,
               ),
             ),
+            // Padding
             SizedBox(height: 20),
+            // Textfield for Email
             new Container(
               child: new TextField(
                 controller: _emailFilter,
@@ -231,7 +281,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
+            // Padding
             SizedBox(height: 20),
+            // Text field for password
             new Container(
               child: new TextField(
                 controller: _passwordFilter,
@@ -244,7 +296,9 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: true,
               ),
             ),
+            // padding
             SizedBox(height: 20),
+            // Textfield for password confirm
             new Container(
               child: new TextField(
                 controller: _confirmPasswordFilter,
@@ -260,26 +314,26 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
       );
-
-
     }
   }
 
-  // Buttons used to move to login 2 or login 3
+  /// Buttons used to submit data or move to password reset
+  /// See Verification Screen (Placeholder)
   Widget _buildButtons() {
+    // Login
     if (_form == FormType.login) {
       return Padding(
         // Padding to attempt to align with Wireframe
-        padding: const EdgeInsets.fromLTRB(0,50,0,0),
+        padding: const EdgeInsets.fromLTRB(0,20,0,0),
         child: new Container(
           // Column means one widget is on top of another
           child: new Column(
             children: <Widget>[
               // Log in Button
               new ButtonTheme(
-                minWidth: 200.0,
+                minWidth: 310.0,
                 height: 50.0,
-                buttonColor: Colors.white,
+                buttonColor: Colors.orangeAccent,
                 child: RaisedButton(
                   onPressed: _loginPressed, // TODO CHANGE
                   child: Text("Log In"),
@@ -296,8 +350,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     }
-    // Test code please ignore for now
-    // TODO move to other place
+    // Form change
     else {
       return Padding(
         padding: const EdgeInsets.fromLTRB(0,20,0,0),
@@ -305,9 +358,9 @@ class _LoginPageState extends State<LoginPage> {
           child: new Column(
             children: <Widget>[
               new ButtonTheme(
-                minWidth: 200.0,
+                minWidth: 310.0,
                 height: 50.0,
-                buttonColor: Colors.white,
+                buttonColor: Colors.orangeAccent,
                 child: RaisedButton(
                   onPressed: _createAccountPressed, // TODO CHANGE
                   child: Text("Create Account"),
@@ -321,6 +374,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // These functions can self contain any user auth logic required, they all have access to _email and _password
+  // logic to be below
 
   void _loginPressed () {
     print("Sign Up pressed");

@@ -78,21 +78,21 @@ class _verficationScreen extends State<VerificationScreen>{
     );
   }
 
+  /// The title widget defines the logo and
+  /// The application name
   Widget _buildTitle(){
     return new Column(
         children: <Widget>[
-
           new Container(
-              // height: 200,
-              // color: Colors.white,
+              height: 200,
+              color: Colors.white,
               child: Center(
-
-                child: Text("Recovery",style: TextStyle(height: 5, fontSize: 32,color: Colors.black),),
-
+                child:Image(image: AssetImage('assets/images/Logo_Placeholder.png')),
               )
           )
         ]
     );
+
   }
 
   Widget _buildTextFields(){
@@ -167,15 +167,11 @@ class _verficationScreen extends State<VerificationScreen>{
         child: new Container(
           child: new Column(
             children: <Widget>[
-              new ButtonTheme(
-                minWidth: 200.0,
-                height: 50.0,
-                buttonColor: Colors.white,
-                child: RaisedButton(
+              //  buttonColor: Colors.white,
+                  new RaisedButton(
                   onPressed: _emailPressed, // TODO CHANGE
                   child: Text("Send"),
                 ),
-              ),
             ],
           ),
         ),
@@ -196,6 +192,10 @@ class _verficationScreen extends State<VerificationScreen>{
                   child: Text("Send Code"),
                 ),
               ),
+              new FlatButton(
+                child: new Text('Back'),
+                onPressed: _BacktoEmail,
+              )
             ],
           ),
         ),
@@ -216,6 +216,10 @@ class _verficationScreen extends State<VerificationScreen>{
                   child: Text("Reset Password"),
                 ),
               ),
+              new FlatButton(
+                child: new Text('Back'),
+                onPressed: _emailPressed,
+              )
             ],
           ),
         ),
@@ -226,6 +230,13 @@ class _verficationScreen extends State<VerificationScreen>{
 
   
   void _createAccountPressed() {
+  }
+
+  void _BacktoEmail() async {
+
+    setState(() {
+      _form = FormType.Email;
+    });
   }
 
   void _emailPressed() async {
