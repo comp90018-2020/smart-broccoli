@@ -64,4 +64,63 @@ main() async {
     expect(() async => await gm.createGroup('Lorem ipsum'),
         throwsA(isA<GroupCreateException>()));
   });
+
+  test('Get groups', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.get(GroupModel.GROUP_URL,
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode([
+              <String, dynamic>{
+                "id": 1,
+                "name": "Foo Bar",
+                "createdAt": "2020-01-01T00:00:00.000Z",
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "defaultGroup": true,
+                "code": "Hq6PP5",
+                "role": "owner"
+              },
+              <String, dynamic>{
+                "id": 2,
+                "name": "lorem",
+                "createdAt": "2020-01-01T00:00:00.000Z",
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "defaultGroup": false,
+                "code": "BG1egA",
+                "role": "owner"
+              },
+              <String, dynamic>{
+                "id": 3,
+                "name": "ipsum",
+                "createdAt": "2020-01-01T00:00:00.000Z",
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "defaultGroup": false,
+                "code": "DKeBBJ",
+                "role": "member"
+              }
+            ]),
+            200));
+
+    final groups = await gm.getGroups();
+    expect(groups, isA<List<Group>>());
+    expect(groups.length, 3);
+    groups.sort((g0, g1) => g0.id.compareTo(g1.id));
+    expect(groups[0].id, 1);
+    expect(groups[1].id, 2);
+    expect(groups[2].id, 3);
+    expect(groups[0].name, "Foo Bar");
+    expect(groups[1].name, "lorem");
+    expect(groups[2].name, "ipsum");
+    expect(groups[0].defaultGroup, true);
+    expect(groups[1].defaultGroup, false);
+    expect(groups[2].defaultGroup, false);
+    expect(groups[0].code, "Hq6PP5");
+    expect(groups[1].code, "BG1egA");
+    expect(groups[2].code, "DKeBBJ");
+  });
 }
