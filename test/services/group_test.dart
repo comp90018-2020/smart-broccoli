@@ -6,6 +6,7 @@ import 'package:fuzzy_broccoli/models.dart';
 import 'package:fuzzy_broccoli/server.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
+import 'package:tuple/tuple.dart';
 
 class MockClient extends Mock implements http.Client {}
 
@@ -149,5 +150,63 @@ main() async {
     expect(group.name, "foo");
     expect(group.defaultGroup, false);
     expect(group.code, "BG1egA");
+  });
+
+  test('Get members of specified group', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.get('${GroupModel.GROUP_URL}/2/member',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode([
+              {
+                "id": 1,
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "name": "Harald Søndergaard",
+                "role": "owner"
+              },
+              {
+                "id": 2,
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "name": "Aaron Harwood",
+                "role": "member"
+              },
+              {
+                "id": 3,
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "name": null,
+                "role": "member"
+              }
+            ]),
+            200));
+
+    // pretend client obtained `g` was from `getGroup` or `getGroups`
+    Group g = Group.fromJson(<String, dynamic>{
+      "id": 2,
+      "name": "foo",
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "defaultGroup": false,
+      "code": "BG1egA",
+      "role": "owner"
+    });
+
+    await gm.getMembers(g);
+    expect(g.members, isA<List<Tuple2<User, GroupRole>>>());
+    expect(g.members.length, 3);
+    g.members.sort((t0, t1) => t0.item1.id.compareTo(t1.item1.id));
+    expect(g.members[0].item1.id, 1);
+    expect(g.members[1].item1.id, 2);
+    expect(g.members[2].item1.id, 3);
+    expect(g.members[0].item1.name, "Harald Søndergaard");
+    expect(g.members[1].item1.name, "Aaron Harwood");
+    expect(g.members[2].item1.name, null);
+    expect(g.members[0].item2, GroupRole.OWNER);
+    expect(g.members[1].item2, GroupRole.MEMBER);
+    expect(g.members[2].item2, GroupRole.MEMBER);
   });
 }
