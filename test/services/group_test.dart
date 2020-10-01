@@ -321,4 +321,67 @@ main() async {
     expect(() async => await gm.deleteGroup(g),
         throwsA(isA<ForbiddenRequestException>()));
   });
+
+  test('Join group', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.post('${GroupModel.GROUP_URL}/join',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "id": 2,
+              "name": "foo",
+              "createdAt": "2020-01-01T00:00:00.000Z",
+              "updatedAt": "2020-01-01T00:00:00.000Z",
+              "defaultGroup": false,
+              "code": "BG1egA",
+              "role": "owner"
+            }),
+            200));
+
+    final g = await gm.joinGroup(name: "foo");
+    expect(g, isA<Group>());
+    expect(g.id, 2);
+    expect(g.name, "foo");
+    expect(g.defaultGroup, false);
+    expect(g.code, "BG1egA");
+  });
+
+  test('Join group (user already in group)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.post('${GroupModel.GROUP_URL}/join',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "Already member of group"}),
+            422));
+
+    expect(() async => await gm.joinGroup(name: "foo"),
+        throwsA(isA<AlreadyInGroupException>()));
+  });
+
+  test('Join group (group not found)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.post('${GroupModel.GROUP_URL}/join',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{"message": "Group not found"}), 404));
+
+    expect(() async => await gm.joinGroup(name: "foo"),
+        throwsA(isA<GroupNotFoundException>()));
+  });
 }
