@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 
+/// Use : The verification screen to reset your passwords
+/// into the application.
+/// Type : Stateful Widget
+/// Transitions: Insert Email -> INsert Verification code -> Reset Password
 class VerificationScreen extends StatefulWidget {
   @override
   _verficationScreen createState() => _verficationScreen();
 }
 
+// Boiler plat for Stateful Widgets
 enum FormType {
   Email,
   Code,
   Password,
 }
+
+// Listeners
 final TextEditingController _emailFilter = new TextEditingController();
 final TextEditingController _passwordFilter = new TextEditingController();
 final TextEditingController _codeFilter = new TextEditingController();
@@ -18,9 +25,8 @@ String _email = "";
 String _code = "";
 String _password = "";
 
-class _verficationScreen extends State<VerificationScreen>{
-
-
+class _verficationScreen extends State<VerificationScreen> {
+// Starting form
   FormType _form = FormType.Email;
 
   _verficationScreen() {
@@ -29,6 +35,7 @@ class _verficationScreen extends State<VerificationScreen>{
     _codeFilter.addListener(_codeListen);
   }
 
+  // Text listeners
   void _codeListen() {
     if (_codeFilter.text.isEmpty) {
       _code = "";
@@ -53,6 +60,7 @@ class _verficationScreen extends State<VerificationScreen>{
     }
   }
 
+  // Main app body
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -74,31 +82,29 @@ class _verficationScreen extends State<VerificationScreen>{
           ),
         ),
       ),
-
     );
   }
 
   /// The title widget defines the logo and
   /// The application name
-  Widget _buildTitle(){
-    return new Column(
-        children: <Widget>[
-          new Container(
-              height: 200,
-              color: Colors.white,
-              child: Center(
-                child:Image(image: AssetImage('assets/images/Logo_Placeholder.png')),
-              )
-          )
-        ]
-    );
-
+  Widget _buildTitle() {
+    return new Column(children: <Widget>[
+      new Container(
+          height: 200,
+          color: Colors.white,
+          child: Center(
+            child:
+                Image(image: AssetImage('assets/images/Logo_Placeholder.png')),
+          ))
+    ]);
   }
 
-  Widget _buildTextFields(){
-    if(_form == FormType.Email){
+  // Text Fields
+  Widget _buildTextFields() {
+    // Email text Field
+    if (_form == FormType.Email) {
       return new Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(36.0),
         child: new Column(
           children: <Widget>[
             new Container(
@@ -108,17 +114,17 @@ class _verficationScreen extends State<VerificationScreen>{
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.white,
-                    labelText: 'Email'
-                ),
+                    labelText: 'Email'),
               ),
             ),
           ],
         ),
       );
     }
-    else if(_form == FormType.Code){
+    // Code Text Field
+    else if (_form == FormType.Code) {
       return new Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(36.0),
         child: new Column(
           children: <Widget>[
             new Container(
@@ -128,18 +134,18 @@ class _verficationScreen extends State<VerificationScreen>{
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.white,
-                    labelText: 'Code'
-                ),
+                    labelText: 'Code'),
               ),
             ),
           ],
         ),
       );
-
     }
-    else{
+    // New Password TExt Field
+    // TODO add confirm password textfield
+    else {
       return new Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(36.0),
         child: new Column(
           children: <Widget>[
             new Container(
@@ -149,8 +155,7 @@ class _verficationScreen extends State<VerificationScreen>{
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.white,
-                    labelText: 'New Password'
-                ),
+                    labelText: 'New Password'),
               ),
             ),
           ],
@@ -159,39 +164,41 @@ class _verficationScreen extends State<VerificationScreen>{
     }
   }
 
-
-  Widget _buildButtons(){
-    if(_form == FormType.Email){
+  // TODO add back button below Send button
+  Widget _buildButtons() {
+    // Send Button
+    if (_form == FormType.Email) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0,50,0,0),
+        padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
         child: new Container(
           child: new Column(
             children: <Widget>[
               //  buttonColor: Colors.white,
-                  new RaisedButton(
-                  onPressed: _emailPressed, // TODO CHANGE
-                  child: Text("Send"),
-                ),
+              new RaisedButton(
+                onPressed: _emailPressed, // TODO CHANGE
+                child: Text("Send"),
+              ),
             ],
           ),
         ),
       );
     }
-    else if(_form == FormType.Code){
+
+    // Unique Identification Code
+    else if (_form == FormType.Code) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0,50,0,0),
+        padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
         child: new Container(
           child: new Column(
             children: <Widget>[
-              new ButtonTheme(
-                minWidth: 200.0,
-                height: 50.0,
-                buttonColor: Colors.white,
-                child: RaisedButton(
-                  onPressed: _codePressed, // TODO CHANGE
-                  child: Text("Send Code"),
-                ),
+              //  minWidth: 200.0,
+              //    height: 50.0,
+              //   buttonColor: Colors.white,
+              new RaisedButton(
+                onPressed: _codePressed, // TODO CHANGE
+                child: Text("Send Code"),
               ),
+
               new FlatButton(
                 child: new Text('Back'),
                 onPressed: _BacktoEmail,
@@ -201,21 +208,22 @@ class _verficationScreen extends State<VerificationScreen>{
         ),
       );
     }
-    else{
+    // Reset Password
+    // TODO add confirm password field
+    else {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0,50,0,0),
+        padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
         child: new Container(
           child: new Column(
             children: <Widget>[
-              new ButtonTheme(
-                minWidth: 200.0,
-                height: 50.0,
-                buttonColor: Colors.white,
-                child: RaisedButton(
-                  onPressed: _passwordPressed, // TODO CHANGE
-                  child: Text("Reset Password"),
-                ),
+              //  minWidth: 200.0,
+              //   height: 50.0,
+              //    buttonColor: Colors.white,
+              new RaisedButton(
+                onPressed: _passwordPressed, // TODO CHANGE
+                child: Text("Reset Password"),
               ),
+
               new FlatButton(
                 child: new Text('Back'),
                 onPressed: _emailPressed,
@@ -227,34 +235,28 @@ class _verficationScreen extends State<VerificationScreen>{
     }
   }
 
-
-  
-  void _createAccountPressed() {
-  }
+  // Methods for Logic
+  void _createAccountPressed() {}
 
   void _BacktoEmail() async {
-
     setState(() {
       _form = FormType.Email;
     });
   }
 
   void _emailPressed() async {
-
     setState(() {
       _form = FormType.Code;
     });
   }
 
   void _codePressed() async {
-
     setState(() {
-      _form =_form = FormType.Password;
+      _form = _form = FormType.Password;
     });
   }
 
-  void _passwordPressed(){
+  void _passwordPressed() {
     print("transition time");
   }
 }
-
