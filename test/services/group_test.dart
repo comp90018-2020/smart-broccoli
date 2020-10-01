@@ -38,4 +38,30 @@ main() async {
     expect(g.defaultGroup, false);
     expect(g.members, null);
   });
+
+  test('Create group (name already taken)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.post(GroupModel.GROUP_URL,
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "message": "Validation error",
+              "errors": [
+                <String, dynamic>{
+                  "msg": "Uniqueness constraint failure",
+                  "location": "body",
+                  "param": "name"
+                }
+              ]
+            }),
+            409));
+
+    expect(() async => await gm.createGroup('Lorem ipsum'),
+        throwsA(isA<GroupCreateException>()));
+  });
 }
