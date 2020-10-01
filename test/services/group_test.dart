@@ -266,4 +266,59 @@ main() async {
     expect(returned.defaultGroup, false);
     expect(returned.code, "BG1egA");
   });
+
+  test('Delete group', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.delete('${GroupModel.GROUP_URL}/2',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response("", 204));
+
+    // pretend client obtained `g` was from `getGroup` or `getGroups`
+    Group g = Group.fromJson(<String, dynamic>{
+      "id": 2,
+      "name": "foo",
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "defaultGroup": false,
+      "code": "BG1egA",
+      "role": "owner"
+    });
+
+    await gm.deleteGroup(g);
+    // no exception should be raised
+  });
+
+  test('Delete group (already deleted)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.delete('${GroupModel.GROUP_URL}/2',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "Cannot perform group action"}),
+            403));
+
+    // pretend client obtained `g` was from `getGroup` or `getGroups`
+    Group g = Group.fromJson(<String, dynamic>{
+      "id": 2,
+      "name": "foo",
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "defaultGroup": false,
+      "code": "BG1egA",
+      "role": "owner"
+    });
+
+    expect(() async => await gm.deleteGroup(g),
+        throwsA(isA<ForbiddenRequestException>()));
+  });
 }
