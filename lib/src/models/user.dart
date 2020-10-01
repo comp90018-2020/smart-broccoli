@@ -41,7 +41,8 @@ class ParticipantUser extends User {
 
 class RegistrationException implements Exception {}
 
-/// Exception thrown when attempting to register with an already registered email
+/// Exception thrown when attempting to register (or update the profile of a
+/// user) with an already registered email
 class RegistrationConflictException extends RegistrationException {}
 
 /// Exception thrown when login is unsuccessful
