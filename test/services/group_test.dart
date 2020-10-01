@@ -72,8 +72,7 @@ main() async {
         mocker: client);
     final GroupModel gm = GroupModel(am, mocker: client);
 
-    when(client.get(GroupModel.GROUP_URL,
-            headers: anyNamed("headers")))
+    when(client.get(GroupModel.GROUP_URL, headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode([
               <String, dynamic>{
@@ -122,5 +121,33 @@ main() async {
     expect(groups[0].code, "Hq6PP5");
     expect(groups[1].code, "BG1egA");
     expect(groups[2].code, "DKeBBJ");
+  });
+
+  test('Get specified group', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.get('${GroupModel.GROUP_URL}/2', headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "id": 2,
+              "name": "foo",
+              "createdAt": "2020-01-01T00:00:00.000Z",
+              "updatedAt": "2020-01-01T00:00:00.000Z",
+              "defaultGroup": false,
+              "code": "BG1egA",
+              "role": "owner"
+            }),
+            200));
+
+    final group = await gm.getGroup(2);
+    expect(group, isA<Group>());
+    expect(group.id, 2);
+    expect(group.name, "foo");
+    expect(group.defaultGroup, false);
+    expect(group.code, "BG1egA");
   });
 }
