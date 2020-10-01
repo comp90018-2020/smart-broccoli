@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import './login.dart';
 import './register.dart';
-import '../shared/bubble_button.dart';
 
 /// Use : The Login Screen provides an interface to verify the user and log them
 /// into the application.
@@ -52,16 +51,20 @@ class _LoginScreenState extends State<LoginScreen>
               child: Column(
                 children: [
                   Container(
+                      margin: EdgeInsets.only(top: 30, bottom: 16),
+                      decoration: BoxDecoration(
+                          color: Color(0xFF82C785),
+                          borderRadius: BorderRadius.all(Radius.circular(25))),
                       child: TabBar(
-                    tabs: [
-                      new Tab(
-                        text: "LOGIN",
-                      ),
-                      new Tab(
-                        text: "SIGN UP",
-                      )
-                    ],
-                  )),
+                        tabs: [
+                          new Tab(
+                            text: "LOGIN",
+                          ),
+                          new Tab(
+                            text: "SIGN UP",
+                          )
+                        ],
+                      )),
                   SizedBox(
                     height: 300,
                     // Subtract the top
