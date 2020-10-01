@@ -209,4 +209,19 @@ main() async {
     expect(g.members[1].item2, GroupRole.MEMBER);
     expect(g.members[2].item2, GroupRole.MEMBER);
   });
+
+  test('Get specified group (does not exist)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.get('${GroupModel.GROUP_URL}/44', headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{"message": "Group not found"}), 404));
+
+    expect(() async => await gm.getGroup(44),
+        throwsA(isA<GroupNotFoundException>()));
+  });
 }

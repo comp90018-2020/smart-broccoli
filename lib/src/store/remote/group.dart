@@ -67,6 +67,7 @@ class GroupModel {
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw GroupNotFoundException();
     throw Exception('Unable to get specified group: unknown error occurred');
   }
 
