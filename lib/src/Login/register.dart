@@ -8,7 +8,12 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
+  final TextEditingController _passwordConfirmController =
+      new TextEditingController();
   final TextEditingController _userNameController = new TextEditingController();
+
+  // Whether password is visible
+  bool _passwordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +27,8 @@ class _RegisterState extends State<Register> {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: TextFormField(
                   controller: _userNameController,
-                  decoration: new InputDecoration(labelText: 'Name'),
+                  decoration: new InputDecoration(
+                      labelText: 'Name', prefixIcon: Icon(Icons.people)),
                   // obscureText: true,
                 ),
               ),
@@ -31,7 +37,8 @@ class _RegisterState extends State<Register> {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: TextFormField(
                   controller: _emailController,
-                  decoration: new InputDecoration(labelText: 'Email'),
+                  decoration: new InputDecoration(
+                      labelText: 'Email', prefixIcon: Icon(Icons.email)),
                 ),
               ),
               // Text field for password
@@ -39,7 +46,39 @@ class _RegisterState extends State<Register> {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: TextFormField(
                   controller: _passwordController,
-                  decoration: new InputDecoration(labelText: 'Password'),
+                  decoration: new InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(_passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off),
+                        onPressed: () {
+                          setState(() {
+                            _passwordVisible = !_passwordVisible;
+                          });
+                        },
+                      )),
+                  obscureText: true,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: TextFormField(
+                  controller: _passwordConfirmController,
+                  decoration: new InputDecoration(
+                      labelText: 'Confirm Password',
+                      prefixIcon: Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(_passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off),
+                        onPressed: () {
+                          setState(() {
+                            _passwordVisible = !_passwordVisible;
+                          });
+                        },
+                      )),
                   obscureText: true,
                 ),
               ),
