@@ -384,4 +384,74 @@ main() async {
     expect(() async => await gm.joinGroup(name: "foo"),
         throwsA(isA<GroupNotFoundException>()));
   });
+
+  test('Update group code', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.post('${GroupModel.GROUP_URL}/2/code',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "id": 2,
+              "name": "foo",
+              "defaultGroup": false,
+              "code": "5EOoU2",
+              "createdAt": "2020-01-01T00:00:00.000Z",
+              "updatedAt": "2020-01-01T00:00:00.000Z",
+              "role": "owner"
+            }),
+            200));
+
+    // pretend client obtained `g` was from `getGroup` or `getGroups`
+    Group g = Group.fromJson(<String, dynamic>{
+      "id": 2,
+      "name": "foo",
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "defaultGroup": false,
+      "code": "BG1egA",
+      "role": "owner"
+    });
+
+    final updated = await gm.refreshCode(g);
+    expect(updated, isA<Group>());
+    expect(updated.id, 2);
+    expect(updated.name, "foo");
+    expect(updated.defaultGroup, false);
+    expect(updated.code, "5EOoU2");
+  });
+
+  test('Update group code (not allowed or group has been deleted)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.post('${GroupModel.GROUP_URL}/2/code',
+            headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "message": "User does not have privilege to access group resource"
+            }),
+            403));
+
+    // pretend client obtained `g` was from `getGroup` or `getGroups`
+    Group g = Group.fromJson(<String, dynamic>{
+      "id": 2,
+      "name": "foo",
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "defaultGroup": false,
+      "code": "BG1egA",
+      "role": "owner"
+    });
+
+    expect(() async => await gm.refreshCode(g),
+        throwsA(isA<ForbiddenRequestException>()));
+  });
 }
