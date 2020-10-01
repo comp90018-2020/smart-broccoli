@@ -19,13 +19,11 @@ class MyApp extends StatelessWidget {
       /// Manually, hopefully a solution can be found soon.
       theme: ThemeData(
         buttonTheme: ButtonThemeData(
-          buttonColor: Colors.orangeAccent,
-          minWidth: 300.0,
-          height: 50.0,
+          buttonColor: Color(0xFFFEC12D),
         ),
         inputDecorationTheme:
             InputDecorationTheme(contentPadding: EdgeInsets.all(5.0)),
-        scaffoldBackgroundColor: Color(0xFF00C853),
+        scaffoldBackgroundColor: Color(0xFF4CAF50),
       ),
       // Initialise the log in page
       home: LoginScreen(),
