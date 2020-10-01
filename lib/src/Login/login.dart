@@ -15,25 +15,21 @@ class _LoginState extends State<Login> {
     return new Column(
       children: <Widget>[
         // Text field for email
-        new TextFormField(
-          controller: _emailController,
-          decoration: new InputDecoration(
-              border: OutlineInputBorder(),
-              filled: true,
-              fillColor: Colors.white,
-              labelText: 'Email'),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: TextFormField(
+            controller: _emailController,
+            decoration: const InputDecoration(labelText: 'Email'),
+          ),
         ),
-        // Padding between the two textboxes
-        SizedBox(height: 20),
         // Text field for password
-        new TextFormField(
-          controller: _passwordController,
-          decoration: new InputDecoration(
-              border: OutlineInputBorder(),
-              filled: true,
-              fillColor: Colors.white,
-              labelText: 'Password'),
-          obscureText: true,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: TextFormField(
+            controller: _passwordController,
+            decoration: const InputDecoration(labelText: 'Password'),
+            obscureText: true,
+          ),
         ),
       ],
     );

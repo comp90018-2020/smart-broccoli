@@ -12,51 +12,36 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      padding: EdgeInsets.all(36.0),
-      child: new Column(
+    return FractionallySizedBox(
+      widthFactor: .75,
+      child: Column(
         children: <Widget>[
           // Text field for name
-          new Container(
-            child: new TextField(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: TextField(
               controller: _userNameController,
-              decoration: new InputDecoration(
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                  labelText: 'Name'),
+              decoration: new InputDecoration(labelText: 'Name'),
               // obscureText: true,
             ),
           ),
-          // Padding
-          SizedBox(height: 20),
           // Textfield for Email
-          new Container(
-            child: new TextField(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: TextField(
               controller: _emailController,
-              decoration: new InputDecoration(
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                  labelText: 'Email'),
+              decoration: new InputDecoration(labelText: 'Email'),
             ),
           ),
-          // Padding
-          SizedBox(height: 20),
           // Text field for password
-          new Container(
-            child: new TextField(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: TextField(
               controller: _passwordController,
-              decoration: new InputDecoration(
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                  labelText: 'Password'),
+              decoration: new InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
           ),
-          // padding
-          SizedBox(height: 20),
           RaisedButton(
             onPressed: _createAccountPressed, // TODO CHANGE
             child: Text("Create Account"),

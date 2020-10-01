@@ -1,5 +1,4 @@
 import 'src/Login/login_screen.dart';
-import 'src/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -21,8 +20,14 @@ class MyApp extends StatelessWidget {
         buttonTheme: ButtonThemeData(
           buttonColor: Color(0xFFFEC12D),
         ),
-        inputDecorationTheme:
-            InputDecorationTheme(contentPadding: EdgeInsets.all(5.0)),
+        textTheme: TextTheme(
+            subtitle1: TextStyle(fontSize: 14, color: Color(0xFFAEAEAE))),
+        inputDecorationTheme: InputDecorationTheme(
+            contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            filled: true,
+            fillColor: Colors.white,
+            border: UnderlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(5)))),
         scaffoldBackgroundColor: Color(0xFF4CAF50),
       ),
       // Initialise the log in page
