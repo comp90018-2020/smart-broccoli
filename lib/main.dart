@@ -18,13 +18,20 @@ class MyApp extends StatelessWidget {
       /// Manually, hopefully a solution can be found soon.
       theme: ThemeData(
         buttonTheme: ButtonThemeData(
-          buttonColor: Color(0xFFFEC12D),
-        ),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(6))),
+            padding: EdgeInsets.symmetric(vertical: 15),
+            buttonColor: Color(0xFFFEC12D),
+            textTheme: ButtonTextTheme.accent,
+            colorScheme: Theme.of(context)
+                .colorScheme
+                .copyWith(secondary: Color(0xFF755915))),
         textTheme: TextTheme(
+            button: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             subtitle1: TextStyle(
-          fontSize: 14,
-          // color: Color(0xFFAEAEAE)
-        )),
+              fontSize: 14,
+              // color: Color(0xFFAEAEAE)
+            )),
         inputDecorationTheme: InputDecorationTheme(
             contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             filled: true,

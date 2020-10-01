@@ -14,15 +14,17 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      widthFactor: .75,
+      // Take up 75% of width
+      widthFactor: .70,
       child: Column(
         children: [
+          // Form TODO: https://flutter.dev/docs/cookbook/forms/validation
           Form(
             child: Column(
               children: [
                 // Text field for email
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(labelText: 'Email'),
@@ -30,17 +32,24 @@ class _LoginState extends State<Login> {
                 ),
                 // Text field for password
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: TextFormField(
                     controller: _passwordController,
                     decoration: const InputDecoration(labelText: 'Password'),
                     obscureText: true,
                   ),
                 ),
+
                 // Log in Button
-                RaisedButton(
-                  onPressed: _loginPressed, // TODO CHANGE
-                  child: const Text("Login"),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20, bottom: 8),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: RaisedButton(
+                      onPressed: _loginPressed,
+                      child: const Text("LOGIN"),
+                    ),
+                  ),
                 ),
 
                 // More padding to prevent two buttons being too close
@@ -49,6 +58,7 @@ class _LoginState extends State<Login> {
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(
+                        fontWeight: FontWeight.normal,
                         decoration: TextDecoration.underline,
                         color: Colors.white),
                   ),

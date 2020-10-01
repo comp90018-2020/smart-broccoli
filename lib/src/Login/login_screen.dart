@@ -58,10 +58,10 @@ class _LoginScreenState extends State<LoginScreen> {
               // Switch
               // Functionality to switch between login and register
               _buildSwitch(),
-              // Padding
-              SizedBox(height: 20),
               // Which form to show
-              _form == FormType.login ? _login : _register
+              Padding(
+                  padding: EdgeInsets.only(top: 30, bottom: 20),
+                  child: _form == FormType.login ? _login : _register)
             ],
           ),
         ),
