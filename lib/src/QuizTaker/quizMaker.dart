@@ -44,8 +44,11 @@ class _quizMakerState extends State<quizMaker> {
           _SwitchButton(),
           // _buildTextFields(),
           // Buttons for navigation
+          SizedBox(height: 50),
           _buildLiveQuiz(),
+          SizedBox(height: 50),
           _buildJoinByPinButton(),
+          SizedBox(height: 50),
           _buildQuizList(),
         ],
       ),
@@ -135,8 +138,10 @@ class _quizMakerState extends State<quizMaker> {
     );
   }
 
+  // TODO change to flat button
   Widget _listTile(){
     return new Container(
+
         width: 160.0,
       child: new Column(
           children: <Widget>[
@@ -146,14 +151,13 @@ class _quizMakerState extends State<quizMaker> {
             ),
             new Container(
                 child: Center(
-                  child: Text("UNI QUIZ",style: TextStyle(height: 5, fontSize: 5,color: Colors.black),),
+                  child: Text("COMP1337",style: TextStyle(height: 5, fontSize: 5,color: Colors.black),),
                 )
             ),
             Expanded(child: Container()),
             new Container(
-                child: Center(
-                  child: Text("WORT WORT WORT",style: TextStyle(height: 5, fontSize: 5,color: Colors.black),),
-                )
+                  child: Text("STATUS Here",style: TextStyle(height: 5, fontSize: 5,color: Colors.black),),
+
             ),
 
           ]
@@ -173,6 +177,7 @@ class _quizMakerState extends State<quizMaker> {
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
         itemBuilder: (context, index) {
+
           return
             _listTile();
         },
