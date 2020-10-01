@@ -507,4 +507,110 @@ main() async {
 
     expect(() async => await gm.leaveGroup(g), throwsException);
   });
+
+  test('Kick member', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.post('${GroupModel.GROUP_URL}/2/member/kick',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response("", 204));
+
+    // pretend client obtained `g` was from `getGroup` or `getGroups`
+    Group g = Group.fromJson(<String, dynamic>{
+      "id": 2,
+      "name": "foo",
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "defaultGroup": false,
+      "code": "BG1egA",
+      "role": "owner"
+    });
+
+    // pretend client obtained `member` from `getMembers`
+    User member = User.fromJson(<String, dynamic>{
+      "id": 2,
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "name": "Aaron Harwood",
+      "role": "member"
+    });
+
+    await gm.kickMember(g, member);
+    // no exception should be raised
+  });
+
+  test('Kick member (not in group)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.post('${GroupModel.GROUP_URL}/2/member/kick',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{"message": "Cannot delete member"}),
+            400));
+
+    // pretend client obtained `g` was from `getGroup` or `getGroups`
+    Group g = Group.fromJson(<String, dynamic>{
+      "id": 2,
+      "name": "foo",
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "defaultGroup": false,
+      "code": "BG1egA",
+      "role": "owner"
+    });
+
+    // pretend client obtained `member` from `getMembers`
+    User member = User.fromJson(<String, dynamic>{
+      "id": 2,
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "name": "Aaron Harwood",
+      "role": "member"
+    });
+
+    expect(() async => await gm.kickMember(g, member), throwsException);
+  });
+
+  test('Kick member (user not group owner)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final GroupModel gm = GroupModel(am, mocker: client);
+
+    when(client.post('${GroupModel.GROUP_URL}/2/member/kick',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "Cannot perform group action"}),
+            403));
+
+    // pretend client obtained `g` was from `getGroup` or `getGroups`
+    Group g = Group.fromJson(<String, dynamic>{
+      "id": 2,
+      "name": "foo",
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "defaultGroup": false,
+      "code": "BG1egA",
+      "role": "owner"
+    });
+
+    // pretend client obtained `member` from `getMembers`
+    User member = User.fromJson(<String, dynamic>{
+      "id": 2,
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "name": "Aaron Harwood",
+      "role": "member"
+    });
+
+    expect(() async => await gm.kickMember(g, member),
+        throwsA(isA<ForbiddenRequestException>()));
+  });
 }
