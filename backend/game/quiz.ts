@@ -1,21 +1,25 @@
 import { jwtVerify } from "../helpers/jwt";
 import Quiz from "../models/quiz";
 import Question from "../models/question";
-import {getQuiz} from "../controllers/quiz"; 
+import { getQuiz } from "../controllers/quiz";
 
-export class QuizIterator extends Quiz {
+export class QuizReader extends Quiz {
     private pos = 0;
+    private quizJson: any;
 
-    loadQuiz(quizId: number) {
+    async loadQuiz(userId: number, quizId: number) {
+        // load quiz from database
+        this.quizJson = await getQuiz(userId, Number(quizId))
     }
 
-    next(){
+    next() {
         if (this.pos < this.questions.length)
             return this.questions[this.pos++];
         else
             return false;
     }
 
+    // make this class iteratable
     [Symbol.iterator]() { return super.questions.values() }
 
 }
@@ -29,7 +33,7 @@ export class LiveQuiz {
     secret: string = "aaa";
 
 
-    constructor() { 
+    constructor() {
         this.sess = {}
     }
 
@@ -66,11 +70,19 @@ export class LiveQuiz {
             }
         } else {
             // quiz is not in session
-            // init quiz in session and make the status be active
-            const quizJson = await getQuiz(userId, Number(quizId))
-            console.log(this.sess);
-            this.sess[quizId] = {"status":"active", "quiz": new Quiz()};
-            ret = { "res": "success" }
+
+            try {
+                // read quiz from database
+                // init quiz in session and make the status be active
+                this.sess[quizId] = { "status": "active", "quiz": new QuizReader(userId, quizId) };
+                console.log(this.sess);
+
+                ret = { "res": "success" }
+            }
+            catch (err) {
+                ret = { "res": `Failed: ${err}` }
+            }
+
         }
 
         // response to the end
@@ -85,8 +97,8 @@ export class LiveQuiz {
 
         // json resoonse  
         const ret = { "res": "success" };
-        if (quizId in this.sess && "status" in this.sess[quizId]){
-            this.sess[quizId].status = "active";
+        if (quizId in this.sess && "status" in this.sess[quizId]) {
+            this.sess[quizId].status = "inactive";
         }
 
         // response to the end
@@ -123,7 +135,7 @@ export class LiveQuiz {
         const quizId = content.quizId;
 
         if (quizId in this.sess && this.sess[quizId].status === 'active') {
-            const msg = {"action": 0, "msg": "Quiz starts" };
+            const msg = { "action": 0, "msg": "Quiz starts" };
             // broadcast to the room with msg that quiz has been started
             socket.to(quizId).send(msg);
 
@@ -143,7 +155,7 @@ export class LiveQuiz {
         let ret: { [key: string]: any };
 
         if (quizId in this.sess && this.sess[quizId].status === 'active') {
-            ret = {"action": 0, "msg": "Quiz starts" };
+            ret = { "action": 0, "msg": "Quiz starts" };
             // broadcast to the room that quiz has been started
             socket.to(quizId).send(ret);
 
