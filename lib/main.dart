@@ -41,14 +41,13 @@ class MyApp extends StatelessWidget {
         tabBarTheme: TabBarTheme(
             labelColor: Color(0xFF654C12),
             unselectedLabelColor: Colors.white,
-            // unselectedLabelColor: Color(),
             indicator: BoxDecoration(
                 borderRadius: BorderRadius.circular(50),
                 color: Color(0xFFFEC12D))),
         scaffoldBackgroundColor: Color(0xFF4CAF50),
       ),
-      // Initialise the log in page
-      home: AuthScreen(),
+      routes: {'/auth': (context) => AuthScreen()},
+      initialRoute: '/auth',
     );
   }
 }
