@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'verification_screen.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -66,18 +65,17 @@ class _LoginState extends State<Login> {
                 ),
               ),
 
-              // More padding to prevent two buttons being too close
               // Optional Forgot password button
-              FlatButton(
-                child: const Text(
-                  'Forgot Password?',
-                  style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      decoration: TextDecoration.underline,
-                      color: Colors.white),
-                ),
-                onPressed: _passwordReset,
-              )
+              // FlatButton(
+              //   child: const Text(
+              //     'Forgot Password?',
+              //     style: TextStyle(
+              //         fontWeight: FontWeight.normal,
+              //         decoration: TextDecoration.underline,
+              //         color: Colors.white),
+              //   ),
+              //   onPressed: _passwordReset,
+              // )
             ],
           ),
         )
@@ -92,12 +90,5 @@ class _LoginState extends State<Login> {
         context,
         MaterialPageRoute(builder: (context) => LoginPage2())
     ); */
-  }
-
-  void _passwordReset() {
-    print(
-        "The user wants a password reset request sent to $_emailController.text");
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => VerificationScreen()));
   }
 }
