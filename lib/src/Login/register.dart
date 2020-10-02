@@ -16,7 +16,7 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10),
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Form(
         child: Column(
           children: <Widget>[
@@ -82,7 +82,7 @@ class _RegisterState extends State<Register> {
             // ),
             // Create account button
             Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 10),
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
               child: SizedBox(
                   width: double.infinity,
                   child: RaisedButton(

@@ -17,7 +17,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10),
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Column(children: [
         // Form TODO: https://flutter.dev/docs/cookbook/forms/validation
         Form(
