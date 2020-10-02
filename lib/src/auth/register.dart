@@ -60,26 +60,6 @@ class _RegisterState extends State<Register> {
                 obscureText: true,
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(vertical: 8),
-            //   child: TextFormField(
-            //     controller: _passwordConfirmController,
-            //     decoration: new InputDecoration(
-            //         labelText: 'Confirm Password',
-            //         prefixIcon: Icon(Icons.lock),
-            //         suffixIcon: IconButton(
-            //           icon: Icon(_passwordVisible
-            //               ? Icons.visibility
-            //               : Icons.visibility_off),
-            //           onPressed: () {
-            //             setState(() {
-            //               _passwordVisible = !_passwordVisible;
-            //             });
-            //           },
-            //         )),
-            //     obscureText: true,
-            //   ),
-            // ),
             // Create account button
             Padding(
               padding: const EdgeInsets.only(top: 20, bottom: 20),
