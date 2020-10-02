@@ -39,17 +39,20 @@ class _RegisterState extends State<Register> {
                   controller: _nameController,
                   decoration: new InputDecoration(
                       labelText: 'Name', prefixIcon: Icon(Icons.people)),
-                  textCapitalization: TextCapitalization.words),
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => FocusScope.of(context).nextFocus()),
             ),
             // Email
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: TextFormField(
-                controller: _emailController,
-                decoration: new InputDecoration(
-                    labelText: 'Email', prefixIcon: Icon(Icons.email)),
-                keyboardType: TextInputType.emailAddress,
-              ),
+                  controller: _emailController,
+                  decoration: new InputDecoration(
+                      labelText: 'Email', prefixIcon: Icon(Icons.email)),
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => FocusScope.of(context).nextFocus()),
             ),
             // Password
             Padding(
