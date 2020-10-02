@@ -5,12 +5,11 @@ void main() => runApp(MyApp());
 
 /// Main entrance class
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Test Flutter',
+      title: 'Fuzzy Broccoli',
 
       /// A issue I've encountered is that not everything can be put into
       /// Theme Data, since out buttons are not all the same

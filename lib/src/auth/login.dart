@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Login tab
 class Login extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _LoginState();
@@ -14,15 +15,23 @@ class _LoginState extends State<Login> {
   bool _passwordVisible = false;
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Column(children: [
-        // Form TODO: https://flutter.dev/docs/cookbook/forms/validation
+        // Form
+        // TODO: https://flutter.dev/docs/cookbook/forms/validation
         Form(
           child: Column(
             children: [
-              // Text field for email
+              // Email
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: TextFormField(
@@ -31,7 +40,7 @@ class _LoginState extends State<Login> {
                       labelText: 'Email', prefixIcon: Icon(Icons.email)),
                 ),
               ),
-              // Text field for password
+              // Password
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: TextFormField(
@@ -39,6 +48,7 @@ class _LoginState extends State<Login> {
                     decoration: InputDecoration(
                         labelText: 'Password',
                         prefixIcon: Icon(Icons.lock),
+                        // Visibility icon
                         // https://stackoverflow.com/questions/49125064
                         suffixIcon: IconButton(
                           icon: Icon(_passwordVisible
@@ -53,7 +63,7 @@ class _LoginState extends State<Login> {
                     obscureText: !_passwordVisible),
               ),
 
-              // Log in Button
+              // Login Button
               Padding(
                 padding: const EdgeInsets.only(top: 20, bottom: 8),
                 child: SizedBox(
@@ -65,7 +75,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
 
-              // Optional Forgot password button
+              // Optional: Forgot password button
               // FlatButton(
               //   child: const Text(
               //     'Forgot Password?',
@@ -86,9 +96,5 @@ class _LoginState extends State<Login> {
   void _loginPressed() {
     print("Login pressed");
     print("${_emailController.text} ${_passwordController.text}");
-    /* Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage2())
-    ); */
   }
 }

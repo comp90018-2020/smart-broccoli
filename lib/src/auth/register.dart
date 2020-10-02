@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
 
+// Register tab
 class Register extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _RegisterState();
 }
 
 class _RegisterState extends State<Register> {
+  // TextField controllers
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
-  final TextEditingController _userNameController = new TextEditingController();
+  final TextEditingController _nameController = new TextEditingController();
 
   // Whether password is visible
   bool _passwordVisible = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,17 +30,16 @@ class _RegisterState extends State<Register> {
       child: Form(
         child: Column(
           children: <Widget>[
-            // Text field for name
+            // Name
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: TextFormField(
-                controller: _userNameController,
+                controller: _nameController,
                 decoration: new InputDecoration(
                     labelText: 'Name', prefixIcon: Icon(Icons.people)),
-                // obscureText: true,
               ),
             ),
-            // Textfield for Email
+            // Email
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: TextFormField(
@@ -39,7 +48,7 @@ class _RegisterState extends State<Register> {
                     labelText: 'Email', prefixIcon: Icon(Icons.email)),
               ),
             ),
-            // Text field for password
+            // Password
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: TextFormField(
@@ -60,6 +69,7 @@ class _RegisterState extends State<Register> {
                 obscureText: true,
               ),
             ),
+
             // Create account button
             Padding(
               padding: const EdgeInsets.only(top: 20, bottom: 20),
@@ -78,14 +88,10 @@ class _RegisterState extends State<Register> {
 
   void signUpPressed() {
     print("Sign Up pressed");
-    /*  Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage3())
-      ); */
   }
 
   void _createAccountPressed() {
     print(
-        'The user wants to create an accoutn with $_emailController.text and $_passwordController.text');
+        'The user wants to create an accoutn with ${_emailController.text} and ${_passwordController.text}');
   }
 }
