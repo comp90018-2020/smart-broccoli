@@ -24,9 +24,8 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      child: Column(children: [
+    return Scaffold(
+      body: Column(children: [
         // Form
         // TODO: https://flutter.dev/docs/cookbook/forms/validation
         Form(
@@ -36,10 +35,12 @@ class _LoginState extends State<Login> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                      labelText: 'Email', prefixIcon: Icon(Icons.email)),
-                ),
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                        labelText: 'Email', prefixIcon: Icon(Icons.email)),
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) =>
+                        FocusScope.of(context).nextFocus()),
               ),
               // Password
               Padding(
