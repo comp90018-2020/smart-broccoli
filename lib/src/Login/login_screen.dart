@@ -14,14 +14,10 @@ class LoginScreen extends StatefulWidget {
 ///
 enum FormType { login, register }
 
-class _LoginScreenState extends State<LoginScreen>
-    with SingleTickerProviderStateMixin {
-  TabController _tabController;
-
+class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(vsync: this, length: 2);
   }
 
   // Primary start up function
@@ -32,71 +28,49 @@ class _LoginScreenState extends State<LoginScreen>
 
     // Create a new Scaffold
     return new Scaffold(
-        body: SingleChildScrollView(
-            child: Column(children: <Widget>[
-      // Build title (logo/application name)
-      Container(
-          height: 200,
-          color: Colors.white,
-          child: Center(
-            child:
-                Image(image: AssetImage('assets/images/Logo_Placeholder.png')),
-          )),
+        body: DefaultTabController(
+            length: 2,
+            child: Column(
+              children: <Widget>[
+                // Build title (logo/application name)
+                Container(
+                    height: 200,
+                    color: Colors.white,
+                    child: Center(
+                      child: Image(
+                          image:
+                              AssetImage('assets/images/Logo_Placeholder.png')),
+                    )),
 
-      // Body
-      FractionallySizedBox(
-          widthFactor: 0.7,
-          child: DefaultTabController(
-              length: 2,
-              child: Column(
-                children: [
-                  Container(
-                      margin: EdgeInsets.only(top: 30, bottom: 16),
-                      decoration: BoxDecoration(
-                          color: Color(0xFF82C785),
-                          borderRadius: BorderRadius.all(Radius.circular(25))),
-                      child: TabBar(
-                        tabs: [
-                          new Tab(
-                            text: "LOGIN",
-                          ),
-                          new Tab(
-                            text: "SIGN UP",
-                          )
-                        ],
-                      )),
-                  SizedBox(
-                    height: 300,
-                    // Subtract the top
-                    child: TabBarView(
-                      children: [login, register],
-                    ),
-                  )
-                ],
-              ))
+                // Tabs
+                FractionallySizedBox(
+                    widthFactor: 0.5,
+                    child: Container(
+                        margin: EdgeInsets.only(top: 35, bottom: 20),
+                        decoration: BoxDecoration(
+                            color: Color(0xFF82C785),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(25))),
+                        child: TabBar(
+                          tabs: [
+                            new Tab(
+                              text: "LOGIN",
+                            ),
+                            new Tab(
+                              text: "SIGN UP",
+                            )
+                          ],
+                        ))),
 
-          // child: Column(
-          //   children: [
-          //     Container(
-          //         child: TabBar(controller: _tabController, tabs: <Tab>[
-          //       new Tab(
-          //         text: "LOGIN",
-          //       ),
-          //       new Tab(
-          //         text: "SIGN UP",
-          //       )
-          //     ])),
-          //     TabBarView(controller: _tabController, children: [
-          //       Expanded(child: Login()),
-          //       Expanded(child: Register()),
-          //     ]),
-          //   ],
-          // ),
-          ),
-    ])));
+                // Tab contents
+                Expanded(
+                    child: FractionallySizedBox(
+                  widthFactor: 0.7,
+                  child: TabBarView(
+                    children: [login, register],
+                  ),
+                )),
+              ],
+            )));
   }
 }
-
-// body: TabBarView(
-//   children: [Login(), Register()],
-// )),

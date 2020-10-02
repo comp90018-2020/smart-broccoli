@@ -15,80 +15,83 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      child: Column(
-        children: <Widget>[
-          // Text field for name
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: TextFormField(
-              controller: _userNameController,
-              decoration: new InputDecoration(
-                  labelText: 'Name', prefixIcon: Icon(Icons.people)),
-              // obscureText: true,
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10),
+      child: Form(
+        child: Column(
+          children: <Widget>[
+            // Text field for name
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: TextFormField(
+                controller: _userNameController,
+                decoration: new InputDecoration(
+                    labelText: 'Name', prefixIcon: Icon(Icons.people)),
+                // obscureText: true,
+              ),
             ),
-          ),
-          // Textfield for Email
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: TextFormField(
-              controller: _emailController,
-              decoration: new InputDecoration(
-                  labelText: 'Email', prefixIcon: Icon(Icons.email)),
+            // Textfield for Email
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: TextFormField(
+                controller: _emailController,
+                decoration: new InputDecoration(
+                    labelText: 'Email', prefixIcon: Icon(Icons.email)),
+              ),
             ),
-          ),
-          // Text field for password
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: TextFormField(
-              controller: _passwordController,
-              decoration: new InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(_passwordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off),
-                    onPressed: () {
-                      setState(() {
-                        _passwordVisible = !_passwordVisible;
-                      });
-                    },
+            // Text field for password
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: TextFormField(
+                controller: _passwordController,
+                decoration: new InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(_passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                      onPressed: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                    )),
+                obscureText: true,
+              ),
+            ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(vertical: 8),
+            //   child: TextFormField(
+            //     controller: _passwordConfirmController,
+            //     decoration: new InputDecoration(
+            //         labelText: 'Confirm Password',
+            //         prefixIcon: Icon(Icons.lock),
+            //         suffixIcon: IconButton(
+            //           icon: Icon(_passwordVisible
+            //               ? Icons.visibility
+            //               : Icons.visibility_off),
+            //           onPressed: () {
+            //             setState(() {
+            //               _passwordVisible = !_passwordVisible;
+            //             });
+            //           },
+            //         )),
+            //     obscureText: true,
+            //   ),
+            // ),
+            // Create account button
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 10),
+              child: SizedBox(
+                  width: double.infinity,
+                  child: RaisedButton(
+                    onPressed: _createAccountPressed,
+                    child: const Text("CREATE ACCOUNT"),
                   )),
-              obscureText: true,
             ),
-          ),
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 8),
-          //   child: TextFormField(
-          //     controller: _passwordConfirmController,
-          //     decoration: new InputDecoration(
-          //         labelText: 'Confirm Password',
-          //         prefixIcon: Icon(Icons.lock),
-          //         suffixIcon: IconButton(
-          //           icon: Icon(_passwordVisible
-          //               ? Icons.visibility
-          //               : Icons.visibility_off),
-          //           onPressed: () {
-          //             setState(() {
-          //               _passwordVisible = !_passwordVisible;
-          //             });
-          //           },
-          //         )),
-          //     obscureText: true,
-          //   ),
-          // ),
-          // Create account button
-          Padding(
-            padding: const EdgeInsets.only(top: 20, bottom: 10),
-            child: SizedBox(
-                width: double.infinity,
-                child: RaisedButton(
-                  onPressed: _createAccountPressed,
-                  child: const Text("CREATE ACCOUNT"),
-                )),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
