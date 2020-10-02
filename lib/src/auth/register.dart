@@ -34,10 +34,10 @@ class _RegisterState extends State<Register> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: TextFormField(
-                controller: _nameController,
-                decoration: new InputDecoration(
-                    labelText: 'Name', prefixIcon: Icon(Icons.people)),
-              ),
+                  controller: _nameController,
+                  decoration: new InputDecoration(
+                      labelText: 'Name', prefixIcon: Icon(Icons.people)),
+                  textCapitalization: TextCapitalization.words),
             ),
             // Email
             Padding(
