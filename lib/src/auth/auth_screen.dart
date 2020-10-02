@@ -16,9 +16,23 @@ class _AuthScreenState extends State<AuthScreen> {
   GlobalKey _key = GlobalKey();
   double _height = 0;
 
+  List<Widget> _tabs;
+
   @override
   void initState() {
     super.initState();
+
+    // Initial tabs (to solve TabBarView unbounded height issue)
+    // When the height of the register tabview child is retrieved,
+    // swap the pages around and constrain the height
+    // https://github.com/flutter/flutter/issues/29749
+    // https://github.com/flutter/flutter/issues/54968
+    _tabs = [
+      Stack(children: [
+        Wrap(children: [Register(key: _key)])
+      ]),
+      Login()
+    ];
 
     // Get height
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -26,6 +40,7 @@ class _AuthScreenState extends State<AuthScreen> {
       if (_height != _renderBox.size.height) {
         setState(() {
           _height = _renderBox.size.height;
+          _tabs = [Login(), Register(key: _key)];
         });
       }
     });
@@ -36,22 +51,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     // Create a new Scaffold
     return new Scaffold(
-        body: Stack(children: [
-      // Shadow element to get height of register box
-      // This only works because register is of static height
-      // https://github.com/flutter/flutter/issues/29749
-      // https://github.com/flutter/flutter/issues/54968
-      Wrap(children: [
-        Visibility(
-          key: _key,
-          child: Register(),
-          visible: false,
-          maintainState: true,
-          maintainSize: true,
-          maintainAnimation: true,
-        )
-      ]),
-      SingleChildScrollView(
+      body: SingleChildScrollView(
           child: DefaultTabController(
               length: 2,
               child: Column(children: <Widget>[
@@ -88,13 +88,14 @@ class _AuthScreenState extends State<AuthScreen> {
                 // Tab contents
                 FractionallySizedBox(
                   widthFactor: 0.7,
+                  // Need to limit height of TabBarView, see comments above
                   child: LimitedBox(
                       maxHeight: _height == 0
                           ? MediaQuery.of(context).size.height
                           : _height,
-                      child: TabBarView(children: [Login(), Register()])),
+                      child: TabBarView(children: _tabs)),
                 ),
               ]))),
-    ]));
+    );
   }
 }

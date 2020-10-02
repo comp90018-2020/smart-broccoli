@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 // Login tab
 class Login extends StatefulWidget {
+  Login({Key key}) : super(key: key);
   @override
   State<StatefulWidget> createState() => new _LoginState();
 }

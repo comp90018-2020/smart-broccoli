@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 // Register tab
 class Register extends StatefulWidget {
+  Register({Key key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => new _RegisterState();
 }
