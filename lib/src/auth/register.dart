@@ -48,6 +48,7 @@ class _RegisterState extends State<Register> {
                 controller: _emailController,
                 decoration: new InputDecoration(
                     labelText: 'Email', prefixIcon: Icon(Icons.email)),
+                keyboardType: TextInputType.emailAddress,
               ),
             ),
             // Password

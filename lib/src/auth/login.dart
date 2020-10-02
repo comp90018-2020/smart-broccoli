@@ -38,6 +38,7 @@ class _LoginState extends State<Login> {
                     controller: _emailController,
                     decoration: const InputDecoration(
                         labelText: 'Email', prefixIcon: Icon(Icons.email)),
+                    keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     onFieldSubmitted: (_) =>
                         FocusScope.of(context).nextFocus()),
