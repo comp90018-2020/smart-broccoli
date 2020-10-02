@@ -1,4 +1,9 @@
+// An animated TabBarView alternative which does not have a sticky header
+// Source:
 // https://gist.github.com/cirnok/e1b70f5d841e47c9d85ccdf6ae866984
+// Github issues:
+// https://github.com/flutter/flutter/issues/29749
+// https://github.com/flutter/flutter/issues/54968
 
 import 'package:flutter/material.dart';
 

@@ -1,4 +1,4 @@
-import 'src/Login/login_screen.dart';
+import 'src/auth/auth_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Color(0xFF4CAF50),
       ),
       // Initialise the log in page
-      home: LoginScreen(),
+      home: AuthScreen(),
     );
   }
 }

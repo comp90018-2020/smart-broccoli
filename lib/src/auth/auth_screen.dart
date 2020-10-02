@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
-import './login.dart';
-import './register.dart';
-import './index_stack.dart';
+import 'login.dart';
+import 'register.dart';
+import 'index_stack.dart';
 
 /// Use : The Login Screen provides an interface to verify the user and log them
 /// into the application.
 /// Type : Stateful Widget
 /// Transitions: A form change from register to login and login to register
-class LoginScreen extends StatefulWidget {
+class AuthScreen extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _LoginScreenState();
+  State<StatefulWidget> createState() => new _AuthScreenState();
 }
 
-///
-enum FormType { login, register }
-
-class _LoginScreenState extends State<LoginScreen> {
+class _AuthScreenState extends State<AuthScreen> {
   int _tabIndex = 0;
 
   @override
@@ -33,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 length: 2,
                 child: Column(
                   children: <Widget>[
-                    // Build title (logo/application name)
+                    // Title (logo/application name)
                     Container(
                         height: 200,
                         color: Colors.white,
