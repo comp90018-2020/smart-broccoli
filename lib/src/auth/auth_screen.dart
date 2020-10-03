@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:fuzzy_broccoli/theme.dart';
 import 'login.dart';
 import 'register.dart';
 
@@ -64,14 +65,13 @@ class _AuthScreenState extends State<AuthScreen> {
               length: 2,
               child: Column(children: <Widget>[
                 // Title (logo/application name)
-                Container(
-                    height: 200,
-                    color: Colors.white,
-                    child: Center(
-                        // child: Image(
-                        //     image:
-                        //         AssetImage('assets/images/Logo_Placeholder.png')),
-                        )),
+                LogoContainer(
+                  child: Center(
+                      // child: Image(
+                      //     image:
+                      //         AssetImage('assets/images/Logo_Placeholder.png')),
+                      ),
+                ),
 
                 // Tabs
                 FractionallySizedBox(
