@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'backend*'
+      - 'dependabot/npm_and_yarn/backend/*'
       - master
   workflow_dispatch:
 
