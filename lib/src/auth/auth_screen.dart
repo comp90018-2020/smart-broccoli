@@ -68,10 +68,10 @@ class _AuthScreenState extends State<AuthScreen> {
                     height: 200,
                     color: Colors.white,
                     child: Center(
-                      child: Image(
-                          image:
-                              AssetImage('assets/images/Logo_Placeholder.png')),
-                    )),
+                        // child: Image(
+                        //     image:
+                        //         AssetImage('assets/images/Logo_Placeholder.png')),
+                        )),
 
                 // Tabs
                 FractionallySizedBox(
