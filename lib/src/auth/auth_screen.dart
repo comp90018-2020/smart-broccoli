@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fuzzy_broccoli/theme.dart';
@@ -16,7 +17,7 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   GlobalKey _registerKey = GlobalKey();
   GlobalKey _loginKey = GlobalKey();
-  double _registerHeight = 0;
+  double _height = 0;
 
   // Tabs that are shown (in TabBarView)
   List<Widget> _tabs;
@@ -46,9 +47,12 @@ class _AuthScreenState extends State<AuthScreen> {
     // Get height of register box
     SchedulerBinding.instance.addPostFrameCallback((_) {
       RenderBox _registerBox = _registerKey.currentContext.findRenderObject();
-      if (_registerHeight != _registerBox.size.height) {
+      RenderBox _loginBox = _loginKey.currentContext.findRenderObject();
+      double maxHeight = max(_registerBox.size.height, _loginBox.size.height);
+
+      if (_height != maxHeight) {
         setState(() {
-          _registerHeight = _registerBox.size.height;
+          _height = maxHeight;
           _tabs = [Login(key: _loginKey), Register(key: _registerKey)];
         });
       }
@@ -83,9 +87,9 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: LimitedBox(
                   // Need to limit height of TabBarView
                   // Error will occur if height is not limited (see above)
-                  maxHeight: _registerHeight == 0
+                  maxHeight: _height == 0
                       ? MediaQuery.of(context).size.height
-                      : _registerHeight,
+                      : _height,
                   child: TabBarView(children: _tabs),
                 ),
               ),

@@ -26,93 +26,89 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      child: Column(children: [
-        // Form
-        // TODO: https://flutter.dev/docs/cookbook/forms/validation
-        Form(
-          child: Column(
-            children: [
-              // Email
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+      child: Form(
+        child: Column(
+          children: [
+            // Email
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email),
                 ),
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
               ),
-              // Password
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: TextFormField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock),
-                    // Visibility icon
-                    // https://stackoverflow.com/questions/49125064
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _passwordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _passwordVisible = !_passwordVisible;
-                        });
-                      },
+            ),
+            // Password
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock),
+                  // Visibility icon
+                  // https://stackoverflow.com/questions/49125064
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
-                  ),
-                  obscureText: !_passwordVisible,
-                  onFieldSubmitted: (_) => _loginPressed(),
-                ),
-              ),
-
-              // Login Button
-              Padding(
-                padding: const EdgeInsets.only(top: 20, bottom: 8),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: RaisedButton(
-                    onPressed: _loginPressed,
-                    child: const Text("LOGIN"),
+                    onPressed: () {
+                      setState(() {
+                        _passwordVisible = !_passwordVisible;
+                      });
+                    },
                   ),
                 ),
+                obscureText: !_passwordVisible,
+                onFieldSubmitted: (_) => _loginPressed(),
               ),
+            ),
 
-              // Optional: Forgot password button
-              // FlatButton(
-              //   child: const Text(
-              //     'Forgot Password?',
-              //     style: TextStyle(
-              //         fontWeight: FontWeight.normal,
-              //         decoration: TextDecoration.underline,
-              //         color: Colors.white),
-              //   ),
-              //   onPressed: _passwordReset,
-              // )
-
-              // Join without registering button
-              Padding(
-                padding: const EdgeInsets.only(top: 20, bottom: 8),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: MaterialButton(
-                    child: const Text('SKIP LOGIN'),
-                    onPressed: _joinAsParticipant,
-                  ),
+            // Login Button
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 8),
+              child: SizedBox(
+                width: double.infinity,
+                child: RaisedButton(
+                  onPressed: _loginPressed,
+                  child: const Text("LOGIN"),
                 ),
               ),
-            ],
-          ),
+            ),
+
+            // Optional: Forgot password button
+            // FlatButton(
+            //   child: const Text(
+            //     'Forgot Password?',
+            //     style: TextStyle(
+            //         fontWeight: FontWeight.normal,
+            //         decoration: TextDecoration.underline,
+            //         color: Colors.white),
+            //   ),
+            //   onPressed: _passwordReset,
+            // )
+
+            // Join without registering button
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 8),
+              child: SizedBox(
+                width: double.infinity,
+                child: MaterialButton(
+                  child: const Text('SKIP LOGIN'),
+                  onPressed: _joinAsParticipant,
+                ),
+              ),
+            ),
+          ],
         ),
-      ]),
+      ),
     );
   }
 
