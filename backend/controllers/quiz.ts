@@ -176,7 +176,7 @@ export const getQuiz = async (userId: number, quizId: number) => {
     if (role === "owner" || state === "complete") {
         // Owners, members who completed quiz
         questions = quiz.questions.map((q) => q.toJSON());
-    } else if (state === "active") {
+    } else if (state === "accessible") {
         // Quiz incomplete, but can view questions
         questions = quiz.questions.map((question) => {
             return {
@@ -255,10 +255,14 @@ export const getQuizAndRole = async (
     // Determine role
     const role = membership ? membership.role : "participant";
     const states = sessions.map((session) => session.state);
+
     // Least progress should be chosen
-    let state = "waiting";
-    if (states.includes("active")) {
-        state = "active";
+    let state = "";
+    if (sessions.length === 0) {
+        // No session, so inaccessible
+        state = "inaccessible";
+    } else if (states.includes("waiting") || states.includes("active")) {
+        state = "accessible";
     } else if (states.includes("complete")) {
         state = "complete";
     }

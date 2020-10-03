@@ -236,7 +236,10 @@ export const getQuestionPicture = async (
     questionId: number
 ) => {
     const { role, state } = await getQuizAndRole(userId, quizId);
-    if ((role === "member" || role === "participant") && state === "inactive") {
+    if (
+        (role === "member" || role === "participant") &&
+        state === "inaccessible"
+    ) {
         throw new ErrorStatus("Cannot access resource (yet)", 403);
     }
 
