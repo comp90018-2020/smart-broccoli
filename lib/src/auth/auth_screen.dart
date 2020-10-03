@@ -13,9 +13,11 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  GlobalKey _key = GlobalKey();
-  double _height = 0;
+  GlobalKey _registerKey = GlobalKey();
+  GlobalKey _loginKey = GlobalKey();
+  double _registerHeight = 0;
 
+  // Tabs that are shown (in TabBarView)
   List<Widget> _tabs;
 
   @override
@@ -28,19 +30,25 @@ class _AuthScreenState extends State<AuthScreen> {
     // https://github.com/flutter/flutter/issues/29749
     // https://github.com/flutter/flutter/issues/54968
     _tabs = [
-      Stack(children: [
-        Wrap(children: [Register(key: _key)])
+      Wrap(children: [
+        Login(key: _loginKey),
+        Visibility(
+            visible: false,
+            maintainState: true,
+            maintainAnimation: true,
+            maintainSize: true,
+            child: Wrap(children: [Register(key: _registerKey)])),
       ]),
-      Login()
+      Container()
     ];
 
-    // Get height
+    // Get height of register box
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      RenderBox _renderBox = _key.currentContext.findRenderObject();
-      if (_height != _renderBox.size.height) {
+      RenderBox _registerBox = _registerKey.currentContext.findRenderObject();
+      if (_registerHeight != _registerBox.size.height) {
         setState(() {
-          _height = _renderBox.size.height;
-          _tabs = [Login(), Register(key: _key)];
+          _registerHeight = _registerBox.size.height;
+          _tabs = [Login(key: _loginKey), Register(key: _registerKey)];
         });
       }
     });
@@ -88,11 +96,12 @@ class _AuthScreenState extends State<AuthScreen> {
                 // Tab contents
                 FractionallySizedBox(
                   widthFactor: 0.7,
-                  // Need to limit height of TabBarView, see comments above
                   child: LimitedBox(
-                      maxHeight: _height == 0
+                      // Need to limit height of TabBarView
+                      // Error will occur if height is not limited (see above)
+                      maxHeight: _registerHeight == 0
                           ? MediaQuery.of(context).size.height
-                          : _height,
+                          : _registerHeight,
                       child: TabBarView(children: _tabs)),
                 ),
               ]))),
