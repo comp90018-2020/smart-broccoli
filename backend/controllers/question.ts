@@ -28,7 +28,7 @@ export const processQuestions = async (
     updated: any[]
 ) => {
     // Quiz with no questions
-    if (updated === undefined) {
+    if (!updated) {
         updated = [];
     }
 

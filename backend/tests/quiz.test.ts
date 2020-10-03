@@ -85,6 +85,12 @@ describe("Quiz", () => {
             .set("Authorization", `Bearer ${user.token}`)
             .send({ ...rest, groupId: group.id });
         expect(res.status).to.equal(201);
+
+        const badRes = await agent
+            .post("/quiz")
+            .set("Authorization", `Bearer ${user.token}`)
+            .send({ ...rest, questions: "1", groupId: group.id });
+        expect(badRes.status).to.equal(400);
     });
 
     it("Update quiz", async () => {
