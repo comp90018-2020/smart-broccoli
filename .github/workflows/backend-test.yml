@@ -3,7 +3,8 @@ name: Test Backend
 on:
   push:
     branches:
-      - '*backend*'
+      - 'backend*'
+      - 'dependabot/npm_and_yarn/backend/*'
       - master
   workflow_dispatch:
 
