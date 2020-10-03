@@ -75,7 +75,8 @@ class _RegisterState extends State<Register> {
               obscureText: !_passwordVisible,
               onFieldSubmitted: (_) => _createAccountPressed(),
             ),
-
+            // Spacing
+            Container(height: 12),
             // Create account button
             SizedBox(
               width: double.infinity,

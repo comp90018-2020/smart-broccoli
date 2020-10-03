@@ -63,7 +63,8 @@ class _LoginState extends State<Login> {
               obscureText: !_passwordVisible,
               onFieldSubmitted: (_) => _loginPressed(),
             ),
-
+            // Spacing
+            Container(height: 12),
             // Login Button
             SizedBox(
               width: double.infinity,
