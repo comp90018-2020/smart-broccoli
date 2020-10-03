@@ -194,12 +194,15 @@ export const getQuiz = async (userId: number, quizId: number) => {
             return {
                 ...question.toJSON,
                 tf: null,
-                options: question.options.map((opt) => {
-                    return {
-                        ...opt,
-                        correct: null,
-                    };
-                }),
+                // Possibly null for truefalse
+                options: question.options
+                    ? question.options.map((opt) => {
+                          return {
+                              ...opt,
+                              correct: null,
+                          };
+                      })
+                    : null,
             };
         });
     } else {

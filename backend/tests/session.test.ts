@@ -7,6 +7,7 @@ import {
     createQuiz,
     registerAndLogin,
     createSession,
+    joinSession,
 } from "./helpers";
 import { jwtVerify } from "../helpers/jwt";
 
@@ -168,5 +169,28 @@ describe("Session", () => {
             .get("/session")
             .set("Authorization", `Bearer ${userMember.token}`);
         expect(getRes.status).to.equal(200);
+    });
+
+    it("Get quiz after session", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, QUIZ);
+        const session = await createSession(userOwner.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+        await joinSession(userMember.id, session.session.code);
+
+        const quizRes = await agent
+            .get(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(quizRes.status).to.equal(200);
+        expect(quizRes.body).to.have.property("questions");
+        expect(quizRes.body.questions).to.have.lengthOf(2);
     });
 });
