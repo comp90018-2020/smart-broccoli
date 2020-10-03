@@ -97,6 +97,18 @@ class _LoginState extends State<Login> {
               //   ),
               //   onPressed: _passwordReset,
               // )
+
+              // Join without registering button
+              Padding(
+                padding: const EdgeInsets.only(top: 20, bottom: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: MaterialButton(
+                    child: const Text('SKIP LOGIN'),
+                    onPressed: _joinAsParticipant,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -107,5 +119,9 @@ class _LoginState extends State<Login> {
   void _loginPressed() {
     print("Login pressed");
     print("${_emailController.text} ${_passwordController.text}");
+  }
+
+  void _joinAsParticipant() {
+    print("Join as participant");
   }
 }
