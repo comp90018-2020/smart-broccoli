@@ -30,71 +30,58 @@ class _RegisterState extends State<Register> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Form(
-        child: Column(
+        child: Wrap(
+          runSpacing: 16,
           children: <Widget>[
             // Name
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: TextFormField(
-                controller: _nameController,
-                decoration: new InputDecoration(
-                  labelText: 'Name',
-                  prefixIcon: Icon(Icons.people),
-                ),
-                textCapitalization: TextCapitalization.words,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+            TextFormField(
+              controller: _nameController,
+              decoration: new InputDecoration(
+                labelText: 'Name',
+                prefixIcon: Icon(Icons.people),
               ),
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
+              onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
             ),
             // Email
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: TextFormField(
-                controller: _emailController,
-                decoration: new InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+            TextFormField(
+              controller: _emailController,
+              decoration: new InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(Icons.email),
               ),
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
             ),
             // Password
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: TextFormField(
-                controller: _passwordController,
-                decoration: new InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _passwordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _passwordVisible = !_passwordVisible;
-                      });
-                    },
+            TextFormField(
+              controller: _passwordController,
+              decoration: new InputDecoration(
+                labelText: 'Password',
+                prefixIcon: Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
                   ),
+                  onPressed: () {
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
+                  },
                 ),
-                obscureText: !_passwordVisible,
-                onFieldSubmitted: (_) => _createAccountPressed(),
               ),
+              obscureText: !_passwordVisible,
+              onFieldSubmitted: (_) => _createAccountPressed(),
             ),
 
             // Create account button
-            Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 20),
-              child: SizedBox(
-                width: double.infinity,
-                child: RaisedButton(
-                  onPressed: _createAccountPressed,
-                  child: const Text("CREATE ACCOUNT"),
-                ),
+            SizedBox(
+              width: double.infinity,
+              child: RaisedButton(
+                onPressed: _createAccountPressed,
+                child: const Text("CREATE ACCOUNT"),
               ),
             ),
           ],

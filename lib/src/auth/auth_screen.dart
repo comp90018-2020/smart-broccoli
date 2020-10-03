@@ -81,7 +81,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
               // Tabs
               TabHolder(
-                  margin: const EdgeInsets.only(top: 35, bottom: 20),
+                  margin: const EdgeInsets.only(top: 35, bottom: 35),
                   tabs: [Tab(text: "LOGIN"), Tab(text: "SIGN UP")]),
 
               // Tab contents
