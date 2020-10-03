@@ -58,7 +58,7 @@ const getUserSessionPartial = async (userId: number) => {
  * Get session that user is in.
  * @param userId
  */
-const getUserSession = async (userId: number) => {
+export const getUserSession = async (userId: number) => {
     // Get session of quiz
     // @ts-ignore
     const session = await Session.findOne({
@@ -77,7 +77,7 @@ const getUserSession = async (userId: number) => {
                 // Get group
                 // @ts-ignore
                 model: Group,
-                attributes: ["id", "name", "defaultGroup"],
+                attributes: ["id", "name", "defaultGroup", "code"],
                 include: [
                     {
                         // Get user
@@ -102,6 +102,10 @@ const getUserSession = async (userId: number) => {
     // Remove Users from group
     const groupJSON: any = session.Group.toJSON();
     delete groupJSON["Users"];
+    // Remove code from group
+    if (!session.subscribeGroup) {
+        delete groupJSON["code"];
+    }
 
     // Sign the token and return
     const token = await signSessionToken(
@@ -144,7 +148,7 @@ const generateCode = (length: number) => {
  * @param opts
  */
 export const createSession = async (userId: number, opts: any) => {
-    const { quizId, isGroup } = opts;
+    const { quizId, isGroup, autoJoinGroup: subscribeGroup } = opts;
 
     // Check session
     const existingSession = await getUserSessionPartial(userId);
@@ -183,6 +187,7 @@ export const createSession = async (userId: number, opts: any) => {
         state: "waiting",
         quizId: quiz.id,
         groupId: quiz.groupId,
+        subscribeGroup
     });
 
     try {
@@ -253,7 +258,7 @@ export const joinSession = async (userId: number, code: string) => {
                 // Get group
                 // @ts-ignore
                 model: Group,
-                attributes: ["id", "name", "defaultGroup"],
+                attributes: ["id", "name", "defaultGroup", "code"],
                 include: [
                     {
                         // Get user
@@ -290,6 +295,10 @@ export const joinSession = async (userId: number, code: string) => {
     // Remove Users from group
     const groupJSON: any = session.Group.toJSON();
     delete groupJSON["Users"];
+    // Remove code from group
+    if (!session.subscribeGroup) {
+        delete groupJSON["code"];
+    }
 
     // Sign code
     const token = await signSessionToken(

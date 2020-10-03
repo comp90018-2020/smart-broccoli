@@ -26,7 +26,7 @@ const schema: Sequelize.ModelAttributes = {
         allowNull: false,
         defaultValue: "waiting",
     },
-    autoJoinGroup: {
+    subscribeGroup: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true,
@@ -36,6 +36,7 @@ const schema: Sequelize.ModelAttributes = {
 interface SessionAttributes {
     id: number;
     isGroup: boolean;
+    subscribeGroup: boolean;
     type: string;
     code: string;
     state: string;
@@ -46,7 +47,7 @@ interface SessionAttributes {
     Group?: Group;
 }
 interface SessionCreationAttributes
-    extends Optional<SessionAttributes, "id" | "code"> {}
+    extends Optional<SessionAttributes, "id" | "code" | "subscribeGroup"> {}
 
 export default class Session
     extends Sequelize.Model<SessionAttributes, SessionCreationAttributes>
@@ -54,7 +55,7 @@ export default class Session
     public readonly id!: number;
 
     public code: string;
-    public autoJoinGroup: boolean;
+    public subscribeGroup: boolean;
 
     public readonly type: string;
     public readonly state!: string;
@@ -71,14 +72,16 @@ export default class Session
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {
             sequelize,
-            indexes: {
-                name: "unique_code",
-                unique: true,
-                fields: [
-                    // @ts-ignore
-                    sequelize.col("code"),
-                ],
-            },
+            indexes: [
+                {
+                    name: "unique_code",
+                    unique: true,
+                    fields: [
+                        // @ts-ignore
+                        sequelize.col("code"),
+                    ],
+                },
+            ],
         });
     }
 }
