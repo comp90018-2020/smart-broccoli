@@ -1,16 +1,18 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { body, param } from "express-validator";
-import CustomStorage, { profileImageProcessor } from "../helpers/upload";
+import fs from "fs";
 import multer, { MulterError } from "multer";
+import CustomStorage, { profileImageProcessor } from "../helpers/upload";
+import validate from "./middleware/validate";
+import ErrorStatus from "../helpers/error";
 import {
     getProfilePicture,
     updateProfile,
     updateProfilePicture,
     getUserProfile,
     getUserProfilePicture,
+    deleteProfilePicture,
 } from "../controllers/user";
-import validate from "./middleware/validate";
-import fs from "fs";
 
 /**
  * @swagger
@@ -122,9 +124,7 @@ router.put(
         // Save picture information to DB
         try {
             if (!req.file) {
-                const err = new Error("File not received");
-                res.status(400);
-                return next(err);
+                return next(new ErrorStatus("File not received", 400));
             }
             await updateProfilePicture(req.user.id, req.file);
             return res.sendStatus(200);
@@ -160,6 +160,26 @@ router.get("/profile/picture", async (req: Request, res, next) => {
         // Read and serve
         const file = fs.readFileSync(`${picture.destination}.thumb`);
         res.end(file, "binary");
+    } catch (err) {
+        return next(err);
+    }
+});
+
+/**
+ * @swagger
+ * /user/profile/picture:
+ *   delete:
+ *     summary: Delete profile picture
+ *     tags:
+ *       - User
+ *     responses:
+ *       '204':
+ *         description: No content
+ */
+router.delete("/profile/picture", async (req: Request, res, next) => {
+    try {
+        await deleteProfilePicture(req.user.pictureId);
+        return res.sendStatus(204);
     } catch (err) {
         return next(err);
     }

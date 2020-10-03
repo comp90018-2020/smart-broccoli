@@ -1,3 +1,7 @@
+import { Request, Response, NextFunction, Router } from "express";
+import { body } from "express-validator";
+import { auth } from "./middleware/auth";
+import validate from "./middleware/validate";
 import {
     join,
     login,
@@ -5,10 +9,7 @@ import {
     promoteParticipant,
     register,
 } from "../controllers/auth";
-import { Request, Response, NextFunction, Router } from "express";
-import { body } from "express-validator";
-import { auth } from "./middleware/auth";
-import validate from "./middleware/validate";
+
 const router = Router();
 
 /**

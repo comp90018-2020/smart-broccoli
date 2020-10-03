@@ -2,9 +2,8 @@ name: Fuzzy Broccoli
 
 on:
   push:
-    branches:
-      - '*'
-      - '!backend*'
+    branches-ignore:
+      - 'backend*'
 
 jobs:
   build:

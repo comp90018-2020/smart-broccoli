@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import { User, UserGroup, Picture } from "../models";
+import sequelize, { User, UserGroup, Picture } from "../models";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 
 /**
@@ -47,15 +47,24 @@ export const updateProfile = async (userId: number, info: any) => {
 export const updateProfilePicture = async (userId: number, file: any) => {
     const user = await User.findByPk(userId);
 
-    // Delete the old picture
-    if (user.pictureId) {
-        await deletePicture(user.pictureId);
+    const transaction = await sequelize.transaction();
+
+    try {
+        // Delete the old picture
+        if (user.pictureId) {
+            await deletePicture(user.pictureId, transaction);
+        }
+        // Insert the new picture
+        const picture = await insertPicture(transaction, file);
+        // Set user picture
+        user.pictureId = picture.id;
+        await user.save({ transaction });
+
+        await transaction.commit();
+    } catch (err) {
+        await transaction.rollback();
+        throw err;
     }
-    // Insert the new picture
-    const picture = await insertPicture(file);
-    // Set user picture
-    user.pictureId = picture.id;
-    return await user.save();
 };
 
 /**
@@ -66,11 +75,17 @@ export const updateProfilePicture = async (userId: number, file: any) => {
 export const getProfilePicture = async (pictureId: number) => {
     const picture = await getPictureById(pictureId);
     if (!picture) {
-        const err = new ErrorStatus("Picture not found", 404);
-        throw err;
+        throw new ErrorStatus("Picture not found", 404);
     }
     return picture;
 };
+
+/**
+ * Delete user's profile picture.
+ * Authorization handled by caller.
+ * @param pictureId ID of picture
+ */
+export const deleteProfilePicture = deletePicture;
 
 /**
  * Can current user access target user's profile?
@@ -102,8 +117,7 @@ export const getUserProfile = async (currentUserId: number, userId: number) => {
             attributes: ["id", "name", "updatedAt"],
         });
     }
-    const err = new ErrorStatus("Cannot access resource", 403);
-    throw err;
+    throw new ErrorStatus("Cannot access resource", 403);
 };
 
 /**
@@ -119,11 +133,9 @@ export const getUserProfilePicture = async (
         // @ts-ignore Model problems
         const user = await User.findByPk(userId, { include: [Picture] });
         if (!user.Picture) {
-            const err = new ErrorStatus("Profile picture not found", 404);
-            throw err;
+            throw new ErrorStatus("Profile picture not found", 404);
         }
         return user.Picture;
     }
-    const err = new ErrorStatus("Cannot access resource", 403);
-    throw err;
+    throw new ErrorStatus("Cannot access resource", 403);
 };

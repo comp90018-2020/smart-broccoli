@@ -1,21 +1,20 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { body, param } from "express-validator";
+import { assertUserRole } from "./middleware/user";
+import validate from "./middleware/validate";
 import {
     createGroup,
     deleteGroup,
     deleteMember,
     getGroup,
-    getGroupAndVerifyRole,
     getGroupMembers,
+    getGroupQuizzes,
     getGroups,
     joinGroup,
     leaveGroup,
     regenerateCode,
     updateGroup,
 } from "../controllers/group";
-import { Group } from "../models";
-import { assertUserRole } from "./middleware/user";
-import validate from "./middleware/validate";
 
 /**
  * @swagger
@@ -51,34 +50,6 @@ import validate from "./middleware/validate";
  *           enum: [member, owner]
  */
 const router = Router();
-
-// Extend req.user
-declare module "express" {
-    export interface Request {
-        group: Group;
-    }
-}
-
-/**
- * Get group and verify role.
- * @param role
- */
-const verifyRole = (role: string) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const group = await getGroupAndVerifyRole(
-                req.user.id,
-                Number(req.params.groupId),
-                role
-            );
-            req.group = group;
-        } catch (err) {
-            return next(err);
-        }
-
-        return next();
-    };
-};
 
 /**
  * @swagger
@@ -156,11 +127,13 @@ router.patch(
     "/:groupId",
     [param("groupId").isInt(), body("name").optional().isString()],
     validate,
-    assertUserRole,
-    verifyRole("owner"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const group = await updateGroup(req.group, req.body.name);
+            const group = await updateGroup(
+                req.user,
+                Number(req.params.groupId),
+                req.body.name
+            );
             return res.json(group);
         } catch (err) {
             return next(err);
@@ -219,8 +192,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/GroupExtended'
+ *               $ref: '#/components/schemas/GroupBrief'
  */
 router.get(
     "/:groupId",
@@ -233,6 +205,47 @@ router.get(
                 Number(req.params.groupId)
             );
             return res.json(group);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /group/{groupId}:
+ *   get:
+ *     summary: Get quizzes of group
+ *     tags:
+ *       - Group
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 $ref: '#/components/schemas/Quiz'
+ */
+router.get(
+    "/:groupId/quiz",
+    [param("groupId").isInt()],
+    validate,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const quizzes = await getGroupQuizzes(
+                req.user,
+                Number(req.params.groupId)
+            );
+            return res.json(quizzes);
         } catch (err) {
             return next(err);
         }
@@ -311,10 +324,12 @@ router.post(
     "/:groupId/code",
     [param("groupId").isInt()],
     validate,
-    verifyRole("owner"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const group = await regenerateCode(req.group);
+            const group = await regenerateCode(
+                req.user,
+                Number(req.params.groupId)
+            );
             return res.json(group);
         } catch (err) {
             return next(err);
@@ -425,10 +440,13 @@ router.post(
     "/:groupId/member/kick",
     [param("groupId").isInt(), body("memberId").isInt()],
     validate,
-    verifyRole("owner"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await deleteMember(Number(req.params.groupId), req.body.memberId);
+            await deleteMember(
+                req.user.id,
+                Number(req.params.groupId),
+                req.body.memberId
+            );
             return res.sendStatus(204);
         } catch (err) {
             return next(err);
@@ -457,10 +475,9 @@ router.delete(
     "/:groupId",
     [param("groupId").isInt()],
     validate,
-    verifyRole("owner"),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await deleteGroup(Number(req.group.id));
+            await deleteGroup(req.user.id, Number(req.params.groupId));
             return res.sendStatus(204);
         } catch (err) {
             return next(err);
