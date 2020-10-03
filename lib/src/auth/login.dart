@@ -64,7 +64,8 @@ class _LoginState extends State<Login> {
                             });
                           },
                         )),
-                    obscureText: !_passwordVisible),
+                    obscureText: !_passwordVisible,
+                    onFieldSubmitted: (_) => _loginPressed()),
               ),
 
               // Login Button

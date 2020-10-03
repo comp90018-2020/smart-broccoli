@@ -73,6 +73,7 @@ class _RegisterState extends State<Register> {
                       },
                     )),
                 obscureText: true,
+                onFieldSubmitted: (_) => _createAccountPressed(),
               ),
             ),
 
