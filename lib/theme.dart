@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class FuzzyBroccoliTheme {
   static final _instance = FuzzyBroccoliTheme._internal();
   final ThemeData _themeData = ThemeData(
+    primaryColor: Color(0xFF4CAF50),
     buttonTheme: ButtonThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(6)),
