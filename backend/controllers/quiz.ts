@@ -26,7 +26,7 @@ export const createQuiz = async (userId: number, info: any) => {
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
     }
-    if (info.description) {
+    if (info.description !== undefined) {
         quiz.description = info.description;
     }
 
@@ -91,7 +91,7 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
     }
-    if (info.description) {
+    if (info.description !== undefined) {
         quiz.description = info.description;
     }
 
