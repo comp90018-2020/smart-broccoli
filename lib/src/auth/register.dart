@@ -76,7 +76,7 @@ class _RegisterState extends State<Register> {
               onFieldSubmitted: (_) => _createAccountPressed(),
             ),
             // Spacing
-            Container(height: 12),
+            const SizedBox(height: 12),
             // Create account button
             SizedBox(
               width: double.infinity,

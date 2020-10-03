@@ -64,7 +64,7 @@ class _LoginState extends State<Login> {
               onFieldSubmitted: (_) => _loginPressed(),
             ),
             // Spacing
-            Container(height: 12),
+            const SizedBox(height: 12),
             // Login Button
             SizedBox(
               width: double.infinity,
