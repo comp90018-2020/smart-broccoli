@@ -117,7 +117,7 @@ export const getGroup = async (userId: number, groupId: number) => {
         ],
     });
     if (!group) {
-        throw new ErrorStatus('Group cannot be accessed', 404);
+        throw new ErrorStatus("Group cannot be accessed", 404);
     }
 
     // Get role
@@ -324,6 +324,7 @@ export const regenerateCode = async (user: User, groupId: number) => {
     const groupJSON: any = groupUpdated.toJSON();
     groupJSON.role = "owner";
     delete groupJSON["Users"];
+    delete groupJSON["UserGroup"];
     return groupJSON;
 };
 

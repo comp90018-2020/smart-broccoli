@@ -103,6 +103,8 @@ describe("Group", () => {
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("code");
         expect(res.body.code).to.not.equal(",,,,,,");
+        expect(res.body).to.not.have.property("UserGroup");
+        expect(res.body).to.not.have.property("Users");
     });
 
     it("Join and leave group", async () => {
