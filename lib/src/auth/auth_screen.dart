@@ -61,33 +61,38 @@ class _AuthScreenState extends State<AuthScreen> {
     // Create a new Scaffold
     return new Scaffold(
       body: SingleChildScrollView(
-          child: DefaultTabController(
-              length: 2,
-              child: Column(children: <Widget>[
-                // Title (logo/application name)
-                LogoContainer(
-                  child: Center(
-                      // child: Image(
-                      //     image:
-                      //         AssetImage('assets/images/Logo_Placeholder.png')),
-                      ),
-                ),
+        child: DefaultTabController(
+          length: 2,
+          child: Column(
+            children: <Widget>[
+              // Title (logo/application name)
+              LogoContainer(
+                child: Center(
+                    // child: Image(
+                    //     image:
+                    //         AssetImage('assets/images/Logo_Placeholder.png')),
+                    ),
+              ),
 
-                // Tabs
-                TabHolder(tabs: [Tab(text: "LOGIN"), Tab(text: "SIGN UP")]),
+              // Tabs
+              TabHolder(tabs: [Tab(text: "LOGIN"), Tab(text: "SIGN UP")]),
 
-                // Tab contents
-                FractionallySizedBox(
-                  widthFactor: 0.7,
-                  child: LimitedBox(
-                      // Need to limit height of TabBarView
-                      // Error will occur if height is not limited (see above)
-                      maxHeight: _registerHeight == 0
-                          ? MediaQuery.of(context).size.height
-                          : _registerHeight,
-                      child: TabBarView(children: _tabs)),
+              // Tab contents
+              FractionallySizedBox(
+                widthFactor: 0.7,
+                child: LimitedBox(
+                  // Need to limit height of TabBarView
+                  // Error will occur if height is not limited (see above)
+                  maxHeight: _registerHeight == 0
+                      ? MediaQuery.of(context).size.height
+                      : _registerHeight,
+                  child: TabBarView(children: _tabs),
                 ),
-              ]))),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
