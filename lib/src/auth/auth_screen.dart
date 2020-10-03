@@ -77,8 +77,8 @@ class _AuthScreenState extends State<AuthScreen> {
                 FractionallySizedBox(
                     widthFactor: 0.5,
                     child: Container(
-                        margin: EdgeInsets.only(top: 35, bottom: 20),
-                        decoration: BoxDecoration(
+                        margin: const EdgeInsets.only(top: 35, bottom: 20),
+                        decoration: const BoxDecoration(
                             color: Color(0xFF82C785),
                             borderRadius:
                                 BorderRadius.all(Radius.circular(25))),

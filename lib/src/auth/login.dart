@@ -53,7 +53,7 @@ class _LoginState extends State<Login> {
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock),
                     // Visibility icon
                     // https://stackoverflow.com/questions/49125064
                     suffixIcon: IconButton(
