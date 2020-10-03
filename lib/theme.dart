@@ -54,3 +54,19 @@ class LogoContainer extends Container {
           child: child,
         );
 }
+
+/// Widget to create sliding-pill-style tabs
+class TabHolder extends FractionallySizedBox {
+  TabHolder({@required List<Tab> tabs})
+      : super(
+          widthFactor: 0.5,
+          child: Container(
+            margin: const EdgeInsets.only(top: 35, bottom: 20),
+            decoration: const BoxDecoration(
+              color: Color(0xFF82C785),
+              borderRadius: BorderRadius.all(Radius.circular(25)),
+            ),
+            child: TabBar(tabs: tabs),
+          ),
+        );
+}

@@ -74,24 +74,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
 
                 // Tabs
-                FractionallySizedBox(
-                    widthFactor: 0.5,
-                    child: Container(
-                        margin: const EdgeInsets.only(top: 35, bottom: 20),
-                        decoration: const BoxDecoration(
-                            color: Color(0xFF82C785),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(25))),
-                        child: TabBar(
-                          tabs: [
-                            new Tab(
-                              text: "LOGIN",
-                            ),
-                            new Tab(
-                              text: "SIGN UP",
-                            )
-                          ],
-                        ))),
+                TabHolder(tabs: [Tab(text: "LOGIN"), Tab(text: "SIGN UP")]),
 
                 // Tab contents
                 FractionallySizedBox(
