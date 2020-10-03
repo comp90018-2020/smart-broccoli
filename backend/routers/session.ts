@@ -73,10 +73,10 @@ const router = Router();
  *               $ref: '#/components/schemas/SessionComplete'
  */
 router.post(
-    "/session",
+    "/",
     [
         body("quizId").isInt(),
-        body("isGroup").isBoolean,
+        body("isGroup").isBoolean(),
         body("subscribeGroup").optional().isBoolean(),
     ],
     validate,
@@ -108,26 +108,23 @@ router.post(
  *             schema:
  *               $ref: '#/components/schemas/SessionComplete'
  */
-router.get(
-    "/session",
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const session = await getUserSession(req.user.id);
-            if (!session) {
-                return res.sendStatus(204);
-            } else {
-                return res.json(session);
-            }
-        } catch (err) {
-            return next(err);
+router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const session = await getUserSession(req.user.id);
+        if (!session) {
+            return res.sendStatus(204);
+        } else {
+            return res.json(session);
         }
+    } catch (err) {
+        return next(err);
     }
-);
+});
 
 /**
  * @swagger
  *
- * /session:
+ * /session/join:
  *   post:
  *     summary: Join session by code
  *     tags:
@@ -149,7 +146,7 @@ router.get(
  *               $ref: '#/components/schemas/SessionComplete'
  */
 router.post(
-    "/session/join",
+    "/join",
     [body("code").isString().isLength({ min: 6, max: 6 })],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {

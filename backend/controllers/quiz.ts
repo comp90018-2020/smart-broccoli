@@ -171,7 +171,7 @@ export const getQuiz = async (userId: number, quizId: number) => {
             {
                 // @ts-ignore
                 model: Question,
-                as: 'questions'
+                as: "questions",
             },
             {
                 // @ts-ignore

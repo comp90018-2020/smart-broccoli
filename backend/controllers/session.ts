@@ -4,6 +4,7 @@ import sequelize, {
     Session,
     SessionParticipant,
     User,
+    Group,
     UserGroup,
 } from "../models";
 import ErrorStatus from "../helpers/error";
@@ -82,7 +83,7 @@ export const getUserSession = async (userId: number) => {
                     {
                         // Get user
                         model: User,
-                        where: { "$UserGroup.role$": "owner" },
+                        where: { "$Group.Users.UserGroup.role$": "owner" },
                         attributes: ["name"],
                         required: true,
                     },
@@ -223,12 +224,12 @@ export const createSession = async (userId: number, opts: any) => {
         await transaction.commit();
 
         // Sign code
-        const code = await signSessionToken(
+        const token = await signSessionToken(
             session.id,
             userId,
             sessionParticipant.role
         );
-        return { session, code };
+        return { session, token };
     } catch (err) {
         await transaction.rollback();
         throw err;
@@ -251,20 +252,19 @@ export const joinSession = async (userId: number, code: string) => {
     }
 
     // Find session with code
+    // @ts-ignore
     const session = await Session.findOne({
         where: { code },
         include: [
             {
                 // Get group
-                // @ts-ignore
                 model: Group,
                 attributes: ["id", "name", "defaultGroup", "code"],
                 include: [
                     {
                         // Get user
-                        // @ts-ignore
                         model: User,
-                        where: { "$UserGroup.role$": "owner" },
+                        where: { "$Group.Users.UserGroup.role$": "owner" },
                         attributes: ["name"],
                         required: true,
                     },
