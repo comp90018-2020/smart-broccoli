@@ -36,7 +36,8 @@ class _quizMakerState extends State<quizMaker> {
   }
 
   Widget _buildTextFields() {
-    return new Container(
+    return new SingleChildScrollView(
+      child: Container(
       child: new Column(
         children: <Widget>[
           // Title "UNI QUIZ"
@@ -44,55 +45,65 @@ class _quizMakerState extends State<quizMaker> {
           _SwitchButton(),
           // _buildTextFields(),
           // Buttons for navigation
-          SizedBox(height: 50),
-          _buildLiveQuiz(),
-          SizedBox(height: 50),
-          _buildJoinByPinButton(),
-          SizedBox(height: 50),
-          _buildQuizList(),
+         // SizedBox(height: 50),
+         // _buildLiveQuiz(),
+         // SizedBox(height: 50),
+          //_buildJoinByPinButton(),
+          //SizedBox(height: 50),
+          // _buildQuizList(),
         ],
       ),
+    )
     );
   }
 
   Widget _SwitchButton(){
-    return new Container(
-        child: new Row(
 
-          children: <Widget>[
-          Expanded (
-            child: new ButtonTheme(
-              buttonColor: Colors.white,
-              child: RaisedButton(
-                onPressed: _formChange,
-                //  onPressed: _loginPressed, // TODO CHANGE
-                child: Text("All"),
-              ),
-            ),
-          ),
-            Expanded (
-            child: new ButtonTheme(
-              buttonColor: Colors.white,
-              child: RaisedButton(
-                onPressed: _formChange,
-                //  onPressed: _loginPressed, // TODO CHANGE
-                child: Text("Live"),
-              ),
-            ),
-          ),
-            Expanded (
-            child: new ButtonTheme(
-              buttonColor: Colors.white,
-              child: RaisedButton(
-                onPressed: _formChange,
-                //  onPressed: _loginPressed, // TODO CHANGE
-                child: Text("Self Paced"),
-              ),
-            ),
-          ),
-        ]
-        )
-    );
+
+    return new DefaultTabController(
+    length: 3,
+    child: Column(
+    children: <Widget>[
+
+    // Tabs
+    FractionallySizedBox(
+    widthFactor: 0.85,
+    child: Container(
+    margin: EdgeInsets.only(top: 35, bottom: 20),
+    decoration: BoxDecoration(
+    color: Color(0xFF82C785),
+    borderRadius:
+    BorderRadius.all(Radius.circular(25))),
+    child: TabBar(
+    tabs: [
+    new Tab(
+    text: "All",
+    ),
+      new Tab(
+        text: "Live",
+      ),
+    new Tab(
+    text: "Self Paced",
+    )
+    ],
+    ))),
+      new Container(
+        child: _buildLiveQuiz(),
+      ),
+      SizedBox(height: 50),
+      new Container(
+        child: _buildJoinByPinButton(),
+      ),
+      SizedBox(height: 50),
+      new Container(
+        child: _buildQuizList(),
+      ),
+
+
+    // Tab contents
+
+    ],
+    ));
   }
 
   Widget _buildLiveQuiz(){
@@ -125,12 +136,15 @@ class _quizMakerState extends State<quizMaker> {
     child: new Column(
     children: <Widget>[
     new ButtonTheme(
-    minWidth: 200.0,
+    minWidth: 150.0,
     height: 50.0,
-    buttonColor: Colors.white,
+    buttonColor: Colors.orangeAccent,
     child: RaisedButton(
     onPressed: _verifyPin, // TODO CHANGE
-    child: Text("Create Account"),
+    child: Text("Join By Pin"),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18.0),
+      ),
     ),
     ),
     ],
@@ -138,16 +152,42 @@ class _quizMakerState extends State<quizMaker> {
     );
   }
 
+  final items = List<String>.generate(10, (i) => "Item $i");
+
+  Widget _buildQuizList(){
+    return Container(
+        // margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+        height: 200.0,
+
+        child: ListView.builder(
+
+          scrollDirection: Axis.horizontal,
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+
+            return
+              _listTile();
+          },
+        )
+
+
+    );
+  }
+
+
   // TODO change to flat button
   Widget _listTile(){
     return new Container(
-
         width: 160.0,
-      child: new Column(
+      child: new RaisedButton(
+          padding: EdgeInsets.all(0.0),
+          color: Colors.white,
+          onPressed: () {  },
+          child: new Column(
           children: <Widget>[
             new Container(
               // TODO GET IMAGE
-              //  child: Image(image: AssetImage('graphics/background.png'))
+              child: Image(image: AssetImage('assets/images/placeholder.png')),
             ),
             new Container(
                 child: Center(
@@ -162,30 +202,10 @@ class _quizMakerState extends State<quizMaker> {
 
           ]
       )
-    );
-  }
-
-  final items = List<String>.generate(10, (i) => "Item $i");
-
-  Widget _buildQuizList(){
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 20.0),
-      height: 200.0,
-
-      child: ListView.builder(
-
-        scrollDirection: Axis.horizontal,
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-
-          return
-            _listTile();
-        },
     )
-
-
     );
   }
+
 
 
 

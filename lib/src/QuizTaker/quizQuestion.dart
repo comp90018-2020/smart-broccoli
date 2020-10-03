@@ -2,21 +2,70 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+enum FormType {
+  ShowCorrect,
+  Standard,
+}
+
+
+
 class quizQuestion extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _quizQuestion();
 }
 
 class _quizQuestion extends State<quizQuestion> {
+  int _answerIndex = -1;
+
+  FormType _form = FormType.Standard;
+
+
+  void _formChange () async {
+    setState(() {
+     _form = FormType.ShowCorrect;
+    });
+  }
+
+
+  Timer _timer;
+  int _start = 10;
+
+
+
+  void startTimer() {
+    const oneSec = const Duration(seconds: 1);
+    _timer = new Timer.periodic(
+      oneSec,
+          (Timer timer) => setState(
+            () {
+          if (_start < 1) {
+            timer.cancel();
+          } else {
+            _start = _start - 1;
+          }
+        },
+      ),
+    );
+  }
+
+
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    startTimer();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
 
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      startTimer();
-
-      }
-    );
 
     return new Scaffold(
         appBar: AppBar(
@@ -50,7 +99,7 @@ class _quizQuestion extends State<quizQuestion> {
       )),
       new Container(
           // TODO GET IMAGE
-          //    child: Image(image: AssetImage('graphics/background.png'))
+          child: Image(image: AssetImage('assets/images/placeholder.png'))
           )
     ]);
   }
@@ -69,12 +118,9 @@ class _quizQuestion extends State<quizQuestion> {
               mainAxisSpacing: 10,
               crossAxisCount: 2,
             children: List.generate(4, (index) {
-              return Center(
-                child: Text(
-                  'Item $index',
-                  style: Theme.of(context).textTheme.headline5,
-                ),
-              );
+
+              return _answerTab(index);
+
             }),
           ),
         ],
@@ -82,10 +128,60 @@ class _quizQuestion extends State<quizQuestion> {
     );
   }
 
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
+  Widget _answerTab(index){
+    int correct = isCorrectIndex(index);
+    
+    if(_form == FormType.Standard) {
+      return Material(
+        color: Colors.white,
+        child: InkWell(
+            highlightColor: Colors.pinkAccent,
+            splashColor: Colors.greenAccent,
+
+            onTap: () => updateAnswer(index),
+            child: Center(
+              child: Text(
+                'Item $index',
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .headline5,
+              ),
+            )
+        ),
+      );
+    }
+    else{
+      Color col = Colors.white;
+      if(correct==1){
+        Color col = Colors.orange;
+      }
+      return Material(
+          color: col,
+          child: InkWell(
+          highlightColor: Colors.pinkAccent,
+          splashColor: Colors.greenAccent,
+
+        //  onTap: () {},
+    child: Center(
+    child: Text(
+    'Item $index',
+    style: Theme
+        .of(context)
+        .textTheme
+        .headline5,
+    ),
+    )
+    ),
+    );
+      
+    }
+
+  }
+
+  void sendAnswer(){
+    int ans = _answerIndex;
+    // TODO logic code here
   }
 
   Widget _quizTimer() {
@@ -97,28 +193,13 @@ class _quizQuestion extends State<quizQuestion> {
     // TODO Add decorations
   }
 
-  Timer _timer;
-  int _start = 10;
+  int isCorrectIndex(index) {
+    // TODO add stuff
 
-
-  void startTimer() {
-    if (_timer != null) {
-      _timer.cancel();
-      _timer = null;
-    } else {
-      _timer = new Timer.periodic(
-        const Duration(seconds: 1),
-            (Timer timer) =>
-            setState(
-                  () {
-                if (_start < 1) {
-                  timer.cancel();
-                } else {
-                  _start = _start - 1;
-                }
-              },
-            ),
-      );
-    }
   }
+  void updateAnswer(ans) async {
+    _answerIndex = ans;
+
+  }
+
 }
