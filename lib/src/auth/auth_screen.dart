@@ -79,7 +79,9 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
 
               // Tabs
-              TabHolder(tabs: [Tab(text: "LOGIN"), Tab(text: "SIGN UP")]),
+              TabHolder(
+                  margin: const EdgeInsets.only(top: 35, bottom: 20),
+                  tabs: [Tab(text: "LOGIN"), Tab(text: "SIGN UP")]),
 
               // Tab contents
               FractionallySizedBox(

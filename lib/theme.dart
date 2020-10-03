@@ -58,11 +58,14 @@ class LogoContainer extends Container {
 
 /// Widget to create sliding-pill-style tabs
 class TabHolder extends FractionallySizedBox {
-  TabHolder({@required List<Tab> tabs})
+  TabHolder(
+      {@required List<Tab> tabs,
+      double widthFactor = 0.5,
+      margin: EdgeInsetsGeometry})
       : super(
-          widthFactor: 0.5,
+          widthFactor: widthFactor,
           child: Container(
-            margin: const EdgeInsets.only(top: 35, bottom: 20),
+            margin: margin,
             decoration: const BoxDecoration(
               color: Color(0xFF82C785),
               borderRadius: BorderRadius.all(Radius.circular(25)),
