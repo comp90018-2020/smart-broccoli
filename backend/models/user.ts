@@ -3,7 +3,7 @@ import Sequelize, {
     Optional,
 } from "sequelize";
 import crypto from "crypto";
-import { Group, UserGroup } from "models";
+import { Group, Session, SessionParticipant, UserGroup } from "models";
 import Picture from "./picture";
 
 // Represents users
@@ -40,6 +40,7 @@ interface UserAttributes {
     updatedAt: Date;
 
     UserGroup?: UserGroup;
+    SessionParticipant?: SessionParticipant;
     Picture?: Picture;
 }
 interface UserCreationAttributes
@@ -63,6 +64,7 @@ class User
     public readonly updatedAt!: Date;
 
     public UserGroup?: UserGroup;
+    public SessionParticipant?: SessionParticipant;
     public Picture?: Picture;
 
     public getGroups!: BelongsToManyGetAssociationsMixin<Group>;
