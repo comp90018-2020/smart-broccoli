@@ -1,6 +1,6 @@
 import { Op, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Group, User, UserGroup } from "../models";
+import sequelize, { Group, Session, User, UserGroup } from "../models";
 
 /**
  * Get group of user.
@@ -440,6 +440,14 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
     // Only active quizzes for members
     const quizzes = await group.getQuizzes({
         where: role === "owner" ? undefined : { active: true },
+        include: [
+            {
+                // @ts-ignore
+                model: Session,
+                where: { state: "waiting" },
+                required: false,
+            },
+        ],
     });
     return quizzes;
 };

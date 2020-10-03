@@ -187,7 +187,7 @@ export const createSession = async (userId: number, opts: any) => {
         state: "waiting",
         quizId: quiz.id,
         groupId: quiz.groupId,
-        subscribeGroup
+        subscribeGroup,
     });
 
     try {

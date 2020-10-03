@@ -76,7 +76,8 @@ Group.belongsToMany(User, { through: UserGroup, foreignKey: "groupId" });
 User.belongsToMany(Group, { through: UserGroup, foreignKey: "userId" });
 
 // Quiz session
-Quiz.belongsTo(Session, { foreignKey: "quizId" });
+Quiz.hasMany(Session, { foreignKey: "quizId" });
+Session.belongsTo(Quiz, { foreignKey: "quizId" });
 
 // Sessions and users are associated
 User.belongsToMany(Session, {

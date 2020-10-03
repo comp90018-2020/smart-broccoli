@@ -11,7 +11,7 @@ const schema: Sequelize.ModelAttributes = {
     },
     role: {
         type: Sequelize.ENUM("host", "participant"),
-        defaultValue: "member",
+        defaultValue: "participant",
         allowNull: false,
     },
 };

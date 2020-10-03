@@ -1,6 +1,6 @@
-import { FindOptions, Transaction } from "sequelize";
+import { FindOptions } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Quiz, Question, UserGroup, User, Picture } from "../models";
+import sequelize, { Quiz, Question, UserGroup, User, Session } from "../models";
 import { processQuestions } from "./question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 import { assertGroupOwnership } from "./group";
@@ -136,6 +136,14 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
                 // @ts-ignore
                 model: Quiz,
                 required: false,
+                include: [
+                    {
+                        // @ts-ignore
+                        model: Session,
+                        required: false,
+                        where: { state: "waiting" },
+                    },
+                ],
             },
         ],
     });
@@ -182,9 +190,6 @@ export const getQuiz = async (userId: number, quizId: number) => {
                 }),
             };
         });
-    } else if (state === "complete") {
-        // Quiz complete, can get answers again
-        questions = quiz.questions.map((question) => question.toJSON());
     } else {
         // Haven't started quiz, no access to questions
         questions = null;
@@ -226,14 +231,39 @@ export const getQuizAndRole = async (
         return { quiz, role: "owner", state: null };
     }
 
-    // TODO: check whether user is participant of quiz (state)
+    // Find user's quiz sessions
+    // This query is not ideal
+    const sessions = await Session.findAll({
+        where: { quizId },
+        attributes: ["id", "state"],
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                where: { id: userId },
+                attributes: ["id"],
+                required: true,
+            },
+        ],
+    });
 
-    // TODO: quiz session
-    if (membership) {
-        return { quiz, role: membership.role, state: "inactive" };
+    // No sessions, not member
+    if (sessions.length === 0 && !membership) {
+        throw new ErrorStatus("Quiz cannot be accessed", 403);
     }
 
-    throw new ErrorStatus("Quiz cannot be accessed", 403);
+    // Determine role
+    const role = membership ? membership.role : "participant";
+    const states = sessions.map((session) => session.state);
+    // Least progress should be chosen
+    let state = "waiting";
+    if (states.includes("active")) {
+        state = "active";
+    } else if (states.includes("complete")) {
+        state = "complete";
+    }
+
+    return { quiz, role, state };
 };
 
 /**

@@ -74,7 +74,7 @@ export default class Session
             sequelize,
             indexes: [
                 {
-                    name: "unique_code",
+                    name: "unique_session_code",
                     unique: true,
                     fields: [
                         // @ts-ignore
