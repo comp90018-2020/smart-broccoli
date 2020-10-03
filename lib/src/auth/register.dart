@@ -36,23 +36,29 @@ class _RegisterState extends State<Register> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: TextFormField(
-                  controller: _nameController,
-                  decoration: new InputDecoration(
-                      labelText: 'Name', prefixIcon: Icon(Icons.people)),
-                  textCapitalization: TextCapitalization.words,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => FocusScope.of(context).nextFocus()),
+                controller: _nameController,
+                decoration: new InputDecoration(
+                  labelText: 'Name',
+                  prefixIcon: Icon(Icons.people),
+                ),
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+              ),
             ),
             // Email
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: TextFormField(
-                  controller: _emailController,
-                  decoration: new InputDecoration(
-                      labelText: 'Email', prefixIcon: Icon(Icons.email)),
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => FocusScope.of(context).nextFocus()),
+                controller: _emailController,
+                decoration: new InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+              ),
             ),
             // Password
             Padding(
@@ -60,18 +66,21 @@ class _RegisterState extends State<Register> {
               child: TextFormField(
                 controller: _passwordController,
                 decoration: new InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(_passwordVisible
+                  labelText: 'Password',
+                  prefixIcon: Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible
                           ? Icons.visibility
-                          : Icons.visibility_off),
-                      onPressed: () {
-                        setState(() {
-                          _passwordVisible = !_passwordVisible;
-                        });
-                      },
-                    )),
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _passwordVisible = !_passwordVisible;
+                      });
+                    },
+                  ),
+                ),
                 obscureText: true,
                 onFieldSubmitted: (_) => _createAccountPressed(),
               ),
@@ -81,11 +90,12 @@ class _RegisterState extends State<Register> {
             Padding(
               padding: const EdgeInsets.only(top: 20, bottom: 20),
               child: SizedBox(
-                  width: double.infinity,
-                  child: RaisedButton(
-                    onPressed: _createAccountPressed,
-                    child: const Text("CREATE ACCOUNT"),
-                  )),
+                width: double.infinity,
+                child: RaisedButton(
+                  onPressed: _createAccountPressed,
+                  child: const Text("CREATE ACCOUNT"),
+                ),
+              ),
             ),
           ],
         ),
@@ -98,7 +108,7 @@ class _RegisterState extends State<Register> {
   }
 
   void _createAccountPressed() {
-    print(
-        'The user wants to create an accoutn with ${_emailController.text} and ${_passwordController.text}');
+    print('The user wants to create an account with ' +
+        '${_emailController.text} and ${_passwordController.text}');
   }
 }

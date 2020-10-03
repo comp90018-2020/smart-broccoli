@@ -36,36 +36,42 @@ class _LoginState extends State<Login> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                        labelText: 'Email', prefixIcon: Icon(Icons.email)),
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    onFieldSubmitted: (_) =>
-                        FocusScope.of(context).nextFocus()),
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+                ),
               ),
               // Password
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: TextFormField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: Icon(Icons.lock),
-                        // Visibility icon
-                        // https://stackoverflow.com/questions/49125064
-                        suffixIcon: IconButton(
-                          icon: Icon(_passwordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off),
-                          onPressed: () {
-                            setState(() {
-                              _passwordVisible = !_passwordVisible;
-                            });
-                          },
-                        )),
-                    obscureText: !_passwordVisible,
-                    onFieldSubmitted: (_) => _loginPressed()),
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock),
+                    // Visibility icon
+                    // https://stackoverflow.com/questions/49125064
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                  obscureText: !_passwordVisible,
+                  onFieldSubmitted: (_) => _loginPressed(),
+                ),
               ),
 
               // Login Button
@@ -93,7 +99,7 @@ class _LoginState extends State<Login> {
               // )
             ],
           ),
-        )
+        ),
       ]),
     );
   }
