@@ -70,6 +70,11 @@ import {
  *               items:
  *                 type: object
  *                 $ref: '#/components/schemas/Question'
+ *             Sessions:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 $ref: '#/components/schemas/QuizSession'
  *     NewQuestion:
  *       type: object
  *       required:

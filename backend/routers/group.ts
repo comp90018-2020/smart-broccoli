@@ -213,7 +213,7 @@ router.get(
 
 /**
  * @swagger
- * /group/{groupId}:
+ * /group/{groupId}/quiz:
  *   get:
  *     summary: Get quizzes of group
  *     tags:

@@ -167,7 +167,19 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
  */
 export const getQuiz = async (userId: number, quizId: number) => {
     const { quiz, role, state } = await getQuizAndRole(userId, quizId, {
-        include: ["questions"],
+        include: [
+            {
+                // @ts-ignore
+                model: Question,
+                as: 'questions'
+            },
+            {
+                // @ts-ignore
+                model: Session,
+                required: false,
+                where: { state: "waiting" },
+            },
+        ],
     });
 
     // Questions

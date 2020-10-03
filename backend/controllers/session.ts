@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import sequelize, {
     Quiz,
     Session,
@@ -5,9 +6,8 @@ import sequelize, {
     User,
     UserGroup,
 } from "../models";
-import { Op } from "sequelize";
-import ErrorStatus from "helpers/error";
-import { jwtSign } from "helpers/jwt";
+import ErrorStatus from "../helpers/error";
+import { jwtSign } from "../helpers/jwt";
 
 /**
  * Sign game token.
@@ -148,7 +148,7 @@ const generateCode = (length: number) => {
  * @param opts
  */
 export const createSession = async (userId: number, opts: any) => {
-    const { quizId, isGroup, autoJoinGroup: subscribeGroup } = opts;
+    const { quizId, isGroup, subscribeGroup } = opts;
 
     // Check session
     const existingSession = await getUserSessionPartial(userId);
