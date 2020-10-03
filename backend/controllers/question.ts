@@ -27,6 +27,11 @@ export const processQuestions = async (
     original: Question[],
     updated: any[]
 ) => {
+    // Quiz with no questions
+    if (updated === undefined) {
+        updated = [];
+    }
+
     // First parse updated into QuestionInfo[]
     const updatedQuestions = updated.map((q) => checkQuestionInfo(q));
 

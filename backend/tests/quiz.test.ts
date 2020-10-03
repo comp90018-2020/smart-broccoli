@@ -74,6 +74,19 @@ describe("Quiz", () => {
         expect(res.body.questions[1].text).to.equal(QUESTION_CHOICE.text);
     });
 
+    it("Create quiz with no questions", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const group = await createGroup(user.id, "foo");
+
+        const { questions, ...rest } = QUIZ;
+        const res = await agent
+            .post("/quiz")
+            .set("Authorization", `Bearer ${user.token}`)
+            .send({ ...rest, groupId: group.id });
+        expect(res.status).to.equal(201);
+    });
+
     it("Update quiz", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
