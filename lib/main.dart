@@ -1,7 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:fuzzy_broccoli/theme.dart';
 
 import 'src/auth/auth_screen.dart';
-import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
 
