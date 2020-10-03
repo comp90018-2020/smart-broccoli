@@ -90,7 +90,7 @@ class _LoginState extends State<Login> {
             SizedBox(
               width: double.infinity,
               child: MaterialButton(
-                textColor: Colors.white,
+                textColor: Theme.of(context).colorScheme.onBackground,
                 child: const Text('SKIP LOGIN'),
                 onPressed: _joinAsParticipant,
               ),

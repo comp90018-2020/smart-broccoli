@@ -10,6 +10,7 @@ class FuzzyBroccoliColourScheme extends ColorScheme {
   FuzzyBroccoliColourScheme()
       : super.light(
           background: Color(0xFF4CAF50),
+          onBackground: Colors.white,
           primary: Color(0xFFFEC12D),
           secondary: Color(0xFF654C12),
           secondaryVariant: Color(0xFFAEAEAE),
