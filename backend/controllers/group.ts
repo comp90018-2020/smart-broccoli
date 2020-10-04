@@ -1,5 +1,6 @@
 import { Op, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
+import Sequelize from "sequelize";
 import sequelize, { Group, Session, User, UserGroup } from "../models";
 
 /**
@@ -442,18 +443,38 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
             {
                 // @ts-ignore
                 model: Session,
-                where: { state: { [Op.or]: ["waiting", "ended"] } },
                 required: false,
+                attributes: [
+                    "id",
+                    "isGroup",
+                    "type",
+                    "code",
+                    "state",
+                    "subscribeGroup",
+                    [
+                        Sequelize.literal('(SELECT COUNT(*) FROM "Users")'),
+                        "match",
+                    ],
+                ],
+                where: {
+                    [Op.or]: [
+                        // Waiting state
+                        { state: "waiting" },
+                        // Not waiting state, requires user to be member
+                        {
+                            state: {
+                                [Op.or]: ["active", "ended"],
+                                match: { [Op.not]: 0 },
+                            },
+                        },
+                    ],
+                },
                 include: [
                     {
                         // @ts-ignore
                         model: User,
                         required: false,
                         attributes: ["id"],
-                        through: {
-                            where: { state: "complete" },
-                            attributes: ["state"],
-                        },
                         where: { id: user.id },
                     },
                 ],
@@ -464,14 +485,18 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
     return quizzes.map((quiz) => {
         return {
             ...quiz.toJSON(),
-            // Is quiz complete?
+            // Whether user has completed quiz
             complete:
-                quiz.Sessions.find((session) => session.Users.length > 0) !=
-                null,
+                quiz.Sessions.find(
+                    (session) =>
+                        session.Users.length > 1 &&
+                        session.Users[0].SessionParticipant.state === "complete"
+                ) != null,
             Sessions: quiz.Sessions.map((session) => {
                 // @ts-ignore
                 const sessionJSON: any = session.toJSON();
                 delete sessionJSON["Users"];
+                delete sessionJSON["match"];
                 return sessionJSON;
             }),
         };

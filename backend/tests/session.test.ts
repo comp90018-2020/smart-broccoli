@@ -202,6 +202,8 @@ describe("Session", () => {
         expect(quizRes.status).to.equal(200);
         expect(quizRes.body).to.have.property("questions");
         expect(quizRes.body.questions).to.have.lengthOf(2);
+        expect(quizRes.body).to.have.property("Sessions");
+        expect(quizRes.body.Sessions).to.have.lengthOf(1);
 
         const groupQuizRes = await agent
             .get(`/group/${group.id}/quiz`)

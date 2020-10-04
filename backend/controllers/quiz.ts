@@ -1,4 +1,4 @@
-import { FindOptions, Op } from "sequelize";
+import { FindOptions, Op, Sequelize } from "sequelize";
 import ErrorStatus from "../helpers/error";
 import sequelize, {
     Quiz,
@@ -153,18 +153,40 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
                     {
                         // @ts-ignore
                         model: Session,
-                        where: { state: { [Op.or]: ["waiting", "ended"] } },
                         required: false,
+                        attributes: [
+                            "id",
+                            "isGroup",
+                            "type",
+                            "code",
+                            "state",
+                            "subscribeGroup",
+                            [
+                                Sequelize.literal(
+                                    '(SELECT COUNT(*) FROM "Users")'
+                                ),
+                                "match",
+                            ],
+                        ],
+                        where: {
+                            [Op.or]: [
+                                // Waiting state
+                                { state: "waiting" },
+                                // Not waiting state, user should be member of session
+                                {
+                                    state: {
+                                        [Op.or]: ["active", "ended"],
+                                        match: { [Op.not]: 0 },
+                                    },
+                                },
+                            ],
+                        },
                         include: [
                             {
                                 // @ts-ignore
                                 model: User,
                                 required: false,
                                 attributes: ["id"],
-                                through: {
-                                    where: { state: "complete" },
-                                    attributes: ["state"],
-                                },
                                 where: { id: user.id },
                             },
                         ],
@@ -184,16 +206,20 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
             }).map((quiz) => {
                 return {
                     ...quiz.toJSON(),
-                    // Whether quiz has been completed by user
+                    role: group.Users[0].UserGroup.role,
+                    // Whether user has completed quiz
                     complete:
                         quiz.Sessions.find(
-                            (session) => session.Users.length > 0
+                            (session) =>
+                                session.Users.length > 1 &&
+                                session.Users[0].SessionParticipant.state ===
+                                    "complete"
                         ) != null,
-                    role: group.Users[0].UserGroup.role,
                     Sessions: quiz.Sessions.map((session) => {
                         // @ts-ignore
                         const sessionJSON: any = session.toJSON();
                         delete sessionJSON["Users"];
+                        delete sessionJSON["match"];
                         return sessionJSON;
                     }),
                 };
@@ -218,18 +244,38 @@ export const getQuiz = async (userId: number, quizId: number) => {
             {
                 // @ts-ignore
                 model: Session,
-                where: { state: { [Op.or]: ["waiting", "ended"] } },
                 required: false,
+                attributes: [
+                    "id",
+                    "isGroup",
+                    "type",
+                    "code",
+                    "state",
+                    "subscribeGroup",
+                    [
+                        Sequelize.literal('(SELECT COUNT(*) FROM "Users")'),
+                        "match",
+                    ],
+                ],
+                where: {
+                    [Op.or]: [
+                        // Waiting state
+                        { state: "waiting" },
+                        // Not waiting state, user should be member of session
+                        {
+                            state: {
+                                [Op.or]: ["active", "ended"],
+                                match: { [Op.not]: 0 },
+                            },
+                        },
+                    ],
+                },
                 include: [
                     {
                         // @ts-ignore
                         model: User,
                         required: false,
                         attributes: ["id"],
-                        through: {
-                            where: { state: "complete" },
-                            attributes: ["state"],
-                        },
                         where: { id: userId },
                     },
                 ],
@@ -267,15 +313,20 @@ export const getQuiz = async (userId: number, quizId: number) => {
 
     return {
         ...quiz.toJSON(),
+        // Whether user has completed quiz
+        complete:
+            quiz.Sessions.find(
+                (session) =>
+                    session.Users.length > 1 &&
+                    session.Users[0].SessionParticipant.state === "complete"
+            ) != null,
         Sessions: quiz.Sessions.map((session) => {
             // @ts-ignore
             const sessionJSON: any = session.toJSON();
             delete sessionJSON["Users"];
+            delete sessionJSON["match"];
             return sessionJSON;
         }),
-
-        // Whether quiz has been completed by user
-        complete: quiz.Sessions.find((session) => session.Users.length > 0),
         questions,
     };
 };
