@@ -24,7 +24,7 @@ class QuizModel {
     _http = mocker != null ? mocker : IOClient();
   }
 
-  /// Return a list of all quizzes created by the authenticated user.
+  /// Return a list of all quizzes available to the authenticated user.
   /// Caveat: The `questions` field of each quiz is NOT set (i.e. is `null`).
   /// `getQuiz` must be invoked to retrieve the list of questions associated
   /// with a quiz.
@@ -242,8 +242,10 @@ class QuizModel {
         headers: ApiBase.headers(authToken: _authModel.token),
         body: json.encode(sessionJson));
 
-    if (response.statusCode == 200)
-      return GameSession.fromJson(json.decode(response.body));
+    if (response.statusCode == 200) {
+      Map resJson = json.decode(response.body);
+      return GameSession.fromJson(resJson["session"], token: resJson["token"]);
+    }
 
     if (response.statusCode == 400 &&
         json.decode(response.body)["message"] ==
@@ -261,8 +263,10 @@ class QuizModel {
     final http.Response response = await _http.get(SESSION_URL,
         headers: ApiBase.headers(authToken: _authModel.token));
 
-    if (response.statusCode == 200)
-      return GameSession.fromJson(json.decode(response.body));
+    if (response.statusCode == 200) {
+      Map resJson = json.decode(response.body);
+      return GameSession.fromJson(resJson["session"], token: resJson["token"]);
+    }
 
     if (response.statusCode == 204) return null;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
@@ -276,8 +280,10 @@ class QuizModel {
         headers: ApiBase.headers(authToken: _authModel.token),
         body: json.encode(<String, dynamic>{"code": joinCode}));
 
-    if (response.statusCode == 200)
-      return GameSession.fromJson(json.decode(response.body));
+    if (response.statusCode == 200) {
+      Map resJson = json.decode(response.body);
+      return GameSession.fromJson(resJson["session"], token: resJson["token"]);
+    }
 
     if (response.statusCode == 400 &&
         json.decode(response.body)["message"] ==

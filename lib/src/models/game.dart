@@ -27,22 +27,20 @@ class GameSession {
   GameSession._internal(this.id, this.quizId, this.groupId, this.type,
       this.state, this.joinCode, this.token, this.groupAutoJoin);
 
-  factory GameSession.fromJson(Map<String, dynamic> json) =>
+  factory GameSession.fromJson(Map<String, dynamic> json, {String token}) =>
       GameSession._internal(
-          json['session']['id'],
-          json['session']['quizId'],
-          json['session']['groupId'],
-          json['session']['isGroup']
-              ? GameSessionType.GROUP
-              : GameSessionType.INDIVIDUAL,
-          json['session']['state'] == 'waiting'
+          json['id'],
+          json['quizId'],
+          json['groupId'],
+          json['isGroup'] ? GameSessionType.GROUP : GameSessionType.INDIVIDUAL,
+          json['state'] == 'waiting'
               ? GameSessionState.WAITING
-              : json['session']['state'] == 'active'
+              : json['state'] == 'active'
                   ? GameSessionState.ACTIVE
                   : GameSessionState.ENDED,
-          json['session']['code'],
-          json['token'],
-          json['session']['subscribeGroup']);
+          json['code'],
+          token,
+          json['subscribeGroup']);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'session': <String, dynamic>{

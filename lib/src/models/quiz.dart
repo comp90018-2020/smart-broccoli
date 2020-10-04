@@ -1,3 +1,5 @@
+import 'game.dart';
+
 enum QuizType { LIVE, SELF_PACED }
 
 /// Object representing a quiz
@@ -16,6 +18,8 @@ class Quiz {
   int groupId;
   QuizType type;
   bool isActive;
+  List<GameSession> _sessions;
+  List<GameSession> get sessions => _sessions;
 
   int timeLimit;
   List<Question> questions;
@@ -37,7 +41,7 @@ class Quiz {
         json['groupId'],
         json['type'] == 'live' ? QuizType.LIVE : QuizType.SELF_PACED,
         json['description'],
-        json['isActive'],
+        json['active'],
         json['timeLimit'],
         null);
     quiz.questions = (json['questions'] as List)
@@ -45,9 +49,15 @@ class Quiz {
             ? TFQuestion.fromJson(quiz, question)
             : MCQuestion.fromJson(quiz, question))
         ?.toList();
+    quiz._sessions = (json['Sessions'] as List)?.map((session) {
+      session['quizId'] = quiz.id;
+      session['groupId'] = quiz.groupId;
+      return GameSession.fromJson(session);
+    })?.toList();
     return quiz;
   }
 
+  // note: sessions not serialised
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,
@@ -55,7 +65,7 @@ class Quiz {
       'groupId': groupId,
       'type': type == QuizType.LIVE ? 'live' : 'self paced',
       'description': description,
-      'isActive': isActive,
+      'active': isActive,
       'timeLimit': timeLimit,
       'questions': questions.map((question) => question.toJson()).toList()
     };

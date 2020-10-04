@@ -10,6 +10,147 @@ import 'package:mockito/mockito.dart';
 class MockClient extends Mock implements http.Client {}
 
 main() async {
+  test('Get quizzes', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.get(QuizModel.QUIZ_URL, headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode([
+              {
+                "id": 1,
+                "title": "foo",
+                "active": true,
+                "description": "hello world",
+                "type": "live",
+                "timeLimit": 10,
+                "createdAt": "2020-01-01T00:00:00.000Z",
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "pictureId": null,
+                "groupId": 2,
+                "Sessions": [
+                  {
+                    "id": 1,
+                    "isGroup": false,
+                    "type": "live",
+                    "code": "107168",
+                    "state": "waiting",
+                    "subscribeGroup": true
+                  }
+                ],
+                "complete": false,
+                "role": "owner"
+              },
+              {
+                "id": 2,
+                "title": "bar",
+                "active": false,
+                "description": null,
+                "type": "live",
+                "timeLimit": 15,
+                "createdAt": "2020-01-01T00:00:00.000Z",
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "pictureId": null,
+                "groupId": 2,
+                "Sessions": [],
+                "complete": false,
+                "role": "owner"
+              },
+              {
+                "id": 3,
+                "title": "baz",
+                "active": true,
+                "description": "quiz for your own time",
+                "type": "self paced",
+                "timeLimit": 20,
+                "createdAt": "2020-01-01T00:00:00.000Z",
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "pictureId": null,
+                "groupId": 2,
+                "Sessions": [
+                  {
+                    "id": 2,
+                    "isGroup": false,
+                    "type": "self paced",
+                    "code": "878838",
+                    "state": "waiting",
+                    "subscribeGroup": false
+                  },
+                  {
+                    "id": 3,
+                    "isGroup": true,
+                    "type": "self paced",
+                    "code": "284163",
+                    "state": "waiting",
+                    "subscribeGroup": false
+                  }
+                ],
+                "complete": false,
+                "role": "member"
+              }
+            ]),
+            200));
+
+    final quizzes = await qm.getQuizzes();
+    expect(quizzes, isA<List<Quiz>>());
+    expect(quizzes.length, 3);
+    quizzes.sort((q0, q1) => q0.id.compareTo(q1.id));
+    expect(quizzes[0].id, 1);
+    expect(quizzes[1].id, 2);
+    expect(quizzes[2].id, 3);
+    expect(quizzes[0].title, "foo");
+    expect(quizzes[1].title, "bar");
+    expect(quizzes[2].title, "baz");
+    expect(quizzes[0].isActive, true);
+    expect(quizzes[1].isActive, false);
+    expect(quizzes[2].isActive, true);
+    expect(quizzes[0].description, "hello world");
+    expect(quizzes[1].description, null);
+    expect(quizzes[2].description, "quiz for your own time");
+    expect(quizzes[0].type, QuizType.LIVE);
+    expect(quizzes[1].type, QuizType.LIVE);
+    expect(quizzes[2].type, QuizType.SELF_PACED);
+    expect(quizzes[0].timeLimit, 10);
+    expect(quizzes[1].timeLimit, 15);
+    expect(quizzes[2].timeLimit, 20);
+    expect(quizzes[0].groupId, 2);
+    expect(quizzes[1].groupId, 2);
+    expect(quizzes[2].groupId, 2);
+    expect(quizzes[0].sessions, isA<List<GameSession>>());
+    expect(quizzes[1].sessions, isA<List<GameSession>>());
+    expect(quizzes[2].sessions, isA<List<GameSession>>());
+    expect(quizzes[0].sessions.length, 1);
+    expect(quizzes[1].sessions.length, 0);
+    expect(quizzes[2].sessions.length, 2);
+    expect(quizzes[0].sessions[0].id, 1);
+    expect(quizzes[2].sessions[0].id, 2);
+    expect(quizzes[2].sessions[1].id, 3);
+    expect(quizzes[0].sessions[0].quizId, 1);
+    expect(quizzes[2].sessions[0].quizId, 3);
+    expect(quizzes[2].sessions[1].quizId, 3);
+    expect(quizzes[0].sessions[0].groupId, 2);
+    expect(quizzes[2].sessions[0].groupId, 2);
+    expect(quizzes[2].sessions[1].groupId, 2);
+    expect(quizzes[0].sessions[0].type, GameSessionType.INDIVIDUAL);
+    expect(quizzes[2].sessions[0].type, GameSessionType.INDIVIDUAL);
+    expect(quizzes[2].sessions[1].type, GameSessionType.GROUP);
+    expect(quizzes[0].sessions[0].state, GameSessionState.WAITING);
+    expect(quizzes[2].sessions[0].state, GameSessionState.WAITING);
+    expect(quizzes[2].sessions[1].state, GameSessionState.WAITING);
+    expect(quizzes[0].sessions[0].joinCode, "107168");
+    expect(quizzes[2].sessions[0].joinCode, "878838");
+    expect(quizzes[2].sessions[1].joinCode, "284163");
+    expect(quizzes[0].sessions[0].token, null);
+    expect(quizzes[2].sessions[0].token, null);
+    expect(quizzes[2].sessions[1].token, null);
+    expect(quizzes[0].sessions[0].groupAutoJoin, true);
+    expect(quizzes[2].sessions[0].groupAutoJoin, false);
+    expect(quizzes[2].sessions[1].groupAutoJoin, false);
+  });
+
   test('Create session', () async {
     final http.Client client = MockClient();
     final AuthModel am = AuthModel(
