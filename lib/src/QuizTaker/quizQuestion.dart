@@ -63,7 +63,6 @@ class _quizQuestion extends State<quizQuestion> {
           elevation: 0,
         ),
         body: Container(
-
           child: new Column(
             children: <Widget>[
               // Title "UNI QUIZ"
@@ -131,11 +130,12 @@ class _quizQuestion extends State<quizQuestion> {
       );
     } else {
       Color col = Colors.deepOrange;
+      print("Correct value = " + correct.toString());
       if (correct == 1) {
-        Color col = Colors.orange;
+        Color col = Colors.white;
       }
       return Material(
-        color: col,
+        color: (correct==1)? Colors.greenAccent : Colors.red,
         child: InkWell(
             highlightColor: Colors.pinkAccent,
             splashColor: Colors.greenAccent,
@@ -166,14 +166,15 @@ class _quizQuestion extends State<quizQuestion> {
   }
 
   int isCorrectIndex(index) {
-    if(_answerIndex == index){
+    print("Actual " + _answerIndex.toString());
+    if (_answerIndex == index) {
       return 1;
     }
     return 0;
   }
 
   void updateAnswer(ans) async {
+    print("Updated " + ans.toString());
     _answerIndex = ans;
   }
-
 }
