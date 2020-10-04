@@ -190,11 +190,18 @@ export const createSession = async (userId: number, opts: any) => {
 
     const transaction = await sequelize.transaction();
 
+    // Initial state of quiz
+    let state = "waiting";
+    if (quiz.type === "self paced" && !isGroup) {
+        // Alone quizzes
+        state = "active";
+    }
+
     // Create session
     const session = new Session({
         isGroup,
         type: quiz.type,
-        state: "waiting",
+        state,
         quizId: quiz.id,
         groupId: quiz.groupId,
         subscribeGroup,
