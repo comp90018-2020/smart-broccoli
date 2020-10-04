@@ -14,6 +14,11 @@ const schema: Sequelize.ModelAttributes = {
         defaultValue: "participant",
         allowNull: false,
     },
+    state: {
+        type: Sequelize.ENUM("joined", "complete", "left"),
+        allowNull: false,
+        defaultValue: "joined",
+    },
 };
 
 interface SessionParticipantAttributes {
@@ -22,10 +27,11 @@ interface SessionParticipantAttributes {
     userId: number;
     User?: User;
     sessionId: number;
+    state: string;
     Session?: Session;
 }
 interface SessionParticipantCreationAttributes
-    extends Optional<SessionParticipantAttributes, "id"> {}
+    extends Optional<SessionParticipantAttributes, "id" | "state"> {}
 
 export default class SessionParticipant
     extends Sequelize.Model<
@@ -35,6 +41,7 @@ export default class SessionParticipant
     implements SessionParticipantAttributes {
     public readonly id!: number;
     public role: string;
+    public state: string;
     public readonly userId: number;
     public readonly sessionId: number;
 

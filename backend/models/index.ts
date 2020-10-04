@@ -90,6 +90,7 @@ Session.belongsToMany(User, {
     through: SessionParticipant,
     foreignKey: "sessionId",
 });
+
 Session.belongsTo(Group, {
     foreignKey: "groupId",
 });

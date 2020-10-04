@@ -38,20 +38,24 @@ const signSessionToken = async (
  * @param userId
  */
 const getUserSessionPartial = async (userId: number) => {
+    // @ts-ignore
     return await Session.findOne({
         where: {
-            state: { [Op.or]: ["active", "waiting"] },
+            state: {
+                [Op.or]: ["active", "waiting"],
+            },
         },
         include: [
             {
-                // Find current user
                 // @ts-ignore
                 model: User,
-                attributes: ["id"],
-                where: { id: userId },
-                required: true,
+                through: { where: { state: { [Op.not]: "left" } } },
+                where: {
+                    id: userId,
+                },
             },
         ],
+        limit: 1,
     });
 };
 
@@ -64,14 +68,19 @@ export const getUserSession = async (userId: number) => {
     // @ts-ignore
     const session = await Session.findOne({
         where: {
-            state: { [Op.or]: ["active", "waiting"] },
+            state: {
+                [Op.or]: ["active", "waiting"],
+            },
         },
         include: [
             {
                 // Find current user
                 model: User,
                 attributes: ["id"],
-                where: { id: userId },
+                through: { where: { state: { [Op.not]: "left" } } },
+                where: {
+                    id: userId,
+                },
                 required: true,
             },
             {
@@ -83,7 +92,7 @@ export const getUserSession = async (userId: number) => {
                     {
                         // Get user
                         model: User,
-                        where: { "$Group.Users.UserGroup.role$": "owner" },
+                        through: { where: { role: "owner" } },
                         attributes: ["name"],
                         required: true,
                     },
@@ -264,7 +273,7 @@ export const joinSession = async (userId: number, code: string) => {
                     {
                         // Get user
                         model: User,
-                        where: { "$Group.Users.UserGroup.role$": "owner" },
+                        through: { where: { role: "owner" } },
                         attributes: ["name"],
                         required: true,
                     },
