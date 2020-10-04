@@ -31,11 +31,8 @@ class Quiz {
   List<Question> questions;
 
   /// Construtor for use when user creates a new quiz
-  factory Quiz(
-          {@required String title,
-          @required int groupId,
-          @required QuizType type,
-          String description,
+  factory Quiz(String title, int groupId, QuizType type,
+          {String description,
           bool isActive,
           int timeLimit,
           List<Question> questions}) =>
