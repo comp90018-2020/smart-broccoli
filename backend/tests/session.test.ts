@@ -212,4 +212,89 @@ describe("Session", () => {
         expect(groupQuizRes.body[0]).to.have.property("Sessions");
         expect(groupQuizRes.body[0].Sessions).to.have.lengthOf(1);
     });
+
+    it("Get quiz - session multiple users", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember1 = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const userMember2 = await registerAndLogin({
+            ...USER,
+            email: "c@c.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, {
+            ...QUIZ,
+            type: "self paced",
+        });
+        await joinGroup(userMember1.id, { code: group.code });
+        await joinGroup(userMember2.id, { code: group.code });
+
+        await createSession(userMember1.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+
+        // GET /quiz
+        const quizAllMember1 = await agent
+            .get("/quiz")
+            .set("Authorization", `Bearer ${userMember1.token}`);
+        expect(quizAllMember1.body).to.have.lengthOf(1);
+        expect(quizAllMember1.body[0].Sessions).to.have.lengthOf(1);
+        expect(quizAllMember1.body[0].role).to.equal("member");
+
+        const quizAllMember2 = await agent
+            .get("/quiz")
+            .set("Authorization", `Bearer ${userMember2.token}`);
+        expect(quizAllMember2.body).to.have.lengthOf(1);
+        expect(quizAllMember2.body[0].Sessions).to.have.lengthOf(0);
+        expect(quizAllMember2.body[0].role).to.equal("member");
+
+        const quizAllOwner = await agent
+            .get("/quiz")
+            .set("Authorization", `Bearer ${userOwner.token}`);
+        expect(quizAllOwner.body).to.have.lengthOf(1);
+        expect(quizAllOwner.body[0].Sessions).to.have.lengthOf(0);
+        expect(quizAllOwner.body[0].role).to.equal("owner");
+
+        // GET /quiz/:id
+        const quizMember1 = await agent
+            .get(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${userMember1.token}`);
+        expect(quizMember1.body).to.have.property("Sessions");
+        expect(quizMember1.body.Sessions).to.have.lengthOf(1);
+
+        const quizMember2 = await agent
+            .get(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${userMember2.token}`);
+        expect(quizMember2.body).to.have.property("Sessions");
+        expect(quizMember2.body.Sessions).to.have.lengthOf(0);
+
+        const quizOwner = await agent
+            .get(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${userOwner.token}`);
+        expect(quizOwner.body).to.have.property("Sessions");
+        expect(quizOwner.body.Sessions).to.have.lengthOf(0);
+
+        // GET /group/quiz
+        const groupMember1 = await agent
+            .get(`/group/${group.id}/quiz`)
+            .set("Authorization", `Bearer ${userMember1.token}`);
+        expect(groupMember1.body).to.have.lengthOf(1);
+        expect(groupMember1.body[0].Sessions).to.have.lengthOf(1);
+
+        const groupMember2 = await agent
+            .get(`/group/${group.id}/quiz`)
+            .set("Authorization", `Bearer ${userMember2.token}`);
+        expect(groupMember2.body).to.have.lengthOf(1);
+        expect(groupMember2.body[0].Sessions).to.have.lengthOf(0);
+
+        const groupOwner = await agent
+            .get(`/group/${group.id}/quiz`)
+            .set("Authorization", `Bearer ${userOwner.token}`);
+        expect(groupOwner.body).to.have.lengthOf(1);
+        expect(groupOwner.body[0].Sessions).to.have.lengthOf(0);
+    });
 });

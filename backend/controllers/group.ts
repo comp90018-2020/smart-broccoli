@@ -444,31 +444,6 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
                 // @ts-ignore
                 model: Session,
                 required: false,
-                attributes: [
-                    "id",
-                    "isGroup",
-                    "type",
-                    "code",
-                    "state",
-                    "subscribeGroup",
-                    [
-                        Sequelize.literal('(SELECT COUNT(*) FROM "Users")'),
-                        "match",
-                    ],
-                ],
-                where: {
-                    [Op.or]: [
-                        // Waiting state
-                        { state: "waiting" },
-                        // Not waiting state, requires user to be member
-                        {
-                            state: {
-                                [Op.or]: ["active", "ended"],
-                                match: { [Op.not]: 0 },
-                            },
-                        },
-                    ],
-                },
                 include: [
                     {
                         // @ts-ignore
@@ -476,6 +451,7 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
                         required: false,
                         attributes: ["id"],
                         where: { id: user.id },
+                        through: { attributes: ["state"] },
                     },
                 ],
             },
@@ -492,11 +468,13 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
                         session.Users.length > 0 &&
                         session.Users[0].SessionParticipant.state === "complete"
                 ) != null,
-            Sessions: quiz.Sessions.map((session) => {
+            Sessions: quiz.Sessions.filter(
+                (session) =>
+                    session.state === "waiting" || session.Users.length > 0
+            ).map((session) => {
                 // @ts-ignore
                 const sessionJSON: any = session.toJSON();
                 delete sessionJSON["Users"];
-                delete sessionJSON["match"];
                 return sessionJSON;
             }),
         };

@@ -142,7 +142,11 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
                 // @ts-ignore
                 model: User,
                 where: { id: user.id },
-                through: { where: opts.role ? { role: opts.role } : undefined },
+                through: {
+                    where: opts.role ? { role: opts.role } : undefined,
+                    attributes: ["role"],
+                },
+                attributes: ["id"],
                 required: true,
             },
             {
@@ -154,33 +158,6 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
                         // @ts-ignore
                         model: Session,
                         required: false,
-                        attributes: [
-                            "id",
-                            "isGroup",
-                            "type",
-                            "code",
-                            "state",
-                            "subscribeGroup",
-                            [
-                                Sequelize.literal(
-                                    '(SELECT COUNT(*) FROM "Users")'
-                                ),
-                                "match",
-                            ],
-                        ],
-                        where: {
-                            [Op.or]: [
-                                // Waiting state
-                                { state: "waiting" },
-                                // Not waiting state, user should be member of session
-                                {
-                                    state: {
-                                        [Op.or]: ["active", "ended"],
-                                        match: { [Op.not]: 0 },
-                                    },
-                                },
-                            ],
-                        },
                         include: [
                             {
                                 // @ts-ignore
@@ -188,6 +165,7 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
                                 required: false,
                                 attributes: ["id"],
                                 where: { id: user.id },
+                                through: { attributes: ["state"] },
                             },
                         ],
                     },
@@ -215,11 +193,16 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
                                 session.Users[0].SessionParticipant.state ===
                                     "complete"
                         ) != null,
-                    Sessions: quiz.Sessions.map((session) => {
+                    // Filter to sessions that user is member of
+                    // and those waiting for more members
+                    Sessions: quiz.Sessions.filter(
+                        (session) =>
+                            session.state === "waiting" ||
+                            session.Users.length > 0
+                    ).map((session) => {
                         // @ts-ignore
                         const sessionJSON: any = session.toJSON();
                         delete sessionJSON["Users"];
-                        delete sessionJSON["match"];
                         return sessionJSON;
                     }),
                 };
@@ -245,31 +228,6 @@ export const getQuiz = async (userId: number, quizId: number) => {
                 // @ts-ignore
                 model: Session,
                 required: false,
-                attributes: [
-                    "id",
-                    "isGroup",
-                    "type",
-                    "code",
-                    "state",
-                    "subscribeGroup",
-                    [
-                        Sequelize.literal('(SELECT COUNT(*) FROM "Users")'),
-                        "match",
-                    ],
-                ],
-                where: {
-                    [Op.or]: [
-                        // Waiting state
-                        { state: "waiting" },
-                        // Not waiting state, user should be member of session
-                        {
-                            state: {
-                                [Op.or]: ["active", "ended"],
-                                match: { [Op.not]: 0 },
-                            },
-                        },
-                    ],
-                },
                 include: [
                     {
                         // @ts-ignore
@@ -277,6 +235,7 @@ export const getQuiz = async (userId: number, quizId: number) => {
                         required: false,
                         attributes: ["id"],
                         where: { id: userId },
+                        through: { attributes: ["state"] },
                     },
                 ],
             },
@@ -320,11 +279,14 @@ export const getQuiz = async (userId: number, quizId: number) => {
                     session.Users.length > 0 &&
                     session.Users[0].SessionParticipant.state === "complete"
             ) != null,
-        Sessions: quiz.Sessions.map((session) => {
+        // Filter to sessions that user is member of
+        // and those waiting for more members
+        Sessions: quiz.Sessions.filter(
+            (session) => session.state === "waiting" || session.Users.length > 0
+        ).map((session) => {
             // @ts-ignore
             const sessionJSON: any = session.toJSON();
             delete sessionJSON["Users"];
-            delete sessionJSON["match"];
             return sessionJSON;
         }),
         questions,
