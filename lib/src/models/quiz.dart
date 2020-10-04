@@ -69,7 +69,7 @@ class Quiz {
 
   // note: sessions not serialised
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
+    Map json = <String, dynamic>{
       'id': id,
       'title': title,
       'groupId': groupId,
@@ -77,8 +77,11 @@ class Quiz {
       'description': description,
       'active': isActive,
       'timeLimit': timeLimit,
-      'questions': questions.map((question) => question.toJson()).toList()
     };
+    if (questions != null)
+      json['questions'] =
+          questions.map((question) => question.toJson()).toList();
+    return json;
   }
 }
 
