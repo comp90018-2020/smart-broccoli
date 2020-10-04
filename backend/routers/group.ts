@@ -200,10 +200,7 @@ router.get(
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const group = await getGroup(
-                req.user,
-                Number(req.params.groupId)
-            );
+            const group = await getGroup(req.user, Number(req.params.groupId));
             return res.json(group);
         } catch (err) {
             return next(err);

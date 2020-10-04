@@ -1,4 +1,4 @@
-import { FindOptions, Op, Sequelize } from "sequelize";
+import { FindOptions } from "sequelize";
 import ErrorStatus from "../helpers/error";
 import sequelize, {
     Quiz,

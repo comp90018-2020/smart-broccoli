@@ -1,6 +1,6 @@
 import { Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Quiz } from "../models";
+import sequelize, { Picture } from "../models";
 import Question, { OptionAttributes } from "../models/question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 import { getQuizAndRole } from "./quiz";
@@ -206,6 +206,7 @@ export const updateQuestionPicture = async (
             quizId,
             id: questionId,
         },
+        attributes: ["id", "pictureId"],
     });
     if (!question) {
         throw new ErrorStatus("Cannot find question", 404);
@@ -249,16 +250,24 @@ export const getQuestionPicture = async (
     }
 
     const question = await Question.findOne({
-        attributes: ["pictureId"],
+        attributes: ["id"],
         where: {
             quizId,
             id: questionId,
         },
+        include: [
+            {
+                // @ts-ignore
+                model: Picture,
+                required: true,
+                attributes: ["id", "destination"],
+            },
+        ],
     });
     if (!question) {
         throw new ErrorStatus("Cannot find question", 404);
     }
-    return await getPictureById(question.pictureId);
+    return question.Picture;
 };
 
 /**

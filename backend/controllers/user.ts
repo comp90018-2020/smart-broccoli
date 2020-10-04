@@ -107,6 +107,7 @@ export const deleteProfilePicture = async (userId: number) => {
  * @param userId ID of target user
  */
 const canAccessProfile = async (currentUserId: number, userId: number) => {
+    // TODO: fix
     // Find common groups
     const userGroups = await UserGroup.findAll({ where: { userId } });
     const sharedGroups = await UserGroup.findAll({

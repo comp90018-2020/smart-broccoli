@@ -3,54 +3,6 @@ import ErrorStatus from "../helpers/error";
 import sequelize, { Group, Session, User, UserGroup } from "../models";
 
 /**
- * Get group of user.
- * @param user User object
- * @param groupId ID of target group
- */
-const getGroupAndVerifyRole = async (
-    userId: number,
-    groupId: number,
-    role: string
-) => {
-    const group = await Group.findOne({
-        where: { id: groupId },
-        include: [
-            {
-                // @ts-ignore
-                model: User,
-                required: true,
-                attributes: [
-                    'id'
-                ],
-                // User is member
-                where: { id: userId },
-                through: {
-                    attributes: ['role'],
-                    where:
-                        role === "owner"
-                            ? // Owner must be owner
-                              { role: "owner" }
-                            : // Owners can be members
-                              {
-                                  [Op.or]: [
-                                      { role: "owner" },
-                                      { role: "member" },
-                                  ],
-                              },
-                },
-            },
-        ],
-    });
-    if (!group) {
-        throw new ErrorStatus(
-            "User does not have privilege to access group resource",
-            403
-        );
-    }
-    return { group, role: group.Users[0].UserGroup.role };
-};
-
-/**
  * Ensure that user is group owner.
  * @param userId
  * @param groupId
@@ -119,16 +71,17 @@ export const getGroups = async (user: User) => {
  */
 export const getGroup = async (user: User, groupId: number) => {
     // Get group
-    const groupQuery = await user.getGroups({ where: { id: groupId },
+    const groupQuery = await user.getGroups({
+        where: { id: groupId },
         include: [
             {
                 // @ts-ignore Typing errors due to model
                 model: User,
                 attributes: ["id", "name"],
                 required: true,
-                through: { where: { role: 'owner' } }
-            }
-        ]
+                through: { where: { role: "owner" } },
+            },
+        ],
     });
     if (groupQuery.length === 0) {
         throw new ErrorStatus("Group cannot be accessed", 404);
@@ -334,7 +287,24 @@ const regenerateCodeHelper = async (
  * @param groupId
  */
 export const regenerateCode = async (userId: number, groupId: number) => {
-    const { group } = await getGroupAndVerifyRole(userId, groupId, "owner");
+    // Find group
+    const group = await Group.findByPk(groupId, {
+        required: true,
+        attributes: ["id", "code"],
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                attributes: [],
+                through: { where: { role: "owner" } },
+                where: { id: userId },
+            },
+        ],
+    });
+    if (!group) {
+        throw new ErrorStatus("Group cannot be accessed", 403);
+    }
+
     const groupUpdated = await regenerateCodeHelper(group);
     const groupJSON: any = groupUpdated.toJSON();
     groupJSON.role = "owner";
@@ -403,7 +373,22 @@ export const updateGroup = async (
     groupId: number,
     name: string
 ) => {
-    const { group } = await getGroupAndVerifyRole(userId, groupId, "owner");
+    // Find group
+    const group = await Group.findByPk(groupId, {
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                attributes: [],
+                through: { where: { role: "owner" } },
+                where: { id: userId },
+                required: true,
+            },
+        ],
+    });
+    if (!group) {
+        throw new ErrorStatus("Group cannot be accessed", 403);
+    }
     if (name && !group.defaultGroup) {
         group.name = name;
     }
@@ -450,13 +435,25 @@ export const deleteGroup = async (userId: number, groupId: number) => {
  */
 export const getGroupQuizzes = async (userId: number, groupId: number) => {
     // Get group and role
-    const { group, role } = await getGroupAndVerifyRole(
-        userId,
-        groupId,
-        "member"
-    );
+    const group = await Group.findByPk(groupId, {
+        attributes: ["id"],
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                required: true,
+                attributes: ["id"],
+                where: { id: userId },
+                through: { attributes: ["role"] },
+            },
+        ],
+    });
+    if (!group) {
+        throw new ErrorStatus("Group does not exist", 404);
+    }
 
     // Only active quizzes for members
+    const role = group.Users[0].UserGroup.role;
     const quizzes = await group.getQuizzes({
         where: role === "owner" ? undefined : { active: true },
         include: [
