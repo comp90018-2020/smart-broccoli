@@ -252,6 +252,103 @@ main() async {
         throwsA(isA<ForbiddenRequestException>()));
   });
 
+  test('Delete quiz', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.delete('${QuizModel.QUIZ_URL}/3', headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response("", 204));
+
+    // pretend user obtained `q` from `getQuizzes` or `getQuiz`
+    Quiz q = Quiz.fromJson(<String, dynamic>{
+      "id": 3,
+      "title": "foo",
+      "active": false,
+      "description": "lorem ipsum",
+      "type": "self paced",
+      "timeLimit": 15,
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "pictureId": null,
+      "groupId": 1,
+      "questions": [],
+      "Sessions": [],
+      "complete": false
+    });
+
+    await qm.deleteQuiz(q);
+    // no exception should be raised
+  });
+
+  test('Delete quiz (not found)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.delete('${QuizModel.QUIZ_URL}/3', headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{"message": "Quiz not found"}), 404));
+
+    // pretend user obtained `q` from `getQuizzes` or `getQuiz`
+    Quiz q = Quiz.fromJson(<String, dynamic>{
+      "id": 3,
+      "title": "foo",
+      "active": false,
+      "description": "lorem ipsum",
+      "type": "self paced",
+      "timeLimit": 15,
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "pictureId": null,
+      "groupId": 1,
+      "questions": [],
+      "Sessions": [],
+      "complete": false
+    });
+
+    expect(() async => await qm.deleteQuiz(q),
+        throwsA(isA<QuizNotFoundException>()));
+  });
+
+  test('Delete quiz (not allowed)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.delete('${QuizModel.QUIZ_URL}/3', headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "Quiz cannot be accessed"}),
+            403));
+
+    // pretend user obtained `q` from `getQuizzes` or `getQuiz`
+    Quiz q = Quiz.fromJson(<String, dynamic>{
+      "id": 3,
+      "title": "foo",
+      "active": false,
+      "description": "lorem ipsum",
+      "type": "self paced",
+      "timeLimit": 15,
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "pictureId": null,
+      "groupId": 1,
+      "questions": [],
+      "Sessions": [],
+      "complete": false
+    });
+
+    expect(() async => await qm.deleteQuiz(q),
+        throwsA(isA<ForbiddenRequestException>()));
+  });
+
   test('Create session', () async {
     final http.Client client = MockClient();
     final AuthModel am = AuthModel(
