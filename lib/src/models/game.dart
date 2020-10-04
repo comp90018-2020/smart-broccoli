@@ -1,4 +1,4 @@
-import 'package:fuzzy_broccoli/models.dart';
+import 'package:smart_broccoli/models.dart';
 
 enum GameSessionType { INDIVIDUAL, GROUP }
 enum GameSessionState { WAITING, ACTIVE, ENDED }
@@ -48,7 +48,9 @@ class GameSession {
           'isGroup': type == GameSessionType.GROUP,
           'state': state == GameSessionState.WAITING
               ? 'waiting'
-              : state == GameSessionState.ACTIVE ? 'active' : 'ended',
+              : state == GameSessionState.ACTIVE
+                  ? 'active'
+                  : 'ended',
           'quizId': quizId,
           'groupId': groupId,
           'subscribeGroup': groupAutoJoin,

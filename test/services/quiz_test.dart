@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fuzzy_broccoli/cache.dart';
-import 'package:fuzzy_broccoli/models.dart';
-import 'package:fuzzy_broccoli/server.dart';
+import 'package:smart_broccoli/cache.dart';
+import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/server.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 
@@ -253,6 +253,41 @@ main() async {
 
     expect(() async => await qm.getQuiz(44),
         throwsA(isA<ForbiddenRequestException>()));
+  });
+
+  test('Create quiz', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.post(QuizModel.QUIZ_URL,
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "active": true,
+              "timeLimit": 10,
+              "id": 1,
+              "groupId": 2,
+              "type": "self paced",
+              "title": "foo",
+              "updatedAt": "2020-01-01T00:00:00.000Z",
+              "createdAt": "2020-01-01T00:00:00.000Z",
+              "description": null,
+              "pictureId": null,
+              "questions": []
+            }),
+            201));
+
+    // user creates new quiz
+    Quiz quiz = Quiz("foo", 2, QuizType.SELF_PACED);
+
+    quiz = await qm.createQuiz(quiz);
+    expect(quiz, isA<Quiz>());
+    expect(quiz.id, 1);
+    expect(quiz.questions, isA<List<Question>>());
+    expect(quiz.questions.length, 0);
   });
 
   test('Delete quiz', () async {
