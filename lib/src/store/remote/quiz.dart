@@ -218,4 +218,20 @@ class QuizModel {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to get question picture: unknown error occurred');
   }
+
+  /// Start a new game [session].
+  /// Return a `GameSession` object constructed from the server's response.
+  ///
+  /// Usage:
+  /// [session] should be a newly constructed `Session` object. Only `quizId`,
+  /// `sessionType` and `groupAutoJoin` will be non-`null` in the object.
+  /// However, the returned object will not have `null` fields.
+  Future<GameSession> createSession(GameSession session) {}
+
+  /// Get the user's current session.
+  /// Return `null` if the user has no session.
+  Future<GameSession> getSession() {}
+
+  /// Join an extsing game session.
+  Future<GameSession> joinSession(String joinCode) {}
 }
