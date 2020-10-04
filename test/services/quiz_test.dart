@@ -69,7 +69,7 @@ main() async {
                 "createdAt": "2020-01-01T00:00:00.000Z",
                 "updatedAt": "2020-01-01T00:00:00.000Z",
                 "pictureId": null,
-                "groupId": 2,
+                "groupId": 3,
                 "Sessions": [
                   {
                     "id": 2,
@@ -118,7 +118,10 @@ main() async {
     expect(quizzes[2].timeLimit, 20);
     expect(quizzes[0].groupId, 2);
     expect(quizzes[1].groupId, 2);
-    expect(quizzes[2].groupId, 2);
+    expect(quizzes[2].groupId, 3);
+    expect(quizzes[0].role, GroupRole.OWNER);
+    expect(quizzes[1].role, GroupRole.OWNER);
+    expect(quizzes[2].role, GroupRole.MEMBER);
     expect(quizzes[0].sessions, isA<List<GameSession>>());
     expect(quizzes[1].sessions, isA<List<GameSession>>());
     expect(quizzes[2].sessions, isA<List<GameSession>>());
@@ -132,8 +135,8 @@ main() async {
     expect(quizzes[2].sessions[0].quizId, 3);
     expect(quizzes[2].sessions[1].quizId, 3);
     expect(quizzes[0].sessions[0].groupId, 2);
-    expect(quizzes[2].sessions[0].groupId, 2);
-    expect(quizzes[2].sessions[1].groupId, 2);
+    expect(quizzes[2].sessions[0].groupId, 3);
+    expect(quizzes[2].sessions[1].groupId, 3);
     expect(quizzes[0].sessions[0].type, GameSessionType.INDIVIDUAL);
     expect(quizzes[2].sessions[0].type, GameSessionType.INDIVIDUAL);
     expect(quizzes[2].sessions[1].type, GameSessionType.GROUP);
