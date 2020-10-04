@@ -1,4 +1,4 @@
-import { FindOptions } from "sequelize";
+import { FindOptions, Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
 import sequelize, {
     Quiz,
@@ -153,8 +153,21 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
                     {
                         // @ts-ignore
                         model: Session,
+                        where: { state: { [Op.or]: ["waiting", "ended"] } },
                         required: false,
-                        where: { state: "waiting" },
+                        include: [
+                            {
+                                // @ts-ignore
+                                model: User,
+                                required: false,
+                                attributes: ["id"],
+                                through: {
+                                    where: { state: "complete" },
+                                    attributes: ["state"],
+                                },
+                                where: { id: user.id },
+                            },
+                        ],
                     },
                 ],
             },
@@ -171,7 +184,18 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
             }).map((quiz) => {
                 return {
                     ...quiz.toJSON(),
+                    // Whether quiz has been completed by user
+                    complete:
+                        quiz.Sessions.find(
+                            (session) => session.Users.length > 0
+                        ) != null,
                     role: group.Users[0].UserGroup.role,
+                    Sessions: quiz.Sessions.map((session) => {
+                        // @ts-ignore
+                        const sessionJSON: any = session.toJSON();
+                        delete sessionJSON["Users"];
+                        return sessionJSON;
+                    }),
                 };
             });
         })
@@ -194,8 +218,21 @@ export const getQuiz = async (userId: number, quizId: number) => {
             {
                 // @ts-ignore
                 model: Session,
+                where: { state: { [Op.or]: ["waiting", "ended"] } },
                 required: false,
-                where: { state: "waiting" },
+                include: [
+                    {
+                        // @ts-ignore
+                        model: User,
+                        required: false,
+                        attributes: ["id"],
+                        through: {
+                            where: { state: "complete" },
+                            attributes: ["state"],
+                        },
+                        where: { id: userId },
+                    },
+                ],
             },
         ],
     });
@@ -230,6 +267,15 @@ export const getQuiz = async (userId: number, quizId: number) => {
 
     return {
         ...quiz.toJSON(),
+        Sessions: quiz.Sessions.map((session) => {
+            // @ts-ignore
+            const sessionJSON: any = session.toJSON();
+            delete sessionJSON["Users"];
+            return sessionJSON;
+        }),
+
+        // Whether quiz has been completed by user
+        complete: quiz.Sessions.find((session) => session.Users.length > 0),
         questions,
     };
 };

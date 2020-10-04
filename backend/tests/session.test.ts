@@ -8,6 +8,7 @@ import {
     registerAndLogin,
     createSession,
     joinSession,
+    joinGroup,
 } from "./helpers";
 import { jwtVerify } from "../helpers/jwt";
 
@@ -185,6 +186,15 @@ describe("Session", () => {
             isGroup: false,
         });
         await joinSession(userMember.id, session.session.code);
+        await joinGroup(userMember.id, { code: group.code });
+
+        const quizAllRes = await agent
+            .get(`/quiz`)
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(quizAllRes.status).to.equal(200);
+        expect(quizAllRes.body).to.have.lengthOf(1);
+        expect(quizAllRes.body[0]).to.have.property("Sessions");
+        expect(quizAllRes.body[0].Sessions).to.have.lengthOf(1);
 
         const quizRes = await agent
             .get(`/quiz/${quiz.id}`)
@@ -192,5 +202,12 @@ describe("Session", () => {
         expect(quizRes.status).to.equal(200);
         expect(quizRes.body).to.have.property("questions");
         expect(quizRes.body.questions).to.have.lengthOf(2);
+
+        const groupQuizRes = await agent
+            .get(`/group/${group.id}/quiz`)
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(groupQuizRes.body).to.have.lengthOf(1);
+        expect(groupQuizRes.body[0]).to.have.property("Sessions");
+        expect(groupQuizRes.body[0].Sessions).to.have.lengthOf(1);
     });
 });

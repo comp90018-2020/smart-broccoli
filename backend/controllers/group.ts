@@ -442,10 +442,40 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
             {
                 // @ts-ignore
                 model: Session,
-                where: { state: "waiting" },
+                where: { state: { [Op.or]: ["waiting", "ended"] } },
                 required: false,
+                include: [
+                    {
+                        // @ts-ignore
+                        model: User,
+                        required: false,
+                        attributes: ["id"],
+                        through: {
+                            where: { state: "complete" },
+                            attributes: ["state"],
+                        },
+                        where: { id: user.id },
+                    },
+                ],
             },
         ],
     });
+
+    return quizzes.map((quiz) => {
+        return {
+            ...quiz.toJSON(),
+            // Is quiz complete?
+            complete:
+                quiz.Sessions.find((session) => session.Users.length > 0) !=
+                null,
+            Sessions: quiz.Sessions.map((session) => {
+                // @ts-ignore
+                const sessionJSON: any = session.toJSON();
+                delete sessionJSON["Users"];
+                return sessionJSON;
+            }),
+        };
+    });
+
     return quizzes;
 };
