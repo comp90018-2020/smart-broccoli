@@ -171,6 +171,9 @@ export const createSession = async (userId: number, opts: any) => {
 
     // Get quiz
     const quiz = await Quiz.findByPk(quizId, { include: ["questions"] });
+    if (!quiz) {
+        throw new ErrorStatus("Quiz not found", 404);
+    }
 
     // Check group
     const userGroup = await UserGroup.findOne({
