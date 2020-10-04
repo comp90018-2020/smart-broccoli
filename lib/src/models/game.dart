@@ -59,3 +59,9 @@ class GameSession {
         'token': token
       };
 }
+
+/// Exception thrown when attempting to join another session when already in one
+class InSessionException implements Exception {}
+
+/// Exception thrown when attempting to join a session which cannot be found
+class SessionNotFoundException implements Exception {}

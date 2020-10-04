@@ -251,5 +251,21 @@ class QuizModel {
   }
 
   /// Join an extsing game session.
-  Future<GameSession> joinSession(String joinCode) {}
+  Future<GameSession> joinSession(String joinCode) async {
+    final http.Response response = await _http.post('$SESSION_URL/join',
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: json.encode(<String, dynamic>{"code": joinCode}));
+
+    if (response.statusCode == 200)
+      return GameSession.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 400 &&
+        json.decode(response.body)["message"] ==
+            "User is already participant of ongoing quiz session")
+      throw InSessionException();
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw SessionNotFoundException();
+    throw Exception('Unable to join session: unknown error occurred');
+  }
 }
