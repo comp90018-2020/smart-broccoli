@@ -49,6 +49,7 @@ class _lobby extends State<lobby> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: Container(
           child: new Column(
         children: <Widget>[

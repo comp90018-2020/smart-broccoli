@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fuzzy_broccoli/theme.dart';
 import 'src/QuizTaker/quizMaker.dart';
-import 'src/Theme/theme.dart';
+
 
 
 void main() => runApp(MyApp());
@@ -10,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: theme.getThemeData(),
+      theme: FuzzyBroccoliTheme().themeData,
       debugShowCheckedModeBanner: false,
       title: 'Test Flutter',
       home: quizMaker(),

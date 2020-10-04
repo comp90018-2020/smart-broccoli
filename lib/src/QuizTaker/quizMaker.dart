@@ -25,7 +25,9 @@ class _quizMakerState extends State<quizMaker> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(body: _buildTextFields());
+    return new Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.background,
+        body: _buildTextFields());
   }
 
   Widget _buildTextFields() {
@@ -36,14 +38,6 @@ class _quizMakerState extends State<quizMaker> {
           // Title "UNI QUIZ"
           SizedBox(height: 50),
           _SwitchButton(),
-          // _buildTextFields(),
-          // Buttons for navigation
-          // SizedBox(height: 50),
-          // _buildLiveQuiz(),
-          // SizedBox(height: 50),
-          //_buildJoinByPinButton(),
-          //SizedBox(height: 50),
-          // _buildQuizList(),
         ],
       ),
     ));
@@ -84,7 +78,15 @@ class _quizMakerState extends State<quizMaker> {
             ),
             SizedBox(height: 50),
             new Container(
-              child: _buildQuizList(),
+              height: 200,
+              child: TabBarView(
+                children: [
+                  _buildQuizList(),
+                  _buildQuizList(),
+                  _buildQuizList(),
+                ],
+              ),
+             // child: _buildQuizList(),
             ),
 
             // Tab contents
@@ -94,17 +96,18 @@ class _quizMakerState extends State<quizMaker> {
 
   Widget _buildLiveQuiz() {
     return new Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.fromLTRB(150, 16, 150, 0),
         child: new Column(children: <Widget>[
           new Container(
-            child: new TextField(
+            child: TextFormField(
               controller: _pinFilter,
               decoration: new InputDecoration(
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                  labelText: 'Name'),
-              obscureText: false,
+                labelText: 'Pin',
+                // prefixIcon: Icon(Icons.people),
+              ),
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
+              onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
             ),
           ),
         ]));
@@ -134,13 +137,18 @@ class _quizMakerState extends State<quizMaker> {
 
   Widget _buildQuizList() {
     return Container(
-        // margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+        // margin: EdgeInsets.fromLTRB(20,0,),
         height: 200.0,
-        child: ListView.builder(
+        child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: items.length,
           itemBuilder: (context, index) {
             return _listTile();
+          },
+          separatorBuilder: (context, index) {
+            color:
+            Colors.white;
+            return Divider(indent: 10);
           },
         ));
   }
