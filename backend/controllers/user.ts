@@ -1,7 +1,15 @@
 import { Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
 import sequelize, { User, UserGroup, Picture } from "../models";
-import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { deletePicture, insertPicture } from "./picture";
+
+/**
+ * Get profile of current user.
+ * @param userId
+ */
+export const getProfile = async (userId: number) => {
+    return await User.findByPk(userId);
+};
 
 /**
  * Update user profile information.
@@ -45,7 +53,9 @@ export const updateProfile = async (userId: number, info: any) => {
  * @param file File attributes
  */
 export const updateProfilePicture = async (userId: number, file: any) => {
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+        attributes: ["id", "pictureId"],
+    });
 
     const transaction = await sequelize.transaction();
 
@@ -72,8 +82,9 @@ export const updateProfilePicture = async (userId: number, file: any) => {
  * Authorization is handled by caller.
  * @param pictureId ID of picture
  */
-export const getProfilePicture = async (pictureId: number) => {
-    const picture = await getPictureById(pictureId);
+export const getProfilePicture = async (userId: number) => {
+    const user = await User.findByPk(userId, { attributes: ["pictureId"] });
+    const picture = await user.getPicture();
     if (!picture) {
         throw new ErrorStatus("Picture not found", 404);
     }
@@ -85,7 +96,10 @@ export const getProfilePicture = async (pictureId: number) => {
  * Authorization handled by caller.
  * @param pictureId ID of picture
  */
-export const deleteProfilePicture = deletePicture;
+export const deleteProfilePicture = async (userId: number) => {
+    const user = await User.findByPk(userId, { attributes: ["pictureId"] });
+    return await deletePicture(user.pictureId);
+};
 
 /**
  * Can current user access target user's profile?

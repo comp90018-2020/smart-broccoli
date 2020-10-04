@@ -31,8 +31,15 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
 
         // Lookup
         const tokenLookup = await Token.findOne({
-            where: { token: token },
-            include: ["User"],
+            where: { token, scope: "auth" },
+            attributes: ["revoked"],
+            include: [
+                {
+                    // @ts-ignore
+                    model: User,
+                    attributes: ["id", "role"],
+                },
+            ],
         });
         if (!tokenLookup || tokenLookup.revoked) {
             throw new ErrorStatus("Token revoked or missing", 403);

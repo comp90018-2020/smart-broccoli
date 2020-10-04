@@ -129,7 +129,10 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
  * Get all quiz that user has access to.
  * @param User
  */
-export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
+export const getAllQuiz = async (
+    userId: number,
+    opts: { role?: string } = {}
+) => {
     // Unset if all
     if (opts.role === "all") {
         opts.role = undefined;
@@ -141,7 +144,7 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
             {
                 // @ts-ignore
                 model: User,
-                where: { id: user.id },
+                where: { id: userId },
                 through: {
                     where: opts.role ? { role: opts.role } : undefined,
                     attributes: ["role"],
@@ -164,7 +167,7 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
                                 model: User,
                                 required: false,
                                 attributes: ["id"],
-                                where: { id: user.id },
+                                where: { id: userId },
                                 through: { attributes: ["state"] },
                             },
                         ],

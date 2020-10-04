@@ -1,6 +1,5 @@
 import { Op, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import Sequelize from "sequelize";
 import sequelize, { Group, Session, User, UserGroup } from "../models";
 
 /**
@@ -8,28 +7,47 @@ import sequelize, { Group, Session, User, UserGroup } from "../models";
  * @param user User object
  * @param groupId ID of target group
  */
-const getGroupAndRole = async (user: User, groupId: number, role: string) => {
-    const groupQuery = await user.getGroups({
-        where: {
-            id: groupId,
-            [Op.or]:
-                role === "owner"
-                    ? // Is owner
-                      [{ "$UserGroup.role$": "owner" }]
-                    : // Owners are members also
-                      [
-                          { "$UserGroup.role$": "owner" },
-                          { "$UserGroup.role$": "member" },
-                      ],
-        },
+const getGroupAndVerifyRole = async (
+    userId: number,
+    groupId: number,
+    role: string
+) => {
+    const group = await Group.findOne({
+        where: { id: groupId },
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                required: true,
+                attributes: [
+                    'id'
+                ],
+                // User is member
+                where: { id: userId },
+                through: {
+                    attributes: ['role'],
+                    where:
+                        role === "owner"
+                            ? // Owner must be owner
+                              { role: "owner" }
+                            : // Owners can be members
+                              {
+                                  [Op.or]: [
+                                      { role: "owner" },
+                                      { role: "member" },
+                                  ],
+                              },
+                },
+            },
+        ],
     });
-    if (groupQuery.length === 0) {
+    if (!group) {
         throw new ErrorStatus(
             "User does not have privilege to access group resource",
             403
         );
     }
-    return { group: groupQuery[0], role: groupQuery[0].UserGroup.role };
+    return { group, role: group.Users[0].UserGroup.role };
 };
 
 /**
@@ -99,32 +117,30 @@ export const getGroups = async (user: User) => {
  * @param userId
  * @param groupId
  */
-export const getGroup = async (userId: number, groupId: number) => {
+export const getGroup = async (user: User, groupId: number) => {
     // Get group
-    const group = await Group.findByPk(groupId, {
+    const groupQuery = await user.getGroups({ where: { id: groupId },
         include: [
             {
                 // @ts-ignore Typing errors due to model
                 model: User,
-                where: {
-                    [Op.or]: [{ id: userId }],
-                },
-                through: { where: { role: "owner" } },
                 attributes: ["id", "name"],
                 required: true,
-            },
-        ],
+                through: { where: { role: 'owner' } }
+            }
+        ]
     });
-    if (!group) {
+    if (groupQuery.length === 0) {
         throw new ErrorStatus("Group cannot be accessed", 404);
     }
 
     // Get role
+    const group = groupQuery[0];
     const groupJSON: any = group.toJSON();
     delete groupJSON["Users"];
     return {
         ...groupJSON,
-        role: group.Users.find((u) => u.id === userId).UserGroup.role,
+        role: group.Users.find((u) => u.id === user.id).UserGroup.role,
         name: group.defaultGroup
             ? group.Users.find((u) => u.UserGroup.role === "owner").name
             : group.name,
@@ -317,8 +333,8 @@ const regenerateCodeHelper = async (
  * @param user User object
  * @param groupId
  */
-export const regenerateCode = async (user: User, groupId: number) => {
-    const { group } = await getGroupAndRole(user, groupId, "owner");
+export const regenerateCode = async (userId: number, groupId: number) => {
+    const { group } = await getGroupAndVerifyRole(userId, groupId, "owner");
     const groupUpdated = await regenerateCodeHelper(group);
     const groupJSON: any = groupUpdated.toJSON();
     groupJSON.role = "owner";
@@ -383,11 +399,11 @@ export const deleteMember = async (
  * @param group
  */
 export const updateGroup = async (
-    user: User,
+    userId: number,
     groupId: number,
     name: string
 ) => {
-    const { group } = await getGroupAndRole(user, groupId, "owner");
+    const { group } = await getGroupAndVerifyRole(userId, groupId, "owner");
     if (name && !group.defaultGroup) {
         group.name = name;
     }
@@ -432,9 +448,13 @@ export const deleteGroup = async (userId: number, groupId: number) => {
  * Get quizzes of group.
  * @param group Group that user is member of
  */
-export const getGroupQuizzes = async (user: User, groupId: number) => {
+export const getGroupQuizzes = async (userId: number, groupId: number) => {
     // Get group and role
-    const { group, role } = await getGroupAndRole(user, groupId, "member");
+    const { group, role } = await getGroupAndVerifyRole(
+        userId,
+        groupId,
+        "member"
+    );
 
     // Only active quizzes for members
     const quizzes = await group.getQuizzes({
@@ -450,8 +470,8 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
                         model: User,
                         required: false,
                         attributes: ["id"],
-                        where: { id: user.id },
                         through: { attributes: ["state"] },
+                        where: { id: userId },
                     },
                 ],
             },

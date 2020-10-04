@@ -1,9 +1,10 @@
 import Sequelize, {
     BelongsToManyGetAssociationsMixin,
+    HasOneGetAssociationMixin,
     Optional,
 } from "sequelize";
 import crypto from "crypto";
-import { Group, Session, SessionParticipant, UserGroup } from "models";
+import { Group, SessionParticipant, UserGroup } from "models";
 import Picture from "./picture";
 
 // Represents users
@@ -68,6 +69,7 @@ class User
     public Picture?: Picture;
 
     public getGroups!: BelongsToManyGetAssociationsMixin<Group>;
+    public getPicture!: HasOneGetAssociationMixin<Picture>;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {

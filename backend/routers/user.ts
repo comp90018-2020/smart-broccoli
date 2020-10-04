@@ -12,6 +12,7 @@ import {
     getUserProfile,
     getUserProfilePicture,
     deleteProfilePicture,
+    getProfile,
 } from "../controllers/user";
 
 /**
@@ -153,7 +154,7 @@ router.put(
 router.get("/profile/picture", async (req: Request, res, next) => {
     try {
         // Get picture
-        const picture = await getProfilePicture(req.user.pictureId);
+        const picture = await getProfilePicture(req.user.id);
 
         // Set content header
         res.setHeader("Content-Type", "image/png");
@@ -178,7 +179,7 @@ router.get("/profile/picture", async (req: Request, res, next) => {
  */
 router.delete("/profile/picture", async (req: Request, res, next) => {
     try {
-        await deleteProfilePicture(req.user.pictureId);
+        await deleteProfilePicture(req.user.id);
         return res.sendStatus(204);
     } catch (err) {
         return next(err);
@@ -200,9 +201,16 @@ router.delete("/profile/picture", async (req: Request, res, next) => {
  *             schema:
  *               $ref: '#/components/schemas/User'
  */
-router.get("/profile", (req: Request, res) => {
-    return res.json(req.user);
-});
+router.get(
+    "/profile",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            return res.json(await getProfile(req.user.id));
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
 
 /**
  * @swagger

@@ -130,7 +130,7 @@ router.patch(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const group = await updateGroup(
-                req.user,
+                req.user.id,
                 Number(req.params.groupId),
                 req.body.name
             );
@@ -201,7 +201,7 @@ router.get(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const group = await getGroup(
-                req.user.id,
+                req.user,
                 Number(req.params.groupId)
             );
             return res.json(group);
@@ -242,7 +242,7 @@ router.get(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const quizzes = await getGroupQuizzes(
-                req.user,
+                req.user.id,
                 Number(req.params.groupId)
             );
             return res.json(quizzes);
@@ -327,7 +327,7 @@ router.post(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const group = await regenerateCode(
-                req.user,
+                req.user.id,
                 Number(req.params.groupId)
             );
             return res.json(group);

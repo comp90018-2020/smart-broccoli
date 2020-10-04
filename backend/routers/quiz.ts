@@ -194,7 +194,7 @@ router.get(
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            return res.json(await getAllQuiz(req.user, req.query));
+            return res.json(await getAllQuiz(req.user.id, req.query));
         } catch (err) {
             return next(err);
         }
