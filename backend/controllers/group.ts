@@ -73,7 +73,7 @@ export const getGroups = async (user: User) => {
             {
                 //@ts-ignore
                 model: User,
-                where: { "$Users.UserGroup.role$": "owner" },
+                through: { where: { role: "owner" } },
                 attributes: ["name"],
                 required: true,
             },
@@ -106,11 +106,9 @@ export const getGroup = async (userId: number, groupId: number) => {
                 // @ts-ignore Typing errors due to model
                 model: User,
                 where: {
-                    [Op.or]: [
-                        { id: userId },
-                        { "$Users.UserGroup.role$": "owner" },
-                    ],
+                    [Op.or]: [{ id: userId }],
                 },
+                through: { where: { role: "owner" } },
                 attributes: ["id", "name"],
                 required: true,
             },

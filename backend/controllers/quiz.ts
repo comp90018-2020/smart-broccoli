@@ -1,6 +1,13 @@
 import { FindOptions } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Quiz, Question, UserGroup, User, Session } from "../models";
+import sequelize, {
+    Quiz,
+    Question,
+    UserGroup,
+    User,
+    Session,
+    Group,
+} from "../models";
 import { processQuestions } from "./question";
 import { deletePicture, getPictureById, insertPicture } from "./picture";
 import { assertGroupOwnership } from "./group";
@@ -129,9 +136,15 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
     }
 
     // Get quizzes of user's groups
-    const groups = await user.getGroups({
-        where: opts.role ? { "$UserGroup.role$": opts.role } : undefined,
+    const groups = await Group.findAll({
         include: [
+            {
+                // @ts-ignore
+                model: User,
+                where: { id: user.id },
+                through: { where: opts.role ? { role: opts.role } : undefined },
+                required: true,
+            },
             {
                 // @ts-ignore
                 model: Quiz,
@@ -152,9 +165,14 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
         .map((group) => {
             return group.Quizzes.filter((quiz) => {
                 // Members are not allowed to get non active quizzes
-                return !(!quiz.active && group.UserGroup.role === "member");
+                return !(
+                    !quiz.active && group.Users[0].UserGroup.role === "member"
+                );
             }).map((quiz) => {
-                return { ...quiz.toJSON(), role: group.UserGroup.role };
+                return {
+                    ...quiz.toJSON(),
+                    role: group.Users[0].UserGroup.role,
+                };
             });
         })
         .flat();
