@@ -211,7 +211,7 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
                     complete:
                         quiz.Sessions.find(
                             (session) =>
-                                session.Users.length > 1 &&
+                                session.Users.length > 0 &&
                                 session.Users[0].SessionParticipant.state ===
                                     "complete"
                         ) != null,
@@ -317,7 +317,7 @@ export const getQuiz = async (userId: number, quizId: number) => {
         complete:
             quiz.Sessions.find(
                 (session) =>
-                    session.Users.length > 1 &&
+                    session.Users.length > 0 &&
                     session.Users[0].SessionParticipant.state === "complete"
             ) != null,
         Sessions: quiz.Sessions.map((session) => {

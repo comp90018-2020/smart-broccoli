@@ -489,7 +489,7 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
             complete:
                 quiz.Sessions.find(
                     (session) =>
-                        session.Users.length > 1 &&
+                        session.Users.length > 0 &&
                         session.Users[0].SessionParticipant.state === "complete"
                 ) != null,
             Sessions: quiz.Sessions.map((session) => {
