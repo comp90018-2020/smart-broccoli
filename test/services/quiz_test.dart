@@ -151,6 +151,107 @@ main() async {
     expect(quizzes[2].sessions[1].groupAutoJoin, false);
   });
 
+  test('Get quiz', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.get('${QuizModel.QUIZ_URL}/3', headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "id": 3,
+              "title": "foo",
+              "active": false,
+              "description": "lorem ipsum",
+              "type": "self paced",
+              "timeLimit": 15,
+              "createdAt": "2020-01-01T00:00:00.000Z",
+              "updatedAt": "2020-01-01T00:00:00.000Z",
+              "pictureId": null,
+              "groupId": 1,
+              "questions": [
+                {
+                  "id": 2,
+                  "text": "blah",
+                  "type": "choice",
+                  "tf": null,
+                  "options": [
+                    {"text": "abc", "correct": false},
+                    {"text": "xyz", "correct": true}
+                  ],
+                  "createdAt": "2020-01-01T00:00:00.000Z",
+                  "updatedAt": "2020-01-01T00:00:00.000Z",
+                  "quizId": 3,
+                  "pictureId": null
+                },
+                {
+                  "id": 3,
+                  "text": "wowee",
+                  "type": "truefalse",
+                  "tf": false,
+                  "options": null,
+                  "createdAt": "2020-01-01T00:00:00.000Z",
+                  "updatedAt": "2020-01-01T00:00:00.000Z",
+                  "quizId": 3,
+                  "pictureId": null
+                }
+              ],
+              "Sessions": [],
+              "complete": false
+            }),
+            200));
+
+    final quiz = await qm.getQuiz(3);
+    expect(quiz, isA<Quiz>());
+    expect(quiz.id, 3);
+    expect(quiz.title, "foo");
+    expect(quiz.isActive, false);
+    expect(quiz.description, "lorem ipsum");
+    expect(quiz.type, QuizType.SELF_PACED);
+    expect(quiz.timeLimit, 15);
+    expect(quiz.groupId, 1);
+    expect(quiz.questions, isA<List<Question>>());
+    expect(quiz.questions.length, 2);
+    expect(quiz.questions[0], isA<MCQuestion>());
+    expect(quiz.questions[1], isA<TFQuestion>());
+    expect(
+        (quiz.questions[0] as MCQuestion).options, isA<List<QuestionOption>>());
+    expect((quiz.questions[0] as MCQuestion).options.length, 2);
+    expect((quiz.questions[1] as TFQuestion).answer, false);
+    expect(quiz.questions[0].text, "blah");
+    expect(quiz.questions[1].text, "wowee");
+  });
+
+  test('Get quiz (not found)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.get('${QuizModel.QUIZ_URL}/44', headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response("", 404));
+
+    expect(() async => await qm.getQuiz(44),
+        throwsA(isA<QuizNotFoundException>()));
+  });
+
+  test('Get quiz (not accessible to user)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.get('${QuizModel.QUIZ_URL}/44', headers: anyNamed("headers")))
+        .thenAnswer((_) async => http.Response("", 403));
+
+    expect(() async => await qm.getQuiz(44),
+        throwsA(isA<ForbiddenRequestException>()));
+  });
+
   test('Create session', () async {
     final http.Client client = MockClient();
     final AuthModel am = AuthModel(
