@@ -476,6 +476,4 @@ export const getGroupQuizzes = async (user: User, groupId: number) => {
             }),
         };
     });
-
-    return quizzes;
 };
