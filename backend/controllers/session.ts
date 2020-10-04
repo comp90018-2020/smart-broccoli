@@ -286,8 +286,10 @@ export const joinSession = async (userId: number, code: string) => {
     }
 
     // See state
-    if (session.state === "inactive" || session.state === "active") {
-        throw new ErrorStatus("Session is already active", 400);
+    if (session.state !== "waiting") {
+        throw new ErrorStatus("Session cannot be joined", 400, {
+            state: session.state,
+        });
     }
 
     // Create association
