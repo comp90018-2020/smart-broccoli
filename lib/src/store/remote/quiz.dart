@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:smart_broccoli/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 
 import 'api_base.dart';
 import 'auth.dart';
@@ -14,15 +15,20 @@ class QuizModel {
   /// AuthModel object used to obtain token for requests
   AuthModel _authModel;
 
+  /// HTTP client (mock client can be specified for testing)
+  http.Client _http;
+
   /// Constructor for external use
-  QuizModel(this._authModel);
+  QuizModel(this._authModel, {http.Client mocker}) {
+    _http = mocker != null ? mocker : IOClient();
+  }
 
   /// Return a list of all quizzes created by the authenticated user.
   /// Caveat: The `questions` field of each quiz is NOT set (i.e. is `null`).
   /// `getQuiz` must be invoked to retrieve the list of questions associated
   /// with a quiz.
   Future<List<Quiz>> getQuizzes() async {
-    http.Response response = await http.get(QUIZ_URL,
+    http.Response response = await _http.get(QUIZ_URL,
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200)
@@ -37,7 +43,7 @@ class QuizModel {
 
   /// Return the quiz with specified [id].
   Future<Quiz> getQuiz(int id) async {
-    http.Response response = await http.get('$QUIZ_URL/$id',
+    http.Response response = await _http.get('$QUIZ_URL/$id',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 200)
@@ -62,7 +68,7 @@ class QuizModel {
     Map<String, dynamic> quizJson = quiz.toJson();
     quizJson.removeWhere((key, value) => value == null);
 
-    http.Response response = await http.patch('$QUIZ_URL/${quiz.id}',
+    http.Response response = await _http.patch('$QUIZ_URL/${quiz.id}',
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(quizJson));
 
@@ -86,7 +92,7 @@ class QuizModel {
     Map<String, dynamic> quizJson = quiz.toJson();
     quizJson.removeWhere((key, value) => value == null);
 
-    http.Response response = await http.post(QUIZ_URL,
+    http.Response response = await _http.post(QUIZ_URL,
         headers: ApiBase.headers(authToken: _authModel.token),
         body: jsonEncode(quizJson));
 
@@ -103,7 +109,7 @@ class QuizModel {
   /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
   Future<void> deleteQuiz(Quiz quiz) async {
-    http.Response response = await http.delete('$QUIZ_URL/${quiz.id}',
+    http.Response response = await _http.delete('$QUIZ_URL/${quiz.id}',
         headers: ApiBase.headers(authToken: _authModel.token));
 
     if (response.statusCode == 204) return;
@@ -119,7 +125,7 @@ class QuizModel {
   /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
   Future<Uint8List> getQuizPicture(Quiz quiz) async {
-    final http.Response response = await http.get(
+    final http.Response response = await _http.get(
         '$QUIZ_URL/${quiz.id}/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
@@ -154,7 +160,7 @@ class QuizModel {
   /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
   Future<void> deleteQuizPicture(Quiz quiz) async {
-    final http.Response response = await http.delete(
+    final http.Response response = await _http.delete(
         '$QUIZ_URL/${quiz.id}/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
@@ -171,7 +177,7 @@ class QuizModel {
   /// [question] should be in the list `quiz.questions` where `quiz` is a `Quiz`
   /// object obtained by `getQuiz` or `getQuizzes`.
   Future<Uint8List> getQuestionPicture(Question question) async {
-    final http.Response response = await http.get(
+    final http.Response response = await _http.get(
         '$QUIZ_URL/${question.quiz.id}/question/${question.id}/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
@@ -209,7 +215,7 @@ class QuizModel {
   /// [question] should be in the list `quiz.questions` where `quiz` is a `Quiz`
   /// object obtained by `getQuiz` or `getQuizzes`.
   Future<void> deleteQuestionPicture(Question question) async {
-    final http.Response response = await http.delete(
+    final http.Response response = await _http.delete(
         '$QUIZ_URL/${question.quiz.id}/question/${question.id}/picture',
         headers: ApiBase.headers(authToken: _authModel.token));
 
