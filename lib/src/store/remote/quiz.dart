@@ -11,6 +11,7 @@ import 'auth.dart';
 /// Class for making quiz management requests
 class QuizModel {
   static const QUIZ_URL = ApiBase.BASE_URL + '/quiz';
+  static const SESSION_URL = ApiBase.BASE_URL + '/session';
 
   /// AuthModel object used to obtain token for requests
   AuthModel _authModel;
@@ -236,7 +237,18 @@ class QuizModel {
 
   /// Get the user's current session.
   /// Return `null` if the user has no session.
-  Future<GameSession> getSession() {}
+  Future<GameSession> getSession() async {
+    final http.Response response = await _http.get(SESSION_URL,
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200)
+      return GameSession.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 204) return null;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get session: unknown error occurred');
+  }
 
   /// Join an extsing game session.
   Future<GameSession> joinSession(String joinCode) {}
