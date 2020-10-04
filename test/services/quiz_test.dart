@@ -10,6 +10,141 @@ import 'package:mockito/mockito.dart';
 class MockClient extends Mock implements http.Client {}
 
 main() async {
+  test('Create session', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.post(QuizModel.SESSION_URL,
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "session": <String, dynamic>{
+                "id": 1,
+                "isGroup": true,
+                "type": "live",
+                "code": "878838",
+                "state": "waiting",
+                "subscribeGroup": false,
+                "createdAt": "2020-01-01T00:00:00.000Z",
+                "updatedAt": "2020-01-01T00:00:00.000Z",
+                "quizId": 2,
+                "groupId": 3,
+                "Group": <String, dynamic>{
+                  "id": 3,
+                  "name": "foo",
+                  "defaultGroup": false
+                }
+              },
+              "token": "thisisagametoken123456789"
+            }),
+            200));
+
+    // pretend user obtained `q` from `getQuizzes` or `getQuiz`
+    Quiz q = Quiz.fromJson(<String, dynamic>{
+      "id": 2,
+      "title": "foo",
+      "active": true,
+      "description": null,
+      "type": "live",
+      "timeLimit": 10,
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "pictureId": null,
+      "groupId": 3,
+      "complete": false,
+      "role": "owner"
+    });
+
+    // user wants to create a session
+    GameSession session = GameSession(q, GameSessionType.INDIVIDUAL);
+
+    session = await qm.createSession(session);
+    expect(session, isA<GameSession>());
+    expect(session.id, 1);
+    expect(session.quizId, 2);
+    expect(session.groupId, 3);
+    expect(session.type, GameSessionType.GROUP);
+    expect(session.state, GameSessionState.WAITING);
+    expect(session.joinCode, "878838");
+    expect(session.token, "thisisagametoken123456789");
+    expect(session.groupAutoJoin, false);
+  });
+
+  test('Create session (user not owner of quiz)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.post(QuizModel.SESSION_URL,
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(
+                <String, dynamic>{"message": "User cannot access quiz"}),
+            403));
+
+    // pretend user obtained `q` from `getQuizzes` or `getQuiz`
+    Quiz q = Quiz.fromJson(<String, dynamic>{
+      "id": 2,
+      "title": "foo",
+      "active": true,
+      "description": null,
+      "type": "live",
+      "timeLimit": 10,
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "pictureId": null,
+      "groupId": 3,
+      "complete": false,
+      "role": "owner"
+    });
+
+    // user wants to create a session
+    GameSession session = GameSession(q, GameSessionType.INDIVIDUAL);
+
+    expect(() async => await qm.createSession(session),
+        throwsA(isA<ForbiddenRequestException>()));
+  });
+
+  test('Create session (quiz not found)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.post(QuizModel.SESSION_URL,
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{"message": "Quiz not found"}), 404));
+
+    // pretend user obtained `q` from `getQuizzes` or `getQuiz`
+    Quiz q = Quiz.fromJson(<String, dynamic>{
+      "id": 2,
+      "title": "foo",
+      "active": true,
+      "description": null,
+      "type": "live",
+      "timeLimit": 10,
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "pictureId": null,
+      "groupId": 3,
+      "complete": false,
+      "role": "owner"
+    });
+
+    // user wants to create a session
+    GameSession session = GameSession(q, GameSessionType.INDIVIDUAL);
+
+    expect(() async => await qm.createSession(session),
+        throwsA(isA<QuizNotFoundException>()));
+  });
+
   test('Get session', () async {
     final http.Client client = MockClient();
     final AuthModel am = AuthModel(

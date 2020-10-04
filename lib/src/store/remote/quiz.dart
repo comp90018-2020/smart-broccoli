@@ -233,7 +233,27 @@ class QuizModel {
   /// [session] should be a newly constructed `Session` object. Only `quizId`,
   /// `sessionType` and `groupAutoJoin` will be non-`null` in the object.
   /// However, the returned object will not have `null` fields.
-  Future<GameSession> createSession(GameSession session) {}
+  Future<GameSession> createSession(GameSession session) async {
+    // serialise session object and remove null values
+    Map<String, dynamic> sessionJson = session.toJson();
+    sessionJson.removeWhere((key, value) => value == null);
+
+    final http.Response response = await _http.post(SESSION_URL,
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: json.encode(sessionJson));
+
+    if (response.statusCode == 200)
+      return GameSession.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 400 &&
+        json.decode(response.body)["message"] ==
+            "User is already participant of ongoing quiz session")
+      throw InSessionException();
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
+    throw Exception('Unable to create session: unknown error occurred');
+  }
 
   /// Get the user's current session.
   /// Return `null` if the user has no session.
