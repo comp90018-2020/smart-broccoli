@@ -10,7 +10,7 @@ import sequelize, { Group, Session, User, UserGroup } from "../models";
 export const assertGroupOwnership = async (userId: number, groupId: number) => {
     // Check whether caller is owner
     const isOwner = await UserGroup.count({
-        where: { userId: userId, groupId, role: "owner" },
+        where: { userId, groupId, role: "owner" },
     });
     if (!isOwner) {
         throw new ErrorStatus("Cannot perform group action", 403);
@@ -32,19 +32,11 @@ export const createDefaultGroup = async (userId: number) => {
 export const getGroups = async (user: User) => {
     // Get groups
     const groups = await user.getGroups({
-        attributes: [
-            "id",
-            "name",
-            "createdAt",
-            "updatedAt",
-            "defaultGroup",
-            "code",
-        ],
         include: [
             {
                 //@ts-ignore
                 model: User,
-                through: { where: { role: "owner" } },
+                through: { where: { role: "owner" }, attributes: ["role"] },
                 attributes: ["name"],
                 required: true,
             },
@@ -79,7 +71,7 @@ export const getGroup = async (user: User, groupId: number) => {
                 model: User,
                 attributes: ["id", "name"],
                 required: true,
-                through: { where: { role: "owner" } },
+                through: { where: { role: "owner" }, attributes: ["role"] },
             },
         ],
     });
@@ -93,7 +85,7 @@ export const getGroup = async (user: User, groupId: number) => {
     delete groupJSON["Users"];
     return {
         ...groupJSON,
-        role: group.Users.find((u) => u.id === user.id).UserGroup.role,
+        role: group.UserGroup.role,
         name: group.defaultGroup
             ? group.Users.find((u) => u.UserGroup.role === "owner").name
             : group.name,
@@ -108,11 +100,13 @@ export const getGroup = async (user: User, groupId: number) => {
 export const getGroupMembers = async (userId: number, groupId: number) => {
     // Get group and associated users
     const group = await Group.findByPk(groupId, {
+        attributes: ["id"],
         // @ts-ignore
         include: {
             model: User,
             required: true,
             attributes: ["id", "updatedAt", "name"],
+            through: { attributes: ["role"] },
         },
     });
     if (!group) {
@@ -123,9 +117,9 @@ export const getGroupMembers = async (userId: number, groupId: number) => {
     }
 
     return group.Users.map((user) => {
-        // @ts-ignore
-        const { UserGroup, ...rest } = user.toJSON();
-        return { ...rest, role: user.UserGroup.role };
+        const userJSON: any = user.toJSON();
+        delete userJSON["UserGroup"];
+        return { ...userJSON, role: user.UserGroup.role };
     });
 };
 
@@ -213,6 +207,7 @@ export const joinGroup = async (
                 // https://sequelize.org/master/manual/typescript.html
                 model: User,
                 where: { id: userId },
+                through: { attributes: [] },
                 required: false,
             },
         ],
@@ -289,12 +284,12 @@ const regenerateCodeHelper = async (
 export const regenerateCode = async (userId: number, groupId: number) => {
     // Find group
     const group = await Group.findByPk(groupId, {
-        required: true,
         attributes: ["id", "code"],
         include: [
             {
                 // @ts-ignore
                 model: User,
+                required: true,
                 attributes: [],
                 through: { where: { role: "owner" } },
                 where: { id: userId },
