@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class FuzzyBroccoliColourScheme extends ColorScheme {
@@ -10,12 +9,14 @@ class FuzzyBroccoliColourScheme extends ColorScheme {
 
   FuzzyBroccoliColourScheme()
       : super.light(
-    background: Color(0xFF4CAF50),
-    onBackground: Colors.white,
-    primary: Color(0xFFFEC12D),
-    secondary: Color(0xFF654C12),
-    secondaryVariant: Color(0xFFAEAEAE),
-  );
+
+          background: Color(0xFF4CAF50),
+          onBackground: Colors.white,
+          primary: Color(0xFFFEC12D),
+          secondary: Color(0xFF654C12),
+          secondaryVariant: Color(0xFFAEAEAE),
+        );
+
 }
 
 /// Singleton class holding the app's `ThemeData` object
@@ -64,27 +65,28 @@ class FuzzyBroccoliTheme {
 class LogoContainer extends Container {
   LogoContainer({@required Widget child})
       : super(
-    height: 200,
-    color: FuzzyBroccoliColourScheme.logoContainerBackground,
-    child: child,
-  );
+          height: 200,
+          color: FuzzyBroccoliColourScheme.logoContainerBackground,
+          child: child,
+        );
 }
 
 /// Widget to create sliding-pill-style tabs
 class TabHolder extends FractionallySizedBox {
   TabHolder(
       {@required List<Tab> tabs,
-        double widthFactor = 0.5,
-        margin: EdgeInsetsGeometry})
+      double widthFactor = 0.5,
+      margin: EdgeInsetsGeometry})
       : super(
-    widthFactor: widthFactor,
-    child: Container(
-      margin: margin,
-      decoration: const BoxDecoration(
-        color: FuzzyBroccoliColourScheme.tabHolderBackground,
-        borderRadius: BorderRadius.all(Radius.circular(25)),
-      ),
-      child: TabBar(tabs: tabs),
-    ),
-  );
+          widthFactor: widthFactor,
+          child: Container(
+            margin: margin,
+            decoration: const BoxDecoration(
+              color: FuzzyBroccoliColourScheme.tabHolderBackground,
+              borderRadius: BorderRadius.all(Radius.circular(25)),
+            ),
+            child: TabBar(tabs: tabs),
+          ),
+        );
 }
+

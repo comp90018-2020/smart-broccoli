@@ -22,7 +22,7 @@
     "sequelize": "^6.3.5",
     "sharp": "0.26.1",
     "swagger-jsdoc": "4.2",
-    "swagger-ui-dist": "^3.34.0"
+    "swagger-ui-dist": "^3.35.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",
@@ -38,9 +38,9 @@
     "@types/swagger-jsdoc": "^3.0.2",
     "@types/swagger-ui-dist": "^3.30.0",
     "@types/validator": "^13.1.0",
-    "@typescript-eslint/eslint-plugin": "^4.2.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^4.2.0",
-    "@typescript-eslint/parser": "^4.2.0",
+    "@typescript-eslint/eslint-plugin": "^4.3.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^4.3.0",
+    "@typescript-eslint/parser": "^4.3.0",
     "chai": "^4.2.0",
     "dotenv": "^8.2.0",
     "mocha": "^8.1.3",

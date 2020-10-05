@@ -3,9 +3,9 @@ import 'package:fuzzy_broccoli/src/QuizTaker/quizQuestion.dart';
 
 import 'lobby.dart';
 
-class quizMaker extends StatefulWidget {
+class quizTaker extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _quizMakerState();
+  State<StatefulWidget> createState() => new _quizTakerState();
 }
 
 
@@ -31,7 +31,7 @@ class BackgroundClipper extends CustomClipper<Path>{
 
 }
 
-class _quizMakerState extends State<quizMaker> {
+class _quizTakerState extends State<quizTaker> {
 
   /// A pin listener
   /// It's backend method hasn't been implemented yet

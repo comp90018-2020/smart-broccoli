@@ -28,7 +28,7 @@ jobs:
     - run: flutter test
 
     - run: flutter build apk
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dependabot/gradle/android')
 
     - name: Save artifacts
       uses: actions/upload-artifact@v1
