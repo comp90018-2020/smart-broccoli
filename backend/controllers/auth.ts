@@ -9,10 +9,13 @@ import { createDefaultGroup } from "./group";
  */
 export const register = async (info: any) => {
     const { password, email, name } = info;
-    const transaction =  await sequelize.transaction();
+    const transaction = await sequelize.transaction();
 
     try {
-        const user = await User.create({ password, email, name, role: "user" }, { transaction });
+        const user = await User.create(
+            { password, email, name, role: "user" },
+            { transaction }
+        );
         await createDefaultGroup(user.id, transaction);
         await transaction.commit();
         return user;
@@ -60,7 +63,7 @@ export const login = async (email: string, password: string) => {
     // Find user
     const user = await User.scope().findOne({
         where: { email, role: "user" },
-        attributes: ['id', 'password']
+        attributes: ["id", "password"],
     });
     if (!user) {
         throw new ErrorStatus("Incorrect email/password", 403);

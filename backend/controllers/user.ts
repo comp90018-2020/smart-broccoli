@@ -1,6 +1,6 @@
-import { Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { User, UserGroup, Picture } from "../models";
+import { Op } from "sequelize";
+import sequelize, { User, Picture, Group } from "../models";
 import { deletePicture, insertPicture } from "./picture";
 
 /**
@@ -107,18 +107,22 @@ export const deleteProfilePicture = async (userId: number) => {
  * @param userId ID of target user
  */
 const canAccessProfile = async (currentUserId: number, userId: number) => {
-    // TODO: fix
     // Find common groups
-    const userGroups = await UserGroup.findAll({ where: { userId } });
-    const sharedGroups = await UserGroup.findAll({
-        where: {
-            userId: currentUserId,
-            [Op.or]: userGroups.map((userGroups) => {
-                return { groupId: userGroups.groupId };
-            }),
-        },
+    // @ts-ignore
+    const sharedGroups: { id: number; count: string }[] = await Group.count({
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                required: true,
+                where: { [Op.or]: [{ id: userId }, { id: currentUserId }] },
+                through: { attributes: [] },
+                attributes: ["id"],
+            },
+        ],
+        group: ["Group.id"],
     });
-    return sharedGroups.length > 0;
+    return sharedGroups.find((group) => group.count === "2");
 };
 
 /**

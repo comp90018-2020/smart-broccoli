@@ -21,8 +21,11 @@ export const assertGroupOwnership = async (userId: number, groupId: number) => {
  * Create default group for user.
  * @param user User object
  */
-export const createDefaultGroup = async (userId: number, transaction: Transaction) => {
-    return await createGroup(userId, null, transaction, true);
+export const createDefaultGroup = async (
+    userId: number,
+    transaction: Transaction
+) => {
+    return await createGroupHelper(userId, null, true, transaction);
 };
 
 /**
@@ -125,26 +128,23 @@ export const getGroupMembers = async (userId: number, groupId: number) => {
 };
 
 /**
- * Create group
+ * Create group helper function.
  * @param userId
- * @param info Group information
+ * @param name Name of group
+ * @param defaultGroup Whether it's the user's default group
+ * @param transaction
  */
-export const createGroup = async (
+const createGroupHelper = async (
     userId: number,
     name: string,
-    transaction: Transaction = null,
-    defaultGroup: boolean = false
+    defaultGroup: boolean = false,
+    transaction: Transaction
 ) => {
     // Create new group
     let group = new Group({
         name,
         defaultGroup,
     });
-
-    // No transaction
-    if (!transaction) {
-        transaction = await sequelize.transaction();
-    }
 
     try {
         // Save group
@@ -163,9 +163,35 @@ export const createGroup = async (
             { transaction: transaction }
         );
 
-        await transaction.commit();
+        return group;
     } catch (err) {
-        await transaction.rollback();
+        throw err;
+    }
+};
+
+/**
+ * Create group
+ * @param userId
+ * @param info Group information
+ */
+export const createGroup = async (
+    userId: number,
+    name: string,
+    defaultGroup: boolean = false,
+    transaction: Transaction = null
+) => {
+    // Create transaction if not passed in
+    const t = transaction ? transaction : await sequelize.transaction();
+
+    try {
+        // Create group
+        const group = await createGroupHelper(userId, name, defaultGroup, t);
+
+        // Save
+        await t.commit();
+        return group;
+    } catch (err) {
+        await t.rollback();
 
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
@@ -180,8 +206,6 @@ export const createGroup = async (
         }
         throw err;
     }
-
-    return group;
 };
 
 /**
@@ -215,7 +239,7 @@ export const joinGroup = async (
                 where: { id: userId },
                 through: { attributes: [] },
                 required: false,
-                attributes: ['id']
+                attributes: ["id"],
             },
         ],
     });
