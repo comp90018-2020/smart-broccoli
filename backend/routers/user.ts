@@ -236,13 +236,14 @@ router.get(
  */
 router.get(
     "/:userId/profile",
-    [param("userId").isInt()],
+    [param("userId").isInt(), body("token").isString()],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = await getUserProfile(
                 req.user.id,
-                Number(req.params.userId)
+                Number(req.params.userId),
+                req.body.token
             );
             return res.json(user);
         } catch (err) {
@@ -276,13 +277,14 @@ router.get(
  */
 router.get(
     "/:userId/profile/picture",
-    [param("userId").isInt()],
+    [param("userId").isInt(), body("token").isString()],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const picture = await getUserProfilePicture(
                 req.user.id,
-                Number(req.params.userId)
+                Number(req.params.userId),
+                req.body.token
             );
             // Set content header
             res.setHeader("Content-Type", "image/png");

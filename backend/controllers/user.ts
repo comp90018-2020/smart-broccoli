@@ -1,7 +1,9 @@
 import ErrorStatus from "../helpers/error";
 import { Op } from "sequelize";
-import sequelize, { User, Picture, Group } from "../models";
+import sequelize, { User, Picture, Group, SessionParticipant } from "../models";
 import { deletePicture, insertPicture } from "./picture";
+import { jwtVerify } from "helpers/jwt";
+import { SessionToken } from "./session";
 
 /**
  * Get profile of current user.
@@ -126,12 +128,44 @@ const canAccessProfile = async (currentUserId: number, userId: number) => {
 };
 
 /**
+ * Verify access using token.
+ * @param token
+ */
+const canAccessByToken = async (token: string) => {
+    if (!token) {
+        return false;
+    }
+
+    // Decrypt the session token
+    const sessionToken: SessionToken = await jwtVerify(
+        token,
+        process.env.TOKEN_SECRET
+    );
+    if (sessionToken.scope !== "game") {
+        return false;
+    }
+
+    // If session count is 1, then user is part of session
+    const sessionCount = await SessionParticipant.count({
+        where: { userId: sessionToken.userId },
+    });
+    return sessionCount === 1;
+};
+
+/**
  * Get profile of user.
  * @param currentUserId ID of current user
  * @param userId ID of target user
  */
-export const getUserProfile = async (currentUserId: number, userId: number) => {
-    if (await canAccessProfile(currentUserId, userId)) {
+export const getUserProfile = async (
+    currentUserId: number,
+    userId: number,
+    token: string
+) => {
+    if (
+        (await canAccessByToken(token)) ||
+        (await canAccessProfile(currentUserId, userId))
+    ) {
         return await User.findByPk(userId, {
             attributes: ["id", "name", "updatedAt"],
         });
@@ -146,9 +180,13 @@ export const getUserProfile = async (currentUserId: number, userId: number) => {
  */
 export const getUserProfilePicture = async (
     currentUserId: number,
-    userId: number
+    userId: number,
+    token: string
 ) => {
-    if (await canAccessProfile(currentUserId, userId)) {
+    if (
+        (await canAccessByToken(token)) ||
+        (await canAccessProfile(currentUserId, userId))
+    ) {
         // @ts-ignore Model problems
         const user = await User.findByPk(userId, { include: [Picture] });
         if (!user.Picture) {

@@ -11,7 +11,7 @@ const jwtSign = (payload: object, secret: string): Promise<string> => {
 };
 
 // Verify JWT token
-const jwtVerify = (token: string, secret: string) => {
+const jwtVerify = (token: string, secret: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         jwt.verify(token, secret, function (err, decoded) {
             if (err) {

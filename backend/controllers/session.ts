@@ -10,6 +10,15 @@ import sequelize, {
 import ErrorStatus from "../helpers/error";
 import { jwtSign } from "../helpers/jwt";
 
+// Represents a session token
+export interface SessionToken {
+    scope: string;
+    userId: number;
+    role: string;
+    sessionId: number;
+    name: string;
+}
+
 /**
  * Sign game token.
  * @param sessionId

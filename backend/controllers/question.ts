@@ -2,7 +2,7 @@ import { Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
 import sequelize, { Picture } from "../models";
 import Question, { OptionAttributes } from "../models/question";
-import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { deletePicture, insertPicture } from "./picture";
 import { getQuizAndRole } from "./quiz";
 
 // Parses question info
