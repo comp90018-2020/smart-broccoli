@@ -1,4 +1,4 @@
-name: Fuzzy Broccoli
+name: Build app
 
 on:
   push:

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuzzy_broccoli/theme.dart';
+import 'package:smart_broccoli/theme.dart';
 
 import 'src/auth/auth_screen.dart';
 
@@ -11,8 +11,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Fuzzy Broccoli',
-      theme: FuzzyBroccoliTheme().themeData,
+      title: 'Smart Broccoli',
+      theme: SmartBroccoliTheme().themeData,
       routes: {'/auth': (context) => AuthScreen()},
       initialRoute: '/auth',
     );

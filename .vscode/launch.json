@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "fuzzy-broccoli",
+            "name": "smart-broccoli",
             "request": "launch",
             "type": "dart"
         }
