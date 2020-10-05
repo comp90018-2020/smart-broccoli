@@ -46,7 +46,7 @@ const signSessionToken = async (
  * Determines whether user is in session by token.
  * @param token
  */
-export const userIsInSession = async (token: string) => {
+export const sessionTokenValid = async (token: string) => {
     if (!token) {
         return false;
     }
