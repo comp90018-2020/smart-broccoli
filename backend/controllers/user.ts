@@ -116,6 +116,8 @@ const canAccessProfile = async (currentUserId: number, userId: number) => {
                 // @ts-ignore
                 model: User,
                 required: true,
+                // User if userId is current or target
+                // Expect 2 rows (or users) for each intersection group
                 where: { [Op.or]: [{ id: userId }, { id: currentUserId }] },
                 through: { attributes: [] },
                 attributes: ["id"],
@@ -162,8 +164,18 @@ export const getUserProfilePicture = async (
         (await canAccessProfile(currentUserId, userId))
     ) {
         // @ts-ignore Model problems
-        const user = await User.findByPk(userId, { include: [Picture] });
-        if (!user.Picture) {
+        const user = await User.findByPk(userId, {
+            attributes: [],
+            include: [
+                {
+                    // @ts-ignore
+                    model: Picture,
+                    required: true,
+                    attributes: ["destination"],
+                },
+            ],
+        });
+        if (!user) {
             throw new ErrorStatus("Profile picture not found", 404);
         }
         return user.Picture;
