@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-class lobby extends StatefulWidget {
+/// The Skeleton for the start lobby
+class start_lobby extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _lobby();
+  State<StatefulWidget> createState() => new _start_lobby();
 }
 
 class BackgroundClipper extends CustomClipper<Path> {
@@ -27,7 +28,7 @@ class BackgroundClipper extends CustomClipper<Path> {
   }
 }
 
-class _lobby extends State<lobby> {
+class _start_lobby extends State<start_lobby> {
   Timer _timer, _timer2;
   int _start = 50;
 

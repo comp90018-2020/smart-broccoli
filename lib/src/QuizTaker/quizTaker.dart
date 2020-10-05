@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:fuzzy_broccoli/src/QuizTaker/quizQuestion.dart';
 
-import 'lobby.dart';
+import '../../theme.dart';
+import 'startLobby.dart';
 
 class quizTaker extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _quizTakerState();
 }
 
-
 /// Super hacky (but official) way to have weird shapes in the background
 /// For clarifications please talk to Harrison
-class BackgroundClipper extends CustomClipper<Path>{
+class BackgroundClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     var path = Path();
 
-    path.moveTo(0, size.height*0.66);
-  //  path.moveTo(0, size.width*1.5);
+    path.moveTo(0, size.height * 0.66);
+    //  path.moveTo(0, size.width*1.5);
     path.lineTo(0, size.height);
     path.lineTo(size.width, size.height);
     path.lineTo(size.width, 150);
@@ -26,15 +26,13 @@ class BackgroundClipper extends CustomClipper<Path>{
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) {
-   return true;
+    return true;
   }
-
 }
 
 class _quizTakerState extends State<quizTaker> {
-
   /// A pin listener
-  /// It's backend method hasn't been implemented yet
+  /// listens for input by the pin listener
   final TextEditingController _pinFilter = new TextEditingController();
 
   String _pin = "";
@@ -47,7 +45,6 @@ class _quizTakerState extends State<quizTaker> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -55,26 +52,26 @@ class _quizTakerState extends State<quizTaker> {
         body: Stack(
           children: <Widget>[
             Container(
-              child:ClipPath(
-                  clipper: BackgroundClipper(),
-                  child: Container(
-                      color: Theme.of(context).colorScheme.onBackground,
-                      ))
+              child: ClipPath(
+                clipper: BackgroundClipper(),
+                child: Container(
+                  color: Theme.of(context).colorScheme.onBackground,
+                ),
+              ),
             ),
             Container(
-              child: new Column(
+              child: SingleChildScrollView(
+                  child: new Column(
                 children: <Widget>[
                   // Title "UNI QUIZ"
                   SizedBox(height: 50),
                   _SwitchButton(),
                 ],
-              ),
-            )
+              )),
+            ),
           ],
-        )
-);
+        ));
   }
-
 
   Widget _buildTextFields() {
     return Container(
@@ -90,66 +87,56 @@ class _quizTakerState extends State<quizTaker> {
 
   Widget _SwitchButton() {
     return new DefaultTabController(
-        length: 3,
-        child: Column(
-          children: <Widget>[
-            // Tabs
-            FractionallySizedBox(
-                widthFactor: 0.85,
-                child: Container(
-                    margin: EdgeInsets.only(top: 35, bottom: 20),
-                    decoration: BoxDecoration(
-                        color: Color(0xFF82C785),
-                        borderRadius: BorderRadius.all(Radius.circular(25))),
-                    child: TabBar(
-                      tabs: [
-                        new Tab(
-                          text: "All",
-                        ),
-                        new Tab(
-                          text: "Live",
-                        ),
-                        new Tab(
-                          text: "Self Paced",
-                        )
-                      ],
-                    ))),
-            new Container(
-              child: _pinForm(),
-            ),
-            // Padding
-            SizedBox(height: 50),
-            new Container(
-              child: _buildJoinByPinButton(),
-            ),
-            // Padding
-            SizedBox(height: 50),
-            new Container(
-              // TODO fix this hack line
-              // So basically the idea here is that the string
-              // Passed into each of the methods will generate a different
-              // List of items
-              height: 250,
-              child: TabBarView(
-                children: [
-                  _buildQuizList("ALL"),
-                  _buildQuizList("LIVE"),
-                  _buildQuizList("SELF"),
-                ],
-              ),
-              // child: _buildQuizList(),
-            ),
+      length: 3,
+      child: Column(
+        children: <Widget>[
+          TabHolder(
+              // TODO change Tabs class to allow to varible sizes for tabs
+              margin: const EdgeInsets.only(top: 35, bottom: 35),
+              tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF")]),
 
-            // Tab contents
-          ],
-        ));
+          // Presistant Elements
+          // The pin form
+          new Container(
+            child: _pinForm(),
+          ),
+          // Padding
+          SizedBox(height: 50),
+          // Join by pin button
+          new Container(
+            child: _buildJoinByPinButton(),
+          ),
+          // Padding
+          SizedBox(height: 50),
+
+          // Tabs
+          new Container(
+            // TODO fix this hack line
+            // So basically the idea here is that the string
+            // Passed into each of the methods will generate a different
+            // List of items
+            height: 250,
+            child: TabBarView(
+              children: [
+                _buildQuizList("ALL"),
+                _buildQuizList("LIVE"),
+                _buildQuizList("SELF"),
+              ],
+            ),
+            // child: _buildQuizList(),
+          ),
+          // Tab contents
+        ],
+      ),
+    );
   }
 
   // The form which you enter the pin into
   Widget _pinForm() {
     return new Container(
-        padding: EdgeInsets.fromLTRB(150, 16, 150, 0),
-        child: new Column(children: <Widget>[
+      padding: EdgeInsets.fromLTRB(150, 16, 150, 0),
+      child: new Column(
+        children: <Widget>[
           new Container(
             child: TextFormField(
               controller: _pinFilter,
@@ -162,51 +149,52 @@ class _quizTakerState extends State<quizTaker> {
               onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
             ),
           ),
-        ]));
+        ],
+      ),
+    );
   }
 
   /// The Join by Pin button
   /// Currently it points towards a question tab
   Widget _buildJoinByPinButton() {
     return new Container(
-        child: new Column(
-      children: <Widget>[
-        new ButtonTheme(
-          minWidth: 150.0,
-          height: 50.0,
-          buttonColor: Colors.orangeAccent,
-          child: RaisedButton(
-            onPressed: _verifyPin, // TODO CHANGE
-            child: Text("Join By Pin"),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18.0),
+      child: new Column(
+        children: <Widget>[
+          new ButtonTheme(
+            minWidth: 150.0,
+            height: 50.0,
+            child: RaisedButton(
+              onPressed: _verifyPin, // TODO CHANGE
+              child: Text("Join By Pin"),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18.0),
+              ),
             ),
           ),
-        ),
-      ],
-    ));
+        ],
+      ),
+    );
   }
-
 
   /// Widget which constructs a quiz list
   Widget _buildQuizList(type) {
     List<String> items = getItems(type);
 
-
     return Container(
-        // margin: EdgeInsets.fromLTRB(20,0,),
-        height: 200.0,
-        child: ListView.separated(
-          // Enable Horizontal Scroll
-          scrollDirection: Axis.horizontal,
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            return _listTile(items[index], type);
-          },
-          separatorBuilder: (context, index) {
-            return Divider(indent: 10);
-          },
-        ));
+      // margin: EdgeInsets.fromLTRB(20,0,),
+      height: 200.0,
+      child: ListView.separated(
+        // Enable Horizontal Scroll
+        scrollDirection: Axis.horizontal,
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          return _listTile(items[index], type);
+        },
+        separatorBuilder: (context, index) {
+          return Divider(indent: 10);
+        },
+      ),
+    );
   }
 
   // TODO change to flat button
@@ -216,33 +204,37 @@ class _quizTakerState extends State<quizTaker> {
   /// This is used to demostrate that tab changes the list as well
   Widget _listTile(val, type) {
     return new Container(
-        width: 160.0,
-        child: new RaisedButton(
-          // The padding somehow allows the image to not leave any gaps on the
-          // List Tile, this is defintively a hack TODO check if it actually does it
-            padding: EdgeInsets.all(0.0),
-            color: Colors.white,
-            onPressed: () => _quiz(),
-            child: new Column(children: <Widget>[
-              new Container(
-                // You will need to change this to a method to get an image
-                child: Image(image: AssetImage('assets/images/placeholder.png')),
+      width: 160.0,
+      child: new RaisedButton(
+        // The padding somehow allows the image to not leave any gaps on the
+        // List Tile, this is defintively a hack TODO check if it actually does it
+        padding: EdgeInsets.all(0.0),
+        color: Colors.white,
+        onPressed: () => _quiz(),
+        child: new Column(
+          children: <Widget>[
+            new Container(
+              // You will need to change this to a method to get an image
+              child: Image(image: AssetImage('assets/images/placeholder.png')),
+            ),
+            new Container(
+                child: Center(
+              child: Text(
+                val + type,
+                style: TextStyle(height: 5, fontSize: 5, color: Colors.black),
               ),
-              new Container(
-                  child: Center(
-                child: Text(
-                  val + type,
-                  style: TextStyle(height: 5, fontSize: 5, color: Colors.black),
-                ),
-              )),
-              Expanded(child: Container()),
-              new Container(
-                child: Text(
-                  "STATUS Here",
-                  style: TextStyle(height: 5, fontSize: 5, color: Colors.black),
-                ),
+            )),
+            Expanded(child: Container()),
+            new Container(
+              child: Text(
+                "STATUS Here",
+                style: TextStyle(height: 5, fontSize: 5, color: Colors.black),
               ),
-            ])));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// Take a quiz, goes to the quiz lobby which then connects you to a quiz
@@ -250,20 +242,21 @@ class _quizTakerState extends State<quizTaker> {
   void _quiz() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => lobby()),
+      MaterialPageRoute(builder: (context) => start_lobby()),
     );
   }
-
 
   /// The verify pin function currently is used for debug purposes
   /// Please change this to the desired result which should be like the method
   /// Above
   void _verifyPin() {
+    print(_pinFilter.text);
+
+    // TODO remove debug code below
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => quizQuestion()),
     );
-    print("TOOD");
   }
 
   /// Entry function for the different type of quizes
