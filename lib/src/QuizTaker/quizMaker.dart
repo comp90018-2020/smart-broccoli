@@ -8,7 +8,27 @@ class quizMaker extends StatefulWidget {
   State<StatefulWidget> createState() => new _quizMakerState();
 }
 
-enum quizType { All, Live, SelfPaced }
+
+
+class BackgroundClipper extends CustomClipper<Path>{
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+
+    path.moveTo(0, size.height*0.66);
+  //  path.moveTo(0, size.width*1.5);
+    path.lineTo(0, size.height);
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width, 150);
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+   return true;
+  }
+
+}
 
 class _quizMakerState extends State<quizMaker> {
   final TextEditingController _pinFilter = new TextEditingController();
@@ -23,24 +43,45 @@ class _quizMakerState extends State<quizMaker> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background,
-        body: _buildTextFields());
+        body: Stack(
+          children: <Widget>[
+            Container(
+              child:ClipPath(
+                  clipper: BackgroundClipper(),
+                  child: Container(
+                      color: Theme.of(context).colorScheme.onBackground,
+                      ))
+            ),
+            Container(
+              child: new Column(
+                children: <Widget>[
+                  // Title "UNI QUIZ"
+                  SizedBox(height: 50),
+                  _SwitchButton(),
+                ],
+              ),
+            )
+          ],
+        )
+);
   }
 
+
   Widget _buildTextFields() {
-    return new SingleChildScrollView(
-        child: Container(
+    return Container(
       child: new Column(
         children: <Widget>[
-          // Title "UNI QUIZ"
+          // Padding
           SizedBox(height: 50),
           _SwitchButton(),
         ],
       ),
-    ));
+    );
   }
 
   Widget _SwitchButton() {
@@ -72,21 +113,25 @@ class _quizMakerState extends State<quizMaker> {
             new Container(
               child: _buildLiveQuiz(),
             ),
+            // Padding
             SizedBox(height: 50),
             new Container(
               child: _buildJoinByPinButton(),
             ),
+            // Padding
             SizedBox(height: 50),
             new Container(
-              height: 200,
+              // color: Theme.of(context).colorScheme.onBackground,
+              // TODO fix this hack line
+              height: 250,
               child: TabBarView(
                 children: [
-                  _buildQuizList(),
-                  _buildQuizList(),
-                  _buildQuizList(),
+                  _buildQuizList("ALL"),
+                  _buildQuizList("LIVE"),
+                  _buildQuizList("SELF"),
                 ],
               ),
-             // child: _buildQuizList(),
+              // child: _buildQuizList(),
             ),
 
             // Tab contents
@@ -133,9 +178,13 @@ class _quizMakerState extends State<quizMaker> {
     ));
   }
 
-  final items = List<String>.generate(10, (i) => "Item $i");
 
-  Widget _buildQuizList() {
+  //final items = List<String>.generate(10, (i) => "Item $i");
+
+  Widget _buildQuizList(type) {
+    List<String> items = getItems(type);
+
+
     return Container(
         // margin: EdgeInsets.fromLTRB(20,0,),
         height: 200.0,
@@ -143,34 +192,34 @@ class _quizMakerState extends State<quizMaker> {
           scrollDirection: Axis.horizontal,
           itemCount: items.length,
           itemBuilder: (context, index) {
-            return _listTile();
+            return _listTile(items[index], type);
           },
           separatorBuilder: (context, index) {
-            color:
-            Colors.white;
             return Divider(indent: 10);
           },
         ));
   }
 
   // TODO change to flat button
-  Widget _listTile() {
+  /// This is a single tile within a list
+  Widget _listTile(val, type) {
     return new Container(
         width: 160.0,
         child: new RaisedButton(
+          // The padding somehow allows the image to not leave any gaps on the
+          // List Tile, this is defintively a hack TODO check if it actually does it
             padding: EdgeInsets.all(0.0),
             color: Colors.white,
             onPressed: () => _quiz(),
             child: new Column(children: <Widget>[
               new Container(
-                // TODO GET IMAGE
-                child:
-                    Image(image: AssetImage('assets/images/placeholder.png')),
+                // You will need to change this to a method to get an image
+                child: Image(image: AssetImage('assets/images/placeholder.png')),
               ),
               new Container(
                   child: Center(
                 child: Text(
-                  "COMP1337",
+                  val + type,
                   style: TextStyle(height: 5, fontSize: 5, color: Colors.black),
                 ),
               )),
@@ -184,6 +233,8 @@ class _quizMakerState extends State<quizMaker> {
             ])));
   }
 
+  /// Take a quiz, goes to the quiz lobby which then connects you to a quiz
+  /// Interface
   void _quiz() {
     Navigator.push(
       context,
@@ -191,15 +242,22 @@ class _quizMakerState extends State<quizMaker> {
     );
   }
 
-  void _formChange() {
-    print('UWU');
-  }
 
+  /// The verify pin function currently is used for debug purposes
+  /// Please change this to the desired result which should be like the method
+  /// Above
   void _verifyPin() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => quizQuestion()),
     );
     print("TOOD");
+  }
+
+  /// Entry function for the different type of quizes
+  /// Please change the output type
+  List<String> getItems(type) {
+    print("NOT IMPLEMENTED");
+    return ["A", "B", "C", "D", "E", "F", "G"];
   }
 }
