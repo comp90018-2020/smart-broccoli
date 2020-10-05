@@ -71,9 +71,10 @@ export const sessionTokenValid = async (token: string) => {
  * Get partial user session information.
  * @param userId
  */
-const getUserSessionPartial = async (userId: number) => {
+const isInSession = async (userId: number) => {
+    // Find active/waiting sessions which user has not left
     // @ts-ignore
-    return await Session.findOne({
+    const count: number = Session.count({
         where: {
             state: {
                 [Op.or]: ["active", "waiting"],
@@ -89,8 +90,8 @@ const getUserSessionPartial = async (userId: number) => {
                 },
             },
         ],
-        limit: 1,
     });
+    return count === 1;
 };
 
 /**
@@ -112,9 +113,7 @@ export const getUserSession = async (userId: number) => {
                 model: User,
                 attributes: ["id"],
                 through: { where: { state: { [Op.not]: "left" } } },
-                where: {
-                    id: userId,
-                },
+                where: { id: userId },
                 required: true,
             },
             {
@@ -195,7 +194,7 @@ export const createSession = async (userId: number, opts: any) => {
     const { quizId, isGroup, subscribeGroup } = opts;
 
     // Check session
-    const existingSession = await getUserSessionPartial(userId);
+    const existingSession = await isInSession(userId);
     if (existingSession) {
         throw new ErrorStatus(
             "User is already participant of ongoing quiz session",
@@ -204,17 +203,17 @@ export const createSession = async (userId: number, opts: any) => {
     }
 
     // Get quiz
-    const quiz = await Quiz.findByPk(quizId, { include: ["questions"] });
+    const quiz = await Quiz.findByPk(quizId);
     if (!quiz) {
         throw new ErrorStatus("Quiz not found", 404);
     }
 
-    // Check group
+    // Only members can initiate quiz
     const userGroup = await UserGroup.findOne({
         where: { userId, groupId: quiz.groupId },
     });
     if (!userGroup) {
-        throw new ErrorStatus("User cannot access quiz", 403);
+        throw new ErrorStatus("User cannot initial quiz", 403);
     }
 
     // Check quiz type/initiator
@@ -296,7 +295,7 @@ export const createSession = async (userId: number, opts: any) => {
  */
 export const joinSession = async (userId: number, code: string) => {
     // Check session
-    const existingSession = await getUserSessionPartial(userId);
+    const existingSession = await isInSession(userId);
     if (existingSession) {
         throw new ErrorStatus(
             "User is already participant of ongoing quiz session",
