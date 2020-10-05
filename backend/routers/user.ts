@@ -236,7 +236,7 @@ router.get(
  */
 router.get(
     "/:userId/profile",
-    [param("userId").isInt(), body("token").isString()],
+    [param("userId").isInt(), body("token").optional().isString()],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -277,7 +277,7 @@ router.get(
  */
 router.get(
     "/:userId/profile/picture",
-    [param("userId").isInt(), body("token").isString()],
+    [param("userId").isInt(), body("token").optional().isString()],
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
