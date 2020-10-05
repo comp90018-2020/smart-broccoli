@@ -196,7 +196,7 @@ export const updateQuestionPicture = async (
     file: any
 ) => {
     // Ensure that user is owner
-    const { role } = await getQuizAndRole(userId, quizId);
+    const { role } = await getQuizAndRole(userId, quizId, { attributes: [] });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot update picture", 403);
     }
@@ -241,7 +241,9 @@ export const getQuestionPicture = async (
     quizId: number,
     questionId: number
 ) => {
-    const { role, state } = await getQuizAndRole(userId, quizId);
+    const { role, state } = await getQuizAndRole(userId, quizId, {
+        attributes: [],
+    });
     if (
         (role === "member" || role === "participant") &&
         state === "inaccessible"
@@ -281,7 +283,7 @@ export const deleteQuestionPicture = async (
     questionId: number
 ) => {
     // Ensure that user is owner
-    const { role } = await getQuizAndRole(userId, quizId);
+    const { role } = await getQuizAndRole(userId, quizId, { attributes: [] });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot update picture", 403);
     }

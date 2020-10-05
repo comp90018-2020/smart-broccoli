@@ -7,10 +7,95 @@ import sequelize, {
     User,
     Session,
     Group,
+    Picture,
 } from "../models";
 import { processQuestions } from "./question";
-import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { deletePicture, insertPicture } from "./picture";
 import { assertGroupOwnership } from "./group";
+
+/**
+ * Get quiz and permissions.
+ * @param userId
+ * @param quizId
+ * @param options FindOptions
+ */
+export const getQuizAndRole = async (
+    userId: number,
+    quizId: number,
+    options?: FindOptions
+) => {
+    // Get quiz
+    const quiz = await Quiz.findByPk(
+        quizId,
+        options
+            ? {
+                  ...options,
+                  attributes: options.attributes
+                      ? [...(options.attributes as string[]), "groupId"]
+                      : options.attributes,
+              }
+            : undefined
+    );
+    if (!quiz) {
+        throw new ErrorStatus("Quiz not found", 404);
+    }
+
+    // Check whether user has privileges
+    const membership = await UserGroup.findOne({
+        where: {
+            userId,
+            groupId: quiz.groupId,
+        },
+    });
+
+    // Quick return if owner
+    if (membership && membership.role === "owner") {
+        return { quiz, role: "owner", state: null };
+    }
+
+    // Not active?
+    if (!quiz.active) {
+        throw new ErrorStatus("Quiz is not active", 403);
+    }
+
+    // Find user's quiz sessions
+    // This query is not ideal
+    const sessions = await Session.findAll({
+        where: { quizId },
+        attributes: ["id", "state"],
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                where: { id: userId },
+                attributes: ["id"],
+                required: true,
+            },
+        ],
+    });
+
+    // No sessions, not member
+    if (sessions.length === 0 && !membership) {
+        throw new ErrorStatus("Quiz cannot be accessed", 403);
+    }
+
+    // Determine role
+    const role = membership ? membership.role : "participant";
+    const states = sessions.map((session) => session.state);
+
+    // Least progress should be chosen
+    let state = "";
+    if (sessions.length === 0) {
+        // No session, so inaccessible
+        state = "inaccessible";
+    } else if (states.includes("waiting") || states.includes("active")) {
+        state = "accessible";
+    } else if (states.includes("complete")) {
+        state = "complete";
+    }
+
+    return { quiz, role, state };
+};
 
 /**
  * Create quiz.
@@ -247,7 +332,6 @@ export const getQuiz = async (userId: number, quizId: number) => {
 
     // Questions
     let questions: any = {};
-
     if (role === "owner" || state === "complete") {
         // Owners, members who completed quiz
         questions = quiz.questions.map((q) => q.toJSON());
@@ -297,80 +381,13 @@ export const getQuiz = async (userId: number, quizId: number) => {
 };
 
 /**
- * Get quiz and permissions.
- * @param userId
- * @param quizId
- * @param options FindOptions
- */
-export const getQuizAndRole = async (
-    userId: number,
-    quizId: number,
-    options?: FindOptions
-) => {
-    // Get quiz
-    const quiz = await Quiz.findByPk(quizId, options);
-    if (!quiz) {
-        throw new ErrorStatus("Quiz not found", 404);
-    }
-
-    // Check whether user has privileges
-    const membership = await UserGroup.findOne({
-        where: {
-            userId,
-            groupId: quiz.groupId,
-        },
-    });
-
-    // Quick return if owner
-    if (membership && membership.role === "owner") {
-        return { quiz, role: "owner", state: null };
-    }
-
-    // Find user's quiz sessions
-    // This query is not ideal
-    const sessions = await Session.findAll({
-        where: { quizId },
-        attributes: ["id", "state"],
-        include: [
-            {
-                // @ts-ignore
-                model: User,
-                where: { id: userId },
-                attributes: ["id"],
-                required: true,
-            },
-        ],
-    });
-
-    // No sessions, not member
-    if (sessions.length === 0 && !membership) {
-        throw new ErrorStatus("Quiz cannot be accessed", 403);
-    }
-
-    // Determine role
-    const role = membership ? membership.role : "participant";
-    const states = sessions.map((session) => session.state);
-
-    // Least progress should be chosen
-    let state = "";
-    if (sessions.length === 0) {
-        // No session, so inaccessible
-        state = "inaccessible";
-    } else if (states.includes("waiting") || states.includes("active")) {
-        state = "accessible";
-    } else if (states.includes("complete")) {
-        state = "complete";
-    }
-
-    return { quiz, role, state };
-};
-
-/**
  * Delete quiz.
  * @param quizId
  */
 export const deleteQuiz = async (userId: number, quizId: number) => {
-    const { quiz, role } = await getQuizAndRole(userId, quizId);
+    const { quiz, role } = await getQuizAndRole(userId, quizId, {
+        attributes: ["id"],
+    });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot delete quiz", 403);
     }
@@ -390,7 +407,9 @@ export const updateQuizPicture = async (
     file: any
 ) => {
     // Ensure that user is owner
-    const { quiz, role } = await getQuizAndRole(userId, quizId);
+    const { quiz, role } = await getQuizAndRole(userId, quizId, {
+        attributes: ["id", "pictureId"],
+    });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot update picture", 403);
     }
@@ -411,6 +430,7 @@ export const updateQuizPicture = async (
         return quiz;
     } catch (err) {
         await transaction.rollback();
+        throw err;
     }
 };
 
@@ -420,8 +440,17 @@ export const updateQuizPicture = async (
  */
 export const getQuizPicture = async (userId: number, quizId: number) => {
     // Ensure that user can access quiz
-    const { quiz } = await getQuizAndRole(userId, quizId);
-    return await getPictureById(quiz.pictureId);
+    const { quiz } = await getQuizAndRole(userId, quizId, {
+        attributes: ["pictureId"],
+        include: [
+            {
+                //@ts-ignore
+                model: Picture,
+                attributes: ["id", "destination"],
+            },
+        ],
+    });
+    return quiz.Picture;
 };
 
 /**
@@ -431,7 +460,9 @@ export const getQuizPicture = async (userId: number, quizId: number) => {
  */
 export const deleteQuizPicture = async (userId: number, quizId: number) => {
     // Ensure that user is owner
-    const { quiz, role } = await getQuizAndRole(userId, quizId);
+    const { quiz, role } = await getQuizAndRole(userId, quizId, {
+        attributes: ["pictureId"],
+    });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot delete picture", 403);
     }

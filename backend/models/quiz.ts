@@ -1,4 +1,4 @@
-import { Question, Session } from "models";
+import { Picture, Question, Session } from "models";
 import Sequelize, { Optional } from "sequelize";
 
 const schema: Sequelize.ModelAttributes = {
@@ -42,6 +42,7 @@ interface QuizAttributes {
     timeLimit?: number;
     questions?: Question[];
     Sessions?: Session[];
+    Picture?: Picture;
 }
 interface QuizCreationAttributes
     extends Optional<QuizAttributes, "id" | "active"> {}
@@ -60,6 +61,7 @@ export default class Quiz
     public pictureId?: number;
     public readonly Sessions?: Session[];
     public readonly questions?: Question[];
+    public readonly Picture?: Picture;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {
