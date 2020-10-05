@@ -123,7 +123,7 @@ export const getUserSession = async (userId: number) => {
                 attributes: ["id", "name", "defaultGroup", "code"],
                 include: [
                     {
-                        // Get user
+                        // Get owner name (for default groups)
                         model: User,
                         through: { where: { role: "owner" } },
                         attributes: ["name"],
@@ -312,15 +312,24 @@ export const joinSession = async (userId: number, code: string) => {
                 // Get group
                 model: Group,
                 attributes: ["id", "name", "defaultGroup", "code"],
+                required: true,
                 include: [
                     {
-                        // Get user
+                        // Get owner name
                         model: User,
                         through: { where: { role: "owner" } },
                         attributes: ["name"],
                         required: true,
                     },
                 ],
+            },
+            // Has user joined and left before?
+            {
+                model: User,
+                attributes: [],
+                through: { where: { state: "left" } },
+                where: { id: userId },
+                required: false,
             },
         ],
     });
@@ -330,18 +339,25 @@ export const joinSession = async (userId: number, code: string) => {
 
     // See state
     if (session.state !== "waiting") {
-        throw new ErrorStatus("Session cannot be joined", 400, {
-            state: session.state,
+        if (session.Users.length > 0) {
+            // Let user rejoin (as they have left before)
+            await session.Users[0].SessionParticipant.update({
+                state: "joined",
+            });
+        } else {
+            throw new ErrorStatus("Session cannot be joined", 400, {
+                state: session.state,
+            });
+        }
+    } else {
+        // Create association
+        const sessionParticipant = new SessionParticipant({
+            sessionId: session.id,
+            userId,
+            role: "participant",
         });
+        await sessionParticipant.save();
     }
-
-    // Create association
-    const sessionParticipant = new SessionParticipant({
-        sessionId: session.id,
-        userId,
-        role: "participant",
-    });
-    await sessionParticipant.save();
 
     // Remove Users from session
     const sessionJSON: any = session.toJSON();
@@ -355,11 +371,7 @@ export const joinSession = async (userId: number, code: string) => {
     }
 
     // Sign code
-    const token = await signSessionToken(
-        session.id,
-        userId,
-        sessionParticipant.role
-    );
+    const token = await signSessionToken(session.id, userId, "participant");
     return {
         session: {
             ...sessionJSON,
