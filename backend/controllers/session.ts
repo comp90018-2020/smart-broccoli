@@ -8,10 +8,10 @@ import sequelize, {
     UserGroup,
 } from "../models";
 import ErrorStatus from "../helpers/error";
-import { jwtSign } from "../helpers/jwt";
+import { jwtSign, jwtVerify } from "../helpers/jwt";
 
 // Represents a session token
-export interface SessionToken {
+interface SessionToken {
     scope: string;
     userId: number;
     role: string;
@@ -40,6 +40,31 @@ const signSessionToken = async (
         },
         process.env.TOKEN_SECRET
     );
+};
+
+/**
+ * Determines whether user is in session by token.
+ * @param token
+ */
+export const userIsInSession = async (token: string) => {
+    if (!token) {
+        return false;
+    }
+
+    // Decrypt the session token
+    const sessionToken: SessionToken = await jwtVerify(
+        token,
+        process.env.TOKEN_SECRET
+    );
+    if (sessionToken.scope !== "game") {
+        return false;
+    }
+
+    // If session count is 1, then user is part of session
+    const sessionCount = await SessionParticipant.count({
+        where: { userId: sessionToken.userId },
+    });
+    return sessionCount === 1;
 };
 
 /**
