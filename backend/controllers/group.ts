@@ -21,11 +21,11 @@ export const assertGroupOwnership = async (userId: number, groupId: number) => {
  * Create default group for user.
  * @param user User object
  */
-export const createDefaultGroup = async (
+export const createDefaultGroup = (
     userId: number,
     transaction: Transaction
 ) => {
-    return await createGroupHelper(userId, null, true, transaction);
+    return createGroupHelper(userId, null, true, transaction);
 };
 
 /**
@@ -40,7 +40,7 @@ export const getGroups = async (user: User) => {
                 //@ts-ignore
                 model: User,
                 // Owner name if default group
-                through: { where: { role: "owner" }, attributes: ["role"] },
+                through: { where: { role: "owner" }, attributes: [] },
                 attributes: ["name"],
                 required: true,
             },
@@ -73,8 +73,9 @@ export const getGroup = async (user: User, groupId: number) => {
             {
                 // @ts-ignore Typing errors due to model
                 model: User,
-                through: { where: { role: "owner" }, attributes: ["role"] },
-                attributes: ["id", "name"],
+                // Owner name if default group
+                through: { where: { role: "owner" }, attributes: [] },
+                attributes: ["name"],
                 required: true,
             },
         ],
@@ -90,9 +91,7 @@ export const getGroup = async (user: User, groupId: number) => {
     return {
         ...groupJSON,
         role: group.UserGroup.role,
-        name: group.defaultGroup
-            ? group.Users.find((u) => u.UserGroup.role === "owner").name
-            : group.name,
+        name: group.defaultGroup ? group.Users[0].name : group.name,
     };
 };
 
@@ -148,7 +147,7 @@ const createGroupHelper = async (
 
     try {
         // Save group
-        group = await group.save({ transaction: transaction });
+        group = await group.save({ transaction });
 
         // Generate first code
         await regenerateCodeHelper(group, transaction);
@@ -160,7 +159,7 @@ const createGroupHelper = async (
                 groupId: group.id,
                 role: "owner",
             },
-            { transaction: transaction }
+            { transaction }
         );
 
         return group;
@@ -186,8 +185,7 @@ export const createGroup = async (
     try {
         // Create group
         const group = await createGroupHelper(userId, name, defaultGroup, t);
-
-        // Save
+        // Commit transaction
         await t.commit();
         return group;
     } catch (err) {
@@ -345,25 +343,23 @@ export const regenerateCode = async (userId: number, groupId: number) => {
  * @param userId Caller's user ID
  */
 export const leaveGroup = async (groupId: number, userId: number) => {
-    // Possible future expansion: manager/owner promotions
-    // Non-optimised checking
-    const userGroup = await UserGroup.findAll({
-        where: { groupId, role: "owner" },
+    // Find user group
+    const userGroup = await UserGroup.findOne({
+        where: { userId, groupId },
+        attributes: ["id", "role"],
     });
-    if (userGroup.length === 1 && userGroup[0].userId === userId) {
+    if (!userGroup) {
+        throw new ErrorStatus("User is not member of group", 400);
+    }
+
+    // Owner cannot leave
+    if (userGroup.role === "owner") {
+        // Can be expanded later if there are multiple owners
         throw new ErrorStatus("Last owner of group cannot leave", 400);
     }
 
     // Destroy association
-    const res = await UserGroup.destroy({
-        where: {
-            groupId,
-            userId,
-        },
-    });
-    if (res != 1) {
-        throw new ErrorStatus("Cannot leave group", 400);
-    }
+    return await userGroup.destroy();
 };
 
 /**
@@ -376,6 +372,7 @@ export const deleteMember = async (
     groupId: number,
     userId: number
 ) => {
+    // Ensure that caller is owner
     await assertGroupOwnership(callerId, groupId);
 
     const res = await UserGroup.destroy({

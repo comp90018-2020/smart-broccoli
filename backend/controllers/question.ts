@@ -179,7 +179,7 @@ const deleteQuestion = async (
         transaction,
     });
     if (deleted == 0) {
-        throw new ErrorStatus("Bad Request", 400);
+        throw new ErrorStatus("Cannot delete specified question", 400);
     }
 };
 
