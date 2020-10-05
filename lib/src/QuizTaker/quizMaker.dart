@@ -9,7 +9,8 @@ class quizMaker extends StatefulWidget {
 }
 
 
-
+/// Super hacky (but official) way to have weird shapes in the background
+/// For clarifications please talk to Harrison
 class BackgroundClipper extends CustomClipper<Path>{
   @override
   Path getClip(Size size) {
@@ -31,6 +32,9 @@ class BackgroundClipper extends CustomClipper<Path>{
 }
 
 class _quizMakerState extends State<quizMaker> {
+
+  /// A pin listener
+  /// It's backend method hasn't been implemented yet
   final TextEditingController _pinFilter = new TextEditingController();
 
   String _pin = "";
@@ -111,7 +115,7 @@ class _quizMakerState extends State<quizMaker> {
                       ],
                     ))),
             new Container(
-              child: _buildLiveQuiz(),
+              child: _pinForm(),
             ),
             // Padding
             SizedBox(height: 50),
@@ -121,8 +125,10 @@ class _quizMakerState extends State<quizMaker> {
             // Padding
             SizedBox(height: 50),
             new Container(
-              // color: Theme.of(context).colorScheme.onBackground,
               // TODO fix this hack line
+              // So basically the idea here is that the string
+              // Passed into each of the methods will generate a different
+              // List of items
               height: 250,
               child: TabBarView(
                 children: [
@@ -139,7 +145,8 @@ class _quizMakerState extends State<quizMaker> {
         ));
   }
 
-  Widget _buildLiveQuiz() {
+  // The form which you enter the pin into
+  Widget _pinForm() {
     return new Container(
         padding: EdgeInsets.fromLTRB(150, 16, 150, 0),
         child: new Column(children: <Widget>[
@@ -158,6 +165,8 @@ class _quizMakerState extends State<quizMaker> {
         ]));
   }
 
+  /// The Join by Pin button
+  /// Currently it points towards a question tab
   Widget _buildJoinByPinButton() {
     return new Container(
         child: new Column(
@@ -179,8 +188,7 @@ class _quizMakerState extends State<quizMaker> {
   }
 
 
-  //final items = List<String>.generate(10, (i) => "Item $i");
-
+  /// Widget which constructs a quiz list
   Widget _buildQuizList(type) {
     List<String> items = getItems(type);
 
@@ -189,6 +197,7 @@ class _quizMakerState extends State<quizMaker> {
         // margin: EdgeInsets.fromLTRB(20,0,),
         height: 200.0,
         child: ListView.separated(
+          // Enable Horizontal Scroll
           scrollDirection: Axis.horizontal,
           itemCount: items.length,
           itemBuilder: (context, index) {
@@ -202,6 +211,9 @@ class _quizMakerState extends State<quizMaker> {
 
   // TODO change to flat button
   /// This is a single tile within a list
+  /// val is the position ID
+  /// type is one of "ALL" "SELF" "LIVE"
+  /// This is used to demostrate that tab changes the list as well
   Widget _listTile(val, type) {
     return new Container(
         width: 160.0,
@@ -256,6 +268,7 @@ class _quizMakerState extends State<quizMaker> {
 
   /// Entry function for the different type of quizes
   /// Please change the output type
+  /// Should default to "ALL"
   List<String> getItems(type) {
     print("NOT IMPLEMENTED");
     return ["A", "B", "C", "D", "E", "F", "G"];
