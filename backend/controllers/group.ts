@@ -21,8 +21,8 @@ export const assertGroupOwnership = async (userId: number, groupId: number) => {
  * Create default group for user.
  * @param user User object
  */
-export const createDefaultGroup = async (userId: number) => {
-    return await createGroup(userId, null, true);
+export const createDefaultGroup = async (userId: number, transaction: Transaction) => {
+    return await createGroup(userId, null, transaction, true);
 };
 
 /**
@@ -36,6 +36,7 @@ export const getGroups = async (user: User) => {
             {
                 //@ts-ignore
                 model: User,
+                // Owner name if default group
                 through: { where: { role: "owner" }, attributes: ["role"] },
                 attributes: ["name"],
                 required: true,
@@ -69,9 +70,9 @@ export const getGroup = async (user: User, groupId: number) => {
             {
                 // @ts-ignore Typing errors due to model
                 model: User,
+                through: { where: { role: "owner" }, attributes: ["role"] },
                 attributes: ["id", "name"],
                 required: true,
-                through: { where: { role: "owner" }, attributes: ["role"] },
             },
         ],
     });
@@ -131,6 +132,7 @@ export const getGroupMembers = async (userId: number, groupId: number) => {
 export const createGroup = async (
     userId: number,
     name: string,
+    transaction: Transaction = null,
     defaultGroup: boolean = false
 ) => {
     // Create new group
@@ -139,7 +141,11 @@ export const createGroup = async (
         defaultGroup,
     });
 
-    const transaction = await sequelize.transaction();
+    // No transaction
+    if (!transaction) {
+        transaction = await sequelize.transaction();
+    }
+
     try {
         // Save group
         group = await group.save({ transaction: transaction });
@@ -209,6 +215,7 @@ export const joinGroup = async (
                 where: { id: userId },
                 through: { attributes: [] },
                 required: false,
+                attributes: ['id']
             },
         ],
     });
@@ -375,7 +382,7 @@ export const updateGroup = async (
                 // @ts-ignore
                 model: User,
                 attributes: [],
-                through: { where: { role: "owner" } },
+                through: { where: { role: "owner" }, attributes: [] },
                 where: { id: userId },
                 required: true,
             },

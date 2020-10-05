@@ -37,7 +37,7 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
                 {
                     // @ts-ignore
                     model: User,
-                    attributes: ["id", "role"],
+                    attributes: ["id", "role", "name"],
                 },
             ],
         });
