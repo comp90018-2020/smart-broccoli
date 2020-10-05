@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fuzzy_broccoli/cache.dart';
-import 'package:fuzzy_broccoli/models.dart';
-import 'package:fuzzy_broccoli/server.dart';
+import 'package:smart_broccoli/cache.dart';
+import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/server.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 
