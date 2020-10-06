@@ -16,7 +16,12 @@ export class LiveQuiz {
 
 
     constructor() {
-        this.sess = { 1: { "participants": new Set([])} };
+        this.sess = {
+            1: {
+                "participants": new Set([]),
+                "questions": [0]
+            }
+        };
     }
 
     /**
@@ -158,7 +163,7 @@ export class LiveQuiz {
 
     private starting(quizId: string) {
         // quiz will be started in 10 seconds
-        return 10;
+        return "10";
     }
 
     start(socket: SocketIO.Socket, content: any) {
@@ -177,14 +182,22 @@ export class LiveQuiz {
 
     }
 
+    private cancelQuiz(quizId: string) {
+        // WIP: disconnect all connections of this quiz
+        console.log("disconnect all connections of quiz: " + quizId);
+
+    }
+
     abort(socket: SocketIO.Socket, content: any) {
         const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
+        console.log([quizId, userId]);
         if (this.isOwner(quizId, userId)) {
             // WIP: Deactivate this quiz in DB records here
 
             // Broadcast that quiz has been aborted
             socket.to(quizId).emit("cancelled", null);
+            this.cancelQuiz(quizId);
         }
 
     }
