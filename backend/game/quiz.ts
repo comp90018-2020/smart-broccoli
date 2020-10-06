@@ -2,39 +2,21 @@ import { jwtVerify } from "../helpers/jwt";
 import Quiz from "../models/quiz";
 import Question from "../models/question";
 import { getQuiz } from "../controllers/quiz";
+import { use } from "chai";
 
-export class QuizReader extends Quiz {
-    private pos = 0;
-    private quizJson: any;
 
-    async loadQuiz(userId: number, quizId: number) {
-        // load quiz from database
-        this.quizJson = await getQuiz(userId, Number(quizId))
-    }
 
-    next() {
-        if (this.pos < this.questions.length)
-            return this.questions[this.pos++];
-        else
-            return false;
-    }
 
-    // make this class iteratable
-    [Symbol.iterator]() { return super.questions.values() }
-
-}
 export class LiveQuiz {
     // shaerd obj saves live quiz sess
     sess: {
-        [key: number]: {
-            [key: string]: any
-        }
+        [key: string]: any
     };
-    secret: string = "aaa";
+
 
 
     constructor() {
-        this.sess = {}
+        this.sess = { 1: { "participant": new Set([])} };
     }
 
     /**
@@ -43,145 +25,261 @@ export class LiveQuiz {
      */
     verifySocketConn(socket: SocketIO.Socket) {
         // jwtVerify(socket.handshake.query.token, this.secret);
+        return true;
     }
 
-    loadQuiz(quizId: number) {
-        return {}
+
+    private checkAnswer(quizId: string, answer: any) {
+        const questionId = answer.question;
+        const MCSelection = answer.MCSelection;
+        const TFSelection = answer.TFSelection;
+        const points = 0;
+        // check answers for this question here 
+        return points;
     }
 
-    async activeQuiz(socket: SocketIO.Socket, content: any) {
-        // verify connection
-        this.verifySocketConn(socket);
+    private recordPoints(userId: string, points: number) {
+        // WIP: record points gained
+    }
 
-        const quizId = content.quizId;
+
+    private formatAnswered(quizId: string, questionId: string) {
+        let count = 0;
+        // WIP: get answered paticipant count here
+
+        return {
+            "question": questionId,
+            "count": count
+        }
+
+    }
+
+    answer(socket: SocketIO.Socket, content: any) {
+        // {
+        //     "question": 3,
+        //     "MCSelection": 0,  // list index of answer chosen (for MC Question)
+        //     "TFSelection": true | false  // for TF question
+        // }
+        const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
-        console.log(userId)
+        const questionId = content.questionId;
+        console.log([quizId, userId, questionId])
 
-        // json resoonse  
-        let ret: { [key: string]: string };
-        if (quizId in this.sess) {
-            // quiz is in session
-            if (this.sess[quizId].status == "inactive") {
-                // and quiz is inactive
-                this.sess[quizId].status = "active";
-                ret = { "res": "success" }
-            } else {
-                ret = { "res": "failed", "msg": `Quiz ${quizId} is ${this.sess[quizId].status}` };
-            }
-        } else {
-            // quiz is not in session
+        const points = this.checkAnswer(quizId, content);
+        this.recordPoints(userId, points);
 
-            try {
-                // read quiz from database
-                // init quiz in session and make the status be active
-                this.sess[quizId] = { "status": "active", "quiz": new QuizReader(userId, quizId) };
-                console.log(this.sess);
+        // braodcast that one more participant answered this question
+        const answered = this.formatAnswered(quizId, questionId);
 
-                ret = { "res": "success" }
-            }
-            catch (err) {
-                ret = { "res": `Failed: ${err}` }
-            }
+        console.log(answered);
+        socket.to(quizId).emit("questionAnswered", answered);
 
+        // if everyone has answered
+        if (answered.count >= this.sess[quizId].participant.length) {
+            this.releaseQuestionOutcome(socket);
         }
-
-        // response to the end
-        socket.send(ret);
     }
 
-    abortQuiz(socket: SocketIO.Socket, content: any) {
-        // verify connection
-        this.verifySocketConn(socket);
+    // WIP: release question outcome after timeout
+    /**
+     * Everyone has answered or timeout
+     * @param socket 
+     */
+    releaseQuestionOutcome(socket: SocketIO.Socket) {
 
-        const quizId = content.quizId;
+        const quizId = socket.handshake.query.quizId;
+        let questionOutCome = {};
+        // WIP: summary question outcome here
 
-        // json resoonse  
-        const ret = { "res": "success" };
-        if (quizId in this.sess && "status" in this.sess[quizId]) {
-            this.sess[quizId].status = "inactive";
-        }
-
-        // response to the end
-        socket.send(ret);
-
+        // braodcast question outcome
+        socket.to(quizId).emit("questionOutcome", questionOutCome);
     }
 
-    joinQuiz(socket: SocketIO.Socket, content: any) {
-        // verify connection
-        this.verifySocketConn(socket);
+    private welcomeMSG(quizId: string) {
+        // WIP: format welcome message here
 
-        const quizId = content.quizId;
+        return Array.from(this.sess[quizId].participant);
+    }
 
-        // json resoonse  
-        let ret: { [key: string]: string };
-        if (quizId in this.sess && this.sess[quizId].status === 'active') {
-            // socket join in a room named ${quizId}
+    welcome(socket: SocketIO.Socket) {
+        const quizId = socket.handshake.query.quizId;
+        const userId = socket.handshake.query.userId;
+
+        if (!this.isOwner(quizId, userId)) {
+            // add user to socket room
             socket.join(quizId);
-            ret = { "res": "success" };
-        } else {
-            ret = { "res": "falied", "msg": `${quizId} is not active` };
-        }
+            // add user to session
+            this.sess[quizId].participant.add(userId);
+            console.log(this.sess[quizId]);
 
-        console.log(this.sess)
-        // response to the end
-        socket.send(ret);
+            // broadcast that user has joined
+            const msg =
+            {
+                "id": userId,
+                "name": this.getUserNameById(userId)
+            }
+            socket.to(quizId).emit("playerJoin", msg);
+
+            socket.emit("welcome", this.welcomeMSG(quizId));
+        }
 
     }
 
-    startQuiz(socket: SocketIO.Socket, content: any) {
-        // verify connection
-        this.verifySocketConn(socket);
+    quit(socket: SocketIO.Socket, content: any) {
+        const quizId = socket.handshake.query.quizId;
+        const userId = socket.handshake.query.userId;
 
-        const quizId = content.quizId;
+        // remove this participant from session in memory
+        const index = this.sess[quizId].participants.indexOf(userId);
+        this.sess[quizId].participants.splice(index, 1);
 
-        if (quizId in this.sess && this.sess[quizId].status === 'active') {
-            const msg = { "action": 0, "msg": "Quiz starts" };
-            // broadcast to the room with msg that quiz has been started
-            socket.to(quizId).send(msg);
+        // WIP: Remove this participant from this quiz in DB records here
 
-            // broadcast to the room the first question
-            this.nextQuestion(socket, content);
-        } else {
-            const ret = { "res": "falied", "msg": "`${quizId} is not active: `${this.sess[quizId].status}``" };
-            socket.send(ret);
+        // broadcast that user has left
+        const msg =
+        {
+            "id": userId,
+            "name": this.getUserNameById(userId)
         }
+        socket.to(quizId).emit("playerLeave", msg);
+    }
+
+    private isOwner(quizId: string, userId: string) {
+        let ret = true;
+        // WIP: check if the user owns this quiz here
+        if (userId == '1') {
+            ret = true;
+        } else {
+            ret = false;
+        }
+        return ret;
+    }
+
+    private starting(quizId: string) {
+        // quiz will be started in 10 seconds
+        return 10;
+    }
+
+    start(socket: SocketIO.Socket, content: any) {
+        console.log(socket.handshake.query);
+        const quizId = socket.handshake.query.quizId;
+        const userId = socket.handshake.query.userId;
+        console.log(socket.handshake.query.quizId);
+        console.log(socket.handshake.query.userId);
+        if (this.isOwner(quizId, userId)) {
+            // WIP: make quiz status started in session
+            console.log(this.sess)
+
+            // Broadcast that quiz will be started
+            socket.to(quizId).emit("starting", this.starting(quizId));
+        }
+
+    }
+
+    abort(socket: SocketIO.Socket, content: any) {
+        const quizId = socket.handshake.query.quizId;
+        const userId = socket.handshake.query.userId;
+        if (this.isOwner(quizId, userId)) {
+            // WIP: Deactivate this quiz in DB records here
+
+            // Broadcast that quiz has been aborted
+            socket.to(quizId).emit("cancelled", null);
+        }
+
+    }
+
+    private getNextQuestionId() {
+        // get next question id here
+        let nextQuestionId = 0;
+        return nextQuestionId;
+    }
+
+    private formatQuestion(questionId: string) {
+        // format question to 
+        // {
+        //     "no": 1,
+        //     "text": "Who sells the magic wands?",
+        //     "hasPic": true | false
+        //     "options": [
+        //         {
+        //             "text": "Aaron Harwood"
+        //         },
+        //         ...
+        //     ],
+        //     "time": 20
+        // }
+
+        const question = {
+            "no": 1,
+            "text": "Is Qifan Pretty?",
+            "hasPic": true,
+            "options": [
+                {
+                    "text": "YES"
+                },
+                {
+                    "text": "SURE"
+                }],
+            "time": 20
+        };
+        return question;
+
     }
 
     nextQuestion(socket: SocketIO.Socket, content: any) {
-        // verify connection
-        this.verifySocketConn(socket);
-        const quizId = content.quizId;
-        // json resoonse  
-        let ret: { [key: string]: any };
-
-        if (quizId in this.sess && this.sess[quizId].status === 'active') {
-            ret = { "action": 0, "msg": "Quiz starts" };
-            // broadcast to the room that quiz has been started
-            socket.to(quizId).send(ret);
-
-            // broadcast to the room the first question
-            this.nextQuestion(socket, content);
-        } else {
-            ret = { "res": "falied", "msg": "`${quizId} is not active: `${this.sess[quizId].status}``" };
-            socket.send(ret);
+        const quizId = socket.handshake.query.quizId;
+        const userId = socket.handshake.query.userId;
+        const nextQuestionId = this.getNextQuestionId();
+        if (this.isOwner(quizId, userId)) {
+            //  broadcast next question to participants
+            const question = this.formatQuestion(this.sess[quizId].questions[nextQuestionId]);
+            socket.to(quizId).emit("nextQuestion", question);
         }
     }
 
-    answerQuiz(socket: SocketIO.Socket, content: any) {
+    private formatBoard(quizId: string) {
+        let leaderboard = [{}];
+        // WIP: format leaderborad here
 
+        return leaderboard;
+    }
+
+    showBoard(socket: SocketIO.Socket, content: any) {
+        const quizId = socket.handshake.query.quizId;
+        const userId = socket.handshake.query.userId;
+
+        if (this.isOwner(quizId, userId)) {
+            //  broadcast Board to participants
+            socket.to(quizId).emit("questionOutcome", this.formatBoard(quizId));
+        }
     }
 
 
 
-    releaseLeaderBoardQuiz(socket: SocketIO.Socket, content: any) {
-
+    private getUserNameById(userId: string) {
+        return "Handsome Broccoli"
     }
 
-    endQuiz(socket: SocketIO.Socket, content: any) {
+    playerJoin(socket: SocketIO.Socket, playerId: string) {
+        const quizId = socket.handshake.query.quizId;
+        const userId = socket.handshake.query.userId;
 
+        return this.sess.quizId.participants.push(userId)
+        return {
+            "id": userId,
+            "name": this.getUserNameById(userId)
+        };
     }
 
-    getQuizStatus(socket: SocketIO.Socket, content: any) {
+    playerLeave(socket: SocketIO.Socket, playerId: string) {
+        const quizId = socket.handshake.query.quizId;
+        const userId = socket.handshake.query.userId;
 
+        return this.sess[quizId].participants.push(userId)
+        return {
+            "id": userId,
+            "name": this.getUserNameById(userId)
+        };
     }
+
 }
