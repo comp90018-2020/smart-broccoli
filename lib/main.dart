@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fuzzy_broccoli/theme.dart';
-import 'src/QuizTaker/quiz_taker.dart';
+import 'src/quiz_taker/quiz_taker.dart';
+import 'package:smart_broccoli/theme.dart';
 
+import 'src/auth/auth_screen.dart';
 
 
 void main() => runApp(MyApp());
@@ -12,11 +13,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      // Warning, this code needs to be changed if ported into main
-      theme: FuzzyBroccoliTheme().themeData,
       debugShowCheckedModeBanner: false,
-      title: 'Test Flutter',
-      home: quizTaker(),
+      title: 'Smart Broccoli',
+      theme: SmartBroccoliTheme().themeData,
+      //routes: {'/auth': (context) => AuthScreen()},
+      //initialRoute: '/auth',
+      // Debug purposes only, replace with above later on
+      routes: {'/quiz_taker': (context) => quizTaker()},
+      initialRoute: '/quiz_taker',
 
     );
   }

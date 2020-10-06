@@ -34,7 +34,7 @@ const options = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "fuzzy-broccoli server",
+            title: "smart-broccoli server",
             version: "1.0.0",
         },
     },
@@ -62,7 +62,7 @@ app.get(["/", "/index.html"], (req, res, next) => {
                     )
                     .replace(
                         "<title>Swagger UI</title>",
-                        "<title>Fuzzy Broccoli</title>"
+                        "<title>Smart Broccoli</title>"
                     )
             );
         }

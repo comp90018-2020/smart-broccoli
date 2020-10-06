@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class FuzzyBroccoliColourScheme extends ColorScheme {
+class SmartBroccoliColourScheme extends ColorScheme {
   static const Color tabHolderBackground = Color(0xFF82C785);
   static const Color tabHolderPill = Color(0xFFFEC12D);
   static const Color tabHolderPillText = Color(0xFF654C12);
   static const Color logoContainerBackground = Colors.white;
   static const Color inputFieldColor = Colors.white;
 
-  FuzzyBroccoliColourScheme()
+  SmartBroccoliColourScheme()
       : super.light(
 
           background: Color(0xFF4CAF50),
@@ -20,10 +20,10 @@ class FuzzyBroccoliColourScheme extends ColorScheme {
 }
 
 /// Singleton class holding the app's `ThemeData` object
-class FuzzyBroccoliTheme {
-  static final _instance = FuzzyBroccoliTheme._internal();
+class SmartBroccoliTheme {
+  static final _instance = SmartBroccoliTheme._internal();
   final ThemeData _themeData = ThemeData(
-    colorScheme: FuzzyBroccoliColourScheme(),
+    colorScheme: SmartBroccoliColourScheme(),
     buttonTheme: ButtonThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(6)),
@@ -39,24 +39,24 @@ class FuzzyBroccoliTheme {
     inputDecorationTheme: InputDecorationTheme(
       contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       filled: true,
-      fillColor: FuzzyBroccoliColourScheme.inputFieldColor,
+      fillColor: SmartBroccoliColourScheme.inputFieldColor,
       border: UnderlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(5)),
       ),
     ),
     tabBarTheme: TabBarTheme(
-      labelColor: FuzzyBroccoliColourScheme.tabHolderPillText,
+      labelColor: SmartBroccoliColourScheme.tabHolderPillText,
       unselectedLabelColor: Colors.white,
       indicator: BoxDecoration(
         borderRadius: BorderRadius.circular(50),
-        color: FuzzyBroccoliColourScheme.tabHolderPill,
+        color: SmartBroccoliColourScheme.tabHolderPill,
       ),
     ),
   );
   ThemeData get themeData => _themeData;
 
-  FuzzyBroccoliTheme._internal();
-  factory FuzzyBroccoliTheme() {
+  SmartBroccoliTheme._internal();
+  factory SmartBroccoliTheme() {
     return _instance;
   }
 }
@@ -66,7 +66,7 @@ class LogoContainer extends Container {
   LogoContainer({@required Widget child})
       : super(
           height: 200,
-          color: FuzzyBroccoliColourScheme.logoContainerBackground,
+          color: SmartBroccoliColourScheme.logoContainerBackground,
           child: child,
         );
 }
@@ -82,7 +82,7 @@ class TabHolder extends FractionallySizedBox {
           child: Container(
             margin: margin,
             decoration: const BoxDecoration(
-              color: FuzzyBroccoliColourScheme.tabHolderBackground,
+              color: SmartBroccoliColourScheme.tabHolderBackground,
               borderRadius: BorderRadius.all(Radius.circular(25)),
             ),
             child: TabBar(tabs: tabs),

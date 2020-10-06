@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:fuzzy_broccoli/theme.dart';
+import 'package:smart_broccoli/theme.dart';
 
 import 'login.dart';
 import 'register.dart';

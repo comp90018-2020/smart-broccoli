@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:fuzzy_broccoli/models.dart';
+import 'package:smart_broccoli/models.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'package:tuple/tuple.dart';

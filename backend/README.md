@@ -1,5 +1,5 @@
 # Backend
-![Build Backend](https://github.com/comp90018-2020/fuzzy-broccoli/workflows/Build%20Backend/badge.svg)
+![Build Backend](https://github.com/comp90018-2020/smart-broccoli/workflows/Build%20Backend/badge.svg)
 
 Backend server for app
 
