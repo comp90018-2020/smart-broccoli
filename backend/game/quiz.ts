@@ -16,7 +16,7 @@ export class LiveQuiz {
 
 
     constructor() {
-        this.sess = { 1: { "participant": new Set([])} };
+        this.sess = { 1: { "participants": new Set([])} };
     }
 
     /**
@@ -68,14 +68,14 @@ export class LiveQuiz {
         const points = this.checkAnswer(quizId, content);
         this.recordPoints(userId, points);
 
-        // braodcast that one more participant answered this question
+        // braodcast that one more participants answered this question
         const answered = this.formatAnswered(quizId, questionId);
 
         console.log(answered);
         socket.to(quizId).emit("questionAnswered", answered);
 
         // if everyone has answered
-        if (answered.count >= this.sess[quizId].participant.length) {
+        if (answered.count >= this.sess[quizId].participants.length) {
             this.releaseQuestionOutcome(socket);
         }
     }
@@ -98,7 +98,7 @@ export class LiveQuiz {
     private welcomeMSG(quizId: string) {
         // WIP: format welcome message here
 
-        return Array.from(this.sess[quizId].participant);
+        return Array.from(this.sess[quizId].participants);
     }
 
     welcome(socket: SocketIO.Socket) {
@@ -109,7 +109,7 @@ export class LiveQuiz {
             // add user to socket room
             socket.join(quizId);
             // add user to session
-            this.sess[quizId].participant.add(userId);
+            this.sess[quizId].participants.add(userId);
             console.log(this.sess[quizId]);
 
             // broadcast that user has joined
@@ -129,11 +129,10 @@ export class LiveQuiz {
         const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
 
-        // remove this participant from session in memory
-        const index = this.sess[quizId].participants.indexOf(userId);
-        this.sess[quizId].participants.splice(index, 1);
+        // remove this participants from session in memory
+        this.sess[quizId].participants.delete(userId);
 
-        // WIP: Remove this participant from this quiz in DB records here
+        // WIP: Remove this participants from this quiz in DB records here
 
         // broadcast that user has left
         const msg =
@@ -142,6 +141,8 @@ export class LiveQuiz {
             "name": this.getUserNameById(userId)
         }
         socket.to(quizId).emit("playerLeave", msg);
+        // disconnect
+        socket.disconnect();
     }
 
     private isOwner(quizId: string, userId: string) {
