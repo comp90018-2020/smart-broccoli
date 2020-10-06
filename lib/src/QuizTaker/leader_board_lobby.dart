@@ -19,16 +19,21 @@ class BackgroundClipper extends CustomClipper<Path> {
 
     // path.moveTo(0, size.height * 0.66);
     //  path.moveTo(0, size.width*1.5);
-    path.lineTo(0.0, size.height/4);
-    path.quadraticBezierTo(
+    path.lineTo(0, size.height / 4.25);
+    var firstControlPoint = new Offset(size.width / 4, size.height / 3);
+    var firstEndPoint = new Offset(size.width / 2, size.height / 3 - 60);
+    var secondControlPoint =
+    new Offset(size.width - (size.width / 4), size.height / 3.5 - 65);
+    var secondEndPoint = new Offset(size.width, size.height / 3 - 40);
 
-        size.width / 4, size.height/(3.5) - 80, size.width / 2, size.height/(3.5) - 40);
+    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
+        firstEndPoint.dx, firstEndPoint.dy);
+    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy,
+        secondEndPoint.dx, secondEndPoint.dy);
 
-    path.quadraticBezierTo(size.width - (size.width / (3.5)), size.height/(3.5),
-
-        size.width, size.height/(3.5) - 40);
-
-    path.lineTo(size.width, 0.0);
+    path.lineTo(size.width, size.height / 3);
+    path.lineTo(size.width, 0);
+    path.close();
 
 
     return path;
@@ -52,11 +57,17 @@ class _leaderBoardLobby extends State<leaderBoardLobby> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onBackground,
+      backgroundColor: Theme
+          .of(context)
+          .colorScheme
+          .onBackground,
       appBar: AppBar(
         title: Text("Quiz"),
         centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme
+            .of(context)
+            .colorScheme
+            .background,
         elevation: 0,
       ),
       // Stacks are used to stack widgets
@@ -67,7 +78,10 @@ class _leaderBoardLobby extends State<leaderBoardLobby> {
             child: ClipPath(
               clipper: BackgroundClipper(),
               child: Container(
-                color: Theme.of(context).colorScheme.background,
+                color: Theme
+                    .of(context)
+                    .colorScheme
+                    .background,
               ),
             ),
           ),
@@ -75,9 +89,9 @@ class _leaderBoardLobby extends State<leaderBoardLobby> {
           Container(
             child: new Column(
               children: <Widget>[
-                SizedBox(height: 50),
-               _topLeaderBoard(),
-                SizedBox(height: 10),
+                SizedBox(height: 40),
+                _topLeaderBoard(),
+                SizedBox(height: 40),
                 // The list of Quiz players
                 _quizPlayers(),
               ],
@@ -88,52 +102,66 @@ class _leaderBoardLobby extends State<leaderBoardLobby> {
     );
   }
 
-  Widget _topLeaderBoard(){
+  Widget _topLeaderBoard() {
     return new Row(
-      mainAxisAlignment: MainAxisAlignment.center, //Center Column contents vertically,
-      crossAxisAlignment: CrossAxisAlignment.center, //Center Column contents horizontally,
+      mainAxisAlignment: MainAxisAlignment.center,
+      //Center Column contents vertically,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      //Center Column contents horizontally,
       children: <Widget>[
-        Container(
-          height: 50,
-          width: 50,
-          decoration: new BoxDecoration(
+        Column(
+          children: <Widget>[
+            Container(
+            height: 50,
+            width: 50,
+            // child: Icon(Icons.)
+            decoration: new BoxDecoration(
 
-            // You need this line or the box will be transparent
-            color: Colors.lightGreen,
-            shape: BoxShape.circle,
+              // You need this line or the box will be transparent
+              color: Colors.lightGreen,
+              shape: BoxShape.circle,
+            ),
           ),
+            Text("Winner 1"),
+          ],
+        ),
+
+        SizedBox(width: 50),
+        Column(
+          children: <Widget>[
+            Container(
+              height: 100,
+              width: 100,
+              decoration: new BoxDecoration(
+
+                // You need this line or the box will be transparent
+                color: Colors.lightGreen,
+                shape: BoxShape.circle,
+              ),
+            ),
+            Text("Winner 2"),
+          ],
         ),
         SizedBox(width: 50),
-        Container(
-          height: 100,
-          width: 100,
-          decoration: new BoxDecoration(
+        Column(
+          children: <Widget>[
+            Container(
+              height: 50,
+              width: 50,
+              decoration: new BoxDecoration(
 
-            // You need this line or the box will be transparent
-            color: Colors.lightGreen,
-            shape: BoxShape.circle,
-          ),
+                // You need this line or the box will be transparent
+                color: Colors.lightGreen,
+                shape: BoxShape.circle,
+              ),
+            ),
+            Text("Winner 3"),
+          ],
         ),
-        SizedBox(width: 50),
-        Container(
-          height: 50,
-          width: 50,
-          decoration: new BoxDecoration(
-
-            // You need this line or the box will be transparent
-            color: Colors.lightGreen,
-            shape: BoxShape.circle,
-          ),
-        ),
-
-
 
 
       ],
     );
-
-
-
   }
 
 
