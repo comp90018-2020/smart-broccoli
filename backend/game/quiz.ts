@@ -1,10 +1,4 @@
 import { jwtVerify } from "../helpers/jwt";
-import Quiz from "../models/quiz";
-import Question from "../models/question";
-import { getQuiz } from "../controllers/quiz";
-import { use } from "chai";
-import { Socket } from "dgram";
-
 
 export class Session {
     private participants: any;
@@ -38,6 +32,7 @@ export class Session {
     allParticipants(){
         return this.participants;
     }
+    
     /**
      * Set questions list of this session
      * @param questions questions list
