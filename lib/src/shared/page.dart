@@ -130,7 +130,6 @@ class CustomPage extends StatelessWidget {
                     leading: const Icon(Icons.exit_to_app),
                     title: Text('Sign out',
                         style: TextStyle(color: Colors.grey[700])),
-                    trailing: const Icon(Icons.chevron_right),
                     onTap: () {},
                   ),
                 ],
