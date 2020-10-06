@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuzzy_broccoli/theme.dart';
-import 'src/QuizTaker/quizTaker.dart';
+import 'src/QuizTaker/quiz_taker.dart';
 
 
 

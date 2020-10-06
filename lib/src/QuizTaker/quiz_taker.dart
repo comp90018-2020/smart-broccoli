@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fuzzy_broccoli/src/QuizTaker/quizQuestion.dart';
+import 'package:fuzzy_broccoli/src/QuizTaker/quiz_question.dart';
 
 import '../../theme.dart';
-import 'startLobby.dart';
+import 'start_lobby.dart';
 
 class quizTaker extends StatefulWidget {
   @override
@@ -50,6 +50,7 @@ class _quizTakerState extends State<quizTaker> {
     return new Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background,
         body: Stack(
+          // overflow: Overflow.visible,
           children: <Widget>[
             Container(
               child: ClipPath(
@@ -71,18 +72,6 @@ class _quizTakerState extends State<quizTaker> {
             ),
           ],
         ));
-  }
-
-  Widget _buildTextFields() {
-    return Container(
-      child: new Column(
-        children: <Widget>[
-          // Padding
-          SizedBox(height: 50),
-          _SwitchButton(),
-        ],
-      ),
-    );
   }
 
   Widget _SwitchButton() {
@@ -116,6 +105,7 @@ class _quizTakerState extends State<quizTaker> {
             // Passed into each of the methods will generate a different
             // List of items
             height: 250,
+
             child: TabBarView(
               children: [
                 _buildQuizList("ALL"),
@@ -176,65 +166,74 @@ class _quizTakerState extends State<quizTaker> {
     );
   }
 
+
+
   /// Widget which constructs a quiz list
   Widget _buildQuizList(type) {
     List<String> items = getItems(type);
 
     return Container(
       // margin: EdgeInsets.fromLTRB(20,0,),
-      height: 200.0,
+      // height: 300.0,
       child: ListView.separated(
         // Enable Horizontal Scroll
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
         itemBuilder: (context, index) {
-          return _listTile(items[index], type);
+          return _cardTile(items[index], type);
         },
+        // Space between the cards
         separatorBuilder: (context, index) {
-          return Divider(indent: 10);
+          return Divider(indent: 1);
         },
       ),
     );
   }
 
-  // TODO change to flat button
   /// This is a single tile within a list
   /// val is the position ID
   /// type is one of "ALL" "SELF" "LIVE"
   /// This is used to demostrate that tab changes the list as well
-  Widget _listTile(val, type) {
+  Widget _cardTile(val, type) {
     return new Container(
-      width: 160.0,
-      child: new RaisedButton(
-        // The padding somehow allows the image to not leave any gaps on the
-        // List Tile, this is defintively a hack TODO check if it actually does it
-        padding: EdgeInsets.all(0.0),
-        color: Colors.white,
-        onPressed: () => _quiz(),
-        child: new Column(
-          children: <Widget>[
-            new Container(
-              // You will need to change this to a method to get an image
-              child: Image(image: AssetImage('assets/images/placeholder.png')),
-            ),
-            new Container(
-                child: Center(
-              child: Text(
-                val + type,
-                style: TextStyle(height: 5, fontSize: 5, color: Colors.black),
+      height: 150,
+      width: 200,
+      child: Card(
+        elevation: 16,
+        child: InkWell(
+          // For cool color effects uncomment these two lines
+          // highlightColor: Colors.pinkAccent,
+          // splashColor: Colors.greenAccent,
+          onTap: () => _quiz(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  // The image here is a placeholder, it is necessary to
+                  // Provide a height and a width value
+                  Image(image: AssetImage('assets/images/placeholder.png')),
+                  Text(
+                    val + type,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  Text('Subtitle', style: TextStyle(fontSize: 15)),
+                ],
               ),
-            )),
-            Expanded(child: Container()),
-            new Container(
-              child: Text(
-                "STATUS Here",
-                style: TextStyle(height: 5, fontSize: 5, color: Colors.black),
-              ),
-            ),
-          ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Text('Live', style: TextStyle(fontSize: 15)),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
+
   }
 
   /// Take a quiz, goes to the quiz lobby which then connects you to a quiz

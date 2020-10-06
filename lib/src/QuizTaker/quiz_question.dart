@@ -17,8 +17,8 @@ class quizQuestion extends StatefulWidget {
 
 class _quizQuestion extends State<quizQuestion> {
   // Global class varibles
-  int state = -1;
-  int _answerIndex = -1;
+  int _state = -1;
+  int _tappedIndex = -1;
 
   // Correct answer getter
   int actual = getAnswer();
@@ -99,11 +99,11 @@ class _quizQuestion extends State<quizQuestion> {
       new Container(
         child: Text(
           "Your Question Here",
-          style: TextStyle(height: 2, fontSize: 30, color: Colors.black),
+          style: TextStyle(height: 2, fontSize: 30),
         ),
       ),
       new Container(
-          // TODO GET IMAGE
+         // The image here is a placeholder
           child: Padding(
               padding: EdgeInsets.fromLTRB(60, 10, 60, 10),
               child: Image(image: AssetImage('assets/images/placeholder.png'))))
@@ -153,12 +153,27 @@ class _quizQuestion extends State<quizQuestion> {
   // features of the indivisual grid tiles
   Widget _answerTab(index) {
     if (_form == FormType.Standard) {
-      return Material(
+      return new Card(
+          elevation: 16,
+          child:InkWell(
+          // For cool color effects uncomment these two lines
+          // highlightColor: Colors.pinkAccent,
+          // splashColor: Colors.greenAccent,
+          onTap: () => updateAnswer(index),
+    child: Center(
+    child: Text(
+    'Item $index',
+    style: Theme.of(context).textTheme.headline5,
+    ),
+    )),
+      );
+
+      /* Material(
         elevation: 10,
-        color: Colors.white,
         child: InkWell(
-            highlightColor: Colors.pinkAccent,
-            splashColor: Colors.greenAccent,
+          // For cool color effects uncomment these two lines
+           // highlightColor: Colors.pinkAccent,
+           // splashColor: Colors.greenAccent,
             onTap: () => updateAnswer(index),
             child: Center(
               child: Text(
@@ -166,16 +181,16 @@ class _quizQuestion extends State<quizQuestion> {
                 style: Theme.of(context).textTheme.headline5,
               ),
             )),
-      );
+      ); */
     } else {
-      return Material(
+      return new Card(
         elevation: 10,
         color: findColour(index),
-        child: InkWell(
-            highlightColor: Colors.pinkAccent,
-            splashColor: Colors.greenAccent,
-
-            //  onTap: () {},
+        child:InkWell(
+          // For cool color effects uncomment these two lines
+          // highlightColor: Colors.pinkAccent,
+          // splashColor: Colors.greenAccent,
+            // onTap: () => updateAnswer(index),
             child: Center(
               child: Text(
                 'Item $index',
@@ -188,7 +203,7 @@ class _quizQuestion extends State<quizQuestion> {
 
   // Send the answer to the server
   void sendAnswer() {
-    int ans = _answerIndex;
+    int ans = _tappedIndex;
     // TODO logic code here
   }
 
@@ -196,7 +211,7 @@ class _quizQuestion extends State<quizQuestion> {
   // Note indexing starts at 0 and goes from
   // left -> right -> down left -> down right
   bool isCorrectIndex(index) {
-    print("Actual " + _answerIndex.toString());
+   // print("Actual " + _tappedIndex.toString());
     if (getAnswer() == index) {
       return true;
     }
@@ -205,7 +220,7 @@ class _quizQuestion extends State<quizQuestion> {
 
   // TODO remove this
   bool isChosenIndex(index) {
-    if (_answerIndex == index) {
+    if (_tappedIndex == index) {
       return true;
     }
     return false;
@@ -215,17 +230,17 @@ class _quizQuestion extends State<quizQuestion> {
   // TODO have highlighting showing which button the user has pressed before time
   void updateAnswer(ans) async {
     print("Updated " + ans.toString());
-    _answerIndex = ans;
+    _tappedIndex = ans;
     if (ans == getAnswer()) {
-      state = 1;
+      _state = 1;
     } else {
-      state = 0;
+      _state = 0;
     }
   }
 
   // See quiztimer, text tells you if you got is right or wrong
   Text determineText() {
-    if (state == 1) {
+    if (_state == 1) {
       return Text("You Got it Correct!");
     }
     return Text("You Got it Incorrect!");
