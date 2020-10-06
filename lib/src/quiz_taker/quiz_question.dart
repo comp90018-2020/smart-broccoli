@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'leader_board_lobby.dart';
+
 enum FormType {
   ShowCorrect,
   Standard,
@@ -191,7 +193,10 @@ class _quizQuestion extends State<quizQuestion> {
           // For cool color effects uncomment these two lines
           // highlightColor: Colors.pinkAccent,
           // splashColor: Colors.greenAccent,
-            // onTap: () => updateAnswer(index),
+
+            // WARN: This ONTAP is for debug purposes only, remove from
+            // Implementation
+            onTap: () =>  next(),
             child: Center(
               child: Text(
                 'Item $index',
@@ -269,5 +274,15 @@ class _quizQuestion extends State<quizQuestion> {
   // TODO implement
   static List<String> getData() {
     return ["hi", "hello", "goodbye", "yes"];
+  }
+
+  // This method in the real app should check if there is another question
+  // If not, move to the leaderboard
+  // Otherwise move to next question
+  void next() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) =>  LeaderBoardLobby()),
+    );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuzzy_broccoli/src/QuizTaker/quiz_question.dart';
+import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 
 import '../../theme.dart';
 import 'start_lobby.dart';

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:fuzzy_broccoli/src/QuizTaker/quiz_question.dart';
+import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 
 /// The Skeleton for the start lobby
 class start_lobby extends StatefulWidget {

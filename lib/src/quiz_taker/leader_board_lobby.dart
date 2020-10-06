@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 /// The Skeleton for the Leaderboard lobby
 /// Unfinished as it is beyond my skill ability
 /// There are pending changes
-class leaderBoardLobby extends StatefulWidget {
+class LeaderBoardLobby extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _leaderBoardLobby();
+  State<StatefulWidget> createState() => new _LeaderBoardLobby();
 }
 
 // Used to design the background
@@ -45,7 +45,7 @@ class BackgroundClipper extends CustomClipper<Path> {
   }
 }
 
-class _leaderBoardLobby extends State<leaderBoardLobby> {
+class _LeaderBoardLobby extends State<LeaderBoardLobby> {
 
 
   // Placeholder list, the list contents should be replaced with usernames.
