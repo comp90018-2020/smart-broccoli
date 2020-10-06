@@ -82,41 +82,53 @@ class CustomPage extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   children: <Widget>[
                     SizedBox(
-                        height: 125,
+                        height: 130,
                         child: DrawerHeader(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
+                          child: Column(
                             children: [
-                              // User picture
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    borderRadius: BorderRadius.circular(100)),
-                                width: 50,
-                                height: 50,
+                              InkWell(
+                                onTap: () {},
+                                child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      // User picture
+                                      Container(
+                                        decoration: BoxDecoration(
+                                            color: Colors.green,
+                                            borderRadius:
+                                                BorderRadius.circular(100)),
+                                        width: 50,
+                                        height: 50,
+                                      ),
+                                      // Name/email
+                                      Expanded(
+                                          child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 18),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text('name',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText1),
+                                            Text('email',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText2),
+                                          ],
+                                        ),
+                                      )),
+                                      Icon(Icons.chevron_right,
+                                          color: Colors.grey[700])
+                                    ]),
                               ),
-                              // Name/email
-                              Expanded(
-                                  child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 18),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('name',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText1),
-                                    Text('email',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2),
-                                  ],
-                                ),
-                              )),
-                              Icon(Icons.chevron_right, color: Colors.grey[700])
+                              Expanded(child: Container())
                             ],
                           ),
                         )),
