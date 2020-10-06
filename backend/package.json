@@ -25,7 +25,7 @@
     "swagger-ui-dist": "^3.35.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.12",
+    "@types/chai": "^4.2.13",
     "@types/express": "^4.17.8",
     "@types/express-validator": "^3.0.0",
     "@types/helmet": "^0.0.48",
