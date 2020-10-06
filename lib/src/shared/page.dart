@@ -63,8 +63,9 @@ class CustomPage extends StatelessWidget {
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(kToolbarHeight),
           child: Container(
+              // Alter shadow: https://stackoverflow.com/questions/54554569
               decoration: BoxDecoration(boxShadow: [
-                BoxShadow(color: Colors.white, offset: Offset(0, .2))
+                BoxShadow(color: Colors.white, offset: const Offset(0, .2))
               ]),
               child: AppBar(
                 title: Text(this.title),
@@ -86,29 +87,29 @@ class CustomPage extends StatelessWidget {
                       ),
                     ),
                     ListTile(
-                      leading: Icon(Icons.question_answer),
-                      title: Text('Take Quiz'),
+                      leading: const Icon(Icons.question_answer),
+                      title: const Text('Take Quiz'),
                       onTap: () {},
                     ),
                     ListTile(
-                      leading: Icon(Icons.edit),
-                      title: Text('Manage Quiz'),
+                      leading: const Icon(Icons.edit),
+                      title: const Text('Manage Quiz'),
                       onTap: () {},
                     ),
                     ListTile(
-                      leading: Icon(Icons.people),
-                      title: Text('Groups'),
+                      leading: const Icon(Icons.people),
+                      title: const Text('Groups'),
                       onTap: () {},
                     ),
                     Divider(),
                     ListTile(
-                      leading: Icon(Icons.info),
-                      title: Text('About'),
+                      leading: const Icon(Icons.info),
+                      title: const Text('About'),
                       onTap: () {},
                     ),
                     ListTile(
-                      leading: Icon(Icons.logout),
-                      title: Text('Sign out'),
+                      leading: const Icon(Icons.logout),
+                      title: const Text('Sign out'),
                       onTap: () {},
                     ),
                   ],
