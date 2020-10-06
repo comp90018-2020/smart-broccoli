@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/shared/page.dart';
+import 'package:smart_broccoli/src/shared/tabbed_page.dart';
 import 'package:smart_broccoli/theme.dart';
 
 void main() => runApp(MyApp());
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Smart Broccoli',
         theme: SmartBroccoliTheme().themeData,
-        home: CustomPage(
+        home: CustomTabbedPage(
           title: 'Page title',
           hasDrawer: true,
           tabs: [Tab(text: 'A'), Tab(text: 'B')],
