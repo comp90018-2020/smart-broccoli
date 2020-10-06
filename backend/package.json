@@ -13,6 +13,7 @@
   "author": "w01/10-4",
   "license": "MIT",
   "dependencies": {
+    "@firebase/app-types": "0.x",
     "express": "^4.17.1",
     "express-validator": "^6.6.1",
     "firebase-admin": "^9.2.0",
