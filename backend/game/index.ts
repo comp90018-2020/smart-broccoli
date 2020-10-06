@@ -10,59 +10,43 @@ const handler = new LiveQuiz();
 export default (socketIO: Server) => {
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
-        console.log('connected');
+        if (handler.verifySocketConn(socket)) {
+            // join & welcome
+            handler.welcome(socket);
 
-        // Emit an event to client
-        socket.emit('message', JSON.stringify({ "serverTs": Date.now() }));
+            // answer
+            socket.on('answer', (content: any) => {
+                handler.answer(socket, content);
+            });
 
-        socket.on('message', (content: any) => {
-            console.log(typeof (content));
-            console.log(content);
-        });
-        // activate quiz
-        socket.on('activateQuiz', (content: any) => {
-            handler.activeQuiz(socket, content);
-        });
+            // quit
+            socket.on('quit', (content: any) => {
+                handler.quit(socket, content);
+            });
 
-        // abort quiz
-        socket.on('abortQuiz', (content: any) => {
-            handler.abortQuiz(socket, content);
-        });
+            // start
+            socket.on('start', (content: any) => {
+                handler.start(socket, content);
+            });
 
-        // join quiz
-        socket.on('joinQuiz', (content: any) => {
-            handler.joinQuiz(socket, content);
-        });
+            // abort
+            socket.on('abort', (content: any) => {
+                handler.abort(socket, content);
+            });
 
-        // start quiz
-        socket.on('startQuiz', (content: any) => {
-            handler.startQuiz(socket, content);
-        });
+            // next question
+            socket.on('next', (content: any) => {
+                handler.nextQuestion(socket, content);
+            });
 
-        // answer quiz
-        socket.on('answerQuiz', (content: any) => {
-            handler.answerQuiz(socket, content);
-        });
+            // showBoard
+            socket.on('showBoard', (content: any) => {
+                handler.showBoard(socket, content);
+            });
 
-        // next question
-        socket.on('nextQuestion', (content: any) => {
-            handler.nextQuestion(socket, content);
-        });
-
-        // show leader board
-        socket.on('releaseLeaderBoard', (content: any) => {
-            handler.releaseLeaderBoardQuiz(socket, content);
-        });
-
-        // end quiz
-        socket.on('endQuiz', (content: any) => {
-            handler.endQuiz(socket, content);
-        });
-
-        // get quiz status in case of user drop out during the quiz
-        socket.on('getQuizStatus', (content: any) => {
-            handler.getQuizStatus(socket, content);
-        });
+        } else {
+            socket.disconnect();
+        };
 
         return next();
     })
