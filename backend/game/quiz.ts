@@ -114,8 +114,8 @@ export class LiveQuiz {
             // add user to socket room
             socket.join(quizId);
             // add user to session
+            const alreadHas = this.sess[quizId].participants.has(userId);
             this.sess[quizId].participants.add(userId);
-            console.log(this.sess[quizId]);
 
             // broadcast that user has joined
             const msg =
@@ -123,7 +123,10 @@ export class LiveQuiz {
                 "id": userId,
                 "name": this.getUserNameById(userId)
             }
-            socket.to(quizId).emit("playerJoin", msg);
+
+            if(!alreadHas){
+                socket.to(quizId).emit("playerJoin", msg);
+            }
 
             socket.emit("welcome", this.welcomeMSG(quizId));
         }
@@ -136,6 +139,9 @@ export class LiveQuiz {
 
         // remove this participants from session in memory
         this.sess[quizId].participants.delete(userId);
+        console.log(this.sess[quizId]);
+        // leave from socket room
+        socket.leave(quizId);
 
         // WIP: Remove this participants from this quiz in DB records here
 
@@ -252,7 +258,7 @@ export class LiveQuiz {
     }
 
     private formatBoard(quizId: string) {
-        let leaderboard = [{}];
+        let leaderboard = [{"this is leaderboard":"wohhoo"}];
         // WIP: format leaderborad here
 
         return leaderboard;
