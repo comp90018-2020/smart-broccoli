@@ -88,6 +88,7 @@ export const getGroup = async (user: User, groupId: number) => {
     const group = groupQuery[0];
     const groupJSON: any = group.toJSON();
     delete groupJSON["Users"];
+    delete groupJSON["UserGroup"];
     return {
         ...groupJSON,
         role: group.UserGroup.role,

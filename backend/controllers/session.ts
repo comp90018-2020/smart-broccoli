@@ -451,37 +451,34 @@ export const endSession = async (
     complete: boolean,
     progress: { userId: number; data: any; state?: string }[]
 ) => {
-    const transaction = await sequelize.transaction();
-
     try {
-        // Session has ended
-        await Session.update(
-            {
-                state: "ended",
-            },
-            {
-                where: { id: sessionId },
-                transaction,
-            }
-        );
-
-        // Update user entries
-        for (const entry of progress) {
-            await SessionParticipant.update(
+        await sequelize.transaction(async (t) => {
+            // Session has ended
+            await Session.update(
                 {
-                    progress: entry.data,
-                    state: entry.state || complete ? "complete" : "left",
+                    state: "ended",
                 },
                 {
-                    where: { userId: entry.userId, sessionId },
-                    transaction,
+                    where: { id: sessionId },
+                    t,
                 }
             );
-        }
 
-        await transaction.commit();
+            // Update user entries
+            for (const entry of progress) {
+                await SessionParticipant.update(
+                    {
+                        progress: entry.data,
+                        state: entry.state || complete ? "complete" : "left",
+                    },
+                    {
+                        where: { userId: entry.userId, sessionId },
+                        t,
+                    }
+                );
+            }
+        }
     } catch (err) {
-        await transaction.rollback();
         throw err;
     }
 };
