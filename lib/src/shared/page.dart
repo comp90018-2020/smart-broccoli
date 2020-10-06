@@ -86,7 +86,7 @@ class CustomPage extends StatelessWidget {
                         child: DrawerHeader(
                           child: Column(
                             children: [
-                              InkWell(
+                              GestureDetector(
                                 onTap: () {},
                                 child: Row(
                                     crossAxisAlignment:
