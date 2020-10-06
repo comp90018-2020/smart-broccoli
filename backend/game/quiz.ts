@@ -3,25 +3,83 @@ import Quiz from "../models/quiz";
 import Question from "../models/question";
 import { getQuiz } from "../controllers/quiz";
 import { use } from "chai";
+import { Socket } from "dgram";
 
 
+export class Session {
+    private participants: any;
+    private questions: [number];
+    private sockets: any;
+    private questionIdx = 0;
 
+    constructor() {
+        this.participants = new Set([]);
+        this.sockets = new Set();
+    }
+
+    addParticipant(userId: string, socket: SocketIO.Socket): void {
+        this.participants.add(userId);
+        this.sockets.add(socket);
+    }
+
+    removeParticipant(userId: string, socket: SocketIO.Socket): void {
+        this.participants.delete(userId);
+        this.sockets.delete(socket);
+    }
+
+    hasParticipant(userId: string): boolean {
+        return this.participants.has(userId);
+    }
+
+    countParticipants():number{
+        return this.participants.length;
+    }
+
+    allParticipants(){
+        return this.participants;
+    }
+    /**
+     * Set questions list of this session
+     * @param questions questions list
+     */
+    setQuestions(questions: any) {
+        this.questions = questions;
+    }
+
+    nextQuestion(): Object {
+        if (this.questionIdx < this.questions.length) {
+            return this.questions[this.questionIdx++];
+        } else {
+            return undefined;
+        }
+    }
+
+    close() {
+        this.sockets.forEach((s: SocketIO.Socket) => {
+            s.disconnect();
+        });
+        this.participants = new Set();
+    }
+
+}
 
 export class LiveQuiz {
     // shaerd obj saves live quiz sess
     sess: {
-        [key: string]: any
+        [key: string]: Session
     };
 
-
-
     constructor() {
-        this.sess = {
-            1: {
-                "participants": new Set([]),
-                "questions": [0]
-            }
-        };
+        this.sess= {};
+        // DEBUG ===>
+        let s = new Session();
+        s.setQuestions([0]);
+        this.addSession('1', s);
+        // DEBUG <===
+    }
+
+    addSession(quizId: string, session: Session) {
+        this.sess[quizId] = session;
     }
 
     /**
@@ -29,6 +87,7 @@ export class LiveQuiz {
      * @param socket socket
      */
     verifySocketConn(socket: SocketIO.Socket) {
+        // WIP: verify connection
         // jwtVerify(socket.handshake.query.token, this.secret);
         return true;
     }
@@ -80,7 +139,7 @@ export class LiveQuiz {
         socket.to(quizId).emit("questionAnswered", answered);
 
         // if everyone has answered
-        if (answered.count >= this.sess[quizId].participants.length) {
+        if (answered.count >= this.sess[quizId].countParticipants()) {
             this.releaseQuestionOutcome(socket);
         }
     }
@@ -103,7 +162,7 @@ export class LiveQuiz {
     private welcomeMSG(quizId: string) {
         // WIP: format welcome message here
 
-        return Array.from(this.sess[quizId].participants);
+        return Array.from(this.sess[quizId].allParticipants());
     }
 
     welcome(socket: SocketIO.Socket) {
@@ -114,8 +173,8 @@ export class LiveQuiz {
             // add user to socket room
             socket.join(quizId);
             // add user to session
-            const alreadHas = this.sess[quizId].participants.has(userId);
-            this.sess[quizId].participants.add(userId);
+            const alreadyJoined = this.sess[quizId].hasParticipant(userId);
+            this.sess[quizId].addParticipant(userId, socket);
 
             // broadcast that user has joined
             const msg =
@@ -124,7 +183,7 @@ export class LiveQuiz {
                 "name": this.getUserNameById(userId)
             }
 
-            if(!alreadHas){
+            if (!alreadyJoined) {
                 socket.to(quizId).emit("playerJoin", msg);
             }
 
@@ -138,8 +197,7 @@ export class LiveQuiz {
         const userId = socket.handshake.query.userId;
 
         // remove this participants from session in memory
-        this.sess[quizId].participants.delete(userId);
-        console.log(this.sess[quizId]);
+        this.sess[quizId].removeParticipant(userId, socket);
         // leave from socket room
         socket.leave(quizId);
 
@@ -191,7 +249,7 @@ export class LiveQuiz {
     private cancelQuiz(quizId: string) {
         // WIP: disconnect all connections of this quiz
         console.log("disconnect all connections of quiz: " + quizId);
-
+        this.sess[quizId].close();
     }
 
     abort(socket: SocketIO.Socket, content: any) {
@@ -208,13 +266,7 @@ export class LiveQuiz {
 
     }
 
-    private getNextQuestionId() {
-        // get next question id here
-        let nextQuestionId = 0;
-        return nextQuestionId;
-    }
-
-    private formatQuestion(questionId: string) {
+    private formatQuestion(questionId: Object) {
         // format question to 
         // {
         //     "no": 1,
@@ -249,16 +301,19 @@ export class LiveQuiz {
     nextQuestion(socket: SocketIO.Socket, content: any) {
         const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
-        const nextQuestionId = this.getNextQuestionId();
+        
         if (this.isOwner(quizId, userId)) {
             //  broadcast next question to participants
-            const question = this.formatQuestion(this.sess[quizId].questions[nextQuestionId]);
-            socket.to(quizId).emit("nextQuestion", question);
+            const nextQuestion = this.sess[quizId].nextQuestion();
+            if (nextQuestion !== undefined) {
+                const question = this.formatQuestion(nextQuestion);
+                socket.to(quizId).emit("nextQuestion", question);
+            }
         }
     }
 
     private formatBoard(quizId: string) {
-        let leaderboard = [{"this is leaderboard":"wohhoo"}];
+        let leaderboard = [{ "this is leaderboard": "wohhoo" }];
         // WIP: format leaderborad here
 
         return leaderboard;
@@ -274,32 +329,7 @@ export class LiveQuiz {
         }
     }
 
-
-
     private getUserNameById(userId: string) {
-        return "Handsome Broccoli"
+        return "Handsome Broccoli - " + userId;
     }
-
-    playerJoin(socket: SocketIO.Socket, playerId: string) {
-        const quizId = socket.handshake.query.quizId;
-        const userId = socket.handshake.query.userId;
-
-        return this.sess.quizId.participants.push(userId)
-        return {
-            "id": userId,
-            "name": this.getUserNameById(userId)
-        };
-    }
-
-    playerLeave(socket: SocketIO.Socket, playerId: string) {
-        const quizId = socket.handshake.query.quizId;
-        const userId = socket.handshake.query.userId;
-
-        return this.sess[quizId].participants.push(userId)
-        return {
-            "id": userId,
-            "name": this.getUserNameById(userId)
-        };
-    }
-
 }
