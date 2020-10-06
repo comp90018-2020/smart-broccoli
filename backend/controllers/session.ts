@@ -410,3 +410,78 @@ export const joinSession = async (userId: number, code: string) => {
         token,
     };
 };
+
+/**
+ * Moves a session to activated state
+ * @param sessionId
+ */
+export const activateSession = async (sessionId: number) => {
+    const session = await Session.update(
+        { state: "active" },
+        { where: { id: sessionId } }
+    );
+    return session[0] === 1;
+};
+
+/**
+ * Handle cases where users leave session.
+ * @param sessionId
+ * @param userId
+ */
+export const leaveSession = async (sessionId: number, userId: number) => {
+    const sessionParticipant = await SessionParticipant.update(
+        {
+            state: "left",
+        },
+        {
+            where: { userId, sessionId },
+        }
+    );
+    return sessionParticipant[0] === 1;
+};
+
+/**
+ * End session and save progress.
+ * @param sessionId
+ * @param complete Successful completion?
+ * @param progress
+ */
+export const endSession = async (
+    sessionId: number,
+    complete: boolean,
+    progress: { userId: number; data: any; state?: string }[]
+) => {
+    const transaction = await sequelize.transaction();
+
+    try {
+        // Session has ended
+        await Session.update(
+            {
+                state: "ended",
+            },
+            {
+                where: { id: sessionId },
+                transaction,
+            }
+        );
+
+        // Update user entries
+        for (const entry of progress) {
+            await SessionParticipant.update(
+                {
+                    progress: entry.data,
+                    state: entry.state || complete ? "complete" : "left",
+                },
+                {
+                    where: { userId: entry.userId, sessionId },
+                    transaction,
+                }
+            );
+        }
+
+        await transaction.commit();
+    } catch (err) {
+        await transaction.rollback();
+        throw err;
+    }
+};

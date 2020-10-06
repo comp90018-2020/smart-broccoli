@@ -19,16 +19,21 @@ const schema: Sequelize.ModelAttributes = {
         allowNull: false,
         defaultValue: "joined",
     },
+    progress: {
+        type: Sequelize.JSON,
+        allowNull: true,
+    },
 };
 
 interface SessionParticipantAttributes {
     id: number;
     role: string;
-    userId: number;
-    User?: User;
-    sessionId: number;
     state: string;
+    progress?: object;
+    userId: number;
+    sessionId: number;
     Session?: Session;
+    User?: User;
 }
 interface SessionParticipantCreationAttributes
     extends Optional<SessionParticipantAttributes, "id" | "state"> {}
@@ -44,6 +49,7 @@ export default class SessionParticipant
     public state: string;
     public readonly userId: number;
     public readonly sessionId: number;
+    public progress: object;
 
     public Session?: Session;
     public User?: User;
