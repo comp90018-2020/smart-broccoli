@@ -33,7 +33,6 @@ interface TokenAttributes {
     revoked?: boolean;
     createdAt: Date;
     updatedAt: Date;
-    User?: User;
 }
 interface TokenCreationAttributes
     extends Optional<TokenAttributes, "id" | "createdAt" | "updatedAt"> {}

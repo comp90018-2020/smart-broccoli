@@ -32,8 +32,6 @@ interface SessionParticipantAttributes {
     progress?: object;
     userId: number;
     sessionId: number;
-    Session?: Session;
-    User?: User;
 }
 interface SessionParticipantCreationAttributes
     extends Optional<SessionParticipantAttributes, "id" | "state"> {}

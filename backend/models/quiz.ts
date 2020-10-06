@@ -41,8 +41,6 @@ interface QuizAttributes {
     pictureId?: number;
     timeLimit?: number;
     questions?: Question[];
-    Sessions?: Session[];
-    Picture?: Picture;
 }
 interface QuizCreationAttributes
     extends Optional<QuizAttributes, "id" | "active"> {}

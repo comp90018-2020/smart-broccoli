@@ -21,8 +21,6 @@ interface UserGroupAttributes {
     role: string;
     userId: number;
     groupId: number;
-    Group?: Group;
-    User?: User;
 }
 interface UserGroupCreationAttributes
     extends Optional<UserGroupAttributes, "id"> {}

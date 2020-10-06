@@ -38,7 +38,6 @@ interface QuestionAttributes {
     tf?: boolean;
     options?: OptionAttributes[];
     pictureId?: number;
-    Picture?: Picture;
 }
 
 export default class Question

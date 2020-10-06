@@ -39,10 +39,6 @@ interface UserAttributes {
 
     createdAt: Date;
     updatedAt: Date;
-
-    UserGroup?: UserGroup;
-    SessionParticipant?: SessionParticipant;
-    Picture?: Picture;
 }
 interface UserCreationAttributes
     extends Optional<UserAttributes, "id" | "createdAt" | "updatedAt"> {}

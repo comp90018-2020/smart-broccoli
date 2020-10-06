@@ -43,8 +43,6 @@ interface SessionAttributes {
 
     quizId: number;
     groupId: number;
-    Users?: User[];
-    Group?: Group;
 }
 interface SessionCreationAttributes
     extends Optional<SessionAttributes, "id" | "code" | "subscribeGroup"> {}
