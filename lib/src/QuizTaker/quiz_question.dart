@@ -37,6 +37,7 @@ class _quizQuestion extends State<quizQuestion> {
   }
 
   // Timing functionalities
+  // TODO after form change transition to the next activity or leaderboard
 
   Timer _timer;
   int _start = 10;

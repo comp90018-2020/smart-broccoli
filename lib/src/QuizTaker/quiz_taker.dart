@@ -254,7 +254,7 @@ class _quizTakerState extends State<quizTaker> {
     // TODO remove debug code below
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => quizQuestion()),
+      MaterialPageRoute(builder: (context) => start_lobby()),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fuzzy_broccoli/src/QuizTaker/quiz_question.dart';
 
 /// The Skeleton for the start lobby
 class start_lobby extends StatefulWidget {
@@ -54,6 +55,11 @@ class _start_lobby extends State<start_lobby> {
             // 2. Call a function in the build class
             // which creates a button for the user to move to the next class
             timer.cancel();
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => quizQuestion()),
+            );
           } else {
             _start = _start - 1;
           }
@@ -72,6 +78,7 @@ class _start_lobby extends State<start_lobby> {
         () {
           if (_start < 1) {
             timer2.cancel();
+
           }
           val++;
           // Insert your update function here
