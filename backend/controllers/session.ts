@@ -1,11 +1,10 @@
-import { Op } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 import sequelize, {
     Quiz,
     Session,
     SessionParticipant,
     User,
     Group,
-    UserGroup,
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
@@ -26,17 +25,19 @@ interface SessionToken {
  * @param userId
  * @param role
  */
-const signSessionToken = async (
-    sessionId: number,
-    userId: number,
-    role: string
-) => {
+const signSessionToken = async (info: {
+    sessionId: number;
+    role: string;
+    userId: number;
+    name: string;
+}) => {
     return await jwtSign(
         {
             scope: "game",
-            userId,
-            role,
-            sessionId,
+            userId: info.userId,
+            role: info.role,
+            sessionId: info.sessionId,
+            name: info.name,
         },
         process.env.TOKEN_SECRET
     );
@@ -111,7 +112,7 @@ export const getUserSession = async (userId: number) => {
             {
                 // Find current user
                 model: User,
-                attributes: ["id"],
+                attributes: ["id", "name"],
                 through: { where: { state: { [Op.not]: "left" } } },
                 where: { id: userId },
                 required: true,
@@ -151,11 +152,12 @@ export const getUserSession = async (userId: number) => {
     }
 
     // Sign the token and return
-    const token = await signSessionToken(
-        session.id,
+    const token = await signSessionToken({
+        sessionId: session.id,
+        role: session.Users[0].SessionParticipant.role,
         userId,
-        session.Users[0].SessionParticipant.role
-    );
+        name: session.Users[0].name,
+    });
     return {
         session: {
             ...sessionJSON,
@@ -208,19 +210,32 @@ export const createSession = async (userId: number, opts: any) => {
         throw new ErrorStatus("Quiz not found", 404);
     }
 
-    // Only members can initiate quiz
-    const userGroup = await UserGroup.findOne({
-        where: { userId, groupId: quiz.groupId },
-    });
-    if (!userGroup) {
-        throw new ErrorStatus("User cannot initial quiz", 403);
+    // Find group/role
+    // No injection should occur because groupId is foreign key
+    // dnd userId should be primary key from auth middleware
+    const groupRole: { role: string; name: string } = await sequelize.query(
+        `
+          SELECT "Users"."name" AS name, "UserGroups"."role" AS "role"
+          FROM "Users"
+          INNER JOIN (SELECT "userId", "role" FROM "UserGroups"
+                      WHERE
+                      "groupId" = ${quiz.groupId} AND "userId" = ${userId})
+                      AS "UserGroups" ON "Users"."id" = "UserGroups"."userId";
+       `,
+        { type: QueryTypes.SELECT, plain: true }
+    );
+    if (!groupRole) {
+        throw new ErrorStatus("Quiz cannot be accessed", 403);
     }
+    const role = groupRole.role;
+    const name = groupRole.name;
 
+    // Get role
     // Check quiz type/initiator
-    if (userGroup.role === "owner" && quiz.type === "self paced") {
+    if (role === "owner" && quiz.type === "self paced") {
         throw new ErrorStatus("Owner cannot start self-paced quiz", 400);
     }
-    if (userGroup.role === "member" && quiz.type === "live") {
+    if (role === "member" && quiz.type === "live") {
         throw new ErrorStatus("Users cannot start live quiz", 400);
     }
 
@@ -268,7 +283,7 @@ export const createSession = async (userId: number, opts: any) => {
         const sessionParticipant = new SessionParticipant({
             sessionId: session.id,
             userId,
-            role: userGroup.role === "owner" ? "host" : "participant",
+            role: role === "owner" ? "host" : "participant",
         });
         await sessionParticipant.save({ transaction });
 
@@ -276,11 +291,12 @@ export const createSession = async (userId: number, opts: any) => {
         await transaction.commit();
 
         // Sign code
-        const token = await signSessionToken(
-            session.id,
+        const token = await signSessionToken({
+            sessionId: session.id,
             userId,
-            sessionParticipant.role
-        );
+            role: sessionParticipant.role,
+            name,
+        });
         return { session, token };
     } catch (err) {
         await transaction.rollback();
@@ -337,6 +353,9 @@ export const joinSession = async (userId: number, code: string) => {
         throw new ErrorStatus("Cannot found session with code", 404);
     }
 
+    // Get user
+    const user = await User.findByPk(userId, { attributes: ["name"] });
+
     // See state
     if (session.state !== "waiting") {
         if (session.Users.length > 0) {
@@ -371,7 +390,12 @@ export const joinSession = async (userId: number, code: string) => {
     }
 
     // Sign code
-    const token = await signSessionToken(session.id, userId, "participant");
+    const token = await signSessionToken({
+        sessionId: session.id,
+        role: "participant",
+        userId,
+        name: user.name,
+    });
     return {
         session: {
             ...sessionJSON,

@@ -20,7 +20,7 @@ describe("Session", () => {
     const USER = {
         email: "a@a.com",
         password: "aaaaaaaa",
-        name: "a",
+        name: "a name",
     };
 
     // Quiz/question
@@ -117,10 +117,12 @@ describe("Session", () => {
         expect(token).to.have.property("sessionId");
         expect(token).to.have.property("userId");
         expect(token).to.have.property("role");
+        expect(token).to.have.property("name");
         expect(token.scope).to.equal("game");
         expect(token.sessionId).to.equal(res.body.session.id);
         expect(token.userId).to.equal(user.id);
         expect(token.role).to.equal("host");
+        expect(token.name).to.equal(USER.name);
     });
 
     it("Join session", async () => {
@@ -160,10 +162,12 @@ describe("Session", () => {
         expect(token).to.have.property("sessionId");
         expect(token).to.have.property("userId");
         expect(token).to.have.property("role");
+        expect(token).to.have.property("name");
         expect(token.scope).to.equal("game");
         expect(token.sessionId).to.equal(res.body.session.id);
         expect(token.userId).to.equal(userMember.id);
         expect(token.role).to.equal("participant");
+        expect(token.name).to.equal(USER.name);
 
         // Get to check
         const getRes = await agent
