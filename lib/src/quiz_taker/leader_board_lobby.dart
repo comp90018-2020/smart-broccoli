@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
+import 'package:smart_broccoli/src/quiz_taker/quiz_taker.dart';
 
 /// The Skeleton for the Leaderboard lobby
 /// Unfinished as it is beyond my skill ability
@@ -23,7 +25,7 @@ class BackgroundClipper extends CustomClipper<Path> {
     var firstControlPoint = new Offset(size.width / 4, size.height / 3);
     var firstEndPoint = new Offset(size.width / 2, size.height / 3 - 60);
     var secondControlPoint =
-    new Offset(size.width - (size.width / 4), size.height / 3.5 - 65);
+        new Offset(size.width - (size.width / 4), size.height / 3.5 - 65);
     var secondEndPoint = new Offset(size.width, size.height / 3 - 40);
 
     path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
@@ -35,7 +37,6 @@ class BackgroundClipper extends CustomClipper<Path> {
     path.lineTo(size.width, 0);
     path.close();
 
-
     return path;
   }
 
@@ -46,28 +47,21 @@ class BackgroundClipper extends CustomClipper<Path> {
 }
 
 class _LeaderBoardLobby extends State<LeaderBoardLobby> {
-
+  int _selectedIndex = 0;
 
   // Placeholder list, the list contents should be replaced with usernames.
   List<String> propList = ["HELLO", "BOB", "MICROOSFT", "OOOOOF"];
   int val = 0;
 
-
   // Entry function
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      backgroundColor: Theme
-          .of(context)
-          .colorScheme
-          .onBackground,
+      backgroundColor: Theme.of(context).colorScheme.onBackground,
       appBar: AppBar(
         title: Text("Quiz"),
         centerTitle: true,
-        backgroundColor: Theme
-            .of(context)
-            .colorScheme
-            .background,
+        backgroundColor: Theme.of(context).colorScheme.background,
         elevation: 0,
       ),
       // Stacks are used to stack widgets
@@ -78,10 +72,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
             child: ClipPath(
               clipper: BackgroundClipper(),
               child: Container(
-                color: Theme
-                    .of(context)
-                    .colorScheme
-                    .background,
+                color: Theme.of(context).colorScheme.background,
               ),
             ),
           ),
@@ -94,9 +85,35 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
                 SizedBox(height: 40),
                 // The list of Quiz players
                 _quizPlayers(),
+                _bottomNavBar()
               ],
             ),
-          )
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bottomNavBar() {
+    bool leave = false;
+    return new BottomAppBar(
+      child: Row(
+        children: [
+          Row (
+            children: <Widget>[
+              IconButton(icon: Icon(Icons.clear), onPressed: () => _onItemTapped(0)),
+             Text("Leave Quiz")
+            ],
+          ),
+          Spacer(),
+          Row (
+            children: <Widget>[
+              Text("Next Question"),
+              IconButton(icon: Icon(Icons.navigate_next), onPressed: () => _onItemTapped(1)),
+             // Text("Next Question")
+            ],
+          ),
+          //IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
         ],
       ),
     );
@@ -112,20 +129,18 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
         Column(
           children: <Widget>[
             Container(
-            height: 50,
-            width: 50,
-            // child: Icon(Icons.)
-            decoration: new BoxDecoration(
-
-              // You need this line or the box will be transparent
-              color: Colors.lightGreen,
-              shape: BoxShape.circle,
+              height: 50,
+              width: 50,
+              // child: Icon(Icons.)
+              decoration: new BoxDecoration(
+                // You need this line or the box will be transparent
+                color: Colors.lightGreen,
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
             Text("Winner 1"),
           ],
         ),
-
         SizedBox(width: 50),
         Column(
           children: <Widget>[
@@ -133,7 +148,6 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
               height: 100,
               width: 100,
               decoration: new BoxDecoration(
-
                 // You need this line or the box will be transparent
                 color: Colors.lightGreen,
                 shape: BoxShape.circle,
@@ -149,7 +163,6 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
               height: 50,
               width: 50,
               decoration: new BoxDecoration(
-
                 // You need this line or the box will be transparent
                 color: Colors.lightGreen,
                 shape: BoxShape.circle,
@@ -158,12 +171,9 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
             Text("Winner 3"),
           ],
         ),
-
-
       ],
     );
   }
-
 
   // Quiz players, the list of quiz users in the current lobby
   Widget _quizPlayers() {
@@ -179,9 +189,23 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
             );
           },
           separatorBuilder: (BuildContext context, int index) =>
-          const Divider(),
+              const Divider(),
         ),
       ),
     );
+  }
+
+  void _onItemTapped(int value) {
+    if (value == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => quizQuestion()),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => quizTaker()),
+      );
+    }
   }
 }
