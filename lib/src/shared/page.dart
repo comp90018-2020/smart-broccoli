@@ -81,35 +81,83 @@ class CustomPage extends StatelessWidget {
                   // Important: Remove any padding from the ListView.
                   padding: EdgeInsets.zero,
                   children: <Widget>[
-                    DrawerHeader(
-                      child: Text(
-                        'Drawer Header',
-                      ),
-                    ),
+                    SizedBox(
+                        height: 125,
+                        child: DrawerHeader(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              // User picture
+                              Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.circular(100)),
+                                width: 50,
+                                height: 50,
+                              ),
+                              // Name/email
+                              Expanded(
+                                  child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 18),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('name',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText1),
+                                    Text('email',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2),
+                                  ],
+                                ),
+                              )),
+                              Icon(Icons.chevron_right, color: Colors.grey[700])
+                            ],
+                          ),
+                        )),
                     ListTile(
+                      dense: true,
                       leading: const Icon(Icons.question_answer),
-                      title: const Text('Take Quiz'),
+                      title: Text('Take Quiz',
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor)),
                       onTap: () {},
                     ),
                     ListTile(
+                      dense: true,
                       leading: const Icon(Icons.edit),
-                      title: const Text('Manage Quiz'),
+                      title: Text('Manage Quiz',
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor)),
                       onTap: () {},
                     ),
                     ListTile(
+                      dense: true,
                       leading: const Icon(Icons.people),
-                      title: const Text('Groups'),
+                      title: Text('Groups',
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor)),
                       onTap: () {},
                     ),
                     Divider(),
                     ListTile(
-                      leading: const Icon(Icons.info),
-                      title: const Text('About'),
+                      dense: true,
+                      leading: const Icon(Icons.info_outline),
+                      title: Text('About',
+                          style: TextStyle(color: Colors.grey[700])),
                       onTap: () {},
                     ),
                     ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: const Text('Sign out'),
+                      dense: true,
+                      leading: const Icon(Icons.exit_to_app),
+                      title: Text('Sign out',
+                          style: TextStyle(color: Colors.grey[700])),
+                      trailing: const Icon(Icons.chevron_right),
                       onTap: () {},
                     ),
                   ],
