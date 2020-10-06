@@ -1,4 +1,3 @@
-import { io } from 'server';
 import { Server, Namespace } from 'socket.io';
 import { LiveQuiz } from './quiz';
 
