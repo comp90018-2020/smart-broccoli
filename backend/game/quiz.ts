@@ -1,6 +1,10 @@
+import { time } from "console";
+import { stringify } from "querystring";
 import { auth } from "routers/middleware/auth";
 import { jwtVerify } from "../helpers/jwt";
-import { User } from "../models";
+import { Quiz, User } from "../models";
+
+const WAITING = 10*1000;
 
 enum AnswerStatus {
     NoAnswered = 0,
@@ -22,21 +26,32 @@ class PlayerStatus {
     }
 }
 
+enum QuizStatus {
+    Active = 0,
+    Waiting = 1,
+    Running = 2,
+    Ended = 3
+}
+
 export class Session {
+    private status: QuizStatus;
+    private quizStartsAt = 0;
     private participants: any;
     private participantsNames: {[key:string]:any};
-    private questions: [{}];
+    private questions: [any];
     private sockets: any;
     private questionIdx = 0;
+    private questionReleasedAt = 0;
     private questionPanel: {
         [key: string]: PlayerStatus
-    };;
+    };
 
     constructor() {
         this.participants = new Set([]);
         this.participantsNames = {};
         this.sockets = new Set();
         this.questionPanel = {};
+        this.status = QuizStatus.Active;
     }
 
     async addParticipant(userId: string, socket: SocketIO.Socket) {
@@ -107,13 +122,41 @@ export class Session {
         this.questions = questions;
     }
 
+    /**
+     * If a connection is lost and subsequently restored during a quiz, 
+     * send current question immediately (corresponding to the current question; 
+     * update time field).
+     */
+    currQuestion(){
+        let currQuestion = this.questions[this.questionIdx];
+        currQuestion.time = currQuestion.time - (Date.now() - this.questionReleasedAt)
+        return currQuestion;
+    }
+
     nextQuestion(): Object {
         if (this.questionIdx < this.questions.length) {
             this.resetQuestionPanel();
-            return this.questions[this.questionIdx++];
+            this.questionReleasedAt = Date.now();
+            return this.questions[this.questionIdx++];        
         } else {
             return undefined;
         }
+    }
+
+    setQuizStatus(status: QuizStatus){
+        this.status = status;
+    }
+
+    getQuizStatus(){
+        return this.status;
+    }
+
+    setQuizStartsAt(timestamp: number){
+        this.quizStartsAt = timestamp;
+    }
+
+    getQuizStartsAt(){
+        return this.quizStartsAt;
     }
 
     close() {
@@ -250,6 +293,10 @@ export class LiveQuiz {
             }
 
             socket.emit("welcome", this.welcomeMSG(quizId));
+
+            if(this.sess[quizId].getQuizStatus() === QuizStatus.Waiting){
+                socket.emit("starting", (this.sess[quizId].getQuizStartsAt() - Date.now() ).toString());
+            }
         }
 
     }
@@ -283,25 +330,25 @@ export class LiveQuiz {
         return ret;
     }
 
-    private starting(quizId: string) {
-        // quiz will be started in 10 seconds
-        return "10";
+    private starting(socket: SocketIO.Socket, father:LiveQuiz) {
+        const quizId = socket.handshake.query.quizId;
+        father.sess[quizId].setQuizStatus(QuizStatus.Running);
+        // release the firt question
+        father.nextQuestion(socket);
     }
 
     start(socket: SocketIO.Socket, content: any) {
-        console.log(socket.handshake.query);
         const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
-        console.log(socket.handshake.query.quizId);
-        console.log(socket.handshake.query.userId);
         if (this.isOwner(quizId, userId)) {
-            // WIP: make quiz status started in session
-            console.log(this.sess)
-
+            // WIP: make quiz status `starting` in session
+            this.sess[quizId].setQuizStatus(QuizStatus.Waiting);
+            this.sess[quizId].setQuizStartsAt(Date.now() + WAITING);
             // Broadcast that quiz will be started
-            socket.to(quizId).emit("starting", this.starting(quizId));
+            socket.to(quizId).emit("starting", (this.sess[quizId].getQuizStartsAt() - Date.now()).toString());
+            setTimeout(this.starting,  this.sess[quizId].getQuizStartsAt()- Date.now(), socket, this);
+            
         }
-
     }
 
     private cancelQuiz(quizId: string) {
@@ -356,7 +403,7 @@ export class LiveQuiz {
 
     }
 
-    nextQuestion(socket: SocketIO.Socket, content: any) {
+    nextQuestion(socket: SocketIO.Socket) {
         const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
 
