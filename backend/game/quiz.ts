@@ -1,48 +1,105 @@
 import { jwtVerify } from "../helpers/jwt";
 
+enum AnswerStatus {
+    NoAnswered = 0,
+    Answered = 1
+}
+
+enum GameStatus {
+    InGame = 0,
+    Left = 1
+}
+
+class PlayerStatus {
+    answer: AnswerStatus;
+    game: GameStatus;
+
+    constructor($answer: AnswerStatus, $game: GameStatus) {
+        this.answer = $answer;
+        this.game = $game;
+    }
+}
+
 export class Session {
     private participants: any;
-    private questions: [number];
+    private questions: [{}];
     private sockets: any;
     private questionIdx = 0;
+    private questionPanel: {
+        [key: string]: PlayerStatus
+    };;
 
     constructor() {
         this.participants = new Set([]);
         this.sockets = new Set();
+        this.questionPanel = {};
     }
 
     addParticipant(userId: string, socket: SocketIO.Socket): void {
         this.participants.add(userId);
         this.sockets.add(socket);
+        this.questionPanel[userId] = new PlayerStatus(AnswerStatus.NoAnswered, GameStatus.InGame);
     }
 
     removeParticipant(userId: string, socket: SocketIO.Socket): void {
         this.participants.delete(userId);
         this.sockets.delete(socket);
+        this.questionPanel[userId].game = GameStatus.Left;
     }
 
     hasParticipant(userId: string): boolean {
         return this.participants.has(userId);
     }
 
-    countParticipants():number{
-        return this.participants.length;
+    countParticipants(): number {
+        return this.participants.size;
     }
 
-    allParticipants(){
+    allParticipants() {
         return this.participants;
     }
-    
+
+    playerAnswered(userId: string) {
+        this.questionPanel[userId].answer = AnswerStatus.Answered;
+    }
+
+    /**
+     * return the count of answered users which are still in game
+     */
+    getAnswered(): number {
+        let count = 0;
+        for (const [key, value] of Object.entries(this.questionPanel)) {
+            console.log(`${key}: ${value}`);
+            if (value.answer == AnswerStatus.Answered && value.game == GameStatus.InGame) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    hasPlayerAnswered(userId: string) {
+        return this.questionPanel[userId].answer === AnswerStatus.Answered;
+    }
+
+    hasPlayerLeft(userId: string) {
+        return this.questionPanel[userId].game === GameStatus.Left;
+    }
+
+    private resetQuestionPanel() {
+        this.questionPanel = {};
+    }
+
     /**
      * Set questions list of this session
      * @param questions questions list
      */
-    setQuestions(questions: any) {
+    setQuestions(questions: [{}]) {
         this.questions = questions;
     }
 
     nextQuestion(): Object {
         if (this.questionIdx < this.questions.length) {
+            this.resetQuestionPanel();
             return this.questions[this.questionIdx++];
         } else {
             return undefined;
@@ -65,10 +122,10 @@ export class LiveQuiz {
     };
 
     constructor() {
-        this.sess= {};
+        this.sess = {};
         // DEBUG ===>
         let s = new Session();
-        s.setQuestions([0]);
+        s.setQuestions([{}]);
         this.addSession('1', s);
         // DEBUG <===
     }
@@ -93,7 +150,7 @@ export class LiveQuiz {
         const MCSelection = answer.MCSelection;
         const TFSelection = answer.TFSelection;
         const points = 0;
-        // check answers for this question here 
+        // WIP: check answers for this question here 
         return points;
     }
 
@@ -103,14 +160,12 @@ export class LiveQuiz {
 
 
     private formatAnswered(quizId: string, questionId: string) {
-        let count = 0;
-        // WIP: get answered paticipant count here
-
+        console.log(this.sess[quizId]);
         return {
             "question": questionId,
-            "count": count
+            "count": this.sess[quizId].getAnswered(),
+            "total": this.sess[quizId].countParticipants()
         }
-
     }
 
     answer(socket: SocketIO.Socket, content: any) {
@@ -122,21 +177,28 @@ export class LiveQuiz {
         const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
         const questionId = content.questionId;
-        console.log([quizId, userId, questionId])
 
-        const points = this.checkAnswer(quizId, content);
-        this.recordPoints(userId, points);
+        // check if already answered
+        const alreadyAnswerd = this.sess[quizId].hasPlayerAnswered(userId);
+        if (!alreadyAnswerd) {
+            // if not answer yet / this is the first time to answer
+            const points = this.checkAnswer(quizId, content);
+            this.recordPoints(userId, points);
+            // record in session that player has answered
+            this.sess[quizId].playerAnswered(userId);
 
-        // braodcast that one more participants answered this question
-        const answered = this.formatAnswered(quizId, questionId);
+            // braodcast that one more participants answered this question
+            const answered = this.formatAnswered(quizId, questionId);
 
-        console.log(answered);
-        socket.to(quizId).emit("questionAnswered", answered);
+            console.log(answered);
+            socket.to(quizId).emit("questionAnswered", answered);
 
-        // if everyone has answered
-        if (answered.count >= this.sess[quizId].countParticipants()) {
-            this.releaseQuestionOutcome(socket);
+            // if everyone has answered
+            if (answered.count >= this.sess[quizId].countParticipants()) {
+                this.releaseQuestionOutcome(socket);
+            }
         }
+
     }
 
     // WIP: release question outcome after timeout
@@ -296,7 +358,7 @@ export class LiveQuiz {
     nextQuestion(socket: SocketIO.Socket, content: any) {
         const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
-        
+
         if (this.isOwner(quizId, userId)) {
             //  broadcast next question to participants
             const nextQuestion = this.sess[quizId].nextQuestion();
