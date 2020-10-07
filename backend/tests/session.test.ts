@@ -303,7 +303,7 @@ describe("Session", () => {
         expect(groupOwner.body[0].Sessions).to.have.lengthOf(0);
     });
 
-    it("Join other users' self-paced quiz", async () => {
+    it("Join other users' self-paced session", async () => {
         const agent = supertest(app);
         const userOwner = await registerAndLogin(USER);
         const userMember1 = await registerAndLogin({
@@ -338,7 +338,7 @@ describe("Session", () => {
         expect(res.status).to.equal(400);
     });
 
-    it("Rejoin quiz", async () => {
+    it("Rejoin session", async () => {
         const agent = supertest(app);
         const userOwner = await registerAndLogin(USER);
         const userMember = await registerAndLogin({
@@ -368,7 +368,7 @@ describe("Session", () => {
         expect(res.status).to.equal(200);
     });
 
-    it("Join quiz after activation", async () => {
+    it("Join session after activation", async () => {
         const agent = supertest(app);
         const userOwner = await registerAndLogin(USER);
         const userMember1 = await registerAndLogin({
@@ -402,5 +402,32 @@ describe("Session", () => {
             .set("Authorization", `Bearer ${userMember2.token}`)
             .send({ code: session.session.code });
         expect(res.status).to.equal(400);
+    });
+
+    it("Join session twice", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, QUIZ);
+
+        // Owner starts live session
+        const session = await createSession(userOwner.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+
+        // User join session
+        await joinSession(userMember.id, session.session.code);
+
+        // User join session
+        const res = await agent
+            .post("/session/join")
+            .set("Authorization", `Bearer ${userMember.token}`)
+            .send({ code: session.session.code });
+        expect(res.status).to.equal(200);
     });
 });

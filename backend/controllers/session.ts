@@ -335,11 +335,13 @@ export const joinSession = async (userId: number, code: string) => {
                     },
                 ],
             },
-            // Has user joined and left before?
+            // Has user joined before?
             {
                 model: User,
                 attributes: ["id"],
-                through: { where: { state: "left" }, attributes: ["id"] },
+                through: {
+                    attributes: ["id", "state"],
+                },
                 where: { id: userId },
                 required: false,
             },
@@ -355,14 +357,13 @@ export const joinSession = async (userId: number, code: string) => {
         await session.Users[0].SessionParticipant.update({
             state: "joined",
         });
-    } else if (session.state === "waiting") {
+    } else if (session.Users.length === 0 && session.state === "waiting") {
         // Create association
-        const sessionParticipant = new SessionParticipant({
+        await SessionParticipant.create({
             sessionId: session.id,
             userId,
             role: "participant",
         });
-        await sessionParticipant.save();
     } else {
         throw new ErrorStatus("Session cannot be joined", 400, {
             state: session.state,
