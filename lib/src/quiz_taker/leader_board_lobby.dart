@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_taker.dart';
+import 'package:smart_broccoli/theme.dart';
 
 /// The Skeleton for the Leaderboard lobby
 /// Unfinished as it is beyond my skill ability
@@ -134,11 +135,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
               width: 50,
               //TODO put picture stuff here
               // child: Icon(Icons.)
-              decoration: new BoxDecoration(
-                // You need this line or the box will be transparent
-                color: Colors.lightGreen,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration1()
             ),
             Text("Winner 1"),
           ],
@@ -151,11 +148,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
               width: 100,
               //TODO put picture stuff here
               //child:
-              decoration: new BoxDecoration(
-                // You need this line or the box will be transparent
-                color: Colors.lightGreen,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration1()
             ),
             Text("Winner 2"),
           ],
@@ -168,11 +161,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
               width: 50,
               //TODO put picture stuff here
               //child:
-              decoration: new BoxDecoration(
-                // You need this line or the box will be transparent
-                color: Colors.lightGreen,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration1()
             ),
             Text("Winner 3"),
           ],

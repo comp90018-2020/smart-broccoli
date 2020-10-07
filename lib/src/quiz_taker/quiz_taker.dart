@@ -148,17 +148,10 @@ class _QuizTakerState extends State<QuizTaker> {
     return new Container(
       child: new Column(
         children: <Widget>[
-          new ButtonTheme(
-            minWidth: 150.0,
-            height: 50.0,
-            child: RaisedButton(
+             RaisedButton(
               onPressed: _verifyPin, // TODO CHANGE
               child: Text("Join By Pin"),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0),
-              ),
             ),
-          ),
         ],
       ),
     );

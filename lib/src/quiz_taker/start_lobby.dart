@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 
+import '../../theme.dart';
+
 /// The Skeleton for the start lobby
 class StartLobby extends StatefulWidget {
   @override
@@ -127,11 +129,7 @@ class _StartLobby extends State<StartLobby> {
                   children: <Widget>[
                     _quizTimer(),
                     // Orange Divider
-                    const Divider(
-                      thickness: 5,
-                      height: 50,
-                      color: Colors.orangeAccent,
-                    ),
+                     Divider1(),
                     _quizTimer(),
                   ],
                 ),
@@ -217,16 +215,7 @@ class _StartLobby extends State<StartLobby> {
           child: Container(
             height: 50,
             width: 50,
-            decoration: new BoxDecoration(
-              border: new Border.all(
-                  // TODO please put this into color themes
-                  color: Colors.orangeAccent,
-                  width: 5.0,
-                  style: BorderStyle.solid),
-              // You need this line or the box will be transparent
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration2(),
             child: Center(child: Text("$_start")),
           ),
         ) // Text("$_start"),

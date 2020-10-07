@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/theme.dart';
 import 'leader_board_lobby.dart';
 
 enum FormType {
@@ -240,22 +241,20 @@ class _QuizQuestion extends State<QuizQuestion> {
     return 2;
   }
 
-  // TODO please put these colours into the Themedata configuration
-
   Color findColour(index) {
     if (_form == FormType.ShowCorrect) {
       if (isCorrectIndex(index)) {
-        return Colors.greenAccent;
+        return AnswerColours.correct();
       } else if (isChosenIndex(index)) {
-        return Colors.orangeAccent;
+        return AnswerColours.selected();
       } else {
-        return Colors.white;
+        return AnswerColours.def();
       }
     } else {
       if (isChosenIndex(index)) {
-        return Colors.orangeAccent;
+        return AnswerColours.selected();
       } else {
-        return Colors.white;
+        return AnswerColours.def();
       }
     }
   }

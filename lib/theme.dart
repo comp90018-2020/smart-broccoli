@@ -9,14 +9,12 @@ class SmartBroccoliColourScheme extends ColorScheme {
 
   SmartBroccoliColourScheme()
       : super.light(
-
           background: Color(0xFF4CAF50),
           onBackground: Colors.white,
           primary: Color(0xFFFEC12D),
           secondary: Color(0xFF654C12),
           secondaryVariant: Color(0xFFAEAEAE),
         );
-
 }
 
 /// Singleton class holding the app's `ThemeData` object
@@ -53,9 +51,11 @@ class SmartBroccoliTheme {
       ),
     ),
   );
+
   ThemeData get themeData => _themeData;
 
   SmartBroccoliTheme._internal();
+
   factory SmartBroccoliTheme() {
     return _instance;
   }
@@ -90,3 +90,47 @@ class TabHolder extends FractionallySizedBox {
         );
 }
 
+class AnswerColours {
+  static Color correct() {
+    return Colors.greenAccent;
+  }
+
+  static Color selected() {
+    return Colors.orangeAccent;
+  }
+
+  static Color def() {
+    return Colors.white;
+  }
+}
+
+class Divider1 extends Divider {
+  Divider1()
+      : super(
+          thickness: 5,
+          height: 50,
+          color: Colors.orangeAccent,
+        );
+}
+
+class BoxDecoration1 extends BoxDecoration {
+  BoxDecoration1()
+      : super(
+          // You need this line or the box will be transparent
+          color: Colors.lightGreen,
+          shape: BoxShape.circle,
+        );
+}
+
+class BoxDecoration2 extends BoxDecoration {
+  BoxDecoration2()
+      : super(
+          border: new Border.all(
+              color: Colors.orangeAccent,
+              width: 5.0,
+              style: BorderStyle.solid),
+          // You need this line or the box will be transparent
+          color: Colors.white,
+          shape: BoxShape.circle,
+        );
+}
