@@ -122,8 +122,7 @@ export const createQuiz = async (userId: number, info: any) => {
         quiz.description = info.description;
     }
 
-    const transaction = await sequelize.transaction();
-    try {
+    return await sequelize.transaction(async (transaction) => {
         await quiz.save({ transaction: transaction });
 
         // Save questions
@@ -133,13 +132,8 @@ export const createQuiz = async (userId: number, info: any) => {
                 await processQuestions(transaction, quiz.id, [], info.questions)
             ).map((q) => q.toJSON()),
         };
-        await transaction.commit();
-
         return quizJSON;
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+    });
 };
 
 /**
@@ -187,8 +181,7 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
         quiz.description = info.description;
     }
 
-    const transaction = await sequelize.transaction();
-    try {
+    return await sequelize.transaction(async (transaction) => {
         await quiz.save({ transaction: transaction });
 
         // Save questions
@@ -202,12 +195,8 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
             );
             quizJSON.questions = updatedQuestions.map((q) => q.toJSON());
         }
-        await transaction.commit();
         return quizJSON;
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+    });
 };
 
 /**
@@ -414,24 +403,20 @@ export const updateQuizPicture = async (
         throw new ErrorStatus("Cannot update picture", 403);
     }
 
-    const transaction = await sequelize.transaction();
-    try {
+    return await sequelize.transaction(async (transaction) => {
         // Delete old picture
         if (quiz.pictureId) {
             await deletePicture(quiz.pictureId, transaction);
         }
+
         // Insert new picture
         const picture = await insertPicture(transaction, file);
+
         // Set picture
         quiz.pictureId = picture.id;
         await quiz.save({ transaction });
-
-        await transaction.commit();
         return quiz;
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+    });
 };
 
 /**

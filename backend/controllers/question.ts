@@ -212,23 +212,19 @@ export const updateQuestionPicture = async (
         throw new ErrorStatus("Cannot find question", 404);
     }
 
-    const transaction = await sequelize.transaction();
-    try {
+    return await sequelize.transaction(async (transaction) => {
         // Delete the old picture
         if (question.pictureId) {
             await deletePicture(question.pictureId, transaction);
         }
+
         // Insert the new picture
         const picture = await insertPicture(transaction, file);
-        // Set user picture
+
+        // Set question picture
         question.pictureId = picture.id;
-        await question.save({ transaction });
-        await transaction.commit();
-        return question;
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+        return await question.save({ transaction });
+    });
 };
 
 /**

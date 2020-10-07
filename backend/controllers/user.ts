@@ -58,24 +58,19 @@ export const updateProfilePicture = async (userId: number, file: any) => {
         attributes: ["id", "pictureId"],
     });
 
-    const transaction = await sequelize.transaction();
-
-    try {
+    await sequelize.transaction(async (transaction) => {
         // Delete the old picture
         if (user.pictureId) {
             await deletePicture(user.pictureId, transaction);
         }
+
         // Insert the new picture
         const picture = await insertPicture(transaction, file);
+
         // Set user picture
         user.pictureId = picture.id;
         await user.save({ transaction });
-
-        await transaction.commit();
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+    });
 };
 
 /**
