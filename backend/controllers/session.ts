@@ -337,7 +337,7 @@ export const joinSession = async (userId: number, code: string) => {
             // Has user joined and left before?
             {
                 model: User,
-                attributes: ['id'],
+                attributes: ["id"],
                 through: { where: { state: "left" }, attributes: [] },
                 where: { id: userId },
                 required: false,
