@@ -452,7 +452,7 @@ export const endSession = async (
     progress: { userId: number; data: any; state?: string }[]
 ) => {
     try {
-        await sequelize.transaction(async (t) => {
+        await sequelize.transaction(async (transaction) => {
             // Session has ended
             await Session.update(
                 {
@@ -460,7 +460,7 @@ export const endSession = async (
                 },
                 {
                     where: { id: sessionId },
-                    t,
+                    transaction,
                 }
             );
 
@@ -473,11 +473,11 @@ export const endSession = async (
                     },
                     {
                         where: { userId: entry.userId, sessionId },
-                        t,
+                        transaction,
                     }
                 );
             }
-        }
+        });
     } catch (err) {
         throw err;
     }

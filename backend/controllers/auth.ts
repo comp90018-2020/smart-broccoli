@@ -10,14 +10,14 @@ import { createDefaultGroup } from "./group";
 export const register = async (info: any) => {
     const { password, email, name } = info;
     try {
-        return sequelize.transaction(async (t) => {
+        return await sequelize.transaction(async (transaction) => {
             const user = await User.create(
                 { password, email, name, role: "user" },
-                { t }
+                { transaction }
             );
-            await createDefaultGroup(user.id, t);
+            await createDefaultGroup(user.id, transaction);
             return user;
-        }
+        });
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
@@ -108,11 +108,11 @@ export const promoteParticipant = async (userId: number, info: any) => {
     user.email = info.email;
     user.name = info.name;
     try {
-        await sequelize.transaction(async (t) => {
-            await user.save({ t });
-            await createDefaultGroup(user.id, t);
-        }
-        return user;
+        return await sequelize.transaction(async (transaction) => {
+            await user.save({ transaction });
+            await createDefaultGroup(user.id, transaction);
+            return user;
+        });
     } catch (err) {
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
