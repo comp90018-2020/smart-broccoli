@@ -5,18 +5,15 @@ import 'package:smart_broccoli/theme.dart';
 
 /// A tabbed page
 class CustomTabbedPage extends CustomPage {
-  /// Tabs (the toggle)
-  final List<Tab> tabs;
-
-  /// Tab views (the tabs/subpages)
-  final List<Widget> tabViews;
-
   /// Constructs a custom page
+  ///
+  /// Tabs (the toggle elements) and tab views (the tabs/subpages) should be in
+  /// `tabs` and `tabViews` respectively.
   CustomTabbedPage(
       {@required String title,
-      @required this.tabs,
-      @required this.tabViews,
-      bool hasDrawer = false})
+      @required List<Tab> tabs,
+      @required List<Widget> tabViews,
+      hasDrawer = false})
       : super(
           title: title,
           child: DefaultTabController(
