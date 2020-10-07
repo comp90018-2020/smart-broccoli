@@ -2,7 +2,7 @@ import ErrorStatus from "../helpers/error";
 import { Op } from "sequelize";
 import sequelize, { User, Picture, Group } from "../models";
 import { deletePicture, insertPicture } from "./picture";
-import { sessionTokenValid } from "./session";
+import { sessionHasUser, sessionTokenDecrypt } from "./session";
 
 /**
  * Get profile of current user.
@@ -133,8 +133,11 @@ export const getUserProfile = async (
     userId: number,
     token: string
 ) => {
+    // Decrypt session token
+    const decryptedToken = await sessionTokenDecrypt(token);
     if (
-        (await sessionTokenValid(token)) ||
+        (decryptedToken &&
+            (await sessionHasUser(decryptedToken.sessionId, userId))) ||
         (await canAccessProfile(currentUserId, userId))
     ) {
         return await User.findByPk(userId, {
@@ -154,8 +157,11 @@ export const getUserProfilePicture = async (
     userId: number,
     token: string
 ) => {
+    // Decrypt session token
+    const decryptedToken = await sessionTokenDecrypt(token);
     if (
-        (await sessionTokenValid(token)) ||
+        (decryptedToken &&
+            (await sessionHasUser(decryptedToken.sessionId, userId))) ||
         (await canAccessProfile(currentUserId, userId))
     ) {
         // @ts-ignore Model problems

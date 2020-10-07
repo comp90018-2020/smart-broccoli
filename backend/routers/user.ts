@@ -9,8 +9,6 @@ import {
     getProfilePicture,
     updateProfile,
     updateProfilePicture,
-    getUserProfile,
-    getUserProfilePicture,
     deleteProfilePicture,
     getProfile,
 } from "../controllers/user";
@@ -206,92 +204,6 @@ router.get(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             return res.json(await getProfile(req.user.id));
-        } catch (err) {
-            return next(err);
-        }
-    }
-);
-
-/**
- * @swagger
- * /user/{userId}/profile:
- *   get:
- *     summary: Get user profile
- *     description: Authorization is by group/quiz session membership
- *     tags:
- *       - User
- *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: integer
- *         required: true
- *     responses:
- *       '200':
- *         description: user
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- */
-router.get(
-    "/:userId/profile",
-    [param("userId").isInt(), body("token").optional().isString()],
-    validate,
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const user = await getUserProfile(
-                req.user.id,
-                Number(req.params.userId),
-                req.body.token
-            );
-            return res.json(user);
-        } catch (err) {
-            return next(err);
-        }
-    }
-);
-
-/**
- * @swagger
- * /user/{userId}/profile/picture:
- *   get:
- *     summary: Get user profile picture
- *     description: Authorization is by group/quiz session membership
- *     tags:
- *       - User
- *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: integer
- *         required: true
- *     responses:
- *       '200':
- *         description: OK
- *         content:
- *           image/png:
- *             schema:
- *               type: string
- *               format: binary
- */
-router.get(
-    "/:userId/profile/picture",
-    [param("userId").isInt(), body("token").optional().isString()],
-    validate,
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const picture = await getUserProfilePicture(
-                req.user.id,
-                Number(req.params.userId),
-                req.body.token
-            );
-            // Set content header
-            res.setHeader("Content-Type", "image/png");
-
-            // Read and serve
-            const file = fs.readFileSync(`${picture.destination}.thumb`);
-            res.end(file, "binary");
         } catch (err) {
             return next(err);
         }
