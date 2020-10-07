@@ -338,7 +338,7 @@ export const joinSession = async (userId: number, code: string) => {
             {
                 model: User,
                 attributes: ["id"],
-                through: { where: { state: "left" }, attributes: [] },
+                through: { where: { state: "left" }, attributes: ["id"] },
                 where: { id: userId },
                 required: false,
             },
@@ -348,19 +348,13 @@ export const joinSession = async (userId: number, code: string) => {
         throw new ErrorStatus("Cannot found session with code", 404);
     }
 
-    // See state
-    if (session.state !== "waiting") {
-        if (session.Users.length > 0) {
-            // Let user rejoin (as they have left before)
-            await session.Users[0].SessionParticipant.update({
-                state: "joined",
-            });
-        } else {
-            throw new ErrorStatus("Session cannot be joined", 400, {
-                state: session.state,
-            });
-        }
-    } else {
+    // Update SessionParticipant
+    if (session.Users.length > 0 && session.state != "complete") {
+        // Let user rejoin (as they regret leaving...)
+        await session.Users[0].SessionParticipant.update({
+            state: "joined",
+        });
+    } else if (session.state === "waiting") {
         // Create association
         const sessionParticipant = new SessionParticipant({
             sessionId: session.id,
@@ -368,6 +362,10 @@ export const joinSession = async (userId: number, code: string) => {
             role: "participant",
         });
         await sessionParticipant.save();
+    } else {
+        throw new ErrorStatus("Session cannot be joined", 400, {
+            state: session.state,
+        });
     }
 
     // Remove Users from session

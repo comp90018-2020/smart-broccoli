@@ -11,6 +11,7 @@ import {
     joinGroup,
 } from "./helpers";
 import { jwtVerify } from "../helpers/jwt";
+import { activateSession, leaveSession } from "../controllers/session";
 
 describe("Session", () => {
     beforeEach(async () => {
@@ -176,41 +177,6 @@ describe("Session", () => {
         expect(getRes.status).to.equal(200);
     });
 
-    it("Join other users' self-paced quiz", async () => {
-        const agent = supertest(app);
-        const userOwner = await registerAndLogin(USER);
-        const userMember1 = await registerAndLogin({
-            ...USER,
-            email: "b@b.com",
-        });
-        const userMember2 = await registerAndLogin({
-            ...USER,
-            email: "c@c.com",
-        });
-        const group = await createGroup(userOwner.id, "foo");
-        const quiz = await createQuiz(userOwner.id, group.id, {
-            ...QUIZ,
-            type: "self paced",
-        });
-
-        // Both members join group
-        await joinGroup(userMember1.id, { code: group.code });
-        await joinGroup(userMember2.id, { code: group.code });
-
-        // User 1 start alone session
-        const session = await createSession(userMember1.id, {
-            quizId: quiz.id,
-            isGroup: false,
-        });
-
-        // User 2 join session
-        const res = await agent
-            .post("/session/join")
-            .set("Authorization", `Bearer ${userMember2.token}`)
-            .send({ code: session.session.code });
-        expect(res.status).to.equal(400);
-    });
-
     it("Get quiz after session", async () => {
         const agent = supertest(app);
         const userOwner = await registerAndLogin(USER);
@@ -335,5 +301,106 @@ describe("Session", () => {
             .set("Authorization", `Bearer ${userOwner.token}`);
         expect(groupOwner.body).to.have.lengthOf(1);
         expect(groupOwner.body[0].Sessions).to.have.lengthOf(0);
+    });
+
+    it("Join other users' self-paced quiz", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember1 = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const userMember2 = await registerAndLogin({
+            ...USER,
+            email: "c@c.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, {
+            ...QUIZ,
+            type: "self paced",
+        });
+
+        // Both members join group
+        await joinGroup(userMember1.id, { code: group.code });
+        await joinGroup(userMember2.id, { code: group.code });
+
+        // User 1 start alone session
+        const session = await createSession(userMember1.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+
+        // User 2 join session
+        const res = await agent
+            .post("/session/join")
+            .set("Authorization", `Bearer ${userMember2.token}`)
+            .send({ code: session.session.code });
+        expect(res.status).to.equal(400);
+    });
+
+    it("Rejoin quiz", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, QUIZ);
+
+        // Owner starts live session
+        const session = await createSession(userOwner.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+
+        // User join session
+        await joinSession(userMember.id, session.session.code);
+
+        // User leave sessoin
+        await leaveSession(session.session.id, userMember.id);
+
+        // User join session
+        const res = await agent
+            .post("/session/join")
+            .set("Authorization", `Bearer ${userMember.token}`)
+            .send({ code: session.session.code });
+        expect(res.status).to.equal(200);
+    });
+
+    it("Join quiz after activation", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember1 = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const userMember2 = await registerAndLogin({
+            ...USER,
+            email: "c@c.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, QUIZ);
+
+        // Owner starts live session
+        const session = await createSession(userOwner.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+
+        // User 1 join session
+        await joinSession(userMember1.id, session.session.code);
+        // User 1 leave session
+        await leaveSession(session.session.id, userMember1.id);
+
+        // Session activates
+        await activateSession(session.session.id);
+
+        // User join session
+        const res = await agent
+            .post("/session/join")
+            .set("Authorization", `Bearer ${userMember2.token}`)
+            .send({ code: session.session.code });
+        expect(res.status).to.equal(400);
     });
 });
