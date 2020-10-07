@@ -8,6 +8,7 @@ import sequelize, {
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
+import { regenerateCode } from "./group";
 
 // Represents a session token
 interface SessionToken {
@@ -239,8 +240,6 @@ export const createSession = async (userId: number, opts: any) => {
         throw new ErrorStatus("Users cannot start live quiz", 400);
     }
 
-    const transaction = await sequelize.transaction();
-
     // Initial state of quiz
     let state = "waiting";
     if (quiz.type === "self paced" && !isGroup) {
@@ -258,7 +257,7 @@ export const createSession = async (userId: number, opts: any) => {
         subscribeGroup,
     });
 
-    try {
+    return await sequelize.transaction(async (transaction) => {
         // Save session
         await session.save({ transaction });
 
@@ -287,9 +286,6 @@ export const createSession = async (userId: number, opts: any) => {
         });
         await sessionParticipant.save({ transaction });
 
-        // Commit
-        await transaction.commit();
-
         // Sign code
         const token = await signSessionToken({
             sessionId: session.id,
@@ -298,10 +294,7 @@ export const createSession = async (userId: number, opts: any) => {
             name,
         });
         return { session, token };
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+    });
 };
 
 /**

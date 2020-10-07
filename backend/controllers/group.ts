@@ -177,21 +177,19 @@ const createGroupHelper = async (
 export const createGroup = async (
     userId: number,
     name: string,
-    defaultGroup: boolean = false,
-    transaction: Transaction = null
+    defaultGroup: boolean = false
 ) => {
-    // Create transaction if not passed in
-    const t = transaction ? transaction : await sequelize.transaction();
-
     try {
         // Create group
-        const group = await createGroupHelper(userId, name, defaultGroup, t);
-        // Commit transaction
-        await t.commit();
-        return group;
+        return await sequelize.transaction(async (transaction) => {
+            return await createGroupHelper(
+                userId,
+                name,
+                defaultGroup,
+                transaction
+            );
+        });
     } catch (err) {
-        await t.rollback();
-
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
             const payload = [
