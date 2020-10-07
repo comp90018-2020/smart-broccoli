@@ -197,12 +197,13 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
 
   void _onItemTapped(int value) {
     if (value == 1) {
-      Navigator.push(
+
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => quizQuestion()),
       );
     } else {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => quizTaker()),
       );

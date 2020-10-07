@@ -55,11 +55,6 @@ class _start_lobby extends State<start_lobby> {
             // 2. Call a function in the build class
             // which creates a button for the user to move to the next class
             timer.cancel();
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => quizQuestion()),
-            );
           } else {
             _start = _start - 1;
           }
@@ -78,7 +73,6 @@ class _start_lobby extends State<start_lobby> {
         () {
           if (_start < 1) {
             timer2.cancel();
-
           }
           val++;
           // Insert your update function here
@@ -153,41 +147,70 @@ class _start_lobby extends State<start_lobby> {
 
   // The quiz prompt with the image/question functionality
   Widget _quizLogo() {
-    return new Container(
-      height: 320,
-      width: 340,
-      child: Card(
-        elevation: 10,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // The image here is a placeholder, it is necessary to
-                // Provide a height and a width value
-                Image(
-                    height: 150,
-                    width: 340,
-                    image: AssetImage('assets/images/placeholder.png')),
-                Text(
-                  'Quiz Name',
-                  style: TextStyle(fontSize: 20),
-                ),
-                Text('Subtitle', style: TextStyle(fontSize: 15)),
-              ],
+    return Stack(
+      children: <Widget>[
+        Center(
+          child: Container(
+            height: 320,
+            width: 340,
+            child: Card(
+              elevation: 10,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      // The image here is a placeholder, it is necessary to
+                      // Provide a height and a width value
+                      Image(
+                          height: 150,
+                          width: 340,
+                          image: AssetImage('assets/images/placeholder.png')),
+                      Text(
+                        'Quiz Name'),
+                      Text('Subtitle'),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Text('Live'),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Text('Live', style: TextStyle(fontSize: 15)),
-              ],
-            )
-          ],
+          ),
         ),
-      ),
+        Column(
+            children: <Widget>[
+          //first element in column is the transparent offset
+          Container(height: 290.0),
+          Center(
+            child: startButton()
+          )
+        ])
+      ],
     );
+  }
+
+  Widget startButton(){
+    if(_start == 0){
+      return RaisedButton(
+        // color: Colors,
+        child: Text("Start"),
+        onPressed: () => _startQuiz(),
+      );
+    }
+    else{
+      FlatButton(
+       // color: Colors.grey,
+        child: Text("Start"),
+        // onPressed: () => _startQuiz(),
+      );
+    }
   }
 
   // Timer display functionality
@@ -219,7 +242,7 @@ class _start_lobby extends State<start_lobby> {
   Widget _quizPlayers() {
     return Expanded(
       child: Container(
-        height: 500.0,
+        // height: 500.0,
         child: ListView.separated(
           itemCount: propList.length,
           itemBuilder: (BuildContext context, int index) {
@@ -234,4 +257,13 @@ class _start_lobby extends State<start_lobby> {
       ),
     );
   }
+
+  void _startQuiz() {
+
+  Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => quizQuestion()),
+  );
 }
+}
+

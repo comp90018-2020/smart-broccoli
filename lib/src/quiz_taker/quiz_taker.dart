@@ -239,7 +239,7 @@ class _quizTakerState extends State<quizTaker> {
   /// Take a quiz, goes to the quiz lobby which then connects you to a quiz
   /// Interface
   void _quiz() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => start_lobby()),
     );
@@ -252,7 +252,7 @@ class _quizTakerState extends State<quizTaker> {
     print(_pinFilter.text);
 
     // TODO remove debug code below
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => start_lobby()),
     );

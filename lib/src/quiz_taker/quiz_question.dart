@@ -101,9 +101,7 @@ class _quizQuestion extends State<quizQuestion> {
     return new Column(children: <Widget>[
       new Container(
         child: Text(
-          "Your Question Here",
-          style: TextStyle(height: 2, fontSize: 30),
-        ),
+          "Your Question Here"),
       ),
       new Container(
          // The image here is a placeholder
@@ -280,7 +278,7 @@ class _quizQuestion extends State<quizQuestion> {
   // If not, move to the leaderboard
   // Otherwise move to next question
   void next() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) =>  LeaderBoardLobby()),
     );
