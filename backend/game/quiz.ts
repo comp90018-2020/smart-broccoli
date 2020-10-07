@@ -1,4 +1,5 @@
 import { jwtVerify } from "../helpers/jwt";
+import { User } from "../models";
 
 enum AnswerStatus {
     NoAnswered = 0,
@@ -222,7 +223,7 @@ export class LiveQuiz {
         return Array.from(this.sess[quizId].allParticipants());
     }
 
-    welcome(socket: SocketIO.Socket) {
+    async welcome(socket: SocketIO.Socket) {
         const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
 
@@ -237,7 +238,7 @@ export class LiveQuiz {
             const msg =
             {
                 "id": userId,
-                "name": this.getUserNameById(userId)
+                "name": await this.getUserNameById(userId)
             }
 
             if (!alreadyJoined) {
@@ -249,7 +250,7 @@ export class LiveQuiz {
 
     }
 
-    quit(socket: SocketIO.Socket, content: any) {
+    async quit(socket: SocketIO.Socket, content: any) {
         const quizId = socket.handshake.query.quizId;
         const userId = socket.handshake.query.userId;
 
@@ -264,7 +265,7 @@ export class LiveQuiz {
         const msg =
         {
             "id": userId,
-            "name": this.getUserNameById(userId)
+            "name": await this.getUserNameById(userId)
         }
         socket.to(quizId).emit("playerLeave", msg);
         // disconnect
@@ -386,7 +387,10 @@ export class LiveQuiz {
         }
     }
 
-    private getUserNameById(userId: string) {
-        return "Handsome Broccoli - " + userId;
+    private async getUserNameById(userId: string) {
+        const res =  await User.findByPk(userId, {
+            attributes: ["name"],
+        });
+        return res.name;
     }
 }
