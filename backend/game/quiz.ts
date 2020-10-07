@@ -24,6 +24,7 @@ class PlayerStatus {
 
 export class Session {
     private participants: any;
+    private participantsNames: {[key:string]:any};
     private questions: [{}];
     private sockets: any;
     private questionIdx = 0;
@@ -33,24 +34,27 @@ export class Session {
 
     constructor() {
         this.participants = new Set([]);
+        this.participantsNames = {};
         this.sockets = new Set();
         this.questionPanel = {};
     }
 
     async addParticipant(userId: string, socket: SocketIO.Socket) {
-        this.participants.add(await aUser(userId));
+        this.participants.add(userId);
+        this.participantsNames[userId] = await aUser(userId);
         this.sockets.add(socket);
         this.questionPanel[userId] = new PlayerStatus(AnswerStatus.NoAnswered, GameStatus.InGame);
     }
 
     async removeParticipant(userId: string, socket: SocketIO.Socket) {
-        this.participants.delete(await aUser(userId));
+        this.participants.delete(userId);
+        delete this.participantsNames[userId];
         this.sockets.delete(socket);
         this.questionPanel[userId].game = GameStatus.Left;
     }
 
-    async hasParticipant(userId: string){
-        return this.participants.has(await aUser(userId));
+    async hasParticipant(userId: string) {
+        return this.participants.has(userId);
     }
 
     countParticipants(): number {
@@ -58,7 +62,11 @@ export class Session {
     }
 
     allParticipants() {
-        return this.participants;
+        let ret = new Set([]);
+        for(const [key, value] of Object.entries(this.participantsNames)){
+            ret.add(value);
+        }
+        return ret;
     }
 
     playerAnswered(userId: string) {
@@ -235,10 +243,9 @@ export class LiveQuiz {
             const alreadyJoined = await this.sess[quizId].hasParticipant(userId);
             await this.sess[quizId].addParticipant(userId, socket);
 
-            // broadcast that user has joined
-            const msg = await aUser(userId);
-
             if (!alreadyJoined) {
+                // broadcast that user has joined
+                const msg = await aUser(userId);
                 socket.to(quizId).emit("playerJoin", msg);
             }
 
@@ -259,11 +266,7 @@ export class LiveQuiz {
         // WIP: Remove this participants from this quiz in DB records here
 
         // broadcast that user has left
-        const msg =
-        {
-            "id": userId,
-            "name": await getUserNameById(userId)
-        }
+        const msg = await aUser(userId);
         socket.to(quizId).emit("playerLeave", msg);
         // disconnect
         socket.disconnect();
@@ -387,13 +390,13 @@ export class LiveQuiz {
 }
 
 async function getUserNameById(userId: string) {
-    const res =  await User.findByPk(userId, {
+    const res = await User.findByPk(userId, {
         attributes: ["name"],
     });
     return res.name;
 }
 
-async function aUser(userId: string){
+async function aUser(userId: string) {
     return {
         "id": userId,
         "name": await getUserNameById(userId)
