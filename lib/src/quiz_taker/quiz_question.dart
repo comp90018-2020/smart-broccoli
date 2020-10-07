@@ -77,6 +77,8 @@ class _QuizQuestion extends State<QuizQuestion> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.onBackground,
+
         appBar: AppBar(
           title: Text("Quiz"),
           centerTitle: true,

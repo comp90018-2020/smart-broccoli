@@ -66,6 +66,7 @@ class _StartLobby extends State<StartLobby> {
 
   // Leaderboard referesh logic
   // Every 10 seconds, referesh and add new tiles
+  // This is a demostration method to show stateful lists at work
   void refreshLeaderboard() {
     const oneSec = const Duration(seconds: 10);
     _timer2 = new Timer.periodic(
@@ -129,7 +130,7 @@ class _StartLobby extends State<StartLobby> {
                   children: <Widget>[
                     _quizTimer(),
                     // Orange Divider
-                     Divider1(),
+                    Divider1(),
                     _quizTimer(),
                   ],
                 ),
@@ -149,45 +150,61 @@ class _StartLobby extends State<StartLobby> {
       children: <Widget>[
         Center(
           child: Container(
-            height: 320,
-            width: 340,
-            child: Card(
-              elevation: 10,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      // The image here is a placeholder, it is necessary to
-                      // Provide a height and a width value
-                      Image(
-                          height: 150,
-                          width: 340,
-                          image: AssetImage('assets/images/placeholder.png')),
-                      Text('Quiz Name'),
-                      Text('Subtitle'),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Text('Live'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            width: 350,
+            height: 210,
+
+            child: titleCard(),
           ),
         ),
-        Column(children: <Widget>[
-          //first element in column is the transparent offset
-          Container(height: 290.0),
-          Center(child: startButton())
-        ])
+        Column(
+          children: <Widget>[
+            //first element in column is the transparent offset
+            SizedBox(height: 180),
+            Center(child: startButton())
+          ],
+        )
       ],
     );
+  }
+
+  Widget titleCard() {
+    return Card(
+      elevation: 10,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          cardTop(),
+          cardBot(),
+        ],
+      ),
+    );
+  }
+
+  Widget cardTop(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        // The image here is a placeholder, it is necessary to
+        // Provide a height and a width value
+        Image(
+            height: 100,
+            width: 150,
+            image: AssetImage('assets/images/placeholder.png')),
+        Text('Quiz Name'),
+        Text('Subtitle'),
+      ],
+    );
+  }
+
+  Widget cardBot(){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Text('Live'),
+      ],
+    );
+
   }
 
   Widget startButton() {

@@ -18,7 +18,7 @@ class BackgroundClipper extends CustomClipper<Path> {
     // path.moveTo(0, size.width*1.5);
     path.lineTo(0, size.height);
     path.lineTo(size.width, size.height);
-    path.lineTo(size.width, size.height-size.height*0.55);
+    path.lineTo(size.width, size.height - size.height * 0.55);
     return path;
   }
 
@@ -148,10 +148,10 @@ class _QuizTakerState extends State<QuizTaker> {
     return new Container(
       child: new Column(
         children: <Widget>[
-             RaisedButton(
-              onPressed: _verifyPin, // TODO CHANGE
-              child: Text("Join By Pin"),
-            ),
+          RaisedButton(
+            onPressed: _verifyPin, // TODO CHANGE
+            child: Text("Join By Pin"),
+          ),
         ],
       ),
     );
@@ -198,29 +198,37 @@ class _QuizTakerState extends State<QuizTaker> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  // The image here is a placeholder, it is necessary to
-                  // Provide a height and a width value
-                  Image(image: AssetImage('assets/images/placeholder.png')),
-                  Text(
-                    val + type,
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  Text('Subtitle', style: TextStyle(fontSize: 15)),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Text('Live', style: TextStyle(fontSize: 15)),
-                ],
-              )
+              pictureWithTitle(val,type),
+              status(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget pictureWithTitle(val, type) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        // The image here is a placeholder, it is necessary to
+        // Provide a height and a width value
+        Image(image: AssetImage('assets/images/placeholder.png')),
+        Text(
+          val + type,
+          style: TextStyle(fontSize: 20),
+        ),
+        Text('Subtitle', style: TextStyle(fontSize: 15)),
+      ],
+    );
+  }
+
+  Widget status() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Text('Live', style: TextStyle(fontSize: 15)),
+      ],
     );
   }
 
