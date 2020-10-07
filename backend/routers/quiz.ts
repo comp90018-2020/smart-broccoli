@@ -70,6 +70,11 @@ import {
  *               items:
  *                 type: object
  *                 $ref: '#/components/schemas/Question'
+ *             Sessions:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 $ref: '#/components/schemas/QuizSession'
  *     NewQuestion:
  *       type: object
  *       required:
@@ -137,6 +142,7 @@ router.post(
         body("timeLimit").optional().isInt(),
         body("groupId").isInt(),
         body("type").isIn(["live", "self paced"]),
+        body("questions").optional({ nullable: true }).isArray(),
         body("questions.*.tf").optional({ nullable: true }).isBoolean(),
         body("questions.*.type").optional().isIn(["truefalse", "choice"]),
         body("questions.*.options").optional({ nullable: true }).isArray(),
@@ -188,7 +194,7 @@ router.get(
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            return res.json(await getAllQuiz(req.user, req.query));
+            return res.json(await getAllQuiz(req.user.id, req.query));
         } catch (err) {
             return next(err);
         }
@@ -275,6 +281,7 @@ router.patch(
         body("timeLimit").optional().isInt(),
         body("groupId").optional().isInt(),
         body("type").optional().isIn(["live", "self paced"]),
+        body("questions").optional({ nullable: true }).isArray(),
         body("questions.*.tf").optional({ nullable: true }).isBoolean(),
         body("questions.*.type").optional().isIn(["truefalse", "choice"]),
         body("questions.*.options").optional({ nullable: true }).isArray(),

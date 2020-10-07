@@ -34,9 +34,6 @@ interface GroupAttributes {
     name?: string;
     defaultGroup: boolean;
     code: string;
-    Users?: User[];
-    UserGroup?: UserGroup;
-    Quizzes?: Quiz[];
 }
 interface GroupCreationAttributes
     extends Optional<GroupAttributes, "id" | "defaultGroup" | "code"> {}

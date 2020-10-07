@@ -158,7 +158,7 @@ router.post(
         body("name").notEmpty().trim(),
     ],
     validate,
-    auth,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = await promoteParticipant(req.user.id, req.body);
@@ -231,7 +231,7 @@ router.post(
  *       '200':
  *         description: OK
  */
-router.get("/session", auth, (req: Request, res) => {
+router.get("/session", auth(), (req: Request, res) => {
     return res.sendStatus(200);
 });
 
@@ -248,7 +248,7 @@ router.get("/session", auth, (req: Request, res) => {
  */
 router.post(
     "/logout",
-    auth,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             await logout(req.token);

@@ -28,6 +28,7 @@ describe("User", () => {
         expect(res.body).to.have.property("email");
         expect(res.body).to.have.property("name");
         expect(res.body).to.have.property("role");
+        expect(res.body).to.not.have.property("password");
     });
 
     it("Update profile", async () => {
@@ -42,6 +43,7 @@ describe("User", () => {
         expect(res.body).to.have.property("id");
         expect(res.body.email).to.equal(UPDATE.email);
         expect(res.body.name).to.equal(UPDATE.name);
+        expect(res.body).to.not.have.property("password");
     });
 
     it("Update profile common email", async () => {

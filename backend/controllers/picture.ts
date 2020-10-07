@@ -2,7 +2,6 @@ import fs from "fs";
 import Picture from "../models/picture";
 import path from "path";
 import { Transaction } from "sequelize";
-import ErrorStatus from "../helpers/error";
 
 /**
  * Get picture by ID.
@@ -18,7 +17,9 @@ const getPictureById = async (pictureId: number) => {
  */
 const deletePicture = async (pictureId: number, transaction?: Transaction) => {
     // Find, delete and destroy from DB
-    const picture = await Picture.findByPk(pictureId);
+    const picture = await Picture.findByPk(pictureId, {
+        attributes: ["id", "destination"],
+    });
     // Already deleted
     if (!picture) {
         return;

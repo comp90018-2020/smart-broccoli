@@ -1,7 +1,16 @@
-import { Op } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { User, UserGroup, Picture } from "../models";
-import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { Op } from "sequelize";
+import sequelize, { User, Picture, Group } from "../models";
+import { deletePicture, insertPicture } from "./picture";
+import { sessionHasUser, sessionTokenDecrypt } from "./session";
+
+/**
+ * Get profile of current user.
+ * @param userId
+ */
+export const getProfile = async (userId: number) => {
+    return await User.findByPk(userId);
+};
 
 /**
  * Update user profile information.
@@ -45,26 +54,23 @@ export const updateProfile = async (userId: number, info: any) => {
  * @param file File attributes
  */
 export const updateProfilePicture = async (userId: number, file: any) => {
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+        attributes: ["id", "pictureId"],
+    });
 
-    const transaction = await sequelize.transaction();
-
-    try {
+    await sequelize.transaction(async (transaction) => {
         // Delete the old picture
         if (user.pictureId) {
             await deletePicture(user.pictureId, transaction);
         }
+
         // Insert the new picture
         const picture = await insertPicture(transaction, file);
+
         // Set user picture
         user.pictureId = picture.id;
         await user.save({ transaction });
-
-        await transaction.commit();
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+    });
 };
 
 /**
@@ -72,8 +78,9 @@ export const updateProfilePicture = async (userId: number, file: any) => {
  * Authorization is handled by caller.
  * @param pictureId ID of picture
  */
-export const getProfilePicture = async (pictureId: number) => {
-    const picture = await getPictureById(pictureId);
+export const getProfilePicture = async (userId: number) => {
+    const user = await User.findByPk(userId, { attributes: ["pictureId"] });
+    const picture = await user.getPicture();
     if (!picture) {
         throw new ErrorStatus("Picture not found", 404);
     }
@@ -85,7 +92,10 @@ export const getProfilePicture = async (pictureId: number) => {
  * Authorization handled by caller.
  * @param pictureId ID of picture
  */
-export const deleteProfilePicture = deletePicture;
+export const deleteProfilePicture = async (userId: number) => {
+    const user = await User.findByPk(userId, { attributes: ["pictureId"] });
+    return await deletePicture(user.pictureId);
+};
 
 /**
  * Can current user access target user's profile?
@@ -94,16 +104,23 @@ export const deleteProfilePicture = deletePicture;
  */
 const canAccessProfile = async (currentUserId: number, userId: number) => {
     // Find common groups
-    const userGroups = await UserGroup.findAll({ where: { userId } });
-    const sharedGroups = await UserGroup.findAll({
-        where: {
-            userId: currentUserId,
-            [Op.or]: userGroups.map((userGroups) => {
-                return { groupId: userGroups.groupId };
-            }),
-        },
+    // @ts-ignore
+    const sharedGroups: { id: number; count: string }[] = await Group.count({
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                required: true,
+                // User if userId is current or target
+                // Expect 2 rows (or users) for each intersection group
+                where: { [Op.or]: [{ id: userId }, { id: currentUserId }] },
+                through: { attributes: [] },
+                attributes: ["id"],
+            },
+        ],
+        group: ["Group.id"],
     });
-    return sharedGroups.length > 0;
+    return sharedGroups.find((group) => group.count === "2");
 };
 
 /**
@@ -111,8 +128,18 @@ const canAccessProfile = async (currentUserId: number, userId: number) => {
  * @param currentUserId ID of current user
  * @param userId ID of target user
  */
-export const getUserProfile = async (currentUserId: number, userId: number) => {
-    if (await canAccessProfile(currentUserId, userId)) {
+export const getUserProfile = async (
+    currentUserId: number,
+    userId: number,
+    token: string
+) => {
+    // Decrypt session token
+    const decryptedToken = await sessionTokenDecrypt(token);
+    if (
+        (decryptedToken &&
+            (await sessionHasUser(decryptedToken.sessionId, userId))) ||
+        (currentUserId && (await canAccessProfile(currentUserId, userId)))
+    ) {
         return await User.findByPk(userId, {
             attributes: ["id", "name", "updatedAt"],
         });
@@ -127,12 +154,29 @@ export const getUserProfile = async (currentUserId: number, userId: number) => {
  */
 export const getUserProfilePicture = async (
     currentUserId: number,
-    userId: number
+    userId: number,
+    token: string
 ) => {
-    if (await canAccessProfile(currentUserId, userId)) {
+    // Decrypt session token
+    const decryptedToken = await sessionTokenDecrypt(token);
+    if (
+        (decryptedToken &&
+            (await sessionHasUser(decryptedToken.sessionId, userId))) ||
+        (currentUserId && (await canAccessProfile(currentUserId, userId)))
+    ) {
         // @ts-ignore Model problems
-        const user = await User.findByPk(userId, { include: [Picture] });
-        if (!user.Picture) {
+        const user = await User.findByPk(userId, {
+            attributes: [],
+            include: [
+                {
+                    // @ts-ignore
+                    model: Picture,
+                    required: true,
+                    attributes: ["destination"],
+                },
+            ],
+        });
+        if (!user) {
             throw new ErrorStatus("Profile picture not found", 404);
         }
         return user.Picture;

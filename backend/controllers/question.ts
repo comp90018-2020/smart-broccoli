@@ -1,8 +1,8 @@
 import { Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Quiz } from "../models";
+import sequelize, { Picture } from "../models";
 import Question, { OptionAttributes } from "../models/question";
-import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { deletePicture, insertPicture } from "./picture";
 import { getQuizAndRole } from "./quiz";
 
 // Parses question info
@@ -27,6 +27,11 @@ export const processQuestions = async (
     original: Question[],
     updated: any[]
 ) => {
+    // Quiz with no questions
+    if (!updated) {
+        updated = [];
+    }
+
     // First parse updated into QuestionInfo[]
     const updatedQuestions = updated.map((q) => checkQuestionInfo(q));
 
@@ -174,7 +179,7 @@ const deleteQuestion = async (
         transaction,
     });
     if (deleted == 0) {
-        throw new ErrorStatus("Bad Request", 400);
+        throw new ErrorStatus("Cannot delete specified question", 400);
     }
 };
 
@@ -191,7 +196,7 @@ export const updateQuestionPicture = async (
     file: any
 ) => {
     // Ensure that user is owner
-    const { role } = await getQuizAndRole(userId, quizId);
+    const { role } = await getQuizAndRole(userId, quizId, { attributes: [] });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot update picture", 403);
     }
@@ -201,28 +206,25 @@ export const updateQuestionPicture = async (
             quizId,
             id: questionId,
         },
+        attributes: ["id", "pictureId"],
     });
     if (!question) {
         throw new ErrorStatus("Cannot find question", 404);
     }
 
-    const transaction = await sequelize.transaction();
-    try {
+    return await sequelize.transaction(async (transaction) => {
         // Delete the old picture
         if (question.pictureId) {
             await deletePicture(question.pictureId, transaction);
         }
+
         // Insert the new picture
         const picture = await insertPicture(transaction, file);
-        // Set user picture
+
+        // Set question picture
         question.pictureId = picture.id;
-        await question.save({ transaction });
-        await transaction.commit();
-        return question;
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+        return await question.save({ transaction });
+    });
 };
 
 /**
@@ -235,22 +237,35 @@ export const getQuestionPicture = async (
     quizId: number,
     questionId: number
 ) => {
-    const { role, state } = await getQuizAndRole(userId, quizId);
-    if ((role === "member" || role === "participant") && state === "inactive") {
+    const { role, state } = await getQuizAndRole(userId, quizId, {
+        attributes: [],
+    });
+    if (
+        (role === "member" || role === "participant") &&
+        state === "inaccessible"
+    ) {
         throw new ErrorStatus("Cannot access resource (yet)", 403);
     }
 
     const question = await Question.findOne({
-        attributes: ["pictureId"],
+        attributes: ["id"],
         where: {
             quizId,
             id: questionId,
         },
+        include: [
+            {
+                // @ts-ignore
+                model: Picture,
+                required: true,
+                attributes: ["id", "destination"],
+            },
+        ],
     });
     if (!question) {
         throw new ErrorStatus("Cannot find question", 404);
     }
-    return await getPictureById(question.pictureId);
+    return question.Picture;
 };
 
 /**
@@ -264,7 +279,7 @@ export const deleteQuestionPicture = async (
     questionId: number
 ) => {
     // Ensure that user is owner
-    const { role } = await getQuizAndRole(userId, quizId);
+    const { role } = await getQuizAndRole(userId, quizId, { attributes: [] });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot update picture", 403);
     }

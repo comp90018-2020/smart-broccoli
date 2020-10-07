@@ -19,8 +19,9 @@ class SmartBroccoliColourScheme extends ColorScheme {
 
 /// Singleton class holding the app's `ThemeData` object
 class SmartBroccoliTheme {
-  static final _instance = SmartBroccoliTheme._internal();
-  final ThemeData _themeData = ThemeData(
+  static final ThemeData _themeData = ThemeData(
+    primaryColor: Color(0xFF4CAF50),
+    scaffoldBackgroundColor: Color(0xFF4CAF50),
     colorScheme: SmartBroccoliColourScheme(),
     buttonTheme: ButtonThemeData(
       shape: RoundedRectangleBorder(
@@ -53,12 +54,6 @@ class SmartBroccoliTheme {
   );
 
   ThemeData get themeData => _themeData;
-
-  SmartBroccoliTheme._internal();
-
-  factory SmartBroccoliTheme() {
-    return _instance;
-  }
 }
 
 /// Widget to hold the app logo on auth screen
@@ -76,7 +71,7 @@ class TabHolder extends FractionallySizedBox {
   TabHolder(
       {@required List<Tab> tabs,
       double widthFactor = 0.5,
-      margin: EdgeInsetsGeometry})
+      EdgeInsetsGeometry margin = EdgeInsets.zero})
       : super(
           widthFactor: widthFactor,
           child: Container(
