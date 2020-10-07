@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_taker.dart';
@@ -99,18 +97,21 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
     return new BottomAppBar(
       child: Row(
         children: [
-          Row (
+          Row(
             children: <Widget>[
-              IconButton(icon: Icon(Icons.clear), onPressed: () => _onItemTapped(0)),
-             Text("Leave Quiz")
+              IconButton(
+                  icon: Icon(Icons.clear), onPressed: () => _onItemTapped(0)),
+              Text("Leave Quiz")
             ],
           ),
           Spacer(),
-          Row (
+          Row(
             children: <Widget>[
               Text("Next Question"),
-              IconButton(icon: Icon(Icons.navigate_next), onPressed: () => _onItemTapped(1)),
-             // Text("Next Question")
+              IconButton(
+                  icon: Icon(Icons.navigate_next),
+                  onPressed: () => _onItemTapped(1)),
+              // Text("Next Question")
             ],
           ),
           //IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
@@ -131,6 +132,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
             Container(
               height: 50,
               width: 50,
+              //TODO put picture stuff here
               // child: Icon(Icons.)
               decoration: new BoxDecoration(
                 // You need this line or the box will be transparent
@@ -147,6 +149,8 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
             Container(
               height: 100,
               width: 100,
+              //TODO put picture stuff here
+              //child:
               decoration: new BoxDecoration(
                 // You need this line or the box will be transparent
                 color: Colors.lightGreen,
@@ -162,6 +166,8 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
             Container(
               height: 50,
               width: 50,
+              //TODO put picture stuff here
+              //child:
               decoration: new BoxDecoration(
                 // You need this line or the box will be transparent
                 color: Colors.lightGreen,
@@ -197,15 +203,14 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
 
   void _onItemTapped(int value) {
     if (value == 1) {
-
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => quizQuestion()),
+        MaterialPageRoute(builder: (context) => QuizQuestion()),
       );
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => quizTaker()),
+        MaterialPageRoute(builder: (context) => QuizTaker()),
       );
     }
   }

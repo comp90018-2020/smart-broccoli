@@ -1,7 +1,5 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-
 import 'leader_board_lobby.dart';
 
 enum FormType {
@@ -12,14 +10,14 @@ enum FormType {
 /// The quiz question class displays an example of what a quiz questionare
 /// would look like
 
-class quizQuestion extends StatefulWidget {
+class QuizQuestion extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _quizQuestion();
+  State<StatefulWidget> createState() => new _QuizQuestion();
 }
 
-class _quizQuestion extends State<quizQuestion> {
+class _QuizQuestion extends State<QuizQuestion> {
   // Global class varibles
-  int _state = -1;
+  int _isCorrect = -1;
   int _tappedIndex = -1;
 
   // Correct answer getter
@@ -70,6 +68,7 @@ class _quizQuestion extends State<quizQuestion> {
   // We start the timer as soon as we begin this state
   @override
   void initState() {
+    super.initState();
     startTimer();
   }
 
@@ -100,11 +99,10 @@ class _quizQuestion extends State<quizQuestion> {
   Widget _quizPrompt() {
     return new Column(children: <Widget>[
       new Container(
-        child: Text(
-          "Your Question Here"),
+        child: Text("Your Question Here"),
       ),
       new Container(
-         // The image here is a placeholder
+          // The image here is a placeholder
           child: Padding(
               padding: EdgeInsets.fromLTRB(60, 10, 60, 10),
               child: Image(image: AssetImage('assets/images/placeholder.png'))))
@@ -155,26 +153,12 @@ class _quizQuestion extends State<quizQuestion> {
   Widget _answerTab(index) {
     if (_form == FormType.Standard) {
       return new Card(
-          elevation: 16,
-          child:InkWell(
-          // For cool color effects uncomment these two lines
-          // highlightColor: Colors.pinkAccent,
-          // splashColor: Colors.greenAccent,
-          onTap: () => updateAnswer(index),
-    child: Center(
-    child: Text(
-    'Item $index',
-    style: Theme.of(context).textTheme.headline5,
-    ),
-    )),
-      );
-
-      /* Material(
-        elevation: 10,
+        color: findColour(index),
+        elevation: 16,
         child: InkWell(
-          // For cool color effects uncomment these two lines
-           // highlightColor: Colors.pinkAccent,
-           // splashColor: Colors.greenAccent,
+            // For cool color effects uncomment these two lines
+            // highlightColor: Colors.pinkAccent,
+            // splashColor: Colors.greenAccent,
             onTap: () => updateAnswer(index),
             child: Center(
               child: Text(
@@ -182,19 +166,19 @@ class _quizQuestion extends State<quizQuestion> {
                 style: Theme.of(context).textTheme.headline5,
               ),
             )),
-      ); */
+      );
     } else {
       return new Card(
         elevation: 10,
         color: findColour(index),
-        child:InkWell(
-          // For cool color effects uncomment these two lines
-          // highlightColor: Colors.pinkAccent,
-          // splashColor: Colors.greenAccent,
+        child: InkWell(
+            // For cool color effects uncomment these two lines
+            // highlightColor: Colors.pinkAccent,
+            // splashColor: Colors.greenAccent,
 
             // WARN: This ONTAP is for debug purposes only, remove from
             // Implementation
-            onTap: () =>  next(),
+            onTap: () => next(),
             child: Center(
               child: Text(
                 'Item $index',
@@ -215,7 +199,7 @@ class _quizQuestion extends State<quizQuestion> {
   // Note indexing starts at 0 and goes from
   // left -> right -> down left -> down right
   bool isCorrectIndex(index) {
-   // print("Actual " + _tappedIndex.toString());
+    // print("Actual " + _tappedIndex.toString());
     if (getAnswer() == index) {
       return true;
     }
@@ -236,15 +220,15 @@ class _quizQuestion extends State<quizQuestion> {
     print("Updated " + ans.toString());
     _tappedIndex = ans;
     if (ans == getAnswer()) {
-      _state = 1;
+      _isCorrect = 1;
     } else {
-      _state = 0;
+      _isCorrect = 0;
     }
   }
 
   // See quiztimer, text tells you if you got is right or wrong
   Text determineText() {
-    if (_state == 1) {
+    if (_isCorrect == 1) {
       return Text("You Got it Correct!");
     }
     return Text("You Got it Incorrect!");
@@ -259,12 +243,20 @@ class _quizQuestion extends State<quizQuestion> {
   // TODO please put these colours into the Themedata configuration
 
   Color findColour(index) {
-    if (isCorrectIndex(index)) {
-      return Colors.greenAccent;
-    } else if (isChosenIndex(index)) {
-      return Colors.orangeAccent;
+    if (_form == FormType.ShowCorrect) {
+      if (isCorrectIndex(index)) {
+        return Colors.greenAccent;
+      } else if (isChosenIndex(index)) {
+        return Colors.orangeAccent;
+      } else {
+        return Colors.white;
+      }
     } else {
-      return Colors.redAccent;
+      if (isChosenIndex(index)) {
+        return Colors.orangeAccent;
+      } else {
+        return Colors.white;
+      }
     }
   }
 
@@ -280,7 +272,7 @@ class _quizQuestion extends State<quizQuestion> {
   void next() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) =>  LeaderBoardLobby()),
+      MaterialPageRoute(builder: (context) => LeaderBoardLobby()),
     );
   }
 }

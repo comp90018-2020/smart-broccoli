@@ -1,12 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 
 /// The Skeleton for the start lobby
-class start_lobby extends StatefulWidget {
+class StartLobby extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _start_lobby();
+  State<StatefulWidget> createState() => new _StartLobby();
 }
 
 // Used to design the background
@@ -31,7 +30,7 @@ class BackgroundClipper extends CustomClipper<Path> {
   }
 }
 
-class _start_lobby extends State<start_lobby> {
+class _StartLobby extends State<StartLobby> {
   // timing functions
   Timer _timer, _timer2;
 
@@ -93,6 +92,7 @@ class _start_lobby extends State<start_lobby> {
   // Initiate timers on start up
   @override
   void initState() {
+    super.initState();
     startTimer1();
     refreshLeaderboard();
   }
@@ -168,8 +168,7 @@ class _start_lobby extends State<start_lobby> {
                           height: 150,
                           width: 340,
                           image: AssetImage('assets/images/placeholder.png')),
-                      Text(
-                        'Quiz Name'),
+                      Text('Quiz Name'),
                       Text('Subtitle'),
                     ],
                   ),
@@ -184,29 +183,25 @@ class _start_lobby extends State<start_lobby> {
             ),
           ),
         ),
-        Column(
-            children: <Widget>[
+        Column(children: <Widget>[
           //first element in column is the transparent offset
           Container(height: 290.0),
-          Center(
-            child: startButton()
-          )
+          Center(child: startButton())
         ])
       ],
     );
   }
 
-  Widget startButton(){
-    if(_start == 0){
+  Widget startButton() {
+    if (_start == 0) {
       return RaisedButton(
         // color: Colors,
         child: Text("Start"),
         onPressed: () => _startQuiz(),
       );
-    }
-    else{
+    } else {
       FlatButton(
-       // color: Colors.grey,
+        // color: Colors.grey,
         child: Text("Start"),
         // onPressed: () => _startQuiz(),
       );
@@ -259,11 +254,9 @@ class _start_lobby extends State<start_lobby> {
   }
 
   void _startQuiz() {
-
-  Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (context) => quizQuestion()),
-  );
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => QuizQuestion()),
+    );
+  }
 }
-}
-

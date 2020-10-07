@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
-
 import '../../theme.dart';
 import 'start_lobby.dart';
 
-class quizTaker extends StatefulWidget {
+class QuizTaker extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _quizTakerState();
+  State<StatefulWidget> createState() => new _QuizTakerState();
 }
 
 /// Super hacky (but official) way to have weird shapes in the background
@@ -30,7 +28,7 @@ class BackgroundClipper extends CustomClipper<Path> {
   }
 }
 
-class _quizTakerState extends State<quizTaker> {
+class _QuizTakerState extends State<QuizTaker> {
   /// A pin listener
   /// listens for input by the pin listener
   final TextEditingController _pinFilter = new TextEditingController();
@@ -166,8 +164,6 @@ class _quizTakerState extends State<quizTaker> {
     );
   }
 
-
-
   /// Widget which constructs a quiz list
   Widget _buildQuizList(type) {
     List<String> items = getItems(type);
@@ -233,7 +229,6 @@ class _quizTakerState extends State<quizTaker> {
         ),
       ),
     );
-
   }
 
   /// Take a quiz, goes to the quiz lobby which then connects you to a quiz
@@ -241,7 +236,7 @@ class _quizTakerState extends State<quizTaker> {
   void _quiz() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => start_lobby()),
+      MaterialPageRoute(builder: (context) => StartLobby()),
     );
   }
 
@@ -254,7 +249,7 @@ class _quizTakerState extends State<quizTaker> {
     // TODO remove debug code below
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => start_lobby()),
+      MaterialPageRoute(builder: (context) => StartLobby()),
     );
   }
 

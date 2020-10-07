@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       //routes: {'/auth': (context) => AuthScreen()},
       //initialRoute: '/auth',
       // Debug purposes only, replace with above later on
-      routes: {'/quiz_taker': (context) => quizTaker()},
+      routes: {'/quiz_taker': (context) => QuizTaker()},
       initialRoute: '/quiz_taker',
 
     );
