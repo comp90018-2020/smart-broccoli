@@ -15,10 +15,10 @@ class BackgroundClipper extends CustomClipper<Path> {
     var path = Path();
 
     path.moveTo(0, size.height * 0.66);
-    //  path.moveTo(0, size.width*1.5);
+    // path.moveTo(0, size.width*1.5);
     path.lineTo(0, size.height);
     path.lineTo(size.width, size.height);
-    path.lineTo(size.width, 150);
+    path.lineTo(size.width, size.height-size.height*0.55);
     return path;
   }
 
@@ -186,7 +186,7 @@ class _QuizTakerState extends State<QuizTaker> {
   Widget _cardTile(val, type) {
     return new Container(
       height: 150,
-      width: 200,
+      width: 170,
       child: Card(
         elevation: 16,
         child: InkWell(

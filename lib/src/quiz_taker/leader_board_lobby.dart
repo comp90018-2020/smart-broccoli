@@ -21,11 +21,11 @@ class BackgroundClipper extends CustomClipper<Path> {
     // path.moveTo(0, size.height * 0.66);
     //  path.moveTo(0, size.width*1.5);
     path.lineTo(0, size.height / 4.25);
-    var firstControlPoint = new Offset(size.width / 4, size.height / 3);
+    var firstControlPoint = new Offset(size.width / 4, size.height / 3.5);
     var firstEndPoint = new Offset(size.width / 2, size.height / 3 - 60);
     var secondControlPoint =
         new Offset(size.width - (size.width / 4), size.height / 3.5 - 65);
-    var secondEndPoint = new Offset(size.width, size.height / 3 - 40);
+    var secondEndPoint = new Offset(size.width, size.height / 3.5 - 40);
 
     path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
         firstEndPoint.dx, firstEndPoint.dy);
@@ -67,6 +67,25 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
       // Since the background is now a widget, it comes first
       body: Stack(
         children: <Widget>[
+          Positioned(
+            // TODO fine tune this to align with centre
+            bottom: 450,
+            left: 15,
+            width: 360,
+            height: 300,
+
+            // alignment: Alignment.lerp(Alignment.topCenter, Alignment.center, ),
+
+            child: Card(
+              color: Colors.yellow,
+              elevation: 10,
+              child:  Align(
+                alignment: Alignment.bottomCenter,
+                child: Text("Your Name Here"),
+              )
+            ),
+          ),
+
           Container(
             child: ClipPath(
               clipper: BackgroundClipper(),
@@ -76,12 +95,13 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
             ),
           ),
           // Then the rest
+
           Container(
             child: new Column(
               children: <Widget>[
-                SizedBox(height: 40),
+                SizedBox(height: 20),
                 _topLeaderBoard(),
-                SizedBox(height: 40),
+                SizedBox(height: 100),
                 // The list of Quiz players
                 _quizPlayers(),
                 _bottomNavBar()
@@ -131,12 +151,11 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
         Column(
           children: <Widget>[
             Container(
-              height: 50,
-              width: 50,
-              //TODO put picture stuff here
-              // child: Icon(Icons.)
-              decoration: BoxDecoration1()
-            ),
+                height: 50,
+                width: 50,
+                //TODO put picture stuff here
+                // child: Icon(Icons.)
+                decoration: BoxDecoration1()),
             Text("Winner 1"),
           ],
         ),
@@ -144,12 +163,11 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
         Column(
           children: <Widget>[
             Container(
-              height: 100,
-              width: 100,
-              //TODO put picture stuff here
-              //child:
-              decoration: BoxDecoration1()
-            ),
+                height: 100,
+                width: 100,
+                //TODO put picture stuff here
+                //child:
+                decoration: BoxDecoration1()),
             Text("Winner 2"),
           ],
         ),
@@ -157,12 +175,11 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
         Column(
           children: <Widget>[
             Container(
-              height: 50,
-              width: 50,
-              //TODO put picture stuff here
-              //child:
-              decoration: BoxDecoration1()
-            ),
+                height: 50,
+                width: 50,
+                //TODO put picture stuff here
+                //child:
+                decoration: BoxDecoration1()),
             Text("Winner 3"),
           ],
         ),
