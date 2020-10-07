@@ -68,7 +68,7 @@ export const sessionTokenDecrypt = async (token: string) => {
  */
 export const sessionHasUser = async (sessionId: number, userId: number) => {
     return await SessionParticipant.count({
-        where: { id: sessionId, userId },
+        where: { sessionId, userId },
     });
 };
 
@@ -318,7 +318,7 @@ export const joinSession = async (userId: number, code: string) => {
     // Find session with code
     // @ts-ignore
     const session = await Session.findOne({
-        where: { code },
+        where: { code, state: { [Op.not]: "ended" } },
         include: [
             {
                 // Get group
@@ -452,6 +452,7 @@ export const endSession = async (
             await Session.update(
                 {
                     state: "ended",
+                    code: null
                 },
                 {
                     where: { id: sessionId },

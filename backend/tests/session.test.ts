@@ -430,4 +430,33 @@ describe("Session", () => {
             .send({ code: session.session.code });
         expect(res.status).to.equal(200);
     });
+
+    it("Use token to get user info", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, QUIZ);
+
+        // Owner starts live session
+        const session = await createSession(userOwner.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+
+        // User join session
+        const sessionUser = await joinSession(
+            userMember.id,
+            session.session.code
+        );
+        expect(sessionUser).to.have.property("token");
+
+        const res = await agent
+            .get(`/user/${userOwner.id}/profile`)
+            .set("Authorization", `Bearer ${sessionUser.token}`);
+        expect(res.status).to.equal(200);
+    });
 });

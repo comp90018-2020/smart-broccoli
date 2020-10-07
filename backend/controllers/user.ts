@@ -138,7 +138,7 @@ export const getUserProfile = async (
     if (
         (decryptedToken &&
             (await sessionHasUser(decryptedToken.sessionId, userId))) ||
-        (await canAccessProfile(currentUserId, userId))
+        (currentUserId && (await canAccessProfile(currentUserId, userId)))
     ) {
         return await User.findByPk(userId, {
             attributes: ["id", "name", "updatedAt"],
@@ -162,7 +162,7 @@ export const getUserProfilePicture = async (
     if (
         (decryptedToken &&
             (await sessionHasUser(decryptedToken.sessionId, userId))) ||
-        (await canAccessProfile(currentUserId, userId))
+        (currentUserId && (await canAccessProfile(currentUserId, userId)))
     ) {
         // @ts-ignore Model problems
         const user = await User.findByPk(userId, {

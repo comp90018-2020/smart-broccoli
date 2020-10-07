@@ -13,7 +13,9 @@ declare module "express" {
 }
 
 // JWT token-based authentication
-const auth = (opts: { sessionAuth: boolean } = { sessionAuth: false }) => {
+export const auth = (
+    opts: { sessionAuth: boolean } = { sessionAuth: false }
+) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         // Examine header
         const auth_header = req.header("authorization");
@@ -66,5 +68,3 @@ const auth = (opts: { sessionAuth: boolean } = { sessionAuth: false }) => {
         }
     };
 };
-
-export { auth };
