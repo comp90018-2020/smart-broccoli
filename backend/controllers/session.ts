@@ -337,8 +337,8 @@ export const joinSession = async (userId: number, code: string) => {
             // Has user joined and left before?
             {
                 model: User,
-                attributes: [],
-                through: { where: { state: "left" } },
+                attributes: ['id'],
+                through: { where: { state: "left" }, attributes: [] },
                 where: { id: userId },
                 required: false,
             },
@@ -347,9 +347,6 @@ export const joinSession = async (userId: number, code: string) => {
     if (!session) {
         throw new ErrorStatus("Cannot found session with code", 404);
     }
-
-    // Get user
-    const user = await User.findByPk(userId, { attributes: ["name"] });
 
     // See state
     if (session.state !== "waiting") {
@@ -383,6 +380,9 @@ export const joinSession = async (userId: number, code: string) => {
     if (!session.subscribeGroup) {
         delete groupJSON["code"];
     }
+
+    // Get user
+    const user = await User.findByPk(userId, { attributes: ["name"] });
 
     // Sign code
     const token = await signSessionToken({

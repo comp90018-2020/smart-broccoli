@@ -176,6 +176,41 @@ describe("Session", () => {
         expect(getRes.status).to.equal(200);
     });
 
+    it("Join other users' self-paced quiz", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember1 = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const userMember2 = await registerAndLogin({
+            ...USER,
+            email: "c@c.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, {
+            ...QUIZ,
+            type: "self paced",
+        });
+
+        // Both members join group
+        await joinGroup(userMember1.id, { code: group.code });
+        await joinGroup(userMember2.id, { code: group.code });
+
+        // User 1 start alone session
+        const session = await createSession(userMember1.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+
+        // User 2 join session
+        const res = await agent
+            .post("/session/join")
+            .set("Authorization", `Bearer ${userMember2.token}`)
+            .send({ code: session.session.code });
+        expect(res.status).to.equal(400);
+    });
+
     it("Get quiz after session", async () => {
         const agent = supertest(app);
         const userOwner = await registerAndLogin(USER);
