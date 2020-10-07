@@ -39,7 +39,8 @@ const signSessionToken = async (info: {
             sessionId: info.sessionId,
             name: info.name,
         },
-        process.env.TOKEN_SECRET
+        process.env.TOKEN_SECRET,
+        { expiresIn: "1h" }
     );
 };
 
