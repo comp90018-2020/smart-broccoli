@@ -1,9 +1,101 @@
-import { FindOptions, Transaction } from "sequelize";
+import { FindOptions } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Quiz, Question, UserGroup, User, Picture } from "../models";
+import sequelize, {
+    Quiz,
+    Question,
+    UserGroup,
+    User,
+    Session,
+    Group,
+    Picture,
+} from "../models";
 import { processQuestions } from "./question";
-import { deletePicture, getPictureById, insertPicture } from "./picture";
+import { deletePicture, insertPicture } from "./picture";
 import { assertGroupOwnership } from "./group";
+
+/**
+ * Get quiz and permissions.
+ * @param userId
+ * @param quizId
+ * @param options FindOptions
+ */
+export const getQuizAndRole = async (
+    userId: number,
+    quizId: number,
+    options?: FindOptions
+) => {
+    // Get quiz
+    const quiz = await Quiz.findByPk(
+        quizId,
+        options
+            ? {
+                  ...options,
+                  attributes: options.attributes
+                      ? [...(options.attributes as string[]), "groupId"]
+                      : options.attributes,
+              }
+            : undefined
+    );
+    if (!quiz) {
+        throw new ErrorStatus("Quiz not found", 404);
+    }
+
+    // Check whether user has privileges
+    const membership = await UserGroup.findOne({
+        where: {
+            userId,
+            groupId: quiz.groupId,
+        },
+    });
+
+    // Quick return if owner
+    if (membership && membership.role === "owner") {
+        return { quiz, role: "owner", state: null };
+    }
+
+    // Not active?
+    if (!quiz.active) {
+        throw new ErrorStatus("Quiz is not active", 403);
+    }
+
+    // Find user's quiz sessions
+    // This query is not ideal
+    const sessions = await Session.findAll({
+        where: { quizId },
+        attributes: ["id", "state"],
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                where: { id: userId },
+                attributes: ["id"],
+                required: true,
+            },
+        ],
+    });
+
+    // No sessions, not member
+    if (sessions.length === 0 && !membership) {
+        throw new ErrorStatus("Quiz cannot be accessed", 403);
+    }
+
+    // Determine role
+    const role = membership ? membership.role : "participant";
+    const states = sessions.map((session) => session.state);
+
+    // Least progress should be chosen
+    let state = "";
+    if (sessions.length === 0) {
+        // No session, so inaccessible
+        state = "inaccessible";
+    } else if (states.includes("waiting") || states.includes("active")) {
+        state = "accessible";
+    } else if (states.includes("complete")) {
+        state = "complete";
+    }
+
+    return { quiz, role, state };
+};
 
 /**
  * Create quiz.
@@ -26,12 +118,11 @@ export const createQuiz = async (userId: number, info: any) => {
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
     }
-    if (info.description) {
+    if (info.description !== undefined) {
         quiz.description = info.description;
     }
 
-    const transaction = await sequelize.transaction();
-    try {
+    return await sequelize.transaction(async (transaction) => {
         await quiz.save({ transaction: transaction });
 
         // Save questions
@@ -41,13 +132,8 @@ export const createQuiz = async (userId: number, info: any) => {
                 await processQuestions(transaction, quiz.id, [], info.questions)
             ).map((q) => q.toJSON()),
         };
-        await transaction.commit();
-
         return quizJSON;
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+    });
 };
 
 /**
@@ -91,12 +177,11 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
     }
-    if (info.description) {
+    if (info.description !== undefined) {
         quiz.description = info.description;
     }
 
-    const transaction = await sequelize.transaction();
-    try {
+    return await sequelize.transaction(async (transaction) => {
         await quiz.save({ transaction: transaction });
 
         // Save questions
@@ -110,32 +195,58 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
             );
             quizJSON.questions = updatedQuestions.map((q) => q.toJSON());
         }
-        await transaction.commit();
         return quizJSON;
-    } catch (err) {
-        await transaction.rollback();
-        throw err;
-    }
+    });
 };
 
 /**
  * Get all quiz that user has access to.
  * @param User
  */
-export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
+export const getAllQuiz = async (
+    userId: number,
+    opts: { role?: string } = {}
+) => {
     // Unset if all
     if (opts.role === "all") {
         opts.role = undefined;
     }
 
     // Get quizzes of user's groups
-    const groups = await user.getGroups({
-        where: opts.role ? { "$UserGroup.role$": opts.role } : undefined,
+    const groups = await Group.findAll({
         include: [
+            {
+                // @ts-ignore
+                model: User,
+                where: { id: userId },
+                through: {
+                    where: opts.role ? { role: opts.role } : undefined,
+                    attributes: ["role"],
+                },
+                attributes: ["id"],
+                required: true,
+            },
             {
                 // @ts-ignore
                 model: Quiz,
                 required: false,
+                include: [
+                    {
+                        // @ts-ignore
+                        model: Session,
+                        required: false,
+                        include: [
+                            {
+                                // @ts-ignore
+                                model: User,
+                                required: false,
+                                attributes: ["id"],
+                                where: { id: userId },
+                                through: { attributes: ["state"] },
+                            },
+                        ],
+                    },
+                ],
             },
         ],
     });
@@ -144,9 +255,34 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
         .map((group) => {
             return group.Quizzes.filter((quiz) => {
                 // Members are not allowed to get non active quizzes
-                return !(!quiz.active && group.UserGroup.role === "member");
+                return !(
+                    !quiz.active && group.Users[0].UserGroup.role === "member"
+                );
             }).map((quiz) => {
-                return { ...quiz.toJSON(), role: group.UserGroup.role };
+                return {
+                    ...quiz.toJSON(),
+                    role: group.Users[0].UserGroup.role,
+                    // Whether user has completed quiz
+                    complete:
+                        quiz.Sessions.find(
+                            (session) =>
+                                session.Users.length > 0 &&
+                                session.Users[0].SessionParticipant.state ===
+                                    "complete"
+                        ) != null,
+                    // Filter to sessions that user is member of
+                    // and those waiting for more members
+                    Sessions: quiz.Sessions.filter(
+                        (session) =>
+                            session.state === "waiting" ||
+                            session.Users.length > 0
+                    ).map((session) => {
+                        // @ts-ignore
+                        const sessionJSON: any = session.toJSON();
+                        delete sessionJSON["Users"];
+                        return sessionJSON;
+                    }),
+                };
             });
         })
         .flat();
@@ -159,32 +295,52 @@ export const getAllQuiz = async (user: User, opts: { role?: string } = {}) => {
  */
 export const getQuiz = async (userId: number, quizId: number) => {
     const { quiz, role, state } = await getQuizAndRole(userId, quizId, {
-        include: ["questions"],
+        include: [
+            {
+                // @ts-ignore
+                model: Question,
+                as: "questions",
+            },
+            {
+                // @ts-ignore
+                model: Session,
+                required: false,
+                include: [
+                    {
+                        // @ts-ignore
+                        model: User,
+                        required: false,
+                        attributes: ["id"],
+                        where: { id: userId },
+                        through: { attributes: ["state"] },
+                    },
+                ],
+            },
+        ],
     });
 
     // Questions
     let questions: any = {};
-
     if (role === "owner" || state === "complete") {
         // Owners, members who completed quiz
         questions = quiz.questions.map((q) => q.toJSON());
-    } else if (state === "active") {
+    } else if (state === "accessible") {
         // Quiz incomplete, but can view questions
         questions = quiz.questions.map((question) => {
             return {
                 ...question.toJSON,
                 tf: null,
-                options: question.options.map((opt) => {
-                    return {
-                        ...opt,
-                        correct: null,
-                    };
-                }),
+                // Possibly null for truefalse
+                options: question.options
+                    ? question.options.map((opt) => {
+                          return {
+                              ...opt,
+                              correct: null,
+                          };
+                      })
+                    : null,
             };
         });
-    } else if (state === "complete") {
-        // Quiz complete, can get answers again
-        questions = quiz.questions.map((question) => question.toJSON());
     } else {
         // Haven't started quiz, no access to questions
         questions = null;
@@ -192,48 +348,25 @@ export const getQuiz = async (userId: number, quizId: number) => {
 
     return {
         ...quiz.toJSON(),
+        // Whether user has completed quiz
+        complete:
+            quiz.Sessions.find(
+                (session) =>
+                    session.Users.length > 0 &&
+                    session.Users[0].SessionParticipant.state === "complete"
+            ) != null,
+        // Filter to sessions that user is member of
+        // and those waiting for more members
+        Sessions: quiz.Sessions.filter(
+            (session) => session.state === "waiting" || session.Users.length > 0
+        ).map((session) => {
+            // @ts-ignore
+            const sessionJSON: any = session.toJSON();
+            delete sessionJSON["Users"];
+            return sessionJSON;
+        }),
         questions,
     };
-};
-
-/**
- * Get quiz and permissions.
- * @param userId
- * @param quizId
- * @param options FindOptions
- */
-export const getQuizAndRole = async (
-    userId: number,
-    quizId: number,
-    options?: FindOptions
-) => {
-    // Get quiz
-    const quiz = await Quiz.findByPk(quizId, options);
-    if (!quiz) {
-        throw new ErrorStatus("Quiz not found", 404);
-    }
-
-    // Check whether user has privileges
-    const membership = await UserGroup.findOne({
-        where: {
-            userId,
-            groupId: quiz.groupId,
-        },
-    });
-
-    // Quick return if owner
-    if (membership && membership.role === "owner") {
-        return { quiz, role: "owner", state: null };
-    }
-
-    // TODO: check whether user is participant of quiz (state)
-
-    // TODO: quiz session
-    if (membership) {
-        return { quiz, role: membership.role, state: "inactive" };
-    }
-
-    throw new ErrorStatus("Quiz cannot be accessed", 403);
 };
 
 /**
@@ -241,7 +374,9 @@ export const getQuizAndRole = async (
  * @param quizId
  */
 export const deleteQuiz = async (userId: number, quizId: number) => {
-    const { quiz, role } = await getQuizAndRole(userId, quizId);
+    const { quiz, role } = await getQuizAndRole(userId, quizId, {
+        attributes: ["id"],
+    });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot delete quiz", 403);
     }
@@ -261,28 +396,27 @@ export const updateQuizPicture = async (
     file: any
 ) => {
     // Ensure that user is owner
-    const { quiz, role } = await getQuizAndRole(userId, quizId);
+    const { quiz, role } = await getQuizAndRole(userId, quizId, {
+        attributes: ["id", "pictureId"],
+    });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot update picture", 403);
     }
 
-    const transaction = await sequelize.transaction();
-    try {
+    return await sequelize.transaction(async (transaction) => {
         // Delete old picture
         if (quiz.pictureId) {
             await deletePicture(quiz.pictureId, transaction);
         }
+
         // Insert new picture
         const picture = await insertPicture(transaction, file);
+
         // Set picture
         quiz.pictureId = picture.id;
         await quiz.save({ transaction });
-
-        await transaction.commit();
         return quiz;
-    } catch (err) {
-        await transaction.rollback();
-    }
+    });
 };
 
 /**
@@ -291,8 +425,17 @@ export const updateQuizPicture = async (
  */
 export const getQuizPicture = async (userId: number, quizId: number) => {
     // Ensure that user can access quiz
-    const { quiz } = await getQuizAndRole(userId, quizId);
-    return await getPictureById(quiz.pictureId);
+    const { quiz } = await getQuizAndRole(userId, quizId, {
+        attributes: ["pictureId"],
+        include: [
+            {
+                //@ts-ignore
+                model: Picture,
+                attributes: ["id", "destination"],
+            },
+        ],
+    });
+    return quiz.Picture;
 };
 
 /**
@@ -302,7 +445,9 @@ export const getQuizPicture = async (userId: number, quizId: number) => {
  */
 export const deleteQuizPicture = async (userId: number, quizId: number) => {
     // Ensure that user is owner
-    const { quiz, role } = await getQuizAndRole(userId, quizId);
+    const { quiz, role } = await getQuizAndRole(userId, quizId, {
+        attributes: ["pictureId"],
+    });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot delete picture", 403);
     }

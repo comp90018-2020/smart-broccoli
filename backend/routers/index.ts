@@ -4,6 +4,7 @@ import authRouter from "./auth";
 import userRouter from "./user";
 import groupRouter from "./group";
 import quizRouter from "./quiz";
+import sessionRouter from "./session";
 
 const router = Router();
 
@@ -21,10 +22,12 @@ const router = Router();
 // Authentication
 router.use("/auth", authRouter);
 // User
-router.use("/user", auth, userRouter);
+router.use("/user", userRouter);
 // Quiz
-router.use("/quiz", auth, quizRouter);
+router.use("/quiz", auth(), quizRouter);
 // Group
-router.use("/group", auth, groupRouter);
+router.use("/group", auth(), groupRouter);
+// Quiz session
+router.use("/session", auth(), sessionRouter);
 
 export default router;

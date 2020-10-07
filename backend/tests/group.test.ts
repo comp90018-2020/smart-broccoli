@@ -3,6 +3,7 @@ import { expect } from "chai";
 import app from "./index";
 import rebuild from "./rebuild";
 import { registerAndLogin, createGroup, joinGroup } from "./helpers";
+import { readFileSync } from "fs";
 
 describe("Group", () => {
     beforeEach(async () => {
@@ -103,6 +104,8 @@ describe("Group", () => {
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("code");
         expect(res.body.code).to.not.equal(",,,,,,");
+        expect(res.body).to.not.have.property("UserGroup");
+        expect(res.body).to.not.have.property("Users");
     });
 
     it("Join and leave group", async () => {
@@ -195,6 +198,17 @@ describe("Group", () => {
         await joinGroup(user2.id, { name: "test" });
 
         // After join
+        const resMissing = await agent
+            .get(`/user/${user2.id}/profile/picture`)
+            .set("Authorization", `Bearer ${user1.token}`);
+        expect(resMissing.status).to.equal(404);
+
+        await agent
+            .put("/user/profile/picture")
+            .attach("avatar", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${user1.token}`);
         const res = await agent
             .get(`/user/${user2.id}/profile/picture`)
             .set("Authorization", `Bearer ${user1.token}`);

@@ -130,7 +130,7 @@ router.patch(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const group = await updateGroup(
-                req.user,
+                req.user.id,
                 Number(req.params.groupId),
                 req.body.name
             );
@@ -200,10 +200,7 @@ router.get(
     validate,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const group = await getGroup(
-                req.user.id,
-                Number(req.params.groupId)
-            );
+            const group = await getGroup(req.user, Number(req.params.groupId));
             return res.json(group);
         } catch (err) {
             return next(err);
@@ -213,7 +210,7 @@ router.get(
 
 /**
  * @swagger
- * /group/{groupId}:
+ * /group/{groupId}/quiz:
  *   get:
  *     summary: Get quizzes of group
  *     tags:
@@ -242,7 +239,7 @@ router.get(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const quizzes = await getGroupQuizzes(
-                req.user,
+                req.user.id,
                 Number(req.params.groupId)
             );
             return res.json(quizzes);
@@ -327,7 +324,7 @@ router.post(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const group = await regenerateCode(
-                req.user,
+                req.user.id,
                 Number(req.params.groupId)
             );
             return res.json(group);

@@ -1,3 +1,4 @@
+import { Picture } from "models";
 import Sequelize from "sequelize";
 
 const schema: Sequelize.ModelAttributes = {
@@ -47,6 +48,7 @@ export default class Question
     public tf?: boolean;
     public options?: OptionAttributes[];
     public pictureId?: number;
+    public Picture?: Picture;
 
     public readonly id!: number;
     public readonly quizId: number;

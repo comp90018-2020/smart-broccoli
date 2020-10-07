@@ -9,10 +9,12 @@ import {
     getProfilePicture,
     updateProfile,
     updateProfilePicture,
-    getUserProfile,
-    getUserProfilePicture,
     deleteProfilePicture,
+    getProfile,
+    getUserProfilePicture,
+    getUserProfile,
 } from "../controllers/user";
+import { auth } from "./middleware/auth";
 
 /**
  * @swagger
@@ -58,6 +60,7 @@ router.patch(
         body("password").optional().isLength({ min: 8 }),
     ],
     validate,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = await updateProfile(req.user.id, req.body);
@@ -105,6 +108,7 @@ const upload = multer({
  */
 router.put(
     "/profile/picture",
+    auth(),
     (req: Request, res: Response, next: NextFunction) => {
         const avatarUpload = upload.single("avatar");
 
@@ -150,10 +154,10 @@ router.put(
  *               type: string
  *               format: binary
  */
-router.get("/profile/picture", async (req: Request, res, next) => {
+router.get("/profile/picture", auth(), async (req: Request, res, next) => {
     try {
         // Get picture
-        const picture = await getProfilePicture(req.user.pictureId);
+        const picture = await getProfilePicture(req.user.id);
 
         // Set content header
         res.setHeader("Content-Type", "image/png");
@@ -176,9 +180,9 @@ router.get("/profile/picture", async (req: Request, res, next) => {
  *       '204':
  *         description: No content
  */
-router.delete("/profile/picture", async (req: Request, res, next) => {
+router.delete("/profile/picture", auth(), async (req: Request, res, next) => {
     try {
-        await deleteProfilePicture(req.user.pictureId);
+        await deleteProfilePicture(req.user.id);
         return res.sendStatus(204);
     } catch (err) {
         return next(err);
@@ -200,9 +204,17 @@ router.delete("/profile/picture", async (req: Request, res, next) => {
  *             schema:
  *               $ref: '#/components/schemas/User'
  */
-router.get("/profile", (req: Request, res) => {
-    return res.json(req.user);
-});
+router.get(
+    "/profile",
+    auth(),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            return res.json(await getProfile(req.user.id));
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
 
 /**
  * @swagger
@@ -230,11 +242,13 @@ router.get(
     "/:userId/profile",
     [param("userId").isInt()],
     validate,
+    auth({ sessionAuth: true }),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = await getUserProfile(
-                req.user.id,
-                Number(req.params.userId)
+                req.user ? req.user.id : undefined,
+                Number(req.params.userId),
+                req.token
             );
             return res.json(user);
         } catch (err) {
@@ -270,11 +284,13 @@ router.get(
     "/:userId/profile/picture",
     [param("userId").isInt()],
     validate,
+    auth({ sessionAuth: true }),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const picture = await getUserProfilePicture(
-                req.user.id,
-                Number(req.params.userId)
+                req.user ? req.user.id : undefined,
+                Number(req.params.userId),
+                req.token
             );
             // Set content header
             res.setHeader("Content-Type", "image/png");

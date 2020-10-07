@@ -1,35 +1,6 @@
 import { Op, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Group, User, UserGroup } from "../models";
-
-/**
- * Get group of user.
- * @param user User object
- * @param groupId ID of target group
- */
-const getGroupAndRole = async (user: User, groupId: number, role: string) => {
-    const groupQuery = await user.getGroups({
-        where: {
-            id: groupId,
-            [Op.or]:
-                role === "owner"
-                    ? // Is owner
-                      [{ "$UserGroup.role$": "owner" }]
-                    : // Owners are members also
-                      [
-                          { "$UserGroup.role$": "owner" },
-                          { "$UserGroup.role$": "member" },
-                      ],
-        },
-    });
-    if (groupQuery.length === 0) {
-        throw new ErrorStatus(
-            "User does not have privilege to access group resource",
-            403
-        );
-    }
-    return { group: groupQuery[0], role: groupQuery[0].UserGroup.role };
-};
+import sequelize, { Group, Session, User, UserGroup } from "../models";
 
 /**
  * Ensure that user is group owner.
@@ -39,7 +10,7 @@ const getGroupAndRole = async (user: User, groupId: number, role: string) => {
 export const assertGroupOwnership = async (userId: number, groupId: number) => {
     // Check whether caller is owner
     const isOwner = await UserGroup.count({
-        where: { userId: userId, groupId, role: "owner" },
+        where: { userId, groupId, role: "owner" },
     });
     if (!isOwner) {
         throw new ErrorStatus("Cannot perform group action", 403);
@@ -50,8 +21,11 @@ export const assertGroupOwnership = async (userId: number, groupId: number) => {
  * Create default group for user.
  * @param user User object
  */
-export const createDefaultGroup = async (userId: number) => {
-    return await createGroup(userId, null, true);
+export const createDefaultGroup = (
+    userId: number,
+    transaction: Transaction
+) => {
+    return createGroupHelper(userId, null, true, transaction);
 };
 
 /**
@@ -61,19 +35,12 @@ export const createDefaultGroup = async (userId: number) => {
 export const getGroups = async (user: User) => {
     // Get groups
     const groups = await user.getGroups({
-        attributes: [
-            "id",
-            "name",
-            "createdAt",
-            "updatedAt",
-            "defaultGroup",
-            "code",
-        ],
         include: [
             {
                 //@ts-ignore
                 model: User,
-                where: { "$Users.UserGroup.role$": "owner" },
+                // Owner name if default group
+                through: { where: { role: "owner" }, attributes: [] },
                 attributes: ["name"],
                 required: true,
             },
@@ -98,34 +65,34 @@ export const getGroups = async (user: User) => {
  * @param userId
  * @param groupId
  */
-export const getGroup = async (userId: number, groupId: number) => {
+export const getGroup = async (user: User, groupId: number) => {
     // Get group
-    const group = await Group.findByPk(groupId, {
+    const groupQuery = await user.getGroups({
+        where: { id: groupId },
         include: [
             {
                 // @ts-ignore Typing errors due to model
                 model: User,
-                where: {
-                    [Op.or]: [
-                        { id: userId },
-                        { "$Users.UserGroup.role$": "owner" },
-                    ],
-                },
-                attributes: ["id", "name"],
+                // Owner name if default group
+                through: { where: { role: "owner" }, attributes: [] },
+                attributes: ["name"],
                 required: true,
             },
         ],
     });
+    if (groupQuery.length === 0) {
+        throw new ErrorStatus("Group cannot be accessed", 404);
+    }
 
     // Get role
+    const group = groupQuery[0];
     const groupJSON: any = group.toJSON();
     delete groupJSON["Users"];
+    delete groupJSON["UserGroup"];
     return {
         ...groupJSON,
-        role: group.Users.find((u) => u.id === userId).UserGroup.role,
-        name: group.defaultGroup
-            ? group.Users.find((u) => u.UserGroup.role === "owner").name
-            : group.name,
+        role: group.UserGroup.role,
+        name: group.defaultGroup ? group.Users[0].name : group.name,
     };
 };
 
@@ -137,11 +104,13 @@ export const getGroup = async (userId: number, groupId: number) => {
 export const getGroupMembers = async (userId: number, groupId: number) => {
     // Get group and associated users
     const group = await Group.findByPk(groupId, {
+        attributes: ["id"],
         // @ts-ignore
         include: {
             model: User,
             required: true,
             attributes: ["id", "updatedAt", "name"],
+            through: { attributes: ["role"] },
         },
     });
     if (!group) {
@@ -152,10 +121,52 @@ export const getGroupMembers = async (userId: number, groupId: number) => {
     }
 
     return group.Users.map((user) => {
-        // @ts-ignore
-        const { UserGroup, ...rest } = user.toJSON();
-        return { ...rest, role: user.UserGroup.role };
+        const userJSON: any = user.toJSON();
+        delete userJSON["UserGroup"];
+        return { ...userJSON, role: user.UserGroup.role };
     });
+};
+
+/**
+ * Create group helper function.
+ * @param userId
+ * @param name Name of group
+ * @param defaultGroup Whether it's the user's default group
+ * @param transaction
+ */
+const createGroupHelper = async (
+    userId: number,
+    name: string,
+    defaultGroup: boolean = false,
+    transaction: Transaction
+) => {
+    // Create new group
+    let group = new Group({
+        name,
+        defaultGroup,
+    });
+
+    try {
+        // Save group
+        group = await group.save({ transaction });
+
+        // Generate first code
+        await regenerateCodeHelper(group, transaction);
+
+        // Add association
+        await UserGroup.create(
+            {
+                userId,
+                groupId: group.id,
+                role: "owner",
+            },
+            { transaction }
+        );
+
+        return group;
+    } catch (err) {
+        throw err;
+    }
 };
 
 /**
@@ -168,34 +179,17 @@ export const createGroup = async (
     name: string,
     defaultGroup: boolean = false
 ) => {
-    // Create new group
-    let group = new Group({
-        name,
-        defaultGroup,
-    });
-
-    const transaction = await sequelize.transaction();
     try {
-        // Save group
-        group = await group.save({ transaction: transaction });
-
-        // Generate first code
-        await regenerateCodeHelper(group, transaction);
-
-        // Add association
-        await UserGroup.create(
-            {
+        // Create group
+        return await sequelize.transaction(async (transaction) => {
+            return await createGroupHelper(
                 userId,
-                groupId: group.id,
-                role: "owner",
-            },
-            { transaction: transaction }
-        );
-
-        await transaction.commit();
+                name,
+                defaultGroup,
+                transaction
+            );
+        });
     } catch (err) {
-        await transaction.rollback();
-
         if (err.parent.code === "23505") {
             const param = err.parent.constraint.split("_")[1];
             const payload = [
@@ -209,8 +203,6 @@ export const createGroup = async (
         }
         throw err;
     }
-
-    return group;
 };
 
 /**
@@ -242,7 +234,9 @@ export const joinGroup = async (
                 // https://sequelize.org/master/manual/typescript.html
                 model: User,
                 where: { id: userId },
+                through: { attributes: [] },
                 required: false,
+                attributes: ["id"],
             },
         ],
     });
@@ -315,12 +309,30 @@ const regenerateCodeHelper = async (
  * @param user User object
  * @param groupId
  */
-export const regenerateCode = async (user: User, groupId: number) => {
-    const { group } = await getGroupAndRole(user, groupId, "owner");
+export const regenerateCode = async (userId: number, groupId: number) => {
+    // Find group
+    const group = await Group.findByPk(groupId, {
+        attributes: ["id", "code"],
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                required: true,
+                attributes: [],
+                through: { where: { role: "owner" } },
+                where: { id: userId },
+            },
+        ],
+    });
+    if (!group) {
+        throw new ErrorStatus("Group cannot be accessed", 403);
+    }
+
     const groupUpdated = await regenerateCodeHelper(group);
     const groupJSON: any = groupUpdated.toJSON();
     groupJSON.role = "owner";
     delete groupJSON["Users"];
+    delete groupJSON["UserGroup"];
     return groupJSON;
 };
 
@@ -330,25 +342,23 @@ export const regenerateCode = async (user: User, groupId: number) => {
  * @param userId Caller's user ID
  */
 export const leaveGroup = async (groupId: number, userId: number) => {
-    // Possible future expansion: manager/owner promotions
-    // Non-optimised checking
-    const userGroup = await UserGroup.findAll({
-        where: { groupId, role: "owner" },
+    // Find user group
+    const userGroup = await UserGroup.findOne({
+        where: { userId, groupId },
+        attributes: ["id", "role"],
     });
-    if (userGroup.length === 1 && userGroup[0].userId === userId) {
+    if (!userGroup) {
+        throw new ErrorStatus("User is not member of group", 400);
+    }
+
+    // Owner cannot leave
+    if (userGroup.role === "owner") {
+        // Can be expanded later if there are multiple owners
         throw new ErrorStatus("Last owner of group cannot leave", 400);
     }
 
     // Destroy association
-    const res = await UserGroup.destroy({
-        where: {
-            groupId,
-            userId,
-        },
-    });
-    if (res != 1) {
-        throw new ErrorStatus("Cannot leave group", 400);
-    }
+    return await userGroup.destroy();
 };
 
 /**
@@ -361,6 +371,7 @@ export const deleteMember = async (
     groupId: number,
     userId: number
 ) => {
+    // Ensure that caller is owner
     await assertGroupOwnership(callerId, groupId);
 
     const res = await UserGroup.destroy({
@@ -380,11 +391,26 @@ export const deleteMember = async (
  * @param group
  */
 export const updateGroup = async (
-    user: User,
+    userId: number,
     groupId: number,
     name: string
 ) => {
-    const { group } = await getGroupAndRole(user, groupId, "owner");
+    // Find group
+    const group = await Group.findByPk(groupId, {
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                attributes: [],
+                through: { where: { role: "owner" }, attributes: [] },
+                where: { id: userId },
+                required: true,
+            },
+        ],
+    });
+    if (!group) {
+        throw new ErrorStatus("Group cannot be accessed", 403);
+    }
     if (name && !group.defaultGroup) {
         group.name = name;
     }
@@ -429,13 +455,67 @@ export const deleteGroup = async (userId: number, groupId: number) => {
  * Get quizzes of group.
  * @param group Group that user is member of
  */
-export const getGroupQuizzes = async (user: User, groupId: number) => {
+export const getGroupQuizzes = async (userId: number, groupId: number) => {
     // Get group and role
-    const { group, role } = await getGroupAndRole(user, groupId, "member");
+    const group = await Group.findByPk(groupId, {
+        attributes: ["id"],
+        include: [
+            {
+                // @ts-ignore
+                model: User,
+                required: true,
+                attributes: ["id"],
+                where: { id: userId },
+                through: { attributes: ["role"] },
+            },
+        ],
+    });
+    if (!group) {
+        throw new ErrorStatus("Group does not exist", 404);
+    }
 
     // Only active quizzes for members
+    const role = group.Users[0].UserGroup.role;
     const quizzes = await group.getQuizzes({
         where: role === "owner" ? undefined : { active: true },
+        include: [
+            {
+                // @ts-ignore
+                model: Session,
+                required: false,
+                include: [
+                    {
+                        // @ts-ignore
+                        model: User,
+                        required: false,
+                        attributes: ["id"],
+                        through: { attributes: ["state"] },
+                        where: { id: userId },
+                    },
+                ],
+            },
+        ],
     });
-    return quizzes;
+
+    return quizzes.map((quiz) => {
+        return {
+            ...quiz.toJSON(),
+            // Whether user has completed quiz
+            complete:
+                quiz.Sessions.find(
+                    (session) =>
+                        session.Users.length > 0 &&
+                        session.Users[0].SessionParticipant.state === "complete"
+                ) != null,
+            Sessions: quiz.Sessions.filter(
+                (session) =>
+                    session.state === "waiting" || session.Users.length > 0
+            ).map((session) => {
+                // @ts-ignore
+                const sessionJSON: any = session.toJSON();
+                delete sessionJSON["Users"];
+                return sessionJSON;
+            }),
+        };
+    });
 };
