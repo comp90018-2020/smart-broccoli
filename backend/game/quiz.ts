@@ -330,12 +330,6 @@ export class LiveQuiz {
         return ret;
     }
 
-    private starting(socket: SocketIO.Socket, father:LiveQuiz) {
-        const quizId = socket.handshake.query.quizId;
-        father.sess[quizId].setQuizStatus(QuizStatus.Running);
-        // release the firt question
-        father.nextQuestion(socket);
-    }
 
     start(socket: SocketIO.Socket, content: any) {
         const quizId = socket.handshake.query.quizId;
@@ -346,7 +340,14 @@ export class LiveQuiz {
             this.sess[quizId].setQuizStartsAt(Date.now() + WAITING);
             // Broadcast that quiz will be started
             socket.to(quizId).emit("starting", (this.sess[quizId].getQuizStartsAt() - Date.now()).toString());
-            setTimeout(this.starting,  this.sess[quizId].getQuizStartsAt()- Date.now(), socket, this);
+            // pass-correct-this-context-to-settimeout-callback
+            // https://stackoverflow.com/questions/2130241
+            setTimeout(() => { 
+                console.log(this.sess[quizId]);
+                this.sess[quizId].setQuizStatus(QuizStatus.Running);
+                        // release the firt question
+                this.nextQuestion(socket);
+            },  this.sess[quizId].getQuizStartsAt()- Date.now(), socket);
             
         }
     }
