@@ -134,3 +134,14 @@ class BoxDecoration2 extends BoxDecoration {
           shape: BoxShape.circle,
         );
 }
+
+class playerStatsCard extends Card{
+  playerStatsCard(name) : super(
+      color: Colors.yellow,
+      elevation: 10,
+      child:  Align(
+        alignment: Alignment.bottomCenter,
+        child: Text(name),
+      )
+  );
+}

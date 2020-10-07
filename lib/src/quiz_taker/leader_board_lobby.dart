@@ -67,35 +67,11 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
       // Since the background is now a widget, it comes first
       body: Stack(
         children: <Widget>[
-          Positioned(
-            // TODO fine tune this to align with centre
-            bottom: 450,
-            left: 15,
-            width: 360,
-            height: 300,
-
-            // alignment: Alignment.lerp(Alignment.topCenter, Alignment.center, ),
-
-            child: Card(
-              color: Colors.yellow,
-              elevation: 10,
-              child:  Align(
-                alignment: Alignment.bottomCenter,
-                child: Text("Your Name Here"),
-              )
-            ),
-          ),
-
-          Container(
-            child: ClipPath(
-              clipper: BackgroundClipper(),
-              child: Container(
-                color: Theme.of(context).colorScheme.background,
-              ),
-            ),
-          ),
-          // Then the rest
-
+          // The player status
+          _playerStats(),
+          // Background shapes (The green part)
+          _backgroundShapes(),
+          // Then the rest overlayed on top
           Container(
             child: new Column(
               children: <Widget>[
@@ -104,6 +80,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
                 SizedBox(height: 100),
                 // The list of Quiz players
                 _quizPlayers(),
+                // Debug nav bar please remove
                 _bottomNavBar()
               ],
             ),
@@ -113,8 +90,32 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
     );
   }
 
+  Widget _backgroundShapes(){
+    return new Container(
+      child: ClipPath(
+        clipper: BackgroundClipper(),
+        child: Container(
+          color: Theme.of(context).colorScheme.background,
+        ),
+      ),
+    );
+    // Then the rest
+  }
+
+  Widget _playerStats(){
+    return new Positioned(
+      // TODO fine tune this to align with centre
+      bottom: 450,
+      left: 15,
+      width: 360,
+      height: 300,
+
+      // alignment: Alignment.lerp(Alignment.topCenter, Alignment.center, ),
+      child: playerStatsCard("Name and other data here"),
+    );
+  }
+
   Widget _bottomNavBar() {
-    bool leave = false;
     return new BottomAppBar(
       child: Row(
         children: [
@@ -141,6 +142,21 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
     );
   }
 
+    Widget topThreeUsers(h,w,text){
+      return Column(
+        children: <Widget>[
+          Container(
+              height: h,
+              width: w,
+              //TODO put picture stuff here
+              // child: Icon(Icons.)
+              decoration: BoxDecoration1()),
+          Text(text),
+        ],
+      );
+    }
+
+
   Widget _topLeaderBoard() {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -148,41 +164,11 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
       crossAxisAlignment: CrossAxisAlignment.center,
       //Center Column contents horizontally,
       children: <Widget>[
-        Column(
-          children: <Widget>[
-            Container(
-                height: 50,
-                width: 50,
-                //TODO put picture stuff here
-                // child: Icon(Icons.)
-                decoration: BoxDecoration1()),
-            Text("Winner 1"),
-          ],
-        ),
+        topThreeUsers(50,50,"Winner 1"),
         SizedBox(width: 50),
-        Column(
-          children: <Widget>[
-            Container(
-                height: 100,
-                width: 100,
-                //TODO put picture stuff here
-                //child:
-                decoration: BoxDecoration1()),
-            Text("Winner 2"),
-          ],
-        ),
+        topThreeUsers(100,100,"Winner 2"),
         SizedBox(width: 50),
-        Column(
-          children: <Widget>[
-            Container(
-                height: 50,
-                width: 50,
-                //TODO put picture stuff here
-                //child:
-                decoration: BoxDecoration1()),
-            Text("Winner 3"),
-          ],
-        ),
+        topThreeUsers(50,50,"Winner 3"),
       ],
     );
   }

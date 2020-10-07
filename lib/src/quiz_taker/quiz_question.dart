@@ -157,9 +157,6 @@ class _QuizQuestion extends State<QuizQuestion> {
         color: findColour(index),
         elevation: 16,
         child: InkWell(
-            // For cool color effects uncomment these two lines
-            // highlightColor: Colors.pinkAccent,
-            // splashColor: Colors.greenAccent,
             onTap: () => updateAnswer(index),
             child: Center(
               child: Text(
@@ -173,10 +170,6 @@ class _QuizQuestion extends State<QuizQuestion> {
         elevation: 10,
         color: findColour(index),
         child: InkWell(
-            // For cool color effects uncomment these two lines
-            // highlightColor: Colors.pinkAccent,
-            // splashColor: Colors.greenAccent,
-
             // WARN: This ONTAP is for debug purposes only, remove from
             // Implementation
             onTap: () => next(),
