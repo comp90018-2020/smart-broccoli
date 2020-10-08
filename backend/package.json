@@ -13,9 +13,6 @@
   "author": "w01/10-4",
   "license": "MIT",
   "dependencies": {
-    "@firebase/app-types": "0.x",
-    "@google-cloud/firestore": "^4.0.0",
-    "@google-cloud/storage": "^5.3.0",
     "express": "^4.17.1",
     "express-validator": "^6.6.1",
     "firebase-admin": "^9.2.0",
