@@ -285,10 +285,13 @@ class QuizModel {
       return GameSession.fromJson(resJson["session"], token: resJson["token"]);
     }
 
-    if (response.statusCode == 400 &&
-        json.decode(response.body)["message"] ==
-            "User is already participant of ongoing quiz session")
-      throw InSessionException();
+    if (response.statusCode == 400)
+      switch (json.decode(response.body)["message"]) {
+        case "User is already participant of ongoing quiz session":
+          throw InSessionException();
+        case "Session cannot be joined":
+          throw SessionNotWaitingException();
+      }
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw SessionNotFoundException();

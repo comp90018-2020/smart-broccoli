@@ -659,4 +659,24 @@ main() async {
     expect(() async => await qm.joinSession('000000'),
         throwsA(isA<SessionNotFoundException>()));
   });
+
+  test('Join session (cannot join; already active)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final QuizModel qm = QuizModel(am, mocker: client);
+
+    when(client.post('${QuizModel.SESSION_URL}/join',
+            headers: anyNamed("headers"), body: anyNamed("body")))
+        .thenAnswer((_) async => http.Response(
+            json.encode(<String, dynamic>{
+              "message": "Session cannot be joined",
+              "errors": <String, dynamic>{"state": "active"}
+            }),
+            400));
+
+    expect(() async => await qm.joinSession('123456'),
+        throwsA(isA<SessionNotWaitingException>()));
+  });
 }

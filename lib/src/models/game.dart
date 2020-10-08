@@ -65,3 +65,7 @@ class InSessionException implements Exception {}
 
 /// Exception thrown when attempting to join a session which cannot be found
 class SessionNotFoundException implements Exception {}
+
+/// Exception thrown when attempting to join a session which is not waiting
+/// (i.e. one which is active or ended)
+class SessionNotWaitingException implements Exception {}
