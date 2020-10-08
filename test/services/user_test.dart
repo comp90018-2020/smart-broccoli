@@ -82,6 +82,71 @@ main() async {
         throwsA(isA<ForbiddenRequestException>()));
   });
 
+  test('Get other user profile (using session token)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
+
+    when(client.get('${UserModel.USER_URL}/1/profile', headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer thisisagametoken123456789'
+    })).thenAnswer((_) async => http.Response(
+        json.encode(<String, dynamic>{
+          "id": 1,
+          "name": "Foo Bar",
+          "updatedAt": "2020-01-01T00:00:00.000Z"
+        }),
+        200));
+
+    // pretend client obtained `s` from `QuizModel.getSession` or
+    // `QuizModel.joinSession`
+    GameSession s = GameSession.fromJson(<String, dynamic>{
+      "id": 1,
+      "isGroup": true,
+      "type": "live",
+      "code": "878838",
+      "state": "waiting",
+      "subscribeGroup": false,
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "quizId": 2,
+      "groupId": 3,
+      "Group": <String, dynamic>{"id": 3, "name": "foo", "defaultGroup": false}
+    }, token: "thisisagametoken123456789");
+    expect(s.token, "thisisagametoken123456789");
+
+    final user = await um.getUser(id: 1, session: s);
+    expect(user, isA<User>());
+    expect(user.id, 1);
+    expect(user.name, "Foo Bar");
+  });
+
+  test('Get other user profile (without session token)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
+
+    when(client.get('${UserModel.USER_URL}/1/profile', headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer asdfqwerty1234567890foobarbaz'
+    })).thenAnswer((_) async => http.Response(
+        json.encode(<String, dynamic>{
+          "id": 1,
+          "name": "Foo Bar",
+          "updatedAt": "2020-01-01T00:00:00.000Z"
+        }),
+        200));
+
+    final user = await um.getUser(id: 1);
+    expect(user, isA<User>());
+    expect(user.id, 1);
+    expect(user.name, "Foo Bar");
+  });
+
   test('Update user profile', () async {
     final http.Client client = MockClient();
     final AuthModel am = AuthModel(

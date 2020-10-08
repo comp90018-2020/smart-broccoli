@@ -27,11 +27,27 @@ class UserModel {
     _http = mocker != null ? mocker : IOClient();
   }
 
-  /// Return a `RegisteredUser` or `ParticipantUser` object corresponding to
-  /// the logged-in or joined user.
-  Future<User> getUser() async {
-    http.Response response = await _http.get('$USER_URL/profile',
-        headers: ApiBase.headers(authToken: _authModel.token));
+  /// Get the profile of a user.
+  ///
+  /// If [id] is not specified (i.e. `null`), return a `RegisteredUser`
+  /// or `ParticipantUser` object corresponding to the logged-in/joined user.
+  /// In this case, [session] is ignored (it should be unspecified).
+  ///
+  /// If [id] is specified, return a `User` object corresponding to the
+  /// user with such ID. Where [session] is specified, the session token is
+  /// used in the authorisation header of the request. Otherwise, the auth
+  /// token is used by default.
+  Future<User> getUser({int id, GameSession session}) async {
+    http.Response response;
+    if (id == null)
+      response = await _http.get('$USER_URL/profile',
+          headers: ApiBase.headers(authToken: _authModel.token));
+    else if (session == null)
+      response = await _http.get('$USER_URL/$id/profile',
+          headers: ApiBase.headers(authToken: _authModel.token));
+    else
+      response = await _http.get('$USER_URL/$id/profile',
+          headers: ApiBase.headers(authToken: session.token));
 
     if (response.statusCode == 200) return _userFromJson(response.body);
     if (response.statusCode == 401) throw UnauthorisedRequestException();
