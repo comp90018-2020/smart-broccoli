@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:smart_broccoli/src/quiz_taker/build_quiz.dart';
 import '../../theme.dart';
 import 'start_lobby.dart';
+
+GlobalKey _allKey = GlobalKey();
+GlobalKey _groupKey = GlobalKey();
+GlobalKey _selfKey = GlobalKey();
 
 class QuizTaker extends StatefulWidget {
   @override
@@ -29,6 +35,11 @@ class BackgroundClipper extends CustomClipper<Path> {
 }
 
 class _QuizTakerState extends State<QuizTaker> {
+  double _height = 0;
+
+  // Tabs that are shown (in TabBarView)
+  List<Widget> _tabs;
+
   /// A pin listener
   /// listens for input by the pin listener
   final TextEditingController _pinFilter = new TextEditingController();
@@ -41,6 +52,70 @@ class _QuizTakerState extends State<QuizTaker> {
     } else {
       _pin = _pinFilter.text;
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initial tabs (to solve TabBarView unbounded height issue)
+    // When the height of the register tabview child is retrieved,
+    // swap the pages around and constrain the height
+    // https://github.com/flutter/flutter/issues/29749
+    // https://github.com/flutter/flutter/issues/54968
+    // NOTE: I can't seem to get this code to work as cards and grids
+    // Require a size value Therefore this is commented out for now
+    // Someone should probably look into getting this part of the code to work
+    // With the class BuildQuiz
+    /*
+     _tabs = [
+      Wrap(
+        children: [
+          BuildQuiz(key: _allKey),
+          Visibility(
+            visible: false,
+            maintainState: true,
+            maintainAnimation: true,
+            maintainSize: true,
+            child: Wrap(
+              children: [
+                BuildQuiz(key: _groupKey),
+              ],
+            ),
+          ),
+        ],
+      ),
+      Container(),
+      Container(),
+    ];
+
+    // Get height of register box
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      RenderBox _allBox = _allKey.currentContext.findRenderObject();
+      RenderBox _selfBox = _selfKey.currentContext.findRenderObject();
+      RenderBox _groupBox = _groupKey.currentContext.findRenderObject();
+
+      double maxHeight = _allBox.size.height;
+
+      if (_height != maxHeight) {
+        setState(() {
+          _height = maxHeight;
+          _tabs = [
+            BuildQuiz(key: _allKey),
+            BuildQuiz(key: _groupKey),
+            BuildQuiz(key: _selfKey)
+          ];
+        });
+      }
+    });
+    */
+
+    _tabs = [
+      BuildQuiz(key: _allKey),
+      BuildQuiz(key: _groupKey),
+      BuildQuiz(key: _selfKey)
+    ];
+
   }
 
   @override
@@ -96,22 +171,13 @@ class _QuizTakerState extends State<QuizTaker> {
           // Padding
           SizedBox(height: 50),
 
-          // Tabs
-          new Container(
-            // TODO fix this hack line
-            // So basically the idea here is that the string
-            // Passed into each of the methods will generate a different
-            // List of items
-            height: 250,
-
-            child: TabBarView(
-              children: [
-                _buildQuizList("ALL"),
-                _buildQuizList("LIVE"),
-                _buildQuizList("SELF"),
-              ],
+          FractionallySizedBox(
+           // widthFactor: 0.7,
+            child: LimitedBox(
+              // Need to limit height of TabBarView
+              maxHeight: MediaQuery.of(context).size.height*0.3,
+              child: TabBarView(children: getTabs()),
             ),
-            // child: _buildQuizList(),
           ),
           // Tab contents
         ],
@@ -157,91 +223,6 @@ class _QuizTakerState extends State<QuizTaker> {
     );
   }
 
-  /// Widget which constructs a quiz list
-  Widget _buildQuizList(type) {
-    List<String> items = getItems(type);
-
-    return Container(
-      // margin: EdgeInsets.fromLTRB(20,0,),
-      // height: 300.0,
-      child: ListView.separated(
-        // Enable Horizontal Scroll
-        scrollDirection: Axis.horizontal,
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          return _cardTile(items[index], type, index.toString());
-        },
-        // Space between the cards
-        separatorBuilder: (context, index) {
-          return Divider(indent: 1);
-        },
-      ),
-    );
-  }
-
-  /// This is a single tile within a list
-  /// val is the position ID
-  /// type is one of "ALL" "SELF" "LIVE"
-  /// This is used to demostrate that tab changes the list as well
-  Widget _cardTile(val, type, index) {
-    return new Container(
-      key: Key(index),
-      height: 150,
-      width: 170,
-      child: Card(
-        elevation: 16,
-        child: InkWell(
-          // For cool color effects uncomment these two lines
-          // highlightColor: Colors.pinkAccent,
-          // splashColor: Colors.greenAccent,
-          onTap: () => _quiz(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              pictureWithTitle(val,type),
-              status(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget pictureWithTitle(val, type) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        // The image here is a placeholder, it is necessary to
-        // Provide a height and a width value
-        Image(image: AssetImage('assets/images/placeholder.png')),
-        Text(
-          val + type,
-          style: TextStyle(fontSize: 20),
-        ),
-        Text('Subtitle', style: TextStyle(fontSize: 15)),
-      ],
-    );
-  }
-
-  Widget status() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        Text('Live', style: TextStyle(fontSize: 15)),
-      ],
-    );
-  }
-
-  /// Take a quiz, goes to the quiz lobby which then connects you to a quiz
-  /// Interface
-  void _quiz() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => StartLobby()),
-    );
-  }
-
   /// The verify pin function currently is used for debug purposes
   /// Please change this to the desired result which should be like the method
   /// Above
@@ -255,11 +236,8 @@ class _QuizTakerState extends State<QuizTaker> {
     );
   }
 
-  /// Entry function for the different type of quizes
-  /// Please change the output type
-  /// Should default to "ALL"
-  List<String> getItems(type) {
-    print("NOT IMPLEMENTED");
-    return ["A", "B", "C", "D", "E", "F", "G"];
+  List<Widget> getTabs() {
+    print(_tabs);
+    return  _tabs;
   }
 }
