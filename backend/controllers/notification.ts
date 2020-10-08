@@ -65,7 +65,7 @@ export const sendMessage = async (message: any, tokens: Token[]) => {
 export const addToken = async (userId: number, token: string) => {
     const tokenValid = await firebaseTokenValid(token);
     if (!tokenValid) {
-        throw new ErrorStatus('Firebase token is not valid', 400);
+        throw new ErrorStatus("Firebase token is not valid", 400);
     }
 
     await Token.create({

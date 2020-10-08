@@ -20,14 +20,14 @@ if (process.env.NODE_ENV === "production") {
  * Determines whether firebase token is valid.
  * @param token
  */
-export const firebaseTokenValid = async(token: string) => {
+export const firebaseTokenValid = async (token: string) => {
     try {
         await admin.auth().verifyIdToken(token, true);
         return true;
     } catch (err) {
         return false;
     }
-}
+};
 
 /**
  * Sends a message to the socket service and FCM.
