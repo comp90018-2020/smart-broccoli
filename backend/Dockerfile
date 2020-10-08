@@ -3,7 +3,7 @@ FROM node:14-alpine as builder
 # Copy files to build directory and navigate to build directory
 COPY . /build
 # Install dependencies and build app
-RUN cd /build && yarn install && yarn run build
+RUN cd /build && yarn install --ignore-optional && yarn run build
 
 FROM node:14-alpine
 
@@ -15,7 +15,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 # Install production dependencies
-RUN yarn install --production --frozen-lockfile && yarn cache clean
+RUN yarn install --production --ignore-optional --frozen-lockfile && yarn cache clean
 
 # Add user
 # RUN adduser -D comp90018

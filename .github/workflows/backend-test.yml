@@ -33,7 +33,7 @@ jobs:
           key: ${{runner.os}}--${{ hashFiles('**/yarn.lock') }}
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --ignore-optional
         working-directory: ./backend
 
       - name: Run test
