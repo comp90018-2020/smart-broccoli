@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_taker.dart';
+import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// The Skeleton for the Leaderboard lobby
@@ -81,7 +82,8 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
                 _topLeaderBoard(),
                 SizedBox(height: 100),
                 // The list of Quiz players
-                _quizPlayers(),
+                //_quizPlayers(),
+                QuizUsers(),
                 // Debug nav bar please remove
                 _bottomNavBar()
               ],
@@ -172,26 +174,6 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
         SizedBox(width: 50),
         topThreeUsers(50,50,"Winner 3"),
       ],
-    );
-  }
-
-  // Quiz players, the list of quiz users in the current lobby
-  Widget _quizPlayers() {
-    return Expanded(
-      child: Container(
-        height: 500.0,
-        child: ListView.separated(
-          itemCount: propList.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              child: Center(child: Text(propList[index])),
-            );
-          },
-          separatorBuilder: (BuildContext context, int index) =>
-              const Divider(),
-        ),
-      ),
     );
   }
 

@@ -121,22 +121,39 @@ class BoxDecoration2 extends BoxDecoration {
   BoxDecoration2()
       : super(
           border: new Border.all(
-              color: Colors.orangeAccent,
-              width: 5.0,
-              style: BorderStyle.solid),
+              color: Colors.orangeAccent, width: 5.0, style: BorderStyle.solid),
           // You need this line or the box will be transparent
           color: Colors.white,
           shape: BoxShape.circle,
         );
 }
 
-class playerStatsCard extends Card{
-  playerStatsCard(name) : super(
-      color: Colors.yellow,
-      elevation: 10,
-      child:  Align(
-        alignment: Alignment.bottomCenter,
-        child: Text(name),
-      )
-  );
+class playerStatsCard extends Card {
+  playerStatsCard(name)
+      : super(
+            color: Colors.yellow,
+            elevation: 10,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Text(name),
+            ));
+}
+
+class CustomBackground1 extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+
+    path.moveTo(0, size.height * 0.63);
+    // path.moveTo(0, size.width*1.5);
+    path.lineTo(0, size.height);
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width, size.height - size.height * 0.66);
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return true;
+  }
 }

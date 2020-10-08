@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
+import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
 
 import '../../theme.dart';
 
@@ -34,13 +35,11 @@ class BackgroundClipper extends CustomClipper<Path> {
 
 class _StartLobby extends State<StartLobby> {
   // timing functions
-  Timer _timer, _timer2;
+  Timer _timer;
 
   // You should have a getter method here to get data from server
   int _start = 50;
 
-  // Placeholder list, the list contents should be replaced with usernames.
-  List<String> propList = ["HELLO", "BOB", "MICROOSFT", "OOOOOF"];
   int val = 0;
 
   void startTimer1() {
@@ -64,31 +63,9 @@ class _StartLobby extends State<StartLobby> {
     );
   }
 
-  // Leaderboard referesh logic
-  // Every 10 seconds, referesh and add new tiles
-  // This is a demostration method to show stateful lists at work
-  void refreshLeaderboard() {
-    const oneSec = const Duration(seconds: 10);
-    _timer2 = new Timer.periodic(
-      oneSec,
-      (Timer timer2) => setState(
-        () {
-          if (_start < 1) {
-            timer2.cancel();
-          }
-          val++;
-          // Insert your update function here
-          // For now we just add 1 item to a string list
-          propList.add("General Kenobi" + val.toString());
-        },
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _timer.cancel();
-    _timer2.cancel();
     super.dispose();
   }
 
@@ -97,7 +74,6 @@ class _StartLobby extends State<StartLobby> {
   void initState() {
     super.initState();
     startTimer1();
-    refreshLeaderboard();
   }
 
   // Entry function
@@ -141,7 +117,8 @@ class _StartLobby extends State<StartLobby> {
                   ],
                 ),
                 // The list of Quiz players
-                _quizPlayers(),
+                QuizUsers(),
+                // _quizPlayers(),
               ],
             ),
           )
@@ -250,25 +227,6 @@ class _StartLobby extends State<StartLobby> {
         );
   }
 
-  // Quiz players, the list of quiz users in the current lobby
-  Widget _quizPlayers() {
-    return Expanded(
-      child: Container(
-        // height: 500.0,
-        child: ListView.separated(
-          itemCount: propList.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              child: Center(child: Text(propList[index])),
-            );
-          },
-          separatorBuilder: (BuildContext context, int index) =>
-              const Divider(),
-        ),
-      ),
-    );
-  }
 
   void _startQuiz() {
     Navigator.pushReplacement(
