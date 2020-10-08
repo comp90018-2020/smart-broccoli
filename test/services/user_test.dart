@@ -260,4 +260,55 @@ main() async {
             500));
     expect(() async => await um.deleteProfilePic(), throwsException);
   });
+
+  test('Get other user profile picture (using session token)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
+
+    when(client.get('${UserModel.USER_URL}/1/profile/picture', headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer thisisagametoken123456789'
+    })).thenAnswer((_) async =>
+        http.Response(Uint8List.fromList([1, 2, 3, 4, 5]).toString(), 200));
+
+    // pretend client obtained `s` from `QuizModel.getSession` or
+    // `QuizModel.joinSession`
+    GameSession s = GameSession.fromJson(<String, dynamic>{
+      "id": 1,
+      "isGroup": true,
+      "type": "live",
+      "code": "878838",
+      "state": "waiting",
+      "subscribeGroup": false,
+      "createdAt": "2020-01-01T00:00:00.000Z",
+      "updatedAt": "2020-01-01T00:00:00.000Z",
+      "quizId": 2,
+      "groupId": 3,
+      "Group": <String, dynamic>{"id": 3, "name": "foo", "defaultGroup": false}
+    }, token: "thisisagametoken123456789");
+    expect(s.token, "thisisagametoken123456789");
+
+    final pic = await um.getProfilePic(id: 1, session: s);
+    expect(pic, isA<Uint8List>());
+  });
+
+  test('Get other user profile picture (without session token)', () async {
+    final http.Client client = MockClient();
+    final AuthModel am = AuthModel(
+        MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
+        mocker: client);
+    final UserModel um = UserModel(am, mocker: client);
+
+    when(client.get('${UserModel.USER_URL}/1/profile/picture', headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer asdfqwerty1234567890foobarbaz'
+    })).thenAnswer((_) async =>
+        http.Response(Uint8List.fromList([1, 2, 3, 4, 5]).toString(), 200));
+
+    final pic = await um.getProfilePic(id: 1);
+    expect(pic, isA<Uint8List>());
+  });
 }

@@ -74,10 +74,26 @@ class UserModel {
     throw Exception('Unable to update user: unknown error occurred');
   }
 
-  /// Get the profile picture of the logged-in user as a list of bytes.
-  Future<Uint8List> getProfilePic() async {
-    final http.Response response = await _http.get('$USER_URL/profile/picture',
-        headers: ApiBase.headers(authToken: _authModel.token));
+  /// Get the profile picture of a user as a list of bytes.
+  ///
+  /// If [id] is not specified (i.e. `null`), return the profile picture of the
+  /// logged-in/joined user. In this case, [session] is ignored.
+  ///
+  /// If [id] is specified, return the profile picture of the user with such ID.
+  /// Where [session] is specified, the session token is used in the
+  /// authorisation header of the request. Otherwise, the auth token is used by
+  /// default.
+  Future<Uint8List> getProfilePic({int id, GameSession session}) async {
+    http.Response response;
+    if (id == null)
+      response = await _http.get('$USER_URL/profile/picture',
+          headers: ApiBase.headers(authToken: _authModel.token));
+    else if (session == null)
+      response = await _http.get('$USER_URL/$id/profile/picture',
+          headers: ApiBase.headers(authToken: _authModel.token));
+    else
+      response = await _http.get('$USER_URL/$id/profile/picture',
+          headers: ApiBase.headers(authToken: session.token));
 
     if (response.statusCode == 200) return response.bodyBytes;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
