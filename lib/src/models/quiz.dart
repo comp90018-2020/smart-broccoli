@@ -22,8 +22,7 @@ class Quiz {
   int groupId;
   QuizType type;
   bool isActive;
-  List<GameSession> _sessions;
-  List<GameSession> get sessions => _sessions;
+  final List<GameSession> sessions;
 
   int timeLimit;
   List<Question> questions;
@@ -35,13 +34,27 @@ class Quiz {
           int timeLimit,
           List<Question> questions}) =>
       Quiz._internal(null, GroupRole.OWNER, title, groupId, type, description,
-          isActive, timeLimit, questions);
+          isActive, timeLimit, questions, null);
 
   /// Constructor for internal use only
-  Quiz._internal(this.id, this.role, this.title, this.groupId, this.type,
-      this.description, this.isActive, this.timeLimit, this.questions);
+  Quiz._internal(
+      this.id,
+      this.role,
+      this.title,
+      this.groupId,
+      this.type,
+      this.description,
+      this.isActive,
+      this.timeLimit,
+      this.questions,
+      this.sessions);
 
   factory Quiz.fromJson(Map<String, dynamic> json) {
+    final Iterable sessions = (json['Sessions'] as List)?.map((session) {
+      session['quizId'] = json['id'];
+      session['groupId'] = json['groupId'];
+      return GameSession.fromJson(session);
+    });
     Quiz quiz = Quiz._internal(
         json['id'],
         json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
@@ -51,17 +64,13 @@ class Quiz {
         json['description'],
         json['active'],
         json['timeLimit'],
-        null);
+        null,
+        sessions != null ? List.unmodifiable(sessions) : null);
     quiz.questions = (json['questions'] as List)
         ?.map((question) => question['type'] == 'truefalse'
             ? TFQuestion.fromJson(quiz, question)
             : MCQuestion.fromJson(quiz, question))
         ?.toList();
-    quiz._sessions = (json['Sessions'] as List)?.map((session) {
-      session['quizId'] = quiz.id;
-      session['groupId'] = quiz.groupId;
-      return GameSession.fromJson(session);
-    })?.toList();
     return quiz;
   }
 
