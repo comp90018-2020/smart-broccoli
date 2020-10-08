@@ -107,6 +107,12 @@ class _StartLobby extends State<StartLobby> {
       backgroundColor: Theme.of(context).colorScheme.onBackground,
       // Stacks are used to stack widgets
       // Since the background is now a widget, it comes first
+      appBar: AppBar(
+        title: Text("Quiz"),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.background,
+        elevation: 10,
+      ),
       body: Stack(
         children: <Widget>[
           Container(
@@ -121,7 +127,7 @@ class _StartLobby extends State<StartLobby> {
           Container(
             child: new Column(
               children: <Widget>[
-                SizedBox(height: 50),
+                SizedBox(height: 20),
                 _quizLogo(),
                 SizedBox(height: 10),
 
@@ -146,20 +152,24 @@ class _StartLobby extends State<StartLobby> {
 
   // The quiz prompt with the image/question functionality
   Widget _quizLogo() {
+    double width = MediaQuery.of(context).size.width;
+    double yourWidth = width * 0.85;
+    double height = MediaQuery.of(context).size.height;
+    double yourheight = height * 0.355;
+
     return Stack(
       children: <Widget>[
         Center(
           child: Container(
-            width: 350,
-            height: 210,
-
+            width: yourWidth,
+            height: yourheight,
             child: titleCard(),
           ),
         ),
         Column(
           children: <Widget>[
             //first element in column is the transparent offset
-            SizedBox(height: 180),
+            SizedBox(height: yourheight*0.9),
             Center(child: startButton())
           ],
         )
@@ -188,7 +198,7 @@ class _StartLobby extends State<StartLobby> {
         // The image here is a placeholder, it is necessary to
         // Provide a height and a width value
         Image(
-            height: 100,
+            height: 150,
             width: 150,
             image: AssetImage('assets/images/placeholder.png')),
         Text('Quiz Name'),
@@ -207,6 +217,7 @@ class _StartLobby extends State<StartLobby> {
 
   }
 
+  // TODO this may need to be refactored
   Widget startButton() {
     if (_start == 0) {
       return RaisedButton(

@@ -169,7 +169,7 @@ class _QuizTakerState extends State<QuizTaker> {
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
         itemBuilder: (context, index) {
-          return _cardTile(items[index], type);
+          return _cardTile(items[index], type, index.toString());
         },
         // Space between the cards
         separatorBuilder: (context, index) {
@@ -183,8 +183,9 @@ class _QuizTakerState extends State<QuizTaker> {
   /// val is the position ID
   /// type is one of "ALL" "SELF" "LIVE"
   /// This is used to demostrate that tab changes the list as well
-  Widget _cardTile(val, type) {
+  Widget _cardTile(val, type, index) {
     return new Container(
+      key: Key(index),
       height: 150,
       width: 170,
       child: Card(
