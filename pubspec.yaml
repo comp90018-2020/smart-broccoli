@@ -10,9 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.12.2
-  shared_preferences: ^0.5.10
   provider: null
   tuple: ^1.0.3
+  localstorage: ^3.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

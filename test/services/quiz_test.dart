@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_broccoli/cache.dart';
-import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/data.dart';
 import 'package:smart_broccoli/server.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
@@ -12,12 +12,12 @@ class MockClient extends Mock implements http.Client {}
 main() async {
   test('Get quizzes', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.get(QuizModel.QUIZ_URL, headers: anyNamed("headers")))
+    when(client.get(QuizCollectionModel.QUIZ_URL, headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode([
               {
@@ -156,12 +156,13 @@ main() async {
 
   test('Get quiz', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.get('${QuizModel.QUIZ_URL}/3', headers: anyNamed("headers")))
+    when(client.get('${QuizCollectionModel.QUIZ_URL}/3',
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
               "id": 3,
@@ -229,12 +230,13 @@ main() async {
 
   test('Get quiz (not found)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.get('${QuizModel.QUIZ_URL}/44', headers: anyNamed("headers")))
+    when(client.get('${QuizCollectionModel.QUIZ_URL}/44',
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response("", 404));
 
     expect(() async => await qm.getQuiz(44),
@@ -243,12 +245,13 @@ main() async {
 
   test('Get quiz (not accessible to user)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.get('${QuizModel.QUIZ_URL}/44', headers: anyNamed("headers")))
+    when(client.get('${QuizCollectionModel.QUIZ_URL}/44',
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response("", 403));
 
     expect(() async => await qm.getQuiz(44),
@@ -257,12 +260,12 @@ main() async {
 
   test('Create quiz', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.post(QuizModel.QUIZ_URL,
+    when(client.post(QuizCollectionModel.QUIZ_URL,
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -292,12 +295,13 @@ main() async {
 
   test('Delete quiz', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.delete('${QuizModel.QUIZ_URL}/3', headers: anyNamed("headers")))
+    when(client.delete('${QuizCollectionModel.QUIZ_URL}/3',
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response("", 204));
 
     // pretend user obtained `q` from `getQuizzes` or `getQuiz`
@@ -323,12 +327,13 @@ main() async {
 
   test('Delete quiz (not found)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.delete('${QuizModel.QUIZ_URL}/3', headers: anyNamed("headers")))
+    when(client.delete('${QuizCollectionModel.QUIZ_URL}/3',
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{"message": "Quiz not found"}), 404));
 
@@ -355,12 +360,13 @@ main() async {
 
   test('Delete quiz (not allowed)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.delete('${QuizModel.QUIZ_URL}/3', headers: anyNamed("headers")))
+    when(client.delete('${QuizCollectionModel.QUIZ_URL}/3',
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(
                 <String, dynamic>{"message": "Quiz cannot be accessed"}),
@@ -389,12 +395,12 @@ main() async {
 
   test('Create session', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.post(QuizModel.SESSION_URL,
+    when(client.post(QuizCollectionModel.SESSION_URL,
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -452,12 +458,12 @@ main() async {
 
   test('Create session (user not owner of quiz)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.post(QuizModel.SESSION_URL,
+    when(client.post(QuizCollectionModel.SESSION_URL,
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(
@@ -489,12 +495,12 @@ main() async {
 
   test('Create session (quiz not found)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.post(QuizModel.SESSION_URL,
+    when(client.post(QuizCollectionModel.SESSION_URL,
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{"message": "Quiz not found"}), 404));
@@ -524,12 +530,13 @@ main() async {
 
   test('Get session', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.get(QuizModel.SESSION_URL, headers: anyNamed("headers")))
+    when(client.get(QuizCollectionModel.SESSION_URL,
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
               "session": <String, dynamic>{
@@ -567,12 +574,13 @@ main() async {
 
   test('Get session (user has no session)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.get(QuizModel.SESSION_URL, headers: anyNamed("headers")))
+    when(client.get(QuizCollectionModel.SESSION_URL,
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response("", 204));
 
     final session = await qm.getSession();
@@ -581,12 +589,12 @@ main() async {
 
   test('Join session', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.post('${QuizModel.SESSION_URL}/join',
+    when(client.post('${QuizCollectionModel.SESSION_URL}/join',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -625,12 +633,12 @@ main() async {
 
   test('Join session (already in a session)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.post('${QuizModel.SESSION_URL}/join',
+    when(client.post('${QuizCollectionModel.SESSION_URL}/join',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -644,12 +652,12 @@ main() async {
 
   test('Join session (session not found)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final QuizModel qm = QuizModel(am, mocker: client);
+    final QuizCollectionModel qm = QuizCollectionModel(am, mocker: client);
 
-    when(client.post('${QuizModel.SESSION_URL}/join',
+    when(client.post('${QuizCollectionModel.SESSION_URL}/join',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(

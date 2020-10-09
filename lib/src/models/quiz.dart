@@ -4,14 +4,19 @@ import 'dart:typed_data';
 import 'package:smart_broccoli/models.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
+import 'package:smart_broccoli/src/models/game.dart';
 
-import 'api_base.dart';
+import '../data/api_base.dart';
 import 'auth.dart';
 
 /// Class for making quiz management requests
 class QuizModel {
   static const QUIZ_URL = ApiBase.BASE_URL + '/quiz';
   static const SESSION_URL = ApiBase.BASE_URL + '/session';
+
+  // TODO
+  // List of quiz
+  // Current quiz
 
   /// AuthModel object used to obtain token for requests
   AuthModel _authModel;

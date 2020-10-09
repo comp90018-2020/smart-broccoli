@@ -1,25 +1,24 @@
 import 'dart:convert';
 
-import 'package:smart_broccoli/models.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'package:tuple/tuple.dart';
 
-import 'api_base.dart';
+import '../store/remote/api_base.dart';
 import 'auth.dart';
 
 /// Class for making group management requests
-class GroupModel {
+class GroupRegistryModel {
   static const GROUP_URL = ApiBase.BASE_URL + '/group';
 
   /// AuthModel object used to obtain token for requests
-  AuthModel _authModel;
+  AuthStateModel _authModel;
 
   /// HTTP client (mock client can be specified for testing)
   http.Client _http;
 
   /// Constructor for external use
-  GroupModel(this._authModel, {http.Client mocker}) {
+  GroupRegistryModel(this._authModel, {http.Client mocker}) {
     _http = mocker != null ? mocker : IOClient();
   }
 
