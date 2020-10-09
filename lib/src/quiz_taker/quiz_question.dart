@@ -77,16 +77,15 @@ class _QuizQuestion extends State<QuizQuestion> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.onBackground,
-
-        appBar: AppBar(
-          title: Text("Quiz"),
-          centerTitle: true,
-          backgroundColor: Theme.of(context).colorScheme.background,
-          elevation: 0,
-        ),
-        body: SingleChildScrollView(
-            child: Container(
+      backgroundColor: Theme.of(context).colorScheme.onBackground,
+      appBar: AppBar(
+        title: Text("Quiz"),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.background,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Container(
           child: new Column(
             children: <Widget>[
               // Title "UNI QUIZ"
@@ -95,7 +94,9 @@ class _QuizQuestion extends State<QuizQuestion> {
               _quizAnswers(),
             ],
           ),
-        )));
+        ),
+      ),
+    );
   }
 
   // The question/image being asked about

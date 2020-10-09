@@ -57,6 +57,10 @@ class _BuildQuiz extends State<BuildQuiz> {
             SizedBox(height: 50),
 
             Container(
+              decoration: new BoxDecoration(
+
+              ),
+
               height: height*0.30,
               //width: 200,
               child: ListView.separated(
@@ -92,7 +96,7 @@ class _BuildQuiz extends State<BuildQuiz> {
       //  controls the width of cards
       width: width * 0.4,
       child: Card(
-        elevation: 16,
+        elevation: 2,
         child: InkWell(
           // For cool color effects uncomment these two lines
           // highlightColor: Colors.pinkAccent,
