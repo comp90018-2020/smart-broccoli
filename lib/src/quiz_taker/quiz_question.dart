@@ -82,6 +82,7 @@ class _QuizQuestion extends State<QuizQuestion> {
         title: Text("Quiz"),
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.background,
+        actions: [_points()],
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -94,6 +95,20 @@ class _QuizQuestion extends State<QuizQuestion> {
               _quizAnswers(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _points(){
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: new Container(
+        child: Column(
+          children: <Widget>[
+            Text("1000"),
+            Text("Points"),
+          ],
         ),
       ),
     );

@@ -6,14 +6,10 @@ class QuizUsers extends StatefulWidget {
   QuizUsers({Key key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => new _QuizUsers(key);
+  State<StatefulWidget> createState() => new _QuizUsers();
 }
 
 class _QuizUsers extends State<QuizUsers> {
-  Key key;
-
-  _QuizUsers(this.key);
-
   // Placeholder list, the list contents should be replaced with usernames.
   List<String> propList;
 

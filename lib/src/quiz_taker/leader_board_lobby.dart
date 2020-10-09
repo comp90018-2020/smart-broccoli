@@ -5,6 +5,7 @@ import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
 import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
 import 'package:smart_broccoli/theme.dart';
 
+
 /// The Skeleton for the Leaderboard lobby
 /// Unfinished as it is beyond my skill ability
 /// There are pending changes
@@ -13,10 +14,10 @@ class LeaderBoardLobby extends StatefulWidget {
   State<StatefulWidget> createState() => new _LeaderBoardLobby();
 }
 class _LeaderBoardLobby extends State<LeaderBoardLobby> {
-  int _selectedIndex = 0;
+ // int _selectedIndex = 0;
 
   // Placeholder list, the list contents should be replaced with usernames.
-  List<String> propList = ["HELLO", "BOB", "MICROOSFT", "OOOOOF"];
+ // List<String> propList = ["HELLO", "BOB", "MICROOSFT", "OOOOOF"];
   int val = 0;
 
   // Entry function
@@ -117,7 +118,6 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
               height: h,
               width: w,
               //TODO put picture stuff here
-              // child: Icon(Icons.)
               decoration: BoxDecoration1()),
           Text(text),
         ],
@@ -128,9 +128,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
   Widget _topLeaderBoard() {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      //Center Column contents vertically,
       crossAxisAlignment: CrossAxisAlignment.center,
-      //Center Column contents horizontally,
       children: <Widget>[
         topThreeUsers(50,50,"Winner 1"),
         SizedBox(width: 50),

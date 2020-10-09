@@ -47,6 +47,11 @@ class _BuildQuiz extends State<BuildQuiz> {
             new Container(
               child: _pinForm(),
             ),
+            SizedBox(height: 10),
+            new Container(
+              width: width*0.5,
+              child: Text("By entering PIN you can access a quiz and join into the group of the that quiz"),
+            ),
             // Padding
             SizedBox(height: 50),
             // Join by pin button

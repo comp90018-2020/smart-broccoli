@@ -146,7 +146,7 @@ class _StartLobby extends State<StartLobby> {
         Column(
           children: <Widget>[
             //first element in column is the transparent offset
-            SizedBox(height: yourheight*0.9),
+            SizedBox(height: yourheight * 0.9),
             Center(child: startButton())
           ],
         )
@@ -168,15 +168,21 @@ class _StartLobby extends State<StartLobby> {
     );
   }
 
-  Widget cardTop(){
+  Widget cardTop() {
+    // Logo size controls (NOT yet IMPLEMENTED)
+    double width = MediaQuery.of(context).size.width;
+    double yourWidth = width * 0.85;
+    double height = MediaQuery.of(context).size.height;
+    double yourheight = height * 0.355;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         // The image here is a placeholder, it is necessary to
         // Provide a height and a width value
         Image(
-            height: 150,
-            width: 150,
+            // height: 150,
+            //width: 150,
             image: AssetImage('assets/images/placeholder.png')),
         Text('Quiz Name'),
         Text('Subtitle'),
@@ -184,14 +190,13 @@ class _StartLobby extends State<StartLobby> {
     );
   }
 
-  Widget cardBot(){
+  Widget cardBot() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Text('Live'),
       ],
     );
-
   }
 
   // TODO this may need to be refactored
@@ -203,11 +208,15 @@ class _StartLobby extends State<StartLobby> {
         onPressed: () => _startQuiz(),
       );
     } else {
-      FlatButton(
-        // color: Colors.grey,
-        child: Text("Start"),
-        // onPressed: () => _startQuiz(),
+      return Column(
+        // Temporary workaround
+        // TODO change padding
+        children: <Widget>[
+          SizedBox(height: 50,),
+          Container(child: Text("Waiting for Quiz to Start")),
+        ],
       );
+      // onPressed: () => _startQuiz()
     }
   }
 
@@ -226,7 +235,6 @@ class _StartLobby extends State<StartLobby> {
         ) // Text("$_start"),
         );
   }
-
 
   void _startQuiz() {
     Navigator.pushReplacement(
