@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_broccoli/cache.dart';
-import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/data.dart';
 import 'package:smart_broccoli/server.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
@@ -12,9 +12,9 @@ class MockClient extends Mock implements http.Client {}
 main() async {
   test('Register user', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+    AuthStateModel am = AuthStateModel(MainMemKeyValueStore(), mocker: client);
 
-    when(client.post('${AuthModel.AUTH_URL}/register',
+    when(client.post('${AuthStateModel.AUTH_URL}/register',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -37,9 +37,9 @@ main() async {
 
   test('Register user with email conflict', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+    AuthStateModel am = AuthStateModel(MainMemKeyValueStore(), mocker: client);
 
-    when(client.post('${AuthModel.AUTH_URL}/register',
+    when(client.post('${AuthStateModel.AUTH_URL}/register',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -61,9 +61,9 @@ main() async {
 
   test('Join', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+    AuthStateModel am = AuthStateModel(MainMemKeyValueStore(), mocker: client);
 
-    when(client.post('${AuthModel.AUTH_URL}/join',
+    when(client.post('${AuthStateModel.AUTH_URL}/join',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(
@@ -76,9 +76,9 @@ main() async {
 
   test('Join (server refusal)', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+    AuthStateModel am = AuthStateModel(MainMemKeyValueStore(), mocker: client);
 
-    when(client.post('${AuthModel.AUTH_URL}/join',
+    when(client.post('${AuthStateModel.AUTH_URL}/join',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{"message": "An error occurred"}),
@@ -90,9 +90,9 @@ main() async {
 
   test('Login', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+    AuthStateModel am = AuthStateModel(MainMemKeyValueStore(), mocker: client);
 
-    when(client.post('${AuthModel.AUTH_URL}/login',
+    when(client.post('${AuthStateModel.AUTH_URL}/login',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(
@@ -105,9 +105,9 @@ main() async {
 
   test('Login bad creds', () async {
     final http.Client client = MockClient();
-    AuthModel am = AuthModel(MainMemKeyValueStore(), mocker: client);
+    AuthStateModel am = AuthStateModel(MainMemKeyValueStore(), mocker: client);
 
-    when(client.post('${AuthModel.AUTH_URL}/login',
+    when(client.post('${AuthStateModel.AUTH_URL}/login',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(
@@ -125,10 +125,10 @@ main() async {
       "token": "asdfqwerty1234567890foobarbaz"
     };
     KeyValueStore kv = MainMemKeyValueStore(init: values);
-    AuthModel am = AuthModel(kv, mocker: client);
+    AuthStateModel am = AuthStateModel(kv, mocker: client);
     expect(am.inSession(), true);
 
-    when(client.get('${AuthModel.AUTH_URL}/session',
+    when(client.get('${AuthStateModel.AUTH_URL}/session',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response("", 200));
 
@@ -141,10 +141,10 @@ main() async {
       "token": "asdfqwerty1234567890foobarbaz"
     };
     KeyValueStore kv = MainMemKeyValueStore(init: values);
-    AuthModel am = AuthModel(kv, mocker: client);
+    AuthStateModel am = AuthStateModel(kv, mocker: client);
     expect(am.inSession(), true);
 
-    when(client.get('${AuthModel.AUTH_URL}/session',
+    when(client.get('${AuthStateModel.AUTH_URL}/session',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(
@@ -161,10 +161,10 @@ main() async {
       "token": "asdfqwerty1234567890foobarbaz"
     };
     KeyValueStore kv = MainMemKeyValueStore(init: values);
-    AuthModel am = AuthModel(kv, mocker: client);
+    AuthStateModel am = AuthStateModel(kv, mocker: client);
     expect(am.inSession(), true);
 
-    when(client.post('${AuthModel.AUTH_URL}/logout',
+    when(client.post('${AuthStateModel.AUTH_URL}/logout',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response("", 200));
 
@@ -178,10 +178,10 @@ main() async {
       "token": "asdfqwerty1234567890foobarbaz"
     };
     KeyValueStore kv = MainMemKeyValueStore(init: values);
-    AuthModel am = AuthModel(kv, mocker: client);
+    AuthStateModel am = AuthStateModel(kv, mocker: client);
     expect(am.inSession(), true);
 
-    when(client.post('${AuthModel.AUTH_URL}/logout',
+    when(client.post('${AuthStateModel.AUTH_URL}/logout',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(

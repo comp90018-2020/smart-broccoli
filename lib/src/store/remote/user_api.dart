@@ -1,30 +1,19 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:smart_broccoli/models.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
+import 'package:smart_broccoli/data.dart';
+import 'package:smart_broccoli/server.dart';
 
-import 'api_base.dart';
-import 'auth.dart';
-
-/// Class for making user profile requests
-/// For all methods in this class:
-/// `UnauthorisedRequestException` is thrown if the user is not logged in.
-/// `ForbiddenRequestException` is thrown if the user is logged in but not
-/// authorised to make the request.
-class UserModel {
+class UserApi {
   static const USER_URL = ApiBase.BASE_URL + '/user';
-
-  /// AuthModel object used to obtain token for requests
-  final AuthModel _authModel;
 
   /// HTTP client (mock client can be specified for testing)
   http.Client _http;
 
-  /// Constructor for external use
-  UserModel(this._authModel, {http.Client mocker}) {
-    _http = mocker != null ? mocker : IOClient();
+  UserApi({http.Client mocker}) {
+    _http = mocker ?? IOClient();
   }
 
   /// Get the profile of a user.
@@ -62,9 +51,9 @@ class UserModel {
   /// Usage:
   /// [user] should be a `User` object obtained by `getUser`. Mutate the fields
   /// to be updated (e.g. `email`, `name`, `password`) then invoke this method.
-  Future<User> updateUser(User user) async {
+  Future<User> updateUser(String token, User user) async {
     final http.Response response = await _http.patch('$USER_URL/profile',
-        headers: ApiBase.headers(authToken: _authModel.token),
+        headers: ApiBase.headers(authToken: token),
         body: jsonEncode(user.toJson()));
 
     if (response.statusCode == 200) return _userFromJson(response.body);
@@ -104,7 +93,8 @@ class UserModel {
 
   /// Set the profile pic of the logged-in user.
   /// This method takes the image as a list of bytes.
-  Future<void> setProfilePic(Uint8List bytes) async {
+  /// TODO: missing headers
+  Future<void> setProfilePic(String token, Uint8List bytes) async {
     final http.MultipartRequest request =
         http.MultipartRequest('PUT', Uri.parse('$USER_URL/profile/picture'))
           ..files.add(http.MultipartFile.fromBytes('avatar', bytes));
@@ -118,10 +108,10 @@ class UserModel {
   }
 
   /// Delete the profile pic of the logged-in user.
-  Future<void> deleteProfilePic() async {
+  Future<void> deleteProfilePic(String token) async {
     final http.Response response = await _http.delete(
         '$USER_URL/profile/picture',
-        headers: ApiBase.headers(authToken: _authModel.token));
+        headers: ApiBase.headers(authToken: token));
 
     if (response.statusCode == 204) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();

@@ -1,203 +1,305 @@
-import 'game.dart';
-import 'group.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
-enum QuizType { LIVE, SELF_PACED }
+import 'package:smart_broccoli/models.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
+import 'package:smart_broccoli/src/models/game.dart';
 
-/// Object representing a quiz
-/// Instances of this class are returned when fetching quizzes from the server.
-/// Additional instances of this class (i.e. not fetched from the server) are
-/// to be constructed when the user creates a new quiz. A new quiz can be
-/// synchronised with the server by passing it to `QuizModel.createQuiz`.
-class Quiz {
-  /// ID of the quiz (for quizzes fetched from server only)
-  final int id;
+import 'api_base.dart';
+import 'auth.dart';
 
-  /// User's role. This field is non-null for quizzes in the list returned by
-  /// `getQuizzes`; however, it will be null for a quiz returned by `getQuiz`
-  final GroupRole role;
+/// Class for making quiz management requests
+class QuizModel {
+  static const QUIZ_URL = ApiBase.BASE_URL + '/quiz';
+  static const SESSION_URL = ApiBase.BASE_URL + '/session';
 
-  String title;
-  String description;
+  // TODO
+  // List of quiz
+  // Current quiz
 
-  int groupId;
-  QuizType type;
-  bool isActive;
-  final List<GameSession> sessions;
+  /// AuthModel object used to obtain token for requests
+  AuthModel _authModel;
 
-  int timeLimit;
-  List<Question> questions;
+  /// HTTP client (mock client can be specified for testing)
+  http.Client _http;
 
-  /// Construtor for use when user creates a new quiz
-  factory Quiz(String title, int groupId, QuizType type,
-          {String description,
-          bool isActive,
-          int timeLimit,
-          List<Question> questions}) =>
-      Quiz._internal(null, GroupRole.OWNER, title, groupId, type, description,
-          isActive, timeLimit, questions, null);
-
-  /// Constructor for internal use only
-  Quiz._internal(
-      this.id,
-      this.role,
-      this.title,
-      this.groupId,
-      this.type,
-      this.description,
-      this.isActive,
-      this.timeLimit,
-      this.questions,
-      this.sessions);
-
-  factory Quiz.fromJson(Map<String, dynamic> json) {
-    final Iterable sessions = (json['Sessions'] as List)?.map((session) {
-      session['quizId'] = json['id'];
-      session['groupId'] = json['groupId'];
-      return GameSession.fromJson(session);
-    });
-    Quiz quiz = Quiz._internal(
-        json['id'],
-        json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
-        json['title'],
-        json['groupId'],
-        json['type'] == 'live' ? QuizType.LIVE : QuizType.SELF_PACED,
-        json['description'],
-        json['active'],
-        json['timeLimit'],
-        null,
-        sessions != null ? List.unmodifiable(sessions) : null);
-    quiz.questions = (json['questions'] as List)
-        ?.map((question) => question['type'] == 'truefalse'
-            ? TFQuestion.fromJson(quiz, question)
-            : MCQuestion.fromJson(quiz, question))
-        ?.toList();
-    return quiz;
+  /// Constructor for external use
+  QuizModel(this._authModel, {http.Client mocker}) {
+    _http = mocker != null ? mocker : IOClient();
   }
 
-  // note: sessions not serialised
-  Map<String, dynamic> toJson() {
-    Map json = <String, dynamic>{
-      'id': id,
-      'title': title,
-      'groupId': groupId,
-      'type': type == QuizType.LIVE ? 'live' : 'self paced',
-      'description': description,
-      'active': isActive,
-      'timeLimit': timeLimit,
-    };
-    if (questions != null)
-      json['questions'] =
-          questions.map((question) => question.toJson()).toList();
-    return json;
+  /// Return a list of all quizzes available to the authenticated user.
+  /// Caveat: The `questions` field of each quiz is NOT set (i.e. is `null`).
+  /// `getQuiz` must be invoked to retrieve the list of questions associated
+  /// with a quiz.
+  Future<List<Quiz>> getQuizzes() async {
+    http.Response response = await _http.get(QUIZ_URL,
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200)
+      return (json.decode(response.body) as List)
+          .map((repr) => Quiz.fromJson(repr))
+          .toList();
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get quizzes: unknown error occurred');
+  }
+
+  /// Return the quiz with specified [id].
+  Future<Quiz> getQuiz(int id) async {
+    http.Response response = await _http.get('$QUIZ_URL/$id',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200)
+      return Quiz.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
+    throw Exception('Unable to get specified quiz: unknown error occurred');
+  }
+
+  /// Synchronise an updated [quiz] with the server.
+  /// Return a `Quiz` object constructed from the server's response (all fields
+  /// should be equal in content).
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  /// Mutate the fields to be updated (e.g. `title`, `questions`) then invoke
+  /// this method.
+  Future<Quiz> updateQuiz(Quiz quiz) async {
+    // serialise quiz and remove null values
+    Map<String, dynamic> quizJson = quiz.toJson();
+    quizJson.removeWhere((key, value) => value == null);
+
+    http.Response response = await _http.patch('$QUIZ_URL/${quiz.id}',
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: jsonEncode(quizJson));
+
+    if (response.statusCode == 200)
+      return Quiz.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
+    throw Exception('Unable to update quiz: unknown error occurred');
+  }
+
+  /// Upload a new [quiz] to the server.
+  /// Return a `Quiz` object constructed from the server's response.
+  ///
+  /// Usage:
+  /// [quiz] should be a newly constructed `Quiz` object, not one obtained by
+  /// `getQuiz` or `getQuizzes`.  The returned object will have a non-null `id`.
+  Future<Quiz> createQuiz(Quiz quiz) async {
+    // serialise quiz and remove null values
+    Map<String, dynamic> quizJson = quiz.toJson();
+    quizJson.removeWhere((key, value) => value == null);
+
+    http.Response response = await _http.post(QUIZ_URL,
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: jsonEncode(quizJson));
+
+    if (response.statusCode == 201)
+      return Quiz.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to create quiz: unknown error occurred');
+  }
+
+  /// Delete a [quiz].
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  Future<void> deleteQuiz(Quiz quiz) async {
+    http.Response response = await _http.delete('$QUIZ_URL/${quiz.id}',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 204) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
+    throw Exception('Unable to delete quiz: unknown error occurred');
+  }
+
+  /// Get the picture of a [quiz] as a list of bytes.
+  /// Return `null` if there is no picture.
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  Future<Uint8List> getQuizPicture(Quiz quiz) async {
+    final http.Response response = await _http.get(
+        '$QUIZ_URL/${quiz.id}/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200) return response.bodyBytes;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) return null;
+    throw Exception('Unable to get quiz picture: unknown error occurred');
+  }
+
+  /// Set the picture of a [quiz].
+  /// This method takes the image as a list of bytes.
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  Future<void> setQuizPicture(Quiz quiz, Uint8List bytes) async {
+    final http.MultipartRequest request =
+        http.MultipartRequest('PUT', Uri.parse('$QUIZ_URL/${quiz.id}/picture'))
+          ..files.add(http.MultipartFile.fromBytes('picture', bytes));
+
+    final http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
+    throw Exception('Unable to set quiz picture: unknown error occurred');
+  }
+
+  /// Delete the picture of a [quiz].
+  ///
+  /// Usage:
+  /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
+  Future<void> deleteQuizPicture(Quiz quiz) async {
+    final http.Response response = await _http.delete(
+        '$QUIZ_URL/${quiz.id}/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 204) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to delete quiz picture: unknown error occurred');
+  }
+
+  /// Get the picture of a [question] as a list of bytes.
+  /// Return `null` if there is no picture.
+  ///
+  /// Usage:
+  /// [question] should be in the list `quiz.questions` where `quiz` is a `Quiz`
+  /// object obtained by `getQuiz` or `getQuizzes`.
+  Future<Uint8List> getQuestionPicture(Question question) async {
+    final http.Response response = await _http.get(
+        '$QUIZ_URL/${question.quiz.id}/question/${question.id}/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200) return response.bodyBytes;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) return null;
+    throw Exception('Unable to get question picture: unknown error occurred');
+  }
+
+  /// Set the picture of a [question].
+  ///
+  /// Usage:
+  /// [question] should be in the list `quiz.questions` where `quiz` is a `Quiz`
+  /// object obtained by `getQuiz` or `getQuizzes`.
+  Future<void> setQuestionPicture(Question question, Uint8List bytes) async {
+    final http.MultipartRequest request = http.MultipartRequest(
+        'PUT',
+        Uri.parse(
+            '$QUIZ_URL/${question.quiz.id}/question/${question.id}/picture'))
+      ..files.add(http.MultipartFile.fromBytes('picture', bytes));
+
+    final http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuestionNotFoundException();
+    throw Exception('Unable to set question picture: unknown error occurred');
+  }
+
+  /// Delete the picture of a [question].
+  ///
+  /// Usage:
+  /// [question] should be in the list `quiz.questions` where `quiz` is a `Quiz`
+  /// object obtained by `getQuiz` or `getQuizzes`.
+  Future<void> deleteQuestionPicture(Question question) async {
+    final http.Response response = await _http.delete(
+        '$QUIZ_URL/${question.quiz.id}/question/${question.id}/picture',
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 204) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get question picture: unknown error occurred');
+  }
+
+  /// Start a new game [session].
+  /// Return a `GameSession` object constructed from the server's response.
+  ///
+  /// Usage:
+  /// [session] should be a newly constructed `Session` object. Only `quizId`,
+  /// `sessionType` and `groupAutoJoin` will be non-`null` in the object.
+  /// However, the returned object will not have `null` fields.
+  Future<GameSession> createSession(GameSession session) async {
+    // serialise session object and remove null values
+    Map<String, dynamic> sessionJson = session.toJson();
+    sessionJson.removeWhere((key, value) => value == null);
+
+    final http.Response response = await _http.post(SESSION_URL,
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: json.encode(sessionJson));
+
+    if (response.statusCode == 200) {
+      Map resJson = json.decode(response.body);
+      return GameSession.fromJson(resJson["session"], token: resJson["token"]);
+    }
+
+    if (response.statusCode == 400 &&
+        json.decode(response.body)["message"] ==
+            "User is already participant of ongoing quiz session")
+      throw InSessionException();
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw QuizNotFoundException();
+    throw Exception('Unable to create session: unknown error occurred');
+  }
+
+  /// Get the user's current session.
+  /// Return `null` if the user has no session.
+  Future<GameSession> getSession() async {
+    final http.Response response = await _http.get(SESSION_URL,
+        headers: ApiBase.headers(authToken: _authModel.token));
+
+    if (response.statusCode == 200) {
+      Map resJson = json.decode(response.body);
+      return GameSession.fromJson(resJson["session"], token: resJson["token"]);
+    }
+
+    if (response.statusCode == 204) return null;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get session: unknown error occurred');
+  }
+
+  /// Join an extsing game session.
+  Future<GameSession> joinSession(String joinCode) async {
+    final http.Response response = await _http.post('$SESSION_URL/join',
+        headers: ApiBase.headers(authToken: _authModel.token),
+        body: json.encode(<String, dynamic>{"code": joinCode}));
+
+    if (response.statusCode == 200) {
+      Map resJson = json.decode(response.body);
+      return GameSession.fromJson(resJson["session"], token: resJson["token"]);
+    }
+
+    if (response.statusCode == 400)
+      switch (json.decode(response.body)["message"]) {
+        case "User is already participant of ongoing quiz session":
+          throw InSessionException();
+        case "Session cannot be joined":
+          throw SessionNotWaitingException();
+      }
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) throw SessionNotFoundException();
+    throw Exception('Unable to join session: unknown error occurred');
   }
 }
-
-/// Object representing a question in a quiz
-/// `Quiz` instances hold a list of this class.
-/// Abstract class; not for instantiation.
-abstract class Question {
-  Quiz _quiz;
-  Quiz get quiz => _quiz;
-
-  int _id;
-  int get id => _id;
-  String text;
-  int imgId;
-
-  Question(this._quiz, this._id, this.text, this.imgId);
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'id': id,
-      'quizId': quiz.id,
-      'text': text,
-      'imgId': imgId
-    };
-  }
-}
-
-/// Object representing a true/false question
-/// Instances of this class should be constructed when the user creates new
-/// true/false questions. To modify an existing true/false question, mutate
-/// the fields directly. The `Quiz` object holding the question must be
-/// synchronised with the server to finalise any changes.
-class TFQuestion extends Question {
-  bool answer;
-
-  /// Constructor for use when user creates a new true/false question
-  TFQuestion(Quiz quiz, String text, this.answer, {int imgId})
-      : super(quiz, null, text, imgId);
-
-  /// Constructor for internal use only
-  TFQuestion._internal(Quiz quiz, int id, String text, int imgId, this.answer)
-      : super(quiz, id, text, imgId);
-
-  factory TFQuestion.fromJson(Quiz quiz, Map<String, dynamic> json) =>
-      TFQuestion._internal(
-          quiz, json['id'], json['text'], json['imgid'], json['tf']);
-
-  Map<String, dynamic> toJson() {
-    Map map = super.toJson();
-    map['type'] = 'truefalse';
-    map['tf'] = answer;
-    return map;
-  }
-}
-
-/// Object representing a multiple choice question
-/// Instances of this class should be constructed when the user creates new
-/// multiple choice questions. To modify an existing multiple choice question,
-/// mutate the fields directly. The `Quiz` object holding the question must be
-/// synchronised with the server to finalise any changes.
-class MCQuestion extends Question {
-  List<QuestionOption> options;
-
-  /// Constructor for use when user creates a new multiple choice question
-  MCQuestion(Quiz quiz, String text, this.options, {int imgId})
-      : super(quiz, null, text, imgId);
-
-  /// Constructor for internal use only
-  MCQuestion._internal(Quiz quiz, int id, String text, int imgId,
-      {this.options})
-      : super(quiz, id, text, imgId);
-
-  factory MCQuestion.fromJson(Quiz quiz, Map<String, dynamic> json) =>
-      MCQuestion._internal(quiz, json['id'], json['text'], json['imgid'],
-          options: (json['options'] as List)
-              .map((option) => QuestionOption.fromJson(option))
-              .toList());
-
-  Map<String, dynamic> toJson() {
-    Map map = super.toJson();
-    map['type'] = 'choice';
-    map['options'] = options.map((option) => option.toJson()).toList();
-    return map;
-  }
-}
-
-/// Object representing an option of a multiple choice question
-/// Instances of this class should be constructed when the user creates new
-/// multiple choice options. To modify an existing multiple choice option,
-/// mutate the fields directly. The `Quiz` object holding the multiple choice
-/// question must be synchronised with the server to finalise any changes.
-class QuestionOption {
-  String text;
-  bool correct;
-
-  /// Constructor for use when user creates a new multiple choice option
-  QuestionOption(this.text, this.correct);
-
-  factory QuestionOption.fromJson(Map<String, dynamic> json) =>
-      QuestionOption(json['text'], json['correct']);
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{'text': text, 'correct': correct};
-  }
-}
-
-/// Exception thrown when a quiz cannot be found by the server
-class QuizNotFoundException implements Exception {}
-
-/// Exception thrown when a question cannot be found by the server
-/// (thrown when setting a question picture)
-class QuestionNotFoundException implements Exception {}

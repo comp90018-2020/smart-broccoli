@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_broccoli/cache.dart';
-import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/data.dart';
 import 'package:smart_broccoli/server.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
@@ -13,12 +13,12 @@ class MockClient extends Mock implements http.Client {}
 main() async {
   test('Create group', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post(GroupModel.GROUP_URL,
+    when(client.post(GroupRegistryModel.GROUP_URL,
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -42,12 +42,12 @@ main() async {
 
   test('Create group (name already taken)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post(GroupModel.GROUP_URL,
+    when(client.post(GroupRegistryModel.GROUP_URL,
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -68,12 +68,12 @@ main() async {
 
   test('Get groups', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.get(GroupModel.GROUP_URL, headers: anyNamed("headers")))
+    when(client.get(GroupRegistryModel.GROUP_URL, headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode([
               <String, dynamic>{
@@ -126,12 +126,13 @@ main() async {
 
   test('Get specified group', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.get('${GroupModel.GROUP_URL}/2', headers: anyNamed("headers")))
+    when(client.get('${GroupRegistryModel.GROUP_URL}/2',
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
               "id": 2,
@@ -154,12 +155,12 @@ main() async {
 
   test('Get members of specified group', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.get('${GroupModel.GROUP_URL}/2/member',
+    when(client.get('${GroupRegistryModel.GROUP_URL}/2/member',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode([
@@ -212,12 +213,13 @@ main() async {
 
   test('Get specified group (does not exist)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.get('${GroupModel.GROUP_URL}/44', headers: anyNamed("headers")))
+    when(client.get('${GroupRegistryModel.GROUP_URL}/44',
+            headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{"message": "Group not found"}), 404));
 
@@ -227,12 +229,12 @@ main() async {
 
   test('Update group', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.patch('${GroupModel.GROUP_URL}/2',
+    when(client.patch('${GroupRegistryModel.GROUP_URL}/2',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -269,12 +271,12 @@ main() async {
 
   test('Delete group', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.delete('${GroupModel.GROUP_URL}/2',
+    when(client.delete('${GroupRegistryModel.GROUP_URL}/2',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response("", 204));
 
@@ -295,12 +297,12 @@ main() async {
 
   test('Delete group (already deleted)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.delete('${GroupModel.GROUP_URL}/2',
+    when(client.delete('${GroupRegistryModel.GROUP_URL}/2',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(
@@ -324,12 +326,12 @@ main() async {
 
   test('Join group', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/join',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/join',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -353,12 +355,12 @@ main() async {
 
   test('Join group (user already in group)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/join',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/join',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(
@@ -371,12 +373,12 @@ main() async {
 
   test('Join group (group not found)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/join',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/join',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{"message": "Group not found"}), 404));
@@ -387,12 +389,12 @@ main() async {
 
   test('Update group code', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/2/code',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/2/code',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -427,12 +429,12 @@ main() async {
 
   test('Update group code (not allowed or group has been deleted)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/2/code',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/2/code',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{
@@ -457,12 +459,12 @@ main() async {
 
   test('Leave group', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/2/leave',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/2/leave',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response("", 204));
 
@@ -483,12 +485,12 @@ main() async {
 
   test('Leave group (not in group or does not exist)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/2/leave',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/2/leave',
             headers: anyNamed("headers")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{"message": "Cannot leave group"}),
@@ -510,12 +512,12 @@ main() async {
 
   test('Kick member', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/2/member/kick',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/2/member/kick',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response("", 204));
 
@@ -544,12 +546,12 @@ main() async {
 
   test('Kick member (not in group)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/2/member/kick',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/2/member/kick',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(<String, dynamic>{"message": "Cannot delete member"}),
@@ -579,12 +581,12 @@ main() async {
 
   test('Kick member (user not group owner)', () async {
     final http.Client client = MockClient();
-    final AuthModel am = AuthModel(
+    final AuthStateModel am = AuthStateModel(
         MainMemKeyValueStore(init: {"token": "asdfqwerty1234567890foobarbaz"}),
         mocker: client);
-    final GroupModel gm = GroupModel(am, mocker: client);
+    final GroupRegistryModel gm = GroupRegistryModel(am, mocker: client);
 
-    when(client.post('${GroupModel.GROUP_URL}/2/member/kick',
+    when(client.post('${GroupRegistryModel.GROUP_URL}/2/member/kick',
             headers: anyNamed("headers"), body: anyNamed("body")))
         .thenAnswer((_) async => http.Response(
             json.encode(
