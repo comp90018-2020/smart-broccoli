@@ -13,6 +13,7 @@ dependencies:
   shared_preferences: ^0.5.10
   provider: null
   tuple: ^1.0.3
+  email_validator: ^1.0.5
 dev_dependencies:
   flutter_test:
     sdk: flutter
