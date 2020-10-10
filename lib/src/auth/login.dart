@@ -16,6 +16,9 @@ class _LoginState extends State<Login> {
   // Key for form widget, allows for validation
   final _formKey = GlobalKey<FormState>();
 
+  // Used to determine Autovalidatemode
+  bool _formSubmitted = false;
+
   // Whether password is visible
   bool _passwordVisible = false;
 
@@ -38,7 +41,9 @@ class _LoginState extends State<Login> {
             // Email
             TextFormField(
               controller: _emailController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
+              autovalidateMode: _formSubmitted
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               validator: (value) {
                 if (!EmailValidator.validate(value)) {
                   return 'Email is invalid';
@@ -56,7 +61,9 @@ class _LoginState extends State<Login> {
             // Password
             TextFormField(
               controller: _passwordController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
+              autovalidateMode: _formSubmitted
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               validator: (value) {
                 if (value.isEmpty) {
                   return 'Password is empty';
@@ -127,6 +134,10 @@ class _LoginState extends State<Login> {
     if (_formKey.currentState.validate()) {
       print("Login pressed");
       print("${_emailController.text} ${_passwordController.text}");
+    } else {
+      setState(() {
+        _formSubmitted = true;
+      });
     }
   }
 

@@ -21,6 +21,9 @@ class _RegisterState extends State<Register> {
   // Whether password is visible
   bool _passwordVisible = false;
 
+  // Used to determine Autovalidatemode
+  bool _formSubmitted = false;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -41,7 +44,9 @@ class _RegisterState extends State<Register> {
             // Name
             TextFormField(
               controller: _nameController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
+              autovalidateMode: _formSubmitted
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               validator: (value) {
                 if (value.isEmpty) {
                   return 'Name is empty';
@@ -59,7 +64,9 @@ class _RegisterState extends State<Register> {
             // Email
             TextFormField(
               controller: _emailController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
+              autovalidateMode: _formSubmitted
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               validator: (value) {
                 if (!EmailValidator.validate(value)) {
                   return 'Email is invalid';
@@ -77,6 +84,9 @@ class _RegisterState extends State<Register> {
             // Password
             TextFormField(
               controller: _passwordController,
+              autovalidateMode: _formSubmitted
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               validator: (value) {
                 if (value.isEmpty) {
                   return 'Password is empty';
@@ -119,12 +129,14 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  void signUpPressed() {
-    print("Sign Up pressed");
-  }
-
   void _createAccountPressed() {
-    print('The user wants to create an account with ' +
-        '${_emailController.text} and ${_passwordController.text}');
+    if (_formKey.currentState.validate()) {
+      print('The user wants to create an account with ' +
+          '${_emailController.text} and ${_passwordController.text}');
+    } else {
+      setState(() {
+        _formSubmitted = true;
+      });
+    }
   }
 }
