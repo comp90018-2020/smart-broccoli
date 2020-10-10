@@ -68,9 +68,6 @@ class _LoginState extends State<Login> {
                 if (value.isEmpty) {
                   return 'Password is empty';
                 }
-                if (value.length < 8) {
-                  return 'Password must be 8 or more characters';
-                }
                 return null;
               },
               decoration: InputDecoration(
