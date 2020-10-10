@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/src/auth/index_stack.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'login.dart';
@@ -19,19 +20,13 @@ class _AuthScreenState extends State<AuthScreen> {
     super.initState();
   }
 
+  int _tabIndex = 0;
+
   // Primary start up function
   @override
   Widget build(BuildContext context) {
-    // Height of SizedBox for TabView (below)
-    double tabViewHeight =
-        MediaQuery.of(context).size.height - // Viewport height
-            200 - // Logo container
-            kToolbarHeight - // Toolbar height
-            70; // Toolbar heading
-
     // Create a new Scaffold
     return new Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
       body: SingleChildScrollView(
         child: DefaultTabController(
           length: 2,
@@ -48,18 +43,21 @@ class _AuthScreenState extends State<AuthScreen> {
 
               // Tabs
               TabHolder(
+                  onTap: (index) {
+                    setState(() {
+                      _tabIndex = index;
+                    });
+                  },
                   margin: const EdgeInsets.only(top: 35, bottom: 35),
                   tabs: [Tab(text: "LOGIN"), Tab(text: "SIGN UP")]),
 
               // Tab contents
-              FractionallySizedBox(
-                widthFactor: 0.7,
-                child: LimitedBox(
-                  // Need to limit height of TabBarView
-                  // Error will occur if height is not limited
-                  maxHeight: tabViewHeight < 150 ? 150 : tabViewHeight,
-                  child: TabBarView(children: [Login(), Register()]),
-                ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: FractionallySizedBox(
+                    widthFactor: 0.7,
+                    child: AnimatedIndexedStack(
+                        index: _tabIndex, children: [Login(), Register()])),
               ),
             ],
           ),
