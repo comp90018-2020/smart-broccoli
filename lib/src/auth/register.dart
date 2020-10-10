@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:email_validator/email_validator.dart';
 
 // Register tab
 class Register extends StatefulWidget {
@@ -13,6 +14,9 @@ class _RegisterState extends State<Register> {
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
   final TextEditingController _nameController = new TextEditingController();
+
+  // Key for form widget, allows for validation
+  final _formKey = GlobalKey<FormState>();
 
   // Whether password is visible
   bool _passwordVisible = false;
@@ -30,12 +34,20 @@ class _RegisterState extends State<Register> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Form(
+        key: _formKey,
         child: Wrap(
           runSpacing: 16,
           children: <Widget>[
             // Name
             TextFormField(
               controller: _nameController,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value.isEmpty) {
+                  return 'Name is empty';
+                }
+                return null;
+              },
               decoration: new InputDecoration(
                 labelText: 'Name',
                 prefixIcon: Icon(Icons.people),
@@ -47,6 +59,13 @@ class _RegisterState extends State<Register> {
             // Email
             TextFormField(
               controller: _emailController,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (!EmailValidator.validate(value)) {
+                  return 'Email is invalid';
+                }
+                return null;
+              },
               decoration: new InputDecoration(
                 labelText: 'Email',
                 prefixIcon: Icon(Icons.email),
@@ -58,6 +77,15 @@ class _RegisterState extends State<Register> {
             // Password
             TextFormField(
               controller: _passwordController,
+              validator: (value) {
+                if (value.isEmpty) {
+                  return 'Password is empty';
+                }
+                if (value.length < 8) {
+                  return 'Password must be 8 or more characters';
+                }
+                return null;
+              },
               decoration: new InputDecoration(
                 labelText: 'Password',
                 prefixIcon: Icon(Icons.lock),
