@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/auth/index_stack.dart';
 import 'package:smart_broccoli/theme.dart';
 
+import 'index_stack.dart';
 import 'login.dart';
 import 'register.dart';
 

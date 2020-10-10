@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/auth/auth_screen.dart';
 import 'package:smart_broccoli/theme.dart';
+
+import 'src/auth/auth_screen.dart';
 
 void main() => runApp(MyApp());
 
