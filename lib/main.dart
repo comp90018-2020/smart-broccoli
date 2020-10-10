@@ -6,8 +6,6 @@ void main() => runApp(MyApp());
 
 /// Main entrance class
 class MyApp extends StatelessWidget {
-  final items = List<String>.generate(10000, (i) => "Item $i");
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
