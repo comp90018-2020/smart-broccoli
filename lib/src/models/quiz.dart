@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:smart_broccoli/models.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
-import 'package:smart_broccoli/src/models/game.dart';
 
-import '../data/api_base.dart';
+import '../data/game.dart';
+import '../data/quiz.dart';
+import '../store/remote/api_base.dart';
 import 'auth.dart';
+
+
 
 /// Class for making quiz management requests
 class QuizModel {
@@ -18,8 +20,8 @@ class QuizModel {
   // List of quiz
   // Current quiz
 
-  /// AuthModel object used to obtain token for requests
-  AuthModel _authModel;
+  /// AuthStateModel object used to obtain token for requests
+  AuthStateModel _authModel;
 
   /// HTTP client (mock client can be specified for testing)
   http.Client _http;

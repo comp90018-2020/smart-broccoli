@@ -2,8 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:smart_broccoli/models.dart';
-import 'package:smart_broccoli/src/store/local/key_value.dart';
-import 'package:smart_broccoli/src/store/remote/user_api.dart';
+
+import '../store/local/key_value.dart';
+import '../store/remote/user_api.dart';
 
 import 'auth.dart';
 

@@ -1,5 +1,6 @@
 import 'package:smart_broccoli/cache.dart';
-import 'package:smart_broccoli/src/store/remote/auth_api.dart';
+
+import '../store/remote/auth_api.dart';
 
 /// Class for making auth requests
 class AuthStateModel {

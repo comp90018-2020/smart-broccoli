@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_broccoli/cache.dart';
-import 'package:smart_broccoli/data.dart';
-import 'package:smart_broccoli/server.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
+import 'package:smart_broccoli/cache.dart';
+import 'package:smart_broccoli/models.dart';
 
 class MockClient extends Mock implements http.Client {}
 

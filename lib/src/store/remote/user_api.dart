@@ -3,8 +3,11 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
-import 'package:smart_broccoli/data.dart';
-import 'package:smart_broccoli/server.dart';
+
+import '../../data/game.dart';
+import '../../data/user.dart';
+
+import 'api_base.dart';
 
 class UserApi {
   static const USER_URL = ApiBase.BASE_URL + '/user';

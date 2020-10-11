@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../models.dart';
 import '../store/remote/api_base.dart';
 import 'auth.dart';
 

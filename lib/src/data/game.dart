@@ -1,4 +1,4 @@
-import 'package:smart_broccoli/models.dart';
+import 'quiz.dart';
 
 enum GameSessionType { INDIVIDUAL, GROUP }
 enum GameSessionState { WAITING, ACTIVE, ENDED }
