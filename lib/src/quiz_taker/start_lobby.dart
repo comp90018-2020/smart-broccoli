@@ -4,7 +4,6 @@ import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
 import 'package:smart_broccoli/theme.dart';
 
-
 /// The Skeleton for the start lobby
 class StartLobby extends StatefulWidget {
   @override
@@ -212,7 +211,9 @@ class _StartLobby extends State<StartLobby> {
         // Temporary workaround
         // TODO change padding
         children: <Widget>[
-          SizedBox(height: 50,),
+          SizedBox(
+            height: 50,
+          ),
           Container(child: Text("Waiting for Quiz to Start")),
         ],
       );

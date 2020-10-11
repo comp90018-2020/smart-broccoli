@@ -24,7 +24,7 @@ class BackgroundClipperMain extends CustomClipper<Path> {
 
 // Used to design the background
 // Looks like a hack, but apparently this isn't a hack according to docs
-class BackgroundClipper extends CustomClipper<Path> {
+class BackgroundClipper3 extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     var path = Path();

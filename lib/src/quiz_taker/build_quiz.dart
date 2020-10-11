@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/shared/background.dart';
 import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
 
-
-
 // Build a list of quizes
 class BuildQuiz extends StatefulWidget {
   BuildQuiz({Key key}) : super(key: key);
@@ -41,16 +39,16 @@ class _BuildQuiz extends State<BuildQuiz> {
     return Stack(
       // overflow: Overflow.visible,
       children: <Widget>[
-
         Column(
           children: <Widget>[
             new Container(
               child: _pinForm(),
             ),
             SizedBox(height: 10),
-            new Container(
-              width: width*0.5,
-              child: Text("By entering PIN you can access a quiz and join into the group of the that quiz"),
+            new FractionallySizedBox(
+              widthFactor: 0.5,
+              child: Text(
+                  "By entering PIN you can access a quiz and join into the group of the that quiz"),
             ),
             // Padding
             SizedBox(height: 50),
@@ -62,26 +60,24 @@ class _BuildQuiz extends State<BuildQuiz> {
             SizedBox(height: 50),
 
             Container(
-              decoration: new BoxDecoration(
-
-              ),
-
-              height: height*0.30,
-              //width: 200,
-              child: ListView.separated(
-                // Enable Horizontal Scroll
-                scrollDirection: Axis.horizontal,
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return _cardTile(
-                      items[index], this.key.toString(), index.toString());
-                },
-                // Space between the cards
-                separatorBuilder: (context, index) {
-                  return Divider(indent: 1);
-                },
+              child: Expanded(
+                //width: 200,
+                child: ListView.separated(
+                  // Enable Horizontal Scroll
+                  scrollDirection: Axis.horizontal,
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    return _cardTile(
+                        items[index], this.key.toString(), index.toString());
+                  },
+                  // Space between the cards
+                  separatorBuilder: (context, index) {
+                    return Divider(indent: 1);
+                  },
+                ),
               ),
             ),
+            SizedBox(height: 80),
           ],
         ),
       ],
@@ -94,6 +90,7 @@ class _BuildQuiz extends State<BuildQuiz> {
   /// This is used to demostrate that tab changes the list as well
   Widget _cardTile(String val, String type, String index) {
     double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
 
     return new Container(
       key: Key(index + val + index),
@@ -122,12 +119,19 @@ class _BuildQuiz extends State<BuildQuiz> {
 
   // You can put a picture and title in this widget
   Widget pictureWithTitle(val, type) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         // The image here is a placeholder, it is necessary to
         // Provide a height and a width value
-        Image(image: AssetImage('assets/images/placeholder.png')),
+        Container(
+          height: height * 0.2,
+          width: width * 0.2,
+          child: Image(image: AssetImage('assets/images/placeholder.png')),
+        ),
         Text(
           val + type,
           style: TextStyle(fontSize: 20),

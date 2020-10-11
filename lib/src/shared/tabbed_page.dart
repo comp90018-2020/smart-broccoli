@@ -48,5 +48,4 @@ class CustomTabbedPage extends CustomPage {
           ),
           hasDrawer: hasDrawer,
         );
-
 }

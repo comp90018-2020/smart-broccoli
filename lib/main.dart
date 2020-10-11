@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'src/quiz_taker/quiz_taker.dart';
+import 'package:smart_broccoli/theme.dart';
+import 'src/auth/auth_screen.dart';
 import 'package:smart_broccoli/src/shared/tabbed_page.dart';
 import 'package:smart_broccoli/theme.dart';
 
@@ -11,24 +14,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Smart Broccoli',
-        theme: SmartBroccoliTheme().themeData,
-        home: CustomTabbedPage(
-          title: 'Page title',
-          hasDrawer: true,
-          tabs: [Tab(text: 'A'), Tab(text: 'B')],
-          tabViews: [
-            ListView.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('${items[index]}'),
-                );
-              },
-            ),
-            Text('Page 2')
-          ],
-        ));
+      debugShowCheckedModeBanner: false,
+      title: 'Smart Broccoli',
+      theme: SmartBroccoliTheme().themeData,
+      //routes: {'/auth': (context) => AuthScreen()},
+      //initialRoute: '/auth',
+      // Debug purposes only, replace with above later on
+      //routes: {'/auth': (context) => AuthScreen()},
+      routes: {'/quiz_taker': (context) => QuizTaker()},
+      initialRoute: '/quiz_taker',
+    );
   }
 }

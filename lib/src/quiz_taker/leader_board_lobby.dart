@@ -3,8 +3,9 @@ import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_taker.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
 import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
+import 'package:smart_broccoli/src/shared/background.dart';
+import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
-
 
 /// The Skeleton for the Leaderboard lobby
 /// Unfinished as it is beyond my skill ability
@@ -13,56 +14,58 @@ class LeaderBoardLobby extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _LeaderBoardLobby();
 }
+
 class _LeaderBoardLobby extends State<LeaderBoardLobby> {
- // int _selectedIndex = 0;
+  // int _selectedIndex = 0;
 
   // Placeholder list, the list contents should be replaced with usernames.
- // List<String> propList = ["HELLO", "BOB", "MICROOSFT", "OOOOOF"];
+  // List<String> propList = ["HELLO", "BOB", "MICROOSFT", "OOOOOF"];
   int val = 0;
 
   // Entry function
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onBackground,
-      appBar: AppBar(
-        title: Text("Quiz"),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.background,
-        elevation: 0,
-      ),
-      // Stacks are used to stack widgets
-      // Since the background is now a widget, it comes first
-      body: Stack(
-        children: <Widget>[
-          // The player status
-          _playerStats(),
-          // Background shapes (The green part)
-          _backgroundShapes(),
-          // Then the rest overlayed on top
-          Container(
-            child: new Column(
-              children: <Widget>[
-                SizedBox(height: 20),
-                _topLeaderBoard(),
-                SizedBox(height: 100),
-                // The list of Quiz players
-                //_quizPlayers(),
-                QuizUsers(),
-                // Debug nav bar please remove
-                _bottomNavBar()
-              ],
-            ),
+
+        // Stacks are used to stack widgets
+        // Since the background is now a widget, it comes first
+
+        body: CustomPage(title: "Leaderboards", child: _entryPoint()));
+  }
+
+  Widget _entryPoint() {
+    return Stack(
+      children: <Widget>[
+        Container(
+          color: Colors.white,
+        ),
+        // The player status
+        _playerStats(),
+        // Background shapes (The green part)
+        _backgroundShapes(),
+        // Then the rest overlayed on top
+        Container(
+          child: new Column(
+            children: <Widget>[
+              SizedBox(height: 20),
+              _topLeaderBoard(),
+              SizedBox(height: 100),
+              // The list of Quiz players
+              //_quizPlayers(),
+              QuizUsers(),
+              // Debug nav bar please remove
+              _bottomNavBar()
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _backgroundShapes(){
+  Widget _backgroundShapes() {
     return new Container(
       child: ClipPath(
-        clipper: BackgroundClipper(),
+        clipper: BackgroundClipper3(),
         child: Container(
           color: Theme.of(context).colorScheme.background,
         ),
@@ -71,7 +74,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
     // Then the rest
   }
 
-  Widget _playerStats(){
+  Widget _playerStats() {
     return new Positioned(
       // TODO I need to find a way to fix this relative to everything else
       bottom: 450,
@@ -111,30 +114,29 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
     );
   }
 
-    Widget topThreeUsers(double  h, double w,text){
-      return Column(
-        children: <Widget>[
-          Container(
-              height: h,
-              width: w,
-              //TODO put picture stuff here
-              decoration: BoxDecoration1()),
-          Text(text),
-        ],
-      );
-    }
-
+  Widget topThreeUsers(double h, double w, text) {
+    return Column(
+      children: <Widget>[
+        Container(
+            height: h,
+            width: w,
+            //TODO put picture stuff here
+            decoration: BoxDecoration1()),
+        Text(text),
+      ],
+    );
+  }
 
   Widget _topLeaderBoard() {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        topThreeUsers(50,50,"Winner 1"),
+        topThreeUsers(50, 50, "Winner 1"),
         SizedBox(width: 50),
-        topThreeUsers(100,100,"Winner 2"),
+        topThreeUsers(100, 100, "Winner 2"),
         SizedBox(width: 50),
-        topThreeUsers(50,50,"Winner 3"),
+        topThreeUsers(50, 50, "Winner 3"),
       ],
     );
   }
