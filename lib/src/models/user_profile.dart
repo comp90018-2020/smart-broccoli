@@ -29,8 +29,11 @@ class UserProfileModel extends ChangeNotifier {
   UserProfileModel(this._keyValueStore, this._authStateModel,
       {UserApi userApi}) {
     _userApi = userApi ?? UserApi();
-    _user = User.fromJson(json.decode(_keyValueStore.getString('user')));
-    _profileImage = json.decode(_keyValueStore.getString('profilePic'));
+    // load last record of profile and picture
+    try {
+      _user = User.fromJson(json.decode(_keyValueStore.getString('user')));
+      _profileImage = json.decode(_keyValueStore.getString('profilePic'));
+    } catch (_) {}
   }
 
   Future<void> refreshUser() async {
