@@ -20,12 +20,12 @@ class AuthApi {
   /// `ParticipantJoinException` is thrown if the server cannot fulfil the
   /// participant join.
   Future<String> join() async {
-    final http.Response res =
+    final http.Response response =
         await _http.post('$AUTH_URL/join', headers: ApiBase.headers());
 
-    if (res.statusCode != 200) throw ParticipantJoinException();
+    if (response.statusCode != 200) throw ParticipantJoinException();
 
-    return json.decode(res.body)['token'];
+    return json.decode(response.body)['token'];
   }
 
   /// Register a user with login details.
@@ -34,7 +34,7 @@ class AuthApi {
   /// a different reason.
   Future<RegisteredUser> register(
       String email, String password, String name) async {
-    final http.Response res = await _http.post('$AUTH_URL/register',
+    final http.Response response = await _http.post('$AUTH_URL/register',
         headers: ApiBase.headers(),
         body: jsonEncode(<String, String>{
           'email': email,
@@ -42,12 +42,11 @@ class AuthApi {
           'name': name,
         }));
 
-    if (res.statusCode == 201)
-      return RegisteredUser.fromJson(json.decode(res.body));
-    else if (res.statusCode == 409)
-      throw RegistrationConflictException();
-    else
-      throw RegistrationException();
+    if (response.statusCode == 201)
+      return RegisteredUser.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 409) throw RegistrationConflictException();
+    throw RegistrationException();
   }
 
   /// Promote a participant user to a registered user.
@@ -56,7 +55,7 @@ class AuthApi {
   /// due to a different reason.
   Future<RegisteredUser> promote(
       String email, String password, String name) async {
-    final http.Response res = await _http.post('$AUTH_URL/promote',
+    final http.Response response = await _http.post('$AUTH_URL/promote',
         headers: ApiBase.headers(),
         body: jsonEncode(<String, String>{
           'email': email,
@@ -64,46 +63,40 @@ class AuthApi {
           'name': name,
         }));
 
-    if (res.statusCode == 200)
-      return RegisteredUser.fromJson(json.decode(res.body));
-    else if (res.statusCode == 409)
-      throw RegistrationConflictException();
-    else
-      throw ParticipantPromotionException();
+    if (response.statusCode == 200)
+      return RegisteredUser.fromJson(json.decode(response.body));
+
+    if (response.statusCode == 409) throw RegistrationConflictException();
+    throw ParticipantPromotionException();
   }
 
   /// Authenticate a registered user.
   /// `LoginFailedException` is thrown if the login is unsuccessful.
   Future<String> login(String email, String password) async {
-    final http.Response res = await _http.post('$AUTH_URL/login',
+    final http.Response response = await _http.post('$AUTH_URL/login',
         headers: ApiBase.headers(),
         body:
             jsonEncode(<String, String>{'email': email, 'password': password}));
 
-    if (res.statusCode != 200) throw LoginFailedException();
+    if (response.statusCode != 200) throw LoginFailedException();
 
-    return json.decode(res.body)['token'];
+    return json.decode(response.body)['token'];
   }
 
   /// Validate the session with the server.
   /// Return `true` if the token is valid and unrevoked.
   Future<bool> sessionIsValid(String token) async {
     if (token == null) return false;
-    final http.Response res = await _http.get('$AUTH_URL/session',
+    final http.Response response = await _http.get('$AUTH_URL/session',
         headers: ApiBase.headers(authToken: token));
-    if (res.statusCode == 200) return true;
-    return false;
+    return response.statusCode == 200;
   }
 
-  /// Invalidate the session.
-  /// Clear the cache and request the server to revoke the token.
+  /// Request the server to invalidate the auth session token.
   /// Return `true` if successful.
   Future<bool> logout(String token) async {
     final http.Response res = await _http.post(AUTH_URL + '/logout',
         headers: ApiBase.headers(authToken: token));
-    if (res.statusCode == 200) {
-      return true;
-    }
-    return false;
+    return res.statusCode == 200;
   }
 }
