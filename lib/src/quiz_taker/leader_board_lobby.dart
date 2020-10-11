@@ -52,7 +52,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
               SizedBox(height: 100),
               // The list of Quiz players
               //_quizPlayers(),
-              QuizUsers(),
+              QuizUsers(["A", "B", "C"]),
               // Debug nav bar please remove
               _bottomNavBar()
             ],

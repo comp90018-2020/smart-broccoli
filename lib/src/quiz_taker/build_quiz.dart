@@ -121,7 +121,7 @@ class _BuildQuiz extends State<BuildQuiz> {
         Container(
           height: height * 0.2,
           width: width * 0.2,
-          child: Image(image: AssetImage('assets/images/placeholder.png')),
+          // child: Image(image: AssetImage('assets/images/placeholder.png')),
         ),
         Text(
           val + type,

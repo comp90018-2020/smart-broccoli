@@ -121,10 +121,14 @@ class _QuizQuestion extends State<QuizQuestion> {
         child: Text("Your Question Here"),
       ),
       new Container(
-          // The image here is a placeholder
-          child: Padding(
-              padding: EdgeInsets.fromLTRB(60, 10, 60, 10),
-              child: Image(image: AssetImage('assets/images/placeholder.png'))))
+        // The image here is a placeholder
+        child: Padding(
+            padding: EdgeInsets.fromLTRB(60, 10, 60, 10), child: Container()
+            // child: Image(
+            //   image: AssetImage('assets/images/placeholder.png'),
+            // ),
+            ),
+      )
     ]);
   }
 

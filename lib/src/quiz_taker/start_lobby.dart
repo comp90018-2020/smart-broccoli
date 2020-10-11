@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
+import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// The Skeleton for the start lobby
@@ -16,13 +17,9 @@ class BackgroundClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     var path = Path();
-
-    // path.moveTo(0, size.height * 0.66);
-    //  path.moveTo(0, size.width*1.5);
     path.lineTo(0, size.height / 4);
     path.lineTo(size.width, size.height / 4);
     path.lineTo(size.width, 0);
-
     return path;
   }
 
@@ -78,17 +75,9 @@ class _StartLobby extends State<StartLobby> {
   // Entry function
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onBackground,
-      // Stacks are used to stack widgets
-      // Since the background is now a widget, it comes first
-      appBar: AppBar(
-        title: Text("Quiz"),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.background,
-        elevation: 10,
-      ),
-      body: Stack(
+    return CustomPage(
+      title: 'Take Quiz',
+      child: Stack(
         children: <Widget>[
           Container(
             child: ClipPath(
@@ -116,7 +105,7 @@ class _StartLobby extends State<StartLobby> {
                   ],
                 ),
                 // The list of Quiz players
-                QuizUsers(),
+                QuizUsers(["A", "B", "C"]),
                 // _quizPlayers(),
               ],
             ),
@@ -177,10 +166,10 @@ class _StartLobby extends State<StartLobby> {
       children: <Widget>[
         // The image here is a placeholder, it is necessary to
         // Provide a height and a width value
-        Image(
-            // height: 150,
-            //width: 150,
-            image: AssetImage('assets/images/placeholder.png')),
+        // Image(
+        //     // height: 150,
+        //     //width: 150,
+        //     // image: AssetImage('assets/images/placeholder.png')),
         Text('Quiz Name'),
         Text('Subtitle'),
       ],

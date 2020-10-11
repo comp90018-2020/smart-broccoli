@@ -21,7 +21,6 @@ class SmartBroccoliColourScheme extends ColorScheme {
 class SmartBroccoliTheme {
   static final ThemeData _themeData = ThemeData(
     primaryColor: Color(0xFF4CAF50),
-    scaffoldBackgroundColor: Color(0xFF4CAF50),
     colorScheme: SmartBroccoliColourScheme(),
     buttonTheme: ButtonThemeData(
       shape: RoundedRectangleBorder(
