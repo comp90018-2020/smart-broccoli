@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
-import '../../data/game.dart';
 import '../../data/user.dart';
 
 import 'api_base.dart';
@@ -21,25 +20,11 @@ class UserApi {
 
   /// Get the profile of a user.
   ///
-  /// If [id] is not specified (i.e. `null`), return a `RegisteredUser`
-  /// or `ParticipantUser` object corresponding to the logged-in/joined user.
-  /// In this case, [session] is ignored (it should be unspecified).
-  ///
-  /// If [id] is specified, return a `User` object corresponding to the
-  /// user with such ID. Where [session] is specified, the session token is
-  /// used in the authorisation header of the request. Otherwise, the auth
-  /// token is used by default.
-  Future<User> getUser({int id, GameSession session}) async {
-    http.Response response;
-    if (id == null)
-      response = await _http.get('$USER_URL/profile',
-          headers: ApiBase.headers(authToken: _authModel.token));
-    else if (session == null)
-      response = await _http.get('$USER_URL/$id/profile',
-          headers: ApiBase.headers(authToken: _authModel.token));
-    else
-      response = await _http.get('$USER_URL/$id/profile',
-          headers: ApiBase.headers(authToken: session.token));
+  /// Return a `RegisteredUser` or `ParticipantUser` object corresponding to
+  /// the user to whom an auth [token] was issued.
+  Future<User> getUser(String token) async {
+    http.Response response = await _http.get('$USER_URL/profile',
+        headers: ApiBase.headers(authToken: token));
 
     if (response.statusCode == 200) return _userFromJson(response.body);
     if (response.statusCode == 401) throw UnauthorisedRequestException();
@@ -47,9 +32,11 @@ class UserApi {
     throw Exception('Unable to get user: unknown error occurred');
   }
 
-  /// Synchronise changes to profile of the logged-in/joined user with server.
-  /// Return a `Quiz` object constructed from the server's response. All fields
-  /// should be equal in content except `password` (`null` in returned object).
+  /// Update the profile of a user.
+  ///
+  /// Return a `User` object constructed from the server's response. All fields
+  /// should be equal in content to the [user] object passed in except
+  /// `password` (which is `null` in the returned object).
   ///
   /// Usage:
   /// [user] should be a `User` object obtained by `getUser`. Mutate the fields
@@ -66,26 +53,12 @@ class UserApi {
     throw Exception('Unable to update user: unknown error occurred');
   }
 
-  /// Get the profile picture of a user as a list of bytes.
+  /// Get the profile picture of a user.
   ///
-  /// If [id] is not specified (i.e. `null`), return the profile picture of the
-  /// logged-in/joined user. In this case, [session] is ignored.
-  ///
-  /// If [id] is specified, return the profile picture of the user with such ID.
-  /// Where [session] is specified, the session token is used in the
-  /// authorisation header of the request. Otherwise, the auth token is used by
-  /// default.
-  Future<Uint8List> getProfilePic({int id, GameSession session}) async {
-    http.Response response;
-    if (id == null)
-      response = await _http.get('$USER_URL/profile/picture',
-          headers: ApiBase.headers(authToken: _authModel.token));
-    else if (session == null)
-      response = await _http.get('$USER_URL/$id/profile/picture',
-          headers: ApiBase.headers(authToken: _authModel.token));
-    else
-      response = await _http.get('$USER_URL/$id/profile/picture',
-          headers: ApiBase.headers(authToken: session.token));
+  /// Return the picture as a list of bytes or `null` if it doesn't exist.
+  Future<Uint8List> getProfilePic(String token) async {
+    final http.Response response = await _http.get('$USER_URL/profile/picture',
+        headers: ApiBase.headers(authToken: token));
 
     if (response.statusCode == 200) return response.bodyBytes;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
@@ -94,7 +67,8 @@ class UserApi {
     throw Exception('Unable to get user profile pic: unknown error occurred');
   }
 
-  /// Set the profile pic of the logged-in user.
+  /// Set the profile pic of a user.
+  ///
   /// This method takes the image as a list of bytes.
   /// TODO: missing headers
   Future<void> setProfilePic(String token, Uint8List bytes) async {
@@ -110,7 +84,7 @@ class UserApi {
     throw Exception('Unable to set user profile pic: unknown error occurred');
   }
 
-  /// Delete the profile pic of the logged-in user.
+  /// Delete the profile pic of a user.
   Future<void> deleteProfilePic(String token) async {
     final http.Response response = await _http.delete(
         '$USER_URL/profile/picture',
