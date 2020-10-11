@@ -12,19 +12,18 @@ class NullKeyValueStore implements KeyValueStore {
   NullKeyValueStore();
 
   @override
-  Future<bool> clear() {
-    return Future.sync(() => true);
+  Future<void> clear() async {
+    _token = null;
   }
 
   @override
-  String getString(String key) {
+  dynamic getItem(String key) {
     if (key == 'token') return _token;
     return null;
   }
 
   @override
-  Future<bool> setString(Object key, String value) {
+  Future<void> setItem(Object key, dynamic value) async {
     if (key == 'token') _token = value;
-    return Future.sync(() => true);
   }
 }

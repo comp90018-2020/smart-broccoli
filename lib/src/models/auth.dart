@@ -16,7 +16,7 @@ class AuthStateModel {
 
   /// Constructor for external use
   AuthStateModel(this._keyValueStore, {AuthApi authApi}) {
-    _token = _keyValueStore.getString('token');
+    _token = _keyValueStore.getItem('token');
     _authApi = authApi ?? AuthApi();
   }
 
@@ -31,13 +31,13 @@ class AuthStateModel {
   Future<void> join() async {
     String token = await _authApi.join();
     this._token = token;
-    await _keyValueStore.setString('token', token);
+    await _keyValueStore.setItem('token', token);
   }
 
   Future<void> login(String email, String password) async {
     String token = await _authApi.login(email, password);
     this._token = token;
-    await _keyValueStore.setString('token', token);
+    await _keyValueStore.setItem('token', token);
   }
 
   Future<void> sessionIsValid() async {

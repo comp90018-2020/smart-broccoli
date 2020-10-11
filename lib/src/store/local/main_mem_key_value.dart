@@ -4,28 +4,26 @@ import 'key_value.dart';
 /// Data stored in this class is non-persistent.
 /// For testing purposes; not intended for use in production.
 class MainMemKeyValueStore implements KeyValueStore {
-  final Map<String, String> _map = Map();
+  final Map<String, dynamic> _map = Map();
 
   /// Constructor for external use
   /// Initial values may optionally be passed in with [init].
-  MainMemKeyValueStore({Map<String, String> init}) {
+  MainMemKeyValueStore({Map<String, dynamic> init}) {
     if (init != null) _map.addAll(init);
   }
 
   @override
-  Future<bool> clear() {
+  Future<void> clear() async {
     _map.clear();
-    return Future.value(true);
   }
 
   @override
-  String getString(String key) {
+  dynamic getItem(String key) {
     return _map[key];
   }
 
   @override
-  Future<bool> setString(Object key, String value) {
+  Future<void> setItem(Object key, dynamic value) async {
     _map[key] = value;
-    return Future.value(true);
   }
 }

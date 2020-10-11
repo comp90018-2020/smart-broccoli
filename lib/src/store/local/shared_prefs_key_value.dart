@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'key_value.dart';
 
 /// Key value store implemented using shared preferences
+/// This class is only capable of storing strings. Attempting to store other
+/// types will cause an exception.
 class SharedPrefsKeyValueStore implements KeyValueStore {
   SharedPreferences _sharedPreferences;
 
@@ -16,17 +18,17 @@ class SharedPrefsKeyValueStore implements KeyValueStore {
   }
 
   @override
-  Future<bool> setString(Object key, String value) {
-    return _sharedPreferences.setString(key, value);
+  Future<void> setItem(Object key, dynamic value) async {
+    await _sharedPreferences.setString(key, value);
   }
 
   @override
-  String getString(String key) {
+  dynamic getItem(String key) {
     return _sharedPreferences.getString(key);
   }
 
   @override
-  Future<bool> clear() {
-    return _sharedPreferences.clear();
+  Future<void> clear() async {
+    await _sharedPreferences.clear();
   }
 }

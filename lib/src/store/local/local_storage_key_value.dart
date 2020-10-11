@@ -18,17 +18,7 @@ class LocalStorageKeyValue extends KeyValueStore {
   }
 
   @override
-  String getString(String key) {
-    return _localStorage.getItem(key);
-  }
-
-  @override
   Future<void> setItem(String key, dynamic value) {
-    return _localStorage.setItem(key, value);
-  }
-
-  @override
-  Future<void> setString(Object key, String value) {
     return _localStorage.setItem(key, value);
   }
 }
