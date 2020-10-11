@@ -13,9 +13,15 @@ class CustomPage extends StatelessWidget {
   /// Whether page has drawer
   final bool hasDrawer;
 
+  // Background overlay
+  final Widget background;
+
   /// Constructs a custom page
   CustomPage(
-      {@required this.title, @required this.child, this.hasDrawer = false});
+      {@required this.title,
+      @required this.child,
+      this.hasDrawer = false,
+      this.background});
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +144,12 @@ class CustomPage extends StatelessWidget {
           : null,
 
       // Body of page
-      body: child,
+      // https://stackoverflow.com/questions/54837854
+      body: background == null
+          ? child
+          : Stack(
+              children: [background, Positioned.fill(child: child)],
+            ),
     );
   }
 }

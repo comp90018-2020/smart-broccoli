@@ -24,8 +24,7 @@ class _QuizTakerState extends State<QuizTaker> {
         BuildQuiz(key: _selfKey)
       ],
       hasDrawer: true,
-      background: true,
-      customBackground: Container(
+      background: Container(
         child: ClipPath(
           clipper: BackgroundClipperMain(),
           child: Container(

@@ -77,39 +77,33 @@ class _StartLobby extends State<StartLobby> {
   Widget build(BuildContext context) {
     return CustomPage(
       title: 'Take Quiz',
-      child: Stack(
-        children: <Widget>[
-          Container(
-            child: ClipPath(
-              clipper: BackgroundClipper(),
-              child: Container(
-                color: Theme.of(context).colorScheme.background,
-              ),
-            ),
+      background: Container(
+        child: ClipPath(
+          clipper: BackgroundClipper(),
+          child: Container(
+            color: Theme.of(context).colorScheme.background,
           ),
-          // Then the rest
-          Container(
-            child: new Column(
-              children: <Widget>[
-                SizedBox(height: 20),
-                _quizLogo(),
-                SizedBox(height: 10),
+        ),
+      ),
+      child: Column(
+        children: <Widget>[
+          SizedBox(height: 20),
+          _quizLogo(),
+          SizedBox(height: 10),
 
-                // The divider Bar
-                Stack(
-                  children: <Widget>[
-                    _quizTimer(),
-                    // Orange Divider
-                    Divider1(),
-                    _quizTimer(),
-                  ],
-                ),
-                // The list of Quiz players
-                QuizUsers(["A", "B", "C"]),
-                // _quizPlayers(),
-              ],
-            ),
-          )
+          // The divider Bar
+          Stack(
+            children: <Widget>[
+              _quizTimer(),
+              // Orange Divider
+              Divider1(),
+              _quizTimer(),
+            ],
+          ),
+
+          // The list of Quiz players
+          Expanded(child: QuizUsers(["A", "B", "C", "D", "E", "F", "G"])),
+          // _quizPlayers(),
         ],
       ),
     );

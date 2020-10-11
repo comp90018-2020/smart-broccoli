@@ -14,38 +14,32 @@ class CustomTabbedPage extends CustomPage {
       @required List<Tab> tabs,
       @required List<Widget> tabViews,
       hasDrawer = false,
-      bool background = false,
-      Widget customBackground})
+      Widget background})
       : super(
-          title: title,
-          child: Stack(
-            children: <Widget>[
-              background ? customBackground : Container(),
-              DefaultTabController(
-                length: tabs.length,
-                child: Column(children: [
-                  // Add tabs
-                  PreferredSize(
-                    preferredSize: Size.fromHeight(kToolbarHeight + 38),
-                    child: Container(
-                      padding: const EdgeInsets.only(top: 26, bottom: 12),
-                      child: TabHolder(
-                        widthFactor: .8,
-                        margin: EdgeInsets.zero,
-                        tabs: tabs,
-                      ),
+            title: title,
+            child: DefaultTabController(
+              length: tabs.length,
+              child: Column(children: [
+                // Add tabs
+                PreferredSize(
+                  preferredSize: Size.fromHeight(kToolbarHeight + 38),
+                  child: Container(
+                    padding: const EdgeInsets.only(top: 26, bottom: 12),
+                    child: TabHolder(
+                      widthFactor: .8,
+                      margin: EdgeInsets.zero,
+                      tabs: tabs,
                     ),
                   ),
-                  // Tab body
-                  Expanded(
-                    child: TabBarView(
-                      children: tabViews,
-                    ),
-                  )
-                ]),
-              ),
-            ],
-          ),
-          hasDrawer: hasDrawer,
-        );
+                ),
+                // Tab body
+                Expanded(
+                  child: TabBarView(
+                    children: tabViews,
+                  ),
+                )
+              ]),
+            ),
+            hasDrawer: hasDrawer,
+            background: background);
 }
