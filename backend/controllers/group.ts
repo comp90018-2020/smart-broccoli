@@ -109,7 +109,7 @@ export const getGroupMembers = async (userId: number, groupId: number) => {
         include: {
             model: User,
             required: true,
-            attributes: ["id", "updatedAt", "name"],
+            attributes: ["id", "updatedAt", "name", "pictureId"],
             through: { attributes: ["role"] },
         },
     });

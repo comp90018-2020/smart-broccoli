@@ -141,7 +141,7 @@ export const getUserProfile = async (
         (currentUserId && (await canAccessProfile(currentUserId, userId)))
     ) {
         return await User.findByPk(userId, {
-            attributes: ["id", "name", "updatedAt"],
+            attributes: ["id", "name", "updatedAt", "pictureId"],
         });
     }
     throw new ErrorStatus("Cannot access resource", 403);
