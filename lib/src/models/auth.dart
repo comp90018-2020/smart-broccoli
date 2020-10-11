@@ -2,7 +2,7 @@ import 'package:smart_broccoli/cache.dart';
 
 import '../store/remote/auth_api.dart';
 
-/// Class for making auth requests
+/// View model for the authentication state of the user
 class AuthStateModel {
   /// Object implementing the KeyValueStore interface for local caching
   final KeyValueStore _keyValueStore;
@@ -13,6 +13,7 @@ class AuthStateModel {
     return _token;
   }
 
+  /// API provider for the auth service
   AuthApi _authApi;
 
   /// Constructor for external use
