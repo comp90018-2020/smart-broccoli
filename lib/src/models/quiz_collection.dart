@@ -46,6 +46,11 @@ class QuizCollectionModel extends ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<void> selectQuiz(int id) async {
+    _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
+    notifyListeners();
+  }
+
   Future<void> refreshAvailableQuizzes() async {
     _availableQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.MEMBER);
