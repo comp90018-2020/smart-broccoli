@@ -100,7 +100,7 @@ class _QuizQuestion extends State<QuizQuestion> {
     );
   }
 
-  Widget _points(){
+  Widget _points() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: new Container(

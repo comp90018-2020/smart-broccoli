@@ -35,7 +35,7 @@ class BackgroundClipper3 extends CustomClipper<Path> {
     var firstControlPoint = new Offset(size.width / 4, size.height / 3.5);
     var firstEndPoint = new Offset(size.width / 2, size.height / 3 - 60);
     var secondControlPoint =
-    new Offset(size.width - (size.width / 4), size.height / 3.5 - 65);
+        new Offset(size.width - (size.width / 4), size.height / 3.5 - 65);
     var secondEndPoint = new Offset(size.width, size.height / 3.5 - 40);
 
     path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
