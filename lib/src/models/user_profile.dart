@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import '../data/user.dart';
 import '../store/local/key_value.dart';
 import '../store/remote/user_api.dart';
-import 'auth.dart';
+import 'auth_state.dart';
 
 /// View model for the user's profile
 class UserProfileModel extends ChangeNotifier {
@@ -34,7 +34,8 @@ class UserProfileModel extends ChangeNotifier {
   }
 
   Future<void> refreshUser() async {
-    _user = await _userApi.getUser(_authStateModel.token);;
+    _user = await _userApi.getUser(_authStateModel.token);
+    ;
     _keyValueStore.setString('user', json.encode(_user.toJson()));
     notifyListeners();
   }

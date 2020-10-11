@@ -1,7 +1,7 @@
 import 'package:smart_broccoli/cache.dart';
 
 import '../store/remote/quiz_api.dart';
-import 'auth.dart';
+import 'auth_state.dart';
 
 /// View model for quiz management
 class QuizCollectionModel {
@@ -19,7 +19,8 @@ class QuizCollectionModel {
   // Current quiz
 
   /// Constructor for external use
-  QuizCollectionModel(this._keyValueStore, this._authStateModel, {QuizApi quizApi}) {
+  QuizCollectionModel(this._keyValueStore, this._authStateModel,
+      {QuizApi quizApi}) {
     _quizApi = quizApi ?? QuizApi();
   }
 }

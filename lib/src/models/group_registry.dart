@@ -2,7 +2,7 @@ import 'package:smart_broccoli/cache.dart';
 
 import '../../models.dart';
 import '../store/remote/group_api.dart';
-import 'auth.dart';
+import 'auth_state.dart';
 
 /// Class for making group management requests
 class GroupRegistryModel {
