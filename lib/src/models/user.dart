@@ -1,19 +1,14 @@
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
-import 'package:smart_broccoli/models.dart';
 
+import '../data/user.dart';
 import '../store/local/key_value.dart';
 import '../store/remote/user_api.dart';
-
 import 'auth.dart';
 
-/// Class for making user profile requests
-/// For all methods in this class:
-/// `UnauthorisedRequestException` is thrown if the user is not logged in.
-/// `ForbiddenRequestException` is thrown if the user is logged in but not
-/// authorised to make the request.
-class UserStateModel with ChangeNotifier {
+/// View model for the user's profile
+class UserProfileModel extends ChangeNotifier {
   /// AuthModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
 
@@ -27,7 +22,7 @@ class UserStateModel with ChangeNotifier {
   KeyValueStore _keyValueStore;
 
   /// Constructor for external use
-  UserStateModel(this._keyValueStore, this._authStateModel, {UserApi userApi}) {
+  UserProfileModel(this._keyValueStore, this._authStateModel, {UserApi userApi}) {
     _userApi = userApi ?? UserApi();
     _user = User.fromJson(_keyValueStore.getItem('user'));
     // TODO: load image
