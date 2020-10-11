@@ -17,18 +17,17 @@ class AuthStateModel extends ChangeNotifier {
   /// API provider for the auth service
   AuthApi _authApi;
 
+  /// Views subscribe to this field
+  /// `true` if the user has logged in or joined as a participant.
+  /// Caveat: The token may be revoked; this method only checks that the user
+  /// has previously logged in/joined without subsequently logging out.
+  /// To validate the session, use `checkSession`.
+  bool get inSession => _token != null;
+
   /// Constructor for external use
   AuthStateModel(this._keyValueStore, {AuthApi authApi}) {
     _token = _keyValueStore.getString('token');
     _authApi = authApi ?? AuthApi();
-  }
-
-  /// Return `true` if the user has logged in or joined as a participant.
-  /// Caveat: The token may be revoked; this method only checks that the user
-  /// has previously logged in/joined without subsequently logging out.
-  /// To validate the session, use `checkSession`.
-  bool get inSession {
-    return _token != null;
   }
 
   Future<void> join() async {
