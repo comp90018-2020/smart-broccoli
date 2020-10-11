@@ -46,6 +46,13 @@ class GroupRegistryModel extends ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<void> selectGroup(int id) async {
+    _selectedGroup = await _groupApi.getGroup(_authStateModel.token, id);
+    _selectedGroup.members =
+        await _groupApi.getMembers(_authStateModel.token, id);
+    notifyListeners();
+  }
+
   Future<void> refreshAvailableQuizzes() async {
     _joinedGroups = (await _groupApi.getGroups(_authStateModel.token))
         .where((group) => group.role == GroupRole.MEMBER);
