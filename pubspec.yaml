@@ -10,7 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.12.2
-  localstorage: ^3.0.0
   provider: null
   shared_preferences: ^0.5.12
   tuple: ^1.0.3

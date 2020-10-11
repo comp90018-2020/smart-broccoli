@@ -17,13 +17,13 @@ class NullKeyValueStore implements KeyValueStore {
   }
 
   @override
-  dynamic getItem(String key) {
+  String getString(String key) {
     if (key == 'token') return _token;
     return null;
   }
 
   @override
-  Future<void> setItem(Object key, dynamic value) async {
+  Future<void> setString(Object key, String value) async {
     if (key == 'token') _token = value;
   }
 }

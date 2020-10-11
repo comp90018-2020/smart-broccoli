@@ -18,12 +18,12 @@ class SharedPrefsKeyValueStore implements KeyValueStore {
   }
 
   @override
-  Future<void> setItem(Object key, dynamic value) async {
+  Future<void> setString(Object key, String value) async {
     await _sharedPreferences.setString(key, value);
   }
 
   @override
-  dynamic getItem(String key) {
+  String getString(String key) {
     return _sharedPreferences.getString(key);
   }
 

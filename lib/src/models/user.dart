@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
@@ -28,27 +29,26 @@ class UserProfileModel extends ChangeNotifier {
   UserProfileModel(this._keyValueStore, this._authStateModel,
       {UserApi userApi}) {
     _userApi = userApi ?? UserApi();
-    _user = User.fromJson(_keyValueStore.getItem('user'));
-    _profileImage = _keyValueStore.getItem('userProfileImage');
+    _user = User.fromJson(json.decode(_keyValueStore.getString('user')));
+    // TODO: load profile image
   }
 
   Future<void> refreshUser() async {
-    User user = await _userApi.getUser(_authStateModel.token);
-    _user = user;
-    _keyValueStore.setItem('user', user);
+    _user = await _userApi.getUser(_authStateModel.token);;
+    _keyValueStore.setString('user', json.encode(_user.toJson()));
     notifyListeners();
   }
 
   Future<void> updateUser({String email, String password, String name}) async {
     _user = await _userApi.updateUser(_authStateModel.token,
         email: email, password: password, name: name);
-    _keyValueStore.setItem('user', user);
+    _keyValueStore.setString('user', json.encode(_user.toJson()));
     notifyListeners();
   }
 
   Future<void> getImage() async {
     Uint8List image = await _userApi.getProfilePic(_authStateModel.token);
     _profileImage = image;
-    _keyValueStore.setItem('userProfileImage', _profileImage);
+    // TODO: store profile image
   }
 }
