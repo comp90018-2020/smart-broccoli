@@ -33,6 +33,20 @@ class UserApi {
     throw Exception('Unable to get user: unknown error occurred');
   }
 
+  /// Get the profile of a different user.
+  ///
+  /// Return a `User` object corresponding to the user with specified [id].
+  Future<User> getUserBy(String token, int id) async {
+    http.Response response = await _http.get('$USER_URL/$id/profile',
+        headers: ApiBase.headers(authToken: token));
+
+    if (response.statusCode == 200)
+      return User.fromJson(json.decode(response.body));
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get user: unknown error occurred');
+  }
+
   /// Update the profile of the logged-in/joined user.
   /// This method is to be invoked with only the parameters to be updated.
   /// For example, if only the email and name are to be updated:
