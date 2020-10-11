@@ -44,7 +44,7 @@ class UserApi {
     if (password != null) body['password'] = password;
     if (name != null) body['name'] = name;
 
-    final http.Response response = await http.patch('$USER_URL/profile',
+    final http.Response response = await _http.patch('$USER_URL/profile',
         headers: ApiBase.headers(authToken: token),
         body: jsonEncode(body));
 
