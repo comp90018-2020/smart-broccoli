@@ -20,13 +20,14 @@ class UserApi {
 
   /// Get the profile of a user.
   ///
-  /// Return a `RegisteredUser` or `ParticipantUser` object corresponding to
-  /// the user to whom an auth [token] was issued.
+  /// Return a `User` object corresponding to the user to whom an auth [token]
+  /// was issued.
   Future<User> getUser(String token) async {
     http.Response response = await _http.get('$USER_URL/profile',
         headers: ApiBase.headers(authToken: token));
 
-    if (response.statusCode == 200) return _userFromJson(response.body);
+    if (response.statusCode == 200)
+      return User.fromJson(json.decode(response.body));
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception('Unable to get user: unknown error occurred');
@@ -38,17 +39,18 @@ class UserApi {
   /// ```
   /// updateUser(email: 'new@email.com', name: 'New Name');
   /// ```
-  Future<User> updateUser(String token, {String email, String password, String name}) async {
+  Future<User> updateUser(String token,
+      {String email, String password, String name}) async {
     Map<String, String> body = {};
     if (email != null) body['email'] = email;
     if (password != null) body['password'] = password;
     if (name != null) body['name'] = name;
 
     final http.Response response = await _http.patch('$USER_URL/profile',
-        headers: ApiBase.headers(authToken: token),
-        body: jsonEncode(body));
+        headers: ApiBase.headers(authToken: token), body: jsonEncode(body));
 
-    if (response.statusCode == 200) return _userFromJson(response.body);
+    if (response.statusCode == 200)
+      return User.fromJson(json.decode(response.body));
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 409) throw RegistrationConflictException();
@@ -97,12 +99,5 @@ class UserApi {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw Exception(
         'Unable to delete user profile pic: unknown error occurred');
-  }
-
-  User _userFromJson(String json) {
-    Map<String, dynamic> jsonMap = jsonDecode(json);
-    return jsonMap['role'] == 'participant'
-        ? ParticipantUser.fromJson(jsonMap)
-        : RegisteredUser.fromJson(jsonMap);
   }
 }

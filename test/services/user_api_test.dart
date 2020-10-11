@@ -31,7 +31,8 @@ main() async {
         }),
         200));
     final user = await api.getUser("asdfqwerty1234567890foobarbaz");
-    expect(user, isA<RegisteredUser>());
+    expect(user, isA<User>());
+    expect(user.type, UserType.REGISTERED);
     expect(user.id, 1);
     expect(user.email, "foo@bar.com");
     expect(user.name, "Foo Bar");
@@ -56,7 +57,8 @@ main() async {
         }),
         200));
     final user = await api.getUser("asdfqwerty1234567890foobarbaz");
-    expect(user, isA<ParticipantUser>());
+    expect(user, isA<User>());
+    expect(user.type, UserType.UNREGISTERED);
     expect(user.id, 1);
     expect(user.email, "foo@bar.com");
     expect(user.name, "Foo Bar");
@@ -104,7 +106,8 @@ main() async {
     });
     final user = await api.updateUser("asdfqwerty1234567890foobarbaz",
         email: "aharwood@unimelb.com", name: "Aaron Harwood");
-    expect(user, isA<RegisteredUser>());
+    expect(user, isA<User>());
+    expect(user.type, UserType.REGISTERED);
     expect(user.id, 1);
     expect(user.email, "aharwood@unimelb.com");
     expect(user.name, "Aaron Harwood");

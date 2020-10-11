@@ -32,8 +32,7 @@ class AuthApi {
   /// `RegistrationConflictException` is thrown if the email is already in use.
   /// `RegistrationException` is thrown if the user cannot be registered due to
   /// a different reason.
-  Future<RegisteredUser> register(
-      String email, String password, String name) async {
+  Future<User> register(String email, String password, String name) async {
     final http.Response response = await _http.post('$AUTH_URL/register',
         headers: ApiBase.headers(),
         body: jsonEncode(<String, String>{
@@ -43,7 +42,7 @@ class AuthApi {
         }));
 
     if (response.statusCode == 201)
-      return RegisteredUser.fromJson(json.decode(response.body));
+      return User.fromJson(json.decode(response.body));
 
     if (response.statusCode == 409) throw RegistrationConflictException();
     throw RegistrationException();
@@ -53,8 +52,7 @@ class AuthApi {
   /// `RegistrationConflictException` is thrown if the email is already in use.
   /// `ParticipantPromotionException` is thrown if the user cannot be registered
   /// due to a different reason.
-  Future<RegisteredUser> promote(
-      String email, String password, String name) async {
+  Future<User> promote(String email, String password, String name) async {
     final http.Response response = await _http.post('$AUTH_URL/promote',
         headers: ApiBase.headers(),
         body: jsonEncode(<String, String>{
@@ -64,7 +62,7 @@ class AuthApi {
         }));
 
     if (response.statusCode == 200)
-      return RegisteredUser.fromJson(json.decode(response.body));
+      return User.fromJson(json.decode(response.body));
 
     if (response.statusCode == 409) throw RegistrationConflictException();
     throw ParticipantPromotionException();

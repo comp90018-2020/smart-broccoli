@@ -40,8 +40,9 @@ main() async {
       return http.Response("", 400);
     });
 
-    RegisteredUser user =
-        await api.register("foo@bar.com", "helloworld", "Foo Bar");
+    final user = await api.register("foo@bar.com", "helloworld", "Foo Bar");
+    expect(user, isA<User>());
+    expect(user.type, UserType.REGISTERED);
     expect(user.id, 1);
     expect(user.email, "foo@bar.com");
     expect(user.name, "Foo Bar");
@@ -121,8 +122,7 @@ main() async {
 
       if (body.containsKey('email') && body.containsKey('password'))
         return http.Response(
-            json.encode({"token": "asdfqwerty1234567890foobarbaz"}),
-            200);
+            json.encode({"token": "asdfqwerty1234567890foobarbaz"}), 200);
 
       return http.Response("", 400);
     });
