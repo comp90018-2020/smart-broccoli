@@ -25,7 +25,8 @@ class UserProfileModel extends ChangeNotifier {
   Uint8List get profileImage => _profileImage;
 
   /// Constructor for external use
-  UserProfileModel(this._keyValueStore, this._authStateModel, {UserApi userApi}) {
+  UserProfileModel(this._keyValueStore, this._authStateModel,
+      {UserApi userApi}) {
     _userApi = userApi ?? UserApi();
     _user = User.fromJson(_keyValueStore.getItem('user'));
     _profileImage = _keyValueStore.getItem('userProfileImage');
@@ -38,8 +39,11 @@ class UserProfileModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateUser({String email, String password, String name}) {
-
+  Future<void> updateUser({String email, String password, String name}) async {
+    _user = await _userApi.updateUser(_authStateModel.token,
+        email: email, password: password, name: name);
+    _keyValueStore.setItem('user', user);
+    notifyListeners();
   }
 
   Future<void> getImage() async {
