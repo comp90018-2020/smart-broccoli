@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 // import 'package:smart_broccoli/src/shared/background.dart';
 import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
 
@@ -23,8 +24,8 @@ class _BuildQuiz extends State<BuildQuiz> {
   // Builder function for a list of card tiles
   @override
   Widget build(BuildContext context) {
-  //  double width = MediaQuery.of(context).size.width;
-  //  double height = MediaQuery.of(context).size.height;
+    //  double width = MediaQuery.of(context).size.width;
+    //  double height = MediaQuery.of(context).size.height;
     List<String> items = getItems(this.key);
     return Stack(
       // overflow: Overflow.visible,
