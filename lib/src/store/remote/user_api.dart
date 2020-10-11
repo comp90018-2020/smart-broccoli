@@ -32,19 +32,21 @@ class UserApi {
     throw Exception('Unable to get user: unknown error occurred');
   }
 
-  /// Update the profile of a user.
-  ///
-  /// Return a `User` object constructed from the server's response. All fields
-  /// should be equal in content to the [user] object passed in except
-  /// `password` (which is `null` in the returned object).
-  ///
-  /// Usage:
-  /// [user] should be a `User` object obtained by `getUser`. Mutate the fields
-  /// to be updated (e.g. `email`, `name`, `password`) then invoke this method.
-  Future<User> updateUser(String token, User user) async {
-    final http.Response response = await _http.patch('$USER_URL/profile',
+  /// Update the profile of the logged-in/joined user.
+  /// This method is to be invoked with only the parameters to be updated.
+  /// For example, if only the email and name are to be updated:
+  /// ```
+  /// updateUser(email: 'new@email.com', name: 'New Name');
+  /// ```
+  Future<User> updateUser(String token, {String email, String password, String name}) async {
+    Map<String, String> body = {};
+    if (email != null) body['email'] = email;
+    if (password != null) body['password'] = password;
+    if (name != null) body['name'] = name;
+
+    final http.Response response = await http.patch('$USER_URL/profile',
         headers: ApiBase.headers(authToken: token),
-        body: jsonEncode(user.toJson()));
+        body: jsonEncode(body));
 
     if (response.statusCode == 200) return _userFromJson(response.body);
     if (response.statusCode == 401) throw UnauthorisedRequestException();
