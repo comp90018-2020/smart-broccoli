@@ -1,11 +1,15 @@
+import 'dart:collection';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:smart_broccoli/cache.dart';
 
 import '../../models.dart';
 import '../store/remote/group_api.dart';
 import 'auth_state.dart';
 
-/// Class for making group management requests
-class GroupRegistryModel {
+/// View model for group management
+class GroupRegistryModel extends ChangeNotifier {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
 
@@ -15,9 +19,46 @@ class GroupRegistryModel {
   /// Local storage service
   KeyValueStore _keyValueStore;
 
+  /// Views subscribe to the fields below
+  Group _selectedGroup;
+  Group get selectedGroup => _selectedGroup;
+  Iterable<Group> _joinedGroups;
+  UnmodifiableListView<Group> get joinedGroups =>
+      UnmodifiableListView(_joinedGroups);
+  Iterable<Group> _createdGroups;
+  UnmodifiableListView<Group> get createdGroups =>
+      UnmodifiableListView(_createdGroups);
+
   /// Constructor for external use
   GroupRegistryModel(this._keyValueStore, this._authStateModel,
       {GroupApi groupApi}) {
     _groupApi = groupApi ?? GroupApi();
+    // load last record of joined and created quizzes from local storage
+    try {
+      _joinedGroups =
+          (json.decode(_keyValueStore.getString('joinedGroups')) as List)
+              .map((repr) => Group.fromJson(repr));
+    } catch (_) {}
+    try {
+      _createdGroups =
+          (json.decode(_keyValueStore.getString('createdGroups')) as List)
+              .map((repr) => Group.fromJson(repr));
+    } catch (_) {}
+  }
+
+  Future<void> refreshAvailableQuizzes() async {
+    _joinedGroups = (await _groupApi.getGroups(_authStateModel.token))
+        .where((group) => group.role == GroupRole.MEMBER);
+    _keyValueStore.setString('availableQuizzes',
+        json.encode(_joinedGroups.map((group) => group.toJson())));
+    notifyListeners();
+  }
+
+  Future<void> refreshCreatedQuizzes() async {
+    _createdGroups = (await _groupApi.getGroups(_authStateModel.token))
+        .where((group) => group.role == GroupRole.OWNER);
+    _keyValueStore.setString('createdQuizzes',
+        json.encode(_createdGroups.map((group) => group.toJson())));
+    notifyListeners();
   }
 }
