@@ -71,6 +71,21 @@ class UserApi {
     throw Exception('Unable to get user profile pic: unknown error occurred');
   }
 
+  /// Get the profile picture of a different user.
+  ///
+  /// Return the picture as a list of bytes or `null` if it doesn't exist.
+  Future<Uint8List> getProfilePicOf(String token, int id) async {
+    final http.Response response = await _http.get(
+        '$USER_URL/$id/profile/picture',
+        headers: ApiBase.headers(authToken: token));
+
+    if (response.statusCode == 200) return response.bodyBytes;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 404) return null; // user has no profile pic
+    throw Exception('Unable to get user profile pic: unknown error occurred');
+  }
+
   /// Set the profile pic of a user.
   ///
   /// This method takes the image as a list of bytes.
