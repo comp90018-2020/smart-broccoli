@@ -1,3 +1,4 @@
+import 'package:smart_broccoli/models.dart';
 import 'package:tuple/tuple.dart';
 
 import 'user.dart';
@@ -11,12 +12,10 @@ enum GroupRole { OWNER, MEMBER }
 /// pass the `Group` object to `GroupModel.updateGroup` to synchronise the
 /// change with the server. Do not change other fields.
 class Group {
-  int _id;
-  int get id => _id;
-  bool _defaultGroup;
-  bool get defaultGroup => _defaultGroup;
-  String _code;
-  String get code => _code;
+  final int id;
+  final bool defaultGroup;
+  final String code;
+  final GroupRole role;
 
   String name;
 
@@ -25,13 +24,29 @@ class Group {
   List<Tuple2<User, GroupRole>> members;
 
   /// Constructor for internal use only
-  Group._internal(
-      this._id, this.name, this._defaultGroup, this._code, this.members);
+  Group._internal(this.id, this.name, this.defaultGroup, this.code, this.role,
+      this.members);
 
   factory Group.fromJson(Map<String, dynamic> json,
           {List<Tuple2<User, GroupRole>> members}) =>
-      Group._internal(json['id'], json['name'], json['defaultGroup'],
-          json['code'], members);
+      Group._internal(
+          json['id'],
+          json['name'],
+          json['defaultGroup'],
+          json['code'],
+          json['role'] == 'member' ? GroupRole.MEMBER : GroupRole.OWNER,
+          members);
+
+  // note: members list is not serialised
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'defaultGroup': defaultGroup,
+      'code': code,
+      'role': role == GroupRole.MEMBER ? 'member' : 'owner'
+    };
+  }
 }
 
 /// Exception thrown when the server is unable to create a group due to the
