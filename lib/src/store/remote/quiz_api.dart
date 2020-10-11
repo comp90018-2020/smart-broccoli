@@ -192,7 +192,8 @@ class QuizApi {
   }
 
   /// Delete the picture of a question.
-  Future<void> deleteQuestionPicture(String token, int quizId, int questionId) async {
+  Future<void> deleteQuestionPicture(
+      String token, int quizId, int questionId) async {
     final http.Response response = await _http.delete(
         '$QUIZ_URL/$quizId/question/$questionId/picture',
         headers: ApiBase.headers(authToken: token));

@@ -526,7 +526,8 @@ main() async {
       return http.Response("", 400);
     });
 
-    expect(() async => await api.kickMember("asdfqwerty1234567890foobarbaz", 2, 3),
+    expect(
+        () async => await api.kickMember("asdfqwerty1234567890foobarbaz", 2, 3),
         throwsA(isA<ForbiddenRequestException>()));
   });
 }

@@ -35,7 +35,6 @@ class UserProfileModel extends ChangeNotifier {
 
   Future<void> refreshUser() async {
     _user = await _userApi.getUser(_authStateModel.token);
-    ;
     _keyValueStore.setString('user', json.encode(_user.toJson()));
     notifyListeners();
   }
