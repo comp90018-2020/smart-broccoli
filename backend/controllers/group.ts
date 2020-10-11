@@ -37,7 +37,7 @@ export const getGroups = async (user: User) => {
     const groups = await user.getGroups({
         include: [
             {
-                //@ts-ignore
+                // @ts-ignore
                 model: User,
                 // Owner name if default group
                 through: { where: { role: "owner" }, attributes: [] },

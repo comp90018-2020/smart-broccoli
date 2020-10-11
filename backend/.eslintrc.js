@@ -4,44 +4,44 @@ module.exports = {
         es6: true,
         node: true,
     },
-    parser: '@typescript-eslint/parser',
+    parser: "@typescript-eslint/parser",
     parserOptions: {
-        sourceType: 'module',
+        sourceType: "module",
     },
-    plugins: ['@typescript-eslint'],
+    plugins: ["@typescript-eslint"],
     rules: {
-        '@typescript-eslint/member-delimiter-style': [
-            'error',
+        "@typescript-eslint/member-delimiter-style": [
+            "error",
             {
                 multiline: {
-                    delimiter: 'semi',
+                    delimiter: "semi",
                     requireLast: true,
                 },
                 singleline: {
-                    delimiter: 'semi',
+                    delimiter: "semi",
                     requireLast: false,
                 },
             },
         ],
-        '@typescript-eslint/prefer-namespace-keyword': 'error',
-        '@typescript-eslint/quotes': [
-            'error',
-            'single',
+        "@typescript-eslint/prefer-namespace-keyword": "error",
+        "@typescript-eslint/quotes": [
+            "error",
+            "double",
             {
                 avoidEscape: true,
             },
         ],
-        semi: ['error', 'always'],
-        '@typescript-eslint/type-annotation-spacing': 'error',
-        'brace-style': ['error', '1tbs'],
-        'no-trailing-spaces': 'error',
-        'no-var': 'error',
-        'prefer-const': 'error',
-        'spaced-comment': [
-            'error',
-            'always',
+        semi: ["error", "always"],
+        "@typescript-eslint/type-annotation-spacing": "error",
+        "brace-style": ["error", "1tbs"],
+        "no-trailing-spaces": "error",
+        "no-var": "error",
+        "prefer-const": "error",
+        "spaced-comment": [
+            "error",
+            "always",
             {
-                markers: ['/'],
+                markers: ["/"],
             },
         ],
     },

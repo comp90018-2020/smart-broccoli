@@ -452,7 +452,7 @@ export const endSession = async (
             await Session.update(
                 {
                     state: "ended",
-                    code: null
+                    code: null,
                 },
                 {
                     where: { id: sessionId },
