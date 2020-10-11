@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_taker.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
-import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
+// import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
 import 'package:smart_broccoli/src/shared/background.dart';
 import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -83,7 +83,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
       height: 300,
 
       // alignment: Alignment.lerp(Alignment.topCenter, Alignment.center, ),
-      child: playerStatsCard("Name and other data here"),
+      child: PlayerStatsCard("Name and other data here"),
     );
   }
 

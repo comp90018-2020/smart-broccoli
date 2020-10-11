@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:smart_broccoli/src/quiz_taker/build_quiz.dart';
 import 'package:smart_broccoli/src/shared/tabbed_page.dart';
-import '../../theme.dart';
 import '../shared/background.dart';
-import 'start_lobby.dart';
 
 GlobalKey _allKey = GlobalKey();
 GlobalKey _groupKey = GlobalKey();
@@ -16,7 +13,7 @@ class QuizTaker extends StatefulWidget {
 }
 
 class _QuizTakerState extends State<QuizTaker> {
-  double _height = 0;
+  // double _height = 0;
 
   // Tabs that are shown (in TabBarView)
   List<Widget> _tabs;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'src/quiz_taker/quiz_taker.dart';
 import 'package:smart_broccoli/theme.dart';
-import 'src/auth/auth_screen.dart';
-import 'package:smart_broccoli/src/shared/tabbed_page.dart';
-import 'package:smart_broccoli/theme.dart';
+// import 'src/auth/auth_screen.dart';
+// import 'package:smart_broccoli/src/shared/tabbed_page.dart';
+// import 'package:smart_broccoli/theme.dart';
 
 void main() => runApp(MyApp());
 

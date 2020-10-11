@@ -203,7 +203,7 @@ class _QuizQuestion extends State<QuizQuestion> {
 
   // Send the answer to the server
   void sendAnswer() {
-    int ans = _tappedIndex;
+    // int ans = _tappedIndex;
     // TODO logic code here
   }
 

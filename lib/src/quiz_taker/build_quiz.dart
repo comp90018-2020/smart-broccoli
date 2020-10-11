@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/shared/background.dart';
+// import 'package:smart_broccoli/src/shared/background.dart';
 import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
 
 // Build a list of quizes
@@ -18,23 +18,13 @@ class _BuildQuiz extends State<BuildQuiz> {
   /// listens for input by the pin listener
   final TextEditingController _pinFilter = new TextEditingController();
 
-  String _pin = "";
-
-  void _pinListen() {
-    if (_pinFilter.text.isEmpty) {
-      _pin = "";
-    } else {
-      _pin = _pinFilter.text;
-    }
-  }
-
   _BuildQuiz(this.key);
 
   // Builder function for a list of card tiles
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
+  //  double width = MediaQuery.of(context).size.width;
+  //  double height = MediaQuery.of(context).size.height;
     List<String> items = getItems(this.key);
     return Stack(
       // overflow: Overflow.visible,
@@ -90,7 +80,7 @@ class _BuildQuiz extends State<BuildQuiz> {
   /// This is used to demostrate that tab changes the list as well
   Widget _cardTile(String val, String type, String index) {
     double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
+    // double height = MediaQuery.of(context).size.height;
 
     return new Container(
       key: Key(index + val + index),

@@ -128,8 +128,8 @@ class BoxDecoration2 extends BoxDecoration {
         );
 }
 
-class playerStatsCard extends Card {
-  playerStatsCard(name)
+class PlayerStatsCard extends Card {
+  PlayerStatsCard(name)
       : super(
             color: Colors.yellow,
             elevation: 10,

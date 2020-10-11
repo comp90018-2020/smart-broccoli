@@ -169,10 +169,9 @@ class _StartLobby extends State<StartLobby> {
 
   Widget cardTop() {
     // Logo size controls (NOT yet IMPLEMENTED)
-    double width = MediaQuery.of(context).size.width;
-    double yourWidth = width * 0.85;
-    double height = MediaQuery.of(context).size.height;
-    double yourheight = height * 0.355;
+    // double width = MediaQuery.of(context).size.width;
+    // double height = MediaQuery.of(context).size.height;
+
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
