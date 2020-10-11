@@ -30,7 +30,7 @@ class UserProfileModel extends ChangeNotifier {
       {UserApi userApi}) {
     _userApi = userApi ?? UserApi();
     _user = User.fromJson(json.decode(_keyValueStore.getString('user')));
-    // TODO: load profile image
+    _profileImage = json.decode(_keyValueStore.getString('profilePic'));
   }
 
   Future<void> refreshUser() async {
@@ -47,8 +47,8 @@ class UserProfileModel extends ChangeNotifier {
   }
 
   Future<void> getImage() async {
-    Uint8List image = await _userApi.getProfilePic(_authStateModel.token);
-    _profileImage = image;
-    // TODO: store profile image
+    _profileImage = await _userApi.getProfilePic(_authStateModel.token);
+    _keyValueStore.setString('profilePic', utf8.decode(_profileImage));
+    notifyListeners();
   }
 }
