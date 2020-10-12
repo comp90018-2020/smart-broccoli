@@ -23,37 +23,14 @@ class QuizCreateForm extends StatefulWidget {
 
 class _QuizCreateFormState extends State<QuizCreateForm> {
 
-  var txt = TextEditingController();
 
+  /**
+   * Timer picker START**********************************/
   int _currentIntValue = 30;
   NumberPicker integerNumberPicker;
 
+  var txt = TextEditingController();
 
-  File imageFile;
-  final picker = ImagePicker();
-
-
-  final _formKey = GlobalKey<FormState>();
-  Quiz model = Quiz("placeholder", 0, QuizType.LIVE);
-
-  //Radio buttons selection
-  QuizType radioBtn = QuizType.LIVE;
-  Key key;
-  String name;
-  _QuizCreateFormState(this.key, this.name);
-
-
-  _handleValueChanged(num value){
-    if(value != null){
-
-      if (value is int){
-        setState(() {
-          _currentIntValue = value;
-        });
-      }
-
-    }
-  }
 
   _handleValueChangedExternally(num value){
 
@@ -69,6 +46,30 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
     }
 
   }
+
+  Future _showIntegerDialog() async {
+    await showDialog<int>(
+        context: context,
+        builder: (BuildContext context){
+          return new NumberPickerDialog.integer(minValue: 5, maxValue: 90, initialIntegerValue: 30);
+        }
+
+    ).then((value) => _handleValueChangedExternally(value));
+
+  }
+
+
+
+  /**
+   * Timer picker END**********************************/
+
+  /**
+   * Image setter START**********************************/
+
+
+  File imageFile;
+  final picker = ImagePicker();
+
 
   _openGallery(BuildContext context) async{
 
@@ -87,8 +88,6 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
     Navigator.of(context).pop();
 
   }
-  
-
 
   Future<void> _showChoiceDialog(BuildContext context){
     return showDialog(context: context, builder: (BuildContext context) {
@@ -120,45 +119,89 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
 
   }
 
+  Widget _decideImageView(){
+
+    if (imageFile == null){
+
+      return IconButton(
+        padding: new EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
+        icon: new Icon(Icons.insert_photo_outlined, size: 100),
+      );
+
+    }else{
+
+      return Image.file(imageFile, fit: BoxFit.cover);
+
+
+    }
+  }
+
+  /**
+   * Image setter END**********************************/
+
+
+
+
+
+  /**
+   * Radio button  START**********************************/
+
+  Quiz model = Quiz("placeholder", 0, QuizType.LIVE);
+
+  QuizType radioBtn = QuizType.LIVE;
+  /**
+   * Radio button  END**********************************/
+
+
+
+
+
+  final _formKey = GlobalKey<FormState>();
+  Key key;
+  String name;
+  _QuizCreateFormState(this.key, this.name);
+
+
+
 
   @override
   Widget build(BuildContext context) {
     Future.delayed(const Duration(), () => SystemChannels.textInput.invokeMethod('TextInput.hide'));
 
-      return Scaffold(
+    return Scaffold(
 
-        appBar: AppBar(
-            centerTitle: true,
-          title: SizedBox(
-              child:  Text("Quiz"),
+      appBar: AppBar(
+        centerTitle: true,
+        title: SizedBox(
+          child:  Text("Quiz"),
         ),
-            leading: GestureDetector(
-              onTap: (){
-              },
-              child: Icon(Icons.close),
+        leading: GestureDetector(
+          onTap: (){
+          },
+          child: Icon(Icons.close),
+        ),
+
+        actions: <Widget> [
+          Padding(
+            padding: EdgeInsets.only(right: 20.0, top: 0.0),
+            child: GestureDetector(
+                onTap: (){},
+                child: Icon(Icons.delete)
             ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(right: 20.0, top: 22.0),
+            child: GestureDetector(
+                onTap: (){},
+                child: Text("SAVE")
+            ),
+          ) ,
 
-            actions: <Widget> [
-              Padding(
-                padding: EdgeInsets.only(right: 20.0, top: 0.0),
-                child: GestureDetector(
-                    onTap: (){},
-                    child: Icon(Icons.delete)
-                ),
-              ),
-              Padding(
-                  padding: EdgeInsets.only(right: 20.0, top: 22.0),
-                  child: GestureDetector(
-                    onTap: (){},
-                    child: Text("SAVE")
-                    ),
-                  ) ,
+        ],
 
-              ],
+      ),
 
-        ),
-
-        body: SingleChildScrollView(
+      body: SingleChildScrollView(
 
 
           key: _formKey,
@@ -166,13 +209,28 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
 
 
             children: <Widget>[
+              Container(
+                  padding: EdgeInsets.fromLTRB(12.00, 10.00, 0, 3.0),
+                  child:  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget> [
+                      new Text(
+                        'Settings',
+                        style: new TextStyle(
+                          fontSize: 17.0, fontWeight: FontWeight.w400, color: Colors.white,
+                        ),
+                      )
+                    ],
+                  )
+              ),
               Padding(padding: EdgeInsets.fromLTRB(12.0, 8, 10.0, 0.0),
-              child:  TextField(
-                decoration: InputDecoration(
-                  labelText: 'Quiz name',
-                ),
-              ))
-             ,
+                  child:  TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Quiz name',
+                    ),
+                  ))
+              ,
 
 
               Container(
@@ -180,44 +238,44 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                   Container(
-                  width: 390,
-                      child: Card(
-                        semanticContainer: true,
-                        clipBehavior: Clip.antiAliasWithSaveLayer,
-                        child: Column(
-                            children: <Widget> [
-                              Container(
-                                width: 380,
-                                height: 100,
-                                child: _decideImageView(),
-                              )
-                              ,
-                              ButtonBar(
-                                alignment: MainAxisAlignment.center,
-                                children: [
-                                  FlatButton(
-                                    textColor: Colors.black54,
-                                    onPressed: () {
-                                      _showChoiceDialog(context);
-                                      // Perform some action
-                                    },
-                                    child: const Text('SET QUIZ IMAGE'),
-                                  ),
-                                ],
-                              )]
+                      Container(
+                          width: 390,
+                          child: Card(
+                            semanticContainer: true,
+                            clipBehavior: Clip.antiAliasWithSaveLayer,
+                            child: Column(
+                                children: <Widget> [
+                                  Container(
+                                    width: 380,
+                                    height: 100,
+                                    child: _decideImageView(),
+                                  )
+                                  ,
+                                  ButtonBar(
+                                    alignment: MainAxisAlignment.center,
+                                    children: [
+                                      FlatButton(
+                                        textColor: Colors.black54,
+                                        onPressed: () {
+                                          _showChoiceDialog(context);
+                                          // Perform some action
+                                        },
+                                        child: const Text('SET QUIZ IMAGE'),
+                                      ),
+                                    ],
+                                  )]
 
-                        ),
-                        shape: RoundedRectangleBorder(
+                            ),
+                            shape: RoundedRectangleBorder(
 
-                        ),
-                        elevation: 5,
-                        margin: EdgeInsets.fromLTRB(12.0, 8, 10.0, 0.0),
+                            ),
+                            elevation: 5,
+                            margin: EdgeInsets.fromLTRB(12.0, 8, 10.0, 0.0),
 
-                      )
+                          )
 
 
-                  ),
+                      ),
 
                     ],
                   ),
@@ -228,40 +286,25 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
               Padding(padding: EdgeInsets.fromLTRB(12.0, 8, 10.0, 0.0),
 
 
-                          child: TextField(
-                            autofocus: false,
-                            controller: txt,
-                            // readOnly: true,
-                            onTap: _showIntegerDialog,
-                            decoration: InputDecoration(
-                                labelText: 'Seconds per question',
-                                prefixIcon: Icon(Icons.timer)
-                            ),
+                  child: TextField(
+                    autofocus: false,
+                    controller: txt,
+                    // readOnly: true,
+                    onTap: _showIntegerDialog,
+                    decoration: InputDecoration(
+                        labelText: 'Seconds per question',
+                        prefixIcon: Icon(Icons.timer)
+                    ),
 
-              )
+                  )
 
 
 
               ),
-              
-              Container(
-                padding: EdgeInsets.fromLTRB(12.00, 10.00, 0, 3.0),
-                child:  Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget> [
-                    new Text(
-                      'Select type of quiz',
-                      style: new TextStyle(
-                        fontSize: 17.0, fontWeight: FontWeight.w400, color: Colors.white,
-                      ),
-                    )
-                  ],
-                )
-              ),
+
               Container(
                 alignment: Alignment.centerLeft,
-                margin: EdgeInsets.fromLTRB(12.0, 0.0, 10.0, 0.0),
+                margin: EdgeInsets.fromLTRB(12.0, 6.0, 10.0, 0.0),
                 height: 100,
                 child: Column(
                   children: <Widget> [
@@ -270,6 +313,7 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
                       title: const Text('LIVE'),
                       dense: true,
                       leading: Radio(
+                        activeColor: Colors.green,
                         value: QuizType.LIVE,
                         groupValue: radioBtn,
                         onChanged: (QuizType value) {
@@ -283,6 +327,7 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
                       dense: true,
                       title: const Text('SELF-PACED'),
                       leading: Radio(
+                        activeColor: Colors.green,
                         value: QuizType.SELF_PACED,
                         groupValue: radioBtn,
                         onChanged: (QuizType value) {
@@ -301,114 +346,41 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
                     color: Colors.white),
 
               ),
-            Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget> [ const SizedBox(height: 30),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget> [
+                  Container(
+                      padding: EdgeInsets.fromLTRB(12.00, 25.00, 0, 3.0),
+                      child:  Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget> [
+                          new Text(
+                            'Questions',
+                            style: new TextStyle(
+                              fontSize: 17.0, fontWeight: FontWeight.w400, color: Colors.white,
+                            ),
+                          )
+                        ],
+                      )
+                  ),
 
-              RaisedButton(
-                onPressed: () {},
-                padding: EdgeInsets.all(20.0),
-                child: const Text('Add Question', style: TextStyle(fontSize: 20), ),
-              )
-            ],)
+                  const SizedBox(height: 30),
 
-
-
-
-
-
+                  RaisedButton(
+                    onPressed: () {},
+                    padding: EdgeInsets.all(20.0),
+                    child: const Text('Add Question', style: TextStyle(fontSize: 20), ),
+                  )
+                ],)
             ],
           )
       ),
-        /*body: _buildSuggestions(),*/
-      );
-
-    }
-  Widget _decideImageView(){
-
-    if (imageFile == null){
-
-  return IconButton(
-        padding: new EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
-        icon: new Icon(Icons.insert_photo_outlined, size: 100),
-      );
-
-    }else{
-
-     return Image.file(imageFile, fit: BoxFit.cover);
-
-
-    }
-  }
-
-
-  Future _showIntegerDialog() async {
-    await showDialog<int>(
-      context: context,
-      builder: (BuildContext context){
-        return new NumberPickerDialog.integer(minValue: 5, maxValue: 90, initialIntegerValue: 30);
-      }
-      
-    ).then((value) => _handleValueChangedExternally(value));
-    
-  }
-
-
-
-
-
-  }
-
-
-class NoKeyboardEditableText extends EditableText {
-
-  NoKeyboardEditableText({
-    @required TextEditingController controller,
-    TextStyle style = const TextStyle(),
-    Color cursorColor = Colors.black,
-    bool autofocus = false,
-    Color selectionColor
-  }):super(
-      controller: controller,
-      focusNode: NoKeyboardEditableTextFocusNode(),
-      style: style,
-      cursorColor: cursorColor,
-      autofocus: autofocus,
-      selectionColor: selectionColor,
-      backgroundCursorColor: Colors.black
-  );
-
-  @override
-  EditableTextState createState() {
-    return NoKeyboardEditableTextState();
-  }
-
-}
-
-class NoKeyboardEditableTextState extends EditableTextState {
-
-  @override
-  Widget build(BuildContext context) {
-    Widget widget = super.build(context);
-    return Container(
-      decoration: UnderlineTabIndicator(borderSide: BorderSide(color: Colors.blueGrey)),
-      child: widget,
+      /*body: _buildSuggestions(),*/
     );
+
   }
 
-  @override
-  void requestKeyboard() {
-    super.requestKeyboard();
-    //hide keyboard
-    SystemChannels.textInput.invokeMethod('TextInput.hide');
-  }
-}
 
-class NoKeyboardEditableTextFocusNode extends FocusNode {
-  @override
-  bool consumeKeyboardToken() {
-    // prevents keyboard from showing on first focus
-    return false;
-  }
 }
