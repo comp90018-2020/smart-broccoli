@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/models.dart';
 
 // Register tab
 class Register extends StatefulWidget {
@@ -111,7 +113,7 @@ class _RegisterState extends State<Register> {
                 ),
               ),
               obscureText: !_passwordVisible,
-              onFieldSubmitted: (_) => _createAccountPressed(),
+              onFieldSubmitted: (_) => _createAccountPressed(context),
             ),
             // Spacing
             Container(height: 0),
@@ -119,7 +121,7 @@ class _RegisterState extends State<Register> {
             SizedBox(
               width: double.infinity,
               child: RaisedButton(
-                onPressed: _createAccountPressed,
+                onPressed: () => _createAccountPressed(context),
                 child: const Text("CREATE ACCOUNT"),
               ),
             ),
@@ -129,14 +131,44 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  void _createAccountPressed() {
+  void _createAccountPressed(BuildContext context) async {
     if (_formKey.currentState.validate()) {
-      print('The user wants to create an account with ' +
-          '${_emailController.text} and ${_passwordController.text}');
+      try {
+        await Provider.of<AuthStateModel>(context, listen: false).register(
+            _emailController.text,
+            _passwordController.text,
+            _nameController.text);
+        Provider.of<AuthStateModel>(context, listen: false)
+            .login(_emailController.text, _passwordController.text);
+      } on RegistrationConflictException {
+        _showRegistrationFailedDialogue(
+            context, 'Registration failed', 'Email already in use');
+      } catch (_) {
+        _showRegistrationFailedDialogue(
+            context, 'Registration failed', 'Something went wrong');
+      }
     } else {
       setState(() {
         _formSubmitted = true;
       });
     }
+  }
+
+  void _showRegistrationFailedDialogue(
+      BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
   }
 }
