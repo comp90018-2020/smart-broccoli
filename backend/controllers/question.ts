@@ -40,6 +40,7 @@ export const checkQuestionInfo = (info: any): QuestionInfo => {
         id: info.id,
         type: info.type,
         text: info.text,
+        options: info.options
     };
 
     const { type, options, tf } = info;
