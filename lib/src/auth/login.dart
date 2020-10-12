@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/models.dart';
 
 // Login tab
 class Login extends StatefulWidget {
@@ -87,7 +89,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
               obscureText: !_passwordVisible,
-              onFieldSubmitted: (_) => _loginPressed(),
+              onFieldSubmitted: (_) => _loginPressed(context),
             ),
             // Spacing
             Container(height: 0),
@@ -95,7 +97,7 @@ class _LoginState extends State<Login> {
             SizedBox(
               width: double.infinity,
               child: RaisedButton(
-                onPressed: _loginPressed,
+                onPressed: () => _loginPressed(context),
                 child: const Text("LOGIN"),
               ),
             ),
@@ -118,7 +120,8 @@ class _LoginState extends State<Login> {
               child: MaterialButton(
                 textColor: Theme.of(context).colorScheme.onBackground,
                 child: const Text('SKIP LOGIN'),
-                onPressed: _joinAsParticipant,
+                onPressed:
+                    Provider.of<AuthStateModel>(context, listen: false).join,
               ),
             ),
           ],
@@ -127,10 +130,14 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void _loginPressed() {
+  void _loginPressed(BuildContext context) async {
     if (_formKey.currentState.validate()) {
-      print("Login pressed");
-      print("${_emailController.text} ${_passwordController.text}");
+      try {
+        await Provider.of<AuthStateModel>(context, listen: false)
+            .login(_emailController.text, _passwordController.text);
+      } on LoginFailedException {
+        _showLoginFailedDialogue(context);
+      }
     } else {
       setState(() {
         _formSubmitted = true;
@@ -138,7 +145,20 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void _joinAsParticipant() {
-    print("Join as participant");
+  void _showLoginFailedDialogue(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Login failed"),
+        content: Text("Incorrect email or password"),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
   }
 }
