@@ -18,57 +18,61 @@ class QuestionCreateForm extends StatefulWidget {
 
   QuestionCreateForm({Key key, this.name}) : super(key: key);
   @override
-  _QuestionCreateFormState createState() => _QuestionCreateFormState(key, name);
+  _QuestionCreateFormState createState() => _QuestionCreateFormState();
 }
 
 class _QuestionCreateFormState extends State<QuestionCreateForm> {
 
-  var txt = TextEditingController();
 
-  int _currentIntValue = 30;
-  NumberPicker integerNumberPicker;
+  /*** Answer cards START
+   *Creates an answer card
+   * *********************************************************/
 
 
+
+  var nameTECs = <TextEditingController>[];
+  var cards = <Card>[];
+
+  Card createCard() {
+    var textController = TextEditingController();
+    nameTECs.add(textController);
+    return Card(
+      margin: EdgeInsets.fromLTRB(12.00, 6, 12.00, 2),
+
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text('Answer ${cards.length + 1}'),
+          TextField(
+              controller: textController,
+              decoration: InputDecoration(labelText: 'Answer')),
+          ButtonBar(
+            alignment: MainAxisAlignment.end,
+            buttonPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+            children: [
+              FlatButton(
+                textColor: Colors.black54,
+                onPressed: () {
+
+                  cards.remove(this);
+                  // Perform some action
+                },
+                child: Icon(Icons.delete),
+              ),
+            ],
+          )],
+      ),
+    );
+  }
+
+  /**Answer cards END**********************************************************
+   * **/
+
+
+/** Set image START*/
   File imageFile;
   final picker = ImagePicker();
 
-
-  final _formKey = GlobalKey<FormState>();
-  Quiz model = Quiz("placeholder", 0, QuizType.LIVE);
-
-  //Radio buttons selection
-  QuizType radioBtn = QuizType.LIVE;
-  Key key;
-  String name;
-  _QuestionCreateFormState(this.key, this.name);
-
-
-  _handleValueChanged(num value){
-    if(value != null){
-
-      if (value is int){
-        setState(() {
-          _currentIntValue = value;
-        });
-      }
-
-    }
-  }
-
-  _handleValueChangedExternally(num value){
-
-    if(value != null){
-
-      if (value is int){
-        setState(() {
-          _currentIntValue = value;
-          txt.text = _currentIntValue.toString() + " seconds";
-        });
-      }
-
-    }
-
-  }
 
   _openGallery(BuildContext context) async{
 
@@ -87,8 +91,6 @@ class _QuestionCreateFormState extends State<QuestionCreateForm> {
     Navigator.of(context).pop();
 
   }
-
-
 
   Future<void> _showChoiceDialog(BuildContext context){
     return showDialog(context: context, builder: (BuildContext context) {
@@ -121,6 +123,26 @@ class _QuestionCreateFormState extends State<QuestionCreateForm> {
   }
 
 
+  Widget _decideImageView(){
+
+    if (imageFile == null){
+
+      return IconButton(
+        padding: new EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
+        icon: new Icon(Icons.insert_photo_outlined, size: 100),
+      );
+
+    }else{
+
+      return Image.file(imageFile, fit: BoxFit.cover);
+    }
+  }
+
+/** Set image END*/
+
+
+
+
   @override
   Widget build(BuildContext context) {
     Future.delayed(const Duration(), () => SystemChannels.textInput.invokeMethod('TextInput.hide'));
@@ -130,7 +152,7 @@ class _QuestionCreateFormState extends State<QuestionCreateForm> {
       appBar: AppBar(
         centerTitle: true,
         title: SizedBox(
-          child:  Text("Quiz"),
+          child:  Text("Question"),
         ),
         leading: GestureDetector(
           onTap: (){
@@ -160,16 +182,29 @@ class _QuestionCreateFormState extends State<QuestionCreateForm> {
 
       body: SingleChildScrollView(
 
-
-          key: _formKey,
           child: Column(
-
+            mainAxisSize: MainAxisSize.min,
 
             children: <Widget>[
+              Container(
+                  padding: EdgeInsets.fromLTRB(12.00, 10.00, 0, 3.0),
+                  child:  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget> [
+                      new Text(
+                        'Settings',
+                        style: new TextStyle(
+                          fontSize: 17.0, fontWeight: FontWeight.w400, color: Colors.white,
+                        ),
+                      )
+                    ],
+                  )
+              ),
               Padding(padding: EdgeInsets.fromLTRB(12.0, 8, 10.0, 0.0),
                   child:  TextField(
                     decoration: InputDecoration(
-                      labelText: 'Quiz name',
+                      labelText: 'Question text',
                     ),
                   ))
               ,
@@ -202,7 +237,7 @@ class _QuestionCreateFormState extends State<QuestionCreateForm> {
                                           _showChoiceDialog(context);
                                           // Perform some action
                                         },
-                                        child: const Text('SET QUIZ IMAGE'),
+                                        child: const Text('SET QUESTION IMAGE'),
                                       ),
                                     ],
                                   )]
@@ -227,21 +262,6 @@ class _QuestionCreateFormState extends State<QuestionCreateForm> {
 
               Padding(padding: EdgeInsets.fromLTRB(12.0, 8, 10.0, 0.0),
 
-
-                  child: TextField(
-                    autofocus: false,
-                    controller: txt,
-                    // readOnly: true,
-                    onTap: _showIntegerDialog,
-                    decoration: InputDecoration(
-                        labelText: 'Seconds per question',
-                        prefixIcon: Icon(Icons.timer)
-                    ),
-
-                  )
-
-
-
               ),
 
               Container(
@@ -251,165 +271,39 @@ class _QuestionCreateFormState extends State<QuestionCreateForm> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget> [
                       new Text(
-                        'Select type of quiz',
+                        'Answers',
                         style: new TextStyle(
                           fontSize: 17.0, fontWeight: FontWeight.w400, color: Colors.white,
                         ),
-                      )
+                      ),
                     ],
                   )
               ),
-              Container(
-                alignment: Alignment.centerLeft,
-                margin: EdgeInsets.fromLTRB(12.0, 0.0, 10.0, 0.0),
-                height: 100,
-                child: Column(
-                  children: <Widget> [
-
-                    ListTile(
-                      title: const Text('LIVE'),
-                      dense: true,
-                      leading: Radio(
-                        value: QuizType.LIVE,
-                        groupValue: radioBtn,
-                        onChanged: (QuizType value) {
-                          setState(() {
-                            radioBtn = value;
-                          });
+              Column(
+                  children: <Widget>[
+                      ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: cards.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return cards[index];
                         },
                       ),
-                    ),
-                    ListTile(
-                      dense: true,
-                      title: const Text('SELF-PACED'),
-                      leading: Radio(
-                        value: QuizType.SELF_PACED,
-                        groupValue: radioBtn,
-                        onChanged: (QuizType value) {
-                          setState(() {
-                            radioBtn = value;
-                          });
-                        },
+                    Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: RaisedButton(
+                        padding: EdgeInsets.all(14.0),
+                        child: Text('ADD ANSWER'),
+                        onPressed: () => setState(() => cards.add(createCard())),
                       ),
                     )
                   ],
-                )
 
-                ,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.white),
-
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget> [ const SizedBox(height: 30),
-
-                  RaisedButton(
-                    onPressed: () {},
-                    padding: EdgeInsets.all(20.0),
-                    child: const Text('Add Question', style: TextStyle(fontSize: 20), ),
-                  )
-                ],)
-
-
-
-
-
-
+                ),
             ],
           )
       ),
       /*body: _buildSuggestions(),*/
     );
-  }
-  
-  
-  Widget _decideImageView(){
-
-    if (imageFile == null){
-
-      return IconButton(
-        padding: new EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
-        icon: new Icon(Icons.insert_photo_outlined, size: 100),
-      );
-
-    }else{
-
-      return Image.file(imageFile, fit: BoxFit.cover);
-
-
-    }
-  }
-
-
-  Future _showIntegerDialog() async {
-    await showDialog<int>(
-        context: context,
-        builder: (BuildContext context){
-          return new NumberPickerDialog.integer(minValue: 5, maxValue: 90, initialIntegerValue: 30);
-        }
-
-    ).then((value) => _handleValueChangedExternally(value));
-
-  }
-
-
-
-
-
-}
-
-
-class NoKeyboardEditableText extends EditableText {
-
-  NoKeyboardEditableText({
-    @required TextEditingController controller,
-    TextStyle style = const TextStyle(),
-    Color cursorColor = Colors.black,
-    bool autofocus = false,
-    Color selectionColor
-  }):super(
-      controller: controller,
-      focusNode: NoKeyboardEditableTextFocusNode(),
-      style: style,
-      cursorColor: cursorColor,
-      autofocus: autofocus,
-      selectionColor: selectionColor,
-      backgroundCursorColor: Colors.black
-  );
-
-  @override
-  EditableTextState createState() {
-    return NoKeyboardEditableTextState();
-  }
-
-}
-
-class NoKeyboardEditableTextState extends EditableTextState {
-
-  @override
-  Widget build(BuildContext context) {
-    Widget widget = super.build(context);
-    return Container(
-      decoration: UnderlineTabIndicator(borderSide: BorderSide(color: Colors.blueGrey)),
-      child: widget,
-    );
-  }
-
-  @override
-  void requestKeyboard() {
-    super.requestKeyboard();
-    //hide keyboard
-    SystemChannels.textInput.invokeMethod('TextInput.hide');
-  }
-}
-
-class NoKeyboardEditableTextFocusNode extends FocusNode {
-  @override
-  bool consumeKeyboardToken() {
-    // prevents keyboard from showing on first focus
-    return false;
   }
 }
