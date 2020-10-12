@@ -14,6 +14,7 @@ class CustomTabbedPage extends CustomPage {
       @required List<Tab> tabs,
       @required List<Widget> tabViews,
       hasDrawer = false,
+      bool secondaryBackgroundColour = false,
       Widget background})
       : super(
             title: title,
@@ -41,5 +42,6 @@ class CustomTabbedPage extends CustomPage {
               ]),
             ),
             hasDrawer: hasDrawer,
-            background: background);
+            background: background,
+            secondaryBackgroundColour: secondaryBackgroundColour);
 }

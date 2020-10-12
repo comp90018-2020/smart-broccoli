@@ -13,19 +13,28 @@ class CustomPage extends StatelessWidget {
   /// Whether page has drawer
   final bool hasDrawer;
 
+  /// Secondary background colour
+  final bool secondaryBackgroundColour;
+
   // Background overlay
   final Widget background;
 
   /// Constructs a custom page
-  CustomPage(
-      {@required this.title,
-      @required this.child,
-      this.hasDrawer = false,
-      this.background});
+  CustomPage({
+    @required this.title,
+    @required this.child,
+    this.hasDrawer = false,
+    this.background,
+    this.secondaryBackgroundColour = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: this.secondaryBackgroundColour
+          ? Theme.of(context).backgroundColor
+          : Theme.of(context).colorScheme.onBackground,
+
       // Appbar
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),

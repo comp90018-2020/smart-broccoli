@@ -34,7 +34,7 @@ class _StartLobby extends State<StartLobby> {
   Timer _timer;
 
   // You should have a getter method here to get data from server
-  int _start = 50;
+  int _start = 10;
 
   int val = 0;
 
@@ -77,6 +77,7 @@ class _StartLobby extends State<StartLobby> {
   Widget build(BuildContext context) {
     return CustomPage(
       title: 'Take Quiz',
+      // Background decoration
       background: Container(
         child: ClipPath(
           clipper: BackgroundClipper(),
@@ -85,26 +86,28 @@ class _StartLobby extends State<StartLobby> {
           ),
         ),
       ),
-      child: Column(
-        children: <Widget>[
-          SizedBox(height: 20),
-          _quizLogo(),
-          SizedBox(height: 10),
+      // Body
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          children: <Widget>[
+            _quizLogo(),
 
-          // The divider Bar
-          Stack(
-            children: <Widget>[
-              _quizTimer(),
-              // Orange Divider
-              Divider1(),
-              _quizTimer(),
-            ],
-          ),
+            // The divider Bar
+            Stack(
+              children: <Widget>[
+                _quizTimer(),
+                // Orange Divider
+                LobbyDivider(),
+                _quizTimer(),
+              ],
+            ),
 
-          // The list of Quiz players
-          Expanded(child: QuizUsers(["A", "B", "C", "D", "E", "F", "G"])),
-          // _quizPlayers(),
-        ],
+            // The list of Quiz players
+            Expanded(child: QuizUsers(["A", "B", "C", "D", "E", "F", "G"])),
+            // _quizPlayers(),
+          ],
+        ),
       ),
     );
   }
@@ -195,7 +198,7 @@ class _StartLobby extends State<StartLobby> {
           SizedBox(
             height: 50,
           ),
-          Container(child: Text("Waiting for Quiz to Start")),
+          Text("Waiting for quiz to start..."),
         ],
       );
       // onPressed: () => _startQuiz()
@@ -219,8 +222,7 @@ class _StartLobby extends State<StartLobby> {
   }
 
   void _startQuiz() {
-    Navigator.pushReplacement(
-      context,
+    Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => QuizQuestion()),
     );
   }

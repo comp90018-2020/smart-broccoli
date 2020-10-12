@@ -25,12 +25,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
   // Entry function
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-
-        // Stacks are used to stack widgets
-        // Since the background is now a widget, it comes first
-
-        body: CustomPage(title: "Leaderboards", child: _entryPoint()));
+    return new CustomPage(title: "Leaderboard", child: _entryPoint());
   }
 
   Widget _entryPoint() {

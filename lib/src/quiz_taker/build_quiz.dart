@@ -9,68 +9,58 @@ class BuildQuiz extends StatefulWidget {
   BuildQuiz({Key key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => new _BuildQuiz(key);
+  State<StatefulWidget> createState() => new _BuildQuiz();
 }
 
 class _BuildQuiz extends State<BuildQuiz> {
-  Key key;
-
   /// A pin listener
   /// listens for input by the pin listener
   final TextEditingController _pinFilter = new TextEditingController();
 
-  _BuildQuiz(this.key);
+  _BuildQuiz();
 
   // Builder function for a list of card tiles
   @override
   Widget build(BuildContext context) {
-    //  double width = MediaQuery.of(context).size.width;
-    //  double height = MediaQuery.of(context).size.height;
-    List<String> items = getItems(this.key);
-    return Stack(
-      // overflow: Overflow.visible,
+    List<String> items = getItems();
+    return Column(
       children: <Widget>[
-        Column(
-          children: <Widget>[
-            new Container(
-              child: _pinForm(),
-            ),
-            SizedBox(height: 10),
-            new FractionallySizedBox(
-              widthFactor: 0.5,
-              child: Text(
-                  "By entering PIN you can access a quiz and join into the group of the that quiz"),
-            ),
-            // Padding
-            SizedBox(height: 50),
-            // Join by pin button
-            new Container(
-              child: _buildJoinByPinButton(),
-            ),
-            // Padding
-            SizedBox(height: 50),
-
-            Container(
-              child: Expanded(
-                //width: 200,
-                child: ListView.separated(
-                  // Enable Horizontal Scroll
-                  scrollDirection: Axis.horizontal,
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return _cardTile(
-                        items[index], this.key.toString(), index.toString());
-                  },
-                  // Space between the cards
-                  separatorBuilder: (context, index) {
-                    return Divider(indent: 1);
-                  },
-                ),
-              ),
-            ),
-            SizedBox(height: 80),
-          ],
+        new Container(
+          child: _pinForm(),
         ),
+        SizedBox(height: 10),
+        new FractionallySizedBox(
+          widthFactor: 0.5,
+          child: Text(
+              "By entering PIN you can access a quiz and join into the group of the that quiz"),
+        ),
+        // Padding
+        SizedBox(height: 50),
+        // Join by pin button
+        new Container(
+          child: _buildJoinByPinButton(),
+        ),
+        // Padding
+        SizedBox(height: 50),
+
+        Container(
+          child: Expanded(
+            //width: 200,
+            child: ListView.separated(
+              // Enable Horizontal Scroll
+              scrollDirection: Axis.horizontal,
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                return _cardTile(items[index], 'A', index.toString());
+              },
+              // Space between the cards
+              separatorBuilder: (context, index) {
+                return Divider(indent: 1);
+              },
+            ),
+          ),
+        ),
+        SizedBox(height: 80),
       ],
     );
   }
@@ -144,8 +134,7 @@ class _BuildQuiz extends State<BuildQuiz> {
   /// Take a quiz, goes to the quiz lobby which then connects you to a quiz
   /// Interface
   void _quiz() {
-    Navigator.pushReplacement(
-      context,
+    Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => StartLobby()),
     );
   }
@@ -205,7 +194,7 @@ class _BuildQuiz extends State<BuildQuiz> {
   /// Please change the output type
   /// Should default to "ALL"
   /// Type should be of type Key
-  List<String> getItems(Key type) {
+  List<String> getItems() {
     print("NOT IMPLEMENTED");
     return ["A", "B", "C", "D", "E", "F", "G"];
   }

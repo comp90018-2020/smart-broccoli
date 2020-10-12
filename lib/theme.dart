@@ -20,6 +20,7 @@ class SmartBroccoliColourScheme extends ColorScheme {
 /// Singleton class holding the app's `ThemeData` object
 class SmartBroccoliTheme {
   static final ThemeData _themeData = ThemeData(
+    backgroundColor: Color(0xFF4CAF50),
     primaryColor: Color(0xFF4CAF50),
     colorScheme: SmartBroccoliColourScheme(),
     buttonTheme: ButtonThemeData(
@@ -98,8 +99,8 @@ class AnswerColours {
   }
 }
 
-class Divider1 extends Divider {
-  Divider1()
+class LobbyDivider extends Divider {
+  LobbyDivider()
       : super(
           thickness: 5,
           height: 50,

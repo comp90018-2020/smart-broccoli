@@ -14,7 +14,7 @@ class QuizUsers extends StatelessWidget {
       itemCount: userList.length,
       itemBuilder: (BuildContext context, int index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
           child: Row(children: [
             // Profile image
             Container(
