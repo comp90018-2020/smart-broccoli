@@ -118,12 +118,10 @@ describe("Session", () => {
         expect(token).to.have.property("sessionId");
         expect(token).to.have.property("userId");
         expect(token).to.have.property("role");
-        expect(token).to.have.property("name");
         expect(token.scope).to.equal("game");
         expect(token.sessionId).to.equal(res.body.session.id);
         expect(token.userId).to.equal(user.id);
         expect(token.role).to.equal("host");
-        expect(token.name).to.equal(USER.name);
     });
 
     it("Join session", async () => {
@@ -163,12 +161,10 @@ describe("Session", () => {
         expect(token).to.have.property("sessionId");
         expect(token).to.have.property("userId");
         expect(token).to.have.property("role");
-        expect(token).to.have.property("name");
         expect(token.scope).to.equal("game");
         expect(token.sessionId).to.equal(res.body.session.id);
         expect(token.userId).to.equal(userMember.id);
         expect(token.role).to.equal("participant");
-        expect(token.name).to.equal(USER.name);
 
         // Get to check
         const getRes = await agent
@@ -194,7 +190,7 @@ describe("Session", () => {
         await joinGroup(userMember.id, { code: group.code });
 
         const quizAllRes = await agent
-            .get(`/quiz`)
+            .get("/quiz")
             .set("Authorization", `Bearer ${userMember.token}`);
         expect(quizAllRes.status).to.equal(200);
         expect(quizAllRes.body).to.have.lengthOf(1);

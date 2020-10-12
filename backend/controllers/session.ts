@@ -5,6 +5,7 @@ import sequelize, {
     SessionParticipant,
     User,
     Group,
+    UserGroup,
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
@@ -15,7 +16,6 @@ interface SessionToken {
     userId: number;
     role: string;
     sessionId: number;
-    name: string;
 }
 
 /**
@@ -29,7 +29,6 @@ const signSessionToken = async (info: {
     sessionId: number;
     role: string;
     userId: number;
-    name: string;
 }) => {
     return await jwtSign(
         {
@@ -37,7 +36,6 @@ const signSessionToken = async (info: {
             userId: info.userId,
             role: info.role,
             sessionId: info.sessionId,
-            name: info.name,
         },
         process.env.TOKEN_SECRET,
         { expiresIn: "1h" }
@@ -116,8 +114,11 @@ export const getUserSession = async (userId: number) => {
             {
                 // Find current user
                 model: User,
-                attributes: ["id", "name"],
-                through: { where: { state: { [Op.not]: "left" } } },
+                attributes: ["id"],
+                through: {
+                    where: { state: { [Op.not]: "left" } },
+                    attributes: ["role"],
+                },
                 where: { id: userId },
                 required: true,
             },
@@ -160,7 +161,6 @@ export const getUserSession = async (userId: number) => {
         sessionId: session.id,
         role: session.Users[0].SessionParticipant.role,
         userId,
-        name: session.Users[0].name,
     });
     return {
         session: {
@@ -215,24 +215,14 @@ export const createSession = async (userId: number, opts: any) => {
     }
 
     // Find group/role
-    // No injection should occur because groupId is foreign key
-    // dnd userId should be primary key from auth middleware
-    const groupRole: { role: string; name: string } = await sequelize.query(
-        `
-          SELECT "Users"."name" AS name, "UserGroups"."role" AS "role"
-          FROM "Users"
-          INNER JOIN (SELECT "userId", "role" FROM "UserGroups"
-                      WHERE
-                      "groupId" = ${quiz.groupId} AND "userId" = ${userId})
-                      AS "UserGroups" ON "Users"."id" = "UserGroups"."userId";
-       `,
-        { type: QueryTypes.SELECT, plain: true }
-    );
+    const groupRole = await UserGroup.findOne({
+        where: { groupId: quiz.groupId, userId },
+        attributes: ["role"],
+    });
     if (!groupRole) {
         throw new ErrorStatus("Quiz cannot be accessed", 403);
     }
     const role = groupRole.role;
-    const name = groupRole.name;
 
     // Get role
     // Check quiz type/initiator
@@ -294,7 +284,6 @@ export const createSession = async (userId: number, opts: any) => {
             sessionId: session.id,
             userId,
             role: sessionParticipant.role,
-            name,
         });
         return { session, token };
     });
@@ -381,15 +370,11 @@ export const joinSession = async (userId: number, code: string) => {
         delete groupJSON["code"];
     }
 
-    // Get user
-    const user = await User.findByPk(userId, { attributes: ["name"] });
-
     // Sign code
     const token = await signSessionToken({
         sessionId: session.id,
         role: "participant",
         userId,
-        name: user.name,
     });
     return {
         session: {

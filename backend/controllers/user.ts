@@ -183,3 +183,13 @@ export const getUserProfilePicture = async (
     }
     throw new ErrorStatus("Cannot access resource", 403);
 };
+
+/**
+ * Get user session info.
+ * @param userId
+ */
+export const getUserSessionProfile = async (userId: number) => {
+    return await User.findByPk(userId, {
+        attributes: ["id", "name", "pictureId"],
+    });
+};
