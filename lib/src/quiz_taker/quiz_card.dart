@@ -20,54 +20,48 @@ class QuizCard extends StatefulWidget {
 
 class _QuizCardState extends State<QuizCard> {
   Widget build(BuildContext context) {
-    Widget card = Card(
-      elevation: 2,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          // Quiz picture
-          AspectRatio(aspectRatio: 1.4, child: Placeholder()),
+    return Card(
+        elevation: 2,
+        child: InkWell(
+          onTap: widget.onTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              // Quiz picture
+              AspectRatio(aspectRatio: 1.4, child: Placeholder()),
 
-          // Rest should expand vertically
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.all(10),
-              width: double.maxFinite,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Quiz title & Group name
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget._quizName,
-                          style: TextStyle(fontSize: 20),
+              // Rest should expand vertically
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  width: double.maxFinite,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Quiz title & Group name
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget._quizName,
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            Text(widget._groupName,
+                                style: TextStyle(fontSize: 15)),
+                          ],
                         ),
-                        Text(widget._groupName, style: TextStyle(fontSize: 15)),
-                      ],
-                    ),
+                      ),
+
+                      // Quiz status
+                      Text('Live', style: TextStyle(fontSize: 15)),
+                    ],
                   ),
-
-                  // Quiz status
-                  Text('Live', style: TextStyle(fontSize: 15)),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
-
-    return widget.onTap != null
-        ? InkWell(
-            // For cool color effects uncomment these two lines
-            // highlightColor: Colors.pinkAccent,
-            // splashColor: Colors.greenAccent,
-            onTap: widget.onTap,
-            child: card)
-        : card;
+        ));
   }
 }
