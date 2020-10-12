@@ -13,9 +13,8 @@ class MainMemKeyValueStore implements KeyValueStore {
   }
 
   @override
-  Future<bool> clear() {
+  Future<void> clear() async {
     _map.clear();
-    return Future.value(true);
   }
 
   @override
@@ -24,8 +23,7 @@ class MainMemKeyValueStore implements KeyValueStore {
   }
 
   @override
-  Future<bool> setString(Object key, String value) {
+  Future<void> setString(Object key, String value) async {
     _map[key] = value;
-    return Future.value(true);
   }
 }

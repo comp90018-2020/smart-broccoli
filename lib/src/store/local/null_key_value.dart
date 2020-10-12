@@ -12,8 +12,8 @@ class NullKeyValueStore implements KeyValueStore {
   NullKeyValueStore();
 
   @override
-  Future<bool> clear() {
-    return Future.sync(() => true);
+  Future<void> clear() async {
+    _token = null;
   }
 
   @override
@@ -23,8 +23,7 @@ class NullKeyValueStore implements KeyValueStore {
   }
 
   @override
-  Future<bool> setString(Object key, String value) {
+  Future<void> setString(Object key, String value) async {
     if (key == 'token') _token = value;
-    return Future.sync(() => true);
   }
 }
