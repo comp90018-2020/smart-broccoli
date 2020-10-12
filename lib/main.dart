@@ -6,7 +6,8 @@ import 'package:smart_broccoli/src/auth/init_router.dart';
 import 'package:smart_broccoli/theme.dart';
 
 void main() async {
-  final KeyValueStore _keyValueStore = MainMemKeyValueStore();
+  WidgetsFlutterBinding.ensureInitialized();
+  final KeyValueStore _keyValueStore = await SharedPrefsKeyValueStore.create();
   runApp(
     MultiProvider(
       providers: [
