@@ -53,6 +53,7 @@ class AuthStateModel extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authApi.logout(_token);
+    _token = null;
     await _keyValueStore.clear();
     notifyListeners();
   }
