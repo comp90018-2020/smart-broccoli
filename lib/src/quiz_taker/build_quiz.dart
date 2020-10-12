@@ -62,6 +62,7 @@ class _BuildQuiz extends State<BuildQuiz> {
               ),
             ),
 
+            // Text for join by pin
             Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 30.0),
               child: FractionallySizedBox(
@@ -78,29 +79,25 @@ class _BuildQuiz extends State<BuildQuiz> {
 
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 290),
-              // Reason for Center
-              // https://stackoverflow.com/questions/54126018
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.only(left: 25),
-                  child: ListView.separated(
-                    // Enable Horizontal Scroll
-                    scrollDirection: Axis.horizontal,
-                    itemCount: widget.items.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          child: QuizCard(
-                            'Quiz name',
-                            'Group name',
-                            onTap: _quiz,
-                          ));
-                    },
-                    // Space between the cards
-                    separatorBuilder: (context, index) {
-                      return Divider(indent: 1);
-                    },
-                  ),
+              child: Container(
+                padding: const EdgeInsets.only(left: 25),
+                child: ListView.separated(
+                  // Enable Horizontal Scroll
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.items.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        child: QuizCard(
+                          'Quiz name',
+                          'Group name',
+                          onTap: _quiz,
+                        ));
+                  },
+                  // Space between the cards
+                  separatorBuilder: (context, index) {
+                    return Divider(indent: 1);
+                  },
                 ),
               ),
             ),

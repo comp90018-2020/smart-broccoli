@@ -9,6 +9,7 @@ class QuizCard extends StatefulWidget {
   /// Quiz name
   final String _quizName;
 
+  // TODO: change attributes to Group/Quiz
   /// Group name
   final String _groupName;
 
