@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Hold list of users
 class QuizUsers extends StatelessWidget {
-  // Hold list of users
   // TODO: change to correct model, provider picture
   final List<String> userList;
 

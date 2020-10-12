@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz_taker/build_quiz.dart';
+import 'package:smart_broccoli/src/quiz/quiz_build.dart';
 import 'package:smart_broccoli/src/shared/tabbed_page.dart';
 // import '../shared/background.dart';
 
@@ -15,7 +15,7 @@ class _QuizTakerState extends State<QuizTaker> {
 
     return CustomTabbedPage(
       title: "Take Quiz",
-      tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF")],
+      tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [BuildQuiz(items), BuildQuiz(items), BuildQuiz(items)],
       hasDrawer: true,
       secondaryBackgroundColour: true,

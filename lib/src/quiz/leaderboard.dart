@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
-import 'package:smart_broccoli/src/quiz_taker/quiz_taker.dart';
-import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
+import 'package:smart_broccoli/src/quiz/question.dart';
+import 'package:smart_broccoli/src/quiz/quiz.dart';
+import 'package:smart_broccoli/src/quiz/widgets/users.dart';
 // import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
 import 'package:smart_broccoli/src/shared/background.dart';
 import 'package:smart_broccoli/src/shared/page.dart';

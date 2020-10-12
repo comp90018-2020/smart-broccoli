@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz_taker/quiz_card.dart';
+import 'package:smart_broccoli/src/quiz/widgets/card.dart';
 
 // import 'package:smart_broccoli/src/shared/background.dart';
-import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
+import 'package:smart_broccoli/src/quiz/lobby.dart';
 
 // Build a list of quizes
 class BuildQuiz extends StatefulWidget {

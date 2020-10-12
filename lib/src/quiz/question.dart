@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/theme.dart';
-import 'leader_board_lobby.dart';
+import 'leaderboard.dart';
 
 enum FormType {
   ShowCorrect,

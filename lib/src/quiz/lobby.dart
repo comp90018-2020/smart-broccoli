@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz_taker/quiz_card.dart';
-import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
-import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
+import 'package:smart_broccoli/src/quiz/widgets/card.dart';
+import 'package:smart_broccoli/src/quiz/question.dart';
+import 'package:smart_broccoli/src/quiz/widgets/users.dart';
 import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
