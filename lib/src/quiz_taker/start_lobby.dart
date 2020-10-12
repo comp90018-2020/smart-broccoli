@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/src/quiz_taker/quiz_card.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_question.dart';
 import 'package:smart_broccoli/src/quiz_taker/quiz_users.dart';
 import 'package:smart_broccoli/src/shared/page.dart';
@@ -91,7 +92,17 @@ class _StartLobby extends State<StartLobby> {
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Column(
           children: <Widget>[
-            _quizLogo(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.4,
+                child: QuizCard(
+                  "Quiz name",
+                  "Quiz group",
+                  aspectRatio: 2.3,
+                ),
+              ),
+            ),
 
             // The divider Bar
             Stack(
@@ -109,76 +120,6 @@ class _StartLobby extends State<StartLobby> {
           ],
         ),
       ),
-    );
-  }
-
-  // The quiz prompt with the image/question functionality
-  Widget _quizLogo() {
-    double width = MediaQuery.of(context).size.width;
-    double yourWidth = width * 0.85;
-    double height = MediaQuery.of(context).size.height;
-    double yourheight = height * 0.355;
-
-    return Stack(
-      children: <Widget>[
-        Center(
-          child: Container(
-            width: yourWidth,
-            height: yourheight,
-            child: titleCard(),
-          ),
-        ),
-        Column(
-          children: <Widget>[
-            //first element in column is the transparent offset
-            SizedBox(height: yourheight * 0.9),
-            Center(child: startButton())
-          ],
-        )
-      ],
-    );
-  }
-
-  Widget titleCard() {
-    return Card(
-      elevation: 10,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          cardTop(),
-          cardBot(),
-        ],
-      ),
-    );
-  }
-
-  Widget cardTop() {
-    // Logo size controls (NOT yet IMPLEMENTED)
-    // double width = MediaQuery.of(context).size.width;
-    // double height = MediaQuery.of(context).size.height;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        // The image here is a placeholder, it is necessary to
-        // Provide a height and a width value
-        // Image(
-        //     // height: 150,
-        //     //width: 150,
-        //     // image: AssetImage('assets/images/placeholder.png')),
-        Text('Quiz Name'),
-        Text('Subtitle'),
-      ],
-    );
-  }
-
-  Widget cardBot() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        Text('Live'),
-      ],
     );
   }
 

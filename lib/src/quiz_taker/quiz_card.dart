@@ -12,7 +12,11 @@ class QuizCard extends StatefulWidget {
   /// Group name
   final String _groupName;
 
-  QuizCard(this._quizName, this._groupName, {Key key, this.onTap});
+  // Aspect ratio
+  final double aspectRatio;
+
+  QuizCard(this._quizName, this._groupName,
+      {Key key, this.onTap, this.aspectRatio = 1.4});
 
   @override
   State<StatefulWidget> createState() => new _QuizCardState();
@@ -29,7 +33,8 @@ class _QuizCardState extends State<QuizCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               // Quiz picture
-              AspectRatio(aspectRatio: 1.4, child: Placeholder()),
+              AspectRatio(
+                  aspectRatio: widget.aspectRatio, child: Placeholder()),
 
               // Rest should expand vertically
               Expanded(

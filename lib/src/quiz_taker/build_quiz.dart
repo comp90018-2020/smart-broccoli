@@ -7,7 +7,9 @@ import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
 
 // Build a list of quizes
 class BuildQuiz extends StatefulWidget {
-  BuildQuiz({Key key}) : super(key: key);
+  BuildQuiz(this.items, {Key key}) : super(key: key);
+
+  final List<String> items;
 
   @override
   State<StatefulWidget> createState() => new _BuildQuiz();
@@ -23,79 +25,87 @@ class _BuildQuiz extends State<BuildQuiz> {
   // Builder function for a list of card tiles
   @override
   Widget build(BuildContext context) {
-    List<String> items = getItems();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        children: <Widget>[
-          // Join by pin box
-          ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 100),
-            child: TextFormField(
-              controller: _pinFilter,
-              decoration: new InputDecoration(
-                labelText: 'Pin',
-                // prefixIcon: Icon(Icons.people),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          children: <Widget>[
+            // Join by pin box
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 100),
+              child: TextFormField(
+                controller: _pinFilter,
+                decoration: new InputDecoration(
+                  labelText: 'Pin',
+                  // prefixIcon: Icon(Icons.people),
+                ),
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
               ),
-              textCapitalization: TextCapitalization.words,
-              textInputAction: TextInputAction.next,
-              onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
             ),
-          ),
 
-          // Join by pin button
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: RaisedButton(
-              onPressed: _verifyPin,
-              child: Text("JOIN BY PIN"),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 20.0),
-            child: FractionallySizedBox(
-              widthFactor: 0.8,
-              child: Text(
-                "By entering PIN you can access a quiz\n and join the group of that quiz",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
+            // Join by pin button
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: RaisedButton(
+                onPressed: _verifyPin,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    "JOIN BY PIN",
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
               ),
             ),
-          ),
 
-          Expanded(
-            // Reason for Center
-            // https://stackoverflow.com/questions/54126018
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.only(left: 25),
-                constraints: BoxConstraints(maxHeight: 290),
-                child: ListView.separated(
-                  // Enable Horizontal Scroll
-                  scrollDirection: Axis.horizontal,
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        child: QuizCard(
-                          'Quiz name',
-                          'Group name',
-                          onTap: _quiz,
-                        ));
-                  },
-                  // Space between the cards
-                  separatorBuilder: (context, index) {
-                    return Divider(indent: 1);
-                  },
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 30.0),
+              child: FractionallySizedBox(
+                widthFactor: 0.8,
+                child: Text(
+                  "By entering PIN you can access a quiz\n and join the group of that quiz",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 290),
+              // Reason for Center
+              // https://stackoverflow.com/questions/54126018
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.only(left: 25),
+                  child: ListView.separated(
+                    // Enable Horizontal Scroll
+                    scrollDirection: Axis.horizontal,
+                    itemCount: widget.items.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: QuizCard(
+                            'Quiz name',
+                            'Group name',
+                            onTap: _quiz,
+                          ));
+                    },
+                    // Space between the cards
+                    separatorBuilder: (context, index) {
+                      return Divider(indent: 1);
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -119,14 +129,5 @@ class _BuildQuiz extends State<BuildQuiz> {
       context,
       MaterialPageRoute(builder: (context) => StartLobby()),
     );
-  }
-
-  /// Entry function for the different type of quizes
-  /// Please change the output type
-  /// Should default to "ALL"
-  /// Type should be of type Key
-  List<String> getItems() {
-    print("NOT IMPLEMENTED");
-    return ["A", "B", "C", "D", "E", "F", "G"];
   }
 }
