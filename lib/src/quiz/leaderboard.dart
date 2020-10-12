@@ -145,7 +145,7 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => QuizTaker()),
+        MaterialPageRoute(builder: (context) => Quiz()),
       );
     }
   }
