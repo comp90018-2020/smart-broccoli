@@ -26,48 +26,57 @@ class QuizCard extends StatefulWidget {
 class _QuizCardState extends State<QuizCard> {
   Widget build(BuildContext context) {
     return Card(
-        elevation: 2,
-        child: InkWell(
-          onTap: widget.onTap,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              // Quiz picture
-              AspectRatio(
-                  aspectRatio: widget.aspectRatio, child: Placeholder()),
+      elevation: 2,
+      child: InkWell(
+        onTap: widget.onTap,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            bool showPicture = constraints.maxHeight > 175;
 
-              // Rest should expand vertically
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  width: double.maxFinite,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Quiz title & Group name
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget._quizName,
-                              style: TextStyle(fontSize: 20),
-                            ),
-                            Text(widget._groupName,
-                                style: TextStyle(fontSize: 15)),
-                          ],
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                // Quiz picture
+                showPicture
+                    ? AspectRatio(
+                        aspectRatio: widget.aspectRatio, child: Placeholder())
+                    : SizedBox(),
+
+                // Rest should expand vertically
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    width: double.maxFinite,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Quiz title & Group name
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget._quizName,
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              Text(widget._groupName,
+                                  style: TextStyle(fontSize: 15)),
+                            ],
+                          ),
                         ),
-                      ),
 
-                      // Quiz status
-                      Text('Live', style: TextStyle(fontSize: 15)),
-                    ],
+                        // Quiz status
+                        Text('Live', style: TextStyle(fontSize: 15)),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ));
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 }

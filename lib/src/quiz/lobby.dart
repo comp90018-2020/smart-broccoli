@@ -87,6 +87,7 @@ class _StartLobby extends State<StartLobby> {
           ),
         ),
       ),
+
       // Body
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -94,22 +95,38 @@ class _StartLobby extends State<StartLobby> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.4,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.35),
                 child: QuizCard(
                   "Quiz name",
                   "Quiz group",
-                  aspectRatio: 2.3,
+                  aspectRatio: 2.5,
                 ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'Waiting for host to start...',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
 
             // The divider Bar
             Stack(
               children: <Widget>[
-                _quizTimer(),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 25),
+                  child: Text(
+                    'Participants',
+                    textAlign: TextAlign.left,
+                  ),
+                ),
                 // Orange Divider
                 LobbyDivider(),
+                // Timer
                 _quizTimer(),
               ],
             ),

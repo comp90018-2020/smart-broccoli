@@ -102,7 +102,7 @@ class AnswerColours {
 class LobbyDivider extends Divider {
   LobbyDivider()
       : super(
-          thickness: 5,
+          thickness: 3,
           height: 50,
           color: Colors.orangeAccent,
         );
@@ -121,7 +121,7 @@ class BoxDecoration2 extends BoxDecoration {
   BoxDecoration2()
       : super(
           border: new Border.all(
-              color: Colors.orangeAccent, width: 5.0, style: BorderStyle.solid),
+              color: Colors.orangeAccent, width: 3, style: BorderStyle.solid),
           // You need this line or the box will be transparent
           color: Colors.white,
           shape: BoxShape.circle,
