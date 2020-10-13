@@ -11,7 +11,7 @@ import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
 
 // Represents a session token
-interface SessionToken {
+export interface SessionToken {
     scope: string;
     userId: number;
     role: string;
@@ -48,7 +48,7 @@ const signSessionToken = async (info: {
  */
 export const sessionTokenDecrypt = async (token: string) => {
     if (!token) {
-        return false;
+        return null;
     }
 
     // Decrypt the session token
@@ -56,7 +56,10 @@ export const sessionTokenDecrypt = async (token: string) => {
         token,
         process.env.TOKEN_SECRET
     );
-    return sessionToken.scope === "game" ? sessionToken : null;
+    if (sessionToken.scope !== "game") {
+        return null;
+    }
+    return sessionToken;
 };
 
 /**
