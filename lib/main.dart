@@ -27,15 +27,17 @@ class MyApp extends StatefulWidget {
 /// Main entrance class
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> mainNavigator = GlobalKey<NavigatorState>();
-  bool started = false;
+  bool inSession;
 
   @override
   Widget build(BuildContext context) {
     AuthStateModel state = Provider.of<AuthStateModel>(context, listen: true);
-    if (started)
-      mainNavigator.currentState
-          .pushReplacementNamed(state.inSession ? '/home' : '/auth');
-    started = true;
+    if (inSession != state.inSession) {
+      if (inSession != null)
+        mainNavigator.currentState
+            .pushReplacementNamed(state.inSession ? '/home' : '/auth');
+      inSession = state.inSession;
+    }
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -46,10 +48,7 @@ class _MyAppState extends State<MyApp> {
         '/home': (context) => InitialRouter(),
       },
       navigatorKey: mainNavigator,
-      onGenerateInitialRoutes: (_) => state.inSession
-          ? [MaterialPageRoute(builder: (_) => InitialRouter())]
-          : [MaterialPageRoute(builder: (_) => AuthScreen())],
-      initialRoute: '/',
+      initialRoute: state.inSession ? '/home' : '/auth',
     );
   }
 }
