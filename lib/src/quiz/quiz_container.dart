@@ -43,13 +43,16 @@ class _BuildQuiz extends State<BuildQuiz> {
                   scrollDirection: Axis.horizontal,
                   itemCount: widget.items.length,
                   itemBuilder: (context, index) {
-                    return Container(
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        child: QuizCard(
-                          'Quiz name',
-                          'Group name',
-                          onTap: _quiz,
-                        ));
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: 175),
+                      child: Container(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: QuizCard(
+                            'Quiz name',
+                            'Group name',
+                            onTap: _quiz,
+                          )),
+                    );
                   },
                   // Space between the cards
                   separatorBuilder: (context, index) {
