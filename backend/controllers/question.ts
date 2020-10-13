@@ -8,7 +8,7 @@ import { getQuizAndRole } from "./quiz";
 // Parses question info
 interface QuestionInfo {
     id?: number;
-    picture?: number;
+    pictureId?: number;
     text?: string;
     type: string;
     tf?: boolean;
@@ -87,9 +87,10 @@ const checkQuestionInfo = (info: any): QuestionInfo => {
         id: info.id,
         type: info.type,
         text: info.text,
+        pictureId: info.pictureId
     };
 
-    const { type, options, tf } = info;
+    const { type, options, tf, pictureId } = info;
     if (type === "truefalse") {
         // True/false questions
         if (typeof tf != "boolean") {
@@ -97,10 +98,12 @@ const checkQuestionInfo = (info: any): QuestionInfo => {
         }
         values.tf = tf;
         values.options = null;
+        values.pictureId = pictureId;
     } else if (type === "choice") {
         // Multiple choice
         values.options = checkOptions(options);
         values.tf = null;
+        values.pictureId = pictureId;
         if (values.options.length <= 1 || values.options.length > 4) {
             throw new ErrorStatus(
                 "Question should have between 2 and 4 options",

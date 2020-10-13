@@ -139,6 +139,7 @@ router.post(
     [
         body("description").optional().isString(),
         body("title").isString(),
+        body("pictureId").optional().isInt(),
         body("timeLimit").optional().isInt(),
         body("groupId").isInt(),
         body("type").isIn(["live", "self paced"]),
