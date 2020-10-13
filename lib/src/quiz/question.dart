@@ -32,7 +32,7 @@ class _QuizQuestion extends State<QuizQuestion> {
 
   FormType _form = FormType.Standard;
 
-  void _formChange() async {
+  void _formChange() {
     setState(() {
       _form = FormType.ShowCorrect;
     });

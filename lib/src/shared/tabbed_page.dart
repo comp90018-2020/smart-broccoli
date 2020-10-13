@@ -15,7 +15,8 @@ class CustomTabbedPage extends CustomPage {
       @required List<Widget> tabViews,
       hasDrawer = false,
       bool secondaryBackgroundColour = false,
-      Widget background})
+      Widget background,
+      Function(int) tabTap})
       : super(
             title: title,
             child: DefaultTabController(
@@ -30,6 +31,7 @@ class CustomTabbedPage extends CustomPage {
                       widthFactor: .8,
                       margin: EdgeInsets.zero,
                       tabs: tabs,
+                      onTap: tabTap,
                     ),
                   ),
                 ),

@@ -15,6 +15,9 @@ class _TakeQuizState extends State<TakeQuiz> {
   // Height of pin box
   double _height;
 
+  // TODO: replace with provider inside build
+  List<String> items = ["A", "B", "C", "D", "E", "F", "G", "H"];
+
   @override
   void initState() {
     super.initState();
@@ -33,15 +36,18 @@ class _TakeQuizState extends State<TakeQuiz> {
 
   @override
   Widget build(BuildContext context) {
-    var items = getItems();
-
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
       title: "Take Quiz",
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
+        // All quizzes
         BuildQuiz(QuizPinBox(key: _buildQuizKey), items),
+
+        // Live quiz
         BuildQuiz(QuizPinBox(), items),
+
+        /// Self-paced quiz has Text to fill the vertical space
         BuildQuiz(
             ConstrainedBox(
                 constraints: BoxConstraints(minHeight: _height ?? 175),
@@ -56,6 +62,7 @@ class _TakeQuizState extends State<TakeQuiz> {
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,
+
       // background: Container(
       //   child: ClipPath(
       //     clipper: BackgroundClipperMain(),
@@ -65,13 +72,5 @@ class _TakeQuizState extends State<TakeQuiz> {
       //   ),
       // ),
     );
-  }
-
-  /// Entry function for the different type of quizes
-  /// Please change the output type
-  /// Should default to "ALL"
-  /// Type should be of type Key
-  List<String> getItems() {
-    return ["A", "B", "C", "D", "E", "F", "G"];
   }
 }

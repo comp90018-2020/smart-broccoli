@@ -6,14 +6,13 @@ import 'package:smart_broccoli/src/quiz/widgets/users.dart';
 import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
-/// The Skeleton for the start lobby
+/// Widget for Lobby
 class StartLobby extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _StartLobby();
 }
 
 // Used to design the background
-// Looks like a hack, but apparently this isn't a hack according to docs
 class BackgroundClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -31,13 +30,10 @@ class BackgroundClipper extends CustomClipper<Path> {
 }
 
 class _StartLobby extends State<StartLobby> {
-  // timing functions
+  // Timer for countdown
   Timer _timer;
-
   // You should have a getter method here to get data from server
   int _start = 10;
-
-  int val = 0;
 
   void startTimer1() {
     // Decrement the timer
@@ -154,7 +150,6 @@ class _StartLobby extends State<StartLobby> {
 
             // The list of Quiz players
             Expanded(child: QuizUsers(["A", "B", "C", "D", "E", "F", "G"])),
-            // _quizPlayers(),
           ],
         ),
       ),
