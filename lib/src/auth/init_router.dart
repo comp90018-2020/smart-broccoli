@@ -15,9 +15,9 @@ class _InitialRouterState extends State<InitialRouter> {
   Widget build(BuildContext context) {
     return Consumer<AuthStateModel>(
       builder: (context, state, child) {
+        Widget screen;
         if (state.inSession)
-          // placeholder: to be replaced by homescreen
-          return CustomPage(
+          screen = CustomPage(
             title: 'Logged in',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,7 +48,13 @@ class _InitialRouterState extends State<InitialRouter> {
               ],
             ),
           );
-        return AuthScreen();
+        else
+          screen = AuthScreen();
+
+        return AnimatedSwitcher(
+          child: screen,
+          duration: Duration(milliseconds: 500),
+        );
       },
     );
   }
