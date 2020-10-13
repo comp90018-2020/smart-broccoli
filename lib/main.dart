@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/cache.dart';
+import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/src/auth/init_router.dart';
 import 'package:smart_broccoli/theme.dart';
 
-import 'src/auth/auth_screen.dart';
-
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final KeyValueStore _keyValueStore = await SharedPrefsKeyValueStore.create();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthStateModel(_keyValueStore))
+      ],
+      child: MyApp(),
+    ),
+  );
+}
 
 /// Main entrance class
 class MyApp extends StatelessWidget {
@@ -14,7 +27,7 @@ class MyApp extends StatelessWidget {
       title: 'Smart Broccoli',
       theme: SmartBroccoliTheme().themeData,
       routes: {
-        '/auth': (context) => AuthScreen(),
+        '/auth': (context) => InitialRouter(),
       },
       initialRoute: '/auth',
     );
