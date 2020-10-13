@@ -31,47 +31,48 @@ class _QuizCardState extends State<QuizCard> {
         onTap: widget.onTap,
         child: LayoutBuilder(
           builder: (context, constraints) {
+            print(constraints.maxHeight);
             bool showPicture = constraints.maxHeight > 175;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 // Quiz picture
-                showPicture
-                    ? AspectRatio(
-                        aspectRatio: widget.aspectRatio, child: Placeholder())
-                    : SizedBox(),
+                Column(children: [
+                  showPicture
+                      ? AspectRatio(
+                          aspectRatio: widget.aspectRatio, child: Placeholder())
+                      : SizedBox(),
 
-                // Rest should expand vertically
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(10),
+                  // Quiz title & Group name
+                  Container(
+                    padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
                     width: double.maxFinite,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Quiz title & Group name
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget._quizName,
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              Text(widget._groupName,
-                                  style: TextStyle(fontSize: 15)),
-                            ],
-                          ),
+                        Text(
+                          widget._quizName,
+                          style: TextStyle(fontSize: 20),
                         ),
-
-                        // Quiz status
-                        Text('Live', style: TextStyle(fontSize: 15)),
+                        Text(widget._groupName, style: TextStyle(fontSize: 15)),
                       ],
                     ),
                   ),
-                ),
+                ]),
+
+                // Quiz status
+                Container(
+                    padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
+                    width: double.maxFinite,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Live', style: TextStyle(fontSize: 15)),
+                      ],
+                    )),
               ],
             );
           },

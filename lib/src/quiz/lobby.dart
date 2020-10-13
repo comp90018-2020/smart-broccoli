@@ -97,7 +97,7 @@ class _StartLobby extends State<StartLobby> {
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.35),
+                    maxHeight: MediaQuery.of(context).size.height * 0.4),
                 child: QuizCard(
                   "Quiz name",
                   "Quiz group",
