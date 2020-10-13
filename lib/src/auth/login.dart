@@ -88,6 +88,7 @@ class _LoginState extends State<Login> {
                   },
                 ),
               ),
+              keyboardType: TextInputType.visiblePassword,
               obscureText: !_passwordVisible,
               onFieldSubmitted: (_) => _loginPressed(context),
             ),

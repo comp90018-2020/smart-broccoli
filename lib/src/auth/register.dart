@@ -112,6 +112,7 @@ class _RegisterState extends State<Register> {
                   },
                 ),
               ),
+              keyboardType: TextInputType.visiblePassword,
               obscureText: !_passwordVisible,
               onFieldSubmitted: (_) => _createAccountPressed(context),
             ),
