@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'leaderboard.dart';
 
@@ -76,16 +77,10 @@ class _QuizQuestion extends State<QuizQuestion> {
   // Entry function
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onBackground,
-      appBar: AppBar(
-        title: Text("Quiz"),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.background,
-        actions: [_points()],
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
+    return CustomPage(
+      title: 'Quiz',
+      appbarActions: [_points()],
+      child: SingleChildScrollView(
         child: Container(
           child: new Column(
             children: <Widget>[

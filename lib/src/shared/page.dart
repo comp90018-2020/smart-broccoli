@@ -16,17 +16,24 @@ class CustomPage extends StatelessWidget {
   /// Secondary background colour
   final bool secondaryBackgroundColour;
 
-  // Background overlay
+  /// Background overlay
   final Widget background;
 
+  /// AppBar leading widget
+  final Widget appbarLeading;
+
+  /// AppBar trailing widget
+  final List<Widget> appbarActions;
+
   /// Constructs a custom page
-  CustomPage({
-    @required this.title,
-    @required this.child,
-    this.hasDrawer = false,
-    this.background,
-    this.secondaryBackgroundColour = false,
-  });
+  CustomPage(
+      {@required this.title,
+      @required this.child,
+      this.hasDrawer = false,
+      this.background,
+      this.secondaryBackgroundColour = false,
+      this.appbarLeading,
+      this.appbarActions});
 
   @override
   Widget build(BuildContext context) {
@@ -39,15 +46,16 @@ class CustomPage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: Container(
-            // Alter shadow: https://stackoverflow.com/questions/54554569
-            decoration: BoxDecoration(boxShadow: [
-              BoxShadow(color: Colors.white, offset: const Offset(0, .2))
-            ]),
-            child: AppBar(
+          // Alter shadow: https://stackoverflow.com/questions/54554569
+          decoration: BoxDecoration(boxShadow: [
+            BoxShadow(color: Colors.white, offset: const Offset(0, .2))
+          ]),
+          child: AppBar(
               title: Text(this.title),
               centerTitle: true,
               elevation: 0,
-            )),
+              actions: appbarActions),
+        ),
       ),
 
       // Drawer (or hamberger menu)

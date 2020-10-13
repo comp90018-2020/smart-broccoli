@@ -78,6 +78,7 @@ class _StartLobby extends State<StartLobby> {
   Widget build(BuildContext context) {
     return CustomPage(
       title: 'Take Quiz',
+
       // Background decoration
       background: Container(
         child: ClipPath(
@@ -95,9 +96,10 @@ class _StartLobby extends State<StartLobby> {
           children: <Widget>[
             Stack(children: [
               // Quiz card
-              Padding(
+              Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+                margin: EdgeInsets.only(bottom: 12),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                       maxHeight: MediaQuery.of(context).size.height * 0.4),
@@ -111,7 +113,6 @@ class _StartLobby extends State<StartLobby> {
 
               // Start button on top of card
               Positioned.fill(
-                bottom: -8,
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: RaisedButton(
@@ -125,10 +126,12 @@ class _StartLobby extends State<StartLobby> {
 
             // Text describing status
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.all(12.0),
               child: Text(
                 'Waiting for host to start...',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    backgroundColor: Colors.transparent),
               ),
             ),
 
