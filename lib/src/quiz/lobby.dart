@@ -167,7 +167,7 @@ class _StartLobby extends State<StartLobby> {
         child: Container(
           height: 50,
           width: 50,
-          decoration: BoxDecoration2(),
+          decoration: LobbyTimerBoxDecoration(),
           child: Center(child: Text("$_start")),
         ),
       ),

@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Smart Broccoli',
-      theme: SmartBroccoliTheme().themeData,
+      theme: SmartBroccoliTheme.themeData,
       //routes: {'/auth': (context) => AuthScreen()},
       //initialRoute: '/auth',
       // Debug purposes only, replace with above later on

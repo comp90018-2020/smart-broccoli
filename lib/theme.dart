@@ -19,7 +19,7 @@ class SmartBroccoliColourScheme extends ColorScheme {
 
 /// Singleton class holding the app's `ThemeData` object
 class SmartBroccoliTheme {
-  static final ThemeData _themeData = ThemeData(
+  static final ThemeData themeData = ThemeData(
     backgroundColor: Color(0xFF4CAF50),
     primaryColor: Color(0xFF4CAF50),
     colorScheme: SmartBroccoliColourScheme(),
@@ -53,13 +53,13 @@ class SmartBroccoliTheme {
     ),
   );
 
+  /// Shape for round RaisedButton
   static final ShapeBorder raisedButtonShape =
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(20));
 
+  /// Padding for round RaisedButton
   static final EdgeInsetsGeometry raisedButtonTextPadding =
       EdgeInsets.symmetric(horizontal: 8);
-
-  ThemeData get themeData => _themeData;
 }
 
 /// Widget to hold the app logo on auth screen
@@ -123,8 +123,8 @@ class BoxDecoration1 extends BoxDecoration {
         );
 }
 
-class BoxDecoration2 extends BoxDecoration {
-  BoxDecoration2()
+class LobbyTimerBoxDecoration extends BoxDecoration {
+  LobbyTimerBoxDecoration()
       : super(
           border: new Border.all(
               color: Colors.orangeAccent, width: 3, style: BorderStyle.solid),
