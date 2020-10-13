@@ -4,12 +4,12 @@ import 'quiz_pin_box.dart';
 import 'package:smart_broccoli/src/shared/tabbed_page.dart';
 
 /// Take/manage quiz page
-class Quiz extends StatefulWidget {
+class TakeQuiz extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _QuizState();
+  State<StatefulWidget> createState() => new _TakeQuizState();
 }
 
-class _QuizState extends State<Quiz> {
+class _TakeQuizState extends State<TakeQuiz> {
   // Key for pin box
   final GlobalKey _buildQuizKey = GlobalKey();
   // Height of pin box

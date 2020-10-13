@@ -25,6 +25,6 @@ doc/api/
 # Backend
 node_modules/
 .env
-data/
+backend/data/
 yarn-error.log
 uploads/

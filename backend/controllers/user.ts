@@ -141,7 +141,7 @@ export const getUserProfile = async (
         (currentUserId && (await canAccessProfile(currentUserId, userId)))
     ) {
         return await User.findByPk(userId, {
-            attributes: ["id", "name", "updatedAt"],
+            attributes: ["id", "name", "updatedAt", "pictureId"],
         });
     }
     throw new ErrorStatus("Cannot access resource", 403);
@@ -182,4 +182,14 @@ export const getUserProfilePicture = async (
         return user.Picture;
     }
     throw new ErrorStatus("Cannot access resource", 403);
+};
+
+/**
+ * Get user session info.
+ * @param userId
+ */
+export const getUserSessionProfile = async (userId: number) => {
+    return await User.findByPk(userId, {
+        attributes: ["id", "name", "pictureId"],
+    });
 };

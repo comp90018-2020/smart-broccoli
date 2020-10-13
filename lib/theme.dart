@@ -77,7 +77,8 @@ class TabHolder extends FractionallySizedBox {
   TabHolder(
       {@required List<Tab> tabs,
       double widthFactor = 0.5,
-      EdgeInsetsGeometry margin = EdgeInsets.zero})
+      EdgeInsetsGeometry margin = EdgeInsets.zero,
+      void Function(int) onTap})
       : super(
           widthFactor: widthFactor,
           child: Container(
@@ -86,7 +87,10 @@ class TabHolder extends FractionallySizedBox {
               color: SmartBroccoliColourScheme.tabHolderBackground,
               borderRadius: BorderRadius.all(Radius.circular(25)),
             ),
-            child: TabBar(tabs: tabs),
+            child: TabBar(
+              tabs: tabs,
+              onTap: onTap,
+            ),
           ),
         );
 }

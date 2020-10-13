@@ -1,3 +1,6 @@
+import 'game.dart';
+import 'group.dart';
+
 enum QuizType { LIVE, SELF_PACED }
 
 /// Object representing a quiz
@@ -6,9 +9,12 @@ enum QuizType { LIVE, SELF_PACED }
 /// to be constructed when the user creates a new quiz. A new quiz can be
 /// synchronised with the server by passing it to `QuizModel.createQuiz`.
 class Quiz {
-  /// ID of the quiz (for quizzes fetched from server only; not to be mutated)
-  int _id;
-  int get id => _id;
+  /// ID of the quiz (for quizzes fetched from server only)
+  final int id;
+
+  /// User's role. This field is non-null for quizzes in the list returned by
+  /// `getQuizzes`; however, it will be null for a quiz returned by `getQuiz`
+  final GroupRole role;
 
   String title;
   String description;
@@ -16,30 +22,50 @@ class Quiz {
   int groupId;
   QuizType type;
   bool isActive;
+  final List<GameSession> sessions;
 
   int timeLimit;
   List<Question> questions;
 
   /// Construtor for use when user creates a new quiz
-  Quiz(this.title, this.groupId, this.type,
-      {this.description, this.isActive, this.timeLimit, this.questions}) {
-    if (questions == null) questions = [];
-  }
+  factory Quiz(String title, int groupId, QuizType type,
+          {String description,
+          bool isActive,
+          int timeLimit,
+          List<Question> questions}) =>
+      Quiz._internal(null, GroupRole.OWNER, title, groupId, type, description,
+          isActive, timeLimit, questions, null);
 
   /// Constructor for internal use only
-  Quiz._internal(this._id, this.title, this.groupId, this.type,
-      this.description, this.isActive, this.timeLimit, this.questions);
+  Quiz._internal(
+      this.id,
+      this.role,
+      this.title,
+      this.groupId,
+      this.type,
+      this.description,
+      this.isActive,
+      this.timeLimit,
+      this.questions,
+      this.sessions);
 
   factory Quiz.fromJson(Map<String, dynamic> json) {
+    final Iterable sessions = (json['Sessions'] as List)?.map((session) {
+      session['quizId'] = json['id'];
+      session['groupId'] = json['groupId'];
+      return GameSession.fromJson(session);
+    });
     Quiz quiz = Quiz._internal(
         json['id'],
+        json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
         json['title'],
         json['groupId'],
         json['type'] == 'live' ? QuizType.LIVE : QuizType.SELF_PACED,
         json['description'],
-        json['isActive'],
+        json['active'],
         json['timeLimit'],
-        null);
+        null,
+        sessions != null ? List.unmodifiable(sessions) : null);
     quiz.questions = (json['questions'] as List)
         ?.map((question) => question['type'] == 'truefalse'
             ? TFQuestion.fromJson(quiz, question)
@@ -48,17 +74,21 @@ class Quiz {
     return quiz;
   }
 
+  // note: sessions not serialised
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
+    Map json = <String, dynamic>{
       'id': id,
       'title': title,
       'groupId': groupId,
       'type': type == QuizType.LIVE ? 'live' : 'self paced',
       'description': description,
-      'isActive': isActive,
+      'active': isActive,
       'timeLimit': timeLimit,
-      'questions': questions.map((question) => question.toJson()).toList()
     };
+    if (questions != null)
+      json['questions'] =
+          questions.map((question) => question.toJson()).toList();
+    return json;
   }
 }
 

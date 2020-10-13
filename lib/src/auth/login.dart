@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/models.dart';
 
 // Login tab
 class Login extends StatefulWidget {
@@ -11,6 +14,12 @@ class _LoginState extends State<Login> {
   // These classes are used to listen for input from the respective text boxes
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
+
+  // Key for form widget, allows for validation
+  final _formKey = GlobalKey<FormState>();
+
+  // Used to determine Autovalidatemode
+  bool _formSubmitted = false;
 
   // Whether password is visible
   bool _passwordVisible = false;
@@ -27,12 +36,22 @@ class _LoginState extends State<Login> {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Form(
+        key: _formKey,
         child: Wrap(
           runSpacing: 16,
           children: [
             // Email
             TextFormField(
               controller: _emailController,
+              autovalidateMode: _formSubmitted
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
+              validator: (value) {
+                if (!EmailValidator.validate(value)) {
+                  return 'Email is invalid';
+                }
+                return null;
+              },
               decoration: const InputDecoration(
                 labelText: 'Email',
                 prefixIcon: Icon(Icons.email),
@@ -44,6 +63,15 @@ class _LoginState extends State<Login> {
             // Password
             TextFormField(
               controller: _passwordController,
+              autovalidateMode: _formSubmitted
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
+              validator: (value) {
+                if (value.isEmpty) {
+                  return 'Password is empty';
+                }
+                return null;
+              },
               decoration: InputDecoration(
                 labelText: 'Password',
                 prefixIcon: const Icon(Icons.lock),
@@ -61,7 +89,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
               obscureText: !_passwordVisible,
-              onFieldSubmitted: (_) => _loginPressed(),
+              onFieldSubmitted: (_) => _loginPressed(context),
             ),
             // Spacing
             Container(height: 0),
@@ -69,7 +97,7 @@ class _LoginState extends State<Login> {
             SizedBox(
               width: double.infinity,
               child: RaisedButton(
-                onPressed: _loginPressed,
+                onPressed: () => _loginPressed(context),
                 child: const Text("LOGIN"),
               ),
             ),
@@ -92,7 +120,8 @@ class _LoginState extends State<Login> {
               child: MaterialButton(
                 textColor: Theme.of(context).colorScheme.onBackground,
                 child: const Text('SKIP LOGIN'),
-                onPressed: _joinAsParticipant,
+                onPressed:
+                    Provider.of<AuthStateModel>(context, listen: false).join,
               ),
             ),
           ],
@@ -101,12 +130,35 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void _loginPressed() {
-    print("Login pressed");
-    print("${_emailController.text} ${_passwordController.text}");
+  void _loginPressed(BuildContext context) async {
+    if (_formKey.currentState.validate()) {
+      try {
+        await Provider.of<AuthStateModel>(context, listen: false)
+            .login(_emailController.text, _passwordController.text);
+      } on LoginFailedException {
+        _showLoginFailedDialogue(context);
+      }
+    } else {
+      setState(() {
+        _formSubmitted = true;
+      });
+    }
   }
 
-  void _joinAsParticipant() {
-    print("Join as participant");
+  void _showLoginFailedDialogue(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Login failed"),
+        content: Text("Incorrect email or password"),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
   }
 }

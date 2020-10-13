@@ -429,7 +429,7 @@ export const getQuizPicture = async (userId: number, quizId: number) => {
         attributes: ["pictureId"],
         include: [
             {
-                //@ts-ignore
+                // @ts-ignore
                 model: Picture,
                 attributes: ["id", "destination"],
             },

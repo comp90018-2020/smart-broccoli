@@ -10,18 +10,28 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.12.2
-  shared_preferences: ^0.5.10
+  path_provider: ^1.6.18
   provider: null
+  shared_preferences: ^0.5.12
   tuple: ^1.0.3
+  email_validator: ^1.0.5
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: ^4.1.1
+  # flutter_launcher_icons: "^0.8.0"
+
+# Icon configuration for flutter_launcher_icons
+flutter_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "LOGO.png"
 
 flutter:
   uses-material-design: true
 
-
+  # assets:
+  #   - assets/images/Logo_Placeholder.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

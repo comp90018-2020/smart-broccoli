@@ -47,14 +47,13 @@ export const processQuestions = async (
         await deleteQuestion(transaction, quizId, id);
     }
 
-    let questions: Question[] = [];
+    const questions: Question[] = [];
     for (const question of updatedQuestions) {
-        // Insert new questions (no id)
         if (!question.id) {
+            // Insert new questions (no id)
             questions.push(await addQuestion(transaction, quizId, question));
-        }
-        // If updated
-        else if (originalIds.includes(question.id)) {
+        } else if (originalIds.includes(question.id)) {
+            // If updated
             questions.push(
                 await updateQuestion(transaction, quizId, question.id, question)
             );
