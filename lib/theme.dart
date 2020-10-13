@@ -53,6 +53,12 @@ class SmartBroccoliTheme {
     ),
   );
 
+  static final ShapeBorder raisedButtonShape =
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(20));
+
+  static final EdgeInsetsGeometry raisedButtonTextPadding =
+      EdgeInsets.symmetric(horizontal: 8);
+
   ThemeData get themeData => _themeData;
 }
 

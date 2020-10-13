@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/quiz/lobby.dart';
+import 'package:smart_broccoli/theme.dart';
 
 class QuizPinBox extends StatefulWidget {
   QuizPinBox({Key key}) : super(key: key);
@@ -35,10 +36,9 @@ class _QuizPinBoxState extends State<QuizPinBox> {
         padding: const EdgeInsets.all(12.0),
         child: RaisedButton(
           onPressed: _verifyPin,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: SmartBroccoliTheme.raisedButtonShape,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: SmartBroccoliTheme.raisedButtonTextPadding,
             child: Text(
               "JOIN BY PIN",
               style: TextStyle(fontSize: 12),

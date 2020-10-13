@@ -93,19 +93,37 @@ class _StartLobby extends State<StartLobby> {
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Column(
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.4),
-                child: QuizCard(
-                  "Quiz name",
-                  "Quiz group",
-                  aspectRatio: 2.5,
+            Stack(children: [
+              // Quiz card
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.4),
+                  child: QuizCard(
+                    "Quiz name",
+                    "Quiz group",
+                    aspectRatio: 2.5,
+                  ),
                 ),
               ),
-            ),
 
+              // Start button on top of card
+              Positioned.fill(
+                bottom: -8,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: RaisedButton(
+                    shape: SmartBroccoliTheme.raisedButtonShape,
+                    child: Text("Start"),
+                    onPressed: () => _startQuiz(),
+                  ),
+                ),
+              ),
+            ]),
+
+            // Text describing status
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
@@ -140,43 +158,20 @@ class _StartLobby extends State<StartLobby> {
     );
   }
 
-  // TODO this may need to be refactored
-  Widget startButton() {
-    if (_start == 0) {
-      return RaisedButton(
-        // color: Colors,
-        child: Text("Start"),
-        onPressed: () => _startQuiz(),
-      );
-    } else {
-      return Column(
-        // Temporary workaround
-        // TODO change padding
-        children: <Widget>[
-          SizedBox(
-            height: 50,
-          ),
-          Text("Waiting for quiz to start..."),
-        ],
-      );
-      // onPressed: () => _startQuiz()
-    }
-  }
-
   // Timer display functionality
   Widget _quizTimer() {
     return new Align(
-        alignment: Alignment.centerRight,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 30, 0),
-          child: Container(
-            height: 50,
-            width: 50,
-            decoration: BoxDecoration2(),
-            child: Center(child: Text("$_start")),
-          ),
-        ) // Text("$_start"),
-        );
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 30, 0),
+        child: Container(
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration2(),
+          child: Center(child: Text("$_start")),
+        ),
+      ),
+    );
   }
 
   void _startQuiz() {
