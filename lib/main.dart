@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-AuthStateModel state = Provider.of<AuthStateModel>(context, listen: true);
+    AuthStateModel state = Provider.of<AuthStateModel>(context, listen: true);
     if (started)
       mainNavigator.currentState
           .pushReplacementNamed(state.inSession ? '/home' : '/auth');
