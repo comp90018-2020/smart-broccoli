@@ -84,11 +84,11 @@ class _StartLobby extends State<QuizLobby> {
                 margin: EdgeInsets.only(bottom: 12),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.4),
+                      maxHeight: MediaQuery.of(context).size.height * 0.35),
                   child: QuizCard(
                     "Quiz name",
                     "Quiz group",
-                    aspectRatio: 2.5,
+                    aspectRatio: 3,
                   ),
                 ),
               ),
@@ -106,9 +106,14 @@ class _StartLobby extends State<QuizLobby> {
               ),
             ]),
 
+            // Chip for group subscriptions
+            Chip(
+                label: Text('Subscribed to group'),
+                avatar: Icon(Icons.check_sharp)),
+
             // Text describing status
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.only(bottom: 12.0),
               child: Text(
                 'Waiting for host to start...',
                 style: TextStyle(
