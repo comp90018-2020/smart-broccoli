@@ -62,18 +62,18 @@ class GroupRegistryModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> refreshAvailableQuizzes() async {
+  Future<void> refreshJoinedGroups() async {
     _joinedGroups = (await _groupApi.getGroups(_authStateModel.token))
         .where((group) => group.role == GroupRole.MEMBER);
-    _keyValueStore.setString('availableQuizzes',
+    _keyValueStore.setString('joinedGroups',
         json.encode(_joinedGroups.map((group) => group.toJson())));
     notifyListeners();
   }
 
-  Future<void> refreshCreatedQuizzes() async {
+  Future<void> refreshCreatedGroups() async {
     _createdGroups = (await _groupApi.getGroups(_authStateModel.token))
         .where((group) => group.role == GroupRole.OWNER);
-    _keyValueStore.setString('createdQuizzes',
+    _keyValueStore.setString('createdGroups',
         json.encode(_createdGroups.map((group) => group.toJson())));
     notifyListeners();
   }
