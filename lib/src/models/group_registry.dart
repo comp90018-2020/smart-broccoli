@@ -95,6 +95,12 @@ class GroupRegistryModel extends ChangeNotifier {
     refreshJoinedGroups();
   }
 
+  Future<void> kickMemberFromSelectedGroup(int memberId) async {
+    await _groupApi.kickMember(
+        _authStateModel.token, _selectedGroup.id, memberId);
+    refreshSelectedGroup();
+  }
+
   /// Delete the selected group.
   ///
   /// No group will subsequently be selected (i.e. [selectedGroup] is `null`).
