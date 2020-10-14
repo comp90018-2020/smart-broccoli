@@ -1,12 +1,7 @@
-
 import 'package:smart_broccoli/src/groups/group-hp.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:smart_broccoli/src/quiz_taker/build_quiz.dart';
 import 'package:smart_broccoli/src/shared/tabbed_page.dart';
-import '../../theme.dart';
-import '../shared/background.dart';
 
 GlobalKey _joinedKey = GlobalKey();
 GlobalKey _createdKey = GlobalKey();
@@ -17,7 +12,6 @@ class GroupHpContainer extends StatefulWidget {
 }
 
 class _GroupHpContainerState extends State<GroupHpContainer> {
-
   // Tabs that are shown (in TabBarView)
   List<Widget> _tabs;
 
@@ -37,20 +31,20 @@ class _GroupHpContainerState extends State<GroupHpContainer> {
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Container(
           child: CustomTabbedPage(
-            title: "GROUPS",
-            tabs: [Tab(text: "JOINED"), Tab(text: "CREATED")],
-            tabViews: _tabs,
-            hasDrawer: true,
-            background: true,
-            customBackground: Container(
-              child: ClipPath(
-                clipper: BackgroundClipperMain(),
-                child: Container(
-                  color: Theme.of(context).colorScheme.onBackground,
-                ),
-              ),
-            ),
-          )),
+        title: "GROUPS",
+        tabs: [Tab(text: "JOINED"), Tab(text: "CREATED")],
+        tabViews: _tabs,
+        hasDrawer: true,
+        // background: true,
+        // customBackground: Container(
+        //   child: ClipPath(
+        //     clipper: BackgroundClipperMain(),
+        //     child: Container(
+        //       color: Theme.of(context).colorScheme.onBackground,
+        //     ),
+        //   ),
+        // ),
+      )),
     );
   }
 }
