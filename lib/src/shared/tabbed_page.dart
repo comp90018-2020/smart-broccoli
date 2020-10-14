@@ -15,7 +15,7 @@ class CustomTabbedPage extends CustomPage {
       @required List<Widget> tabViews,
       hasDrawer = false,
       bool secondaryBackgroundColour = false,
-      Widget background,
+      List<Widget> background,
       Function(int) tabTap})
       : super(
             title: title,

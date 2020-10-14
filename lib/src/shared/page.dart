@@ -17,7 +17,7 @@ class CustomPage extends StatelessWidget {
   final bool secondaryBackgroundColour;
 
   /// Background overlay
-  final Widget background;
+  final List<Widget> background;
 
   /// AppBar leading widget
   final Widget appbarLeading;
@@ -165,7 +165,7 @@ class CustomPage extends StatelessWidget {
       body: background == null
           ? child
           : Stack(
-              children: [background, Positioned.fill(child: child)],
+              children: [...background, Positioned.fill(child: child)],
             ),
     );
   }

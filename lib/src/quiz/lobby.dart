@@ -60,14 +60,16 @@ class _StartLobby extends State<StartLobby> {
       title: 'Take Quiz',
 
       // Background decoration
-      background: Container(
-        child: ClipPath(
-          clipper: _BackgroundClipper(),
-          child: Container(
-            color: Theme.of(context).colorScheme.background,
+      background: [
+        Container(
+          child: ClipPath(
+            clipper: _BackgroundClipper(),
+            child: Container(
+              color: Theme.of(context).colorScheme.background,
+            ),
           ),
         ),
-      ),
+      ],
 
       // Body
       child: Padding(

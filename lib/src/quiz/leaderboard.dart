@@ -18,49 +18,48 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
   Widget build(BuildContext context) {
     return new CustomPage(
       title: "Leaderboard",
-      background: Container(
-        child: ClipPath(
-          clipper: _BackgroundClipper(),
-          child: Container(
-            color: Theme.of(context).colorScheme.background,
-          ),
-        ),
-      ),
-      child: Stack(
-        children: <Widget>[
-          // The player status
-          _playerStats(),
-
-          // Then the rest overlayed on top
-          Container(
-            child: new Column(
-              children: <Widget>[
-                SizedBox(height: 20),
-                _topLeaderBoard(),
-                SizedBox(height: 100),
-                // The list of Quiz players
-                //_quizPlayers(),
-                QuizUsers(["A", "B", "C"]),
-                // Debug nav bar please remove
-                _bottomNavBar()
-              ],
+      background: [
+        Container(
+          child: ClipPath(
+            clipper: _BackgroundRectClipper(),
+            child: Container(
+              color: Colors.yellow,
             ),
           ),
+        ),
+        Container(
+          child: ClipPath(
+            clipper: _BackgroundClipper(),
+            child: Container(
+              color: Theme.of(context).colorScheme.background,
+            ),
+          ),
+        ),
+      ],
+      child: Column(
+        children: <Widget>[
+          // Top 3
+          Container(
+              padding: EdgeInsets.all(16),
+              constraints: BoxConstraints(maxHeight: 165),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                runAlignment: WrapAlignment.center,
+                spacing: 10,
+                children: <Widget>[
+                  topThreeUsers(50, 50, "Winner 1"),
+                  topThreeUsers(100, 100, "Winner 2"),
+                  topThreeUsers(50, 50, "Winner 3"),
+                ],
+              )),
+
+          // List of users
+          QuizUsers(["A", "B", "C"]),
+
+          // Temporary nav bar
+          _bottomNavBar(),
         ],
       ),
-    );
-  }
-
-  Widget _playerStats() {
-    return new Positioned(
-      // TODO I need to find a way to fix this relative to everything else
-      bottom: 450,
-      left: 15,
-      width: 360,
-      height: 300,
-
-      // alignment: Alignment.lerp(Alignment.topCenter, Alignment.center, ),
-      child: PlayerStatsCard("Name and other data here"),
     );
   }
 
@@ -93,27 +92,10 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
 
   Widget topThreeUsers(double h, double w, text) {
     return Column(
-      children: <Widget>[
-        Container(
-            height: h,
-            width: w,
-            //TODO put picture stuff here
-            decoration: BoxDecoration1()),
-        Text(text),
-      ],
-    );
-  }
-
-  Widget _topLeaderBoard() {
-    return new Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        topThreeUsers(50, 50, "Winner 1"),
-        SizedBox(width: 50),
-        topThreeUsers(100, 100, "Winner 2"),
-        SizedBox(width: 50),
-        topThreeUsers(50, 50, "Winner 3"),
+        Container(height: h, width: w, decoration: BoxDecoration1()),
+        Text(text),
       ],
     );
   }
@@ -139,12 +121,11 @@ class _BackgroundClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     var path = Path();
 
-    path.lineTo(0, size.height / 4.25);
-    var firstControlPoint = new Offset(size.width / 4, size.height / 3.5);
-    var firstEndPoint = new Offset(size.width / 2, size.height / 3 - 60);
-    var secondControlPoint =
-        new Offset(size.width - (size.width / 4), size.height / 3.5 - 65);
-    var secondEndPoint = new Offset(size.width, size.height / 3.5 - 40);
+    path.lineTo(0, 125);
+    var firstControlPoint = new Offset(size.width / 4, 165);
+    var firstEndPoint = new Offset(size.width / 2, 150);
+    var secondControlPoint = new Offset(size.width - (size.width / 4), 125);
+    var secondEndPoint = new Offset(size.width, 150);
 
     path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
         firstEndPoint.dx, firstEndPoint.dy);
@@ -155,6 +136,23 @@ class _BackgroundClipper extends CustomClipper<Path> {
     path.lineTo(size.width, 0);
     path.close();
 
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return true;
+  }
+}
+
+// Used to clip the background
+class _BackgroundRectClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, 165.0 + 30);
+    path.lineTo(size.width, 165.0 + 30);
+    path.lineTo(size.width, 0);
     return path;
   }
 
