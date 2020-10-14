@@ -20,17 +20,17 @@ class _QuizPinBoxState extends State<QuizPinBox> {
       // Join by pin box
       ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 100),
-        child: TextFormField(
+        child: TextField(
           controller: _pinFilter,
+          textAlign: TextAlign.center,
           decoration: new InputDecoration(
-            labelText: 'Pin',
-            // prefixIcon: Icon(Icons.people),
+            hintText: 'PIN',
             counterText: '',
           ),
           keyboardType: TextInputType.number,
           maxLength: 6,
           textInputAction: TextInputAction.done,
-          onFieldSubmitted: (_) => _verifyPin(),
+          onSubmitted: (_) => _verifyPin(),
         ),
       ),
 
