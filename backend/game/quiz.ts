@@ -1,7 +1,8 @@
 import { User as BackendUser, Session as SessInController, Quiz as QuizInModels } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session"
 import { User, Session, Conn, QuizStatus } from "./session";
-import {Server} from "socket.io";
+import { Server } from "socket.io";
+import { Socket } from "dgram";
 
 
 const WAITING = 10 * 1000;
@@ -86,7 +87,7 @@ export class Quiz {
         }
     }
 
-    answer(socket: SocketIO.Socket, content: any, conn: Conn) {
+    answer(socketIO: Server, content: any, conn: Conn) {
         // {
         //     "question": 3,
         //     "MCSelection": 0,  // list index of answer chosen (for MC Question)
@@ -107,11 +108,11 @@ export class Quiz {
 
             // braodcast that one more participants answered this question
             const answered = this.formatAnswered(sessId, questionId);
-            socket.to(sessId.toString()).emit("questionAnswered", answered);
+            socketIO.to(sessId.toString()).emit("questionAnswered", answered);
 
             // if everyone has answered
             if (answered.count >= this.sess[sessId].countParticipants()) {
-                this.releaseQuestionOutcome(socket, conn);
+                this.releaseQuestionOutcome(socketIO, conn);
             }
         }
 
@@ -120,16 +121,16 @@ export class Quiz {
     // WIP: release question outcome after timeout
     /**
      * Everyone has answered or timeout
-     * @param socket 
+     * @param socketIO 
      */
-    releaseQuestionOutcome(socket: SocketIO.Socket, conn: Conn) {
+    releaseQuestionOutcome(socketIO: Server, conn: Conn) {
 
         const sessId = conn.sessionToken.sessionId;;
         let questionOutCome = {};
         // WIP: summary question outcome here
 
         // braodcast question outcome
-        socket.to(sessId.toString()).emit("questionOutcome", questionOutCome);
+        socketIO.to(sessId.toString()).emit("questionOutcome", questionOutCome);
     }
 
     private welcomeMSG(sessionId: number) {
@@ -138,7 +139,7 @@ export class Quiz {
         return Array.from(this.sess[sessionId].allParticipants());
     }
 
-    async welcome(socket: SocketIO.Socket, conn: Conn) {
+    async welcome(socketIO: Server, socket: SocketIO.Socket, conn: Conn) {
         const sessId = conn.sessionToken.sessionId;
         const userId = conn.user.id;
         if (this.sess[sessId] === undefined) {
@@ -154,7 +155,7 @@ export class Quiz {
             await this.sess[sessId].addParticipant(await this.getUserInfo(userId), socket);
             // broadcast that user has joined
             const msg = await this.getUserInfo(userId);
-            socket.to(sessId.toString()).emit("playerJoin", msg);
+            socketIO.to(sessId.toString()).emit("playerJoin", msg);
 
         }
 
@@ -167,7 +168,7 @@ export class Quiz {
 
     }
 
-    async quit(socket: SocketIO.Socket, conn: Conn) {
+    async quit(socketIO: Server, socket: SocketIO.Socket, conn: Conn) {
         const sessId = conn.sessionToken.sessionId;
         const userId = conn.sessionToken.userId;
 
@@ -180,7 +181,7 @@ export class Quiz {
 
         // broadcast that user has left
         const msg = await this.getUserInfo(userId);
-        socket.to(sessId.toString()).emit("playerLeave", msg);
+        socketIO.to(sessId.toString()).emit("playerLeave", msg);
         // disconnect
         socket.disconnect();
     }
@@ -190,10 +191,10 @@ export class Quiz {
     }
 
 
-    start(socketIO: Server, socket: SocketIO.Socket, conn: Conn ) {
+    start(socketIO: Server, socket: SocketIO.Socket, conn: Conn) {
         const sessId = conn.sessionToken.sessionId;
         if (this.isOwner(conn)) {
-            // WIP: make quiz status `starting` in session
+
             this.sess[sessId].setQuizStatus(QuizStatus.Starting);
             this.sess[sessId].setQuizStartsAt(Date.now() + WAITING);
             // Broadcast that quiz will be started
@@ -203,42 +204,46 @@ export class Quiz {
             setTimeout(() => {
                 this.sess[sessId].setQuizStatus(QuizStatus.Running);
                 // release the firt question
-                this.nextQuestion(socketIO, conn);
+                this.nextQuestion(socketIO, socket, conn);
             }, this.sess[sessId].getQuizStartsAt() - Date.now(), socket);
 
         }
     }
 
-    private cancelQuiz(quizId: number) {
-        // WIP: disconnect all connections of this quiz
-        console.log("disconnect all connections of quiz: " + quizId);
-        this.sess[quizId].close();
-    }
-
-    abort(socket: SocketIO.Socket, conn: Conn) {
+    abort(socketIO: Server, socket: SocketIO.Socket, conn: Conn) {
         const sessId = conn.sessionToken.sessionId;
         if (this.isOwner(conn)) {
             // WIP: Deactivate this quiz in DB records here
 
             // Broadcast that quiz has been aborted
-            socket.to(sessId.toString()).emit("cancelled", null);
-            this.cancelQuiz(sessId);
+            socketIO.to(sessId.toString()).emit("cancelled", null);
+            this.sess[sessId].close();
+            socket.disconnect();
         }
 
     }
 
-    nextQuestion(socketIO:Server, conn: Conn) {
+    nextQuestion(socketIO: Server, socket: SocketIO.Socket, conn: Conn) {
         const sessId = conn.sessionToken.sessionId;
 
         if (this.isOwner(conn)) {
             //  broadcast next question to participants
-            const nextQuestion = this.sess[sessId].nextQuestion();
-            if (nextQuestion !== undefined) {
-                // socket.to(sessId.toString()).emit("nextQuestion", nextQuestion);
-                socketIO.to(sessId.toString()).emit("nextQuestion", nextQuestion);
-            }else{
-                this.showBoard(socketIO, conn);
+            if (this.sess[sessId].getQuizStartsAt() === 0) {
+                this.start(socketIO, socket, conn);
+            } else if (this.sess[sessId].getQuizStartsAt() - Date.now() <= 0) {
+                const nextQuestion = this.sess[sessId].nextQuestion();
+                if (nextQuestion !== undefined) {
+                    socketIO.to(sessId.toString()).emit("nextQuestion", nextQuestion);
+                } else {
+                    if (this.sess[sessId].hasFinalBoardReleased === false) {
+                        this.showBoard(socketIO, conn);
+                        this.sess[sessId].hasFinalBoardReleased = true;
+                    } else {
+                        this.abort(socketIO, socket, conn);
+                    }
+                }
             }
+
         }
     }
 
@@ -249,7 +254,7 @@ export class Quiz {
         return leaderboard;
     }
 
-    showBoard(socketIO:Server, conn: Conn) {
+    showBoard(socketIO: Server, conn: Conn) {
         // NOTE: get quizId and userId from decrypted token
         // Record it somewhere (cache or socket.handshake)
         // * token will expire in 1 hour
