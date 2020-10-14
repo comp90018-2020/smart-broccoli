@@ -39,7 +39,7 @@ export class Quiz {
 
     async addSession(quiz: any, s: SessInController): Promise<SessInController> {
         this.sess[s.id] = new Session(quiz, s);
-        return this.sess[s.id].hostSessInController;
+        return this.sess[s.id].SessInController;
     }
 
     /**
@@ -231,15 +231,26 @@ export class Quiz {
             if (this.sess[sessId].getQuizStartsAt() === 0) {
                 this.start(socketIO, socket, conn);
             } else if (this.sess[sessId].getQuizStartsAt() - Date.now() <= 0) {
-                const nextQuestion = this.sess[sessId].nextQuestion();
-                if (nextQuestion !== undefined) {
-                    socketIO.to(sessId.toString()).emit("nextQuestion", nextQuestion);
-                } else {
-                    if (this.sess[sessId].hasFinalBoardReleased === false) {
-                        this.showBoard(socketIO, conn);
-                        this.sess[sessId].hasFinalBoardReleased = true;
-                    } else {
-                        this.abort(socketIO, socket, conn);
+                try {
+                    const qIdx = this.sess[sessId].nextQuestionIdx();
+                    // send question without answer to participants
+                    socket.to(sessId.toString()).emit("nextQuestion", this.sess[sessId].getQuestion(qIdx));
+                    socketIO.to(socket.id).emit("nextQuestion", this.sess[sessId].getQuestionWithAns(qIdx));
+
+                }
+                catch (err) {
+                    if (err === "no more question") {
+                        if (this.sess[sessId].hasFinalBoardReleased === false) {
+                            this.showBoard(socketIO, conn);
+                            this.sess[sessId].hasFinalBoardReleased = true;
+                        } else {
+                            this.abort(socketIO, socket, conn);
+                        }
+                    } else if (err === "there is a running question") {
+
+                    }
+                    else {
+
                     }
                 }
             }

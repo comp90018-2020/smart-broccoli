@@ -43,6 +43,7 @@ export class User {
 
 class Option {
     constructor(
+        readonly correct: boolean,
         readonly text: string
     ) { };
 }
@@ -67,24 +68,25 @@ export class Conn {
 
 export class Session {
     private id: number;
-    hostSessInController: SessInController;
+    SessInController: SessInController;
     private status: QuizStatus;
     private quizStartsAt = 0;
     private participants: any;
     private participantsNames: { [key: string]: any };
     private questions: Question[];
+    private questionsWithAns: Question[];
     private sockets: Set<SocketIO.Socket>;
     private questionIdx = 0;
     private questionReleasedAt = 0;
     private questionPanel: {
         [key: string]: PlayerStatus
     };
-    
+
     hasFinalBoardReleased: boolean;
 
     constructor($quiz: any, $s: SessInController) {
         this.id = $s.id;
-        this.hostSessInController = $s;
+        this.SessInController = $s;
         this.participants = new Set([]);
         this.participantsNames = {};
         this.sockets = new Set();
@@ -160,19 +162,20 @@ export class Session {
     private async setQuestions(quiz: any) {
         // TODO: format questions that can be sent to players here
         const questions: Question[] = [];
+        const questionsWithAns: Question[] = [];
         let i = 0;
         while (quiz.questions.length > 0) {
             const q = quiz.questions.shift();
             const options: Option[] = q.options === null ? null : [];
-            
+            const optionsWithAns: Option[] = q.options === null ? null : [];
+
             if (options !== null) {
                 while (q.options.length > 0) {
                     const option = q.options.shift();
-                    options.push(new Option(option.text))
+                    options.push(new Option(null, option.text))
+                    optionsWithAns.push(new Option(option.correct, option.text))
                 }
-            } else if( q.tf !== null) {
-
-            }
+            } 
             const question = new Question(
                 i++,
                 q.text,
@@ -180,9 +183,19 @@ export class Session {
                 options,
                 null,
                 quiz.timeLimit);
+            const questionWithAns = new Question(
+                i++,
+                q.text,
+                q.pictureId,
+                optionsWithAns,
+                q.tf,
+                quiz.timeLimit);
+
             questions.push(question);
+            questionsWithAns.push(questionWithAns);
         }
         this.questions = questions;
+        this.questionsWithAns = questionsWithAns;
     }
 
     /**
@@ -197,13 +210,24 @@ export class Session {
         return currQuestion;
     }
 
-    nextQuestion(): Object {
-        if (this.questionIdx < this.questions.length) {
+    getQuestion(idx:number){
+        return this.questions[idx];
+    }
+
+    getQuestionWithAns(idx:number){
+        return this.questionsWithAns[idx];
+    }
+
+    nextQuestionIdx(): number {
+        if (this.questionIdx >= this.questions.length) { throw "no more question"; }
+        else if (this.questions[this.questionIdx].time * 1000 +
+            this.questionReleasedAt - Date.now() > 0) {
+            throw "there is a running question";
+        }
+        else {
             this.resetQuestionPanel();
             this.questionReleasedAt = Date.now();
-            return this.questions[this.questionIdx++];
-        } else {
-            return undefined;
+            return this.questionIdx++;
         }
     }
 
