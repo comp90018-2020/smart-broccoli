@@ -36,7 +36,7 @@ export default (socketIO: Server) => {
 
             // next question
             socket.on('next', () => {
-                handler.nextQuestion(socketIO, socket, conn);
+                handler.next(socketIO, socket, conn);
             });
 
             // showBoard
