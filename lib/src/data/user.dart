@@ -1,13 +1,12 @@
 enum UserType { REGISTERED, UNREGISTERED }
 
 class User {
-  UserType type;
-  int _id;
-  int get id => _id;
-  String email;
-  String name;
+  final UserType type;
+  final int id;
+  final String email;
+  final String name;
 
-  User(this.type, this._id, this.email, this.name);
+  User(this.type, this.id, this.email, this.name);
 
   factory User.fromJson(Map<String, dynamic> json) => User(
       json['role'] == 'user' ? UserType.REGISTERED : UserType.UNREGISTERED,
