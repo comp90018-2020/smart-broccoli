@@ -70,9 +70,7 @@ class GroupRegistryModel extends ChangeNotifier {
   /// This callback also refreshes the `members` field the group. If no group
   /// is currently selected, this callback has no effect.
   Future<void> refreshSelectedGroup() async {
-    if (_selectedGroup == null) return;
-    selectGroup(_selectedGroup.id);
-    notifyListeners();
+    if (_selectedGroup != null) selectGroup(_selectedGroup.id);
   }
 
   /// Refresh the code to join the selected group (ask server for new one).
