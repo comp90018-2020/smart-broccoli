@@ -18,30 +18,58 @@ class UserRepository {
     _userApi = userApi ?? UserApi();
   }
 
+  Future<User> getUser(String token) async {
+    User user = await _userApi.getUser(token);
+    // no picture; return straight away
+    if (user.pictureId == null) return user;
+    // otherwise, check whether picture has already been cached
+    if ((user.picture = await lookupPicLocally(user.pictureId)) != null)
+      return user;
+    // if not, use the API then cache the picture (in background) for next time
+    user.picture = await _userApi.getProfilePic(token);
+    _storePicLocally(user.pictureId, user.picture); // no need to await
+    return user;
+  }
+
   Future<User> getUserBy(String token, int id, {bool fromCache = true}) async {
     // first try from cache
     if (fromCache && _users.containsKey(id)) return _users[id];
-    // otherwise, get from API
+    // if not found (or caller specified not from cache), use the API
     _users[id] = await _userApi.getUserBy(token, id);
-    // in the background (no await), fetch profile pic
-    getProfilePicOf(token, id);
+    // no picture; return straight away
+    if (_users[id].pictureId == null) return _users[id];
+    // otherwise, check whether picture has already been cached
+    if ((_users[id].picture = await lookupPicLocally(_users[id].pictureId)) !=
+        null) return _users[id];
+    // if not, use the API then cache the picture (in background) for next time
+    _users[id].picture = await _userApi.getProfilePic(token);
+    _storePicLocally(
+        _users[id].pictureId, _users[id].picture); // no need to await
     return _users[id];
   }
 
-  Future<Uint8List> getProfilePicOf(String token, int id) async {
-    // TODO: store imgId in User object and use to check cache
+  Future<User> updateUser(String token,
+          {String email, String password, String name}) async =>
+      await _userApi.updateUser(token,
+          email: email, password: password, name: name);
+
+  Future<Uint8List> lookupPicLocally(int pictureId) async {
     String assetDir =
-        '${(await getTemporaryDirectory()).toString()}/picture/$id';
+        '${(await getTemporaryDirectory()).toString()}/picture/$pictureId';
     try {
       // see if the image is already stored locally
       return File(assetDir).readAsBytes();
     } catch (_) {
-      // if not, use the API
-      Uint8List bytes = await _userApi.getProfilePicOf(token, id);
-      if (bytes == null) return null;
+      return null;
+    }
+  }
+
+  Future<void> _storePicLocally(int pictureId, Uint8List bytes) async {
+    String assetDir =
+        '${(await getTemporaryDirectory()).toString()}/picture/$pictureId';
+    try {
       File f = File(assetDir);
       f.writeAsBytes(bytes);
-      return bytes;
-    }
+    } catch (_) {}
   }
 }

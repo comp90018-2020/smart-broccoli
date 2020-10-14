@@ -30,16 +30,23 @@ class MyApp extends StatefulWidget {
 
 /// Main entrance class
 class _MyAppState extends State<MyApp> {
+  // Key for navigator
   final GlobalKey<NavigatorState> mainNavigator = GlobalKey<NavigatorState>();
+
+  // Stores previous state about whether user's authenticated
   bool inSession;
 
   @override
   Widget build(BuildContext context) {
+    // Get AuthStateModel
     AuthStateModel state = Provider.of<AuthStateModel>(context, listen: true);
+
+    // On change of inSession
     if (inSession != state.inSession) {
+      // Push route if app is initialised
       if (inSession != null)
-        mainNavigator.currentState
-            .pushReplacementNamed(state.inSession ? '/home' : '/auth');
+        mainNavigator.currentState.pushNamedAndRemoveUntil(
+            state.inSession ? '/home' : '/auth', (route) => false);
       inSession = state.inSession;
     }
 
