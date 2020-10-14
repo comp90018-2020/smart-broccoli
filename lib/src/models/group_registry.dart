@@ -100,4 +100,12 @@ class GroupRegistryModel extends ChangeNotifier {
         json.encode(_createdGroups.map((group) => group.toJson())));
     notifyListeners();
   }
+
+  /// Create a new group.
+  ///
+  /// This callback refreshes [createdGroups].
+  Future<void> createGroup(String name) async {
+    await _groupApi.createGroup(_authStateModel.token, name);
+    refreshCreatedGroups();
+  }
 }
