@@ -30,8 +30,21 @@ class User {
                 : null,
       );
 
-  Map<String, dynamic> toJson() =>
-      <String, dynamic>{'id': id, 'email': email, 'name': name};
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'pictureId': pictureId,
+        'email': email,
+        'name': name,
+        'role': type == UserType.REGISTERED
+            ? 'user'
+            : type == UserType.UNREGISTERED
+                ? 'participant'
+                : groupRole == GroupRole.OWNER
+                    ? 'owner'
+                    : groupRole == GroupRole.MEMBER
+                        ? 'member'
+                        : null,
+      };
 }
 
 class RegistrationException implements Exception {}
