@@ -36,7 +36,6 @@ class _BuildQuiz extends State<QuizContainer> {
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 290),
               child: Container(
-                padding: const EdgeInsets.only(left: 25),
                 child: ListView.separated(
                   // Enable Horizontal Scroll
                   scrollDirection: Axis.horizontal,
@@ -45,6 +44,9 @@ class _BuildQuiz extends State<QuizContainer> {
                     return ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: 175),
                       child: Container(
+                          margin: index == 0
+                              ? EdgeInsets.only(left: 20)
+                              : EdgeInsets.zero,
                           width: MediaQuery.of(context).size.width * 0.4,
                           child: QuizCard(
                             'Quiz name',
