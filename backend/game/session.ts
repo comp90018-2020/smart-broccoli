@@ -69,7 +69,7 @@ export class Conn {
 export class Session {
     private id: number;
     SessInController: SessInController;
-    private status: QuizStatus;
+    status: QuizStatus;
     private quizStartsAt = 0;
     private participants: any;
     private participantsNames: { [key: string]: any };
@@ -77,6 +77,7 @@ export class Session {
     private questionsWithAns: Question[];
     private sockets: Set<SocketIO.Socket>;
     private questionIdx = 0;
+    private preQuestionIdx = 0;
     private questionReleasedAt = 0;
     private questionPanel: {
         [key: string]: PlayerStatus
@@ -175,22 +176,23 @@ export class Session {
                     options.push(new Option(null, option.text))
                     optionsWithAns.push(new Option(option.correct, option.text))
                 }
-            } 
+            }
             const question = new Question(
-                i++,
+                i,
                 q.text,
                 q.pictureId,
                 options,
                 null,
                 quiz.timeLimit);
             const questionWithAns = new Question(
-                i++,
+                i,
                 q.text,
                 q.pictureId,
                 optionsWithAns,
                 q.tf,
                 quiz.timeLimit);
-
+            
+            i++;
             questions.push(question);
             questionsWithAns.push(questionWithAns);
         }
@@ -204,17 +206,20 @@ export class Session {
      * update time field).
      */
     currQuestion() {
-        const { no, text, pictureId, options, tf, time } = this.questions[this.questionIdx];
-        const currQuestion = new Question(no, text, pictureId, options, tf,
-            time - (Date.now() - this.questionReleasedAt));
-        return currQuestion;
+        if(this.questionIdx === this.preQuestionIdx){
+            const { no, text, pictureId, options, tf, time } = this.questions[this.questionIdx];
+            return new Question(no, text, pictureId, options, tf, time * 1000 - (Date.now() - this.questionReleasedAt))
+        }else{
+            const { no, text, pictureId, options, tf, time } = this.questions[this.preQuestionIdx];
+            return new Question(no, text, pictureId, options, tf, 0);
+        }
     }
 
-    getQuestion(idx:number){
+    getQuestion(idx: number) {
         return this.questions[idx];
     }
 
-    getQuestionWithAns(idx:number){
+    getQuestionWithAns(idx: number) {
         return this.questionsWithAns[idx];
     }
 
@@ -227,16 +232,16 @@ export class Session {
         else {
             this.resetQuestionPanel();
             this.questionReleasedAt = Date.now();
-            return this.questionIdx++;
+            setTimeout(() => {
+                this.questionIdx++;
+            }, this.questions[this.questionIdx].time * 1000);
+            this.preQuestionIdx = this.questionIdx;
+            return this.questionIdx;
         }
     }
 
     setQuizStatus(status: QuizStatus) {
         this.status = status;
-    }
-
-    getQuizStatus() {
-        return this.status;
     }
 
     setQuizStartsAt(timestamp: number) {

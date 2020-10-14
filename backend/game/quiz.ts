@@ -161,10 +161,13 @@ export class Quiz {
 
         socket.emit("welcome", this.welcomeMSG(sessId));
 
-        if (this.sess[sessId].getQuizStatus() === QuizStatus.Starting) {
+        if (this.sess[sessId].status === QuizStatus.Starting) {
             socket.emit("starting", (this.sess[sessId].getQuizStartsAt() - Date.now()).toString());
-        }
+        } 
 
+        if (this.sess[sessId].status === QuizStatus.Running) {
+            socket.emit("nextQuestion",this.sess[sessId].currQuestion());
+        } 
 
     }
 
@@ -202,9 +205,9 @@ export class Quiz {
             // pass-correct-this-context-to-settimeout-callback
             // https://stackoverflow.com/questions/2130241
             setTimeout(() => {
-                this.sess[sessId].setQuizStatus(QuizStatus.Running);
+                this.sess[sessId].status = QuizStatus.Running;
                 // release the firt question
-                this.nextQuestion(socketIO, socket, conn);
+                this.next(socketIO, socket, conn);
             }, this.sess[sessId].getQuizStartsAt() - Date.now(), socket);
 
         }
@@ -223,14 +226,16 @@ export class Quiz {
 
     }
 
-    nextQuestion(socketIO: Server, socket: SocketIO.Socket, conn: Conn) {
+    next(socketIO: Server, socket: SocketIO.Socket, conn: Conn) {
         const sessId = conn.sessionToken.sessionId;
 
         if (this.isOwner(conn)) {
             //  broadcast next question to participants
-            if (this.sess[sessId].getQuizStartsAt() === 0) {
+            if (this.sess[sessId].status === QuizStatus.Pending) {
                 this.start(socketIO, socket, conn);
-            } else if (this.sess[sessId].getQuizStartsAt() - Date.now() <= 0) {
+            } else if (this.sess[sessId].status === QuizStatus.Starting) {
+                // nothing to do
+            } else if (this.sess[sessId].status === QuizStatus.Running) {
                 try {
                     const qIdx = this.sess[sessId].nextQuestionIdx();
                     // send question without answer to participants
