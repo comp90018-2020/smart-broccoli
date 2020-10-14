@@ -82,6 +82,14 @@ class GroupRegistryModel extends ChangeNotifier {
     refreshCreatedGroups();
   }
 
+  /// Delete the selected group.
+  Future<void> deleteSelectedGroup() async {
+    if (_selectedGroup == null) return;
+    await _groupApi.deleteGroup(_authStateModel.token, _selectedGroup.id);
+    _selectedGroup = null;
+    refreshCreatedGroups();
+  }
+
   /// Refresh the ListView of groups the user has joined.
   ///
   /// This callback does not populate the `members` field of each group. The
