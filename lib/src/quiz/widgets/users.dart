@@ -15,7 +15,14 @@ class QuizUsers extends StatelessWidget {
       itemCount: userList.length,
       itemBuilder: (BuildContext context, int index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+          padding: index == 0 || index == userList.length - 1
+              ? EdgeInsets.only(
+                  left: 25,
+                  right: 25,
+                  top: index == 0 ? 15 : 5,
+                  bottom: index == 0 ? 5 : 15,
+                )
+              : const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
           child: UserItem(userList[index]),
         );
       },
