@@ -1,72 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz/question.dart';
-import 'package:smart_broccoli/src/quiz/quiz.dart';
-import 'package:smart_broccoli/src/quiz/widgets/users.dart';
-// import 'package:smart_broccoli/src/quiz_taker/start_lobby.dart';
-import 'package:smart_broccoli/src/shared/background.dart';
-import 'package:smart_broccoli/src/shared/page.dart';
-import 'package:smart_broccoli/theme.dart';
 
-/// The Skeleton for the Leaderboard lobby
-/// Unfinished as it is beyond my skill ability
-/// There are pending changes
+import 'package:smart_broccoli/theme.dart';
+import '../shared/page.dart';
+import 'question.dart';
+import 'quiz.dart';
+import 'widgets/users.dart';
+
+/// Leaderboard page
 class LeaderBoardLobby extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _LeaderBoardLobby();
 }
 
 class _LeaderBoardLobby extends State<LeaderBoardLobby> {
-  // int _selectedIndex = 0;
-
-  // Placeholder list, the list contents should be replaced with usernames.
-  // List<String> propList = ["HELLO", "BOB", "MICROOSFT", "OOOOOF"];
-  int val = 0;
-
   // Entry function
   @override
   Widget build(BuildContext context) {
-    return new CustomPage(title: "Leaderboard", child: _entryPoint());
-  }
-
-  Widget _entryPoint() {
-    return Stack(
-      children: <Widget>[
-        Container(
-          color: Colors.white,
-        ),
-        // The player status
-        _playerStats(),
-        // Background shapes (The green part)
-        _backgroundShapes(),
-        // Then the rest overlayed on top
-        Container(
-          child: new Column(
-            children: <Widget>[
-              SizedBox(height: 20),
-              _topLeaderBoard(),
-              SizedBox(height: 100),
-              // The list of Quiz players
-              //_quizPlayers(),
-              QuizUsers(["A", "B", "C"]),
-              // Debug nav bar please remove
-              _bottomNavBar()
-            ],
+    return new CustomPage(
+      title: "Leaderboard",
+      background: Container(
+        child: ClipPath(
+          clipper: _BackgroundClipper(),
+          child: Container(
+            color: Theme.of(context).colorScheme.background,
           ),
         ),
-      ],
-    );
-  }
+      ),
+      child: Stack(
+        children: <Widget>[
+          // The player status
+          _playerStats(),
 
-  Widget _backgroundShapes() {
-    return new Container(
-      child: ClipPath(
-        clipper: BackgroundClipper3(),
-        child: Container(
-          color: Theme.of(context).colorScheme.background,
-        ),
+          // Then the rest overlayed on top
+          Container(
+            child: new Column(
+              children: <Widget>[
+                SizedBox(height: 20),
+                _topLeaderBoard(),
+                SizedBox(height: 100),
+                // The list of Quiz players
+                //_quizPlayers(),
+                QuizUsers(["A", "B", "C"]),
+                // Debug nav bar please remove
+                _bottomNavBar()
+              ],
+            ),
+          ),
+        ],
       ),
     );
-    // Then the rest
   }
 
   Widget _playerStats() {
@@ -148,5 +130,36 @@ class _LeaderBoardLobby extends State<LeaderBoardLobby> {
         MaterialPageRoute(builder: (context) => TakeQuiz()),
       );
     }
+  }
+}
+
+/// Used to design the background
+class _BackgroundClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+
+    path.lineTo(0, size.height / 4.25);
+    var firstControlPoint = new Offset(size.width / 4, size.height / 3.5);
+    var firstEndPoint = new Offset(size.width / 2, size.height / 3 - 60);
+    var secondControlPoint =
+        new Offset(size.width - (size.width / 4), size.height / 3.5 - 65);
+    var secondEndPoint = new Offset(size.width, size.height / 3.5 - 40);
+
+    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
+        firstEndPoint.dx, firstEndPoint.dy);
+    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy,
+        secondEndPoint.dx, secondEndPoint.dy);
+
+    path.lineTo(size.width, size.height / 3);
+    path.lineTo(size.width, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return true;
   }
 }

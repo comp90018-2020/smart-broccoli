@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../shared/tabbed_page.dart';
 import 'quiz_container.dart';
 import 'quiz_pin_box.dart';
-import 'package:smart_broccoli/src/shared/tabbed_page.dart';
 
 /// Take/manage quiz page
 class TakeQuiz extends StatefulWidget {
@@ -74,3 +75,21 @@ class _TakeQuizState extends State<TakeQuiz> {
     );
   }
 }
+
+/// Background clipper
+// class BackgroundClipperMain extends CustomClipper<Path> {
+//   @override
+//   Path getClip(Size size) {
+//     var path = Path();
+//     path.moveTo(0, size.height * 0.63);
+//     path.lineTo(0, size.height);
+//     path.lineTo(size.width, size.height);
+//     path.lineTo(size.width, size.height - size.height * 0.66);
+//     return path;
+//   }
+
+//   @override
+//   bool shouldReclip(CustomClipper<Path> oldClipper) {
+//     return true;
+//   }
+// }

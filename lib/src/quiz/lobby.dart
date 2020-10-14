@@ -1,32 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz/widgets/card.dart';
-import 'package:smart_broccoli/src/quiz/question.dart';
-import 'package:smart_broccoli/src/quiz/widgets/users.dart';
-import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
+
+import '../shared/page.dart';
+import 'widgets/card.dart';
+import 'widgets/users.dart';
+import 'question.dart';
 
 /// Widget for Lobby
 class StartLobby extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _StartLobby();
-}
-
-// Used to design the background
-class BackgroundClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    path.lineTo(0, size.height / 4);
-    path.lineTo(size.width, size.height / 4);
-    path.lineTo(size.width, 0);
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return true;
-  }
 }
 
 class _StartLobby extends State<StartLobby> {
@@ -78,7 +62,7 @@ class _StartLobby extends State<StartLobby> {
       // Background decoration
       background: Container(
         child: ClipPath(
-          clipper: BackgroundClipper(),
+          clipper: _BackgroundClipper(),
           child: Container(
             color: Theme.of(context).colorScheme.background,
           ),
@@ -176,5 +160,22 @@ class _StartLobby extends State<StartLobby> {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => QuizQuestion()),
     );
+  }
+}
+
+// Used to clip the background
+class _BackgroundClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, size.height / 4);
+    path.lineTo(size.width, size.height / 4);
+    path.lineTo(size.width, 0);
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return true;
   }
 }
