@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/src/store/remote/group_api.dart';
 
 import '../store/remote/user_api.dart';
 
@@ -12,10 +13,14 @@ class UserRepository {
   /// API provider for the user profile service
   UserApi _userApi;
 
+  /// API provider for the group management service
+  GroupApi _groupApi;
+
   Map<int, User> _users;
 
-  UserRepository({UserApi userApi}) {
+  UserRepository({UserApi userApi, GroupApi groupApi}) {
     _userApi = userApi ?? UserApi();
+    _groupApi = groupApi ?? GroupApi();
   }
 
   Future<User> getUser(String token) async {
@@ -52,6 +57,18 @@ class UserRepository {
           {String email, String password, String name}) async =>
       await _userApi.updateUser(token,
           email: email, password: password, name: name);
+
+  Future<List<User>> getMembersOf(String token, int id) async {
+    List<User> members = await _groupApi.getMembers(token, id);
+    members.forEach((member) async {
+      _users[member.id] = member;
+      // store member in the hashmap and look for profile pic locally first
+      if (member.pictureId != null &&
+          (member.picture = await lookupPicLocally(member.pictureId)) == null)
+        member.picture = await _userApi.getProfilePic(token);
+    });
+    return members;
+  }
 
   Future<Uint8List> lookupPicLocally(int pictureId) async {
     String assetDir =
