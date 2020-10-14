@@ -61,6 +61,10 @@ class SmartBroccoliTheme {
   /// Padding for round RaisedButton
   static final EdgeInsetsGeometry raisedButtonTextPadding =
       EdgeInsets.symmetric(horizontal: 8);
+
+  /// Winner text style (1, 2, 3)
+  static final TextStyle leaderboardRankStyle = TextStyle(
+      fontSize: 16, color: Color(0xFF696E69), fontWeight: FontWeight.bold);
 }
 
 /// Widget to hold the app logo on auth screen
@@ -116,11 +120,11 @@ class LobbyDivider extends Divider {
         );
 }
 
-class BoxDecoration1 extends BoxDecoration {
-  BoxDecoration1()
+class WinnerBubble extends BoxDecoration {
+  WinnerBubble()
       : super(
           // You need this line or the box will be transparent
-          color: Colors.lightGreen,
+          color: Color(0xFF8DCC8F),
           shape: BoxShape.circle,
         );
 }

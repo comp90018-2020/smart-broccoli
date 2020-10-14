@@ -23,7 +23,7 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
           child: ClipPath(
             clipper: _BackgroundRectClipper(),
             child: Container(
-              color: Colors.yellow,
+              color: Color(0xFFFEC12D),
             ),
           ),
         ),
@@ -45,77 +45,68 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
               child: Wrap(
                 alignment: WrapAlignment.center,
                 runAlignment: WrapAlignment.center,
-                spacing: 10,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 25,
                 children: <Widget>[
-                  topThreeUsers(50, 50, "Winner 1"),
-                  topThreeUsers(100, 100, "Winner 2"),
-                  topThreeUsers(50, 50, "Winner 3"),
+                  topThreeUsers(
+                    "Winner 2",
+                    50,
+                    Text(
+                      '2',
+                      style: SmartBroccoliTheme.leaderboardRankStyle,
+                    ),
+                  ),
+                  topThreeUsers("Winner 1", 75,
+                      Text('1', style: SmartBroccoliTheme.leaderboardRankStyle),
+                      bolded: true),
+                  topThreeUsers(
+                      "Winner 3",
+                      50,
+                      Text('3',
+                          style: SmartBroccoliTheme.leaderboardRankStyle)),
                 ],
               )),
 
+          Container(
+              margin: EdgeInsets.only(top: 9, bottom: 6),
+              height: 25.0 + 35,
+              child: QuizUsers(["A"])),
+
           // List of users
-          QuizUsers(["A", "B", "C"]),
-
-          // Temporary nav bar
-          _bottomNavBar(),
+          Expanded(child: QuizUsers(["A", "B", "C"])),
         ],
       ),
     );
   }
 
-  Widget _bottomNavBar() {
-    return new BottomAppBar(
-      child: Row(
-        children: [
-          Row(
-            children: <Widget>[
-              IconButton(
-                  icon: Icon(Icons.clear), onPressed: () => _onItemTapped(0)),
-              Text("Leave Quiz")
-            ],
-          ),
-          Spacer(),
-          Row(
-            children: <Widget>[
-              Text("Next Question"),
-              IconButton(
-                  icon: Icon(Icons.navigate_next),
-                  onPressed: () => _onItemTapped(1)),
-              // Text("Next Question")
-            ],
-          ),
-          //IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
-        ],
-      ),
-    );
-  }
-
-  Widget topThreeUsers(double h, double w, text) {
+  // Creates user image and name
+  Widget topThreeUsers(text, double dimensions, Widget inner,
+      {bool bolded = false}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Container(height: h, width: w, decoration: BoxDecoration1()),
-        Text(text),
+        // Bubble
+        Container(
+            height: dimensions,
+            width: dimensions,
+            decoration: WinnerBubble(),
+            child: Align(alignment: Alignment.center, child: inner)),
+        // Name
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            text,
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onBackground,
+                fontWeight: bolded ? FontWeight.bold : FontWeight.normal),
+          ),
+        ),
       ],
     );
   }
-
-  void _onItemTapped(int value) {
-    if (value == 1) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => QuizQuestion()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => TakeQuiz()),
-      );
-    }
-  }
 }
 
-/// Used to design the background
+// Curved clipper
 class _BackgroundClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -145,14 +136,15 @@ class _BackgroundClipper extends CustomClipper<Path> {
   }
 }
 
-// Used to clip the background
+// User highlight clipper
 class _BackgroundRectClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     var path = Path();
-    path.lineTo(0, 165.0 + 30);
-    path.lineTo(size.width, 165.0 + 30);
-    path.lineTo(size.width, 0);
+    path.lineTo(15, 0);
+    path.lineTo(15, 165.0 + 40);
+    path.lineTo(size.width - 15, 165.0 + 40);
+    path.lineTo(size.width - 15, 0);
     return path;
   }
 
