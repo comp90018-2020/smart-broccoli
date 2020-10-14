@@ -14,8 +14,8 @@ enum GameStatus {
 
 class PlayerStatus {
     constructor(
-        answer: AnswerStatus,
-        game: GameStatus
+        public answer: AnswerStatus,
+        public game: GameStatus
     ) { };
 }
 
