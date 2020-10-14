@@ -74,73 +74,79 @@ class _StartLobby extends State<QuizLobby> {
       // Body
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Column(
-          children: <Widget>[
-            Stack(children: [
-              // Quiz card
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-                margin: EdgeInsets.only(bottom: 12),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.35),
-                  child: QuizCard(
-                    "Quiz name",
-                    "Quiz group",
-                    aspectRatio: 3,
-                  ),
-                ),
-              ),
-
-              // Start button on top of card
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: RaisedButton(
-                    shape: SmartBroccoliTheme.raisedButtonShape,
-                    child: Text("Start"),
-                    onPressed: () => _startQuiz(),
-                  ),
-                ),
-              ),
-            ]),
-
-            // Chip for group subscriptions
-            Chip(
-                label: Text('Subscribed to group'),
-                avatar: Icon(Icons.check_sharp)),
-
-            // Text describing status
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: Text(
-                'Waiting for host to start...',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    backgroundColor: Colors.transparent),
-              ),
-            ),
-
-            // The divider Bar
-            Stack(
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
+                Stack(children: [
+                  // Quiz card
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+                    margin: EdgeInsets.only(bottom: 12),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.35),
+                      child: QuizCard(
+                        "Quiz name",
+                        "Quiz group",
+                        aspectRatio: 3,
+                      ),
+                    ),
+                  ),
+
+                  // Start button on top of card
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: RaisedButton(
+                        shape: SmartBroccoliTheme.raisedButtonShape,
+                        child: Text("Start"),
+                        onPressed: () => _startQuiz(),
+                      ),
+                    ),
+                  ),
+                ]),
+
+                // Chip for group subscriptions
+                Chip(
+                  label: Text('Subscribed to group'),
+                  avatar: Icon(Icons.check_sharp),
+                ),
+
+                // Text describing status
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Text(
+                    'Waiting for host to start...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      backgroundColor: Colors.transparent,
+                    ),
+                  ),
+                ),
+
+                // Participants text
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 25),
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 3),
                   child: Text(
                     'Participants',
                     textAlign: TextAlign.left,
                   ),
                 ),
+
                 // Orange Divider
                 LobbyDivider(),
-                // Timer
-                _quizTimer(),
+
+                // The list of Quiz players
+                Expanded(child: QuizUsers(["A", "B", "C", "D", "E", "F", "G"])),
               ],
             ),
 
-            // The list of Quiz players
-            Expanded(child: QuizUsers(["A", "B", "C", "D", "E", "F", "G"])),
+            // Timer stacked on top
+            _quizTimer(),
           ],
         ),
       ),
