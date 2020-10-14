@@ -181,19 +181,20 @@ class _BackgroundRectClipper extends CustomClipper<Path> {
     // GOTO width = 15 height = 0
     path.lineTo(15, 0);
     // GOTO width 15, height 165.0 + 30
-    path.lineTo(15, 165.0+30);
+    path.lineTo(15, 165.0 + 30);
     // Make a curve at control point width = 15, height = 165+30
     // i.e the Bottom leftmost point
     // Starting at width 15, height 165.0 + 30
     // And ending at width 20, 165.0+40
-    path.quadraticBezierTo(15, 165.0+40, 20, 165.0 + 40);
+    path.quadraticBezierTo(15, 165.0 + 40, 20, 165.0 + 40);
     // From width 20, 165.0+40 goto Width = Width max - 20 height = 165.0+40
     path.lineTo(size.width - 20, 165.0 + 40);
     // Make a curve at control point width max - 15, height = 165+40
     // i.e the Bottom right most point
     // Starting at size.width - 20 , 165.0 + 40
     // And ending at  size.width - 15, 165.0 + 30
-    path.quadraticBezierTo(size.width - 15, 165.0+40, size.width - 15, 165.0 + 30);
+    path.quadraticBezierTo(
+        size.width - 15, 165.0 + 40, size.width - 15, 165.0 + 30);
     // Finish up at the right top sidez
     path.lineTo(size.width - 15, 0);
     return path;
