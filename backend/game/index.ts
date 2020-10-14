@@ -1,13 +1,16 @@
 import { Server } from 'socket.io';
-import { Conn, LiveQuiz } from './quiz';
+import { Quiz } from './quiz';
+import { Conn } from './session';
 
-export const handler:LiveQuiz = new LiveQuiz();
+export const handler: Quiz = new Quiz();
 
 export default (socketIO: Server) => {
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
-        try{
+        try {
             const conn: Conn = await handler.verifySocket(socket);
+            console.log(conn);
+
             // join & welcome
             handler.welcome(socket, conn);
 
@@ -17,33 +20,33 @@ export default (socketIO: Server) => {
             });
 
             // quit
-            socket.on('quit', (content: any) => {
-                handler.quit(socket, content, conn);
+            socket.on('quit', () => {
+                handler.quit(socket, conn);
             });
 
             // start
-            socket.on('start', (content: any) => {
-                handler.start(socket, content, conn);
+            socket.on('start', () => {
+                handler.start(socketIO, socket, conn);
             });
 
             // abort
-            socket.on('abort', (content: any) => {
-                handler.abort(socket, content, conn);
+            socket.on('abort', () => {
+                handler.abort(socket, conn);
             });
 
             // next question
-            socket.on('next', (content: any) => {
-                handler.nextQuestion(socket, conn);
+            socket.on('next', () => {
+                handler.nextQuestion(socketIO, conn);
             });
 
             // showBoard
-            socket.on('showBoard', (content: any) => {
-                handler.showBoard(socket, content, conn);
+            socket.on('showBoard', () => {
+                handler.showBoard(socketIO, conn);
             });
 
         }
-        catch(err){
-            if(process.env.NODE_EVN === 'debug'){
+        catch (err) {
+            if (process.env.NODE_EVN === 'debug') {
                 // https://stackoverflow.com/questions/18391212
                 socket.send(JSON.stringify(err, Object.getOwnPropertyNames(err)));
             }
