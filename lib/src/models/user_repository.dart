@@ -48,6 +48,11 @@ class UserRepository {
     return _users[id];
   }
 
+  Future<User> updateUser(String token,
+          {String email, String password, String name}) async =>
+      await _userApi.updateUser(token,
+          email: email, password: password, name: name);
+
   Future<Uint8List> lookupPicLocally(int pictureId) async {
     String assetDir =
         '${(await getTemporaryDirectory()).toString()}/picture/$pictureId';
