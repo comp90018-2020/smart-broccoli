@@ -72,10 +72,7 @@ class _QuizPinBoxState extends State<QuizPinBox> {
   /// Above
   void _verifyPin() {
     print(_pinFilter.text);
-
-    // TODO remove debug code below
-    Navigator.pushReplacement(
-      context,
+    Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => QuizLobby()),
     );
   }
