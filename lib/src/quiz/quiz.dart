@@ -63,33 +63,6 @@ class _TakeQuizState extends State<TakeQuiz> {
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,
-
-      // background: Container(
-      //   child: ClipPath(
-      //     clipper: BackgroundClipperMain(),
-      //     child: Container(
-      //       color: Theme.of(context).colorScheme.onBackground,
-      //     ),
-      //   ),
-      // ),
     );
   }
 }
-
-/// Background clipper
-// class BackgroundClipperMain extends CustomClipper<Path> {
-//   @override
-//   Path getClip(Size size) {
-//     var path = Path();
-//     path.moveTo(0, size.height * 0.63);
-//     path.lineTo(0, size.height);
-//     path.lineTo(size.width, size.height);
-//     path.lineTo(size.width, size.height - size.height * 0.66);
-//     return path;
-//   }
-
-//   @override
-//   bool shouldReclip(CustomClipper<Path> oldClipper) {
-//     return true;
-//   }
-// }

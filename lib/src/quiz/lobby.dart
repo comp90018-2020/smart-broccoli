@@ -124,14 +124,6 @@ class _StartLobby extends State<QuizLobby> {
               ),
             ),
 
-            // Container(
-            //   padding: EdgeInsets.symmetric(horizontal: 25),
-            //   child: Text(
-            //     'Participants',
-            //     textAlign: TextAlign.left,
-            //   ),
-            // ),
-
             Expanded(
               child: Stack(
                 children: [
@@ -148,8 +140,6 @@ class _StartLobby extends State<QuizLobby> {
                       LobbyDivider(),
                     ],
                   ),
-                  // Orange divider
-                  // LobbyDivider(),
 
                   // The list of Quiz players
                   Padding(
