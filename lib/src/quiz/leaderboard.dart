@@ -17,6 +17,7 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
     return new CustomPage(
       title: "Leaderboard",
       background: [
+        // The clip for the current user's rank
         Container(
           child: ClipPath(
             clipper: _BackgroundRectClipper(),
@@ -25,6 +26,7 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
             ),
           ),
         ),
+        // Overall wavy clip
         Container(
           child: ClipPath(
             clipper: _BackgroundClipper(),
@@ -112,16 +114,19 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 3),
           child: Row(children: [
+            // Rank
             Text(
               '1',
               style: SmartBroccoliTheme.listItemTextStyle,
             ),
+            // Name/image
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: UserItem('name'),
               ),
             ),
+            // Score
             Wrap(
                 spacing: 5,
                 crossAxisAlignment: WrapCrossAlignment.center,
