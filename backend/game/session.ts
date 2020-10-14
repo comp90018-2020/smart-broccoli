@@ -13,13 +13,10 @@ enum GameStatus {
 }
 
 class PlayerStatus {
-    answer: AnswerStatus;
-    game: GameStatus;
-
-    constructor($answer: AnswerStatus, $game: GameStatus) {
-        this.answer = $answer;
-        this.game = $game;
-    }
+    constructor(
+        answer: AnswerStatus,
+        game: GameStatus
+    ) { };
 }
 
 export enum QuizStatus {
@@ -30,15 +27,11 @@ export enum QuizStatus {
 }
 
 export class User {
-    readonly id: number;
-    readonly name: string;
-    readonly picturId: number;
-
-    constructor($id: number, $name: string, $picturId: number) {
-        this.id = $id;
-        this.name = $name;
-        this.picturId = $picturId;
-    }
+    constructor(
+        readonly id: number,
+        readonly name: string,
+        readonly picturId: number
+    ) { };
 }
 
 class Option {
@@ -191,7 +184,7 @@ export class Session {
                 optionsWithAns,
                 q.tf,
                 quiz.timeLimit);
-            
+
             i++;
             questions.push(question);
             questionsWithAns.push(questionWithAns);
@@ -206,10 +199,10 @@ export class Session {
      * update time field).
      */
     currQuestion() {
-        if(this.questionIdx === this.preQuestionIdx){
+        if (this.questionIdx === this.preQuestionIdx) {
             const { no, text, pictureId, options, tf, time } = this.questions[this.questionIdx];
             return new Question(no, text, pictureId, options, tf, time * 1000 - (Date.now() - this.questionReleasedAt))
-        }else{
+        } else {
             const { no, text, pictureId, options, tf, time } = this.questions[this.preQuestionIdx];
             return new Question(no, text, pictureId, options, tf, 0);
         }

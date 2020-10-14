@@ -2,7 +2,6 @@ import { User as BackendUser, Session as SessInController, Quiz as QuizInModels 
 import { sessionTokenDecrypt as decrypt } from "../controllers/session"
 import { User, Session, Conn, QuizStatus } from "./session";
 import { Server } from "socket.io";
-import { Socket } from "dgram";
 
 
 const WAITING = 10 * 1000;
@@ -64,8 +63,7 @@ export class Quiz {
         return conn;
     }
 
-
-    private checkAnswer(quizId: number, answer: any) {
+    private checkAnswer(sessId: number, answer: any) {
         const questionId = answer.question;
         const MCSelection = answer.MCSelection;
         const TFSelection = answer.TFSelection;
@@ -79,11 +77,11 @@ export class Quiz {
     }
 
 
-    private formatAnswered(quizId: number, questionId: number) {
+    private formatAnswered(sessId: number, questionId: number) {
         return {
             "question": questionId,
-            "count": this.sess[quizId].getAnswered(),
-            "total": this.sess[quizId].countParticipants()
+            "count": this.sess[sessId].getAnswered(),
+            "total": this.sess[sessId].countParticipants()
         }
     }
 
