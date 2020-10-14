@@ -1,3 +1,5 @@
+import 'package:smart_broccoli/models.dart';
+
 enum UserType { REGISTERED, UNREGISTERED }
 
 class User {
@@ -6,15 +8,27 @@ class User {
   final int pictureId;
   final String email;
   final String name;
+  final GroupRole groupRole;
 
-  User._internal(this.type, this.id, this.pictureId, this.email, this.name);
+  User._internal(this.type, this.id, this.pictureId, this.email, this.name,
+      this.groupRole);
 
   factory User.fromJson(Map<String, dynamic> json) => User._internal(
-      json['role'] == 'user' ? UserType.REGISTERED : UserType.UNREGISTERED,
-      json['id'],
-      json['pictureId'],
-      json['email'],
-      json['name']);
+        json['role'] == 'user'
+            ? UserType.REGISTERED
+            : json['role'] == 'participant'
+                ? UserType.UNREGISTERED
+                : null,
+        json['id'],
+        json['pictureId'],
+        json['email'],
+        json['name'],
+        json['role'] == 'owner'
+            ? GroupRole.OWNER
+            : json['role'] == 'member'
+                ? GroupRole.MEMBER
+                : null,
+      );
 
   Map<String, dynamic> toJson() =>
       <String, dynamic>{'id': id, 'email': email, 'name': name};
