@@ -17,13 +17,16 @@ class QuizQuestion extends StatefulWidget {
 }
 
 class _QuizQuestion extends State<QuizQuestion> {
-  // Global class varibles
-  int _isCorrect = -1;
   int _tappedIndex = -1;
 
   // Correct answer getter
   int actual = 2;
-  List<String> data = ["hi", "hello", "goodbye", "yes"];
+  List<String> data = [
+    "very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very veryvery very very very very very very very very very very very very very very very very long",
+    "hello",
+    "very very very very very very very very very very very very long",
+    "yes"
+  ];
 
   // State of question
   QuestionState _questionState = QuestionState.Standard;
@@ -146,32 +149,32 @@ class _QuizQuestion extends State<QuizQuestion> {
       children: [
         Expanded(child: _answerTab(0)),
         Expanded(
-            child: Row(
-          children: [
-            Expanded(child: _answerTab(1)),
-            Expanded(child: _answerTab(2))
-          ],
-        )),
+          child: Row(
+            children: [
+              Expanded(child: _answerTab(1)),
+              Expanded(child: _answerTab(2))
+            ],
+          ),
+        ),
         Expanded(child: _answerTab(3)),
       ],
     );
   }
 
   // Answer selection tabs
-  Widget _answerTab(index) {
+  Widget _answerTab(int index) {
     return Card(
-      color: findColour(index),
-      elevation: 3,
-      child: InkWell(
-          onTap: () => _questionState == QuestionState.Standard
-              ? updateAnswer(index)
-              : next(), // Temporary mesure to get to leaderboard
-          child: Center(
-            child: Text(
-              'Item $index',
-              style: Theme.of(context).textTheme.headline5,
-            ),
-          )),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Container(
+          height: double.maxFinite,
+          width: double.maxFinite,
+          child: Text(
+            'Item $index: ${data[index]}',
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      ),
     );
   }
 
