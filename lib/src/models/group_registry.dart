@@ -86,7 +86,18 @@ class GroupRegistryModel extends ChangeNotifier {
     refreshCreatedGroups();
   }
 
+  /// Leave the selected group.
+  ///
+  /// No group will subsequently be selected (i.e. [selectedGroup] is `null`).
+  Future<void> leaveSelectedGroup() async {
+    await _groupApi.leaveGroup(_authStateModel.token, _selectedGroup.id);
+    _selectedGroup = null;
+    refreshJoinedGroups();
+  }
+
   /// Delete the selected group.
+  ///
+  /// No group will subsequently be selected (i.e. [selectedGroup] is `null`).
   Future<void> deleteSelectedGroup() async {
     if (_selectedGroup == null) return;
     await _groupApi.deleteGroup(_authStateModel.token, _selectedGroup.id);
