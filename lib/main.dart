@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
-import 'package:smart_broccoli/src/auth/auth_screen.dart';
-import 'package:smart_broccoli/src/auth/init_page.dart';
-import 'package:smart_broccoli/src/quiz/leaderboard.dart';
-import 'package:smart_broccoli/src/quiz/lobby.dart';
-import 'package:smart_broccoli/src/quiz/question.dart';
-import 'package:smart_broccoli/src/quiz/quiz.dart';
 import 'package:smart_broccoli/theme.dart';
+
+import 'src/auth/auth_screen.dart';
+import 'src/auth/init_page.dart';
+import 'src/quiz/leaderboard.dart';
+import 'src/quiz/lobby.dart';
+import 'src/quiz/question.dart';
+import 'src/quiz/quiz.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

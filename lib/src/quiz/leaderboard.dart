@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz/widgets/user.dart';
-
 import 'package:smart_broccoli/theme.dart';
+
 import '../shared/page.dart';
+import 'widgets/user.dart';
 
 /// Leaderboard page
 class QuizLeaderboard extends StatefulWidget {

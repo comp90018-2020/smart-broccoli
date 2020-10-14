@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz/widgets/user.dart';
+
+import 'user.dart';
 
 /// Hold list of users
 class QuizUsers extends StatelessWidget {

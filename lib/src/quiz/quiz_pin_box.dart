@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:smart_broccoli/theme.dart';
+
 import 'lobby.dart';
 
 class QuizPinBox extends StatefulWidget {
