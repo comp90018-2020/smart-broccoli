@@ -164,14 +164,20 @@ class _QuizQuestion extends State<QuizQuestion> {
   // Answer selection tabs
   Widget _answerTab(int index) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Container(
-          height: double.maxFinite,
-          width: double.maxFinite,
-          child: Text(
-            'Item $index: ${data[index]}',
-            style: TextStyle(fontSize: 16),
+      color: findColour(index),
+      child: InkWell(
+        onTap: () => _questionState == QuestionState.Standard
+            ? updateAnswer(index)
+            : next(),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Container(
+            height: double.maxFinite,
+            width: double.maxFinite,
+            child: Text(
+              'Item $index: ${data[index]}',
+              style: TextStyle(fontSize: 16),
+            ),
           ),
         ),
       ),
