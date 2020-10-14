@@ -24,23 +24,23 @@ class Group {
   Group._internal(this.id, this.name, this.defaultGroup, this.code, this.role,
       this.members);
 
-  factory Group.fromJson(Map<String, dynamic> json, {List<User> members}) =>
-      Group._internal(
-          json['id'],
-          json['name'],
-          json['defaultGroup'],
-          json['code'],
-          json['role'] == 'member' ? GroupRole.MEMBER : GroupRole.OWNER,
-          members);
+  factory Group.fromJson(Map<String, dynamic> json) => Group._internal(
+        json['id'],
+        json['name'],
+        json['defaultGroup'],
+        json['code'],
+        json['role'] == 'member' ? GroupRole.MEMBER : GroupRole.OWNER,
+        (json['members'] as List)?.map((repr) => User.fromJson(repr))?.toList(),
+      );
 
-  // note: members list is not serialised
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,
       'name': name,
       'defaultGroup': defaultGroup,
       'code': code,
-      'role': role == GroupRole.MEMBER ? 'member' : 'owner'
+      'role': role == GroupRole.MEMBER ? 'member' : 'owner',
+      'members': members?.map((member) => member.toJson())?.toList(),
     };
   }
 }
