@@ -30,11 +30,12 @@ class SmartBroccoliTheme {
       padding: EdgeInsets.symmetric(vertical: 15),
     ),
     textTheme: TextTheme(
-      button: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-      subtitle1: TextStyle(
-        fontSize: 14,
-      ),
-    ),
+        button: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        subtitle1: TextStyle(
+          fontSize: 14,
+        ),
+        headline6:
+            TextStyle(fontWeight: FontWeight.normal, color: Color(0xFF707070))),
     inputDecorationTheme: InputDecorationTheme(
       contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       filled: true,
@@ -96,17 +97,14 @@ class TabHolder extends FractionallySizedBox {
 }
 
 class AnswerColours {
-  static Color correct() {
-    return Colors.greenAccent;
-  }
+  /// Correct
+  static Color correct = Color(0xFF4CAF50);
 
-  static Color selected() {
-    return Colors.orangeAccent;
-  }
+  /// Selected
+  static Color selected = Color(0xFFFEC12D);
 
-  static Color def() {
-    return Colors.white;
-  }
+  /// Default
+  static Color normal = Colors.white;
 }
 
 class LobbyDivider extends Divider {

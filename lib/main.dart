@@ -4,6 +4,7 @@ import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/src/auth/auth_screen.dart';
 import 'package:smart_broccoli/src/auth/init_page.dart';
+import 'package:smart_broccoli/src/quiz/leaderboard.dart';
 import 'package:smart_broccoli/src/quiz/lobby.dart';
 import 'package:smart_broccoli/src/quiz/question.dart';
 import 'package:smart_broccoli/src/quiz/quiz.dart';
@@ -51,11 +52,12 @@ class _MyAppState extends State<MyApp> {
         '/home': (context) => InitialRouter(),
         '/take_quiz': (context) => TakeQuiz(),
         '/lobby': (context) => StartLobby(),
-        '/question': (context) => QuizQuestion()
+        '/question': (context) => QuizQuestion(),
+        '/leaderboard': (context) => LeaderBoardLobby()
       },
       navigatorKey: mainNavigator,
       // initialRoute: state.inSession ? '/home' : '/auth',
-      initialRoute: '/take_quiz',
+      initialRoute: '/question',
     );
   }
 }
