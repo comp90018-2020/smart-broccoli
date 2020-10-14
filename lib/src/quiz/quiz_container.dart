@@ -41,18 +41,19 @@ class _BuildQuiz extends State<QuizContainer> {
                   scrollDirection: Axis.horizontal,
                   itemCount: widget.items.length,
                   itemBuilder: (context, index) {
-                    return ConstrainedBox(
+                    return Container(
                       constraints: BoxConstraints(maxWidth: 175),
-                      child: Container(
-                          margin: index == 0
-                              ? EdgeInsets.only(left: 20)
-                              : EdgeInsets.zero,
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          child: QuizCard(
-                            'Quiz name',
-                            'Group name',
-                            onTap: _quiz,
-                          )),
+                      margin: index == 0 || index == widget.items.length - 1
+                          ? EdgeInsets.only(
+                              left: index == 0 ? 20 : 0,
+                              right: index == 0 ? 0 : 20)
+                          : EdgeInsets.zero,
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: QuizCard(
+                        'Quiz name',
+                        'Group name',
+                        onTap: _quiz,
+                      ),
                     );
                   },
                   // Space between the cards

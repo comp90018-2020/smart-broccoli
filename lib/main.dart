@@ -64,7 +64,7 @@ class _MyAppState extends State<MyApp> {
       },
       navigatorKey: mainNavigator,
       // initialRoute: state.inSession ? '/home' : '/auth',
-      initialRoute: '/lobby',
+      initialRoute: '/take_quiz',
     );
   }
 }
