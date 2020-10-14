@@ -6,7 +6,6 @@ import 'package:mockito/mockito.dart';
 import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/src/store/remote/api_base.dart';
 import 'package:smart_broccoli/src/store/remote/group_api.dart';
-import 'package:tuple/tuple.dart';
 
 class MockClient extends Mock implements http.Client {}
 
@@ -202,18 +201,18 @@ main() async {
         200));
 
     final members = await api.getMembers("asdfqwerty1234567890foobarbaz", 2);
-    expect(members, isA<List<Tuple2<User, GroupRole>>>());
+    expect(members, isA<List<User>>());
     expect(members.length, 3);
-    members.sort((t0, t1) => t0.item1.id.compareTo(t1.item1.id));
-    expect(members[0].item1.id, 1);
-    expect(members[1].item1.id, 2);
-    expect(members[2].item1.id, 3);
-    expect(members[0].item1.name, "Harald Søndergaard");
-    expect(members[1].item1.name, "Aaron Harwood");
-    expect(members[2].item1.name, null);
-    expect(members[0].item2, GroupRole.OWNER);
-    expect(members[1].item2, GroupRole.MEMBER);
-    expect(members[2].item2, GroupRole.MEMBER);
+    members.sort((t0, t1) => t0.id.compareTo(t1.id));
+    expect(members[0].id, 1);
+    expect(members[1].id, 2);
+    expect(members[2].id, 3);
+    expect(members[0].name, "Harald Søndergaard");
+    expect(members[1].name, "Aaron Harwood");
+    expect(members[2].name, null);
+    expect(members[0].groupRole, GroupRole.OWNER);
+    expect(members[1].groupRole, GroupRole.MEMBER);
+    expect(members[2].groupRole, GroupRole.MEMBER);
   });
 
   test('Get specified group (does not exist)', () async {

@@ -1,5 +1,4 @@
 import 'package:smart_broccoli/models.dart';
-import 'package:tuple/tuple.dart';
 
 import 'user.dart';
 
@@ -13,38 +12,35 @@ enum GroupRole { OWNER, MEMBER }
 /// change with the server. Do not change other fields.
 class Group {
   final int id;
+  final String name;
   final bool defaultGroup;
   final String code;
   final GroupRole role;
 
-  String name;
-
-  /// Read-only list of members (with roles); mutating this list will have
-  /// no effect on the server
-  List<Tuple2<User, GroupRole>> members;
+  /// List of members; mutating this list will have no effect on the server
+  List<User> members;
 
   /// Constructor for internal use only
   Group._internal(this.id, this.name, this.defaultGroup, this.code, this.role,
       this.members);
 
-  factory Group.fromJson(Map<String, dynamic> json,
-          {List<Tuple2<User, GroupRole>> members}) =>
-      Group._internal(
-          json['id'],
-          json['name'],
-          json['defaultGroup'],
-          json['code'],
-          json['role'] == 'member' ? GroupRole.MEMBER : GroupRole.OWNER,
-          members);
+  factory Group.fromJson(Map<String, dynamic> json) => Group._internal(
+        json['id'],
+        json['name'],
+        json['defaultGroup'],
+        json['code'],
+        json['role'] == 'member' ? GroupRole.MEMBER : GroupRole.OWNER,
+        (json['members'] as List)?.map((repr) => User.fromJson(repr))?.toList(),
+      );
 
-  // note: members list is not serialised
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,
       'name': name,
       'defaultGroup': defaultGroup,
       'code': code,
-      'role': role == GroupRole.MEMBER ? 'member' : 'owner'
+      'role': role == GroupRole.MEMBER ? 'member' : 'owner',
+      'members': members?.map((member) => member.toJson())?.toList(),
     };
   }
 }

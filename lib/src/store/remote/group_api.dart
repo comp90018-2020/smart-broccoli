@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'package:smart_broccoli/models.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../data/group.dart';
 import 'api_base.dart';
@@ -53,16 +52,14 @@ class GroupApi {
     throw Exception('Unable to get specified group: unknown error occurred');
   }
 
-  /// Return a list of members as (User, GroupRole) tuples for a group with
-  /// specified [id].
-  Future<List<Tuple2<User, GroupRole>>> getMembers(String token, int id) async {
+  /// Return a list of members (as User) for a group with specified [id].
+  Future<List<User>> getMembers(String token, int id) async {
     http.Response response = await _http.get('$GROUP_URL/$id/member',
         headers: ApiBase.headers(authToken: token));
 
     if (response.statusCode == 200)
       return (json.decode(response.body) as List)
-          .map((repr) => Tuple2(User.fromJson(repr),
-              repr['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER))
+          .map((repr) => User.fromJson(repr))
           .toList();
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
