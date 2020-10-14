@@ -43,13 +43,13 @@ class _TakeQuizState extends State<TakeQuiz> {
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        BuildQuiz(QuizPinBox(key: _buildQuizKey), items),
+        QuizContainer(QuizPinBox(key: _buildQuizKey), items),
 
         // Live quiz
-        BuildQuiz(QuizPinBox(), items),
+        QuizContainer(QuizPinBox(), items),
 
         /// Self-paced quiz has Text to fill the vertical space
-        BuildQuiz(
+        QuizContainer(
             ConstrainedBox(
                 constraints: BoxConstraints(minHeight: _height ?? 175),
                 child: Align(

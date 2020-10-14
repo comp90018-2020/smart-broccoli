@@ -51,9 +51,9 @@ class _MyAppState extends State<MyApp> {
         '/auth': (context) => AuthScreen(),
         '/home': (context) => InitialRouter(),
         '/take_quiz': (context) => TakeQuiz(),
-        '/lobby': (context) => StartLobby(),
+        '/lobby': (context) => QuizLobby(),
         '/question': (context) => QuizQuestion(),
-        '/leaderboard': (context) => LeaderBoardLobby()
+        '/leaderboard': (context) => QuizLeaderboard()
       },
       navigatorKey: mainNavigator,
       // initialRoute: state.inSession ? '/home' : '/auth',

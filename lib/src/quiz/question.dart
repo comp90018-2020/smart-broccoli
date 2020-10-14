@@ -136,6 +136,7 @@ class _QuizQuestion extends State<QuizQuestion> {
                 ],
               ),
             ),
+            // Answer selection boxes
             Expanded(flex: 5, child: _quizAnswers())
           ],
         ),
@@ -219,7 +220,7 @@ class _QuizQuestion extends State<QuizQuestion> {
   void next() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LeaderBoardLobby()),
+      MaterialPageRoute(builder: (context) => QuizLeaderboard()),
     );
   }
 }

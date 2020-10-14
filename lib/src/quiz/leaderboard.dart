@@ -7,12 +7,12 @@ import 'quiz.dart';
 import 'widgets/users.dart';
 
 /// Leaderboard page
-class LeaderBoardLobby extends StatefulWidget {
+class QuizLeaderboard extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _LeaderBoardLobby();
 }
 
-class _LeaderBoardLobby extends State<LeaderBoardLobby> {
+class _LeaderBoardLobby extends State<QuizLeaderboard> {
   // Entry function
   @override
   Widget build(BuildContext context) {

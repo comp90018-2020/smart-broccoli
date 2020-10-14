@@ -8,12 +8,12 @@ import 'widgets/users.dart';
 import 'question.dart';
 
 /// Widget for Lobby
-class StartLobby extends StatefulWidget {
+class QuizLobby extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _StartLobby();
 }
 
-class _StartLobby extends State<StartLobby> {
+class _StartLobby extends State<QuizLobby> {
   // Timer for countdown
   Timer _timer;
   // You should have a getter method here to get data from server

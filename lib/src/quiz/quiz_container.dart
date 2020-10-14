@@ -5,8 +5,8 @@ import 'widgets/card.dart';
 import 'lobby.dart';
 
 /// Build a list of quizzes
-class BuildQuiz extends StatefulWidget {
-  BuildQuiz(this.header, this.items, {Key key}) : super(key: key);
+class QuizContainer extends StatefulWidget {
+  QuizContainer(this.header, this.items, {Key key}) : super(key: key);
 
   /// List of items
   final List<String> items;
@@ -18,7 +18,7 @@ class BuildQuiz extends StatefulWidget {
   State<StatefulWidget> createState() => new _BuildQuiz();
 }
 
-class _BuildQuiz extends State<BuildQuiz> {
+class _BuildQuiz extends State<QuizContainer> {
   _BuildQuiz();
 
   // Builder function for a list of card tiles
@@ -70,7 +70,7 @@ class _BuildQuiz extends State<BuildQuiz> {
   /// Interface
   void _quiz() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => StartLobby()),
+      MaterialPageRoute(builder: (context) => QuizLobby()),
     );
   }
 }

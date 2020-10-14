@@ -74,7 +74,7 @@ class _QuizPinBoxState extends State<QuizPinBox> {
     // TODO remove debug code below
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => StartLobby()),
+      MaterialPageRoute(builder: (context) => QuizLobby()),
     );
   }
 }
