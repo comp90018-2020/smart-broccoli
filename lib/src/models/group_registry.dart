@@ -75,6 +75,12 @@ class GroupRegistryModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Refresh the code to join the selected group (ask server for new one).
+  Future<void> refreshSelectedGroupCode() async {
+    await _groupApi.refreshCode(_authStateModel.token, _selectedGroup.id);
+    refreshSelectedGroup();
+  }
+
   /// Update the name of the group currently selected.
   Future<void> updateSelectedGroup(String name) async {
     await _groupApi.updateGroup(_authStateModel.token, _selectedGroup.id, name);
