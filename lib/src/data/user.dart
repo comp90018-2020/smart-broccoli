@@ -1,22 +1,56 @@
+import 'dart:typed_data';
+
+import 'package:smart_broccoli/models.dart';
+
 enum UserType { REGISTERED, UNREGISTERED }
 
 class User {
-  UserType type;
-  int _id;
-  int get id => _id;
-  String email;
-  String name;
+  final UserType type;
+  final int id;
+  final int pictureId;
+  final String email;
+  final String name;
+  final GroupRole groupRole;
 
-  User(this.type, this._id, this.email, this.name);
+  Uint8List picture;
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
-      json['role'] == 'user' ? UserType.REGISTERED : UserType.UNREGISTERED,
-      json['id'],
-      json['email'],
-      json['name']);
+  User._internal(this.type, this.id, this.pictureId, this.email, this.name,
+      this.groupRole, this.picture);
 
-  Map<String, dynamic> toJson() =>
-      <String, dynamic>{'id': id, 'email': email, 'name': name};
+  factory User.fromJson(Map<String, dynamic> json, {Uint8List picture}) =>
+      User._internal(
+        json['role'] == 'user'
+            ? UserType.REGISTERED
+            : json['role'] == 'participant'
+                ? UserType.UNREGISTERED
+                : null,
+        json['id'],
+        json['pictureId'],
+        json['email'],
+        json['name'],
+        json['role'] == 'owner'
+            ? GroupRole.OWNER
+            : json['role'] == 'member'
+                ? GroupRole.MEMBER
+                : null,
+        picture,
+      );
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'pictureId': pictureId,
+        'email': email,
+        'name': name,
+        'role': type == UserType.REGISTERED
+            ? 'user'
+            : type == UserType.UNREGISTERED
+                ? 'participant'
+                : groupRole == GroupRole.OWNER
+                    ? 'owner'
+                    : groupRole == GroupRole.MEMBER
+                        ? 'member'
+                        : null,
+      };
 }
 
 class RegistrationException implements Exception {}
