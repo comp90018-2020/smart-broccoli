@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/src/quiz/widgets/user.dart';
 
 import 'package:smart_broccoli/theme.dart';
 import '../shared/page.dart';
-import 'question.dart';
-import 'quiz.dart';
 import 'widgets/users.dart';
 
 /// Leaderboard page
@@ -48,7 +47,7 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 25,
                 children: <Widget>[
-                  topThreeUsers(
+                  _topThreeUsers(
                     "Winner 2",
                     50,
                     Text(
@@ -56,10 +55,10 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
                       style: SmartBroccoliTheme.leaderboardRankStyle,
                     ),
                   ),
-                  topThreeUsers("Winner 1", 75,
+                  _topThreeUsers("Winner 1", 75,
                       Text('1', style: SmartBroccoliTheme.leaderboardRankStyle),
                       bolded: true),
-                  topThreeUsers(
+                  _topThreeUsers(
                       "Winner 3",
                       50,
                       Text('3',
@@ -67,20 +66,21 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
                 ],
               )),
 
+          // Current user & ranking
           Container(
-              margin: EdgeInsets.only(top: 9, bottom: 6),
+              margin: EdgeInsets.only(top: 12, bottom: 3),
               height: 25.0 + 35,
-              child: QuizUsers(["A"])),
+              child: _leaderboardList(["A"])),
 
           // List of users
-          Expanded(child: QuizUsers(["A", "B", "C"])),
+          Expanded(child: _leaderboardList(["A", "B", "C"])),
         ],
       ),
     );
   }
 
   // Creates user image and name
-  Widget topThreeUsers(text, double dimensions, Widget inner,
+  Widget _topThreeUsers(text, double dimensions, Widget inner,
       {bool bolded = false}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -104,6 +104,38 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
       ],
     );
   }
+
+  Widget _leaderboardList(List<String> list) {
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: list.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 3),
+          child: Row(children: [
+            Text(
+              '1',
+              style: SmartBroccoliTheme.listItemTextStyle,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: UserItem('name'),
+              ),
+            ),
+            Wrap(
+                spacing: 5,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text('3,500', style: SmartBroccoliTheme.listItemTextStyle),
+                  Icon(Icons.star, color: Color(0xFF656565))
+                ])
+          ]),
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
+    );
+  }
 }
 
 // Curved clipper
@@ -113,8 +145,8 @@ class _BackgroundClipper extends CustomClipper<Path> {
     var path = Path();
 
     path.lineTo(0, 125);
-    var firstControlPoint = new Offset(size.width / 4, 165);
-    var firstEndPoint = new Offset(size.width / 2, 150);
+    var firstControlPoint = new Offset(size.width / 4, 160);
+    var firstEndPoint = new Offset(size.width / 2, 145);
     var secondControlPoint = new Offset(size.width - (size.width / 4), 125);
     var secondEndPoint = new Offset(size.width, 150);
 

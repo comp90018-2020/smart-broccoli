@@ -65,6 +65,10 @@ class SmartBroccoliTheme {
   /// Winner text style (1, 2, 3)
   static final TextStyle leaderboardRankStyle = TextStyle(
       fontSize: 16, color: Color(0xFF696E69), fontWeight: FontWeight.bold);
+
+  /// List item text style
+  static final TextStyle listItemTextStyle =
+      TextStyle(color: Color(0xFF656565), fontWeight: FontWeight.bold);
 }
 
 /// Widget to hold the app logo on auth screen

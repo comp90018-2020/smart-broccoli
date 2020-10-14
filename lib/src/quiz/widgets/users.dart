@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/src/quiz/widgets/user.dart';
 
 /// Hold list of users
 class QuizUsers extends StatelessWidget {
@@ -15,20 +16,7 @@ class QuizUsers extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-          child: Row(children: [
-            // Profile image
-            Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(100))),
-            // Name
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Text(userList[index]),
-            )
-          ]),
+          child: UserItem(userList[index]),
         );
       },
       separatorBuilder: (BuildContext context, int index) => const Divider(),
