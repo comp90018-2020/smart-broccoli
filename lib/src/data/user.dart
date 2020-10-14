@@ -3,14 +3,16 @@ enum UserType { REGISTERED, UNREGISTERED }
 class User {
   final UserType type;
   final int id;
+  final int pictureId;
   final String email;
   final String name;
 
-  User(this.type, this.id, this.email, this.name);
+  User._internal(this.type, this.id, this.pictureId, this.email, this.name);
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
+  factory User.fromJson(Map<String, dynamic> json) => User._internal(
       json['role'] == 'user' ? UserType.REGISTERED : UserType.UNREGISTERED,
       json['id'],
+      json['pictureId'],
       json['email'],
       json['name']);
 
