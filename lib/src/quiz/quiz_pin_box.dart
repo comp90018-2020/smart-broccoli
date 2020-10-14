@@ -25,10 +25,12 @@ class _QuizPinBoxState extends State<QuizPinBox> {
           decoration: new InputDecoration(
             labelText: 'Pin',
             // prefixIcon: Icon(Icons.people),
+            counterText: '',
           ),
-          textCapitalization: TextCapitalization.words,
-          textInputAction: TextInputAction.next,
-          onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+          keyboardType: TextInputType.number,
+          maxLength: 6,
+          textInputAction: TextInputAction.done,
+          onFieldSubmitted: (_) => _verifyPin(),
         ),
       ),
 
