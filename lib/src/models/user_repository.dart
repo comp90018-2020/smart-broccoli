@@ -70,6 +70,14 @@ class UserRepository {
     return members;
   }
 
+  Future<Uint8List> getProfilePicOf(String token, int id) async {
+    Uint8List bytes;
+    if (_users.containsKey(id) &&
+        (bytes = await lookupPicLocally(_users[id].pictureId)) != null)
+      return bytes;
+    return await _userApi.getProfilePicOf(token, id);
+  }
+
   Future<Uint8List> lookupPicLocally(int pictureId) async {
     String assetDir =
         '${(await getTemporaryDirectory()).toString()}/picture/$pictureId';
