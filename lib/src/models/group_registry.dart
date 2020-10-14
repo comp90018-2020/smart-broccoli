@@ -75,6 +75,13 @@ class GroupRegistryModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Update the name of the group currently selected.
+  Future<void> updateSelectedGroup(String name) async {
+    await _groupApi.updateGroup(_authStateModel.token, _selectedGroup.id, name);
+    refreshSelectedGroup();
+    refreshCreatedGroups();
+  }
+
   /// Refresh the ListView of groups the user has joined.
   ///
   /// This callback does not populate the `members` field of each group. The
