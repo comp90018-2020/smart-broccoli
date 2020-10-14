@@ -165,7 +165,7 @@ class _QuizQuestion extends State<QuizQuestion> {
       child: InkWell(
           onTap: () => _questionState == QuestionState.Standard
               ? updateAnswer(index)
-              : next(),
+              : next(), // Temporary mesure to get to leaderboard
           child: Center(
             child: Text(
               'Item $index',
