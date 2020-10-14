@@ -127,4 +127,14 @@ class GroupRegistryModel extends ChangeNotifier {
     await _groupApi.createGroup(_authStateModel.token, name);
     refreshCreatedGroups();
   }
+
+  /// Join a group.
+  ///
+  /// The group will subsequently be selected (i.e. is [selectedGroup]).
+  Future<void> joinGroup({String name, String code}) async {
+    Group group = await _groupApi.joinGroup(_authStateModel.token,
+        name: name, code: code);
+    selectGroup(group.id);
+    refreshJoinedGroups();
+  }
 }
