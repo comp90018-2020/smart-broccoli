@@ -119,7 +119,7 @@ class LobbyDivider extends Divider {
   LobbyDivider()
       : super(
           thickness: 3,
-          height: 3,
+          height: 20,
           color: Colors.orangeAccent,
         );
 }

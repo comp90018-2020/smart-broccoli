@@ -74,79 +74,99 @@ class _StartLobby extends State<QuizLobby> {
       // Body
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Stack(children: [
-                  // Quiz card
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-                    margin: EdgeInsets.only(bottom: 12),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height * 0.35),
-                      child: QuizCard(
-                        "Quiz name",
-                        "Quiz group",
-                        aspectRatio: 3,
-                      ),
-                    ),
-                  ),
-
-                  // Start button on top of card
-                  Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: RaisedButton(
-                        shape: SmartBroccoliTheme.raisedButtonShape,
-                        child: Text("Start"),
-                        onPressed: () => _startQuiz(),
-                      ),
-                    ),
-                  ),
-                ]),
-
-                // Chip for group subscriptions
-                Chip(
-                  label: Text('Subscribed to group'),
-                  avatar: Icon(Icons.check_sharp),
-                ),
-
-                // Text describing status
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Text(
-                    'Waiting for host to start...',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      backgroundColor: Colors.transparent,
-                    ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Stack(children: [
+              // Quiz card
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+                margin: EdgeInsets.only(bottom: 12),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.35),
+                  child: QuizCard(
+                    "Quiz name",
+                    "Quiz group",
+                    aspectRatio: 3,
                   ),
                 ),
+              ),
 
-                // Participants text
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 3),
-                  child: Text(
-                    'Participants',
-                    textAlign: TextAlign.left,
+              // Start button on top of card
+              Positioned.fill(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: RaisedButton(
+                    shape: SmartBroccoliTheme.raisedButtonShape,
+                    child: Text("Start"),
+                    onPressed: () => _startQuiz(),
                   ),
                 ),
+              ),
+            ]),
 
-                // Orange Divider
-                LobbyDivider(),
+            // Chip for group subscriptions
+            Chip(
+                label: Text('Subscribed to group'),
+                avatar: Icon(Icons.check_sharp)),
 
-                // The list of Quiz players
-                Expanded(child: QuizUsers(["A", "B", "C", "D", "E", "F", "G"])),
-              ],
+            // Text describing status
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: Text(
+                'Waiting for host to start...',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    backgroundColor: Colors.transparent),
+              ),
             ),
 
-            // Timer stacked on top
-            _quizTimer(),
+            // Container(
+            //   padding: EdgeInsets.symmetric(horizontal: 25),
+            //   child: Text(
+            //     'Participants',
+            //     textAlign: TextAlign.left,
+            //   ),
+            // ),
+
+            Expanded(
+              child: Stack(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 25),
+                        child: Text(
+                          'Participants',
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                      LobbyDivider(),
+                    ],
+                  ),
+                  // Orange divider
+                  // LobbyDivider(),
+
+                  // The list of Quiz players
+                  Padding(
+                    padding: EdgeInsets.only(top: 26),
+                    child: QuizUsers(["A", "B", "C", "D", "E", "F", "G"]),
+                  ),
+
+                  // Quiz countdown
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: _quizTimer(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -155,16 +175,13 @@ class _StartLobby extends State<QuizLobby> {
 
   // Timer display functionality
   Widget _quizTimer() {
-    return new Align(
-      alignment: Alignment.centerRight,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 30, 0),
-        child: Container(
-          height: 50,
-          width: 50,
-          decoration: LobbyTimerBoxDecoration(),
-          child: Center(child: Text("$_start")),
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 30, 0),
+      child: Container(
+        height: 50,
+        width: 50,
+        decoration: LobbyTimerBoxDecoration(),
+        child: Center(child: Text("$_start")),
       ),
     );
   }
