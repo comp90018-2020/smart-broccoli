@@ -1,4 +1,3 @@
-// code structure inspired by https://medium.com/@mahmudahsan/how-to-create-validate-and-save-form-in-flutter-e80b4d2a70a4
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,14 +5,14 @@ import 'package:flutter/services.dart';
 
 import 'package:image_picker/image_picker.dart';
 
-class QuestionCreateForm extends StatefulWidget {
-  QuestionCreateForm({Key key}) : super(key: key);
+class QuestionCreate extends StatefulWidget {
+  QuestionCreate({Key key}) : super(key: key);
 
   @override
-  _QuestionCreateFormState createState() => _QuestionCreateFormState();
+  _QuestionCreateState createState() => _QuestionCreateState();
 }
 
-class _QuestionCreateFormState extends State<QuestionCreateForm> {
+class _QuestionCreateState extends State<QuestionCreate> {
   // Answer cards START
   // Creates an answer card
 

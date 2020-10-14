@@ -5,6 +5,8 @@ import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/src/about/acknowledgements.dart';
 import 'package:smart_broccoli/src/auth/auth_screen.dart';
 import 'package:smart_broccoli/src/auth/init_page.dart';
+import 'package:smart_broccoli/src/groups/group_list.dart';
+import 'package:smart_broccoli/src/quiz_creator/question_creator.dart';
 import 'package:smart_broccoli/src/quiz_creator/quiz_creator.dart';
 import 'package:smart_broccoli/theme.dart';
 
@@ -69,12 +71,14 @@ class _MyAppState extends State<MyApp> {
         '/leaderboard': (context) => QuizLeaderboard(),
         '/about': (context) => AboutPage(),
         '/about/acknowledgements': (context) => AcknowledgementsPage(),
-        '/group-hp': (context) => QuizCreateForm(),
+        '/group_home': (context) => GroupList(),
+        '/quiz': (context) => QuizCreate(),
+        '/quiz/question': (context) => QuestionCreate()
       },
       navigatorKey: mainNavigator,
       // initialRoute: state.inSession ? '/home' : '/auth',
       // Debug purposes only, replace with above later on
-      initialRoute: '/group-hp',
+      initialRoute: '/group_home',
     );
   }
 }

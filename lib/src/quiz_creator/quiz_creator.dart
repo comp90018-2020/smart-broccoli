@@ -1,4 +1,3 @@
-// code structure inspired by https://medium.com/@mahmudahsan/how-to-create-validate-and-save-form-in-flutter-e80b4d2a70a4
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,14 +7,14 @@ import '../data/quiz.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:numberpicker/numberpicker.dart';
 
-class QuizCreateForm extends StatefulWidget {
-  QuizCreateForm({Key key}) : super(key: key);
+class QuizCreate extends StatefulWidget {
+  QuizCreate({Key key}) : super(key: key);
 
   @override
-  _QuizCreateFormState createState() => _QuizCreateFormState();
+  _QuizCreateState createState() => _QuizCreateState();
 }
 
-class _QuizCreateFormState extends State<QuizCreateForm> {
+class _QuizCreateState extends State<QuizCreate> {
   // Timer picker START
   int _currentIntValue = 30;
   NumberPicker integerNumberPicker;
@@ -42,8 +41,7 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
         }).then((value) => _handleValueChangedExternally(value));
   }
 
-  /**
-   * Timer picker END**********************************/
+  // Timer picker END**********************************/
 
   // Image setter START**********************************/
 
@@ -109,7 +107,7 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
   QuizType radioBtn = QuizType.LIVE;
 
   final _formKey = GlobalKey<FormState>();
-  _QuizCreateFormState();
+  _QuizCreateState();
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,4 @@
-import 'package:smart_broccoli/src/groups/group-hp.dart';
+import 'package:smart_broccoli/src/groups/group_list.dart';
 
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/shared/tabbed_page.dart';
@@ -6,12 +6,12 @@ import 'package:smart_broccoli/src/shared/tabbed_page.dart';
 GlobalKey _joinedKey = GlobalKey();
 GlobalKey _createdKey = GlobalKey();
 
-class GroupHpContainer extends StatefulWidget {
+class GroupListContainer extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _GroupHpContainerState();
+  State<StatefulWidget> createState() => new _GroupListContainerState();
 }
 
-class _GroupHpContainerState extends State<GroupHpContainer> {
+class _GroupListContainerState extends State<GroupListContainer> {
   // Tabs that are shown (in TabBarView)
   List<Widget> _tabs;
 
@@ -20,8 +20,8 @@ class _GroupHpContainerState extends State<GroupHpContainer> {
     super.initState();
 
     _tabs = [
-      GroupTab(key: _joinedKey, name: 'joined'),
-      GroupTab(key: _createdKey, name: 'created')
+      GroupList(key: _joinedKey, name: 'joined'),
+      GroupList(key: _createdKey, name: 'created')
     ];
   }
 

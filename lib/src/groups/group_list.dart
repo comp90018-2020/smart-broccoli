@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-class GroupTab extends StatefulWidget {
+class GroupList extends StatefulWidget {
   final String name;
 
-  GroupTab({Key key, this.name}) : super(key: key);
+  GroupList({Key key, this.name}) : super(key: key);
   @override
-  _GroupTabState createState() => _GroupTabState();
+  _GroupListState createState() => _GroupListState();
 }
 
-class _GroupTabState extends State<GroupTab> {
+class _GroupListState extends State<GroupList> {
   final _groups = ["Math", "Biology", "Chemistry"];
   final _biggerFont = TextStyle(fontSize: 18.0);
 
