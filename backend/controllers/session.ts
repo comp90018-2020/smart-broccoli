@@ -9,6 +9,7 @@ import sequelize, {
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
+import {handler} from "../game/index";
 
 // Represents a session token
 export interface SessionToken {
@@ -300,6 +301,10 @@ export const createSession = async (userId: number, opts: any) => {
             userId,
             role: sessionParticipant.role,
         });
+
+        // pass quiz and session to socket 
+        const res = handler.addSession(quiz, session);
+
         return { session, token };
     });
 };
