@@ -198,7 +198,6 @@ class _BackgroundRectClipper extends CustomClipper<Path> {
     path.lineTo(size.width - 15, 0);
     return path;
   }
-
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) {
     return true;
