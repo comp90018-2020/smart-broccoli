@@ -79,32 +79,43 @@ class _QuestionCreateState extends State<QuestionCreate> {
               ),
 
               // Question image
-              Card(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        height: 100,
-                        child: _decideImageView(),
-                      ),
-                      ButtonBar(
-                        alignment: MainAxisAlignment.center,
-                        children: [
-                          FlatButton(
-                            textColor: Colors.black54,
-                            onPressed: () {
-                              _showChoiceDialog(context);
-                              // Perform some action
-                            },
-                            child: const Text('SET QUESTION IMAGE'),
+              Container(
+                height: 175,
+                child: Expanded(
+                  child: Card(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: <Widget>[
+                        Container(
+                          width: double.maxFinite,
+                          height: 100,
+                          child: imageFile == null
+                              ? Icon(Icons.insert_photo_outlined, size: 100)
+                              : Image.file(imageFile, fit: BoxFit.cover),
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 6,
+                          child: ButtonTheme(
+                            minWidth: 10,
+                            child: RaisedButton(
+                              shape: SmartBroccoliTheme.raisedButtonShape,
+                              child: Icon(
+                                Icons.add_a_photo,
+                                size: 20,
+                              ),
+                              onPressed: () => _showChoiceDialog(context),
+                            ),
                           ),
-                        ],
-                      )
-                    ]),
-                margin: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4)),
-                elevation: 5,
+                        ),
+                      ],
+                    ),
+                    margin: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
+                    elevation: 5,
+                  ),
+                ),
               ),
 
               // Answers heading
@@ -230,17 +241,5 @@ class _QuestionCreateState extends State<QuestionCreate> {
             ),
           );
         });
-  }
-
-  Widget _decideImageView() {
-    if (imageFile == null) {
-      return IconButton(
-        padding: new EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
-        icon: new Icon(Icons.insert_photo_outlined, size: 100),
-        onPressed: () {},
-      );
-    } else {
-      return Image.file(imageFile, fit: BoxFit.cover);
-    }
   }
 }
