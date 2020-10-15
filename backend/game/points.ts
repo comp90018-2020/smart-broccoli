@@ -38,7 +38,6 @@ export class PointSystem {
         if (factor !== 0) {
             const factorStreak = ansRes.streak * 0.1;
             const factorRank = (1 - ansRes.rank / this.participantCount) / 2;
-            console.log(factor, factorStreak, factorRank);
             return factor + (factorStreak < 1 ? factorStreak : 1) + factorRank;
         }
         return factor;
