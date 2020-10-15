@@ -50,7 +50,7 @@ class _QuizCreateState extends State<QuizCreate> {
           onPressed: () {},
           child: Text(
             'Save',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 16),
           ),
         ),
       ],

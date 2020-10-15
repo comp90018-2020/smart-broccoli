@@ -64,7 +64,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
           onPressed: () {},
           child: Text(
             'Save',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 16),
           ),
         ),
       ],
