@@ -133,15 +133,21 @@ class CustomPage extends StatelessWidget {
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.question_answer),
-                    title: Text('Take Quiz',
+                    title: Text('TAKE QUIZ',
                         style:
                             TextStyle(color: Theme.of(context).primaryColor)),
-                    onTap: () {},
+                    onTap: () {
+                      if (ModalRoute.of(context).settings.name != '/take_quiz')
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/take_quiz', (route) => false);
+                      else
+                        Navigator.pop(context);
+                    },
                   ),
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.edit),
-                    title: Text('Manage Quiz',
+                    title: Text('MANAGE QUIZ',
                         style:
                             TextStyle(color: Theme.of(context).primaryColor)),
                     onTap: () {},
@@ -149,7 +155,7 @@ class CustomPage extends StatelessWidget {
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.people),
-                    title: Text('Groups',
+                    title: Text('GROUPS',
                         style:
                             TextStyle(color: Theme.of(context).primaryColor)),
                     onTap: () {},
