@@ -1,23 +1,6 @@
 import { Session as SessInController, Quiz as QuizInModels } from "../models";
 import { sessionTokenDecrypt as decrypt, SessionToken } from "../controllers/session"
-import { PointSystem, Answer, AnswerOutcome } from "./scores";
-
-enum AnswerStatus {
-    NoAnswered = 0,
-    Answered = 1
-}
-
-enum GameStatus {
-    InGame = 0,
-    Left = 1
-}
-
-class PlayerStatus {
-    constructor(
-        public answer: AnswerStatus,
-        public game: GameStatus
-    ) { };
-}
+import { PointSystem, Answer, AnswerOutcome } from "./points";
 
 export enum QuizStatus {
     Pending = 0,
@@ -26,7 +9,7 @@ export enum QuizStatus {
     Ended = 3
 }
 
-export class User {
+export class Player {
     constructor(
         readonly id: number,
         readonly name: string,
@@ -54,9 +37,23 @@ class Question {
 
 export class Conn {
     constructor(
-        readonly user: User,
+        readonly player: Player,
         readonly sessionToken: SessionToken
     ) { }
+}
+
+class Record {
+    constructor(
+        public oldPos: number,
+        public newPos: number,
+        public bonusPoints: number,
+        public points: number,
+        public streak: number
+    ) { }
+}
+
+class PlayerRecord {
+    constructor(readonly player: Player, readonly record: Record) { }
 }
 
 export class Session {
@@ -64,71 +61,78 @@ export class Session {
     SessInController: SessInController;
     status: QuizStatus;
     private quizStartsAt = 0;
-    private participants: any;
-    private participantNames: { [key: string]: any };
-    public participantAnsOutcomes: { [key: string]: AnswerOutcome };
+    private playerIdSet: Set<number>;
+    private playerNames: { [key: string]: any };
+    private players: { [key: string]: Player };
+    public playerAnsOutcomes: { [key: string]: AnswerOutcome };
     private questions: Question[];
     private questionsWithAns: Question[];
     private sockets: Set<SocketIO.Socket>;
     private questionIdx = 0;
     private preQuestionIdx = 0;
     private questionReleasedAt = 0;
-    public readyForNextQuestion : boolean = true;
+    public readyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem(0);
     public hasFinalBoardReleased: boolean;
+
+    public playerRecords: { [key: number]: PlayerRecord };
+
 
     constructor($quiz: any, $s: SessInController) {
         this.id = $s.id;
         this.SessInController = $s;
-        this.participants = new Set([]);
-        this.participantNames = {};
-        this.participantAnsOutcomes = {};
+        this.playerIdSet = new Set([]);
+        this.playerNames = {};
+        this.players = {};
+        this.playerAnsOutcomes = {};
         this.sockets = new Set();
         this.status = QuizStatus.Pending;
         this.setQuestions($quiz);
         this.hasFinalBoardReleased = false;
+        this.playerRecords = {};
     }
 
-    async addParticipant(user: User, socket: SocketIO.Socket) {
-        this.participants.add(user.id);
+    async addParticipant(player: Player, socket: SocketIO.Socket) {
+        this.playerIdSet.add(player.id);
         ++this.pointSys.participantCount;
-        this.participantNames[user.id] = user.name;
+        this.playerNames[player.id] = player.name;
+        this.players[player.id] = player;
         this.sockets.add(socket);
-        if (!this.participantAnsOutcomes.hasOwnProperty(user.id)) {
-            this.participantAnsOutcomes[user.id] = new AnswerOutcome(false, 100000000, -1, -1);
+        if (!this.playerAnsOutcomes.hasOwnProperty(player.id)) {
+            this.playerAnsOutcomes[player.id] = new AnswerOutcome(false, 100000000, -1, -1);
+        }
+
+        if (!this.playerRecords.hasOwnProperty(player.id)) {
+            const record = new Record(100000000, 100000000, 0, 0, -1);
+            this.playerRecords[player.id] = new PlayerRecord(player, record);
         }
     }
 
-    async removeParticipant(userId: number, socket: SocketIO.Socket) {
-        this.participants.delete(userId);
+    async removeParticipant(playerId: number, socket: SocketIO.Socket) {
+        this.playerIdSet.delete(playerId);
         --this.pointSys.participantCount;
-        delete this.participantNames[userId];
+        delete this.playerNames[playerId];
         this.sockets.delete(socket);
     }
 
-    async hasParticipant(userId: number) {
-        return this.participants.has(userId);
+    async hasParticipant(playerId: number) {
+        return this.playerIdSet.has(playerId);
     }
 
     countParticipants(): number {
-        return this.participants.size;
+        return this.playerIdSet.size;
     }
 
     allParticipants() {
         let participantsSet = new Set([]);
-        for (const [key, value] of Object.entries(this.participantNames)) {
+        for (const [key, value] of Object.entries(this.playerNames)) {
             participantsSet.add(value);
         }
         return participantsSet;
     }
 
-    public playerAnswered(userId: number, ansOutcome: AnswerOutcome, points: number) {
-        // TODO
-    }
-
-    public hasPlayerAnswered(userId: number) {
-        // TODO
-        return this.pointSys.answeredPlayer.has(userId);
+    public hasPlayerAnswered(playerId: number) {
+        return this.pointSys.answeredPlayer.has(playerId);
     }
 
     /**
@@ -223,12 +227,12 @@ export class Session {
     }
 
 
-    getPreAnsOut(userId: number) {
-        return this.participantAnsOutcomes[userId];
+    getPreAnsOut(playerId: number) {
+        return this.playerAnsOutcomes[playerId];
     }
 
-    canAnswer(userId: number) {
-        return this.getActiveQuesionIdx() > this.participantAnsOutcomes[userId].quesionNo;
+    canAnswer(playerId: number) {
+        return this.getActiveQuesionIdx() > this.playerAnsOutcomes[playerId].quesionNo;
     }
 
     nextQuestionIdx(): number {
@@ -251,34 +255,60 @@ export class Session {
         }
     }
 
-    assessAns(userId: number, ans: Answer) {
+    assessAns(playerId: number, ans: Answer) {
         const activeQuesionIdx = this.getActiveQuesionIdx();
         const correctAns = this.getAnsOfQuestion(activeQuesionIdx);
-        const preAnsOut = this.getPreAnsOut(userId);
-        const ansOutcome = this.pointSys.checkAns(ans, correctAns, preAnsOut);
+        const preAnsOut = this.getPreAnsOut(playerId);
+        const ansOutcome: AnswerOutcome = this.pointSys.checkAns(ans, correctAns, preAnsOut);
         // record in session that player has answered
-        this.participantAnsOutcomes[userId] = ansOutcome;
-        this.pointSys.answeredPlayer.add(userId);
-
+        this.playerAnsOutcomes[playerId] = ansOutcome;
+        this.pointSys.answeredPlayer.add(playerId);
         const points = this.pointSys.getNewPoints(ansOutcome);
-        this.updateBoard(userId, points, ansOutcome);
+        this.updateBoard(playerId, points, ansOutcome);
     }
 
-    setForNewQuesiton():boolean{
-        if(this.pointSys.hasAllPlayersAnswered()){
+    trySettingForNewQuesiton(): boolean {
+        if (this.pointSys.hasAllPlayersAnswered()) {
             this.questionIdx = this.preQuestionIdx + 1;
             this.pointSys.setForNewQuestion();
             this.readyForNextQuestion = true;
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
-    updateBoard(userId: number, points: number, ansOutCome: AnswerOutcome) {
-        console.log(userId, points, ansOutCome);
+    async updateBoard(playerId: number, points: number, ansOutCome: AnswerOutcome) {
+        this.playerRecords[playerId].record.oldPos = this.playerRecords[playerId].record.newPos;
+        this.playerRecords[playerId].record.newPos = null;
+        this.playerRecords[playerId].record.bonusPoints = points;
+        this.playerRecords[playerId].record.points = points + this.playerRecords[playerId].record.points;
+        this.playerRecords[playerId].record.streak = ansOutCome.streak;
+
+        console.log(this.playerRecords);
     }
 
+    rankBoard(){
+        const playerRecordsList : PlayerRecord[] = [];
+        for(const [playerId, playerRecord]  of Object.entries(this.playerRecords)){
+            playerRecordsList.push(playerRecord);
+        }
+        // list.sort((a, b) => (a.color > b.color) ? 1 : -1)
+        // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
+        playerRecordsList.sort((a, b) => (a.record.points < b.record.points) ? 1 : -1);
+
+        console.log("palyer records list length: ", playerRecordsList.length);
+
+        for (let [i, playerRecord] of playerRecordsList.entries()) {
+            console.log(i);
+            playerRecord.record.newPos = i;
+            console.log(playerRecord);
+            this.playerRecords[playerRecord.player.id] = playerRecord;
+        }
+
+        console.log(this.playerRecords);
+
+    }
     setQuizStatus(status: QuizStatus) {
         this.status = status;
     }
@@ -295,7 +325,7 @@ export class Session {
         this.sockets.forEach((s: SocketIO.Socket) => {
             s.disconnect();
         });
-        this.participants = new Set();
+        this.playerIdSet = new Set();
     }
 
 }

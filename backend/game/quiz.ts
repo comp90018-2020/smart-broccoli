@@ -1,12 +1,12 @@
 import { User as BackendUser, Session as SessInController, Quiz as QuizInModels } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session"
-import { User, Session, Conn, QuizStatus } from "./session";
-import { PointSystem, Answer, AnswerOutcome } from "./scores";
+import { Player, Session, Conn, QuizStatus } from "./session";
+import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Server } from "socket.io";
 
 
 const WAITING = 10 * 1000;
-const userCache: { [key: number]: User } = {};
+const userCache: { [key: number]: Player } = {};
 
 export class Quiz {
     // shaerd obj saves live quiz sess
@@ -79,7 +79,7 @@ export class Quiz {
         //     "TFSelection": true | false  // for TF question
         // }
         const sessId = conn.sessionToken.sessionId;
-        const userId = conn.user.id;
+        const userId = conn.player.id;
         const questionId = content.questionId;
 
         // check if already answered
@@ -97,7 +97,11 @@ export class Quiz {
                 const answeredNotification = this.formatAnsweredNotification(sessId, questionId);
                 socket.to(sessId.toString()).emit("questionAnswered", answeredNotification);
 
-                const hasAllAnswered =  this.sess[sessId].setForNewQuesiton();
+                const hasAllAnswered =  this.sess[sessId].trySettingForNewQuesiton();
+                console.log(hasAllAnswered);
+                if(hasAllAnswered){
+                    this.sess[sessId].rankBoard();
+                }
 
             } catch (err) {
                 if (process.env.NODE_EVN === 'debug') {
@@ -131,7 +135,7 @@ export class Quiz {
 
     async welcome(socketIO: Server, socket: SocketIO.Socket, conn: Conn) {
         const sessId = conn.sessionToken.sessionId;
-        const userId = conn.user.id;
+        const userId = conn.player.id;
         if (this.sess[sessId] === undefined) {
             socket.disconnect();
             return;
@@ -272,14 +276,14 @@ export class Quiz {
         }
     }
 
-    async getUserInfo(userId: number): Promise<User> {
+    async getUserInfo(userId: number): Promise<Player> {
         if (userCache.hasOwnProperty(userId)) {
             return userCache[userId];
         } else {
             const res = await BackendUser.findByPk(userId, {
                 attributes: ["name", "pictureId"],
             });
-            const user = new User(userId, res.name, res.pictureId);
+            const user = new Player(userId, res.name, res.pictureId);
             userCache[userId] = user;
             return user;
         }
