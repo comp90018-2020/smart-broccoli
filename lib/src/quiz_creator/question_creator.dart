@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-import 'package:image_picker/image_picker.dart';
+import 'package:smart_broccoli/src/quiz_creator/picture.dart';
 import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
@@ -20,6 +16,9 @@ class _QuestionCreateState extends State<QuestionCreate> {
   var answerTextControllers = <TextEditingController>[];
   // ???
   var answerCards = <Card>[];
+
+  // The current picked file
+  String picturePath;
 
   @override
   Widget build(BuildContext context) {
@@ -79,44 +78,11 @@ class _QuestionCreateState extends State<QuestionCreate> {
               ),
 
               // Question image
-              Container(
-                height: 175,
-                child: Expanded(
-                  child: Card(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: <Widget>[
-                        Container(
-                          width: double.maxFinite,
-                          height: 100,
-                          child: imageFile == null
-                              ? Icon(Icons.insert_photo_outlined, size: 100)
-                              : Image.file(imageFile, fit: BoxFit.cover),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 6,
-                          child: ButtonTheme(
-                            minWidth: 10,
-                            child: RaisedButton(
-                              shape: SmartBroccoliTheme.raisedButtonShape,
-                              child: Icon(
-                                Icons.add_a_photo,
-                                size: 20,
-                              ),
-                              onPressed: () => _showChoiceDialog(context),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    margin: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)),
-                    elevation: 5,
-                  ),
-                ),
-              ),
+              PictureCard(picturePath, (path) {
+                setState(() {
+                  picturePath = path;
+                });
+              }),
 
               // Answers heading
               Container(
@@ -193,53 +159,5 @@ class _QuestionCreateState extends State<QuestionCreate> {
         ],
       ),
     );
-  }
-
-  // Answer cards END**********************************************************
-
-  // Set image START
-  File imageFile;
-  final picker = ImagePicker();
-
-  _openGallery(BuildContext context) async {
-    imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
-    this.setState(() {});
-    Navigator.of(context).pop();
-  }
-
-  _openCamera(BuildContext context) async {
-    imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
-    this.setState(() {});
-
-    Navigator.of(context).pop();
-  }
-
-  Future<void> _showChoiceDialog(BuildContext context) {
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Select upload method"),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  GestureDetector(
-                    child: Text("From gallery"),
-                    onTap: () {
-                      _openGallery(context);
-                    },
-                  ),
-                  Padding(padding: EdgeInsets.all(8.0)),
-                  GestureDetector(
-                    child: Text("Using camera"),
-                    onTap: () {
-                      _openCamera(context);
-                    },
-                  )
-                ],
-              ),
-            ),
-          );
-        });
   }
 }
