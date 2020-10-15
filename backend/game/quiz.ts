@@ -257,22 +257,15 @@ export class Quiz {
         }
     }
 
-    private formatBoard(quizId: number) {
-        let leaderboard = [{ "this is leaderboard": "wohhoo" }];
-        // WIP: format leaderborad here
-
-        return leaderboard;
-    }
-
     showBoard(socketIO: Server, conn: Conn) {
         // NOTE: get quizId and userId from decrypted token
         // Record it somewhere (cache or socket.handshake)
         // * token will expire in 1 hour
         const sessId = conn.sessionToken.sessionId;;
 
-        if (this.isOwner(conn)) {
+        if (this.isOwner(conn) && !this.sess[sessId].isCurrQuestionActive()) {
             //  broadcast Board to participants
-            socketIO.to(sessId.toString()).emit("questionOutcome", this.formatBoard(sessId));
+            this.sess[sessId].releaseBoard();
         }
     }
 
