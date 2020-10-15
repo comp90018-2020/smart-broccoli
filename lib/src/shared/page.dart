@@ -13,26 +13,49 @@ class CustomPage extends StatelessWidget {
   /// Whether page has drawer
   final bool hasDrawer;
 
+  /// Secondary background colour
+  final bool secondaryBackgroundColour;
+
+  /// Background overlay
+  final List<Widget> background;
+
+  /// AppBar leading widget
+  final Widget appbarLeading;
+
+  /// AppBar trailing widget
+  final List<Widget> appbarActions;
+
   /// Constructs a custom page
   CustomPage(
-      {@required this.title, @required this.child, this.hasDrawer = false});
+      {@required this.title,
+      @required this.child,
+      this.hasDrawer = false,
+      this.background,
+      this.secondaryBackgroundColour = false,
+      this.appbarLeading,
+      this.appbarActions});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: this.secondaryBackgroundColour
+          ? Theme.of(context).backgroundColor
+          : Theme.of(context).colorScheme.onBackground,
+
       // Appbar
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: Container(
-            // Alter shadow: https://stackoverflow.com/questions/54554569
-            decoration: BoxDecoration(boxShadow: [
-              BoxShadow(color: Colors.white, offset: const Offset(0, .2))
-            ]),
-            child: AppBar(
+          // Alter shadow: https://stackoverflow.com/questions/54554569
+          decoration: BoxDecoration(boxShadow: [
+            BoxShadow(color: Colors.white, offset: const Offset(0, .2))
+          ]),
+          child: AppBar(
               title: Text(this.title),
               centerTitle: true,
               elevation: 0,
-            )),
+              actions: appbarActions),
+        ),
       ),
 
       // Drawer (or hamberger menu)
@@ -138,7 +161,12 @@ class CustomPage extends StatelessWidget {
           : null,
 
       // Body of page
-      body: child,
+      // https://stackoverflow.com/questions/54837854
+      body: background == null
+          ? child
+          : Stack(
+              children: [...background, Positioned.fill(child: child)],
+            ),
     );
   }
 }

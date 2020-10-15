@@ -27,6 +27,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     // Create a new Scaffold
     return new Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
       body: SingleChildScrollView(
         child: DefaultTabController(
           length: 2,

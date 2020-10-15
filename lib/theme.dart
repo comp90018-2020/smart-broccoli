@@ -19,9 +19,9 @@ class SmartBroccoliColourScheme extends ColorScheme {
 
 /// Singleton class holding the app's `ThemeData` object
 class SmartBroccoliTheme {
-  static final ThemeData _themeData = ThemeData(
+  static final ThemeData themeData = ThemeData(
+    backgroundColor: Color(0xFF4CAF50),
     primaryColor: Color(0xFF4CAF50),
-    scaffoldBackgroundColor: Color(0xFF4CAF50),
     colorScheme: SmartBroccoliColourScheme(),
     buttonTheme: ButtonThemeData(
       shape: RoundedRectangleBorder(
@@ -30,11 +30,12 @@ class SmartBroccoliTheme {
       padding: EdgeInsets.symmetric(vertical: 15),
     ),
     textTheme: TextTheme(
-      button: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-      subtitle1: TextStyle(
-        fontSize: 14,
-      ),
-    ),
+        button: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        subtitle1: TextStyle(
+          fontSize: 14,
+        ),
+        headline6:
+            TextStyle(fontWeight: FontWeight.normal, color: Color(0xFF707070))),
     inputDecorationTheme: InputDecorationTheme(
       contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       filled: true,
@@ -52,7 +53,22 @@ class SmartBroccoliTheme {
       ),
     ),
   );
-  ThemeData get themeData => _themeData;
+
+  /// Shape for round RaisedButton
+  static final ShapeBorder raisedButtonShape =
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(20));
+
+  /// Padding for round RaisedButton
+  static final EdgeInsetsGeometry raisedButtonTextPadding =
+      EdgeInsets.symmetric(horizontal: 20);
+
+  /// Winner text style (1, 2, 3)
+  static final TextStyle leaderboardRankStyle = TextStyle(
+      fontSize: 16, color: Color(0xFF696E69), fontWeight: FontWeight.bold);
+
+  /// List item text style
+  static final TextStyle listItemTextStyle =
+      TextStyle(color: Color(0xFF656565), fontWeight: FontWeight.bold);
 }
 
 /// Widget to hold the app logo on auth screen
@@ -85,5 +101,45 @@ class TabHolder extends FractionallySizedBox {
               onTap: onTap,
             ),
           ),
+        );
+}
+
+class AnswerColours {
+  /// Correct
+  static Color correct = Color(0xFF4CAF50);
+
+  /// Selected
+  static Color selected = Color(0xFFFEC12D);
+
+  /// Default
+  static Color normal = Colors.white;
+}
+
+class LobbyDivider extends Divider {
+  LobbyDivider()
+      : super(
+          thickness: 3,
+          height: 20,
+          color: Colors.orangeAccent,
+        );
+}
+
+class WinnerBubble extends BoxDecoration {
+  WinnerBubble()
+      : super(
+          // You need this line or the box will be transparent
+          color: Color(0xFF8DCC8F),
+          shape: BoxShape.circle,
+        );
+}
+
+class LobbyTimerBoxDecoration extends BoxDecoration {
+  LobbyTimerBoxDecoration()
+      : super(
+          border: new Border.all(
+              color: Colors.orangeAccent, width: 3, style: BorderStyle.solid),
+          // You need this line or the box will be transparent
+          color: Colors.white,
+          shape: BoxShape.circle,
         );
 }

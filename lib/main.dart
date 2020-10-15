@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
-import 'package:smart_broccoli/src/auth/auth_screen.dart';
-import 'package:smart_broccoli/src/auth/init_page.dart';
 import 'package:smart_broccoli/theme.dart';
+
+import 'src/auth/auth_screen.dart';
+import 'src/auth/init_page.dart';
+import 'src/quiz/leaderboard.dart';
+import 'src/quiz/lobby.dart';
+import 'src/quiz/question.dart';
+import 'src/quiz/quiz.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,10 +54,14 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Smart Broccoli',
-      theme: SmartBroccoliTheme().themeData,
+      theme: SmartBroccoliTheme.themeData,
       routes: {
         '/auth': (context) => AuthScreen(),
         '/home': (context) => InitialRouter(),
+        '/take_quiz': (context) => TakeQuiz(),
+        '/lobby': (context) => QuizLobby(),
+        '/question': (context) => QuizQuestion(),
+        '/leaderboard': (context) => QuizLeaderboard()
       },
       navigatorKey: mainNavigator,
       initialRoute: state.inSession ? '/home' : '/auth',
