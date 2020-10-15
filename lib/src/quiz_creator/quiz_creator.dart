@@ -5,7 +5,6 @@ import 'package:smart_broccoli/theme.dart';
 
 import '../data/quiz.dart';
 import '../shared/page.dart';
-
 import 'picture.dart';
 
 class QuizCreate extends StatefulWidget {

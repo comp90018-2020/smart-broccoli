@@ -56,23 +56,30 @@ class _GroupListState extends State<GroupList> {
   Widget buildGroupList(List<String> groups) {
     return FractionallySizedBox(
       widthFactor: 0.85,
-      child: ListView.separated(
-          itemCount: groups.length,
-          padding: EdgeInsets.symmetric(vertical: 16.0),
-          itemBuilder: (context, index) {
-            return ListTile(
+      child: ListView.builder(
+        itemCount: groups.length,
+        padding: EdgeInsets.symmetric(vertical: 16.0),
+        itemBuilder: (context, index) {
+          return Card(
+            child: ListTile(
               dense: true,
-              visualDensity: VisualDensity.compact,
               onTap: () {},
               title: Text(
                 groups[index],
-                style: TextStyle(fontSize: 16, color: Colors.white),
+                style: TextStyle(fontSize: 16),
               ),
-            );
-          },
-          separatorBuilder: (context, index) {
-            return Divider(color: Colors.white);
-          }),
+              // subtitle for joined groups
+              subtitle:
+                  Row(children: [Icon(Icons.person), Text('{n} members')]),
+              // subtitle for created groups
+              // subtitle: Row(children: [
+              //   Icon(Icons.assignment),
+              //   Text('{n} incomplete self-paced quizzes')
+              // ]),
+            ),
+          );
+        },
+      ),
     );
   }
 
