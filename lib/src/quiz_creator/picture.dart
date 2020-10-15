@@ -27,41 +27,39 @@ class _PictureCardState extends State<PictureCard> {
   Widget build(BuildContext context) {
     return Container(
       height: 175,
-      child: Expanded(
-        child: Card(
-          child: Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              // Picture
-              Container(
-                width: double.maxFinite,
-                child: widget.picturePath == null
-                    ? Icon(Icons.insert_photo_outlined, size: 100)
-                    : Image.file(File(widget.picturePath), fit: BoxFit.cover),
-              ),
+      child: Card(
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            // Picture
+            Container(
+              width: double.maxFinite,
+              child: widget.picturePath == null
+                  ? Icon(Icons.insert_photo_outlined, size: 100)
+                  : Image.file(File(widget.picturePath), fit: BoxFit.cover),
+            ),
 
-              // Update picture (top right)
-              Positioned(
-                top: 0,
-                right: 6,
-                child: ButtonTheme(
-                  minWidth: 10,
-                  child: RaisedButton(
-                    shape: SmartBroccoliTheme.raisedButtonShape,
-                    child: Icon(
-                      Icons.add_a_photo,
-                      size: 20,
-                    ),
-                    onPressed: () => _showChoiceDialog(context),
+            // Update picture (top right)
+            Positioned(
+              top: 0,
+              right: 6,
+              child: ButtonTheme(
+                minWidth: 10,
+                child: RaisedButton(
+                  shape: SmartBroccoliTheme.raisedButtonShape,
+                  child: Icon(
+                    Icons.add_a_photo,
+                    size: 20,
                   ),
+                  onPressed: () => _showChoiceDialog(context),
                 ),
               ),
-            ],
-          ),
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-          elevation: 5,
+            ),
+          ],
         ),
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        elevation: 5,
       ),
     );
   }
