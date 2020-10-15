@@ -60,7 +60,7 @@ class SmartBroccoliTheme {
 
   /// Padding for round RaisedButton
   static final EdgeInsetsGeometry raisedButtonTextPadding =
-      EdgeInsets.symmetric(horizontal: 8);
+      EdgeInsets.symmetric(horizontal: 20);
 
   /// Winner text style (1, 2, 3)
   static final TextStyle leaderboardRankStyle = TextStyle(

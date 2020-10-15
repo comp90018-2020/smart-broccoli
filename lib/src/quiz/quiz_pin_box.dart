@@ -19,7 +19,7 @@ class _QuizPinBoxState extends State<QuizPinBox> {
     return Column(children: [
       // Join by pin box
       ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 100),
+        constraints: BoxConstraints(maxWidth: 80),
         child: TextField(
           controller: _pinFilter,
           textAlign: TextAlign.center,
@@ -44,7 +44,7 @@ class _QuizPinBoxState extends State<QuizPinBox> {
             padding: SmartBroccoliTheme.raisedButtonTextPadding,
             child: Text(
               "JOIN BY PIN",
-              style: TextStyle(fontSize: 12),
+              style: TextStyle(fontSize: 13),
             ),
           ),
         ),
@@ -56,7 +56,7 @@ class _QuizPinBoxState extends State<QuizPinBox> {
         child: FractionallySizedBox(
           widthFactor: 0.8,
           child: Text(
-            "By entering PIN you can access a quiz\n and join the group of that quiz",
+            "By entering PIN you can access a live quiz\n and join the group of that quiz",
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
