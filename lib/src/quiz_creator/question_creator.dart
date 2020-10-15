@@ -108,7 +108,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
                 // Answers heading
                 Container(
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.only(top: 20, bottom: 4),
                   child: Text(
                     'Answers',
                     style: new TextStyle(
@@ -126,7 +126,10 @@ class _QuestionCreateState extends State<QuestionCreate> {
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: question.options.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return _optionCard(index, question.options[index]);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                      child: _optionCard(index, question.options[index]),
+                    );
                   },
                 ),
 
