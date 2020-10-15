@@ -297,14 +297,14 @@ export class Session {
     releaseBoard(hostSocket:Socket){
         for(const [playerId, socket] of Object.entries(this.sockets)){
             const playerRecord  = this.playerRecords[Number(playerId)];
-            const plaerAheadRecord = playerRecord.record.newPos === 0 ? 
+            const playerAheadRecord = playerRecord.record.newPos === 0 ? 
                 null :
                 this.playerRecordList[playerRecord.record.newPos - 1];
             const quesitonOutcome = {
                 "question" : this.preQuestionIdx,
                 "leaderBoard": this.playerRecordList.slice(0, 5),
                 "record" : this.playerRecords[Number(playerId)].record,
-                "playerRecordAhead" : plaerAheadRecord
+                "playerAhead" : playerAheadRecord
             };
             socket.emit("questionOutcome", quesitonOutcome);
         }
