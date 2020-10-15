@@ -167,6 +167,10 @@ class MCQuestion extends Question {
               .map((option) => QuestionOption.fromJson(option))
               .toList());
 
+  void addOption(QuestionOption option) {
+    options.add(option);
+  }
+
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
     map['type'] = 'choice';

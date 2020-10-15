@@ -1,9 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/src/quiz_creator/picture.dart';
 import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
+/// Arguments passed to question create page
+class QuestionArgs {
+  final int questionNumber;
+  final Question question;
+
+  QuestionArgs(this.questionNumber, this.question);
+}
+
+/// Question create page
 class QuestionCreate extends StatefulWidget {
   QuestionCreate({Key key}) : super(key: key);
 
@@ -13,12 +23,23 @@ class QuestionCreate extends StatefulWidget {
 
 class _QuestionCreateState extends State<QuestionCreate> {
   // Text controllers for answer
-  var answerTextControllers = <TextEditingController>[];
-  // ???
-  var answerCards = <Card>[];
+  // TODO: initial state needs to be created
+  var _optionTextControllers = <TextEditingController>[];
 
   // The current picked file
   String picturePath;
+
+  // Should be cloned (to allow discard of changes)
+  MCQuestion question = MCQuestion(null, 'Text', []);
+  int questionNumber = 1;
+
+  @override
+  void dispose() {
+    for (var controller in _optionTextControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,114 +70,154 @@ class _QuestionCreateState extends State<QuestionCreate> {
       ],
 
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Question number
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  'Question X',
-                  style: new TextStyle(
-                    fontSize: 17.0,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.white,
+        child: Form(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // Question number
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    'Question $questionNumber',
+                    style: new TextStyle(
+                      fontSize: 17.0,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
-              // Question
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Question text',
+                // Question
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Question text',
+                    ),
                   ),
                 ),
-              ),
 
-              // Question image
-              PictureCard(picturePath, (path) {
-                setState(() {
-                  picturePath = path;
-                });
-              }),
+                // Question image
+                PictureCard(picturePath, (path) {
+                  setState(() {
+                    picturePath = path;
+                  });
+                }),
 
-              // Answers heading
-              Container(
-                padding: EdgeInsets.only(top: 16),
-                child: Text(
-                  'Answers',
-                  style: new TextStyle(
-                    fontSize: 17.0,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.white,
+                // Answers heading
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    'Answers',
+                    style: new TextStyle(
+                      fontSize: 17.0,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
 
-              // Card container
-              ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: answerCards.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return answerCards[index];
-                },
-              ),
-
-              // Add Answer
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: RaisedButton(
-                    shape: SmartBroccoliTheme.raisedButtonShape,
-                    padding: EdgeInsets.all(14.0),
-                    child: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 3,
-                        children: [Icon(Icons.add), Text('ADD ANSWER')]),
-                    onPressed: () =>
-                        setState(() => answerCards.add(createCard())),
-                  ),
+                // Card container
+                ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: question.options.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return _optionCard(index, question.options[index]);
+                  },
                 ),
-              )
-            ],
+
+                // Add Answer
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: RaisedButton(
+                      shape: SmartBroccoliTheme.raisedButtonShape,
+                      padding: EdgeInsets.all(14.0),
+                      child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 3,
+                          children: [Icon(Icons.add), Text('ADD ANSWER')]),
+                      onPressed: () {
+                        // Add text controller
+                        TextEditingController textController =
+                            TextEditingController();
+                        _optionTextControllers.add(textController);
+
+                        // Add choice
+                        setState(() =>
+                            {question.addOption(QuestionOption('', false))});
+                      },
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Card createCard() {
-    var textController = TextEditingController();
-    answerTextControllers.add(textController);
+  // Creates a card for an option
+  Widget _optionCard(int index, QuestionOption option) {
     return Card(
-      margin: EdgeInsets.fromLTRB(12.00, 6, 12.00, 2),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text('Answer ${answerCards.length + 1}'),
-          TextField(
-              controller: textController,
-              decoration: InputDecoration(labelText: 'Answer')),
-          ButtonBar(
-            alignment: MainAxisAlignment.end,
-            buttonPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-            children: [
-              FlatButton(
-                textColor: Colors.black54,
-                onPressed: () {
-                  answerCards.remove(this);
-                  // Perform some action
-                },
-                child: Icon(Icons.delete),
+      key: ObjectKey(option),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // Answer text
+            TextFormField(
+                controller: _optionTextControllers[index],
+                decoration: InputDecoration(labelText: 'Answer')),
+
+            // Bottom button action bar
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+              child: ButtonBar(
+                buttonPadding: EdgeInsets.zero,
+                buttonMinWidth: 35,
+                alignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Correct or not
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Text('Correct: '),
+                      Switch(
+                        value: option.correct,
+                        onChanged: (value) {
+                          setState(() {
+                            question.options[index].correct = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // Remove
+                  FlatButton(
+                    visualDensity: VisualDensity.compact,
+                    textColor: Colors.black54,
+                    onPressed: () {
+                      setState(() {
+                        question.options.removeAt(index);
+                        _optionTextControllers.removeAt(index);
+                      });
+                    },
+                    child: Icon(Icons.delete),
+                  ),
+                ],
               ),
-            ],
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
