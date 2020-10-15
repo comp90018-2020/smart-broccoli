@@ -29,13 +29,15 @@ class SmartBroccoliTheme {
       ),
       padding: EdgeInsets.symmetric(vertical: 15),
     ),
+    floatingActionButtonTheme:
+        FloatingActionButtonThemeData(backgroundColor: Color(0xFFFEC12D)),
     textTheme: TextTheme(
         button: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         subtitle1: TextStyle(
           fontSize: 14,
         ),
         headline6:
-            TextStyle(fontWeight: FontWeight.normal, color: Color(0xFF707070))),
+            TextStyle(fontWeight: FontWeight.normal, color: Color(0xFF654C12))),
     inputDecorationTheme: InputDecorationTheme(
       contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       filled: true,

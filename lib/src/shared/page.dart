@@ -166,6 +166,7 @@ class CustomPage extends StatelessWidget {
 
       // Floating action button
       floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
       // Body of page
       // https://stackoverflow.com/questions/54837854
