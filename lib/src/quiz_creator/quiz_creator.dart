@@ -221,6 +221,7 @@ class _QuizCreateState extends State<QuizCreate> {
   // Used to represent questions
   Widget _questionCard(int index, Question question) {
     return Card(
+      margin: EdgeInsets.symmetric(vertical: 4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
