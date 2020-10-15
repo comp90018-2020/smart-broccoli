@@ -61,11 +61,12 @@ class _QuizCreateState extends State<QuizCreate> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Settings
                 Text(
-                  'Settings',
+                  'Attributes',
                   style: new TextStyle(
                     fontSize: 17.0,
                     fontWeight: FontWeight.w400,
@@ -84,7 +85,11 @@ class _QuizCreateState extends State<QuizCreate> {
                 ),
 
                 // Picture selection
-                PictureCard(picturePath, (_) {}),
+                PictureCard(picturePath, (path) {
+                  setState(() {
+                    picturePath = path;
+                  });
+                }),
 
                 // Seconds selection
                 Padding(
@@ -167,7 +172,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
                 // Questions title
                 Padding(
-                  padding: const EdgeInsets.only(top: 16, bottom: 8),
+                  padding: const EdgeInsets.only(top: 24, bottom: 8),
                   child: Text(
                     'Questions',
                     style: new TextStyle(
@@ -176,6 +181,17 @@ class _QuizCreateState extends State<QuizCreate> {
                       color: Colors.white,
                     ),
                   ),
+                ),
+
+                // Question card
+                ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: 2,
+                  itemBuilder: (BuildContext context, int index) {
+                    return _questionCard(index, MCQuestion(null, 'Hello', []));
+                  },
                 ),
 
                 // Add question
@@ -197,6 +213,33 @@ class _QuizCreateState extends State<QuizCreate> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Used to represent questions
+  Widget _questionCard(int index, Question question) {
+    return Card(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.maxFinite,
+            child: AspectRatio(aspectRatio: 3, child: Placeholder()),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Question $index',
+                    style: Theme.of(context).textTheme.headline6),
+                Text(question.text)
+              ],
+            ),
+          )
+        ],
       ),
     );
   }

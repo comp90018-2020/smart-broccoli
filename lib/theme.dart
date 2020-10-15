@@ -37,8 +37,7 @@ class SmartBroccoliTheme {
         subtitle1: TextStyle(
           fontSize: 14,
         ),
-        headline6:
-            TextStyle(fontWeight: FontWeight.normal, color: Color(0xFF654C12))),
+        headline6: TextStyle(fontWeight: FontWeight.normal)),
     inputDecorationTheme: InputDecorationTheme(
       contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       filled: true,
