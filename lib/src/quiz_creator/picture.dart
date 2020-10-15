@@ -76,28 +76,34 @@ class _PictureCardState extends State<PictureCard> {
     return showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Select upload method"),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  GestureDetector(
-                    child: Text("From gallery"),
-                    onTap: () {
-                      _openPictureSelector(context, ImageSource.gallery);
-                    },
-                  ),
-                  Padding(padding: EdgeInsets.all(8.0)),
-                  GestureDetector(
-                    child: Text("Using camera"),
-                    onTap: () {
-                      _openPictureSelector(context, ImageSource.camera);
-                    },
-                  )
-                ],
-              ),
-            ),
-          );
+          return SimpleDialog(
+              title: const Text("Select upload method"),
+              children: [
+                SimpleDialogOption(
+                  child: Row(children: [
+                    Icon(Icons.picture_in_picture),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12),
+                      child: Text("From gallery"),
+                    )
+                  ]),
+                  onPressed: () {
+                    _openPictureSelector(context, ImageSource.gallery);
+                  },
+                ),
+                SimpleDialogOption(
+                  child: Row(children: [
+                    Icon(Icons.camera),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12),
+                      child: Text("Use camera"),
+                    )
+                  ]),
+                  onPressed: () {
+                    _openPictureSelector(context, ImageSource.camera);
+                  },
+                )
+              ]);
         });
   }
 }
