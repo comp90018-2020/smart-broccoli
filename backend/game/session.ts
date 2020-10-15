@@ -1,6 +1,7 @@
 import { Session as SessInController, Quiz as QuizInModels } from "../models";
 import { sessionTokenDecrypt as decrypt, SessionToken } from "../controllers/session"
 import { PointSystem, Answer, AnswerOutcome } from "./points";
+import {Socket} from "socket.io";
 
 export enum QuizStatus {
     Pending = 0,
@@ -67,7 +68,7 @@ export class Session {
     public playerAnsOutcomes: { [key: string]: AnswerOutcome } = {};
     private questions: Question[];
     private questionsWithAns: Question[];
-    private sockets: { [key: number]: SocketIO.Socket } ={};
+    private sockets: { [key: number]: Socket } ={};
     private questionIdx = 0;
     private preQuestionIdx = 0;
     private questionReleasedAt = 0;
@@ -84,7 +85,7 @@ export class Session {
         this.setQuestions($quiz);
     }
 
-    async addParticipant(player: Player, socket: SocketIO.Socket) {
+    async addParticipant(player: Player, socket: Socket) {
         this.playerIdSet.add(player.id);
         ++this.pointSys.participantCount;
         this.playerNames[player.id] = player.name;
@@ -100,7 +101,7 @@ export class Session {
         }
     }
 
-    async removeParticipant(playerId: number, socket: SocketIO.Socket) {
+    async removeParticipant(playerId: number, socket: Socket) {
         this.playerIdSet.delete(playerId);
         --this.pointSys.participantCount;
         delete this.playerNames[playerId];
@@ -293,7 +294,7 @@ export class Session {
     }
 
 
-    releaseBoard(){
+    releaseBoard(hostSocket:Socket){
         for(const [playerId, socket] of Object.entries(this.sockets)){
             const playerRecord  = this.playerRecords[Number(playerId)];
             const plaerAheadRecord = playerRecord.record.newPos === 0 ? 
@@ -307,6 +308,7 @@ export class Session {
             };
             socket.emit("questionOutcome", quesitonOutcome);
         }
+        hostSocket.emit("questionOutcome", this.playerRecordList);
     }
 
     setQuizStatus(status: QuizStatus) {
