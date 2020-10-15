@@ -303,7 +303,7 @@ export class Session {
             const quesitonOutcome = {
                 "question" : this.preQuestionIdx,
                 "leaderBoard": this.playerRecordList.slice(0, 5),
-                "mineRecord" : this.playerRecords[Number(playerId)],
+                "record" : this.playerRecords[Number(playerId)].record,
                 "playerRecordAhead" : plaerAheadRecord
             };
             socket.emit("questionOutcome", quesitonOutcome);
