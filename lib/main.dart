@@ -3,21 +3,19 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/src/about/acknowledgements.dart';
-import 'package:smart_broccoli/src/auth/auth_screen.dart';
-import 'package:smart_broccoli/src/auth/init_page.dart';
-import 'package:smart_broccoli/src/groups/group_create.dart';
-import 'package:smart_broccoli/src/groups/group_list.dart';
-import 'package:smart_broccoli/src/quiz_creator/question_creator.dart';
-import 'package:smart_broccoli/src/quiz_creator/quiz_creator.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'src/about/about.dart';
 import 'src/auth/auth_screen.dart';
 import 'src/auth/init_page.dart';
+import 'src/groups/group_create.dart';
+import 'src/groups/group_list.dart';
 import 'src/quiz/leaderboard.dart';
 import 'src/quiz/lobby.dart';
 import 'src/quiz/question.dart';
 import 'src/quiz/quiz.dart';
+import 'src/quiz_creator/question_creator.dart';
+import 'src/quiz_creator/quiz_creator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/shared/tabbed_page.dart';
+
+import '../shared/tabbed_page.dart';
 
 /// Group list page
 class GroupList extends StatefulWidget {

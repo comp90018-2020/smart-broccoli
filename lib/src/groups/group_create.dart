@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/shared/page.dart';
+
+import '../shared/page.dart';
 
 /// Create group page
 class GroupCreate extends StatefulWidget {

@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/quiz_creator/picture.dart';
-import 'package:smart_broccoli/src/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import '../data/quiz.dart';
+import '../shared/page.dart';
 import 'package:numberpicker/numberpicker.dart';
+
+import 'picture.dart';
 
 class QuizCreate extends StatefulWidget {
   QuizCreate({Key key}) : super(key: key);
