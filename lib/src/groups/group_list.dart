@@ -35,12 +35,16 @@ class _GroupListState extends State<GroupList> {
       // Action buttons
       floatingActionButton: tab == 0
           ? FloatingActionButton.extended(
-              onPressed: () {},
+              onPressed: () {
+                joinDialog().then((value) => {print(value)});
+              },
               label: Text('JOIN GROUP'),
               icon: Icon(Icons.add),
             )
           : FloatingActionButton.extended(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pushNamed('/group/create');
+              },
               label: Text('CREATE GROUP'),
               icon: Icon(Icons.group_add)),
     );
@@ -70,61 +74,34 @@ class _GroupListState extends State<GroupList> {
     );
   }
 
-  // void joinDialog() {
-  //   return showDialog(
-  //       context: context,
-  //       builder: (context) {
-  //         return AlertDialog(
-  //           title: Text("Create New Group"),
-  //           content: TextField(
-  //             controller: cController,
-  //             decoration: const InputDecoration(
-  //               labelText: 'Name for your group',
-  //             ),
-  //           ),
-  //           actions: <Widget>[
-  //             MaterialButton(
-  //                 elevation: 5.0,
-  //                 child: Text("Cancel"),
-  //                 onPressed: () {
-  //                   Navigator.of(context).pop();
-  //                 }),
-  //             MaterialButton(
-  //                 elevation: 5.0,
-  //                 child: Text("Create"),
-  //                 onPressed: () {
-  //                   Navigator.of(context).pop(cController.text.toString());
-  //                 })
-  //           ],
-  //         );
-  //       });
-  // }
+  /// The join group dialog
+  Future<String> joinDialog() async {
+    TextEditingController controller = TextEditingController();
 
-//       return showDialog(
-//           context: context,
-//           builder: (context) {
-//             return AlertDialog(
-//               title: Text("Join group"),
-//               content: TextField(
-//                 controller: cController,
-//                 decoration: const InputDecoration(
-//                   labelText: 'Name of the group',
-//                 ),
-//               ),
-//               actions: <Widget>[
-//                 MaterialButton(
-//                     elevation: 5.0,
-//                     child: Text("Cancel"),
-//                     onPressed: () {
-//                       Navigator.of(context).pop();
-//                     }),
-//                 MaterialButton(
-//                     elevation: 5.0,
-//                     child: Text("Join"),
-//                     onPressed: () {
-//                       Navigator.of(context).pop(cController.text.toString());
-//                     })
-//               ],
-//             );
-//           });
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Join group"),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Name of group',
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  }),
+              TextButton(
+                  child: Text("Join"),
+                  onPressed: () {
+                    Navigator.of(context).pop(controller.text);
+                  })
+            ],
+          );
+        });
+  }
 }

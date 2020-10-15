@@ -54,6 +54,9 @@ class SmartBroccoliTheme {
         color: SmartBroccoliColourScheme.tabHolderPill,
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.green))),
   );
 
   /// Shape for round RaisedButton
