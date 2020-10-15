@@ -46,7 +46,8 @@ class _GroupListState extends State<GroupList> {
                 Navigator.of(context).pushNamed('/group/create');
               },
               label: Text('CREATE GROUP'),
-              icon: Icon(Icons.group_add)),
+              icon: Icon(Icons.group_add),
+            ),
     );
   }
 
@@ -79,29 +80,31 @@ class _GroupListState extends State<GroupList> {
     TextEditingController controller = TextEditingController();
 
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("Join group"),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Name of group',
-              ),
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Join group"),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: 'Name of group',
             ),
-            actions: <Widget>[
-              TextButton(
-                  child: Text("Cancel"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  }),
-              TextButton(
-                  child: Text("Join"),
-                  onPressed: () {
-                    Navigator.of(context).pop(controller.text);
-                  })
-            ],
-          );
-        });
+          ),
+          actions: <Widget>[
+            TextButton(
+                child: Text("Cancel"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                }),
+            TextButton(
+              child: Text("Join"),
+              onPressed: () {
+                Navigator.of(context).pop(controller.text);
+              },
+            )
+          ],
+        );
+      },
+    );
   }
 }
