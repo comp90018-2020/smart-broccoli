@@ -113,12 +113,16 @@ class GroupRegistryModel extends ChangeNotifier {
 
   /// Refresh the ListView of groups the user has joined.
   ///
-  /// This callback does not populate the `members` field of each group. The
-  /// `members` field of a group is populated when the `selectGroup` callback
-  /// is invoked for a particular group.
-  Future<void> refreshJoinedGroups() async {
+  /// This callback only populates the `members` field of each group if the
+  /// optional [withMembers] parameter is `true`.
+  Future<void> refreshJoinedGroups({bool withMembers = false}) async {
     _joinedGroups = (await _groupApi.getGroups(_authStateModel.token))
         .where((group) => group.role == GroupRole.MEMBER);
+    if (withMembers)
+      await Future.forEach(_joinedGroups, (group) async {
+        group.members =
+            await _userRepo.getMembersOf(_authStateModel.token, group.id);
+      });
     _keyValueStore.setString('joinedGroups',
         json.encode(_joinedGroups.map((group) => group.toJson())));
     notifyListeners();
@@ -126,12 +130,16 @@ class GroupRegistryModel extends ChangeNotifier {
 
   /// Refresh the ListView of groups the user has created.
   ///
-  /// This callback does not populate the `members` field of each group. The
-  /// `members` field of a group is populated when the `selectGroup` callback
-  /// is invoked for a particular group.
-  Future<void> refreshCreatedGroups() async {
+  /// This callback only populates the `members` field of each group if the
+  /// optional [withMembers] parameter is `true`.
+  Future<void> refreshCreatedGroups({bool withMembers = false}) async {
     _createdGroups = (await _groupApi.getGroups(_authStateModel.token))
         .where((group) => group.role == GroupRole.OWNER);
+    if (withMembers)
+      await Future.forEach(_createdGroups, (group) async {
+        group.members =
+            await _userRepo.getMembersOf(_authStateModel.token, group.id);
+      });
     _keyValueStore.setString('createdGroups',
         json.encode(_createdGroups.map((group) => group.toJson())));
     notifyListeners();
