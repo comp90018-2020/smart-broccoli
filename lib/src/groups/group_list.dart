@@ -1,143 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/src/shared/tabbed_page.dart';
+import 'package:smart_broccoli/src/groups/group_list_container.dart';
 
 class GroupList extends StatefulWidget {
-  final String name;
-
-  GroupList({Key key, this.name}) : super(key: key);
   @override
-  _GroupListState createState() => _GroupListState();
+  State<StatefulWidget> createState() => new _GroupListState();
 }
 
 class _GroupListState extends State<GroupList> {
-  final _groups = ["Math", "Biology", "Chemistry"];
-  final _biggerFont = TextStyle(fontSize: 18.0);
-
+  @override
   Widget build(BuildContext context) {
-    if (widget.name == "created") {
-      return Scaffold(
-        appBar: AppBar(centerTitle: true),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            createAlertDialog(context).then((value) {
-              if (value != null) {
-                setState(() {
-                  _groups.add(value);
-                });
-              }
-            });
-
-            // Add your onPressed code here!
-          },
-          label: Text('CREATE GROUP'),
-          icon: Icon(Icons.group_add),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        body: _buildSuggestions(),
-      );
-    } else {
-      return Scaffold(
-        appBar: AppBar(centerTitle: true),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            createAlertDialog(context).then((value) {
-              if (value != null) {
-                setState(() {
-                  _groups.add(value);
-                });
-              }
-            });
-
-            // Add your onPressed code here!
-          },
-          label: Text('JOIN GROUP'),
-          icon: Icon(Icons.add),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        body: _buildSuggestions(),
-      );
-    }
-  }
-
-  Future<String> createAlertDialog(BuildContext context) {
-    TextEditingController cController = TextEditingController();
-
-    if (widget.name == "created") {
-      return showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Create New Group"),
-              content: TextField(
-                controller: cController,
-                decoration: const InputDecoration(
-                  labelText: 'Name for your group',
-                ),
-              ),
-              actions: <Widget>[
-                MaterialButton(
-                    elevation: 5.0,
-                    child: Text("Cancel"),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    }),
-                MaterialButton(
-                    elevation: 5.0,
-                    child: Text("Create"),
-                    onPressed: () {
-                      Navigator.of(context).pop(cController.text.toString());
-                    })
-              ],
-            );
-          });
-    } else {
-      return showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Join group"),
-              content: TextField(
-                controller: cController,
-                decoration: const InputDecoration(
-                  labelText: 'Name of the group',
-                ),
-              ),
-              actions: <Widget>[
-                MaterialButton(
-                    elevation: 5.0,
-                    child: Text("Cancel"),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    }),
-                MaterialButton(
-                    elevation: 5.0,
-                    child: Text("Join"),
-                    onPressed: () {
-                      Navigator.of(context).pop(cController.text.toString());
-                    })
-              ],
-            );
-          });
-    }
-  }
-
-  Widget _buildSuggestions() {
-    return ListView.separated(
-        itemCount: _groups.length,
-        padding: EdgeInsets.all(16.0),
-        itemBuilder: /*1*/ (context, i) {
-          return _buildRow(_groups[i]);
-        },
-        separatorBuilder: (context, index) {
-          return Divider();
-        });
-  }
-
-  Widget _buildRow(String name) {
-    return ListTile(
-      title: Text(
-        name,
-        style: _biggerFont,
-      ),
+    return new CustomTabbedPage(
+      title: "Groups",
+      tabs: [Tab(text: "JOINED"), Tab(text: "CREATED")],
+      tabViews: [
+        GroupListContainer(name: 'joined'),
+        GroupListContainer(name: 'created')
+      ],
+      hasDrawer: true,
+      secondaryBackgroundColour: true,
+      // background: true,
+      // customBackground: Container(
+      //   child: ClipPath(
+      //     clipper: BackgroundClipperMain(),
+      //     child: Container(
+      //       color: Theme.of(context).colorScheme.onBackground,
+      //     ),
+      //   ),
+      // ),
     );
   }
 }

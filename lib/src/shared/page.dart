@@ -25,6 +25,9 @@ class CustomPage extends StatelessWidget {
   /// AppBar trailing widget
   final List<Widget> appbarActions;
 
+  /// Floating action button
+  final Widget floatingActionButton;
+
   /// Constructs a custom page
   CustomPage(
       {@required this.title,
@@ -33,7 +36,8 @@ class CustomPage extends StatelessWidget {
       this.background,
       this.secondaryBackgroundColour = false,
       this.appbarLeading,
-      this.appbarActions});
+      this.appbarActions,
+      this.floatingActionButton});
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +163,9 @@ class CustomPage extends StatelessWidget {
               ),
             )
           : null,
+
+      // Floating action button
+      floatingActionButton: floatingActionButton,
 
       // Body of page
       // https://stackoverflow.com/questions/54837854
