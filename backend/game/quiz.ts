@@ -307,7 +307,7 @@ export class Quiz {
 
             if (this.isOwner(conn) && !this.sess[sessId].isCurrQuestionActive()) {
                 //  broadcast Board to participants
-                this.sess[sessId].releaseBoard();
+                this.sess[sessId].releaseBoard(socket);
             }
         } catch (error) {
             if (process.env.NODE_EVN === 'debug') {
