@@ -58,8 +58,8 @@ class PlayerRecord {
 
 export class Session {
     private id: number;
-    SessInController: SessInController;
-    status: QuizStatus = QuizStatus.Pending;
+    public SessInController: SessInController;
+    public status: QuizStatus = QuizStatus.Pending;
     private quizStartsAt = 0;
     private  playerIdSet: Set<number> =new Set([]);
     private playerNames: { [key: string]: any } = {};
@@ -276,8 +276,6 @@ export class Session {
         this.playerRecords[playerId].record.bonusPoints = points;
         this.playerRecords[playerId].record.points = points + this.playerRecords[playerId].record.points;
         this.playerRecords[playerId].record.streak = ansOutCome.streak;
-
-        console.log(this.playerRecords);
     }
 
     rankBoard(){
@@ -307,7 +305,6 @@ export class Session {
                 "mineRecord" : this.playerRecords[Number(playerId)],
                 "playerRecordAhead" : plaerAheadRecord
             };
-            console.log(quesitonOutcome);
             socket.emit("questionOutcome", quesitonOutcome);
         }
     }

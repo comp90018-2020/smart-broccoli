@@ -12,36 +12,36 @@ export default (socketIO: Server) => {
             console.log(conn);
 
             // join & welcome
-            handler.welcome(socketIO, socket, conn);
+            handler.welcome(socketIO, socket);
 
             // answer
             socket.on('answer', (content: any) => {
-                handler.answer(socketIO,socket, content, conn);
+                handler.answer(socketIO,socket, content);
             });
 
             // quit
             socket.on('quit', () => {
-                handler.quit(socketIO, socket, conn);
+                handler.quit(socketIO, socket);
             });
 
             // start
             socket.on('start', () => {
-                handler.start(socketIO, socket, conn);
+                handler.start(socketIO, socket);
             });
 
             // abort
             socket.on('abort', () => {
-                handler.abort(socketIO, socket, conn);
+                handler.abort(socketIO, socket);
             });
 
             // next question
             socket.on('next', () => {
-                handler.next(socketIO, socket, conn);
+                handler.next(socketIO, socket);
             });
 
             // showBoard
             socket.on('showBoard', () => {
-                handler.showBoard(socketIO, conn);
+                handler.showBoard(socketIO, socket);
             });
 
         }
