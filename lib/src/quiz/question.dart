@@ -188,7 +188,6 @@ class _QuizQuestion extends State<QuizQuestion> {
 
   // User updated their answer, hence update accordingly
   void updateAnswer(ans) async {
-    print("Updated " + ans.toString());
     setState(() {
       _tappedIndex = ans;
     });

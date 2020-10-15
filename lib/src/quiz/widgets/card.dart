@@ -31,7 +31,6 @@ class _QuizCardState extends State<QuizCard> {
         onTap: widget.onTap,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            print(constraints.maxHeight);
             bool showPicture = constraints.maxHeight > 175;
 
             return Column(

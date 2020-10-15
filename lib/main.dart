@@ -64,8 +64,7 @@ class _MyAppState extends State<MyApp> {
         '/leaderboard': (context) => QuizLeaderboard()
       },
       navigatorKey: mainNavigator,
-      // initialRoute: state.inSession ? '/home' : '/auth',
-      initialRoute: '/take_quiz',
+      initialRoute: state.inSession ? '/home' : '/auth',
     );
   }
 }
