@@ -1,6 +1,6 @@
 import { Session as SessInController, Quiz as QuizInModels } from "../models";
 import { sessionTokenDecrypt as decrypt, SessionToken } from "../controllers/session"
-
+import { PointSystem, Answer, AnswerOutcome } from "./scores";
 
 enum AnswerStatus {
     NoAnswered = 0,
@@ -65,26 +65,25 @@ export class Session {
     status: QuizStatus;
     private quizStartsAt = 0;
     private participants: any;
-    private participantsNames: { [key: string]: any };
+    private participantNames: { [key: string]: any };
+    public participantAnsOutcomes: { [key: string]: AnswerOutcome };
     private questions: Question[];
     private questionsWithAns: Question[];
     private sockets: Set<SocketIO.Socket>;
     private questionIdx = 0;
     private preQuestionIdx = 0;
     private questionReleasedAt = 0;
-    private questionPanel: {
-        [key: string]: PlayerStatus
-    };
-
-    hasFinalBoardReleased: boolean;
+    public readyForNextQuestion : boolean = true;
+    public pointSys: PointSystem = new PointSystem(0);
+    public hasFinalBoardReleased: boolean;
 
     constructor($quiz: any, $s: SessInController) {
         this.id = $s.id;
         this.SessInController = $s;
         this.participants = new Set([]);
-        this.participantsNames = {};
+        this.participantNames = {};
+        this.participantAnsOutcomes = {};
         this.sockets = new Set();
-        this.questionPanel = {};
         this.status = QuizStatus.Pending;
         this.setQuestions($quiz);
         this.hasFinalBoardReleased = false;
@@ -92,16 +91,19 @@ export class Session {
 
     async addParticipant(user: User, socket: SocketIO.Socket) {
         this.participants.add(user.id);
-        this.participantsNames[user.id] = user.name;
+        ++this.pointSys.participantCount;
+        this.participantNames[user.id] = user.name;
         this.sockets.add(socket);
-        this.questionPanel[user.id] = new PlayerStatus(AnswerStatus.NoAnswered, GameStatus.InGame);
+        if (!this.participantAnsOutcomes.hasOwnProperty(user.id)) {
+            this.participantAnsOutcomes[user.id] = new AnswerOutcome(false, 100000000, -1, -1);
+        }
     }
 
     async removeParticipant(userId: number, socket: SocketIO.Socket) {
         this.participants.delete(userId);
-        delete this.participantsNames[userId];
+        --this.pointSys.participantCount;
+        delete this.participantNames[userId];
         this.sockets.delete(socket);
-        this.questionPanel[userId].game = GameStatus.Left;
     }
 
     async hasParticipant(userId: number) {
@@ -113,40 +115,20 @@ export class Session {
     }
 
     allParticipants() {
-        let ret = new Set([]);
-        for (const [key, value] of Object.entries(this.participantsNames)) {
-            ret.add(value);
+        let participantsSet = new Set([]);
+        for (const [key, value] of Object.entries(this.participantNames)) {
+            participantsSet.add(value);
         }
-        return ret;
+        return participantsSet;
     }
 
-    playerAnswered(userId: number) {
-        this.questionPanel[userId].answer = AnswerStatus.Answered;
+    public playerAnswered(userId: number, ansOutcome: AnswerOutcome, points: number) {
+        // TODO
     }
 
-    /**
-     * return the count of answered users which are still in game
-     */
-    getAnswered(): number {
-        let count = 0;
-        for (const [key, value] of Object.entries(this.questionPanel)) {
-            if (value.answer == AnswerStatus.Answered && value.game == GameStatus.InGame) {
-                ++count;
-            }
-        }
-        return count;
-    }
-
-    hasPlayerAnswered(userId: number) {
-        return this.questionPanel[userId].answer === AnswerStatus.Answered;
-    }
-
-    hasPlayerLeft(userId: number) {
-        return this.questionPanel[userId].game === GameStatus.Left;
-    }
-
-    private resetQuestionPanel() {
-        this.questionPanel = {};
+    public hasPlayerAnswered(userId: number) {
+        // TODO
+        return this.pointSys.answeredPlayer.has(userId);
     }
 
     /**
@@ -208,29 +190,93 @@ export class Session {
         }
     }
 
-    getQuestion(idx: number) {
+    getQuestion(idx: number): Question {
         return this.questions[idx];
     }
 
-    getQuestionWithAns(idx: number) {
+    getQuestionWithAns(idx: number): Question {
         return this.questionsWithAns[idx];
+    }
+
+    isCurrQuestionActive() {
+        return this.preQuestionIdx === this.questionIdx;
+    }
+
+    getAnsOfQuestion(idx: number): Answer {
+        const questionWithAns = this.getQuestionWithAns(idx);
+        if (questionWithAns.options === null) {
+            return new Answer(questionWithAns.no, null, questionWithAns.tf);
+        } else {
+            let i = 0
+            for (const option of questionWithAns.options) {
+                if (option.correct) {
+                    return new Answer(questionWithAns.no, i, null);
+                }
+                ++i;
+            }
+            throw `No ans in Question[${idx}], this should never happen.`
+        }
+    }
+
+    getActiveQuesionIdx(): number {
+        return this.preQuestionIdx;
+    }
+
+
+    getPreAnsOut(userId: number) {
+        return this.participantAnsOutcomes[userId];
+    }
+
+    canAnswer(userId: number) {
+        return this.getActiveQuesionIdx() > this.participantAnsOutcomes[userId].quesionNo;
     }
 
     nextQuestionIdx(): number {
         if (this.questionIdx >= this.questions.length) { throw "no more question"; }
         else if (this.questions[this.questionIdx].time * 1000 +
-            this.questionReleasedAt - Date.now() > 0) {
+            this.questionReleasedAt - Date.now() > 0 && !this.readyForNextQuestion) {
             throw "there is a running question";
         }
         else {
-            this.resetQuestionPanel();
             this.questionReleasedAt = Date.now();
             setTimeout(() => {
-                this.questionIdx++;
+                if (this.questionIdx === this.preQuestionIdx) {
+                    this.questionIdx = this.preQuestionIdx + 1;
+                    this.pointSys.setForNewQuestion();
+                }
             }, this.questions[this.questionIdx].time * 1000);
             this.preQuestionIdx = this.questionIdx;
+            this.readyForNextQuestion = false;
             return this.questionIdx;
         }
+    }
+
+    assessAns(userId: number, ans: Answer) {
+        const activeQuesionIdx = this.getActiveQuesionIdx();
+        const correctAns = this.getAnsOfQuestion(activeQuesionIdx);
+        const preAnsOut = this.getPreAnsOut(userId);
+        const ansOutcome = this.pointSys.checkAns(ans, correctAns, preAnsOut);
+        // record in session that player has answered
+        this.participantAnsOutcomes[userId] = ansOutcome;
+        this.pointSys.answeredPlayer.add(userId);
+
+        const points = this.pointSys.getNewPoints(ansOutcome);
+        this.updateBoard(userId, points, ansOutcome);
+    }
+
+    setForNewQuesiton():boolean{
+        if(this.pointSys.hasAllPlayersAnswered()){
+            this.questionIdx = this.preQuestionIdx + 1;
+            this.pointSys.setForNewQuestion();
+            this.readyForNextQuestion = true;
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    updateBoard(userId: number, points: number, ansOutCome: AnswerOutcome) {
+        console.log(userId, points, ansOutCome);
     }
 
     setQuizStatus(status: QuizStatus) {

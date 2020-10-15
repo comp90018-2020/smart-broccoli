@@ -1,6 +1,7 @@
 import { User as BackendUser, Session as SessInController, Quiz as QuizInModels } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session"
 import { User, Session, Conn, QuizStatus } from "./session";
+import { PointSystem, Answer, AnswerOutcome } from "./scores";
 import { Server } from "socket.io";
 
 
@@ -22,7 +23,7 @@ export class Quiz {
     }
 
     private async DEBUG() {
-        const quiz = await QuizInModels.findByPk(16, { include: ["questions"] })
+        const quiz = await QuizInModels.findByPk(19, { include: ["questions"] })
         const sessInController = new SessInController({
             id: 19,
             isGroup: true,
@@ -33,7 +34,7 @@ export class Quiz {
             subscribeGroup: true,
             code: "501760"
         });
-        this.sess[sessInController.id] = new Session(quiz, sessInController);
+        this.sess[Number(sessInController.id)] = new Session(quiz, sessInController);
     }
 
     async addSession(quiz: any, s: SessInController): Promise<SessInController> {
@@ -63,29 +64,15 @@ export class Quiz {
         return conn;
     }
 
-    private checkAnswer(sessId: number, answer: any) {
-        const questionId = answer.question;
-        const MCSelection = answer.MCSelection;
-        const TFSelection = answer.TFSelection;
-        const points = 0;
-        // WIP: check answers for this question here 
-        return points;
-    }
-
-    private recordPoints(userId: number, points: number) {
-        // WIP: record points gained
-    }
-
-
-    private formatAnswered(sessId: number, questionId: number) {
+    private formatAnsweredNotification(sessId: number, questionId: number) {
         return {
             "question": questionId,
-            "count": this.sess[sessId].getAnswered(),
+            "count": this.sess[sessId].pointSys.answeredPlayer.size,
             "total": this.sess[sessId].countParticipants()
         }
     }
 
-    answer(socketIO: Server, content: any, conn: Conn) {
+    answer(socketIO: Server, socket: SocketIO.Socket, content: any, conn: Conn) {
         // {
         //     "question": 3,
         //     "MCSelection": 0,  // list index of answer chosen (for MC Question)
@@ -96,21 +83,26 @@ export class Quiz {
         const questionId = content.questionId;
 
         // check if already answered
-        const alreadyAnswerd = this.sess[sessId].hasPlayerAnswered(userId);
-        if (!alreadyAnswerd) {
-            // if not answer yet / this is the first time to answer
-            const points = this.checkAnswer(sessId, content);
-            this.recordPoints(userId, points);
-            // record in session that player has answered
-            this.sess[sessId].playerAnswered(userId);
+        if (this.sess[sessId].isCurrQuestionActive() && !this.sess[sessId].hasPlayerAnswered(userId)) {
+            try {
+                // if not answer yet, i.e. this is the first time to answer
+                // assess answer
+                const ans: Answer = new Answer(
+                    content.question,
+                    content.MCSelection,
+                    content.TFSelection);
+                this.sess[sessId].assessAns(userId, ans);
 
-            // braodcast that one more participants answered this question
-            const answered = this.formatAnswered(sessId, questionId);
-            socketIO.to(sessId.toString()).emit("questionAnswered", answered);
+                // braodcast that one more participants answered this question
+                const answeredNotification = this.formatAnsweredNotification(sessId, questionId);
+                socket.to(sessId.toString()).emit("questionAnswered", answeredNotification);
 
-            // if everyone has answered
-            if (answered.count >= this.sess[sessId].countParticipants()) {
-                this.releaseQuestionOutcome(socketIO, conn);
+                const hasAllAnswered =  this.sess[sessId].setForNewQuesiton();
+
+            } catch (err) {
+                if (process.env.NODE_EVN === 'debug') {
+                    socket.send(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+                }
             }
         }
 
@@ -161,11 +153,11 @@ export class Quiz {
 
         if (this.sess[sessId].status === QuizStatus.Starting) {
             socket.emit("starting", (this.sess[sessId].getQuizStartsAt() - Date.now()).toString());
-        } 
+        }
 
         if (this.sess[sessId].status === QuizStatus.Running) {
-            socket.emit("nextQuestion",this.sess[sessId].currQuestion());
-        } 
+            socket.emit("nextQuestion", this.sess[sessId].currQuestion());
+        }
 
     }
 
