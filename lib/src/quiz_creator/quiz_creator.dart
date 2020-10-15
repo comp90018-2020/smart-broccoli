@@ -107,7 +107,7 @@ class _QuizCreateState extends State<QuizCreate> {
                     margin: EdgeInsets.zero,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 12),
+                          vertical: 0, horizontal: 12),
                       child: Row(
                         children: [
                           Icon(
