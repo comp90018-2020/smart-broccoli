@@ -41,6 +41,16 @@ class CustomPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Dismiss keyboard when clicking outside
+    // https://stackoverflow.com/questions/51652897
+    Widget wrappedChild = GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      child: child,
+      onTap: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
+
     return Scaffold(
       backgroundColor: this.secondaryBackgroundColour
           ? Theme.of(context).backgroundColor
@@ -171,9 +181,9 @@ class CustomPage extends StatelessWidget {
       // Body of page
       // https://stackoverflow.com/questions/54837854
       body: background == null
-          ? child
+          ? wrappedChild
           : Stack(
-              children: [...background, Positioned.fill(child: child)],
+              children: [...background, Positioned.fill(child: wrappedChild)],
             ),
     );
   }

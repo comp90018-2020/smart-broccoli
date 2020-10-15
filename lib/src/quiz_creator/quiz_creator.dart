@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../data/quiz.dart';
 import 'package:image_picker/image_picker.dart';
@@ -111,9 +110,6 @@ class _QuizCreateState extends State<QuizCreate> {
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(const Duration(),
-        () => SystemChannels.textInput.invokeMethod('TextInput.hide'));
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
