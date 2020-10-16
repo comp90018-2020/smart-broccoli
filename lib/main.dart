@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
         '/leaderboard': (context) => QuizLeaderboard(),
         '/about': (context) => AboutPage(),
         '/about/acknowledgements': (context) => AcknowledgementsPage(),
-        '/group_home': (context) => GroupList(),
+        '/group/home': (context) => GroupList(),
         '/group/create': (context) => GroupCreate(),
         '/quiz': (context) => QuizCreate(),
         '/quiz/question': (context) => QuestionCreate()
