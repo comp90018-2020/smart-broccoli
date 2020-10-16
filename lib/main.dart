@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/src/about/acknowledgements.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'src/about/about.dart';
-import 'src/about/acknowledgements.dart';
 import 'src/auth/auth_screen.dart';
 import 'src/auth/init_page.dart';
 import 'src/quiz/leaderboard.dart';
@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
         '/about/acknowledgements': (context) => AcknowledgementsPage()
       },
       navigatorKey: mainNavigator,
-      initialRoute: '/about',
+      initialRoute: state.inSession ? '/home' : '/auth',
     );
   }
 }
