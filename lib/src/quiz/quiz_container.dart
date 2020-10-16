@@ -52,7 +52,6 @@ class _BuildQuiz extends State<QuizContainer> {
                       child: QuizCard(
                         'Quiz name',
                         'Group name',
-                        onTap: _quiz,
                       ),
                     );
                   },

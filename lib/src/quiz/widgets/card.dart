@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Represents a quiz card
 class QuizCard extends StatefulWidget {
-  /// Tap function
-  final void Function() onTap;
-
   // TODO: change attributes to Group/Quiz
   /// Quiz name
   final String _quizName;
@@ -16,8 +13,11 @@ class QuizCard extends StatefulWidget {
   // Aspect ratio
   final double aspectRatio;
 
+  /// Whether options are enabled
+  final bool optionsEnabled;
+
   QuizCard(this._quizName, this._groupName,
-      {Key key, this.onTap, this.aspectRatio = 1.4});
+      {Key key, this.aspectRatio = 1.4, this.optionsEnabled = false});
 
   @override
   State<StatefulWidget> createState() => new _QuizCardState();
@@ -28,7 +28,7 @@ class _QuizCardState extends State<QuizCard> {
     return Card(
       elevation: 2,
       child: InkWell(
-        onTap: widget.onTap,
+        onTap: () {},
         child: LayoutBuilder(
           builder: (context, constraints) {
             bool showPicture = constraints.maxHeight > 175;
