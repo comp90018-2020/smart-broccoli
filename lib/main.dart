@@ -8,10 +8,14 @@ import 'package:smart_broccoli/theme.dart';
 import 'src/about/about.dart';
 import 'src/auth/auth_screen.dart';
 import 'src/auth/init_page.dart';
+import 'src/groups/group_create.dart';
+import 'src/groups/group_list.dart';
 import 'src/quiz/leaderboard.dart';
 import 'src/quiz/lobby.dart';
 import 'src/quiz/question.dart';
 import 'src/quiz/quiz.dart';
+import 'src/quiz_creator/question_creator.dart';
+import 'src/quiz_creator/quiz_creator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,7 +69,11 @@ class _MyAppState extends State<MyApp> {
         '/question': (context) => QuizQuestion(),
         '/leaderboard': (context) => QuizLeaderboard(),
         '/about': (context) => AboutPage(),
-        '/about/acknowledgements': (context) => AcknowledgementsPage()
+        '/about/acknowledgements': (context) => AcknowledgementsPage(),
+        '/group/home': (context) => GroupList(),
+        '/group/create': (context) => GroupCreate(),
+        '/quiz': (context) => QuizCreate(),
+        '/quiz/question': (context) => QuestionCreate()
       },
       navigatorKey: mainNavigator,
       initialRoute: state.inSession ? '/home' : '/auth',

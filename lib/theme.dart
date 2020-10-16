@@ -22,6 +22,7 @@ class SmartBroccoliTheme {
   static final ThemeData themeData = ThemeData(
     backgroundColor: Color(0xFF4CAF50),
     primaryColor: Color(0xFF4CAF50),
+    accentColor: Colors.green,
     colorScheme: SmartBroccoliColourScheme(),
     buttonTheme: ButtonThemeData(
       shape: RoundedRectangleBorder(
@@ -29,13 +30,14 @@ class SmartBroccoliTheme {
       ),
       padding: EdgeInsets.symmetric(vertical: 15),
     ),
+    floatingActionButtonTheme:
+        FloatingActionButtonThemeData(backgroundColor: Color(0xFFFEC12D)),
     textTheme: TextTheme(
         button: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         subtitle1: TextStyle(
           fontSize: 14,
         ),
-        headline6:
-            TextStyle(fontWeight: FontWeight.normal, color: Color(0xFF707070))),
+        headline6: TextStyle(fontWeight: FontWeight.normal)),
     inputDecorationTheme: InputDecorationTheme(
       contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       filled: true,
@@ -52,6 +54,9 @@ class SmartBroccoliTheme {
         color: SmartBroccoliColourScheme.tabHolderPill,
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.green))),
   );
 
   /// Shape for round RaisedButton

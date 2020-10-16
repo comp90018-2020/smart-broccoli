@@ -25,6 +25,9 @@ class CustomPage extends StatelessWidget {
   /// AppBar trailing widget
   final List<Widget> appbarActions;
 
+  /// Floating action button
+  final Widget floatingActionButton;
+
   /// Constructs a custom page
   CustomPage(
       {@required this.title,
@@ -33,10 +36,21 @@ class CustomPage extends StatelessWidget {
       this.background,
       this.secondaryBackgroundColour = false,
       this.appbarLeading,
-      this.appbarActions});
+      this.appbarActions,
+      this.floatingActionButton});
 
   @override
   Widget build(BuildContext context) {
+    // Dismiss keyboard when clicking outside
+    // https://stackoverflow.com/questions/51652897
+    Widget wrappedChild = GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      child: child,
+      onTap: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
+
     return Scaffold(
       backgroundColor: this.secondaryBackgroundColour
           ? Theme.of(context).backgroundColor
@@ -160,12 +174,16 @@ class CustomPage extends StatelessWidget {
             )
           : null,
 
+      // Floating action button
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+
       // Body of page
       // https://stackoverflow.com/questions/54837854
       body: background == null
-          ? child
+          ? wrappedChild
           : Stack(
-              children: [...background, Positioned.fill(child: child)],
+              children: [...background, Positioned.fill(child: wrappedChild)],
             ),
     );
   }

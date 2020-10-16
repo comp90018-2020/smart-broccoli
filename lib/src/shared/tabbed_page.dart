@@ -16,6 +16,7 @@ class CustomTabbedPage extends CustomPage {
       hasDrawer = false,
       bool secondaryBackgroundColour = false,
       List<Widget> background,
+      Widget floatingActionButton,
       Function(int) tabTap})
       : super(
             title: title,
@@ -44,6 +45,7 @@ class CustomTabbedPage extends CustomPage {
               ]),
             ),
             hasDrawer: hasDrawer,
+            floatingActionButton: floatingActionButton,
             background: background,
             secondaryBackgroundColour: secondaryBackgroundColour);
 }
