@@ -19,9 +19,9 @@ class _GroupCreateState extends State<GroupCreate> {
       child: SingleChildScrollView(
         child: Container(
           alignment: Alignment.topCenter,
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 300),
+            constraints: BoxConstraints(maxWidth: 275),
             child: FractionallySizedBox(
               widthFactor: 0.8,
               child: Form(
