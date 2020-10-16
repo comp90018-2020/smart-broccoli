@@ -96,6 +96,7 @@ class _GroupListState extends State<GroupList> {
             controller: controller,
             decoration: const InputDecoration(
               labelText: 'Name of group',
+              prefixIcon: Icon(Icons.people),
             ),
           ),
           actions: <Widget>[
