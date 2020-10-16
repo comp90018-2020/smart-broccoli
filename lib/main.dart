@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
         '/about/acknowledgements': (context) => AcknowledgementsPage()
       },
       navigatorKey: mainNavigator,
-      initialRoute: state.inSession ? '/home' : '/auth',
+      initialRoute: '/about',
     );
   }
 }

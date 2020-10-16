@@ -57,8 +57,7 @@ class AcknowledgementsPage extends StatelessWidget {
               if (_libs[index]['url'] != null)
                 launch(_libs[index]['url'], forceWebView: true);
             },
-            title: Text(_libs[index]['title'],
-                style: DefaultTextStyle.of(context).style),
+            title: Text(_libs[index]['title']),
           );
         },
       ),
