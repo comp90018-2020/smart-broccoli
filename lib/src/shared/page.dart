@@ -166,7 +166,13 @@ class CustomPage extends StatelessWidget {
                     leading: const Icon(Icons.info_outline),
                     title: Text('About',
                         style: TextStyle(color: Colors.grey[700])),
-                    onTap: () {},
+                    onTap: () {
+                      if (ModalRoute.of(context).settings.name != '/about')
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/about', (route) => false);
+                      else
+                        Navigator.pop(context);
+                    },
                   ),
                   ListTile(
                     dense: true,
