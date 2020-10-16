@@ -1,9 +1,9 @@
-name: Build Backend
+name: Build Socket
 
 on:
   push:
     branches:
-      - master
+      - backend-socket
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
       - name: Login to Registry
         run: echo ${{ secrets.REG_PASS }} | docker login ${{ secrets.REG_HOST }} -u ${{ secrets.REG_USER }} --password-stdin
       - name: Build backend image
-        run: docker build . -t ${{ secrets.REG_HOST }}/comp90018/backend:latest
+        run: docker build . -t ${{ secrets.REG_HOST }}/comp90018/socket:latest
         working-directory: ./backend
       - name: Push backend image
-        run: docker push ${{ secrets.REG_HOST }}/comp90018/backend:latest
+        run: docker push ${{ secrets.REG_HOST }}/comp90018/socket:latest
