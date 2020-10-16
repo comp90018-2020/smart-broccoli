@@ -76,9 +76,7 @@ class _MyAppState extends State<MyApp> {
         '/quiz/question': (context) => QuestionCreate()
       },
       navigatorKey: mainNavigator,
-      // initialRoute: state.inSession ? '/home' : '/auth',
-      // Debug purposes only, replace with above later on
-      initialRoute: '/group_home',
+      initialRoute: state.inSession ? '/home' : '/auth',
     );
   }
 }
