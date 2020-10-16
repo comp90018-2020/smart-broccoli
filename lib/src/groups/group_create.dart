@@ -31,8 +31,10 @@ class _GroupCreateState extends State<GroupCreate> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: TextFormField(
-                        decoration:
-                            const InputDecoration(labelText: 'Group name'),
+                        decoration: const InputDecoration(
+                          labelText: 'Group name',
+                          prefixIcon: Icon(Icons.people),
+                        ),
                       ),
                     ),
                     // Button
