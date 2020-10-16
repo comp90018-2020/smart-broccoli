@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/src/about/acknowledgements.dart';
 import 'package:smart_broccoli/theme.dart';
 
+import 'src/about/about.dart';
 import 'src/auth/auth_screen.dart';
 import 'src/auth/init_page.dart';
 import 'src/quiz/leaderboard.dart';
@@ -61,7 +63,9 @@ class _MyAppState extends State<MyApp> {
         '/take_quiz': (context) => TakeQuiz(),
         '/lobby': (context) => QuizLobby(),
         '/question': (context) => QuizQuestion(),
-        '/leaderboard': (context) => QuizLeaderboard()
+        '/leaderboard': (context) => QuizLeaderboard(),
+        '/about': (context) => AboutPage(),
+        '/about/acknowledgements': (context) => AcknowledgementsPage()
       },
       navigatorKey: mainNavigator,
       initialRoute: state.inSession ? '/home' : '/auth',
