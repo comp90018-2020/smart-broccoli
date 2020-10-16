@@ -4,7 +4,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart' show Divider, ListTile;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:smart_broccoli/src/shared/page.dart';
+import '../shared/page.dart';
 
 /// Acknowledgements page for used libraries and code
 class AcknowledgementsPage extends StatelessWidget {
