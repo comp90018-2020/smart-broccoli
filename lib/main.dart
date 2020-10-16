@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/src/about/acknowledgements.dart';
+import 'package:smart_broccoli/src/quiz/manage_quiz.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'src/about/about.dart';
@@ -10,10 +11,10 @@ import 'src/auth/auth_screen.dart';
 import 'src/auth/init_page.dart';
 import 'src/groups/group_create.dart';
 import 'src/groups/group_list.dart';
-import 'src/quiz/leaderboard.dart';
-import 'src/quiz/lobby.dart';
-import 'src/quiz/question.dart';
-import 'src/quiz/quiz.dart';
+import 'src/session/leaderboard.dart';
+import 'src/session/lobby.dart';
+import 'src/session/question.dart';
+import 'src/quiz/take_quiz.dart';
 import 'src/quiz_creator/question_creator.dart';
 import 'src/quiz_creator/quiz_creator.dart';
 
@@ -65,6 +66,7 @@ class _MyAppState extends State<MyApp> {
         '/auth': (context) => AuthScreen(),
         '/home': (context) => InitialRouter(),
         '/take_quiz': (context) => TakeQuiz(),
+        '/manage_quiz': (context) => ManageQuiz(),
         '/lobby': (context) => QuizLobby(),
         '/question': (context) => QuizQuestion(),
         '/leaderboard': (context) => QuizLeaderboard(),
@@ -76,7 +78,7 @@ class _MyAppState extends State<MyApp> {
         '/quiz/question': (context) => QuestionCreate()
       },
       navigatorKey: mainNavigator,
-      initialRoute: state.inSession ? '/home' : '/auth',
+      initialRoute: '/manage_quiz',
     );
   }
 }

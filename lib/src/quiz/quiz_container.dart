@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'widgets/card.dart';
-import 'lobby.dart';
+import '../session/lobby.dart';
 
 /// Build a list of quizzes
 class QuizContainer extends StatefulWidget {

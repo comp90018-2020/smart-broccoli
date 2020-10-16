@@ -4,7 +4,7 @@ import '../shared/tabbed_page.dart';
 import 'quiz_container.dart';
 import 'quiz_pin_box.dart';
 
-/// Take/manage quiz page
+/// Take quiz page
 class TakeQuiz extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _TakeQuizState();
