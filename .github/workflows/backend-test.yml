@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    runs-on: [ubuntu-latest, backend]
+    runs-on: Linux
     container: node:14
 
     services:

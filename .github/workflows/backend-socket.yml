@@ -7,13 +7,13 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, ubuntu-latest]
+    runs-on: Linux
     steps:
       - uses: actions/checkout@v2
       - name: Login to Registry
         run: echo ${{ secrets.REG_PASS }} | docker login ${{ secrets.REG_HOST }} -u ${{ secrets.REG_USER }} --password-stdin
-      - name: Build backend image
+      - name: Build socket image
         run: docker build . -t ${{ secrets.REG_HOST }}/comp90018/socket:latest
         working-directory: ./backend
-      - name: Push backend image
+      - name: Push socket image
         run: docker push ${{ secrets.REG_HOST }}/comp90018/socket:latest
