@@ -153,7 +153,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
                         // Add choice
                         setState(() =>
-                            {question.addOption(QuestionOption('', false))});
+                            {question.options.add(QuestionOption('', false))});
                       },
                     ),
                   ),
