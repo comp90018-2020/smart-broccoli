@@ -62,8 +62,6 @@ class _ManageQuizState extends State<ManageQuiz> {
                   underline: Container(),
                   onChanged: (_) {},
                   isExpanded: true,
-                  icon: Transform.rotate(
-                      angle: -90 * pi / 180, child: Icon(Icons.chevron_left)),
                   items: [
                     DropdownMenuItem(child: Center(child: Text('A')), value: 0),
                     DropdownMenuItem(child: Center(child: Text('B')), value: 1)
