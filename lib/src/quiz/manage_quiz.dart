@@ -15,27 +15,6 @@ class _ManageQuizState extends State<ManageQuiz> {
   // TODO: replace with provider inside build
   List<String> items = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
-  // Key for action button
-  final GlobalKey _actionButtonKey = GlobalKey();
-  double _height;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Set _height
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      RenderBox renderBox = _actionButtonKey.currentContext.findRenderObject();
-      double buttonHeight = renderBox.size.height;
-      print(_height);
-      if (buttonHeight != _height) {
-        setState(() {
-          _height = buttonHeight;
-        });
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
@@ -55,7 +34,6 @@ class _ManageQuizState extends State<ManageQuiz> {
       hasDrawer: true,
       secondaryBackgroundColour: true,
       floatingActionButton: FloatingActionButton.extended(
-        key: _actionButtonKey,
         onPressed: () {},
         label: Text('CREATE QUIZ'),
         icon: Icon(Icons.add),
