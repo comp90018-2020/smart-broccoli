@@ -200,9 +200,9 @@ class CustomPage extends StatelessWidget {
 
   /// Navigate to named route
   void _navigateToNamed(context, routeName) {
-    if (ModalRoute.of(context).settings.name != '/take_quiz')
+    if (ModalRoute.of(context).settings.name != routeName)
       Navigator.of(context)
-          .pushNamedAndRemoveUntil('/take_quiz', (route) => false);
+          .pushNamedAndRemoveUntil(routeName, (route) => false);
     else
       Navigator.pop(context);
   }
