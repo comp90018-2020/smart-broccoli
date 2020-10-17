@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/theme.dart';
+import 'dart:math';
 
 import '../shared/tabbed_page.dart';
 import 'quiz_container.dart';
-import 'quiz_pin_box.dart';
 
 /// Manage quiz page
 class ManageQuiz extends StatefulWidget {
@@ -11,13 +12,12 @@ class ManageQuiz extends StatefulWidget {
 }
 
 class _ManageQuizState extends State<ManageQuiz> {
-  // Key for pin box
-  final GlobalKey _buildQuizKey = GlobalKey();
-  // Height of pin box
-  double _height;
-
   // TODO: replace with provider inside build
   List<String> items = ["A", "B", "C", "D", "E", "F", "G", "H"];
+
+  // Key for action button
+  final GlobalKey _actionButtonKey = GlobalKey();
+  double _height;
 
   @override
   void initState() {
@@ -25,11 +25,12 @@ class _ManageQuizState extends State<ManageQuiz> {
 
     // Set _height
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      RenderBox renderBox = _buildQuizKey.currentContext.findRenderObject();
-      double pinBoxHeight = renderBox.size.height;
-      if (pinBoxHeight != _height) {
+      RenderBox renderBox = _actionButtonKey.currentContext.findRenderObject();
+      double buttonHeight = renderBox.size.height;
+      print(_height);
+      if (buttonHeight != _height) {
         setState(() {
-          _height = pinBoxHeight;
+          _height = buttonHeight;
         });
       }
     });
@@ -43,26 +44,59 @@ class _ManageQuizState extends State<ManageQuiz> {
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        QuizContainer(QuizPinBox(key: _buildQuizKey), items),
+        QuizContainer(quizSelector(), items, hiddenButton: true),
 
         // Live quiz
-        QuizContainer(QuizPinBox(), items),
+        QuizContainer(quizSelector(), items, hiddenButton: true),
 
         /// Self-paced quiz has Text to fill the vertical space
-        QuizContainer(
-            ConstrainedBox(
-                constraints: BoxConstraints(minHeight: _height ?? 175),
-                child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Take a self-paced quiz...\nHave some fun',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
-                    ))),
-            items)
+        QuizContainer(quizSelector(), items, hiddenButton: true),
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,
+      floatingActionButton: FloatingActionButton.extended(
+        key: _actionButtonKey,
+        onPressed: () {},
+        label: Text('CREATE QUIZ'),
+        icon: Icon(Icons.add),
+      ),
+    );
+  }
+
+  /// Quiz selection dropdown
+  Widget quizSelector() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      constraints: BoxConstraints(maxWidth: 200),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text('GROUP',
+              style: TextStyle(
+                  color: SmartBroccoliColourScheme().onBackground,
+                  fontSize: 16)),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: DropdownButton(
+                  underline: Container(),
+                  onChanged: (_) {},
+                  isExpanded: true,
+                  icon: Transform.rotate(
+                      angle: -90 * pi / 180, child: Icon(Icons.chevron_left)),
+                  items: [
+                    DropdownMenuItem(child: Center(child: Text('A')), value: 0),
+                    DropdownMenuItem(child: Center(child: Text('B')), value: 1)
+                  ],
+                  value: 0,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

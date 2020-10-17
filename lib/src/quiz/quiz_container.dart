@@ -5,13 +5,23 @@ import 'widgets/card.dart';
 
 /// Build a list of quizzes
 class QuizContainer extends StatefulWidget {
-  QuizContainer(this.header, this.items, {Key key}) : super(key: key);
+  QuizContainer(this.header, this.items,
+      {Key key,
+      this.padding = const EdgeInsets.symmetric(vertical: 8),
+      this.hiddenButton = false})
+      : super(key: key);
 
   /// List of items
   final List<String> items;
 
   /// Header widget
   final Widget header;
+
+  /// Padding
+  final EdgeInsetsGeometry padding;
+
+  /// Whether to leave some space at the bottom
+  final bool hiddenButton;
 
   @override
   State<StatefulWidget> createState() => new _BuildQuiz();
@@ -25,7 +35,7 @@ class _BuildQuiz extends State<QuizContainer> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: widget.padding,
         child: Column(
           children: <Widget>[
             // Header widgets
@@ -61,6 +71,20 @@ class _BuildQuiz extends State<QuizContainer> {
                 ),
               ),
             ),
+
+            // Leave some space for a hidden floating action button
+            widget.hiddenButton
+                ? Visibility(
+                    maintainState: true,
+                    maintainAnimation: true,
+                    maintainSize: true,
+                    visible: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: FloatingActionButton(onPressed: null),
+                    ),
+                  )
+                : Container()
           ],
         ),
       ),
