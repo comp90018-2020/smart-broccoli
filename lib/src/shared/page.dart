@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/models.dart';
 
 /// A page extending scaffold
 /// Supports tabs, drawer
@@ -137,11 +139,7 @@ class CustomPage extends StatelessWidget {
                         style:
                             TextStyle(color: Theme.of(context).primaryColor)),
                     onTap: () {
-                      if (ModalRoute.of(context).settings.name != '/take_quiz')
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/take_quiz', (route) => false);
-                      else
-                        Navigator.pop(context);
+                      _navigateToNamed(context, '/take_quiz');
                     },
                   ),
                   ListTile(
@@ -150,7 +148,9 @@ class CustomPage extends StatelessWidget {
                     title: Text('MANAGE QUIZ',
                         style:
                             TextStyle(color: Theme.of(context).primaryColor)),
-                    onTap: () {},
+                    onTap: () {
+                      _navigateToNamed(context, '/manage_quiz');
+                    },
                   ),
                   ListTile(
                     dense: true,
@@ -158,7 +158,9 @@ class CustomPage extends StatelessWidget {
                     title: Text('GROUPS',
                         style:
                             TextStyle(color: Theme.of(context).primaryColor)),
-                    onTap: () {},
+                    onTap: () {
+                      _navigateToNamed(context, '/group/home');
+                    },
                   ),
                   Divider(),
                   ListTile(
@@ -167,11 +169,7 @@ class CustomPage extends StatelessWidget {
                     title: Text('About',
                         style: TextStyle(color: Colors.grey[700])),
                     onTap: () {
-                      if (ModalRoute.of(context).settings.name != '/about')
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/about', (route) => false);
-                      else
-                        Navigator.pop(context);
+                      _navigateToNamed(context, '/about');
                     },
                   ),
                   ListTile(
@@ -179,7 +177,7 @@ class CustomPage extends StatelessWidget {
                     leading: const Icon(Icons.exit_to_app),
                     title: Text('Sign out',
                         style: TextStyle(color: Colors.grey[700])),
-                    onTap: () {},
+                    onTap: Provider.of<AuthStateModel>(context).logout,
                   ),
                 ],
               ),
@@ -198,5 +196,14 @@ class CustomPage extends StatelessWidget {
               children: [...background, Positioned.fill(child: wrappedChild)],
             ),
     );
+  }
+
+  /// Navigate to named route
+  void _navigateToNamed(context, routeName) {
+    if (ModalRoute.of(context).settings.name != '/take_quiz')
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/take_quiz', (route) => false);
+    else
+      Navigator.pop(context);
   }
 }
