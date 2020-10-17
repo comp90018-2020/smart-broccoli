@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/src/about/acknowledgements.dart';
-import 'package:smart_broccoli/src/quiz/manage_quiz.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'src/about/about.dart';
@@ -15,6 +14,7 @@ import 'src/session/leaderboard.dart';
 import 'src/session/lobby.dart';
 import 'src/session/question.dart';
 import 'src/quiz/take_quiz.dart';
+import 'src/quiz/manage_quiz.dart';
 import 'src/quiz_creator/question_creator.dart';
 import 'src/quiz_creator/quiz_creator.dart';
 
@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
         '/quiz/question': (context) => QuestionCreate()
       },
       navigatorKey: mainNavigator,
-      initialRoute: '/manage_quiz',
+      initialRoute: state.inSession ? '/home' : '/auth',
     );
   }
 }
