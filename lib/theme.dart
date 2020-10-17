@@ -148,3 +148,81 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
           shape: BoxShape.circle,
         );
 }
+
+class ProfileTheme {
+  static Widget profileBackground(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
+
+    return Column(
+      children: <Widget>[
+        Container(
+          height: height / 8,
+          color: Colors.green,
+        ),
+        Expanded(
+          child: Container(
+            color: Colors.white,
+          ),
+        )
+      ],
+    );
+  }
+
+  static BoxDecoration bd1() {
+    return BoxDecoration(
+      border: Border(
+        top: BorderSide(
+            color: Colors.black12, width: 2, style: BorderStyle.solid),
+        bottom: BorderSide(
+          color: Colors.black12,
+          width: 2,
+          style: BorderStyle.solid,
+        ),
+        right: BorderSide(
+          color: Colors.black12,
+          width: 2,
+          style: BorderStyle.solid,
+        ),
+      ),
+    );
+  }
+
+  static BoxDecoration bd2() {
+    return BoxDecoration(
+      border: Border(
+        right: BorderSide(
+          color: Colors.black12,
+          width: 2,
+          style: BorderStyle.solid,
+        ),
+        bottom: BorderSide(
+          color: Colors.black12,
+          width: 2,
+          style: BorderStyle.solid,
+        ),
+        left: BorderSide(
+          color: Colors.black12,
+          width: 2,
+          style: BorderStyle.solid,
+        ),
+      ),
+    );
+  }
+
+  static BoxDecoration bd3() {
+    return BoxDecoration(
+      border: Border(
+        bottom: BorderSide(
+          color: Colors.black12,
+          width: 2,
+          style: BorderStyle.solid,
+        ),
+        right: BorderSide(
+          color: Colors.black12,
+          width: 2,
+          style: BorderStyle.solid,
+        ),
+      ),
+    );
+  }
+}
