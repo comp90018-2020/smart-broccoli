@@ -166,10 +166,12 @@ class _QuizCardState extends State<QuizCard> {
                         return Row(
                           children: [
                             Switch(
-                              value: false,
+                              value: true,
                               onChanged: (bool value) {},
                             ),
-                            Text('Active'),
+                            Container(
+                                child: Text('Active'),
+                                transform: Matrix4.translationValues(-3, 0, 0))
                           ],
                         );
                       },
