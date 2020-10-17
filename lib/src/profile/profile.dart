@@ -47,7 +47,10 @@ class _ProfileState extends State<Profile> {
 
   Widget edit() {
     return FlatButton(
-      child: Text("Edit"),
+      child: Text(
+        "Edit",
+        style: TextStyle(color: Colors.white),
+      ),
       onPressed: () {
         // do something
         _toggleEdit();
@@ -65,10 +68,25 @@ class _ProfileState extends State<Profile> {
               child: Column(
                 children: mainBody(
                   TextFormField(
+                    decoration: new InputDecoration(
+                      border: InputBorder.none,
+                      suffixIcon: IconButton(
+                        onPressed: () =>  _nameController.clear(),
+                        icon: Icon(Icons.clear),
+                      ),
+                    ),
                     controller: _nameController,
                   ),
                   TextFormField(
+                    decoration: new InputDecoration(
+                      border: InputBorder.none,
+                      suffixIcon: IconButton(
+                        onPressed: () => _emailController.clear(),
+                        icon: Icon(Icons.clear),
+                      ),
+                    ),
                     controller: _emailController,
+
                   ),
                 ),
               ),
@@ -84,7 +102,15 @@ class _ProfileState extends State<Profile> {
             child: Container(
               child: Column(
                 children: mainBody(
-                    Text(_nameController.text), Text(_emailController.text)),
+                  Text(
+                    _nameController.text,
+                    style: TextStyle(color: Colors.black38),
+                  ),
+                  Text(
+                    _emailController.text,
+                    style: TextStyle(color: Colors.black38),
+                  ),
+                ),
               ),
             ),
           ),
@@ -94,10 +120,12 @@ class _ProfileState extends State<Profile> {
   }
 
   List<Widget> mainBody(Widget c1, Widget c2) {
+    double height = MediaQuery.of(context).size.height;
     return <Widget>[
-      SizedBox(height: 50),
+      SizedBox(height: height / 5.8),
       CircleAvatar(
         backgroundColor: Colors.black12,
+        radius: height / 19,
       ),
       SizedBox(height: 50),
       Row(
@@ -105,18 +133,22 @@ class _ProfileState extends State<Profile> {
         children: <Widget>[
           Container(
             height: 50,
-            width: 100,
+            width: 120,
             decoration: BoxDecoration(
               border: Border.all(
                 color: Colors.black12,
                 width: 2,
               ),
             ),
-            child: Center(child: Text("Name")),
+            child: Center(
+                child: Text(
+              "Name",
+              style: TextStyle(color: Colors.black38),
+            )),
           ),
           Container(
             height: 50,
-            width: 200,
+            width: 250,
             decoration: ProfileTheme.bd1(),
             child: Center(child: c1),
           )
@@ -127,13 +159,17 @@ class _ProfileState extends State<Profile> {
         children: <Widget>[
           Container(
             height: 50,
-            width: 100,
+            width: 120,
             decoration: ProfileTheme.bd2(),
-            child: Center(child: Text("Email")),
+            child: Center(
+                child: Text(
+              "Email",
+              style: TextStyle(color: Colors.black38),
+            )),
           ),
           Container(
             height: 50,
-            width: 200,
+            width: 250,
             decoration: ProfileTheme.bd3(),
             child: Center(child: c2),
           )

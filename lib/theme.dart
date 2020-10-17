@@ -151,13 +151,17 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
 
 class ProfileTheme {
   static Widget profileBackground(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
+
 
     return Column(
       children: <Widget>[
-        Container(
-          height: height / 8,
-          color: Colors.green,
+        Flexible(
+          child: FractionallySizedBox(
+            heightFactor: 0.5,
+            child: Container(
+              color: Colors.green,
+            ),
+          ),
         ),
         Expanded(
           child: Container(
