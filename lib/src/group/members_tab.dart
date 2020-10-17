@@ -25,7 +25,7 @@ class _MembersTab extends State<MembersTab> {
           itemCount: propList.length,
           itemBuilder: (BuildContext context, int index) {
             return ListTile(
-              // TODO inject profile pic to User Avartar
+                // TODO inject profile pic to User Avartar
                 leading: UserAvatar(),
                 title: Text(propList[index]),
                 trailing: IconButton(
@@ -34,7 +34,7 @@ class _MembersTab extends State<MembersTab> {
                 ));
           },
           separatorBuilder: (BuildContext context, int index) =>
-          const Divider(),
+              const Divider(),
         ),
       ),
     );
@@ -48,7 +48,7 @@ class _MembersTab extends State<MembersTab> {
   // And the list get's updated accordingly
   void updateList() {
     setState(
-          () {
+      () {
         propList.add("NEW PERSON");
       },
     );
