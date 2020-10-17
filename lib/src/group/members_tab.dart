@@ -18,25 +18,30 @@ class _MembersTab extends State<MembersTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        // height: 500.0,
-        child: ListView.separated(
-          itemCount: propList.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-                // TODO inject profile pic to User Avartar
-                leading: UserAvatar(),
-                title: Text(propList[index]),
-                trailing: IconButton(
-                  icon: Icon(Icons.person_add),
-                  onPressed: addFriend(),
-                ));
-          },
-          separatorBuilder: (BuildContext context, int index) =>
-              const Divider(),
+    return Stack(
+      children: <Widget>[
+        groupBackground(true),
+        Expanded(
+          child: Container(
+            // height: 500.0,
+            child: ListView.separated(
+              itemCount: propList.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                    // TODO inject profile pic to User Avartar
+                    leading: UserAvatar(),
+                    title: Text(propList[index],style: TextStyle(color: Colors.white), ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.person_add,color: Colors.white,),
+                      onPressed: addFriend(),
+                    ));
+              },
+              separatorBuilder: (BuildContext context, int index) =>
+                  const Divider(),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 

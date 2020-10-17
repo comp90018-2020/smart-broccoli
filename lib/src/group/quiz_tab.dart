@@ -55,6 +55,7 @@ class _QuizTab extends State<QuizTab> {
         tabViews: _tabs,
         hasDrawer: false,
         hasAppBar: false,
+        background: [groupBackground(false)],
       )),
     );
   }
