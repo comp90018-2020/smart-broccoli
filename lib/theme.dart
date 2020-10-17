@@ -63,6 +63,10 @@ class SmartBroccoliTheme {
   static final ShapeBorder raisedButtonShape =
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(20));
 
+  /// Round raised button
+  static final ShapeBorder raisedButtonShapeRound =
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(100));
+
   /// Padding for round RaisedButton
   static final EdgeInsetsGeometry raisedButtonTextPadding =
       EdgeInsets.symmetric(horizontal: 20);

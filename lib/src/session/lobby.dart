@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import '../shared/page.dart';
-import 'widgets/card.dart';
+import '../quiz/widgets/card.dart';
 import 'widgets/users.dart';
 import 'question.dart';
 
