@@ -140,7 +140,7 @@ class _QuizCardState extends State<QuizCard> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.only(right: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -163,21 +163,14 @@ class _QuizCardState extends State<QuizCard> {
                     padding: const EdgeInsets.only(right: 6),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        return ToggleButtons(
-                          color: Colors.black,
-                          fillColor: Colors.green,
-                          borderRadius: BorderRadius.circular(12),
-                          // This -4 is for the border width
-                          // See borderWidth property
-                          constraints: BoxConstraints.expand(
-                              width: constraints.maxWidth / 2 - 4, height: 36),
-                          selectedColor: Colors.black,
-                          onPressed: (_) {},
+                        return Row(
                           children: [
-                            Text('Open'),
-                            Text('Closed'),
+                            Switch(
+                              value: false,
+                              onChanged: (bool value) {},
+                            ),
+                            Text('Active'),
                           ],
-                          isSelected: [true, false],
                         );
                       },
                     ),
