@@ -39,7 +39,7 @@ class _ManageQuizState extends State<ManageQuiz> {
   Widget build(BuildContext context) {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
-      title: "Take Quiz",
+      title: "Manage Quiz",
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes

@@ -34,7 +34,7 @@ class _BuildQuiz extends State<QuizContainer> {
 
             // The list of quiz
             ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 290),
+              constraints: BoxConstraints(maxHeight: 300),
               child: Container(
                 child: ListView.separated(
                   // Enable Horizontal Scroll
@@ -42,13 +42,13 @@ class _BuildQuiz extends State<QuizContainer> {
                   itemCount: widget.items.length,
                   itemBuilder: (context, index) {
                     return Container(
-                      constraints: BoxConstraints(maxWidth: 175),
+                      constraints: BoxConstraints(maxWidth: 200, minWidth: 180),
                       margin: index == 0 || index == widget.items.length - 1
                           ? EdgeInsets.only(
                               left: index == 0 ? 20 : 0,
                               right: index == 0 ? 0 : 20)
                           : EdgeInsets.zero,
-                      width: MediaQuery.of(context).size.width * 0.4,
+                      width: MediaQuery.of(context).size.height * 0.4,
                       child: QuizCard(
                         'Quiz name',
                         'Group name',
@@ -65,14 +65,6 @@ class _BuildQuiz extends State<QuizContainer> {
           ],
         ),
       ),
-    );
-  }
-
-  /// Take a quiz, goes to the quiz lobby which then connects you to a quiz
-  /// Interface
-  void _quiz() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => QuizLobby()),
     );
   }
 }
