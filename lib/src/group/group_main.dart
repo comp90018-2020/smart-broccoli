@@ -15,7 +15,7 @@ class GroupMain extends StatelessWidget {
               Tab(child: Text("Members")),
             ],
           ),
-          title: Text('Tabs Demo'),
+          title: Text('COMP1234'),
         ),
         body: TabBarView(
           children: [
