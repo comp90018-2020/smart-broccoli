@@ -28,7 +28,7 @@ class _ManageQuizState extends State<ManageQuiz> {
         // Live quiz
         QuizContainer(quizSelector(), items, hiddenButton: true),
 
-        /// Self-paced quiz has Text to fill the vertical space
+        /// Self-paced quiz
         QuizContainer(quizSelector(), items, hiddenButton: true),
       ],
       hasDrawer: true,
