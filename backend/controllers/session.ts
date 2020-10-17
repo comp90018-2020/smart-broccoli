@@ -303,7 +303,7 @@ export const createSession = async (userId: number, opts: any) => {
         });
 
         // pass quiz and session to socket 
-        const res = handler.addSession(quiz, session);
+        const [resSess, resPlayerRecordsRank] = handler.addSession(quiz, session);
 
         return { session, token };
     });

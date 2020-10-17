@@ -1,6 +1,6 @@
 import { User as BackendUser, Session as SessInController, Quiz as QuizInModels } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session"
-import { Player, Session, Conn, QuizStatus } from "./session";
+import { Player, Session, Conn, QuizStatus, QuizResult } from "./session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Server, Socket } from "socket.io";
 
@@ -37,9 +37,15 @@ export class Quiz {
         this.sess[Number(sessInController.id)] = new Session(quiz, sessInController);
     }
 
-    async addSession(quiz: any, s: SessInController): Promise<SessInController> {
+    /**
+     * @returns original session and player final rank with details
+     * @param quiz 
+     * @param s 
+     */
+
+    addSession(quiz: any, s: SessInController): [SessInController, QuizResult] {
         this.sess[s.id] = new Session(quiz, s);
-        return this.sess[s.id].SessInController;
+        return this.sess[s.id].result;
     }
 
     /**
