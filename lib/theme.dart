@@ -152,3 +152,11 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
           shape: BoxShape.circle,
         );
 }
+
+class UserAvatar extends CircleAvatar {
+  UserAvatar()
+      : super(
+          backgroundColor: Colors.black12,
+          maxRadius: 20,
+        );
+}

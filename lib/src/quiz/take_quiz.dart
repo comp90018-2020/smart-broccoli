@@ -13,6 +13,7 @@ class TakeQuiz extends StatefulWidget {
 class _TakeQuizState extends State<TakeQuiz> {
   // Key for pin box
   final GlobalKey _buildQuizKey = GlobalKey();
+
   // Height of pin box
   double _height;
 
@@ -43,23 +44,24 @@ class _TakeQuizState extends State<TakeQuiz> {
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        QuizContainer(QuizPinBox(key: _buildQuizKey), items),
+        QuizContainer(items, header: QuizPinBox(key: _buildQuizKey)),
 
         // Live quiz
-        QuizContainer(QuizPinBox(), items),
+        QuizContainer(items, header: QuizPinBox()),
 
         /// Self-paced quiz has Text to fill the vertical space
         QuizContainer(
-            ConstrainedBox(
-                constraints: BoxConstraints(minHeight: _height ?? 175),
-                child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Take a self-paced quiz...\nHave some fun',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
-                    ))),
-            items)
+          items,
+          header: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: _height ?? 175),
+              child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Take a self-paced quiz...\nHave some fun',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white),
+                  ))),
+        )
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,

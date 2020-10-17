@@ -5,8 +5,9 @@ import 'widgets/card.dart';
 
 /// Build a list of quizzes
 class QuizContainer extends StatefulWidget {
-  QuizContainer(this.header, this.items,
+  QuizContainer(this.items,
       {Key key,
+      this.header,
       this.padding = const EdgeInsets.only(top: 20, bottom: 8),
       this.hiddenButton = false})
       : super(key: key);
@@ -39,7 +40,7 @@ class _BuildQuiz extends State<QuizContainer> {
         child: Column(
           children: <Widget>[
             // Header widgets
-            widget.header,
+            widget.header != null ? widget.header : Container(),
 
             // The list of quiz
             ConstrainedBox(
@@ -85,7 +86,7 @@ class _BuildQuiz extends State<QuizContainer> {
                           FloatingActionButton(heroTag: null, onPressed: null),
                     ),
                   )
-                : Container()
+                : Container(),
           ],
         ),
       ),
