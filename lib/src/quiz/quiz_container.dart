@@ -81,7 +81,8 @@ class _BuildQuiz extends State<QuizContainer> {
                     visible: false,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: FloatingActionButton(onPressed: null),
+                      child:
+                          FloatingActionButton(heroTag: null, onPressed: null),
                     ),
                   )
                 : Container()
