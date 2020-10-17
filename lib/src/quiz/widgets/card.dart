@@ -101,14 +101,14 @@ class _QuizCardState extends State<QuizCard> {
                         //       ),
                         //     ),
                         //     Text('Live', style: TextStyle(fontSize: 13))),
-                        // Scheduled
+                        // Self-paced
                         buildIndicator(
                           Icon(
                             Icons.schedule,
                             size: 15,
                             color: Theme.of(context).backgroundColor,
                           ),
-                          Text('Scheduled', style: TextStyle(fontSize: 13)),
+                          Text('Self-paced', style: TextStyle(fontSize: 13)),
                         )
                       ],
                     )),
