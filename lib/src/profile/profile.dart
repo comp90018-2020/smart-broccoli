@@ -63,7 +63,13 @@ class _ProfileState extends State<Profile> {
           SingleChildScrollView(
             child: Container(
               child: Column(
-                children: mainBody(TextFormField(controller: _nameController,), TextFormField(controller: _emailController,),
+                children: mainBody(
+                  TextFormField(
+                    controller: _nameController,
+                  ),
+                  TextFormField(
+                    controller: _emailController,
+                  ),
                 ),
               ),
             ),
@@ -77,7 +83,8 @@ class _ProfileState extends State<Profile> {
           SingleChildScrollView(
             child: Container(
               child: Column(
-                children: mainBody(Text(_nameController.text), Text(_emailController.text)),
+                children: mainBody(
+                    Text(_nameController.text), Text(_emailController.text)),
               ),
             ),
           ),
