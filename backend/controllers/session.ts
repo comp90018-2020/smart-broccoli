@@ -10,7 +10,8 @@ import sequelize, {
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
 import {handler} from "../game/index";
-
+import { QuizResult} from "../game/session";
+ 
 // Represents a session token
 export interface SessionToken {
     scope: string;
@@ -303,8 +304,8 @@ export const createSession = async (userId: number, opts: any) => {
         });
 
         // pass quiz and session to socket 
-        const [resSess, resPlayerRecordsRank] = handler.addSession(quiz, session);
-
+        const res: null | [Session, QuizResult]  = handler.addSession(quiz, session);
+        
         return { session, token };
     });
 };
