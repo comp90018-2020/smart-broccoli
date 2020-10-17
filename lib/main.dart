@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/src/about/acknowledgements.dart';
+import 'package:smart_broccoli/src/profile/profile.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'src/about/about.dart';
@@ -73,10 +74,11 @@ class _MyAppState extends State<MyApp> {
         '/group/home': (context) => GroupList(),
         '/group/create': (context) => GroupCreate(),
         '/quiz': (context) => QuizCreate(),
-        '/quiz/question': (context) => QuestionCreate()
+        '/quiz/question': (context) => QuestionCreate(),
+        'profile': (context) => Profile(),
       },
       navigatorKey: mainNavigator,
-      initialRoute: state.inSession ? '/home' : '/auth',
+      initialRoute: 'profile', // state.inSession ? '/home' : '/auth',
     );
   }
 }

@@ -65,7 +65,7 @@ class _ProfileState extends State<Profile> {
               child: Column(
                 children: mainBody(
                   TextFormField(
-                    controller: _emailController,
+                    controller: _nameController,
                   ),
                   TextFormField(
                     controller: _emailController,
@@ -83,7 +83,7 @@ class _ProfileState extends State<Profile> {
           SingleChildScrollView(
             child: Container(
               child: Column(
-                children: mainBody(Text("Get Name"), Text("Get Email")),
+                children: mainBody(Text(_nameController.text), Text(_emailController.text)),
               ),
             ),
           ),
@@ -128,7 +128,7 @@ class _ProfileState extends State<Profile> {
             height: 50,
             width: 100,
             decoration: ProfileTheme.bd2(),
-            child: Center(child: Text("Name")),
+            child: Center(child: Text("Email")),
           ),
           Container(
             height: 50,
