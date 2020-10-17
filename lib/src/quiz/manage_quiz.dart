@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/theme.dart';
-import 'dart:math';
 
 import '../shared/tabbed_page.dart';
 import 'quiz_container.dart';
