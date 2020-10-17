@@ -1,13 +1,22 @@
-import { Session as SessInController, Quiz as QuizInModels } from "../models";
+import { Session as SessInController, Quiz as QuizInModels, Quiz } from "../models";
 import { sessionTokenDecrypt as decrypt, SessionToken } from "../controllers/session"
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket } from "socket.io";
+import { quizPictureProcessor } from "helpers/upload";
 
 export enum QuizStatus {
     Pending = 0,
     Starting = 1,
     Running = 2,
     Ended = 3
+}
+
+
+export class QuizResult {
+    constructor(
+        readonly questionFinshed: number,
+        readonly questionTotal: number,
+        readonly borad: PlayerRecord[]) { }
 }
 
 export class Player {
@@ -53,13 +62,13 @@ class Record {
     ) { }
 }
 
-class PlayerRecord {
+export class PlayerRecord {
     constructor(readonly player: Player, readonly record: Record) { }
 }
 
 export class Session {
     private id: number;
-    public SessInController: SessInController;
+    public sessInController: SessInController;
     public status: QuizStatus = QuizStatus.Pending;
     private quizStartsAt = 0;
     private playerIdSet: Set<number> = new Set([]);
@@ -77,11 +86,12 @@ export class Session {
     public hasFinalBoardReleased: boolean = false;
 
     public playerRecords: { [key: number]: PlayerRecord } = {};
-    private playerRecordList: PlayerRecord[] = [];
+    public playerRecordList: PlayerRecord[] = [];
+    public result: [SessInController, QuizResult] = null;
 
     constructor($quiz: any, $s: SessInController) {
         this.id = $s.id;
-        this.SessInController = $s;
+        this.sessInController = $s;
         this.setQuestions($quiz);
     }
 
@@ -230,16 +240,14 @@ export class Session {
 
     nextQuestionIdx(): number {
         if (this.questionIdx >= this.questions.length) { throw "no more question"; }
-        else if (this.questions[this.questionIdx].time * 1000 +
-            this.questionReleasedAt - Date.now() > 0 && !this.readyForNextQuestion) {
+        else if (!this.readyForNextQuestion) {
             throw "there is a running question";
         }
         else {
             this.questionReleasedAt = Date.now();
             setTimeout(() => {
                 if (this.questionIdx === this.preQuestionIdx) {
-                    this.questionIdx = this.preQuestionIdx + 1;
-                    this.pointSys.setForNewQuestion();
+                    this.moveToNextQuestion();
                 }
             }, this.questions[this.questionIdx].time * 1000);
             this.preQuestionIdx = this.questionIdx;
@@ -262,13 +270,17 @@ export class Session {
 
     trySettingForNewQuesiton(): boolean {
         if (this.pointSys.hasAllPlayersAnswered()) {
-            this.questionIdx = this.preQuestionIdx + 1;
-            this.pointSys.setForNewQuestion();
-            this.readyForNextQuestion = true;
+            this.moveToNextQuestion();
             return true;
         } else {
             return false;
         }
+    }
+
+    private moveToNextQuestion() {
+        this.questionIdx = this.preQuestionIdx + 1;
+        this.pointSys.setForNewQuestion();
+        this.readyForNextQuestion = true;
     }
 
     async updateBoard(playerId: number, points: number, ansOutCome: AnswerOutcome) {
@@ -330,7 +342,20 @@ export class Session {
         for (const [playerId, socket] of Object.entries(this.sockets)) {
             socket.disconnect();
         }
-        this.playerIdSet = new Set();
+        this.result = [
+            this.sessInController,
+            new QuizResult(
+                (this.questionIdx === 0 && this.readyForNextQuestion ? -1 :
+                    (
+                        this.readyForNextQuestion ?
+                            this.preQuestionIdx : this.preQuestionIdx - 1
+                    )
+                ) + 1,
+                this.questions.length,
+                this.playerRecordList
+            )
+        ];
+        console.log(this.result);
     }
 
 }
