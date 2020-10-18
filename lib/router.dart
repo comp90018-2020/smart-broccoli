@@ -1,5 +1,6 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:smart_broccoli/src/group/group_main.dart';
 
 import 'src/about/about.dart';
 import 'src/about/acknowledgements.dart';
@@ -26,6 +27,7 @@ class Routes {
   static String sessionLeaderboard = "/session/leaderboard";
   static String about = "/about";
   static String acknowledgements = "/about/acknowledgements";
+  static String group = "/group/:id";
   static String groupHome = "/group/home";
   static String groupCreate = "/group/create";
   static String quiz = "/quiz";
@@ -83,6 +85,12 @@ class Routes {
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return GroupList();
     }), transitionType: TransitionType.inFromLeft);
+
+    // Group
+    router.define(group, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return GroupMain();
+    }));
 
     // Quiz
     router.define(quiz, handler: Handler(
