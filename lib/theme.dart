@@ -6,6 +6,7 @@ class SmartBroccoliColourScheme extends ColorScheme {
   static const Color tabHolderPillText = Color(0xFF654C12);
   static const Color logoContainerBackground = Colors.white;
   static const Color inputFieldColor = Colors.white;
+  static const Color membersTabBackground = Colors.white;
 
   SmartBroccoliColourScheme()
       : super.light(
@@ -150,5 +151,13 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
           // You need this line or the box will be transparent
           color: Colors.white,
           shape: BoxShape.circle,
+        );
+}
+
+class UserAvatar extends CircleAvatar {
+  UserAvatar()
+      : super(
+          backgroundColor: Colors.black12,
+          maxRadius: 20,
         );
 }

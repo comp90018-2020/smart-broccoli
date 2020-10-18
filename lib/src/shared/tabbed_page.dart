@@ -14,6 +14,7 @@ class CustomTabbedPage extends CustomPage {
       @required List<Tab> tabs,
       @required List<Widget> tabViews,
       hasDrawer = false,
+      primary = true,
       bool secondaryBackgroundColour = false,
       List<Widget> background,
       Widget floatingActionButton,
@@ -44,6 +45,7 @@ class CustomTabbedPage extends CustomPage {
               ]),
             ),
             hasDrawer: hasDrawer,
+            primary: primary,
             floatingActionButton: floatingActionButton,
             background: background,
             secondaryBackgroundColour: secondaryBackgroundColour);

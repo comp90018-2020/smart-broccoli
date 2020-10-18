@@ -15,6 +15,9 @@ class CustomPage extends StatelessWidget {
   /// Whether page has drawer
   final bool hasDrawer;
 
+  /// Whether page is at top of screen
+  final bool primary;
+
   /// Secondary background colour
   final bool secondaryBackgroundColour;
 
@@ -35,6 +38,7 @@ class CustomPage extends StatelessWidget {
       {@required this.title,
       @required this.child,
       this.hasDrawer = false,
+      this.primary = true,
       this.background,
       this.secondaryBackgroundColour = false,
       this.appbarLeading,
@@ -58,21 +62,26 @@ class CustomPage extends StatelessWidget {
           ? Theme.of(context).backgroundColor
           : Theme.of(context).colorScheme.onBackground,
 
+      // At top
+      primary: primary,
+
       // Appbar
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: Container(
-          // Alter shadow: https://stackoverflow.com/questions/54554569
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(color: Colors.white, offset: const Offset(0, .2))
-          ]),
-          child: AppBar(
-              title: Text(this.title),
-              centerTitle: true,
-              elevation: 0,
-              actions: appbarActions),
-        ),
-      ),
+      appBar: primary
+          ? PreferredSize(
+              preferredSize: Size.fromHeight(kToolbarHeight),
+              child: Container(
+                // Alter shadow: https://stackoverflow.com/questions/54554569
+                decoration: BoxDecoration(boxShadow: [
+                  BoxShadow(color: Colors.white, offset: const Offset(0, .2))
+                ]),
+                child: AppBar(
+                    title: Text(this.title),
+                    centerTitle: true,
+                    elevation: 0,
+                    actions: appbarActions),
+              ),
+            )
+          : null,
 
       // Drawer (or hamberger menu)
       drawer: hasDrawer

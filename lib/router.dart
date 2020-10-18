@@ -7,6 +7,7 @@ import 'src/auth/auth_screen.dart';
 import 'src/auth/init_page.dart';
 import 'src/groups/group_create.dart';
 import 'src/groups/group_list.dart';
+import 'src/group/group_main.dart';
 import 'src/session/leaderboard.dart';
 import 'src/session/lobby.dart';
 import 'src/session/question.dart';
@@ -26,6 +27,7 @@ class Routes {
   static String sessionLeaderboard = "/session/leaderboard";
   static String about = "/about";
   static String acknowledgements = "/about/acknowledgements";
+  static String group = "/group/:id";
   static String groupHome = "/group/home";
   static String groupCreate = "/group/create";
   static String quiz = "/quiz";
@@ -83,6 +85,12 @@ class Routes {
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return GroupList();
     }), transitionType: TransitionType.inFromLeft);
+
+    // Group
+    router.define(group, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return GroupMain();
+    }));
 
     // Quiz
     router.define(quiz, handler: Handler(
