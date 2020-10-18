@@ -58,10 +58,7 @@ export const sessionTokenDecrypt = async (token: string) => {
         token,
         process.env.TOKEN_SECRET
     );
-    if (sessionToken.scope !== "game") {
-        return null;
-    }
-    return sessionToken;
+    return sessionToken.scope === "game" ? sessionToken : null;
 };
 
 /**
