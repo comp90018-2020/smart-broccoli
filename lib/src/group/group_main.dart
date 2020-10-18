@@ -54,10 +54,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                 )
               ]
             : [
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () {},
-                )
+                Container()
               ],
         centerTitle: true,
         title: Text('COMP1234'),
