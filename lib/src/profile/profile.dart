@@ -1,11 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/theme.dart';
-
-// import 'package:smart_broccoli/shared/page.dart';
-// TODO FIX THIS IMPORT
 import '../shared/page.dart';
 
-// Login tab
+// Profile
 class Profile extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _ProfileState();
@@ -22,161 +19,127 @@ class _ProfileState extends State<Profile> {
     super.dispose();
   }
 
+  /// Whether edit mode is activated
   bool _isEdit = false;
-
-  void _toggleEdit() {
-    setState(() {
-      if (_isEdit) {
-        _isEdit = !_isEdit;
-      } else {
-        _isEdit = !_isEdit;
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        body: CustomPage(
-      title: "Profile",
-      hasDrawer: true,
-      child: _profileStats(),
-      appbarActions: [edit()],
-    ));
-  }
+      body: CustomPage(
+        title: "Profile",
+        hasDrawer: true,
 
-  Widget edit() {
-    return FlatButton(
-      child: Text(
-        "Edit",
-        style: ProfileTheme.appBarTS,
+        // Save/edit
+        appbarActions: [
+          CupertinoButton(
+            child: Text(_isEdit ? "Save" : "Edit",
+                style: TextStyle(color: Colors.white)),
+            onPressed: () {
+              setState(() {
+                _isEdit = !_isEdit;
+              });
+            },
+          )
+        ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [profilePicture(), _formBody()],
+          ),
+        ),
       ),
-      onPressed: () {
-        // do something
-        _toggleEdit();
-      },
     );
   }
 
-  Widget _profileStats() {
-    if (_isEdit) {
-      return new Stack(
-        children: <Widget>[
-          ProfileTheme.profileBackground(context),
-          SingleChildScrollView(
-            child: Container(
-              child: Column(
-                children: mainBody(
-                  TextFormField(
-                    decoration: new InputDecoration(
-                      labelText: _nameController.text,
-                      border: InputBorder.none,
-                      suffixIcon: IconButton(
-                        onPressed: () => _nameController.clear(),
-                        icon: Icon(Icons.clear),
-                      ),
-                    ),
-                    controller: _nameController,
-                  ),
-                  TextFormField(
-                    decoration: new InputDecoration(
-                      labelText: _emailController.text,
-                      border: InputBorder.none,
-                      suffixIcon: IconButton(
-                        onPressed: () => _emailController.clear(),
-                        icon: Icon(Icons.clear),
-                      ),
-                    ),
-                    controller: _emailController,
-                  ),
-                ),
-              ),
-            ),
+  // The picture
+  Widget profilePicture() {
+    return Stack(
+      children: [
+        Column(
+          children: [
+            Container(
+                color: Theme.of(context).backgroundColor,
+                height: MediaQuery.of(context).size.height * 0.18),
+            Container(color: Colors.white, height: 40),
+          ],
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: CircleAvatar(
+            backgroundColor: Colors.black12,
+            radius: 40,
           ),
-        ],
-      );
-    } else {
-      return new Stack(
-        children: <Widget>[
-          ProfileTheme.profileBackground(context),
-          SingleChildScrollView(
-            child: Container(
-              child: Column(
-                children: mainBody(
-                  Text(
-                    _nameController.text,
-                    style: ProfileTheme.profileTS,
-                  ),
-                  Text(
-                    _emailController.text,
-                    style: ProfileTheme.profileTS,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
+        ),
+      ],
+    );
   }
 
-  List<Widget> mainBody(Widget c1, Widget c2) {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
-    return <Widget>[
-      SizedBox(height: height / 5.8),
-      CircleAvatar(
-        backgroundColor: Colors.black12,
-        radius: height / 19,
-      ),
-      SizedBox(height: 50),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            height: 50,
-            width: width * 0.25,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black12,
-                width: 2,
+  // Body
+  Widget _formBody() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: Material(
+        type: MaterialType.card,
+        elevation: 3,
+        child: Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          columnWidths: {0: FlexColumnWidth(0.3), 1: FlexColumnWidth(0.7)},
+          border: TableBorder.all(width: 0.8, color: Colors.black12),
+          children: [
+            // Name
+            TableRow(children: [
+              _paddedCell(Text('NAME', style: TextStyle(color: Colors.black38)),
+                  padding: EdgeInsets.only(left: 16)),
+              _paddedCell(
+                TextFormField(
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.zero,
+                      hintStyle: TextStyle(color: Colors.black38),
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {},
+                      ),
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      hintText: 'John Smith'),
+                  controller: _nameController,
+                ),
+                padding: EdgeInsets.only(left: 16),
               ),
-            ),
-            child: Center(
-                child: Text(
-              "Name",
-              style: ProfileTheme.profileTS,
-            )),
-          ),
-          Container(
-            height: 50,
-            width: width * 0.5,
-            decoration: ProfileTheme.bd1(),
-            child: Center(child: c1),
-          )
-        ],
+            ]),
+            // Email
+            TableRow(children: [
+              _paddedCell(
+                  Text('EMAIL', style: TextStyle(color: Colors.black38)),
+                  padding: EdgeInsets.only(left: 16)),
+              _paddedCell(
+                TextFormField(
+                  textAlignVertical: TextAlignVertical.center,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.zero,
+                      hintStyle: TextStyle(color: Colors.black38),
+                      border: InputBorder.none,
+                      suffixIcon: Icon(IconData(0x20)), // A space
+                      focusedBorder: InputBorder.none,
+                      hintText: 'name@example.com'),
+                  controller: _emailController,
+                ),
+                padding: EdgeInsets.only(left: 16),
+              ),
+            ])
+          ],
+        ),
       ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            height: 50,
-            width: width * 0.25,
-            decoration: ProfileTheme.bd2(),
-            child: Center(
-                child: Text(
-              "Email",
-              style: ProfileTheme.profileTS,
-            )),
-          ),
-          Container(
-            height: 50,
-            width: width * 0.5,
-            decoration: ProfileTheme.bd3(),
-            child: Center(child: c2),
-          )
-        ],
-      ),
-    ];
+    );
   }
+
+  /// Creates a padded table cell
+  Widget _paddedCell(Widget child,
+          {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
+      TableCell(
+        child: Padding(padding: padding, child: Expanded(child: child)),
+      );
 }
