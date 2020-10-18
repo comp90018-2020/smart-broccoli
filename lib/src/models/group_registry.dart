@@ -29,10 +29,10 @@ class GroupRegistryModel extends ChangeNotifier {
   /// [joinedGroups] and [createdGroups] do not
   Group _selectedGroup;
   Group get selectedGroup => _selectedGroup;
-  Iterable<Group> _joinedGroups;
+  Iterable<Group> _joinedGroups = Iterable.empty();
   UnmodifiableListView<Group> get joinedGroups =>
       UnmodifiableListView(_joinedGroups);
-  Iterable<Group> _createdGroups;
+  Iterable<Group> _createdGroups = Iterable.empty();
   UnmodifiableListView<Group> get createdGroups =>
       UnmodifiableListView(_createdGroups);
 
