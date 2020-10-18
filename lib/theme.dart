@@ -150,9 +150,12 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
 }
 
 class ProfileTheme {
+  static TextStyle _tx1 = TextStyle(color: Colors.black38);
+  static TextStyle _tx2 = TextStyle(color: Colors.white);
+  static TextStyle get profileTS => _tx1;
+  static TextStyle get appBarTS => _tx2;
+
   static Widget profileBackground(BuildContext context) {
-
-
     return Column(
       children: <Widget>[
         Flexible(

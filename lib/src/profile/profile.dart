@@ -49,7 +49,7 @@ class _ProfileState extends State<Profile> {
     return FlatButton(
       child: Text(
         "Edit",
-        style: TextStyle(color: Colors.white),
+        style: ProfileTheme.appBarTS,
       ),
       onPressed: () {
         // do something
@@ -71,7 +71,7 @@ class _ProfileState extends State<Profile> {
                     decoration: new InputDecoration(
                       border: InputBorder.none,
                       suffixIcon: IconButton(
-                        onPressed: () =>  _nameController.clear(),
+                        onPressed: () => _nameController.clear(),
                         icon: Icon(Icons.clear),
                       ),
                     ),
@@ -86,7 +86,6 @@ class _ProfileState extends State<Profile> {
                       ),
                     ),
                     controller: _emailController,
-
                   ),
                 ),
               ),
@@ -104,11 +103,11 @@ class _ProfileState extends State<Profile> {
                 children: mainBody(
                   Text(
                     _nameController.text,
-                    style: TextStyle(color: Colors.black38),
+                    style: ProfileTheme.profileTS,
                   ),
                   Text(
                     _emailController.text,
-                    style: TextStyle(color: Colors.black38),
+                    style: ProfileTheme.profileTS,
                   ),
                 ),
               ),
@@ -143,7 +142,7 @@ class _ProfileState extends State<Profile> {
             child: Center(
                 child: Text(
               "Name",
-              style: TextStyle(color: Colors.black38),
+              style: ProfileTheme.profileTS,
             )),
           ),
           Container(
@@ -164,7 +163,7 @@ class _ProfileState extends State<Profile> {
             child: Center(
                 child: Text(
               "Email",
-              style: TextStyle(color: Colors.black38),
+              style: ProfileTheme.profileTS,
             )),
           ),
           Container(
