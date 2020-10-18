@@ -56,12 +56,15 @@ class _ProfileState extends State<Profile> {
       children: [
         Column(
           children: [
+            // Green clip
             Container(
                 color: Theme.of(context).backgroundColor,
                 height: MediaQuery.of(context).size.height * 0.18),
+            // White container which is half the width of the profile picture
             Container(color: Colors.white, height: 40),
           ],
         ),
+        // Profile picture
         Positioned(
           left: 0,
           right: 0,
