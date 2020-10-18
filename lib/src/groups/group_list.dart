@@ -41,7 +41,7 @@ class _GroupListState extends State<GroupList> {
         ),
         Consumer<GroupRegistryModel>(
           builder: (context, registry, child) =>
-              buildGroupList(registry?.createdGroups),
+              buildGroupList(registry.createdGroups),
         )
       ],
 
