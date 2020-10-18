@@ -37,11 +37,11 @@ class _GroupListState extends State<GroupList> {
       tabViews: [
         Consumer<GroupRegistryModel>(
           builder: (context, registry, child) =>
-              buildGroupList(registry?.joinedGroups ?? []),
+              buildGroupList(registry.joinedGroups),
         ),
         Consumer<GroupRegistryModel>(
           builder: (context, registry, child) =>
-              buildGroupList(registry?.createdGroups ?? []),
+              buildGroupList(registry?.createdGroups),
         )
       ],
 
@@ -69,7 +69,7 @@ class _GroupListState extends State<GroupList> {
     return FractionallySizedBox(
       widthFactor: 0.85,
       child: ListView.builder(
-        itemCount: groups == null ? 0 : groups.length,
+        itemCount: groups.length,
         padding: EdgeInsets.symmetric(vertical: 16.0),
         itemBuilder: (context, index) {
           return Card(
