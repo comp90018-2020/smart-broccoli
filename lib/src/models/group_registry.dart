@@ -18,10 +18,10 @@ class GroupRegistryModel extends ChangeNotifier {
   GroupApi _groupApi;
 
   /// Cached provider for user profile service
-  UserRepository _userRepo;
+  final UserRepository _userRepo;
 
   /// Local storage service
-  KeyValueStore _keyValueStore;
+  final KeyValueStore _keyValueStore;
 
   /// Views subscribe to the fields below
   ///
@@ -37,7 +37,7 @@ class GroupRegistryModel extends ChangeNotifier {
       UnmodifiableListView(_createdGroups);
 
   /// Constructor for external use
-  GroupRegistryModel(this._keyValueStore, this._authStateModel,
+  GroupRegistryModel(this._keyValueStore, this._authStateModel, this._userRepo,
       {GroupApi groupApi}) {
     _groupApi = groupApi ?? GroupApi();
     // load last record of joined and created quizzes from local storage
