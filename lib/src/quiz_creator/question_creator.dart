@@ -56,10 +56,12 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
       // Delete and Save on AppBar
       appbarActions: <Widget>[
-        CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () {},
-            child: Icon(Icons.delete)),
+        IconButton(
+          icon: Icon(Icons.delete),
+          padding: EdgeInsets.zero,
+          splashRadius: 20,
+          onPressed: () {},
+        ),
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
           onPressed: () {},

@@ -45,6 +45,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
         leading: new IconButton(
           icon: new Icon(Icons.close),
           enableFeedback: false,
+          splashRadius: 20,
           onPressed: () => Navigator.of(context).pop(),
         ),
 
@@ -54,6 +55,8 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
             : [
                 IconButton(
                   icon: Icon(Icons.more_vert),
+                  padding: EdgeInsets.zero,
+                  splashRadius: 20,
                   onPressed: () {},
                 )
               ],
