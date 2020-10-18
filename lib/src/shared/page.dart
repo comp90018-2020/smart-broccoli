@@ -15,7 +15,7 @@ class CustomPage extends StatelessWidget {
   /// Whether page has drawer
   final bool hasDrawer;
 
-  final bool hasAppBar;
+  final bool primary;
 
   /// Secondary background colour
   final bool secondaryBackgroundColour;
@@ -37,7 +37,7 @@ class CustomPage extends StatelessWidget {
       {@required this.title,
       @required this.child,
       this.hasDrawer = false,
-      this.hasAppBar = true,
+      this.primary = true,
       this.background,
       this.secondaryBackgroundColour = false,
       this.appbarLeading,
@@ -61,8 +61,11 @@ class CustomPage extends StatelessWidget {
           ? Theme.of(context).backgroundColor
           : Theme.of(context).colorScheme.onBackground,
 
+      // At top
+      primary: primary,
+
       // Appbar
-      appBar: hasAppBar
+      appBar: primary
           ? PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight),
               child: Container(
