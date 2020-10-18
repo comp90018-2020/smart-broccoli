@@ -19,6 +19,7 @@ class _MembersTab extends State<MembersTab> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: SmartBroccoliColourScheme.membersTabBackground,
       padding: EdgeInsets.symmetric(vertical: 12),
       child: ListView.separated(
         itemCount: _users.length,
@@ -30,13 +31,11 @@ class _MembersTab extends State<MembersTab> {
               // Name
               title: Text(
                 _users[index],
-                style: TextStyle(color: Colors.white),
               ),
               // Remove
               trailing: IconButton(
                 icon: Icon(
                   Icons.person_remove,
-                  color: Colors.white,
                 ),
                 splashRadius: 20,
                 onPressed: () {},

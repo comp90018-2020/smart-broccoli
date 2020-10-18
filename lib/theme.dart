@@ -6,6 +6,7 @@ class SmartBroccoliColourScheme extends ColorScheme {
   static const Color tabHolderPillText = Color(0xFF654C12);
   static const Color logoContainerBackground = Colors.white;
   static const Color inputFieldColor = Colors.white;
+  static const Color membersTabBackground = Colors.white;
 
   SmartBroccoliColourScheme()
       : super.light(
