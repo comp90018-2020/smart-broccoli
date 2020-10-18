@@ -67,10 +67,10 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
 
           // Current user & ranking
           Container(
-              margin: EdgeInsets.only(top: 4, bottom: 8),
+              margin: EdgeInsets.symmetric(vertical: 8),
               // Lowest point of green area to end of yellow (150 -> 205)
               // See below for more details
-              height: 55,
+              height: 65,
               child: _leaderboardList(["A"], scrollable: false)),
 
           // List of users
