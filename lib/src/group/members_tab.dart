@@ -30,9 +30,15 @@ class _MembersTab extends State<MembersTab> {
                 return ListTile(
                     // TODO inject profile pic to User Avartar
                     leading: UserAvatar(),
-                    title: Text(propList[index],style: TextStyle(color: Colors.white), ),
+                    title: Text(
+                      propList[index],
+                      style: TextStyle(color: Colors.white),
+                    ),
                     trailing: IconButton(
-                      icon: Icon(Icons.person_add,color: Colors.white,),
+                      icon: Icon(
+                        Icons.person_add,
+                        color: Colors.white,
+                      ),
                       onPressed: addFriend(),
                     ));
               },
