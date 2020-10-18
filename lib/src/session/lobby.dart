@@ -4,7 +4,6 @@ import 'package:smart_broccoli/theme.dart';
 
 import '../shared/page.dart';
 import '../quiz/widgets/card.dart';
-import 'widgets/users.dart';
 import 'question.dart';
 
 /// Widget for Lobby
@@ -73,7 +72,7 @@ class _StartLobby extends State<QuizLobby> {
 
       // Body
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.only(top: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -144,7 +143,7 @@ class _StartLobby extends State<QuizLobby> {
                   // The list of Quiz players
                   Padding(
                     padding: EdgeInsets.only(top: 26),
-                    child: QuizUsers(["A", "B", "C", "D", "E", "F", "G"]),
+                    child: _quizUsers(),
                   ),
 
                   // Quiz countdown
@@ -173,6 +172,31 @@ class _StartLobby extends State<QuizLobby> {
         decoration: LobbyTimerBoxDecoration(),
         child: Center(child: Text("$_start")),
       ),
+    );
+  }
+
+  final userList = ["A", "B", "C", "D", "E", "F", "G"];
+  // Quiz users list
+  Widget _quizUsers() {
+    return ListView.separated(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      shrinkWrap: true,
+      itemCount: userList.length,
+      itemBuilder: (BuildContext context, int index) {
+        return ListTile(
+            dense: true,
+            // Avatar
+            leading: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(100))),
+            // Name
+            title: Text(userList[index],
+                style: SmartBroccoliTheme.listItemTextStyle));
+      },
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
     );
   }
 
