@@ -7,7 +7,7 @@ import 'widgets/card.dart';
 class QuizContainer extends StatefulWidget {
   QuizContainer(this.header, this.items,
       {Key key,
-      this.padding = const EdgeInsets.symmetric(vertical: 8),
+      this.padding = const EdgeInsets.only(top: 20, bottom: 8),
       this.hiddenButton = false})
       : super(key: key);
 
