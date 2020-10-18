@@ -18,6 +18,8 @@ class _ManageQuizState extends State<ManageQuiz> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<QuizCollectionModel>(context, listen: true).init();
+    Provider.of<UserProfileModel>(context, listen: true).init();
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
       title: "Manage Quiz",
