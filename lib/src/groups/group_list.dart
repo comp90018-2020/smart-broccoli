@@ -19,7 +19,7 @@ class _GroupListState extends State<GroupList> {
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshJoinedGroups();
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups();
+        .refreshCreatedGroups(withMembers: true);
     return new CustomTabbedPage(
       title: "Groups",
       tabs: [Tab(text: "JOINED"), Tab(text: "CREATED")],
@@ -71,24 +71,29 @@ class _GroupListState extends State<GroupList> {
       child: ListView.builder(
         itemCount: groups.length,
         padding: EdgeInsets.symmetric(vertical: 16.0),
-        itemBuilder: (context, index) {
+        itemBuilder: (context, i) {
           return Card(
             child: ListTile(
               dense: true,
               onTap: () {},
               title: Text(
-                groups[index].name,
+                groups[i].name,
                 style: TextStyle(fontSize: 16),
               ),
-              // subtitle: groups[index].role == GroupRole.OWNER
-              //     ? Row(children: [
-              //         Icon(Icons.person),
-              //         Text('${groups[index].members.length} members')
-              //       ])
-              //     : Row(children: [
-              //         Icon(Icons.assignment),
-              //         Text('{n} incomplete self-paced quizzes')
-              //       ]),
+              subtitle: groups[i].role == GroupRole.OWNER
+                  ? (groups[i].members == null
+                      ? null
+                      : Row(
+                          children: [
+                            Icon(Icons.person),
+                            Text('${groups[i].members.length} member'
+                                '${groups[i].members.length > 1 ? "s" : ""}'),
+                          ],
+                        ))
+                  : Row(children: [
+                      Icon(Icons.assignment),
+                      Text('{n} incomplete self-paced quizzes')
+                    ]),
             ),
           );
         },
