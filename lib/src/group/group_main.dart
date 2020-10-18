@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/group/members_tab.dart';
 import 'package:smart_broccoli/src/group/quiz_tab.dart';
 
 class GroupMain extends StatefulWidget {
