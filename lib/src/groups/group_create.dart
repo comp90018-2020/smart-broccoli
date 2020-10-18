@@ -64,24 +64,30 @@ class _GroupCreateState extends State<GroupCreate> {
   }
 
   void _createGroup() async {
+    if (controller.text == "")
+      return _showUnsuccessful("Cannot create group", "Name required");
     try {
       await Provider.of<GroupRegistryModel>(context, listen: false)
           .createGroup(controller.text);
       Navigator.of(context).pop();
     } on GroupCreateException {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text("Cannot create group"),
-          content: Text("Name already in use"),
-          actions: [
-            TextButton(
-              child: Text("OK"),
-              onPressed: Navigator.of(context).pop,
-            ),
-          ],
-        ),
-      );
+      _showUnsuccessful("Cannot create group", "Name already in use");
     }
+  }
+
+  void _showUnsuccessful(String title, String body) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
+      ),
+    );
   }
 }
