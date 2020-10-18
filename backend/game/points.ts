@@ -3,7 +3,7 @@ export class AnswerOutcome {
         readonly correct: boolean,
         readonly rank: number,
         readonly streak: number,
-        readonly quesionNo: number
+        readonly questionNo: number
     ) {}
 }
 

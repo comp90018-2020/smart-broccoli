@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
-import { Quiz } from "./quiz";
+import { Game } from "./quiz";
 import { Conn } from "./session";
 
-export const handler: Quiz = new Quiz();
+export const handler: Game = new Game();
 
 export default (socketIO: Server) => {
     socketIO.use(async (socket, next) => {
