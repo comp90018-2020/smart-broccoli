@@ -36,6 +36,16 @@ class AcknowledgementsPage extends StatelessWidget {
       'url':
           'https://raw.githubusercontent.com/fredeil/email-validator.dart/master/LICENSE'
     },
+    {
+      'title': 'lukepighetti/fluro',
+      'url':
+          'https://raw.githubusercontent.com/lukepighetti/fluro/master/LICENSE'
+    },
+    {
+      'title': 'MarcinusX/NumberPicker',
+      'url':
+          'https://raw.githubusercontent.com/MarcinusX/NumberPicker/master/LICENSE'
+    }
   ];
 
   @override
