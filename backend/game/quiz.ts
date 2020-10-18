@@ -11,7 +11,7 @@ import { Server, Socket } from "socket.io";
 const WAITING = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
 
-export class Quiz {
+export class Game {
     // shaerd obj saves live quiz sess
     sess: {
         [key: number]: Session;

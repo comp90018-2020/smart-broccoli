@@ -18,7 +18,7 @@ export class QuizResult {
     constructor(
         readonly questionFinshed: number,
         readonly questionTotal: number,
-        readonly borad: PlayerRecord[]
+        readonly board: PlayerRecord[]
     ) {}
 }
 
@@ -253,7 +253,7 @@ export class Session {
     canAnswer(playerId: number) {
         return (
             this.getActiveQuesionIdx() >
-            this.playerAnsOutcomes[playerId].quesionNo
+            this.playerAnsOutcomes[playerId].questionNo
         );
     }
 
