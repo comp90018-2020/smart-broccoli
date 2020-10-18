@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/models.dart';
 
 import '../shared/tabbed_page.dart';
 
@@ -12,11 +14,12 @@ class _GroupListState extends State<GroupList> {
   // Current tab
   int tab = 0;
 
-  // Groups (should get from provider instead)
-  List<String> groups = ["Biology", "Chemistry", "Physics"];
-
   @override
   Widget build(BuildContext context) {
+    Provider.of<GroupRegistryModel>(context, listen: false)
+        .refreshJoinedGroups(withMembers: true);
+    Provider.of<GroupRegistryModel>(context, listen: false)
+        .refreshCreatedGroups(withMembers: true);
     return new CustomTabbedPage(
       title: "Groups",
       tabs: [Tab(text: "JOINED"), Tab(text: "CREATED")],
@@ -31,14 +34,21 @@ class _GroupListState extends State<GroupList> {
       },
 
       // Tabs
-      tabViews: [buildGroupList(groups), buildGroupList(groups)],
+      tabViews: [
+        Consumer<GroupRegistryModel>(
+          builder: (context, registry, child) =>
+              buildGroupList(registry.joinedGroups),
+        ),
+        Consumer<GroupRegistryModel>(
+          builder: (context, registry, child) =>
+              buildGroupList(registry.createdGroups),
+        )
+      ],
 
       // Action buttons
       floatingActionButton: tab == 0
           ? FloatingActionButton.extended(
-              onPressed: () {
-                joinDialog().then((value) => {print(value)});
-              },
+              onPressed: _joinGroup,
               label: Text('JOIN GROUP'),
               icon: Icon(Icons.add),
             )
@@ -53,29 +63,30 @@ class _GroupListState extends State<GroupList> {
   }
 
   // Builds a list of groups
-  Widget buildGroupList(List<String> groups) {
+  Widget buildGroupList(List<Group> groups) {
     return FractionallySizedBox(
       widthFactor: 0.85,
       child: ListView.builder(
         itemCount: groups.length,
         padding: EdgeInsets.symmetric(vertical: 16.0),
-        itemBuilder: (context, index) {
+        itemBuilder: (context, i) {
           return Card(
             child: ListTile(
               dense: true,
               onTap: () {},
               title: Text(
-                groups[index],
+                groups[i].name,
                 style: TextStyle(fontSize: 16),
               ),
-              // subtitle for joined groups
-              subtitle:
-                  Row(children: [Icon(Icons.person), Text('{n} members')]),
-              // subtitle for created groups
-              // subtitle: Row(children: [
-              //   Icon(Icons.assignment),
-              //   Text('{n} incomplete self-paced quizzes')
-              // ]),
+              subtitle: groups[i].members == null
+                  ? null
+                  : Row(
+                      children: [
+                        Icon(Icons.person),
+                        Text('${groups[i].members.length} member'
+                            '${groups[i].members.length > 1 ? "s" : ""}'),
+                      ],
+                    ),
             ),
           );
         },
@@ -98,6 +109,7 @@ class _GroupListState extends State<GroupList> {
               labelText: 'Name of group',
               prefixIcon: Icon(Icons.people),
             ),
+            onSubmitted: (_) => Navigator.of(context).pop(controller.text),
           ),
           actions: <Widget>[
             TextButton(
@@ -114,6 +126,37 @@ class _GroupListState extends State<GroupList> {
           ],
         );
       },
+    );
+  }
+
+  void _joinGroup() async {
+    final String groupName = await joinDialog();
+    if (groupName == "") return;
+    try {
+      await Provider.of<GroupRegistryModel>(context, listen: false)
+          .joinGroup(name: groupName);
+    } on GroupNotFoundException {
+      _showUnsuccessful("Group does not exist: $groupName");
+    } on AlreadyInGroupException {
+      _showUnsuccessful("Already a member of group: $groupName");
+    } catch (err) {
+      _showUnsuccessful("Something went wrong");
+    }
+  }
+
+  void _showUnsuccessful(String text) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Cannot join"),
+        content: Text(text),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
+      ),
     );
   }
 }

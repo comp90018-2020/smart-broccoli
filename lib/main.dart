@@ -10,10 +10,16 @@ import 'package:smart_broccoli/theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final KeyValueStore _keyValueStore = await SharedPrefsKeyValueStore.create();
+  final AuthStateModel _authStateModel = AuthStateModel(_keyValueStore);
+  final UserRepository _userRepo = UserRepository();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthStateModel(_keyValueStore))
+        ChangeNotifierProvider(create: (_) => _authStateModel),
+        ChangeNotifierProvider(
+          create: (context) =>
+              GroupRegistryModel(_keyValueStore, _authStateModel, _userRepo),
+        )
       ],
       child: MyApp(),
     ),

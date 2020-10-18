@@ -18,10 +18,10 @@ class GroupRegistryModel extends ChangeNotifier {
   GroupApi _groupApi;
 
   /// Cached provider for user profile service
-  UserRepository _userRepo;
+  final UserRepository _userRepo;
 
   /// Local storage service
-  KeyValueStore _keyValueStore;
+  final KeyValueStore _keyValueStore;
 
   /// Views subscribe to the fields below
   ///
@@ -29,15 +29,15 @@ class GroupRegistryModel extends ChangeNotifier {
   /// [joinedGroups] and [createdGroups] do not
   Group _selectedGroup;
   Group get selectedGroup => _selectedGroup;
-  Iterable<Group> _joinedGroups;
+  Iterable<Group> _joinedGroups = Iterable.empty();
   UnmodifiableListView<Group> get joinedGroups =>
       UnmodifiableListView(_joinedGroups);
-  Iterable<Group> _createdGroups;
+  Iterable<Group> _createdGroups = Iterable.empty();
   UnmodifiableListView<Group> get createdGroups =>
       UnmodifiableListView(_createdGroups);
 
   /// Constructor for external use
-  GroupRegistryModel(this._keyValueStore, this._authStateModel,
+  GroupRegistryModel(this._keyValueStore, this._authStateModel, this._userRepo,
       {GroupApi groupApi}) {
     _groupApi = groupApi ?? GroupApi();
     // load last record of joined and created quizzes from local storage
@@ -123,8 +123,8 @@ class GroupRegistryModel extends ChangeNotifier {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       });
-    _keyValueStore.setString('joinedGroups',
-        json.encode(_joinedGroups.map((group) => group.toJson())));
+    // _keyValueStore.setString('joinedGroups',
+    //     json.encode(_joinedGroups.map((group) => group.toJson())));
     notifyListeners();
   }
 
@@ -140,8 +140,8 @@ class GroupRegistryModel extends ChangeNotifier {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       });
-    _keyValueStore.setString('createdGroups',
-        json.encode(_createdGroups.map((group) => group.toJson())));
+    // _keyValueStore.setString('createdGroups',
+    //     json.encode(_createdGroups.map((group) => group.toJson())));
     notifyListeners();
   }
 
@@ -150,7 +150,7 @@ class GroupRegistryModel extends ChangeNotifier {
   /// This callback refreshes [createdGroups].
   Future<void> createGroup(String name) async {
     await _groupApi.createGroup(_authStateModel.token, name);
-    refreshCreatedGroups();
+    refreshCreatedGroups(withMembers: true);
   }
 
   /// Join a group.
@@ -160,6 +160,6 @@ class GroupRegistryModel extends ChangeNotifier {
     Group group = await _groupApi.joinGroup(_authStateModel.token,
         name: name, code: code);
     selectGroup(group.id);
-    refreshJoinedGroups();
+    refreshJoinedGroups(withMembers: true);
   }
 }

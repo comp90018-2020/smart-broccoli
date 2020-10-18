@@ -16,7 +16,7 @@ class UserRepository {
   /// API provider for the group management service
   GroupApi _groupApi;
 
-  Map<int, User> _users;
+  Map<int, User> _users = {};
 
   UserRepository({UserApi userApi, GroupApi groupApi}) {
     _userApi = userApi ?? UserApi();
