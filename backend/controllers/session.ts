@@ -9,9 +9,9 @@ import sequelize, {
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
-import {handler} from "../game/index";
-import { QuizResult} from "../game/session";
- 
+import { handler } from "../game/index";
+import { QuizResult } from "../game/session";
+
 // Represents a session token
 export interface SessionToken {
     scope: string;
@@ -303,9 +303,12 @@ export const createSession = async (userId: number, opts: any) => {
             role: sessionParticipant.role,
         });
 
-        // pass quiz and session to socket 
-        const res: null | [Session, QuizResult]  = handler.addSession(quiz, session);
-        
+        // pass quiz and session to socket
+        const res: null | [Session, QuizResult] = handler.addSession(
+            quiz,
+            session
+        );
+
         return { session, token };
     });
 };

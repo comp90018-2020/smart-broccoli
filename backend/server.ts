@@ -3,8 +3,8 @@ import "./env";
 import http from "http";
 import app from "./app";
 import sequelize from "./models";
-import socket from 'socket.io';
-import io from './game/index';
+import socket from "socket.io";
+import io from "./game/index";
 
 if (!process.env.TOKEN_SECRET) {
     console.error("TOKEN_SECRET not set, exiting...");

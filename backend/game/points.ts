@@ -4,15 +4,15 @@ export class AnswerOutcome {
         readonly rank: number,
         readonly streak: number,
         readonly quesionNo: number
-    ) { };
+    ) {}
 }
 
 export class Answer {
     constructor(
         readonly questionNo: number,
         readonly MCSelection: number,
-        readonly TFSelection: boolean,
-    ) { };
+        readonly TFSelection: boolean
+    ) {}
 }
 
 export class PointSystem {
@@ -21,7 +21,7 @@ export class PointSystem {
     public answeredPlayer: Set<number> = new Set([]);
     private rankOfNextRightAns: number = 0;
 
-    constructor(public participantCount: number) { 
+    constructor(public participantCount: number) {
         this.setForNewQuestion();
     }
 
@@ -43,23 +43,33 @@ export class PointSystem {
         return factor;
     }
 
-    public setForNewQuestion(){
+    public setForNewQuestion() {
         this.rankOfNextRightAns = 0;
         this.answeredPlayer = new Set([]);
     }
 
-    public checkAns(ans: Answer, correctAns: Answer, preAnsOutcome: AnswerOutcome): AnswerOutcome {
+    public checkAns(
+        ans: Answer,
+        correctAns: Answer,
+        preAnsOutcome: AnswerOutcome
+    ): AnswerOutcome {
         if (ans.questionNo !== correctAns.questionNo) {
             throw `This is ans for question ${ans.questionNo} not for ${correctAns.questionNo}`;
         } else {
-            const correct = correctAns.MCSelection !== null ?
-                (ans.MCSelection === correctAns.MCSelection ? true : false) :
-                (ans.TFSelection === correctAns.TFSelection ? true : false);
+            const correct =
+                correctAns.MCSelection !== null
+                    ? ans.MCSelection === correctAns.MCSelection
+                        ? true
+                        : false
+                    : ans.TFSelection === correctAns.TFSelection
+                    ? true
+                    : false;
             return new AnswerOutcome(
                 correct,
                 correct ? this.getRankForARightAns() : this.participantCount,
                 correct ? preAnsOutcome.streak + 1 : 0,
-                correctAns.questionNo);
+                correctAns.questionNo
+            );
         }
     }
 

@@ -1,6 +1,6 @@
-import { Server } from 'socket.io';
-import { Quiz } from './quiz';
-import { Conn } from './session';
+import { Server } from "socket.io";
+import { Quiz } from "./quiz";
+import { Conn } from "./session";
 
 export const handler: Quiz = new Quiz();
 
@@ -15,46 +15,44 @@ export default (socketIO: Server) => {
             handler.welcome(socketIO, socket);
 
             // answer
-            socket.on('answer', (content: any) => {
-                handler.answer(socketIO,socket, content);
+            socket.on("answer", (content: any) => {
+                handler.answer(socketIO, socket, content);
             });
 
             // quit
-            socket.on('quit', () => {
+            socket.on("quit", () => {
                 handler.quit(socketIO, socket);
             });
 
             // start
-            socket.on('start', () => {
+            socket.on("start", () => {
                 handler.start(socketIO, socket);
             });
 
             // abort
-            socket.on('abort', () => {
+            socket.on("abort", () => {
                 handler.abort(socketIO, socket);
             });
 
             // next question
-            socket.on('next', () => {
+            socket.on("next", () => {
                 handler.next(socketIO, socket);
             });
 
             // showBoard
-            socket.on('showBoard', () => {
+            socket.on("showBoard", () => {
                 handler.showBoard(socketIO, socket);
             });
-
-        }
-        catch (err) {
-            if (process.env.NODE_EVN === 'debug') {
+        } catch (err) {
+            if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
-                socket.send(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+                socket.send(
+                    JSON.stringify(err, Object.getOwnPropertyNames(err))
+                );
             }
             socket.disconnect();
-        };
+        }
 
         return next();
-    })
-
-
-}
+    });
+};
