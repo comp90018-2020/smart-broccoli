@@ -48,8 +48,54 @@ class _GroupListState extends State<GroupList> {
       // Action buttons
       floatingActionButton: tab == 0
           ? FloatingActionButton.extended(
-              onPressed: () {
-                joinDialog().then((value) => {print(value)});
+              onPressed: () async {
+                final String groupName = await joinDialog();
+                try {
+                  await Provider.of<GroupRegistryModel>(context, listen: false)
+                      .joinGroup(name: groupName);
+                } on GroupNotFoundException {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: Text("Cannot join"),
+                      content: Text("Group does not exist: $groupName"),
+                      actions: [
+                        TextButton(
+                          child: Text("OK"),
+                          onPressed: Navigator.of(context).pop,
+                        ),
+                      ],
+                    ),
+                  );
+                } on AlreadyInGroupException {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: Text("Cannot join"),
+                      content: Text("Already a member of group: $groupName"),
+                      actions: [
+                        TextButton(
+                          child: Text("OK"),
+                          onPressed: Navigator.of(context).pop,
+                        ),
+                      ],
+                    ),
+                  );
+                } catch (err) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: Text("Cannot join"),
+                      content: Text("Something went wrong"),
+                      actions: [
+                        TextButton(
+                          child: Text("OK"),
+                          onPressed: Navigator.of(context).pop,
+                        ),
+                      ],
+                    ),
+                  );
+                }
               },
               label: Text('JOIN GROUP'),
               icon: Icon(Icons.add),
