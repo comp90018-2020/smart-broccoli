@@ -1,9 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_broccoli/src/profile/joined_profile.dart';
+import 'package:smart_broccoli/src/profile/registered_profile.dart';
 import '../shared/page.dart';
 
 // Profile
 class Profile extends StatefulWidget {
+  final bool isJoined;
+
+  Profile(this.isJoined);
+
   @override
   State<StatefulWidget> createState() => new _ProfileState();
 }
@@ -21,6 +27,9 @@ class _ProfileState extends State<Profile> {
 
   /// Whether edit mode is activated
   bool _isEdit = false;
+
+  /// Is a registered user
+  bool _isJoined;
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +52,27 @@ class _ProfileState extends State<Profile> {
         ],
         child: SingleChildScrollView(
           child: Column(
-            children: [profilePicture(), _formBody()],
+            children: [
+              profilePicture(),
+              _formBody(),
+              widget.isJoined ? _promote() : Container(),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _promote() {
+    return new SizedBox(
+      width: 150,
+      child: RaisedButton(onPressed: () => gotoJoined(), child: Text("Promote User")),
+    );
+  }
+  // Code to promote profile to a joined profile
+  void gotoJoined(){
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => JoinedProfile(false)),
     );
   }
 
@@ -125,7 +151,8 @@ class _ProfileState extends State<Profile> {
                       contentPadding: EdgeInsets.zero,
                       hintStyle: TextStyle(color: Colors.black38),
                       border: InputBorder.none,
-                      suffixIcon: Icon(IconData(0x20)), // A space
+                      suffixIcon: Icon(IconData(0x20)),
+                      // A space
                       focusedBorder: InputBorder.none,
                       hintText: 'name@example.com'),
                   controller: _emailController,

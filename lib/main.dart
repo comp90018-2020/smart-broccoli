@@ -4,6 +4,7 @@ import 'package:smart_broccoli/cache.dart';
 import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/src/about/acknowledgements.dart';
 import 'package:smart_broccoli/src/profile/profile.dart';
+import 'package:smart_broccoli/src/profile/profile_main.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'src/about/about.dart';
@@ -75,7 +76,7 @@ class _MyAppState extends State<MyApp> {
         '/group/create': (context) => GroupCreate(),
         '/quiz': (context) => QuizCreate(),
         '/quiz/question': (context) => QuestionCreate(),
-        'profile': (context) => Profile(),
+        'profile': (context) => ProfileMain(),
       },
       navigatorKey: mainNavigator,
       initialRoute: 'profile', // state.inSession ? '/home' : '/auth',
