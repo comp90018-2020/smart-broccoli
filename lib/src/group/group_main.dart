@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/group/quiz_tab.dart';
+import './members_tab.dart';
+import './quiz_tab.dart';
 
 class GroupMain extends StatefulWidget {
   @override
@@ -7,13 +8,7 @@ class GroupMain extends StatefulWidget {
 }
 
 class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
-  bool showMore = true;
-
-  final List<Tab> myTabs = <Tab>[
-    Tab(child: Text("Quiz")),
-    Tab(child: Text("Members")),
-  ];
-
+  // Main tab controller
   TabController _controller;
 
   void initState() {
@@ -22,13 +17,13 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
     _controller.addListener(_handleSelected);
   }
 
+  // On the first tab?
+  bool _onQuizPage = true;
+
+  // Tab controller change
   void _handleSelected() {
     setState(() {
-      if (_controller.index == 1) {
-        showMore = false;
-      } else {
-        showMore = true;
-      }
+      _onQuizPage = _controller.index == 0;
     });
   }
 
@@ -40,40 +35,41 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
           controller: _controller,
           labelColor: Colors.white,
           indicator: UnderlineTabIndicator(),
-          tabs: myTabs,
+          tabs: [
+            Tab(child: Text("Quiz")),
+            Tab(child: Text("Members")),
+          ],
         ),
-        leading: IconButton(
-          icon: Icon(Icons.close),
-          onPressed: () {},
+
+        // Close button
+        leading: new IconButton(
+          icon: new Icon(Icons.close),
+          enableFeedback: false,
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: showMore
-            ? [
+
+        // More actions
+        actions: _onQuizPage
+            ? []
+            : [
                 IconButton(
                   icon: Icon(Icons.more_vert),
                   onPressed: () {},
                 )
-              ]
-            : [
-                Container()
               ],
+
         centerTitle: true,
         title: Text('COMP1234'),
       ),
+
+      // Tabs
       body: TabBarView(
         controller: _controller,
         children: [
-          moveToQuizTab(),
-          moveToMembersTab(),
+          QuizTab(),
+          MembersTab(),
         ],
       ),
     );
-  }
-
-  Widget moveToQuizTab() {
-    return QuizTab();
-  }
-
-  Widget moveToMembersTab() {
-    return QuizTab();
   }
 }
