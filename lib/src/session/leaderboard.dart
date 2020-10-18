@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/theme.dart';
-
 import '../shared/page.dart';
-import 'widgets/user.dart';
 
 /// Leaderboard page
 class QuizLeaderboard extends StatefulWidget {
@@ -69,8 +67,10 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
 
           // Current user & ranking
           Container(
-              margin: EdgeInsets.only(top: 12, bottom: 3),
-              height: 25.0 + 35,
+              margin: EdgeInsets.only(top: 6, bottom: 4),
+              // Lowest point of green area to end of yellow (150 -> 205)
+              // See below for more details
+              height: 55,
               child: _leaderboardList(["A"])),
 
           // List of users
@@ -110,31 +110,46 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
     return ListView.separated(
       shrinkWrap: true,
       itemCount: list.length,
+      padding: EdgeInsets.symmetric(horizontal: 12),
       itemBuilder: (BuildContext context, int index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 3),
-          child: Row(children: [
-            // Rank
-            Text(
-              '1',
-              style: SmartBroccoliTheme.listItemTextStyle,
-            ),
-            // Name/image
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: UserItem('name'),
+        return ListTile(
+          leading: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Rank
+              Text(
+                '1',
+                style: SmartBroccoliTheme.listItemTextStyle,
               ),
-            ),
-            // Score
-            Wrap(
-                spacing: 5,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text('3,500', style: SmartBroccoliTheme.listItemTextStyle),
-                  Icon(Icons.star, color: Color(0xFF656565))
-                ])
-          ]),
+              // Name/image
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(children: [
+                  // Profile image
+                  Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(100))),
+                  // Name
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Text('name',
+                        style: SmartBroccoliTheme.listItemTextStyle),
+                  )
+                ]),
+              )
+            ],
+          ),
+          // Score
+          trailing: Wrap(
+              spacing: 5,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text('3,500', style: SmartBroccoliTheme.listItemTextStyle),
+                Icon(Icons.star, color: Color(0xFF656565))
+              ]),
         );
       },
       separatorBuilder: (BuildContext context, int index) => const Divider(),
