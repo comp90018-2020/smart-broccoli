@@ -172,7 +172,7 @@ Widget groupBackground(flip) {
       ),
       Expanded(
         child: Container(
-          color: flip ?  Colors.white : Colors.green,
+          color: flip ? Colors.white : Colors.green,
         ),
       )
     ],
