@@ -123,8 +123,8 @@ class GroupRegistryModel extends ChangeNotifier {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       });
-    _keyValueStore.setString('joinedGroups',
-        json.encode(_joinedGroups.map((group) => group.toJson())));
+    // _keyValueStore.setString('joinedGroups',
+    //     json.encode(_joinedGroups.map((group) => group.toJson())));
     notifyListeners();
   }
 
@@ -140,8 +140,8 @@ class GroupRegistryModel extends ChangeNotifier {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       });
-    _keyValueStore.setString('createdGroups',
-        json.encode(_createdGroups.map((group) => group.toJson())));
+    // _keyValueStore.setString('createdGroups',
+    //     json.encode(_createdGroups.map((group) => group.toJson())));
     notifyListeners();
   }
 
