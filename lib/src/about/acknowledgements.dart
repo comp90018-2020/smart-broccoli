@@ -32,11 +32,6 @@ class AcknowledgementsPage extends StatelessWidget {
           'https://raw.githubusercontent.com/rrousselGit/provider/master/LICENSE',
     },
     {
-      'title': 'google/tuple.dart',
-      'url':
-          'https://raw.githubusercontent.com/google/tuple.dart/master/LICENSE',
-    },
-    {
       'title': 'fredeil/email-validator.dart',
       'url':
           'https://raw.githubusercontent.com/fredeil/email-validator.dart/master/LICENSE'
