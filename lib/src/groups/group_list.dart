@@ -48,56 +48,7 @@ class _GroupListState extends State<GroupList> {
       // Action buttons
       floatingActionButton: tab == 0
           ? FloatingActionButton.extended(
-              onPressed: () async {
-                final String groupName = await joinDialog();
-                if (groupName == null) return;
-                try {
-                  await Provider.of<GroupRegistryModel>(context, listen: false)
-                      .joinGroup(name: groupName);
-                } on GroupNotFoundException {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: Text("Cannot join"),
-                      content: Text("Group does not exist: $groupName"),
-                      actions: [
-                        TextButton(
-                          child: Text("OK"),
-                          onPressed: Navigator.of(context).pop,
-                        ),
-                      ],
-                    ),
-                  );
-                } on AlreadyInGroupException {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: Text("Cannot join"),
-                      content: Text("Already a member of group: $groupName"),
-                      actions: [
-                        TextButton(
-                          child: Text("OK"),
-                          onPressed: Navigator.of(context).pop,
-                        ),
-                      ],
-                    ),
-                  );
-                } catch (err) {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: Text("Cannot join"),
-                      content: Text("Something went wrong"),
-                      actions: [
-                        TextButton(
-                          child: Text("OK"),
-                          onPressed: Navigator.of(context).pop,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              },
+              onPressed: _joinGroup,
               label: Text('JOIN GROUP'),
               icon: Icon(Icons.add),
             )
@@ -175,6 +126,37 @@ class _GroupListState extends State<GroupList> {
           ],
         );
       },
+    );
+  }
+
+  void _joinGroup() async {
+    final String groupName = await joinDialog();
+    if (groupName == "") return;
+    try {
+      await Provider.of<GroupRegistryModel>(context, listen: false)
+          .joinGroup(name: groupName);
+    } on GroupNotFoundException {
+      _showUnsuccessful("Group does not exist: $groupName");
+    } on AlreadyInGroupException {
+      _showUnsuccessful("Already a member of group: $groupName");
+    } catch (err) {
+      _showUnsuccessful("Something went wrong");
+    }
+  }
+
+  void _showUnsuccessful(String text) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Cannot join"),
+        content: Text(text),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
+      ),
     );
   }
 }
