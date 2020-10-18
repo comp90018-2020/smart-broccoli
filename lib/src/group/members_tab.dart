@@ -7,47 +7,44 @@ class MembersTab extends StatefulWidget {
 }
 
 class _MembersTab extends State<MembersTab> {
-  List<String> propList;
+  List<String> _users;
 
   // Initiate timers on start up
   @override
   void initState() {
     super.initState();
-    propList = getUserList();
+    _users = getUserList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        groupBackground(true),
-        Expanded(
-          child: Container(
-            // height: 500.0,
-            child: ListView.separated(
-              itemCount: propList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                    // TODO inject profile pic to User Avartar
-                    leading: UserAvatar(),
-                    title: Text(
-                      propList[index],
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(
-                        Icons.person_add,
-                        color: Colors.white,
-                      ),
-                      onPressed: addFriend(),
-                    ));
-              },
-              separatorBuilder: (BuildContext context, int index) =>
-                  const Divider(),
-            ),
-          ),
-        ),
-      ],
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 12),
+      child: ListView.separated(
+        itemCount: _users.length,
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+              dense: true,
+              // Avatar
+              leading: UserAvatar(),
+              // Name
+              title: Text(
+                _users[index],
+                style: TextStyle(color: Colors.white),
+              ),
+              // Remove
+              trailing: IconButton(
+                icon: Icon(
+                  Icons.person_remove,
+                  color: Colors.white,
+                ),
+                splashRadius: 20,
+                onPressed: () {},
+              ));
+        },
+        separatorBuilder: (BuildContext context, int index) =>
+            const Divider(color: Colors.transparent),
+      ),
     );
   }
 
@@ -60,12 +57,8 @@ class _MembersTab extends State<MembersTab> {
   void updateList() {
     setState(
       () {
-        propList.add("NEW PERSON");
+        _users.add("NEW PERSON");
       },
     );
-  }
-
-  addFriend() {
-    print("TODO");
   }
 }

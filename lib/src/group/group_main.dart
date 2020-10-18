@@ -30,6 +30,8 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
+
       appBar: AppBar(
         bottom: new TabBar(
           controller: _controller,
