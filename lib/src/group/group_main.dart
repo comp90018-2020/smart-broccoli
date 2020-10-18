@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import './members_tab.dart';
-import './quiz_tab.dart';
+
+import 'members_tab.dart';
+import 'quiz_tab.dart';
 
 class GroupMain extends StatefulWidget {
   @override

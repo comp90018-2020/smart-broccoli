@@ -1,6 +1,5 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:smart_broccoli/src/group/group_main.dart';
 
 import 'src/about/about.dart';
 import 'src/about/acknowledgements.dart';
@@ -8,6 +7,7 @@ import 'src/auth/auth_screen.dart';
 import 'src/auth/init_page.dart';
 import 'src/groups/group_create.dart';
 import 'src/groups/group_list.dart';
+import 'src/group/group_main.dart';
 import 'src/session/leaderboard.dart';
 import 'src/session/lobby.dart';
 import 'src/session/question.dart';
