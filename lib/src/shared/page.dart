@@ -15,6 +15,7 @@ class CustomPage extends StatelessWidget {
   /// Whether page has drawer
   final bool hasDrawer;
 
+  /// Whether page is at top of screen
   final bool primary;
 
   /// Secondary background colour
