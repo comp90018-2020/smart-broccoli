@@ -14,23 +14,24 @@ class _QuizTab extends State<QuizTab> {
     return new Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Container(
-          child: CustomTabbedPage(
-        title: "YES",
-        tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-        tabViews: [
-          QuizContainer(['A', 'B', 'C', 'D'], hiddenButton: true),
-          QuizContainer(['E', 'F', 'G', 'H'], hiddenButton: true),
-          QuizContainer(['I', 'J', 'K', 'L'], hiddenButton: true),
-        ],
-        hasDrawer: false,
-        primary: false,
-        background: [groupBackground(true)],
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {},
-          label: Text('CREATE QUIZ'),
-          icon: Icon(Icons.add),
+        child: CustomTabbedPage(
+          secondaryBackgroundColour: true,
+          title: "YES",
+          tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
+          tabViews: [
+            QuizContainer(['A', 'B', 'C', 'D'], hiddenButton: true),
+            QuizContainer(['E', 'F', 'G', 'H'], hiddenButton: true),
+            QuizContainer(['I', 'J', 'K', 'L'], hiddenButton: true),
+          ],
+          hasDrawer: false,
+          primary: false,
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {},
+            label: Text('CREATE QUIZ'),
+            icon: Icon(Icons.add),
+          ),
         ),
-      )),
+      ),
     );
   }
 }

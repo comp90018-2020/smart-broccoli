@@ -160,21 +160,3 @@ class UserAvatar extends CircleAvatar {
           maxRadius: 20,
         );
 }
-
-Widget groupBackground(flip) {
-  return new Column(
-    children: <Widget>[
-      Flexible(
-        //  widthFactor: 1,
-        child: Container(
-          color: flip ? Colors.green : Colors.white,
-        ),
-      ),
-      Expanded(
-        child: Container(
-          color: flip ? Colors.white : Colors.green,
-        ),
-      )
-    ],
-  );
-}
