@@ -158,6 +158,7 @@ class _GroupListState extends State<GroupList> {
               labelText: 'Name of group',
               prefixIcon: Icon(Icons.people),
             ),
+            onSubmitted: (_) => Navigator.of(context).pop(controller.text),
           ),
           actions: <Widget>[
             TextButton(
