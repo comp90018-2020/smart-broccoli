@@ -69,6 +69,7 @@ class _ProfileState extends State<Profile> {
                 children: mainBody(
                   TextFormField(
                     decoration: new InputDecoration(
+                      labelText: _nameController.text,
                       border: InputBorder.none,
                       suffixIcon: IconButton(
                         onPressed: () => _nameController.clear(),
@@ -79,6 +80,7 @@ class _ProfileState extends State<Profile> {
                   ),
                   TextFormField(
                     decoration: new InputDecoration(
+                      labelText: _emailController.text,
                       border: InputBorder.none,
                       suffixIcon: IconButton(
                         onPressed: () => _emailController.clear(),
