@@ -1,5 +1,12 @@
-import { Session as SessInController, Quiz as QuizInModels, Quiz } from "../models";
-import { sessionTokenDecrypt as decrypt, SessionToken } from "../controllers/session"
+import {
+    Session as SessInController,
+    Quiz as QuizInModels,
+    Quiz,
+} from "../models";
+import {
+    sessionTokenDecrypt as decrypt,
+    SessionToken,
+} from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket } from "socket.io";
 import { quizPictureProcessor } from "helpers/upload";
@@ -8,15 +15,15 @@ export enum QuizStatus {
     Pending = 0,
     Starting = 1,
     Running = 2,
-    Ended = 3
+    Ended = 3,
 }
-
 
 export class QuizResult {
     constructor(
         readonly questionFinshed: number,
         readonly questionTotal: number,
-        readonly borad: PlayerRecord[]) { }
+        readonly borad: PlayerRecord[]
+    ) {}
 }
 
 export class Player {
@@ -24,14 +31,11 @@ export class Player {
         readonly id: number,
         readonly name: string,
         readonly picturId: number
-    ) { };
+    ) {}
 }
 
 class Option {
-    constructor(
-        readonly correct: boolean,
-        readonly text: string
-    ) { };
+    constructor(readonly correct: boolean, readonly text: string) {}
 }
 
 class Question {
@@ -41,15 +45,12 @@ class Question {
         readonly pictureId: boolean,
         readonly options: Option[] | null,
         readonly tf: boolean | null,
-        readonly time: number,
-    ) { }
+        readonly time: number
+    ) {}
 }
 
 export class Conn {
-    constructor(
-        readonly player: Player,
-        readonly sessionToken: SessionToken
-    ) { }
+    constructor(readonly player: Player, readonly sessionToken: SessionToken) {}
 }
 
 class Record {
@@ -59,11 +60,11 @@ class Record {
         public bonusPoints: number,
         public points: number,
         public streak: number
-    ) { }
+    ) {}
 }
 
 export class PlayerRecord {
-    constructor(readonly player: Player, readonly record: Record) { }
+    constructor(readonly player: Player, readonly record: Record) {}
 }
 
 export class Session {
@@ -102,7 +103,12 @@ export class Session {
         this.players[player.id] = player;
         this.sockets[player.id] = socket;
         if (!this.playerAnsOutcomes.hasOwnProperty(player.id)) {
-            this.playerAnsOutcomes[player.id] = new AnswerOutcome(false, null, -1, -1);
+            this.playerAnsOutcomes[player.id] = new AnswerOutcome(
+                false,
+                null,
+                -1,
+                -1
+            );
         }
 
         if (!this.playerRecords.hasOwnProperty(player.id)) {
@@ -155,8 +161,10 @@ export class Session {
             if (options !== null) {
                 while (q.options.length > 0) {
                     const option = q.options.shift();
-                    options.push(new Option(null, option.text))
-                    optionsWithAns.push(new Option(option.correct, option.text))
+                    options.push(new Option(null, option.text));
+                    optionsWithAns.push(
+                        new Option(option.correct, option.text)
+                    );
                 }
             }
             const question = new Question(
@@ -165,14 +173,16 @@ export class Session {
                 q.pictureId,
                 options,
                 null,
-                quiz.timeLimit);
+                quiz.timeLimit
+            );
             const questionWithAns = new Question(
                 i,
                 q.text,
                 q.pictureId,
                 optionsWithAns,
                 q.tf,
-                quiz.timeLimit);
+                quiz.timeLimit
+            );
 
             i++;
             questions.push(question);
@@ -183,16 +193,27 @@ export class Session {
     }
 
     /**
-     * If a connection is lost and subsequently restored during a quiz, 
-     * send current question immediately (corresponding to the current question; 
+     * If a connection is lost and subsequently restored during a quiz,
+     * send current question immediately (corresponding to the current question;
      * update time field).
      */
     currQuestion() {
         if (this.questionIdx === this.preQuestionIdx) {
-            const { no, text, pictureId, options, tf, time } = this.questions[this.questionIdx];
-            return new Question(no, text, pictureId, options, tf, time * 1000 - (Date.now() - this.questionReleasedAt))
+            const { no, text, pictureId, options, tf, time } = this.questions[
+                this.questionIdx
+            ];
+            return new Question(
+                no,
+                text,
+                pictureId,
+                options,
+                tf,
+                time * 1000 - (Date.now() - this.questionReleasedAt)
+            );
         } else {
-            const { no, text, pictureId, options, tf, time } = this.questions[this.preQuestionIdx];
+            const { no, text, pictureId, options, tf, time } = this.questions[
+                this.preQuestionIdx
+            ];
             return new Question(no, text, pictureId, options, tf, 0);
         }
     }
@@ -214,14 +235,14 @@ export class Session {
         if (questionWithAns.options === null) {
             return new Answer(questionWithAns.no, null, questionWithAns.tf);
         } else {
-            let i = 0
+            let i = 0;
             for (const option of questionWithAns.options) {
                 if (option.correct) {
                     return new Answer(questionWithAns.no, i, null);
                 }
                 ++i;
             }
-            throw `No ans in Question[${idx}], this should never happen.`
+            throw `No ans in Question[${idx}], this should never happen.`;
         }
     }
 
@@ -229,21 +250,23 @@ export class Session {
         return this.preQuestionIdx;
     }
 
-
     getPreAnsOut(playerId: number) {
         return this.playerAnsOutcomes[playerId];
     }
 
     canAnswer(playerId: number) {
-        return this.getActiveQuesionIdx() > this.playerAnsOutcomes[playerId].quesionNo;
+        return (
+            this.getActiveQuesionIdx() >
+            this.playerAnsOutcomes[playerId].quesionNo
+        );
     }
 
     nextQuestionIdx(): number {
-        if (this.questionIdx >= this.questions.length) { throw "no more question"; }
-        else if (!this.readyForNextQuestion) {
+        if (this.questionIdx >= this.questions.length) {
+            throw "no more question";
+        } else if (!this.readyForNextQuestion) {
             throw "there is a running question";
-        }
-        else {
+        } else {
             this.questionReleasedAt = Date.now();
             setTimeout(() => {
                 if (this.questionIdx === this.preQuestionIdx) {
@@ -260,7 +283,11 @@ export class Session {
         const activeQuesionIdx = this.getActiveQuesionIdx();
         const correctAns = this.getAnsOfQuestion(activeQuesionIdx);
         const preAnsOut = this.getPreAnsOut(playerId);
-        const ansOutcome: AnswerOutcome = this.pointSys.checkAns(ans, correctAns, preAnsOut);
+        const ansOutcome: AnswerOutcome = this.pointSys.checkAns(
+            ans,
+            correctAns,
+            preAnsOut
+        );
         // record in session that player has answered
         this.playerAnsOutcomes[playerId] = ansOutcome;
         this.pointSys.answeredPlayer.add(playerId);
@@ -283,21 +310,32 @@ export class Session {
         this.readyForNextQuestion = true;
     }
 
-    async updateBoard(playerId: number, points: number, ansOutCome: AnswerOutcome) {
-        this.playerRecords[playerId].record.oldPos = this.playerRecords[playerId].record.newPos;
+    async updateBoard(
+        playerId: number,
+        points: number,
+        ansOutCome: AnswerOutcome
+    ) {
+        this.playerRecords[playerId].record.oldPos = this.playerRecords[
+            playerId
+        ].record.newPos;
         this.playerRecords[playerId].record.newPos = null;
         this.playerRecords[playerId].record.bonusPoints = points;
-        this.playerRecords[playerId].record.points = points + this.playerRecords[playerId].record.points;
+        this.playerRecords[playerId].record.points =
+            points + this.playerRecords[playerId].record.points;
         this.playerRecords[playerId].record.streak = ansOutCome.streak;
     }
 
     rankBoard() {
         const playerRecordsList: PlayerRecord[] = [];
-        for (const [playerId, playerRecord] of Object.entries(this.playerRecords)) {
+        for (const [playerId, playerRecord] of Object.entries(
+            this.playerRecords
+        )) {
             playerRecordsList.push(playerRecord);
         }
         // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
-        playerRecordsList.sort((a, b) => (a.record.points < b.record.points) ? 1 : -1);
+        playerRecordsList.sort((a, b) =>
+            a.record.points < b.record.points ? 1 : -1
+        );
         this.playerRecordList = playerRecordsList;
         for (let [i, playerRecord] of playerRecordsList.entries()) {
             playerRecord.record.newPos = i;
@@ -305,24 +343,24 @@ export class Session {
         }
     }
 
-
     releaseBoard(hostSocket: Socket) {
         for (const [playerId, socket] of Object.entries(this.sockets)) {
             const playerRecord = this.playerRecords[Number(playerId)];
-            const playerAheadRecord = playerRecord.record.newPos === 0 ?
-                null :
-                this.playerRecordList[playerRecord.record.newPos - 1];
+            const playerAheadRecord =
+                playerRecord.record.newPos === 0
+                    ? null
+                    : this.playerRecordList[playerRecord.record.newPos - 1];
             const quesitonOutcome = {
-                "question": this.preQuestionIdx,
-                "leaderBoard": this.playerRecordList.slice(0, 5),
-                "record": this.playerRecords[Number(playerId)].record,
-                "playerAhead": playerAheadRecord
+                question: this.preQuestionIdx,
+                leaderBoard: this.playerRecordList.slice(0, 5),
+                record: this.playerRecords[Number(playerId)].record,
+                playerAhead: playerAheadRecord,
             };
             socket.emit("questionOutcome", quesitonOutcome);
         }
         hostSocket.emit("questionOutcome", {
-            "question": this.preQuestionIdx,
-            "leaderboard": this.playerRecordList
+            question: this.preQuestionIdx,
+            leaderboard: this.playerRecordList,
         });
     }
 
@@ -345,18 +383,15 @@ export class Session {
         this.result = [
             this.sessInController,
             new QuizResult(
-                (this.questionIdx === 0 && this.readyForNextQuestion ? -1 :
-                    (
-                        this.readyForNextQuestion ?
-                            this.preQuestionIdx : this.preQuestionIdx - 1
-                    )
-                ) + 1,
+                (this.questionIdx === 0 && this.readyForNextQuestion
+                    ? -1
+                    : this.readyForNextQuestion
+                    ? this.preQuestionIdx
+                    : this.preQuestionIdx - 1) + 1,
                 this.questions.length,
                 this.playerRecordList
-            )
+            ),
         ];
         console.log(this.result);
     }
-
 }
-

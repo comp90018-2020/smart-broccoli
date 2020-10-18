@@ -1,9 +1,12 @@
-import { User as BackendUser, Session as SessInController, Quiz as QuizInModels } from "../models";
-import { sessionTokenDecrypt as decrypt } from "../controllers/session"
+import {
+    User as BackendUser,
+    Session as SessInController,
+    Quiz as QuizInModels,
+} from "../models";
+import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { Player, Session, Conn, QuizStatus, QuizResult } from "./session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Server, Socket } from "socket.io";
-
 
 const WAITING = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
@@ -11,19 +14,21 @@ const userCache: { [key: number]: Player } = {};
 export class Quiz {
     // shaerd obj saves live quiz sess
     sess: {
-        [key: number]: Session
+        [key: number]: Session;
     };
 
     constructor() {
         this.sess = {};
         if (process.env.NODE_ENV === "debug") {
-            console.log("[*] Debug mode.")
+            console.log("[*] Debug mode.");
             this.DEBUG();
         }
     }
 
     private async DEBUG() {
-        const quiz = await QuizInModels.findByPk(19, { include: ["questions"] })
+        const quiz = await QuizInModels.findByPk(19, {
+            include: ["questions"],
+        });
         const sessInController = new SessInController({
             id: 19,
             isGroup: true,
@@ -32,15 +37,18 @@ export class Quiz {
             quizId: 16,
             groupId: 2,
             subscribeGroup: true,
-            code: "501760"
+            code: "501760",
         });
-        this.sess[Number(sessInController.id)] = new Session(quiz, sessInController);
+        this.sess[Number(sessInController.id)] = new Session(
+            quiz,
+            sessInController
+        );
     }
 
     /**
      * @returns original session and player final rank with details
-     * @param quiz 
-     * @param s 
+     * @param quiz
+     * @param s
      */
 
     addSession(quiz: any, s: SessInController): [SessInController, QuizResult] {
@@ -49,33 +57,33 @@ export class Quiz {
     }
 
     /**
-     *  Verify socket connection using jwt token 
+     *  Verify socket connection using jwt token
      * @param socket socket
      */
     async verifySocket(socket: Socket): Promise<Conn> {
         if (process.env.NODE_ENV === "debug") {
             const userId = Number(socket.handshake.query.userId);
-            return new Conn(
-                await this.getUserInfo(userId),
-                {
-                    scope: 'game',
-                    userId: userId,
-                    role: userId === 1 ? 'host' : 'participant',
-                    sessionId: 19
-                }
-            );
+            return new Conn(await this.getUserInfo(userId), {
+                scope: "game",
+                userId: userId,
+                role: userId === 1 ? "host" : "participant",
+                sessionId: 19,
+            });
         }
         const plain = await decrypt(socket.handshake.query.token);
-        const conn: Conn = new Conn(await this.getUserInfo(plain.userId), plain);
+        const conn: Conn = new Conn(
+            await this.getUserInfo(plain.userId),
+            plain
+        );
         return conn;
     }
 
     private formatAnsweredNotification(sessId: number, questionId: number) {
         return {
-            "question": questionId,
-            "count": this.sess[sessId].pointSys.answeredPlayer.size,
-            "total": this.sess[sessId].countParticipants()
-        }
+            question: questionId,
+            count: this.sess[sessId].pointSys.answeredPlayer.size,
+            total: this.sess[sessId].countParticipants(),
+        };
     }
 
     async answer(socketIO: Server, socket: Socket, content: any) {
@@ -86,35 +94,49 @@ export class Quiz {
             const questionId = content.questionId;
 
             // check if already answered
-            if (this.sess[sessId].isCurrQuestionActive() && !this.sess[sessId].hasPlayerAnswered(userId)) {
+            if (
+                this.sess[sessId].isCurrQuestionActive() &&
+                !this.sess[sessId].hasPlayerAnswered(userId)
+            ) {
                 try {
                     // if not answer yet, i.e. this is the first time to answer
                     // assess answer
                     const ans: Answer = new Answer(
                         content.question,
                         content.MCSelection,
-                        content.TFSelection);
+                        content.TFSelection
+                    );
                     this.sess[sessId].assessAns(userId, ans);
 
                     // braodcast that one more participants answered this question
-                    const answeredNotification = this.formatAnsweredNotification(sessId, questionId);
-                    socket.to(sessId.toString()).emit("questionAnswered", answeredNotification);
+                    const answeredNotification = this.formatAnsweredNotification(
+                        sessId,
+                        questionId
+                    );
+                    socket
+                        .to(sessId.toString())
+                        .emit("questionAnswered", answeredNotification);
 
-                    const hasAllAnswered = this.sess[sessId].trySettingForNewQuesiton();
+                    const hasAllAnswered = this.sess[
+                        sessId
+                    ].trySettingForNewQuesiton();
                     if (hasAllAnswered) {
                         this.sess[sessId].rankBoard();
                     }
-
                 } catch (err) {
-                    if (process.env.NODE_EVN === 'debug') {
-                        socket.send(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+                    if (process.env.NODE_EVN === "debug") {
+                        socket.send(
+                            JSON.stringify(err, Object.getOwnPropertyNames(err))
+                        );
                     }
                 }
             }
         } catch (error) {
-            if (process.env.NODE_EVN === 'debug') {
+            if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
-                socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+                socket.send(
+                    JSON.stringify(error, Object.getOwnPropertyNames(error))
+                );
             }
             socket.disconnect();
         }
@@ -123,11 +145,10 @@ export class Quiz {
     // WIP: release question outcome after timeout
     /**
      * Everyone has answered or timeout
-     * @param socketIO 
+     * @param socketIO
      */
     releaseQuestionOutcome(socketIO: Server, conn: Conn) {
-
-        const sessId = conn.sessionToken.sessionId;;
+        const sessId = conn.sessionToken.sessionId;
         let questionOutCome = {};
         // WIP: summary question outcome here
 
@@ -148,28 +169,42 @@ export class Quiz {
             // add user to socket room
             socket.join(sessId.toString());
             // add user to session
-            const alreadyJoined = await this.sess[sessId].hasParticipant(userId);
+            const alreadyJoined = await this.sess[sessId].hasParticipant(
+                userId
+            );
             if (!this.isOwner(conn) && !alreadyJoined) {
-                await this.sess[sessId].addParticipant(await this.getUserInfo(userId), socket);
+                await this.sess[sessId].addParticipant(
+                    await this.getUserInfo(userId),
+                    socket
+                );
                 // broadcast that user has joined
                 const msg = await this.getUserInfo(userId);
                 socketIO.to(sessId.toString()).emit("playerJoin", msg);
-
             }
 
-            socket.emit("welcome", Array.from(this.sess[sessId].allParticipants()));
+            socket.emit(
+                "welcome",
+                Array.from(this.sess[sessId].allParticipants())
+            );
 
             if (this.sess[sessId].status === QuizStatus.Starting) {
-                socket.emit("starting", (this.sess[sessId].getQuizStartsAt() - Date.now()).toString());
+                socket.emit(
+                    "starting",
+                    (
+                        this.sess[sessId].getQuizStartsAt() - Date.now()
+                    ).toString()
+                );
             }
 
             if (this.sess[sessId].status === QuizStatus.Running) {
                 socket.emit("nextQuestion", this.sess[sessId].currQuestion());
             }
         } catch (error) {
-            if (process.env.NODE_EVN === 'debug') {
+            if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
-                socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+                socket.send(
+                    JSON.stringify(error, Object.getOwnPropertyNames(error))
+                );
             }
             socket.disconnect();
         }
@@ -194,9 +229,11 @@ export class Quiz {
             // disconnect
             socket.disconnect();
         } catch (error) {
-            if (process.env.NODE_EVN === 'debug') {
+            if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
-                socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+                socket.send(
+                    JSON.stringify(error, Object.getOwnPropertyNames(error))
+                );
             }
             socket.disconnect();
         }
@@ -206,7 +243,6 @@ export class Quiz {
         return conn.sessionToken.role === "host";
     }
 
-
     async start(socketIO: Server, socket: Socket) {
         try {
             const conn: Conn = await this.verifySocket(socket);
@@ -215,20 +251,32 @@ export class Quiz {
                 this.sess[sessId].setQuizStatus(QuizStatus.Starting);
                 this.sess[sessId].setQuizStartsAt(Date.now() + WAITING);
                 // Broadcast that quiz will be started
-                socketIO.to(sessId.toString()).emit("starting", (this.sess[sessId].getQuizStartsAt() - Date.now()).toString());
+                socketIO
+                    .to(sessId.toString())
+                    .emit(
+                        "starting",
+                        (
+                            this.sess[sessId].getQuizStartsAt() - Date.now()
+                        ).toString()
+                    );
                 // pass-correct-this-context-to-settimeout-callback
                 // https://stackoverflow.com/questions/2130241
-                setTimeout(() => {
-                    this.sess[sessId].status = QuizStatus.Running;
-                    // release the firt question
-                    this.next(socketIO, socket);
-                }, this.sess[sessId].getQuizStartsAt() - Date.now(), socket);
-
+                setTimeout(
+                    () => {
+                        this.sess[sessId].status = QuizStatus.Running;
+                        // release the firt question
+                        this.next(socketIO, socket);
+                    },
+                    this.sess[sessId].getQuizStartsAt() - Date.now(),
+                    socket
+                );
             }
         } catch (error) {
-            if (process.env.NODE_EVN === 'debug') {
+            if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
-                socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+                socket.send(
+                    JSON.stringify(error, Object.getOwnPropertyNames(error))
+                );
             }
             socket.disconnect();
         }
@@ -247,9 +295,11 @@ export class Quiz {
                 socket.disconnect();
             }
         } catch (error) {
-            if (process.env.NODE_EVN === 'debug') {
+            if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
-                socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+                socket.send(
+                    JSON.stringify(error, Object.getOwnPropertyNames(error))
+                );
             }
             socket.disconnect();
         }
@@ -270,32 +320,41 @@ export class Quiz {
                     try {
                         const qIdx = this.sess[sessId].nextQuestionIdx();
                         // send question without answer to participants
-                        socket.to(sessId.toString()).emit("nextQuestion", this.sess[sessId].getQuestion(qIdx));
-                        socketIO.to(socket.id).emit("nextQuestion", this.sess[sessId].getQuestionWithAns(qIdx));
-
-                    }
-                    catch (err) {
+                        socket
+                            .to(sessId.toString())
+                            .emit(
+                                "nextQuestion",
+                                this.sess[sessId].getQuestion(qIdx)
+                            );
+                        socketIO
+                            .to(socket.id)
+                            .emit(
+                                "nextQuestion",
+                                this.sess[sessId].getQuestionWithAns(qIdx)
+                            );
+                    } catch (err) {
                         if (err === "no more question") {
-                            if (this.sess[sessId].hasFinalBoardReleased === false) {
+                            if (
+                                this.sess[sessId].hasFinalBoardReleased ===
+                                false
+                            ) {
                                 this.showBoard(socketIO, socket);
                                 this.sess[sessId].hasFinalBoardReleased = true;
                             } else {
                                 this.abort(socketIO, socket);
                             }
                         } else if (err === "there is a running question") {
-
-                        }
-                        else {
-
+                        } else {
                         }
                     }
                 }
-
             }
         } catch (error) {
-            if (process.env.NODE_EVN === 'debug') {
+            if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
-                socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+                socket.send(
+                    JSON.stringify(error, Object.getOwnPropertyNames(error))
+                );
             }
             socket.disconnect();
         }
@@ -303,22 +362,26 @@ export class Quiz {
 
     async showBoard(socketIO: Server, socket: Socket) {
         try {
-
             // NOTE: get quizId and userId from decrypted token
             // Record it somewhere (cache or socket.handshake)
             // * token will expire in 1 hour
 
             const conn: Conn = await this.verifySocket(socket);
-            const sessId = conn.sessionToken.sessionId;;
+            const sessId = conn.sessionToken.sessionId;
 
-            if (this.isOwner(conn) && !this.sess[sessId].isCurrQuestionActive()) {
+            if (
+                this.isOwner(conn) &&
+                !this.sess[sessId].isCurrQuestionActive()
+            ) {
                 //  broadcast Board to participants
                 this.sess[sessId].releaseBoard(socket);
             }
         } catch (error) {
-            if (process.env.NODE_EVN === 'debug') {
+            if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
-                socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+                socket.send(
+                    JSON.stringify(error, Object.getOwnPropertyNames(error))
+                );
             }
             socket.disconnect();
         }
@@ -336,5 +399,4 @@ export class Quiz {
             return user;
         }
     }
-
 }
