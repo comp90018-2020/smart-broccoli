@@ -138,7 +138,6 @@ export const getUserProfile = async (
 ) => {
     // Decrypt session token
     const decryptedToken = await sessionTokenDecrypt(token);
-
     if (
         (decryptedToken &&
             (await sessionHasUser(decryptedToken.sessionId, userId))) ||
@@ -163,7 +162,6 @@ export const getUserProfilePicture = async (
 ) => {
     // Decrypt session token
     const decryptedToken = await sessionTokenDecrypt(token);
-
     if (
         (decryptedToken &&
             (await sessionHasUser(decryptedToken.sessionId, userId))) ||
