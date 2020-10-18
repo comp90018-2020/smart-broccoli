@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/models.dart';
 
 /// A page extending scaffold
 /// Supports tabs, drawer
@@ -133,26 +135,32 @@ class CustomPage extends StatelessWidget {
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.question_answer),
-                    title: Text('Take Quiz',
+                    title: Text('TAKE QUIZ',
                         style:
                             TextStyle(color: Theme.of(context).primaryColor)),
-                    onTap: () {},
+                    onTap: () {
+                      _navigateToNamed(context, '/take_quiz');
+                    },
                   ),
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.edit),
-                    title: Text('Manage Quiz',
+                    title: Text('MANAGE QUIZ',
                         style:
                             TextStyle(color: Theme.of(context).primaryColor)),
-                    onTap: () {},
+                    onTap: () {
+                      _navigateToNamed(context, '/manage_quiz');
+                    },
                   ),
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.people),
-                    title: Text('Groups',
+                    title: Text('GROUPS',
                         style:
                             TextStyle(color: Theme.of(context).primaryColor)),
-                    onTap: () {},
+                    onTap: () {
+                      _navigateToNamed(context, '/group/home');
+                    },
                   ),
                   Divider(),
                   ListTile(
@@ -160,14 +168,16 @@ class CustomPage extends StatelessWidget {
                     leading: const Icon(Icons.info_outline),
                     title: Text('About',
                         style: TextStyle(color: Colors.grey[700])),
-                    onTap: () {},
+                    onTap: () {
+                      _navigateToNamed(context, '/about');
+                    },
                   ),
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.exit_to_app),
                     title: Text('Sign out',
                         style: TextStyle(color: Colors.grey[700])),
-                    onTap: () {},
+                    onTap: Provider.of<AuthStateModel>(context).logout,
                   ),
                 ],
               ),
@@ -186,5 +196,14 @@ class CustomPage extends StatelessWidget {
               children: [...background, Positioned.fill(child: wrappedChild)],
             ),
     );
+  }
+
+  /// Navigate to named route
+  void _navigateToNamed(context, routeName) {
+    if (ModalRoute.of(context).settings.name != routeName)
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(routeName, (route) => false);
+    else
+      Navigator.pop(context);
   }
 }

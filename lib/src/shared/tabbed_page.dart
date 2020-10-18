@@ -25,9 +25,10 @@ class CustomTabbedPage extends CustomPage {
               child: Column(children: [
                 // Add tabs
                 PreferredSize(
-                  preferredSize: Size.fromHeight(kToolbarHeight + 38),
+                  preferredSize: Size.fromHeight(kToolbarHeight + 24),
                   child: Container(
-                    padding: const EdgeInsets.only(top: 26, bottom: 12),
+                    padding: const EdgeInsets.only(top: 24),
+                    color: Colors.transparent,
                     child: TabHolder(
                       widthFactor: .8,
                       margin: EdgeInsets.zero,
@@ -38,9 +39,7 @@ class CustomTabbedPage extends CustomPage {
                 ),
                 // Tab body
                 Expanded(
-                  child: TabBarView(
-                    children: tabViews,
-                  ),
+                  child: TabBarView(children: tabViews),
                 )
               ]),
             ),

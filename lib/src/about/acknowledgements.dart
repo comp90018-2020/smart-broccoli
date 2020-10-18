@@ -4,7 +4,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart' show Divider, ListTile;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:smart_broccoli/src/shared/page.dart';
+import '../shared/page.dart';
 
 /// Acknowledgements page for used libraries and code
 class AcknowledgementsPage extends StatelessWidget {
@@ -32,15 +32,20 @@ class AcknowledgementsPage extends StatelessWidget {
           'https://raw.githubusercontent.com/rrousselGit/provider/master/LICENSE',
     },
     {
-      'title': 'google/tuple.dart',
-      'url':
-          'https://raw.githubusercontent.com/google/tuple.dart/master/LICENSE',
-    },
-    {
       'title': 'fredeil/email-validator.dart',
       'url':
           'https://raw.githubusercontent.com/fredeil/email-validator.dart/master/LICENSE'
     },
+    {
+      'title': 'lukepighetti/fluro',
+      'url':
+          'https://raw.githubusercontent.com/lukepighetti/fluro/master/LICENSE'
+    },
+    {
+      'title': 'MarcinusX/NumberPicker',
+      'url':
+          'https://raw.githubusercontent.com/MarcinusX/NumberPicker/master/LICENSE'
+    }
   ];
 
   @override
