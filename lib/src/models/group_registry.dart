@@ -150,7 +150,7 @@ class GroupRegistryModel extends ChangeNotifier {
   /// This callback refreshes [createdGroups].
   Future<void> createGroup(String name) async {
     await _groupApi.createGroup(_authStateModel.token, name);
-    refreshCreatedGroups();
+    refreshCreatedGroups(withMembers: true);
   }
 
   /// Join a group.
