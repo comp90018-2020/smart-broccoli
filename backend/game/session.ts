@@ -9,7 +9,6 @@ import {
 } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket } from "socket.io";
-import { quizPictureProcessor } from "helpers/upload";
 
 export enum QuizStatus {
     Pending = 0,
@@ -133,7 +132,7 @@ export class Session {
     }
 
     allParticipants() {
-        let participantsSet = new Set([]);
+        const participantsSet = new Set([]);
         for (const [key, value] of Object.entries(this.playerNames)) {
             participantsSet.add(value);
         }
@@ -337,7 +336,7 @@ export class Session {
             a.record.points < b.record.points ? 1 : -1
         );
         this.playerRecordList = playerRecordsList;
-        for (let [i, playerRecord] of playerRecordsList.entries()) {
+        for (const [i, playerRecord] of playerRecordsList.entries()) {
             playerRecord.record.newPos = i;
             this.playerRecords[playerRecord.player.id] = playerRecord;
         }

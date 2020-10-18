@@ -149,7 +149,7 @@ export class Quiz {
      */
     releaseQuestionOutcome(socketIO: Server, conn: Conn) {
         const sessId = conn.sessionToken.sessionId;
-        let questionOutCome = {};
+        const questionOutCome = {};
         // WIP: summary question outcome here
 
         // braodcast question outcome
