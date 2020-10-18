@@ -48,31 +48,6 @@ export class PointSystem {
         this.answeredPlayer = new Set([]);
     }
 
-    public checkAns(
-        ans: Answer,
-        correctAns: Answer,
-        preAnsOutcome: AnswerOutcome
-    ): AnswerOutcome {
-        if (ans.questionNo !== correctAns.questionNo) {
-            throw `This is ans for question ${ans.questionNo} not for ${correctAns.questionNo}`;
-        } else {
-            const correct =
-                correctAns.MCSelection !== null
-                    ? ans.MCSelection === correctAns.MCSelection
-                        ? true
-                        : false
-                    : ans.TFSelection === correctAns.TFSelection
-                    ? true
-                    : false;
-            return new AnswerOutcome(
-                correct,
-                correct ? this.getRankForARightAns() : this.participantCount,
-                correct ? preAnsOutcome.streak + 1 : 0,
-                correctAns.questionNo
-            );
-        }
-    }
-
     public getNewPoints(ansOutcome: AnswerOutcome): number {
         // if (!this.hasAllPlayersAnswered()) {
         //     throw "Wait for others to answer";

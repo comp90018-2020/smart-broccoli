@@ -1,9 +1,5 @@
-import {
-    Session as SessInController,
-} from "../models";
-import {
-    SessionToken,
-} from "../controllers/session";
+import { Session as SessInController } from "../models";
+import { SessionToken } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket } from "socket.io";
 
@@ -279,7 +275,7 @@ export class Session {
         const activeQuesionIdx = this.getActiveQuesionIdx();
         const correctAns = this.getAnsOfQuestion(activeQuesionIdx);
         const preAnsOut = this.getPreAnsOut(playerId);
-        const ansOutcome: AnswerOutcome = this.pointSys.checkAns(
+        const ansOutcome: AnswerOutcome = this.checkAns(
             ans,
             correctAns,
             preAnsOut
@@ -289,6 +285,41 @@ export class Session {
         this.pointSys.answeredPlayer.add(playerId);
         const points = this.pointSys.getNewPoints(ansOutcome);
         this.updateBoard(playerId, points, ansOutcome);
+    }
+
+    checkAns(
+        ans: Answer,
+        correctAns: Answer,
+        preAnsOutcome: AnswerOutcome
+    ): AnswerOutcome {
+        if (ans.questionNo !== correctAns.questionNo) {
+            throw `This is ans for question ${ans.questionNo} not for ${correctAns.questionNo}`;
+        } else {
+            const correct =
+                correctAns.MCSelection !== null
+                    ? ans.MCSelection === correctAns.MCSelection
+                        ? true
+                        : false
+                    : ans.TFSelection === correctAns.TFSelection
+                    ? true
+                    : false;
+
+            if (correct) {
+                return new AnswerOutcome(
+                    correct,
+                    this.pointSys.getRankForARightAns(),
+                    preAnsOutcome.streak + 1,
+                    correctAns.questionNo
+                );
+            } else {
+                return new AnswerOutcome(
+                    correct,
+                    this.pointSys.participantCount,
+                    0,
+                    correctAns.questionNo
+                );
+            }
+        }
     }
 
     trySettingForNewQuesiton(): boolean {
