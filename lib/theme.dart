@@ -152,25 +152,22 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
 class ProfileTheme {
   static TextStyle _tx1 = TextStyle(color: Colors.black38);
   static TextStyle _tx2 = TextStyle(color: Colors.white);
+
   static TextStyle get profileTS => _tx1;
+
   static TextStyle get appBarTS => _tx2;
 
   static Widget profileBackground(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
     return Column(
       children: <Widget>[
-        Flexible(
-          child: FractionallySizedBox(
-            heightFactor: 0.5,
-            child: Container(
-              color: Colors.green,
-            ),
-          ),
+        Container(
+          height: height / 5.8 + (height / 19),
+          color: Colors.green,
         ),
-        Expanded(
-          child: Container(
-            color: Colors.white,
-          ),
-        )
+        Container(
+          color: Colors.white,
+        ),
       ],
     );
   }

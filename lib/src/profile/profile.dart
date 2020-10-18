@@ -120,6 +120,7 @@ class _ProfileState extends State<Profile> {
 
   List<Widget> mainBody(Widget c1, Widget c2) {
     double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
     return <Widget>[
       SizedBox(height: height / 5.8),
       CircleAvatar(
@@ -132,7 +133,7 @@ class _ProfileState extends State<Profile> {
         children: <Widget>[
           Container(
             height: 50,
-            width: 120,
+            width: width * 0.25,
             decoration: BoxDecoration(
               border: Border.all(
                 color: Colors.black12,
@@ -147,7 +148,7 @@ class _ProfileState extends State<Profile> {
           ),
           Container(
             height: 50,
-            width: 250,
+            width: width * 0.5,
             decoration: ProfileTheme.bd1(),
             child: Center(child: c1),
           )
@@ -158,7 +159,7 @@ class _ProfileState extends State<Profile> {
         children: <Widget>[
           Container(
             height: 50,
-            width: 120,
+            width: width * 0.25,
             decoration: ProfileTheme.bd2(),
             child: Center(
                 child: Text(
@@ -168,7 +169,7 @@ class _ProfileState extends State<Profile> {
           ),
           Container(
             height: 50,
-            width: 250,
+            width: width * 0.5,
             decoration: ProfileTheme.bd3(),
             child: Center(child: c2),
           )
