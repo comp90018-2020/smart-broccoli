@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/models.dart';
 
 import '../shared/page.dart';
 
@@ -10,6 +12,7 @@ class GroupCreate extends StatefulWidget {
 }
 
 class _GroupCreateState extends State<GroupCreate> {
+  final TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return new CustomPage(
@@ -31,10 +34,12 @@ class _GroupCreateState extends State<GroupCreate> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: TextFormField(
+                        controller: controller,
                         decoration: const InputDecoration(
                           labelText: 'Group name',
                           prefixIcon: Icon(Icons.people),
                         ),
+                        onFieldSubmitted: (_) => _createGroup(),
                       ),
                     ),
                     // Button
@@ -43,7 +48,7 @@ class _GroupCreateState extends State<GroupCreate> {
                       child: SizedBox(
                         width: double.infinity,
                         child: RaisedButton(
-                          onPressed: () => {},
+                          onPressed: _createGroup,
                           child: const Text("CREATE"),
                         ),
                       ),
@@ -56,5 +61,27 @@ class _GroupCreateState extends State<GroupCreate> {
         ),
       ),
     );
+  }
+
+  void _createGroup() async {
+    try {
+      await Provider.of<GroupRegistryModel>(context, listen: false)
+          .createGroup(controller.text);
+      Navigator.of(context).pop();
+    } on GroupCreateException {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("Cannot create group"),
+          content: Text("Name already in use"),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: Navigator.of(context).pop,
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
