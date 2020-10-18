@@ -58,7 +58,7 @@ class _BuildQuiz extends State<QuizContainer> {
                               left: index == 0 ? 20 : 0,
                               right: index == 0 ? 0 : 20)
                           : EdgeInsets.zero,
-                      width: MediaQuery.of(context).size.height * 0.4,
+                      width: MediaQuery.of(context).size.width * 0.4,
                       child: QuizCard(
                         'Quiz name',
                         'Group name',
