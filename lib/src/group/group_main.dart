@@ -38,7 +38,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
           labelColor: Colors.white,
           indicator: UnderlineTabIndicator(),
           tabs: [
-            Tab(child: Text("Quiz")),
+            Tab(child: Text("Quizzes")),
             Tab(child: Text("Members")),
           ],
         ),
