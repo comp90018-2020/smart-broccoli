@@ -17,7 +17,7 @@ class _GroupListState extends State<GroupList> {
   @override
   Widget build(BuildContext context) {
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshJoinedGroups();
+        .refreshJoinedGroups(withMembers: true);
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups(withMembers: true);
     return new CustomTabbedPage(
@@ -127,20 +127,15 @@ class _GroupListState extends State<GroupList> {
                 groups[i].name,
                 style: TextStyle(fontSize: 16),
               ),
-              subtitle: groups[i].role == GroupRole.OWNER
-                  ? (groups[i].members == null
-                      ? null
-                      : Row(
-                          children: [
-                            Icon(Icons.person),
-                            Text('${groups[i].members.length} member'
-                                '${groups[i].members.length > 1 ? "s" : ""}'),
-                          ],
-                        ))
-                  : Row(children: [
-                      Icon(Icons.assignment),
-                      Text('{n} incomplete self-paced quizzes')
-                    ]),
+              subtitle: groups[i].members == null
+                  ? null
+                  : Row(
+                      children: [
+                        Icon(Icons.person),
+                        Text('${groups[i].members.length} member'
+                            '${groups[i].members.length > 1 ? "s" : ""}'),
+                      ],
+                    ),
             ),
           );
         },

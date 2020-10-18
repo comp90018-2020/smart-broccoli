@@ -160,6 +160,6 @@ class GroupRegistryModel extends ChangeNotifier {
     Group group = await _groupApi.joinGroup(_authStateModel.token,
         name: name, code: code);
     selectGroup(group.id);
-    refreshJoinedGroups();
+    refreshJoinedGroups(withMembers: true);
   }
 }
