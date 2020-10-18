@@ -1,10 +1,7 @@
 import {
     Session as SessInController,
-    Quiz as QuizInModels,
-    Quiz,
 } from "../models";
 import {
-    sessionTokenDecrypt as decrypt,
     SessionToken,
 } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";

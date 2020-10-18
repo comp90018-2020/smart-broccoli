@@ -5,7 +5,7 @@ import {
 } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { Player, Session, Conn, QuizStatus, QuizResult } from "./session";
-import { PointSystem, Answer, AnswerOutcome } from "./points";
+import { Answer } from "./points";
 import { Server, Socket } from "socket.io";
 
 const WAITING = 10 * 1000;
