@@ -50,6 +50,7 @@ class _GroupListState extends State<GroupList> {
           ? FloatingActionButton.extended(
               onPressed: () async {
                 final String groupName = await joinDialog();
+                if (groupName == null) return;
                 try {
                   await Provider.of<GroupRegistryModel>(context, listen: false)
                       .joinGroup(name: groupName);
