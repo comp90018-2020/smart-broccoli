@@ -67,11 +67,11 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
 
           // Current user & ranking
           Container(
-              margin: EdgeInsets.only(top: 6, bottom: 4),
+              margin: EdgeInsets.only(top: 4, bottom: 8),
               // Lowest point of green area to end of yellow (150 -> 205)
               // See below for more details
               height: 55,
-              child: _leaderboardList(["A"])),
+              child: _leaderboardList(["A"], scrollable: false)),
 
           // List of users
           Expanded(child: _leaderboardList(["A", "B", "C"])),
@@ -106,11 +106,12 @@ class _LeaderBoardLobby extends State<QuizLeaderboard> {
     );
   }
 
-  Widget _leaderboardList(List<String> list) {
+  Widget _leaderboardList(List<String> list, {bool scrollable = true}) {
     return ListView.separated(
       shrinkWrap: true,
       itemCount: list.length,
-      padding: EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      physics: scrollable ? null : NeverScrollableScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
         return ListTile(
           leading: Row(
