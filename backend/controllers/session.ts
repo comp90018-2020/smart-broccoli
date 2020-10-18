@@ -301,10 +301,7 @@ export const createSession = async (userId: number, opts: any) => {
         });
 
         // pass quiz and session to socket
-        const res: null | [Session, QuizResult] = handler.addSession(
-            quiz,
-            session
-        );
+        handler.addSession(quiz, session);
 
         return { session, token };
     });
