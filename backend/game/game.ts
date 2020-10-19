@@ -1,11 +1,6 @@
 import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
-import {
-    Player,
-    GameSession as GameSession,
-    QuizStatus,
-    QuizResult,
-} from "./session";
+import { Player, GameSession, QuizStatus, QuizResult } from "./session";
 import { Answer } from "./points";
 import { formatQuestion, formatWelcome, formatPlayer } from "./formatter";
 
@@ -50,18 +45,21 @@ export class GameHandler {
      * @param socket socket
      */
     async verifySocket(socket: Socket): Promise<Player> {
-
         if (process.env.NODE_ENV === "debug") {
-            const player = await this.getUserInfo(socket.handshake.query.userId);
+            const player = await this.getUserInfo(
+                socket.handshake.query.userId
+            );
             player.sessionId = 19;
             player.role = Number(player.id) === 1 ? "host" : "participant";
             return player;
         } else {
             const plain = await decrypt(socket.handshake.query.token);
             const player = await this.getUserInfo(plain.userId);
-            
+
             player.socketId = socket.id;
-            const { userId, scope, role, sessionId } = await decrypt(socket.handshake.query.token);
+            const { userId, scope, role, sessionId } = await decrypt(
+                socket.handshake.query.token
+            );
             player.sessionId = sessionId;
             player.role = role;
             return player;
@@ -206,7 +204,12 @@ export class GameHandler {
             // WIP: Remove this participants from this quiz in DB records here
 
             // broadcast that user has left
-            socketIO.to(sessionId.toString()).emit("playerLeave", formatPlayer(await this.getUserInfo(userId)));
+            socketIO
+                .to(sessionId.toString())
+                .emit(
+                    "playerLeave",
+                    formatPlayer(await this.getUserInfo(userId))
+                );
             // disconnect
             socket.disconnect();
         } catch (error) {
@@ -388,7 +391,14 @@ export class GameHandler {
             const res = await BackendUser.findByPk(userId, {
                 attributes: ["name", "pictureId"],
             });
-            const player = new Player(userId, res.name, res.pictureId, null, null, null);
+            const player = new Player(
+                userId,
+                res.name,
+                res.pictureId,
+                null,
+                null,
+                null
+            );
             userCache[userId] = player;
             return player;
         }

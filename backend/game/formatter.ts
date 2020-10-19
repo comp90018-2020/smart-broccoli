@@ -27,20 +27,19 @@ export const formatQuestion = (
     };
 };
 
-
 export const formatWelcome = (playerSet: Set<Player>) => {
     const welcomeMessage: any[] = [];
     for (const [_, player] of Object.entries(Array.from(playerSet))) {
         const { id, name, pictureId } = player;
         console.log(player);
         welcomeMessage.push({
-            "id": id,
-            "name": name,
-            "pictureId": pictureId
+            id: id,
+            name: name,
+            pictureId: pictureId,
         });
     }
     return welcomeMessage;
-}
+};
 
 export const rankPlayer = (playerMap: { [key: string]: Player }) => {
     const playersArray: Player[] = [];
@@ -48,17 +47,15 @@ export const rankPlayer = (playerMap: { [key: string]: Player }) => {
         playersArray.push(player);
     }
     // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
-    playersArray.sort((a, b) =>
-        a.record.points < b.record.points ? 1 : -1
-    );
+    playersArray.sort((a, b) => (a.record.points < b.record.points ? 1 : -1));
     return playersArray;
-}
+};
 
 export const formatPlayer = (player: Player) => {
     const { id, name, pictureId, socketId, record } = player;
     return {
-        "id": id,
-        "name": name,
-        "pictureId": pictureId
+        id: id,
+        name: name,
+        pictureId: pictureId,
     };
-}
+};
