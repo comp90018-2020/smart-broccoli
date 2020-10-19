@@ -43,6 +43,12 @@ export default (socketIO: Server) => {
             socket.on("showBoard", () => {
                 handler.showBoard(socketIO, socket);
             });
+
+            // reset for debug
+            socket.on("resetForDebug", () => {
+                handler.DEBUG();
+            });
+
         } catch (err) {
             if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
