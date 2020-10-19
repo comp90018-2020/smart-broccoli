@@ -21,7 +21,7 @@ class Profile extends StatefulWidget {
   State<StatefulWidget> createState() => new _ProfileState();
 }
 
-enum ProfileType { Promoted, Registered }
+enum ProfileType { Promoted, Registered, Registering }
 
 class _ProfileState extends State<Profile> {
   final TextEditingController _nameController = new TextEditingController();
@@ -38,6 +38,16 @@ class _ProfileState extends State<Profile> {
 
   /// Whether edit mode is activated
   bool _isEdit = false;
+  bool _hideIsEdit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.pType == ProfileType.Registering) {
+      _isEdit = true;
+      _hideIsEdit = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,29 +57,64 @@ class _ProfileState extends State<Profile> {
         hasDrawer: true,
 
         // Save/edit
-        appbarActions: [
-          CupertinoButton(
-            child: Text(_isEdit ? "Save" : "Edit",
-                style: TextStyle(color: Colors.white)),
-            onPressed: () {
-              setState(() {
-                _isEdit = !_isEdit;
-              });
-            },
-          )
-        ],
+        appbarActions: !_hideIsEdit
+            ? [
+                CupertinoButton(
+                  child: Text(_isEdit ? "Save" : "Edit",
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    setState(() {
+                      _isEdit = !_isEdit;
+                    });
+                  },
+                )
+              ]
+            : [],
         child: SingleChildScrollView(
           child: Column(
             children: [
-              profilePicture(),
+              profilePicture(), // _changePassword()
               _formBody(),
-              (widget.pType == ProfileType.Registered)
+
+              _isEdit
+                  ? (widget.pType == ProfileType.Promoted ||
+                          widget.pType == ProfileType.Registering)
+                      ? _changePassword()
+                      : Container()
+                  : (widget.pType == ProfileType.Registered ||
+                          widget.pType == ProfileType.Registered)
+                      ? _promote()
+                      : Container(),
+              SizedBox(
+                height: 20,
+              ),
+              (widget.pType == ProfileType.Registering)
                   ? _promote()
                   : Container(),
+              SizedBox(
+                height: 20,
+              ),
+              widget.pType == ProfileType.Promoted
+                  ? Text(
+                      "Registered User",
+                      textAlign: TextAlign.center,
+                    )
+                  : Text(
+                      "registering lets you login from another device and create groups",
+                      textAlign: TextAlign.center,
+                    ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _changePassword() {
+    return new SizedBox(
+      width: 150,
+      child: RaisedButton(
+          onPressed: () => showDialog(), child: Text("Change Password")),
     );
   }
 
@@ -79,17 +124,23 @@ class _ProfileState extends State<Profile> {
     return new SizedBox(
       width: 150,
       child: RaisedButton(
-          onPressed: () => goToPromoted(), child: Text("Promote User")),
+          onPressed: () => goToPromoted(), child: Text("Register User")),
     );
   }
 
   // Code to promote profile to a joined profile
   void goToPromoted() {
     // TODO provider update here
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => PromotedProfile()),
-    );
+    if (ProfileType.Registering == widget.pType) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => PromotedProfile()),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+            builder: (context) => Profile(ProfileType.Registering)),
+      );
+    }
   }
 
   // The picture
@@ -135,10 +186,9 @@ class _ProfileState extends State<Profile> {
             // Name
             nameTableRow(),
             // Email
-            emailTableRow(),
-            // pType
-            (widget.pType == ProfileType.Registered)
-                ? passwordTableRow()
+            (widget.pType == ProfileType.Promoted ||
+                    widget.pType == ProfileType.Registering)
+                ? emailTableRow()
                 : TableRow(children: [Container(), Container()]),
           ],
         ),
@@ -155,12 +205,13 @@ class _ProfileState extends State<Profile> {
           padding: EdgeInsets.only(left: 16)),
       _paddedCell(
         TextFormField(
+          readOnly: !_isEdit,
           textAlignVertical: TextAlignVertical.center,
           decoration: InputDecoration(
               contentPadding: EdgeInsets.zero,
               hintStyle: TextStyle(color: Colors.black38),
               suffixIcon: IconButton(
-                icon: Icon(Icons.clear),
+                icon: _isEdit ? Icon(Icons.clear) : Icon(null),
                 onPressed: () {},
               ),
               border: InputBorder.none,
@@ -181,12 +232,15 @@ class _ProfileState extends State<Profile> {
         _paddedCell(
           TextFormField(
             textAlignVertical: TextAlignVertical.center,
-            readOnly: true,
+            readOnly: !_isEdit,
             decoration: InputDecoration(
                 contentPadding: EdgeInsets.zero,
                 hintStyle: TextStyle(color: Colors.black38),
                 border: InputBorder.none,
-                suffixIcon: Icon(IconData(0x20)),
+                suffixIcon: IconButton(
+                  icon: _isEdit ? Icon(Icons.clear) : Icon(null),
+                  onPressed: () {},
+                ),
                 // A space
                 focusedBorder: InputBorder.none,
                 hintText: 'name@example.com'),
@@ -225,10 +279,104 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  TableRow passwordTableRow2() {
+    return TableRow(
+      children: [
+        _paddedCell(
+            Text('Confirm Password', style: TextStyle(color: Colors.black38)),
+            padding: EdgeInsets.only(left: 16)),
+        _paddedCell(
+          TextFormField(
+            obscureText: true,
+            textAlignVertical: TextAlignVertical.center,
+            //readOnly: true,
+
+            decoration: InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                hintStyle: TextStyle(color: Colors.black38),
+                border: InputBorder.none,
+                suffixIcon: Icon(IconData(0x20)),
+                // A space
+                focusedBorder: InputBorder.none,
+                hintText: 'Confirm password'),
+            controller: _passwordController,
+          ),
+          padding: EdgeInsets.only(left: 16),
+        ),
+      ],
+    );
+  }
+
   /// Creates a padded table cell
   Widget _paddedCell(Widget child,
           {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
       TableCell(
         child: Padding(padding: padding, child: Expanded(child: child)),
       );
+
+  /// A placeholder dialog class adopted from
+  /// https://stackoverflow.com/questions/53019061/how-to-implement-a-custom-dialog-box-in-flutter
+  ///
+  void showDialog() {
+    showGeneralDialog(
+      barrierLabel: "Barrier",
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: Duration(milliseconds: 700),
+      context: context,
+      pageBuilder: (_, __, ___) {
+        return Align(
+          alignment: Alignment.center,
+          child: Container(
+            height: 300,
+            child: Column(
+              children: <Widget>[
+                Text(
+                  "Set Password",
+                  style: TextStyle(
+                    color: Colors.black38,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  child: Material(
+                    type: MaterialType.card,
+                    child: Table(
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      columnWidths: {
+                        0: FlexColumnWidth(0.3),
+                        1: FlexColumnWidth(0.7)
+                      },
+                      border:
+                          TableBorder.all(width: 0.8, color: Colors.black12),
+                      children: [
+                        passwordTableRow(),
+                        passwordTableRow2(),
+                      ],
+                    ),
+                  ),
+                ),
+                RaisedButton(onPressed: () => {}, child: Text("Submit")),
+              ],
+
+            ),
+            margin: EdgeInsets.only(bottom: 50, left: 12, right: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (_, anim, __, child) {
+        return SlideTransition(
+          position: Tween(begin: Offset(0, 1), end: Offset(0, 0)).animate(anim),
+          child: child,
+        );
+      },
+    );
+  }
 }
