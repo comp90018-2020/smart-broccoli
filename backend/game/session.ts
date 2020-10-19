@@ -1,7 +1,7 @@
-import { TokenInfo as TokenInfo } from "../controllers/session";
+import { TokenInfo } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket, Server } from "socket.io";
-import {rankPlayer} from "./formatter"
+import { rankPlayer } from "./formatter";
 
 export enum QuizStatus {
     Pending = 0,
@@ -16,7 +16,7 @@ export class QuizResult {
         readonly questionFinshed: number,
         readonly questionTotal: number,
         readonly board: Player[]
-    ) { }
+    ) {}
 }
 
 export class Player {
@@ -25,8 +25,8 @@ export class Player {
         readonly id: number,
         readonly name: string,
         readonly pictureId: number,
-        public socketId:string,
-        public sessionId:number,
+        public socketId: string,
+        public sessionId: number,
         public role: string
     ) {
         this.record.oldPos = null;
@@ -36,7 +36,6 @@ export class Player {
         this.record.streak = -1;
     }
 }
-
 
 export class GameSession {
     private sessionId: number;
@@ -71,7 +70,6 @@ export class GameSession {
                 );
             }
         }
-
     }
 
     async removeParticipant(playerId: number, socket: Socket) {
@@ -231,8 +229,8 @@ export class GameSession {
                         ? true
                         : false
                     : ans.TFSelection === correctAns.TFSelection
-                        ? true
-                        : false;
+                    ? true
+                    : false;
 
             if (correct) {
                 return new AnswerOutcome(
@@ -282,9 +280,8 @@ export class GameSession {
         this.playerMap[playerId].record.streak = ansOutCome.streak;
         console.log(this.playerMap);
     }
-;
-    releaseBoard(socketIO:Server, hostSocket: Socket) {
-        const playersArray =  rankPlayer(this.playerMap);
+    releaseBoard(socketIO: Server, hostSocket: Socket) {
+        const playersArray = rankPlayer(this.playerMap);
         // socketIO.sockets.adapter.rooms[this.sessionId].sockets)
         for (const [playerId, player] of Object.entries(this.playerMap)) {
             const playerRecord = this.playerMap[Number(playerId)];
@@ -298,7 +295,9 @@ export class GameSession {
                 record: playersArray[Number(playerId)].record,
                 playerAhead: playerAheadRecord,
             };
-            socketIO.to(player.socketId).emit("questionOutcome", quesitonOutcome);
+            socketIO
+                .to(player.socketId)
+                .emit("questionOutcome", quesitonOutcome);
         }
         hostSocket.emit("questionOutcome", {
             question: this.preQuestionIdx,
@@ -319,7 +318,9 @@ export class GameSession {
     }
 
     close(socketIO: Server, socket: Socket) {
-        for (const socketId of Object.keys(socketIO.sockets.adapter.rooms[this.sessionId].sockets)) {
+        for (const socketId of Object.keys(
+            socketIO.sockets.adapter.rooms[this.sessionId].sockets
+        )) {
             socketIO.sockets.connected[socketId].disconnect();
         }
         this.result = new QuizResult(
@@ -327,8 +328,8 @@ export class GameSession {
             (this.questionIdx === 0 && this.readyForNextQuestion
                 ? -1
                 : this.readyForNextQuestion
-                    ? this.preQuestionIdx
-                    : this.preQuestionIdx - 1) + 1,
+                ? this.preQuestionIdx
+                : this.preQuestionIdx - 1) + 1,
             this.quiz.questions.length,
             rankPlayer(this.playerMap)
         );
