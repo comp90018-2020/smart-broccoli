@@ -1,6 +1,6 @@
 import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
-import { Player, Session, Conn, QuizStatus, QuizResult } from "./session";
+import { Player, Session, PlayerSession, QuizStatus, QuizResult } from "./session";
 import { Answer } from "./points";
 import { formatQuestion } from "./formatter";
 
@@ -44,10 +44,10 @@ export class Game {
      *  Verify socket connection using jwt token
      * @param socket socket
      */
-    async verifySocket(socket: Socket): Promise<Conn> {
+    async verifySocket(socket: Socket): Promise<PlayerSession> {
         if (process.env.NODE_ENV === "debug") {
             const userId = Number(socket.handshake.query.userId);
-            return new Conn(await this.getUserInfo(userId), {
+            return new PlayerSession(await this.getUserInfo(userId), {
                 scope: "game",
                 userId: userId,
                 role: userId === 1 ? "host" : "participant",
@@ -55,7 +55,7 @@ export class Game {
             });
         }
         const plain = await decrypt(socket.handshake.query.token);
-        const conn: Conn = new Conn(
+        const conn: PlayerSession = new PlayerSession(
             await this.getUserInfo(plain.userId),
             plain
         );
@@ -64,7 +64,7 @@ export class Game {
 
     async answer(socketIO: Server, socket: Socket, content: any) {
         try {
-            const conn: Conn = await this.verifySocket(socket);
+            const conn: PlayerSession = await this.verifySocket(socket);
             const sessionId = conn.sessionToken.sessionId;
             const userId = conn.player.id;
             const questionId = content.questionId;
@@ -122,7 +122,7 @@ export class Game {
      * Everyone has answered or timeout
      * @param socketIO
      */
-    releaseQuestionOutcome(socketIO: Server, conn: Conn) {
+    releaseQuestionOutcome(socketIO: Server, conn: PlayerSession) {
         const sessionId = conn.sessionToken.sessionId;
         const questionOutCome = {};
         // WIP: summary question outcome here
@@ -135,7 +135,7 @@ export class Game {
 
     async welcome(socketIO: Server, socket: Socket) {
         try {
-            const conn: Conn = await this.verifySocket(socket);
+            const conn: PlayerSession = await this.verifySocket(socket);
             const sessionId = conn.sessionToken.sessionId;
             const userId = conn.player.id;
             if (this.sessions[sessionId] === undefined) {
@@ -192,7 +192,7 @@ export class Game {
 
     async quit(socketIO: Server, socket: Socket) {
         try {
-            const conn: Conn = await this.verifySocket(socket);
+            const conn: PlayerSession = await this.verifySocket(socket);
             const sessionId = conn.sessionToken.sessionId;
             const userId = conn.sessionToken.userId;
 
@@ -219,13 +219,13 @@ export class Game {
         }
     }
 
-    private isOwner(conn: Conn) {
+    private isOwner(conn: PlayerSession) {
         return conn.sessionToken.role === "host";
     }
 
     async start(socketIO: Server, socket: Socket) {
         try {
-            const conn: Conn = await this.verifySocket(socket);
+            const conn: PlayerSession = await this.verifySocket(socket);
             const sessionId = conn.sessionToken.sessionId;
             if (this.isOwner(conn)) {
                 this.sessions[sessionId].setQuizStatus(QuizStatus.Starting);
@@ -266,7 +266,7 @@ export class Game {
 
     async abort(socketIO: Server, socket: Socket) {
         try {
-            const conn: Conn = await this.verifySocket(socket);
+            const conn: PlayerSession = await this.verifySocket(socket);
             const sessionId = conn.sessionToken.sessionId;
             if (this.isOwner(conn)) {
                 // WIP: Deactivate this quiz in DB records here
@@ -290,7 +290,7 @@ export class Game {
 
     async next(socketIO: Server, socket: Socket) {
         try {
-            const conn: Conn = await this.verifySocket(socket);
+            const conn: PlayerSession = await this.verifySocket(socket);
             const sessionId = conn.sessionToken.sessionId;
             if (this.isOwner(conn)) {
                 //  broadcast next question to participants
@@ -366,7 +366,7 @@ export class Game {
             // Record it somewhere (cache or socket.handshake)
             // * token will expire in 1 hour
 
-            const conn: Conn = await this.verifySocket(socket);
+            const conn: PlayerSession = await this.verifySocket(socket);
             const sessionId = conn.sessionToken.sessionId;
 
             if (

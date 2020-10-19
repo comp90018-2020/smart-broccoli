@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { Game } from "./game";
-import { Conn } from "./session";
+import { PlayerSession } from "./session";
 
 export const handler: Game = new Game();
 
@@ -8,7 +8,7 @@ export default (socketIO: Server) => {
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
         try {
-            const conn: Conn = await handler.verifySocket(socket);
+            const conn: PlayerSession = await handler.verifySocket(socket);
             console.log(conn);
 
             // join & welcome
