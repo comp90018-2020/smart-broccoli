@@ -22,13 +22,13 @@ class _ManageQuizState extends State<ManageQuiz> {
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        QuizContainer(items, header: _groupSelector()),
+        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
 
         // Live quiz
-        QuizContainer(items, header: _groupSelector()),
+        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
 
         /// Self-paced quiz
-        QuizContainer(items, header: _groupSelector()),
+        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,

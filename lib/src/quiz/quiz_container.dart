@@ -9,7 +9,7 @@ class QuizContainer extends StatefulWidget {
       {Key key,
       this.header,
       this.padding = const EdgeInsets.only(top: 8, bottom: 8),
-      this.headerPadding = const EdgeInsets.fromLTRB(8, 0, 8, 32),
+      this.headerPadding = const EdgeInsets.fromLTRB(8, 16, 8, 16),
       this.hiddenButton = false})
       : super(key: key);
 
