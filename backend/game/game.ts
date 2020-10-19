@@ -19,13 +19,13 @@ export class Game {
 
     constructor() {
         this.sessions = {};
-        this.DEBUG();
+        this.checkEnv();
     }
 
-    public async DEBUG() {
+    public async checkEnv() {
         if (process.env.NODE_ENV === "debug") {
-            console.log("[*] Debug mode.");
-            console.log("[*] reset for debug");
+            console.log("[-] Debug mode.");
+            console.log("[*] reset a game session for debug");
             const sessionId = 19.;
             if (this.sessions.hasOwnProperty(sessionId)) {
                 delete this.sessions[sessionId];
@@ -276,6 +276,7 @@ export class Game {
                 socketIO.to(sessionId.toString()).emit("cancelled", null);
                 this.sessions[sessionId].close();
                 socket.disconnect();
+                this.checkEnv();
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {
