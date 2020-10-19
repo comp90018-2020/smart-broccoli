@@ -52,7 +52,7 @@ class _QuizPinBoxState extends State<QuizPinBox> {
 
       // Text for join by pin
       Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 30.0),
+        padding: const EdgeInsets.only(top: 8),
         child: FractionallySizedBox(
           widthFactor: 0.8,
           child: Text(
