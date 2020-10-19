@@ -1,4 +1,4 @@
-import { Session as SessInController } from "../models";
+import { Quiz, Session as SessInController } from "../models";
 import { SessionToken } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket } from "socket.io";
@@ -12,6 +12,7 @@ export enum QuizStatus {
 
 export class QuizResult {
     constructor(
+        readonly sessionId : number,
         readonly questionFinshed: number,
         readonly questionTotal: number,
         readonly board: PlayerRecord[]
@@ -60,8 +61,7 @@ export class PlayerRecord {
 }
 
 export class Session {
-    private id: number;
-    public sessInController: SessInController;
+    private sessionId: number;
     public status: QuizStatus = QuizStatus.Pending;
     private quizStartsAt = 0;
     private playerIdSet: Set<number> = new Set([]);
@@ -80,11 +80,10 @@ export class Session {
 
     public playerRecords: { [key: number]: PlayerRecord } = {};
     public playerRecordList: PlayerRecord[] = [];
-    public result: [SessInController, QuizResult] = null;
+    public result: QuizResult = null;
 
-    constructor($quiz: any, $s: SessInController) {
-        this.id = $s.id;
-        this.sessInController = $s;
+    constructor($quiz: any, $sessionId: number) {
+        this.sessionId = $sessionId;
         this.setQuestions($quiz);
     }
 
@@ -407,9 +406,9 @@ export class Session {
         for (const [playerId, socket] of Object.entries(this.sockets)) {
             socket.disconnect();
         }
-        this.result = [
-            this.sessInController,
+        this.result = 
             new QuizResult(
+                this.sessionId,
                 (this.questionIdx === 0 && this.readyForNextQuestion
                     ? -1
                     : this.readyForNextQuestion
@@ -417,8 +416,7 @@ export class Session {
                     : this.preQuestionIdx - 1) + 1,
                 this.questions.length,
                 this.playerRecordList
-            ),
-        ];
+            );
         console.log(this.result);
     }
 }
