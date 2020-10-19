@@ -1,6 +1,7 @@
 import { TokenInfo as TokenInfo } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
-import { Socket } from "socket.io";
+import { Socket, Server } from "socket.io";
+import {rankPlayer} from "./formatter"
 
 export enum QuizStatus {
     Pending = 0,
@@ -15,7 +16,7 @@ export class QuizResult {
         readonly questionFinshed: number,
         readonly questionTotal: number,
         readonly board: Player[]
-    ) {}
+    ) { }
 }
 
 export class Player {
@@ -23,7 +24,10 @@ export class Player {
     constructor(
         readonly id: number,
         readonly name: string,
-        readonly pictureId: number
+        readonly pictureId: number,
+        public socketId:string,
+        public sessionId:number,
+        public role: string
     ) {
         this.record.oldPos = null;
         this.record.newPos = null;
@@ -33,22 +37,16 @@ export class Player {
     }
 }
 
-export class PlayerSession {
-    constructor(readonly player: Player, readonly tokenInfo: TokenInfo) {}
-}
 
-export class Session {
+export class GameSession {
     private sessionId: number;
     public quiz: any;
     public status: QuizStatus = QuizStatus.Pending;
-    private quizStartsAt = 0;
-    private playerIdSet: Set<number> = new Set([]);
-    private playersMap: { [key: string]: Player } = {};
-    private playersArray: Player[] = [];
+    private playerMap: { [playerId: number]: Player } = {};
     public playerAnsOutcomes: { [key: string]: AnswerOutcome } = {};
-    private sockets: { [key: number]: Socket } = {};
     private questionIdx = 0;
     private preQuestionIdx = 0;
+    private quizStartsAt = 0;
     private questionReleasedAt = 0;
     public readyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem(0);
@@ -61,37 +59,37 @@ export class Session {
     }
 
     async addParticipant(player: Player, socket: Socket) {
-        this.playerIdSet.add(player.id);
-        ++this.pointSys.participantCount;
-        this.playersMap[player.id] = player;
-        this.sockets[player.id] = socket;
-        if (!this.playerAnsOutcomes.hasOwnProperty(player.id)) {
-            this.playerAnsOutcomes[player.id] = new AnswerOutcome(
-                false,
-                null,
-                -1,
-                -1
-            );
+        if (!this.playerMap.hasOwnProperty(player.id)) {
+            ++this.pointSys.participantCount;
+            this.playerMap[player.id] = player;
+            if (!this.playerAnsOutcomes.hasOwnProperty(player.id)) {
+                this.playerAnsOutcomes[player.id] = new AnswerOutcome(
+                    false,
+                    null,
+                    -1,
+                    -1
+                );
+            }
         }
+
     }
 
     async removeParticipant(playerId: number, socket: Socket) {
-        this.playerIdSet.delete(playerId);
+        delete this.playerMap[playerId];
         --this.pointSys.participantCount;
-        delete this.sockets[playerId];
     }
 
     async hasParticipant(playerId: number) {
-        return this.playerIdSet.has(playerId);
+        return this.playerMap.hasOwnProperty(playerId);
     }
 
     countParticipants(): number {
-        return this.playerIdSet.size;
+        return Object.keys(this.playerMap).length;
     }
 
     allParticipants() {
         const participantsSet = new Set([]);
-        for (const [key, player] of Object.entries(this.playersMap)) {
+        for (const [key, player] of Object.entries(this.playerMap)) {
             participantsSet.add(player);
         }
         return participantsSet;
@@ -211,6 +209,7 @@ export class Session {
             correctAns,
             preAnsOut
         );
+        console.log(ansOutcome);
         // record in session that player has answered
         this.playerAnsOutcomes[playerId] = ansOutcome;
         this.pointSys.answeredPlayer.add(playerId);
@@ -232,8 +231,8 @@ export class Session {
                         ? true
                         : false
                     : ans.TFSelection === correctAns.TFSelection
-                    ? true
-                    : false;
+                        ? true
+                        : false;
 
             if (correct) {
                 return new AnswerOutcome(
@@ -273,45 +272,37 @@ export class Session {
         points: number,
         ansOutCome: AnswerOutcome
     ) {
-        this.playersMap[playerId].record.oldPos = this.playersMap[
+        this.playerMap[playerId].record.oldPos = this.playerMap[
             playerId
         ].record.newPos;
-        this.playersMap[playerId].record.newPos = null;
-        this.playersMap[playerId].record.bonusPoints = points;
-        this.playersMap[playerId].record.points =
-            points + this.playersMap[playerId].record.points;
-        this.playersMap[playerId].record.streak = ansOutCome.streak;
-        console.log(this.playersMap);
+        this.playerMap[playerId].record.newPos = null;
+        this.playerMap[playerId].record.bonusPoints = points;
+        this.playerMap[playerId].record.points =
+            points + this.playerMap[playerId].record.points;
+        this.playerMap[playerId].record.streak = ansOutCome.streak;
+        console.log(this.playerMap);
     }
-
-    rankPlayers() {
-        for (const [playerId, player] of Object.entries(this.playersMap)) {
-            this.playersArray.push(player);
-        }
-        // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
-        this.playersArray.sort((a, b) =>
-            a.record.points < b.record.points ? 1 : -1
-        );
-    }
-
-    releaseBoard(hostSocket: Socket) {
-        for (const [playerId, socket] of Object.entries(this.sockets)) {
-            const playerRecord = this.playersMap[Number(playerId)];
+;
+    releaseBoard(socketIO:Server, hostSocket: Socket) {
+        const playersArray =  rankPlayer(this.playerMap);
+        // socketIO.sockets.adapter.rooms[this.sessionId].sockets)
+        for (const [playerId, player] of Object.entries(this.playerMap)) {
+            const playerRecord = this.playerMap[Number(playerId)];
             const playerAheadRecord =
                 playerRecord.record.newPos === 0
                     ? null
-                    : this.playersArray[playerRecord.record.newPos - 1];
+                    : playersArray[playerRecord.record.newPos - 1];
             const quesitonOutcome = {
                 question: this.preQuestionIdx,
-                leaderBoard: this.playersArray.slice(0, 5),
-                record: this.playersArray[Number(playerId)].record,
+                leaderBoard: playersArray.slice(0, 5),
+                record: playersArray[Number(playerId)].record,
                 playerAhead: playerAheadRecord,
             };
-            socket.emit("questionOutcome", quesitonOutcome);
+            socketIO.to(player.socketId).emit("questionOutcome", quesitonOutcome);
         }
         hostSocket.emit("questionOutcome", {
             question: this.preQuestionIdx,
-            leaderboard: this.playersArray,
+            leaderboard: playersArray,
         });
     }
 
@@ -327,19 +318,19 @@ export class Session {
         return this.quizStartsAt;
     }
 
-    close() {
-        for (const [playerId, socket] of Object.entries(this.sockets)) {
-            socket.disconnect();
+    close(socketIO: Server, socket: Socket) {
+        for (const socketId of Object.keys(socketIO.sockets.adapter.rooms[this.sessionId].sockets)) {
+            socketIO.sockets.connected[socketId].disconnect();
         }
         this.result = new QuizResult(
             this.sessionId,
             (this.questionIdx === 0 && this.readyForNextQuestion
                 ? -1
                 : this.readyForNextQuestion
-                ? this.preQuestionIdx
-                : this.preQuestionIdx - 1) + 1,
+                    ? this.preQuestionIdx
+                    : this.preQuestionIdx - 1) + 1,
             this.quiz.questions.length,
-            this.playersArray
+            rankPlayer(this.playerMap)
         );
     }
 }

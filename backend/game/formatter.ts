@@ -1,8 +1,8 @@
-import { Session, Player } from "./session";
+import { GameSession, Player } from "./session";
 
 export const formatQuestion = (
     questionIndex: number,
-    session: Session,
+    session: GameSession,
     isHost: boolean
 ) => {
     const quesionCopy = JSON.parse(
@@ -28,10 +28,37 @@ export const formatQuestion = (
 };
 
 
-export const formatWelcome= (playerSet: Set<Player>)=>{
-    const playerArray: any[] = JSON.parse(JSON.stringify(Array.from(playerSet)))
-    for(let i = 0; i < playerArray.length; ++i){
-        delete playerArray[i].record;
+export const formatWelcome = (playerSet: Set<Player>) => {
+    const welcomeMessage: any[] = [];
+    for (const [_, player] of Object.entries(Array.from(playerSet))) {
+        const { id, name, pictureId } = player;
+        console.log(player);
+        welcomeMessage.push({
+            "id": id,
+            "name": name,
+            "pictureId": pictureId
+        });
     }
-    return playerArray;
+    return welcomeMessage;
+}
+
+export const rankPlayer = (playerMap: { [key: string]: Player }) => {
+    const playersArray: Player[] = [];
+    for (const [playerId, player] of Object.entries(playerMap)) {
+        playersArray.push(player);
+    }
+    // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
+    playersArray.sort((a, b) =>
+        a.record.points < b.record.points ? 1 : -1
+    );
+    return playersArray;
+}
+
+export const formatPlayer = (player: Player) => {
+    const { id, name, pictureId, socketId, record } = player;
+    return {
+        "id": id,
+        "name": name,
+        "pictureId": pictureId
+    };
 }
