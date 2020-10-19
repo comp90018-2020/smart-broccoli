@@ -4,7 +4,7 @@ import {
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { Player, Session, Conn, QuizStatus, QuizResult } from "./session";
 import { Answer } from "./points";
-import { formatQuestion } from "./formater";
+import { formatQuestion } from "./formatter";
 
 import { Server, Socket } from "socket.io";
 

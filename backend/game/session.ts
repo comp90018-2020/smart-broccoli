@@ -122,7 +122,7 @@ export class Session {
     allParticipants() {
         const participantsSet = new Set([]);
         for (const [key, player] of Object.entries(this.players)) {
-            participantsSet.add(player.name);
+            participantsSet.add(player);
         }
         return participantsSet;
     }
