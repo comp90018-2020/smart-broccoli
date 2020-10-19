@@ -46,7 +46,7 @@ export default (socketIO: Server) => {
 
             // reset for debug
             socket.on("resetForDebug", () => {
-                handler.DEBUG();
+                handler.checkEnv();
             });
 
         } catch (err) {
