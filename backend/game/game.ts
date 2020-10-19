@@ -2,23 +2,22 @@ import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import {
     Player,
-    Session,
-    PlayerSession,
+    GameSession as GameSession,
     QuizStatus,
     QuizResult,
 } from "./session";
 import { Answer } from "./points";
-import { formatQuestion, formatWelcome } from "./formatter";
+import { formatQuestion, formatWelcome, formatPlayer } from "./formatter";
 
 import { Server, Socket } from "socket.io";
 
 const WAITING = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
 
-export class Game {
+export class GameHandler {
     // shaerd obj saves live quiz sess
     sessions: {
-        [key: number]: Session;
+        [key: number]: GameSession;
     };
 
     constructor() {
@@ -37,12 +36,12 @@ export class Game {
             const quiz = JSON.parse(
                 '{"id":19,"title":"Fruits Master","active":true,"description":"Test Quiz","type":"live","timeLimit":20,"createdAt":"2020-10-15T07:42:47.905Z","updatedAt":"2020-10-15T07:42:47.905Z","pictureId":null,"groupId":2,"questions":[{"id":32,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.927Z","updatedAt":"2020-10-15T07:42:47.927Z","quizId":19,"pictureId":null},{"id":33,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.935Z","updatedAt":"2020-10-15T07:42:47.935Z","quizId":19,"pictureId":null},{"id":34,"text":"Which one is fruit?","type":"choice","tf":null,"options":[{"text":"apple","correct":true},{"text":"Apple","correct":false},{"text":"rice","correct":false},{"text":"cola","correct":false}],"createdAt":"2020-10-15T07:42:47.939Z","updatedAt":"2020-10-15T07:42:47.939Z","quizId":19,"pictureId":null}]}'
             );
-            this.sessions[sessionId] = new Session(quiz, sessionId);
+            this.sessions[sessionId] = new GameSession(quiz, sessionId);
         }
     }
 
     addSession(quiz: any, sessionId: number) {
-        this.sessions[sessionId] = new Session(quiz, sessionId);
+        this.sessions[sessionId] = new GameSession(quiz, sessionId);
         return this.sessions[sessionId].result;
     }
 
@@ -50,30 +49,30 @@ export class Game {
      *  Verify socket connection using jwt token
      * @param socket socket
      */
-    async verifySocket(socket: Socket): Promise<PlayerSession> {
+    async verifySocket(socket: Socket): Promise<Player> {
+
         if (process.env.NODE_ENV === "debug") {
-            const userId = Number(socket.handshake.query.userId);
-            return new PlayerSession(await this.getUserInfo(userId), {
-                scope: "game",
-                userId: userId,
-                role: userId === 1 ? "host" : "participant",
-                sessionId: 19,
-            });
+            const player = await this.getUserInfo(socket.handshake.query.userId);
+            player.sessionId = 19;
+            player.role = Number(player.id) === 1 ? "host" : "participant";
+            return player;
         } else {
             const plain = await decrypt(socket.handshake.query.token);
-            const playerSession: PlayerSession = new PlayerSession(
-                await this.getUserInfo(plain.userId),
-                plain
-            );
-            return playerSession;
+            const player = await this.getUserInfo(plain.userId);
+            
+            player.socketId = socket.id;
+            const { userId, scope, role, sessionId } = await decrypt(socket.handshake.query.token);
+            player.sessionId = sessionId;
+            player.role = role;
+            return player;
         }
     }
 
     async answer(socketIO: Server, socket: Socket, content: any) {
         try {
-            const playerSession: PlayerSession = await this.verifySocket(socket);
-            const sessionId = playerSession.tokenInfo.sessionId;
-            const userId = playerSession.player.id;
+            const player: Player = await this.verifySocket(socket);
+            const sessionId = player.sessionId;
+            const userId = player.id;
             const questionId = content.questionId;
 
             // check if already answered
@@ -84,12 +83,13 @@ export class Game {
                 try {
                     // if not answer yet, i.e. this is the first time to answer
                     // assess answer
-                    const ans: Answer = new Answer(
+                    const answer: Answer = new Answer(
                         content.question,
                         content.MCSelection,
                         content.TFSelection
                     );
-                    this.sessions[sessionId].assessAns(userId, ans);
+
+                    // this.sessions[sessionId].assessAns(userId, answer);
 
                     // braodcast that one more participants answered this question
                     socket.to(sessionId.toString()).emit("questionAnswered", {
@@ -99,12 +99,7 @@ export class Game {
                         total: this.sessions[sessionId].countParticipants(),
                     });
 
-                    const hasAllAnswered = this.sessions[
-                        sessionId
-                    ].trySettingForNewQuesiton();
-                    if (hasAllAnswered) {
-                        this.sessions[sessionId].rankPlayers();
-                    }
+                    this.sessions[sessionId].trySettingForNewQuesiton();
                 } catch (err) {
                     if (process.env.NODE_EVN === "debug") {
                         socket.send(
@@ -129,8 +124,8 @@ export class Game {
      * Everyone has answered or timeout
      * @param socketIO
      */
-    releaseQuestionOutcome(socketIO: Server, playerSession: PlayerSession) {
-        const sessionId = playerSession.tokenInfo.sessionId;
+    releaseQuestionOutcome(socketIO: Server, player: Player) {
+        const sessionId = player.sessionId;
         const questionOutCome = {};
         // WIP: summary question outcome here
 
@@ -142,9 +137,9 @@ export class Game {
 
     async welcome(socketIO: Server, socket: Socket) {
         try {
-            const playerSession: PlayerSession = await this.verifySocket(socket);
-            const sessionId = playerSession.tokenInfo.sessionId;
-            const userId = playerSession.player.id;
+            const player: Player = await this.verifySocket(socket);
+            const sessionId = player.sessionId;
+            const userId = player.id;
             if (this.sessions[sessionId] === undefined) {
                 socket.disconnect();
                 return;
@@ -156,7 +151,7 @@ export class Game {
             const alreadyJoined = await this.sessions[sessionId].hasParticipant(
                 userId
             );
-            if (!this.isOwner(playerSession) && !alreadyJoined) {
+            if (player.role !== "host" && !alreadyJoined) {
                 await this.sessions[sessionId].addParticipant(
                     await this.getUserInfo(userId),
                     socket
@@ -168,7 +163,7 @@ export class Game {
 
             socket.emit(
                 "welcome",
-                formatWelcome(this.sessions[sessionId].allParticipants()) 
+                formatWelcome(this.sessions[sessionId].allParticipants())
             );
 
             if (this.sessions[sessionId].status === QuizStatus.Starting) {
@@ -199,9 +194,9 @@ export class Game {
 
     async quit(socketIO: Server, socket: Socket) {
         try {
-            const playerSession: PlayerSession = await this.verifySocket(socket);
-            const sessionId = playerSession.tokenInfo.sessionId;
-            const userId = playerSession.tokenInfo.userId;
+            const player: Player = await this.verifySocket(socket);
+            const sessionId = player.sessionId;
+            const userId = player.sessionId;
 
             // remove this participants from session in memory
             await this.sessions[sessionId].removeParticipant(userId, socket);
@@ -211,8 +206,7 @@ export class Game {
             // WIP: Remove this participants from this quiz in DB records here
 
             // broadcast that user has left
-            const msg = await this.getUserInfo(userId);
-            socketIO.to(sessionId.toString()).emit("playerLeave", msg);
+            socketIO.to(sessionId.toString()).emit("playerLeave", formatPlayer(await this.getUserInfo(userId)));
             // disconnect
             socket.disconnect();
         } catch (error) {
@@ -226,15 +220,11 @@ export class Game {
         }
     }
 
-    private isOwner(playerSession: PlayerSession) {
-        return playerSession.tokenInfo.role === "host";
-    }
-
     async start(socketIO: Server, socket: Socket) {
         try {
-            const playerSession: PlayerSession = await this.verifySocket(socket);
-            const sessionId = playerSession.tokenInfo.sessionId;
-            if (this.isOwner(playerSession)) {
+            const player: Player = await this.verifySocket(socket);
+            const sessionId = player.sessionId;
+            if (player.role === "host") {
                 this.sessions[sessionId].setQuizStatus(QuizStatus.Starting);
                 this.sessions[sessionId].setQuizStartsAt(Date.now() + WAITING);
                 // Broadcast that quiz will be started
@@ -273,15 +263,12 @@ export class Game {
 
     async abort(socketIO: Server, socket: Socket) {
         try {
-            const playerSession: PlayerSession = await this.verifySocket(socket);
-            const sessionId = playerSession.tokenInfo.sessionId;
-            if (this.isOwner(playerSession)) {
-                // WIP: Deactivate this quiz in DB records here
-
+            const player: Player = await this.verifySocket(socket);
+            const sessionId = player.sessionId;
+            if (player.role === "host") {
                 // Broadcast that quiz has been aborted
                 socketIO.to(sessionId.toString()).emit("cancelled", null);
-                this.sessions[sessionId].close();
-                socket.disconnect();
+                this.sessions[sessionId].close(socketIO, socket);
                 this.checkEnv();
             }
         } catch (error) {
@@ -297,9 +284,9 @@ export class Game {
 
     async next(socketIO: Server, socket: Socket) {
         try {
-            const playerSession: PlayerSession = await this.verifySocket(socket);
-            const sessionId = playerSession.tokenInfo.sessionId;
-            if (this.isOwner(playerSession)) {
+            const player: Player = await this.verifySocket(socket);
+            const sessionId = player.sessionId;
+            if (player.role === "host") {
                 //  broadcast next question to participants
                 if (this.sessions[sessionId].status === QuizStatus.Pending) {
                     this.start(socketIO, socket);
@@ -373,15 +360,15 @@ export class Game {
             // Record it somewhere (cache or socket.handshake)
             // * token will expire in 1 hour
 
-            const playerSession: PlayerSession = await this.verifySocket(socket);
-            const sessionId = playerSession.tokenInfo.sessionId;
+            const player: Player = await this.verifySocket(socket);
+            const sessionId = player.sessionId;
 
             if (
-                this.isOwner(playerSession) &&
+                player.role === "host" &&
                 !this.sessions[sessionId].isCurrQuestionActive()
             ) {
                 //  broadcast Board to participants
-                this.sessions[sessionId].releaseBoard(socket);
+                this.sessions[sessionId].releaseBoard(socketIO, socket);
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {
@@ -401,7 +388,7 @@ export class Game {
             const res = await BackendUser.findByPk(userId, {
                 attributes: ["name", "pictureId"],
             });
-            const player = new Player(userId, res.name, res.pictureId);
+            const player = new Player(userId, res.name, res.pictureId, null, null, null);
             userCache[userId] = player;
             return player;
         }
