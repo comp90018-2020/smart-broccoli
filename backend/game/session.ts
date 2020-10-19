@@ -1,4 +1,3 @@
-import { Quiz, Session as SessInController } from "../models";
 import { SessionToken } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket } from "socket.io";
@@ -24,21 +23,6 @@ export class Player {
         readonly id: number,
         readonly name: string,
         readonly pictureId: number
-    ) {}
-}
-
-class Option {
-    constructor(readonly correct: boolean, readonly text: string) {}
-}
-
-class Question {
-    constructor(
-        readonly no: number,
-        readonly text: string,
-        readonly pictureId: boolean,
-        readonly options: Option[] | null,
-        readonly tf: boolean | null,
-        readonly time: number
     ) {}
 }
 
@@ -146,14 +130,14 @@ export class Session {
                 tf,
                 time,
             } = this.quiz.questions[this.questionIdx];
-            return new Question(
-                no,
-                text,
-                pictureId,
-                options,
-                tf,
-                time * 1000 - (Date.now() - this.questionReleasedAt)
-            );
+            return {
+                id: no,
+                text: text,
+                tf: tf,
+                options: options,
+                pictureId: pictureId,
+                time: time * 1000 - (Date.now() - this.questionReleasedAt)
+            };
         } else {
             const {
                 no,
@@ -163,11 +147,18 @@ export class Session {
                 tf,
                 time,
             } = this.quiz.questions[this.preQuestionIdx];
-            return new Question(no, text, pictureId, options, tf, 0);
+            return {
+                id: no,
+                text: text,
+                tf: tf,
+                options: options,
+                pictureId: pictureId,
+                time: 0
+            };
         }
     }
 
-    getQuestion(idx: number): Question {
+    getQuestion(idx: number) {
         return this.quiz[idx];
     }
 
