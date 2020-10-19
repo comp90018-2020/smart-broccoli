@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/profile/joined_profile.dart';
+import 'package:smart_broccoli/src/profile/promoted_profile.dart';
 import 'package:smart_broccoli/src/profile/profile.dart';
 import 'package:smart_broccoli/src/profile/registered_profile.dart';
 
@@ -22,15 +22,19 @@ class ProfileMain extends StatelessWidget {
     if (isRegistered) {
       // Wait for rendering to complete
       Future.delayed(Duration.zero, () {
+        // A user which has joined but not promoted
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => RegisteredProfile(true)),
+          MaterialPageRoute(
+            builder: (context) => RegisteredProfile(),
+          ),
         );
       });
     } else {
       // Wait for rendering to complete
       Future.delayed(Duration.zero, () {
+        // A promoted user
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => JoinedProfile(false)),
+          MaterialPageRoute(builder: (context) => PromotedProfile()),
         );
       });
     }

@@ -1,35 +1,44 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/profile/joined_profile.dart';
+import 'package:smart_broccoli/src/profile/promoted_profile.dart';
 import 'package:smart_broccoli/src/profile/registered_profile.dart';
 import '../shared/page.dart';
 
 // Profile
 class Profile extends StatefulWidget {
-  final bool isJoined;
+  // final bool isJoined;
 
-  Profile(this.isJoined);
+  /// now you could have only 3 states, i.e
+  /// 1. is a profile being registered?
+  /// 2. is a profile being saved
+  /// 3. Or is the profile already saved
+  /// However I did it this way to allow for maximal flexibility
+
+  ProfileType pType;
+
+  Profile(this.pType);
 
   @override
   State<StatefulWidget> createState() => new _ProfileState();
 }
 
+enum ProfileType { Promoted, Registered }
+
 class _ProfileState extends State<Profile> {
   final TextEditingController _nameController = new TextEditingController();
   final TextEditingController _emailController = new TextEditingController();
+  final TextEditingController _passwordController = new TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _nameController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
   /// Whether edit mode is activated
   bool _isEdit = false;
-
-  /// Is a registered user
-  bool _isJoined;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +64,7 @@ class _ProfileState extends State<Profile> {
             children: [
               profilePicture(),
               _formBody(),
-              widget.isJoined ? _promote() : Container(),
+              (widget.pType == ProfileType.Registered) ? _promote() : Container(),
             ],
           ),
         ),
@@ -63,16 +72,42 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  Widget _save() {
+    return new SizedBox(
+      width: 150,
+      child:
+          RaisedButton(onPressed: () => goToSave(), child: Text("Save User")),
+    );
+  }
+
+  // Code here for best abstraction practices, don't inject widgets from few
+  // parents above
   Widget _promote() {
     return new SizedBox(
       width: 150,
-      child: RaisedButton(onPressed: () => gotoJoined(), child: Text("Promote User")),
+      child: RaisedButton(
+          onPressed: () => goToPromoted(), child: Text("Promote User")),
     );
   }
+
+  void goToSave() {
+    // TODO provider update here
+
+    if ((widget.pType == ProfileType.Registered)) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+            builder: (context) =>
+                Profile(ProfileType.Promoted)),
+      );
+    }
+  }
+
   // Code to promote profile to a joined profile
-  void gotoJoined(){
+  void goToPromoted() {
+    // TODO provider update here
+
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => JoinedProfile(false)),
+      MaterialPageRoute(builder: (context) => PromotedProfile()),
     );
   }
 
@@ -117,52 +152,95 @@ class _ProfileState extends State<Profile> {
           border: TableBorder.all(width: 0.8, color: Colors.black12),
           children: [
             // Name
-            TableRow(children: [
-              _paddedCell(Text('NAME', style: TextStyle(color: Colors.black38)),
-                  padding: EdgeInsets.only(left: 16)),
-              _paddedCell(
-                TextFormField(
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                      hintStyle: TextStyle(color: Colors.black38),
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.clear),
-                        onPressed: () {},
-                      ),
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      hintText: 'John Smith'),
-                  controller: _nameController,
-                ),
-                padding: EdgeInsets.only(left: 16),
-              ),
-            ]),
+            nameTableRow(),
             // Email
-            TableRow(children: [
-              _paddedCell(
-                  Text('EMAIL', style: TextStyle(color: Colors.black38)),
-                  padding: EdgeInsets.only(left: 16)),
-              _paddedCell(
-                TextFormField(
-                  textAlignVertical: TextAlignVertical.center,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                      hintStyle: TextStyle(color: Colors.black38),
-                      border: InputBorder.none,
-                      suffixIcon: Icon(IconData(0x20)),
-                      // A space
-                      focusedBorder: InputBorder.none,
-                      hintText: 'name@example.com'),
-                  controller: _emailController,
-                ),
-                padding: EdgeInsets.only(left: 16),
-              ),
-            ])
+            emailTableRow(),
+            // pType
+            (widget.pType == ProfileType.Registered)
+                ? passwordTableRow()
+                : TableRow(children: [Container(), Container()]),
           ],
         ),
       ),
+    );
+  }
+
+  /// I can't find a more elegant way of abstracting the Table Rows away since
+  /// These table rows need the edit varible.
+
+  TableRow nameTableRow() {
+    return TableRow(children: [
+      _paddedCell(Text('NAME', style: TextStyle(color: Colors.black38)),
+          padding: EdgeInsets.only(left: 16)),
+      _paddedCell(
+        TextFormField(
+          textAlignVertical: TextAlignVertical.center,
+          decoration: InputDecoration(
+              contentPadding: EdgeInsets.zero,
+              hintStyle: TextStyle(color: Colors.black38),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.clear),
+                onPressed: () {},
+              ),
+              border: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              hintText: 'John Smith'),
+          controller: _nameController,
+        ),
+        padding: EdgeInsets.only(left: 16),
+      ),
+    ]);
+  }
+
+  TableRow emailTableRow() {
+    return TableRow(
+      children: [
+        _paddedCell(Text('EMAIL', style: TextStyle(color: Colors.black38)),
+            padding: EdgeInsets.only(left: 16)),
+        _paddedCell(
+          TextFormField(
+            textAlignVertical: TextAlignVertical.center,
+            readOnly: true,
+            decoration: InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                hintStyle: TextStyle(color: Colors.black38),
+                border: InputBorder.none,
+                suffixIcon: Icon(IconData(0x20)),
+                // A space
+                focusedBorder: InputBorder.none,
+                hintText: 'name@example.com'),
+            controller: _emailController,
+          ),
+          padding: EdgeInsets.only(left: 16),
+        ),
+      ],
+    );
+  }
+
+  TableRow passwordTableRow() {
+    return TableRow(
+      children: [
+        _paddedCell(Text('Password', style: TextStyle(color: Colors.black38)),
+            padding: EdgeInsets.only(left: 16)),
+        _paddedCell(
+          TextFormField(
+            obscureText: true,
+            textAlignVertical: TextAlignVertical.center,
+            //readOnly: true,
+
+            decoration: InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                hintStyle: TextStyle(color: Colors.black38),
+                border: InputBorder.none,
+                suffixIcon: Icon(IconData(0x20)),
+                // A space
+                focusedBorder: InputBorder.none,
+                hintText: 'password'),
+            controller: _passwordController,
+          ),
+          padding: EdgeInsets.only(left: 16),
+        ),
+      ],
     );
   }
 

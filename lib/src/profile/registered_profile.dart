@@ -5,5 +5,5 @@ import 'package:smart_broccoli/src/profile/profile.dart';
 
 // Profile
 class RegisteredProfile extends Profile{
-  RegisteredProfile(bool isJoined) : super(isJoined);
+  RegisteredProfile() : super(ProfileType.Registered);
 }
