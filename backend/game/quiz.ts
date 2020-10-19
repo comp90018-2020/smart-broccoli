@@ -1,7 +1,5 @@
 import {
-    User as BackendUser,
-    Session as SessInController,
-    Quiz as QuizInModels,
+    User as BackendUser
 } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { Player, Session, Conn, QuizStatus, QuizResult } from "./session";
@@ -13,12 +11,12 @@ const userCache: { [key: number]: Player } = {};
 
 export class Game {
     // shaerd obj saves live quiz sess
-    sess: {
+    sessions: {
         [key: number]: Session;
     };
 
     constructor() {
-        this.sess = {};
+        this.sessions = {};
         if (process.env.NODE_ENV === "debug") {
             console.log("[*] Debug mode.");
             this.DEBUG();
@@ -27,31 +25,14 @@ export class Game {
 
     private async DEBUG() {
         const quiz = JSON.parse('{"id":19,"title":"Fruits Master","active":true,"description":"Test Quiz","type":"live","timeLimit":20,"createdAt":"2020-10-15T07:42:47.905Z","updatedAt":"2020-10-15T07:42:47.905Z","pictureId":null,"groupId":2,"questions":[{"id":32,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.927Z","updatedAt":"2020-10-15T07:42:47.927Z","quizId":19,"pictureId":null},{"id":33,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.935Z","updatedAt":"2020-10-15T07:42:47.935Z","quizId":19,"pictureId":null},{"id":34,"text":"Which one is fruit?","type":"choice","tf":null,"options":[{"text":"apple","correct":true},{"text":"Apple","correct":false},{"text":"rice","correct":false},{"text":"cola","correct":false}],"createdAt":"2020-10-15T07:42:47.939Z","updatedAt":"2020-10-15T07:42:47.939Z","quizId":19,"pictureId":null}]}');
-        const sessInController = new SessInController({
-            id: 19,
-            isGroup: true,
-            type: "live",
-            state: "waiting",
-            quizId: 16,
-            groupId: 2,
-            subscribeGroup: true,
-            code: "501760",
-        });
-        this.sess[Number(sessInController.id)] = new Session(
-            quiz,
-            sessInController
-        );
+        const sessionId = 19.;
+        this.sessions[sessionId] = new Session(quiz,sessionId);
     }
 
-    /**
-     * @returns original session and player final rank with details
-     * @param quiz
-     * @param s
-     */
 
-    addSession(quiz: any, s: SessInController): [SessInController, QuizResult] {
-        this.sess[s.id] = new Session(quiz, s);
-        return this.sess[s.id].result;
+    addSession(quiz: any, sessionId: number){
+        this.sessions[sessionId] = new Session(quiz,sessionId );
+        return this.sessions[sessionId].result
     }
 
     /**
@@ -79,8 +60,8 @@ export class Game {
     private formatAnsweredNotification(sessId: number, questionId: number) {
         return {
             question: questionId,
-            count: this.sess[sessId].pointSys.answeredPlayer.size,
-            total: this.sess[sessId].countParticipants(),
+            count: this.sessions[sessId].pointSys.answeredPlayer.size,
+            total: this.sessions[sessId].countParticipants(),
         };
     }
 
@@ -93,8 +74,8 @@ export class Game {
 
             // check if already answered
             if (
-                this.sess[sessId].isCurrQuestionActive() &&
-                !this.sess[sessId].hasPlayerAnswered(userId)
+                this.sessions[sessId].isCurrQuestionActive() &&
+                !this.sessions[sessId].hasPlayerAnswered(userId)
             ) {
                 try {
                     // if not answer yet, i.e. this is the first time to answer
@@ -104,7 +85,7 @@ export class Game {
                         content.MCSelection,
                         content.TFSelection
                     );
-                    this.sess[sessId].assessAns(userId, ans);
+                    this.sessions[sessId].assessAns(userId, ans);
 
                     // braodcast that one more participants answered this question
                     const answeredNotification = this.formatAnsweredNotification(
@@ -115,11 +96,11 @@ export class Game {
                         .to(sessId.toString())
                         .emit("questionAnswered", answeredNotification);
 
-                    const hasAllAnswered = this.sess[
+                    const hasAllAnswered = this.sessions[
                         sessId
                     ].trySettingForNewQuesiton();
                     if (hasAllAnswered) {
-                        this.sess[sessId].rankBoard();
+                        this.sessions[sessId].rankBoard();
                     }
                 } catch (err) {
                     if (process.env.NODE_EVN === "debug") {
@@ -159,7 +140,7 @@ export class Game {
             const conn: Conn = await this.verifySocket(socket);
             const sessId = conn.sessionToken.sessionId;
             const userId = conn.player.id;
-            if (this.sess[sessId] === undefined) {
+            if (this.sessions[sessId] === undefined) {
                 socket.disconnect();
                 return;
             }
@@ -167,11 +148,11 @@ export class Game {
             // add user to socket room
             socket.join(sessId.toString());
             // add user to session
-            const alreadyJoined = await this.sess[sessId].hasParticipant(
+            const alreadyJoined = await this.sessions[sessId].hasParticipant(
                 userId
             );
             if (!this.isOwner(conn) && !alreadyJoined) {
-                await this.sess[sessId].addParticipant(
+                await this.sessions[sessId].addParticipant(
                     await this.getUserInfo(userId),
                     socket
                 );
@@ -182,20 +163,20 @@ export class Game {
 
             socket.emit(
                 "welcome",
-                Array.from(this.sess[sessId].allParticipants())
+                Array.from(this.sessions[sessId].allParticipants())
             );
 
-            if (this.sess[sessId].status === QuizStatus.Starting) {
+            if (this.sessions[sessId].status === QuizStatus.Starting) {
                 socket.emit(
                     "starting",
                     (
-                        this.sess[sessId].getQuizStartsAt() - Date.now()
+                        this.sessions[sessId].getQuizStartsAt() - Date.now()
                     ).toString()
                 );
             }
 
-            if (this.sess[sessId].status === QuizStatus.Running) {
-                socket.emit("nextQuestion", this.sess[sessId].currQuestion());
+            if (this.sessions[sessId].status === QuizStatus.Running) {
+                socket.emit("nextQuestion", this.sessions[sessId].currQuestion());
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {
@@ -215,7 +196,7 @@ export class Game {
             const userId = conn.sessionToken.userId;
 
             // remove this participants from session in memory
-            await this.sess[sessId].removeParticipant(userId, socket);
+            await this.sessions[sessId].removeParticipant(userId, socket);
             // leave from socket room
             socket.leave(sessId.toString());
 
@@ -246,26 +227,26 @@ export class Game {
             const conn: Conn = await this.verifySocket(socket);
             const sessId = conn.sessionToken.sessionId;
             if (this.isOwner(conn)) {
-                this.sess[sessId].setQuizStatus(QuizStatus.Starting);
-                this.sess[sessId].setQuizStartsAt(Date.now() + WAITING);
+                this.sessions[sessId].setQuizStatus(QuizStatus.Starting);
+                this.sessions[sessId].setQuizStartsAt(Date.now() + WAITING);
                 // Broadcast that quiz will be started
                 socketIO
                     .to(sessId.toString())
                     .emit(
                         "starting",
                         (
-                            this.sess[sessId].getQuizStartsAt() - Date.now()
+                            this.sessions[sessId].getQuizStartsAt() - Date.now()
                         ).toString()
                     );
                 // pass-correct-this-context-to-settimeout-callback
                 // https://stackoverflow.com/questions/2130241
                 setTimeout(
                     () => {
-                        this.sess[sessId].status = QuizStatus.Running;
+                        this.sessions[sessId].status = QuizStatus.Running;
                         // release the firt question
                         this.next(socketIO, socket);
                     },
-                    this.sess[sessId].getQuizStartsAt() - Date.now(),
+                    this.sessions[sessId].getQuizStartsAt() - Date.now(),
                     socket
                 );
             }
@@ -289,7 +270,7 @@ export class Game {
 
                 // Broadcast that quiz has been aborted
                 socketIO.to(sessId.toString()).emit("cancelled", null);
-                this.sess[sessId].close();
+                this.sessions[sessId].close();
                 socket.disconnect();
             }
         } catch (error) {
@@ -310,34 +291,34 @@ export class Game {
 
             if (this.isOwner(conn)) {
                 //  broadcast next question to participants
-                if (this.sess[sessId].status === QuizStatus.Pending) {
+                if (this.sessions[sessId].status === QuizStatus.Pending) {
                     this.start(socketIO, socket);
-                } else if (this.sess[sessId].status === QuizStatus.Starting) {
+                } else if (this.sessions[sessId].status === QuizStatus.Starting) {
                     // nothing to do
-                } else if (this.sess[sessId].status === QuizStatus.Running) {
+                } else if (this.sessions[sessId].status === QuizStatus.Running) {
                     try {
-                        const qIdx = this.sess[sessId].nextQuestionIdx();
+                        const qIdx = this.sessions[sessId].nextQuestionIdx();
                         // send question without answer to participants
                         socket
                             .to(sessId.toString())
                             .emit(
                                 "nextQuestion",
-                                this.sess[sessId].getQuestion(qIdx)
+                                this.sessions[sessId].getQuestion(qIdx)
                             );
                         socketIO
                             .to(socket.id)
                             .emit(
                                 "nextQuestion",
-                                this.sess[sessId].getQuestionWithAns(qIdx)
+                                this.sessions[sessId].getQuestionWithAns(qIdx)
                             );
                     } catch (err) {
                         if (err === "no more question") {
                             if (
-                                this.sess[sessId].hasFinalBoardReleased ===
+                                this.sessions[sessId].hasFinalBoardReleased ===
                                 false
                             ) {
                                 this.showBoard(socketIO, socket);
-                                this.sess[sessId].hasFinalBoardReleased = true;
+                                this.sessions[sessId].hasFinalBoardReleased = true;
                             } else {
                                 this.abort(socketIO, socket);
                             }
@@ -369,10 +350,10 @@ export class Game {
 
             if (
                 this.isOwner(conn) &&
-                !this.sess[sessId].isCurrQuestionActive()
+                !this.sessions[sessId].isCurrQuestionActive()
             ) {
                 //  broadcast Board to participants
-                this.sess[sessId].releaseBoard(socket);
+                this.sessions[sessId].releaseBoard(socket);
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {
