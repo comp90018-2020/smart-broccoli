@@ -26,7 +26,7 @@ export class Player {
     ) {}
 }
 
-export class Conn {
+export class PlayerSession {
     constructor(readonly player: Player, readonly sessionToken: SessionToken) {}
 }
 
@@ -136,7 +136,7 @@ export class Session {
                 tf: tf,
                 options: options,
                 pictureId: pictureId,
-                time: time * 1000 - (Date.now() - this.questionReleasedAt)
+                time: time * 1000 - (Date.now() - this.questionReleasedAt),
             };
         } else {
             const {
@@ -153,7 +153,7 @@ export class Session {
                 tf: tf,
                 options: options,
                 pictureId: pictureId,
-                time: 0
+                time: 0,
             };
         }
     }
