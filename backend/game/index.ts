@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { Game } from "./quiz";
+import { Game } from "./game";
 import { Conn } from "./session";
 
 export const handler: Game = new Game();

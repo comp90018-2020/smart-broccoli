@@ -62,14 +62,12 @@ export class PlayerRecord {
 
 export class Session {
     private sessionId: number;
+    public quiz: any;
     public status: QuizStatus = QuizStatus.Pending;
     private quizStartsAt = 0;
     private playerIdSet: Set<number> = new Set([]);
-    private playerNames: { [key: string]: any } = {};
     private players: { [key: string]: Player } = {};
     public playerAnsOutcomes: { [key: string]: AnswerOutcome } = {};
-    private questions: Question[];
-    private questionsWithAns: Question[];
     private sockets: { [key: number]: Socket } = {};
     private questionIdx = 0;
     private preQuestionIdx = 0;
@@ -84,13 +82,12 @@ export class Session {
 
     constructor($quiz: any, $sessionId: number) {
         this.sessionId = $sessionId;
-        this.setQuestions($quiz);
+        this.quiz = $quiz;
     }
 
     async addParticipant(player: Player, socket: Socket) {
         this.playerIdSet.add(player.id);
         ++this.pointSys.participantCount;
-        this.playerNames[player.id] = player.name;
         this.players[player.id] = player;
         this.sockets[player.id] = socket;
         if (!this.playerAnsOutcomes.hasOwnProperty(player.id)) {
@@ -111,7 +108,6 @@ export class Session {
     async removeParticipant(playerId: number, socket: Socket) {
         this.playerIdSet.delete(playerId);
         --this.pointSys.participantCount;
-        delete this.playerNames[playerId];
         delete this.sockets[playerId];
     }
 
@@ -125,8 +121,8 @@ export class Session {
 
     allParticipants() {
         const participantsSet = new Set([]);
-        for (const [key, value] of Object.entries(this.playerNames)) {
-            participantsSet.add(value);
+        for (const [key, player] of Object.entries(this.players)) {
+            participantsSet.add(player.name);
         }
         return participantsSet;
     }
@@ -135,53 +131,6 @@ export class Session {
         return this.pointSys.answeredPlayer.has(playerId);
     }
 
-    /**
-     * Set questions list of this session
-     * @param questions questions list
-     */
-    private async setQuestions(quiz: any) {
-        // TODO: format questions that can be sent to players here
-        const questions: Question[] = [];
-        const questionsWithAns: Question[] = [];
-        let i = 0;
-        while (quiz.questions.length > 0) {
-            const q = quiz.questions.shift();
-            const options: Option[] = q.options === null ? null : [];
-            const optionsWithAns: Option[] = q.options === null ? null : [];
-
-            if (options !== null) {
-                while (q.options.length > 0) {
-                    const option = q.options.shift();
-                    options.push(new Option(null, option.text));
-                    optionsWithAns.push(
-                        new Option(option.correct, option.text)
-                    );
-                }
-            }
-            const question = new Question(
-                i,
-                q.text,
-                q.pictureId,
-                options,
-                null,
-                quiz.timeLimit
-            );
-            const questionWithAns = new Question(
-                i,
-                q.text,
-                q.pictureId,
-                optionsWithAns,
-                q.tf,
-                quiz.timeLimit
-            );
-
-            i++;
-            questions.push(question);
-            questionsWithAns.push(questionWithAns);
-        }
-        this.questions = questions;
-        this.questionsWithAns = questionsWithAns;
-    }
 
     /**
      * If a connection is lost and subsequently restored during a quiz,
@@ -190,7 +139,7 @@ export class Session {
      */
     currQuestion() {
         if (this.questionIdx === this.preQuestionIdx) {
-            const { no, text, pictureId, options, tf, time } = this.questions[
+            const { no, text, pictureId, options, tf, time } = this.quiz.questions[
                 this.questionIdx
             ];
             return new Question(
@@ -202,7 +151,7 @@ export class Session {
                 time * 1000 - (Date.now() - this.questionReleasedAt)
             );
         } else {
-            const { no, text, pictureId, options, tf, time } = this.questions[
+            const { no, text, pictureId, options, tf, time } = this.quiz.questions[
                 this.preQuestionIdx
             ];
             return new Question(no, text, pictureId, options, tf, 0);
@@ -210,11 +159,7 @@ export class Session {
     }
 
     getQuestion(idx: number): Question {
-        return this.questions[idx];
-    }
-
-    getQuestionWithAns(idx: number): Question {
-        return this.questionsWithAns[idx];
+        return this.quiz[idx];
     }
 
     isCurrQuestionActive() {
@@ -222,7 +167,8 @@ export class Session {
     }
 
     getAnsOfQuestion(idx: number): Answer {
-        const questionWithAns = this.getQuestionWithAns(idx);
+        const questionWithAns = this.quiz.questions[idx];
+        
         if (questionWithAns.options === null) {
             return new Answer(questionWithAns.no, null, questionWithAns.tf);
         } else {
@@ -253,7 +199,7 @@ export class Session {
     }
 
     nextQuestionIdx(): number {
-        if (this.questionIdx >= this.questions.length) {
+        if (this.questionIdx >= this.quiz.questions.length) {
             throw "no more question";
         } else if (!this.readyForNextQuestion) {
             throw "there is a running question";
@@ -263,7 +209,7 @@ export class Session {
                 if (this.questionIdx === this.preQuestionIdx) {
                     this.moveToNextQuestion();
                 }
-            }, this.questions[this.questionIdx].time * 1000);
+            }, this.quiz.questions[this.questionIdx].time * 1000);
             this.preQuestionIdx = this.questionIdx;
             this.readyForNextQuestion = false;
             return this.questionIdx;
@@ -414,7 +360,7 @@ export class Session {
                     : this.readyForNextQuestion
                     ? this.preQuestionIdx
                     : this.preQuestionIdx - 1) + 1,
-                this.questions.length,
+                this.quiz.questions.length,
                 this.playerRecordList
             );
         console.log(this.result);
