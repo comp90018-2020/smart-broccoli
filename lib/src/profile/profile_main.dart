@@ -1,16 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/profile/promoted_profile.dart';
-import 'package:smart_broccoli/src/profile/profile.dart';
 import 'package:smart_broccoli/src/profile/registered_profile.dart';
 
 class ProfileMain extends StatelessWidget {
-  bool isRegistered;
+  // Debug value
+  final bool isRegistered = true;
 
   ProfileMain() {
     /// Provider Code here
     /// Defaults to true
-    isRegistered = true;
   }
 
   /// The job of this class is to be a tmp widget to determine which Profile

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/profile/promoted_profile.dart';
-import 'package:smart_broccoli/src/profile/registered_profile.dart';
 import '../shared/page.dart';
 
 // Profile
@@ -14,7 +13,7 @@ class Profile extends StatefulWidget {
   /// 3. Or is the profile already saved
   /// However I did it this way to allow for maximal flexibility
 
-  ProfileType pType;
+  final ProfileType pType;
 
   Profile(this.pType);
 
@@ -64,19 +63,13 @@ class _ProfileState extends State<Profile> {
             children: [
               profilePicture(),
               _formBody(),
-              (widget.pType == ProfileType.Registered) ? _promote() : Container(),
+              (widget.pType == ProfileType.Registered)
+                  ? _promote()
+                  : Container(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _save() {
-    return new SizedBox(
-      width: 150,
-      child:
-          RaisedButton(onPressed: () => goToSave(), child: Text("Save User")),
     );
   }
 
@@ -88,18 +81,6 @@ class _ProfileState extends State<Profile> {
       child: RaisedButton(
           onPressed: () => goToPromoted(), child: Text("Promote User")),
     );
-  }
-
-  void goToSave() {
-    // TODO provider update here
-
-    if ((widget.pType == ProfileType.Registered)) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-            builder: (context) =>
-                Profile(ProfileType.Promoted)),
-      );
-    }
   }
 
   // Code to promote profile to a joined profile
