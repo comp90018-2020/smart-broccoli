@@ -77,8 +77,7 @@ class _ProfileState extends State<Profile> {
               _formBody(),
 
               _isEdit
-                  ? (widget.pType == ProfileType.Promoted ||
-                          widget.pType == ProfileType.Registering)
+                  ? (widget.pType == ProfileType.Promoted)
                       ? _changePassword()
                       : Container()
                   : (widget.pType == ProfileType.Registered ||
@@ -190,6 +189,12 @@ class _ProfileState extends State<Profile> {
                     widget.pType == ProfileType.Registering)
                 ? emailTableRow()
                 : TableRow(children: [Container(), Container()]),
+            (widget.pType == ProfileType.Registering)
+                ? passwordTableRow()
+                : TableRow(children: [Container(), Container()]),
+            (widget.pType == ProfileType.Registering)
+                ? passwordTableRow2()
+                : TableRow(children: [Container(), Container()]),
           ],
         ),
       ),
@@ -267,7 +272,10 @@ class _ProfileState extends State<Profile> {
                 contentPadding: EdgeInsets.zero,
                 hintStyle: TextStyle(color: Colors.black38),
                 border: InputBorder.none,
-                suffixIcon: Icon(IconData(0x20)),
+                suffixIcon: IconButton(
+                  icon: _isEdit ? Icon(Icons.clear) : Icon(null),
+                  onPressed: () {},
+                ),
                 // A space
                 focusedBorder: InputBorder.none,
                 hintText: 'password'),
@@ -295,7 +303,10 @@ class _ProfileState extends State<Profile> {
                 contentPadding: EdgeInsets.zero,
                 hintStyle: TextStyle(color: Colors.black38),
                 border: InputBorder.none,
-                suffixIcon: Icon(IconData(0x20)),
+                suffixIcon: IconButton(
+                  icon: _isEdit ? Icon(Icons.clear) : Icon(null),
+                  onPressed: () {},
+                ),
                 // A space
                 focusedBorder: InputBorder.none,
                 hintText: 'Confirm password'),
@@ -361,7 +372,6 @@ class _ProfileState extends State<Profile> {
                 ),
                 RaisedButton(onPressed: () => {}, child: Text("Submit")),
               ],
-
             ),
             margin: EdgeInsets.only(bottom: 50, left: 12, right: 12),
             decoration: BoxDecoration(
