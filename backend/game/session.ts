@@ -1,4 +1,4 @@
-import { SessionToken } from "../controllers/session";
+import { TokenInfo as TokenInfo } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket } from "socket.io";
 
@@ -14,34 +14,27 @@ export class QuizResult {
         readonly sessionId: number,
         readonly questionFinshed: number,
         readonly questionTotal: number,
-        readonly board: PlayerRecord[]
+        readonly board: Player[]
     ) {}
 }
 
 export class Player {
+    public record: { [key: string]: any } = {};
     constructor(
         readonly id: number,
         readonly name: string,
         readonly pictureId: number
-    ) {}
+    ) {
+        this.record.oldPos = null;
+        this.record.newPos = null;
+        this.record.bonusPoints = 0;
+        this.record.points = 0;
+        this.record.streak = -1;
+    }
 }
 
 export class PlayerSession {
-    constructor(readonly player: Player, readonly sessionToken: SessionToken) {}
-}
-
-class Record {
-    constructor(
-        public oldPos: number,
-        public newPos: number,
-        public bonusPoints: number,
-        public points: number,
-        public streak: number
-    ) {}
-}
-
-export class PlayerRecord {
-    constructor(readonly player: Player, readonly record: Record) {}
+    constructor(readonly player: Player, readonly tokenInfo: TokenInfo) {}
 }
 
 export class Session {
@@ -50,7 +43,8 @@ export class Session {
     public status: QuizStatus = QuizStatus.Pending;
     private quizStartsAt = 0;
     private playerIdSet: Set<number> = new Set([]);
-    private players: { [key: string]: Player } = {};
+    private playersMap: { [key: string]: Player } = {};
+    private playersArray: Player[] = [];
     public playerAnsOutcomes: { [key: string]: AnswerOutcome } = {};
     private sockets: { [key: number]: Socket } = {};
     private questionIdx = 0;
@@ -59,9 +53,6 @@ export class Session {
     public readyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem(0);
     public hasFinalBoardReleased: boolean = false;
-
-    public playerRecords: { [key: number]: PlayerRecord } = {};
-    public playerRecordList: PlayerRecord[] = [];
     public result: QuizResult = null;
 
     constructor($quiz: any, $sessionId: number) {
@@ -72,7 +63,7 @@ export class Session {
     async addParticipant(player: Player, socket: Socket) {
         this.playerIdSet.add(player.id);
         ++this.pointSys.participantCount;
-        this.players[player.id] = player;
+        this.playersMap[player.id] = player;
         this.sockets[player.id] = socket;
         if (!this.playerAnsOutcomes.hasOwnProperty(player.id)) {
             this.playerAnsOutcomes[player.id] = new AnswerOutcome(
@@ -81,11 +72,6 @@ export class Session {
                 -1,
                 -1
             );
-        }
-
-        if (!this.playerRecords.hasOwnProperty(player.id)) {
-            const record = new Record(null, null, 0, 0, -1);
-            this.playerRecords[player.id] = new PlayerRecord(player, record);
         }
     }
 
@@ -105,7 +91,7 @@ export class Session {
 
     allParticipants() {
         const participantsSet = new Set([]);
-        for (const [key, player] of Object.entries(this.players)) {
+        for (const [key, player] of Object.entries(this.playersMap)) {
             participantsSet.add(player);
         }
         return participantsSet;
@@ -287,52 +273,45 @@ export class Session {
         points: number,
         ansOutCome: AnswerOutcome
     ) {
-        this.playerRecords[playerId].record.oldPos = this.playerRecords[
+        this.playersMap[playerId].record.oldPos = this.playersMap[
             playerId
         ].record.newPos;
-        this.playerRecords[playerId].record.newPos = null;
-        this.playerRecords[playerId].record.bonusPoints = points;
-        this.playerRecords[playerId].record.points =
-            points + this.playerRecords[playerId].record.points;
-        this.playerRecords[playerId].record.streak = ansOutCome.streak;
+        this.playersMap[playerId].record.newPos = null;
+        this.playersMap[playerId].record.bonusPoints = points;
+        this.playersMap[playerId].record.points =
+            points + this.playersMap[playerId].record.points;
+        this.playersMap[playerId].record.streak = ansOutCome.streak;
+        console.log(this.playersMap);
     }
 
-    rankBoard() {
-        const playerRecordsList: PlayerRecord[] = [];
-        for (const [playerId, playerRecord] of Object.entries(
-            this.playerRecords
-        )) {
-            playerRecordsList.push(playerRecord);
+    rankPlayers() {
+        for (const [playerId, player] of Object.entries(this.playersMap)) {
+            this.playersArray.push(player);
         }
         // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
-        playerRecordsList.sort((a, b) =>
+        this.playersArray.sort((a, b) =>
             a.record.points < b.record.points ? 1 : -1
         );
-        this.playerRecordList = playerRecordsList;
-        for (const [i, playerRecord] of playerRecordsList.entries()) {
-            playerRecord.record.newPos = i;
-            this.playerRecords[playerRecord.player.id] = playerRecord;
-        }
     }
 
     releaseBoard(hostSocket: Socket) {
         for (const [playerId, socket] of Object.entries(this.sockets)) {
-            const playerRecord = this.playerRecords[Number(playerId)];
+            const playerRecord = this.playersMap[Number(playerId)];
             const playerAheadRecord =
                 playerRecord.record.newPos === 0
                     ? null
-                    : this.playerRecordList[playerRecord.record.newPos - 1];
+                    : this.playersArray[playerRecord.record.newPos - 1];
             const quesitonOutcome = {
                 question: this.preQuestionIdx,
-                leaderBoard: this.playerRecordList.slice(0, 5),
-                record: this.playerRecords[Number(playerId)].record,
+                leaderBoard: this.playersArray.slice(0, 5),
+                record: this.playersArray[Number(playerId)].record,
                 playerAhead: playerAheadRecord,
             };
             socket.emit("questionOutcome", quesitonOutcome);
         }
         hostSocket.emit("questionOutcome", {
             question: this.preQuestionIdx,
-            leaderboard: this.playerRecordList,
+            leaderboard: this.playersArray,
         });
     }
 
@@ -360,7 +339,7 @@ export class Session {
                 ? this.preQuestionIdx
                 : this.preQuestionIdx - 1) + 1,
             this.quiz.questions.length,
-            this.playerRecordList
+            this.playersArray
         );
     }
 }

@@ -13,7 +13,7 @@ import { handler } from "../game/index";
 import { QuizResult } from "../game/session";
 
 // Represents a session token
-export interface SessionToken {
+export interface TokenInfo {
     scope: string;
     userId: number;
     role: string;
@@ -54,7 +54,7 @@ export const sessionTokenDecrypt = async (token: string) => {
     }
 
     // Decrypt the session token
-    const sessionToken: SessionToken = await jwtVerify(
+    const sessionToken: TokenInfo = await jwtVerify(
         token,
         process.env.TOKEN_SECRET
     );
