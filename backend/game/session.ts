@@ -12,7 +12,7 @@ export enum QuizStatus {
 
 export class QuizResult {
     constructor(
-        readonly sessionId : number,
+        readonly sessionId: number,
         readonly questionFinshed: number,
         readonly questionTotal: number,
         readonly board: PlayerRecord[]
@@ -131,7 +131,6 @@ export class Session {
         return this.pointSys.answeredPlayer.has(playerId);
     }
 
-
     /**
      * If a connection is lost and subsequently restored during a quiz,
      * send current question immediately (corresponding to the current question;
@@ -139,9 +138,14 @@ export class Session {
      */
     currQuestion() {
         if (this.questionIdx === this.preQuestionIdx) {
-            const { no, text, pictureId, options, tf, time } = this.quiz.questions[
-                this.questionIdx
-            ];
+            const {
+                no,
+                text,
+                pictureId,
+                options,
+                tf,
+                time,
+            } = this.quiz.questions[this.questionIdx];
             return new Question(
                 no,
                 text,
@@ -151,9 +155,14 @@ export class Session {
                 time * 1000 - (Date.now() - this.questionReleasedAt)
             );
         } else {
-            const { no, text, pictureId, options, tf, time } = this.quiz.questions[
-                this.preQuestionIdx
-            ];
+            const {
+                no,
+                text,
+                pictureId,
+                options,
+                tf,
+                time,
+            } = this.quiz.questions[this.preQuestionIdx];
             return new Question(no, text, pictureId, options, tf, 0);
         }
     }
@@ -168,7 +177,7 @@ export class Session {
 
     getAnsOfQuestion(idx: number): Answer {
         const questionWithAns = this.quiz.questions[idx];
-        
+
         if (questionWithAns.options === null) {
             return new Answer(questionWithAns.no, null, questionWithAns.tf);
         } else {
@@ -352,17 +361,15 @@ export class Session {
         for (const [playerId, socket] of Object.entries(this.sockets)) {
             socket.disconnect();
         }
-        this.result = 
-            new QuizResult(
-                this.sessionId,
-                (this.questionIdx === 0 && this.readyForNextQuestion
-                    ? -1
-                    : this.readyForNextQuestion
-                    ? this.preQuestionIdx
-                    : this.preQuestionIdx - 1) + 1,
-                this.quiz.questions.length,
-                this.playerRecordList
-            );
-        console.log(this.result);
+        this.result = new QuizResult(
+            this.sessionId,
+            (this.questionIdx === 0 && this.readyForNextQuestion
+                ? -1
+                : this.readyForNextQuestion
+                ? this.preQuestionIdx
+                : this.preQuestionIdx - 1) + 1,
+            this.quiz.questions.length,
+            this.playerRecordList
+        );
     }
 }

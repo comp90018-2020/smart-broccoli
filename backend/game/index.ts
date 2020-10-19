@@ -48,7 +48,6 @@ export default (socketIO: Server) => {
             socket.on("resetForDebug", () => {
                 handler.checkEnv();
             });
-
         } catch (err) {
             if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212

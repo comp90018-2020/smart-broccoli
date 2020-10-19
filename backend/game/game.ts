@@ -1,6 +1,4 @@
-import {
-    User as BackendUser
-} from "../models";
+import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { Player, Session, Conn, QuizStatus, QuizResult } from "./session";
 import { Answer } from "./points";
@@ -26,21 +24,20 @@ export class Game {
         if (process.env.NODE_ENV === "debug") {
             console.log("[-] Debug mode.");
             console.log("[*] reset a game session for debug");
-            const sessionId = 19.;
+            const sessionId = 19;
             if (this.sessions.hasOwnProperty(sessionId)) {
                 delete this.sessions[sessionId];
             }
-            const quiz = JSON.parse('{"id":19,"title":"Fruits Master","active":true,"description":"Test Quiz","type":"live","timeLimit":20,"createdAt":"2020-10-15T07:42:47.905Z","updatedAt":"2020-10-15T07:42:47.905Z","pictureId":null,"groupId":2,"questions":[{"id":32,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.927Z","updatedAt":"2020-10-15T07:42:47.927Z","quizId":19,"pictureId":null},{"id":33,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.935Z","updatedAt":"2020-10-15T07:42:47.935Z","quizId":19,"pictureId":null},{"id":34,"text":"Which one is fruit?","type":"choice","tf":null,"options":[{"text":"apple","correct":true},{"text":"Apple","correct":false},{"text":"rice","correct":false},{"text":"cola","correct":false}],"createdAt":"2020-10-15T07:42:47.939Z","updatedAt":"2020-10-15T07:42:47.939Z","quizId":19,"pictureId":null}]}');
+            const quiz = JSON.parse(
+                '{"id":19,"title":"Fruits Master","active":true,"description":"Test Quiz","type":"live","timeLimit":20,"createdAt":"2020-10-15T07:42:47.905Z","updatedAt":"2020-10-15T07:42:47.905Z","pictureId":null,"groupId":2,"questions":[{"id":32,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.927Z","updatedAt":"2020-10-15T07:42:47.927Z","quizId":19,"pictureId":null},{"id":33,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.935Z","updatedAt":"2020-10-15T07:42:47.935Z","quizId":19,"pictureId":null},{"id":34,"text":"Which one is fruit?","type":"choice","tf":null,"options":[{"text":"apple","correct":true},{"text":"Apple","correct":false},{"text":"rice","correct":false},{"text":"cola","correct":false}],"createdAt":"2020-10-15T07:42:47.939Z","updatedAt":"2020-10-15T07:42:47.939Z","quizId":19,"pictureId":null}]}'
+            );
             this.sessions[sessionId] = new Session(quiz, sessionId);
         }
-
     }
-
-
 
     addSession(quiz: any, sessionId: number) {
         this.sessions[sessionId] = new Session(quiz, sessionId);
-        return this.sessions[sessionId].result
+        return this.sessions[sessionId].result;
     }
 
     /**
@@ -88,15 +85,12 @@ export class Game {
                     this.sessions[sessionId].assessAns(userId, ans);
 
                     // braodcast that one more participants answered this question
-                    socket
-                        .to(sessionId.toString())
-                        .emit("questionAnswered",
-                            {
-                                question: questionId,
-                                count: this.sessions[sessionId].pointSys.answeredPlayer.size,
-                                total: this.sessions[sessionId].countParticipants(),
-                            }
-                        );
+                    socket.to(sessionId.toString()).emit("questionAnswered", {
+                        question: questionId,
+                        count: this.sessions[sessionId].pointSys.answeredPlayer
+                            .size,
+                        total: this.sessions[sessionId].countParticipants(),
+                    });
 
                     const hasAllAnswered = this.sessions[
                         sessionId
@@ -134,7 +128,9 @@ export class Game {
         // WIP: summary question outcome here
 
         // braodcast question outcome
-        socketIO.to(sessionId.toString()).emit("questionOutcome", questionOutCome);
+        socketIO
+            .to(sessionId.toString())
+            .emit("questionOutcome", questionOutCome);
     }
 
     async welcome(socketIO: Server, socket: Socket) {
@@ -178,7 +174,10 @@ export class Game {
             }
 
             if (this.sessions[sessionId].status === QuizStatus.Running) {
-                socket.emit("nextQuestion", this.sessions[sessionId].currQuestion());
+                socket.emit(
+                    "nextQuestion",
+                    this.sessions[sessionId].currQuestion()
+                );
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {
@@ -237,14 +236,14 @@ export class Game {
                     .emit(
                         "starting",
                         (
-                            this.sessions[sessionId].getQuizStartsAt() - Date.now()
+                            this.sessions[sessionId].getQuizStartsAt() -
+                            Date.now()
                         ).toString()
                     );
                 // pass-correct-this-context-to-settimeout-callback
                 // https://stackoverflow.com/questions/2130241
                 setTimeout(
                     () => {
-                        console.log("run next")
                         this.sessions[sessionId].status = QuizStatus.Running;
                         // release the firt question
                         this.next(socketIO, socket);
@@ -297,17 +296,27 @@ export class Game {
                 //  broadcast next question to participants
                 if (this.sessions[sessionId].status === QuizStatus.Pending) {
                     this.start(socketIO, socket);
-                } else if (this.sessions[sessionId].status === QuizStatus.Starting) {
+                } else if (
+                    this.sessions[sessionId].status === QuizStatus.Starting
+                ) {
                     // nothing to do
-                } else if (this.sessions[sessionId].status === QuizStatus.Running) {
+                } else if (
+                    this.sessions[sessionId].status === QuizStatus.Running
+                ) {
                     try {
-                        const questionIndex = this.sessions[sessionId].nextQuestionIdx();
+                        const questionIndex = this.sessions[
+                            sessionId
+                        ].nextQuestionIdx();
                         // send question without answer to participants
                         socket
                             .to(sessionId.toString())
                             .emit(
                                 "nextQuestion",
-                                formatQuestion(this.sessions[sessionId].quiz.questions[questionIndex], false)
+                                formatQuestion(
+                                    questionIndex,
+                                    this.sessions[sessionId],
+                                    false
+                                )
                             );
 
                         // send question with answer to the host
@@ -315,16 +324,22 @@ export class Game {
                             .to(socket.id)
                             .emit(
                                 "nextQuestion",
-                                formatQuestion(this.sessions[sessionId].quiz.questions[questionIndex], true)
+                                formatQuestion(
+                                    questionIndex,
+                                    this.sessions[sessionId],
+                                    true
+                                )
                             );
                     } catch (err) {
                         if (err === "no more question") {
                             if (
-                                this.sessions[sessionId].hasFinalBoardReleased ===
-                                false
+                                this.sessions[sessionId]
+                                    .hasFinalBoardReleased === false
                             ) {
                                 this.showBoard(socketIO, socket);
-                                this.sessions[sessionId].hasFinalBoardReleased = true;
+                                this.sessions[
+                                    sessionId
+                                ].hasFinalBoardReleased = true;
                             } else {
                                 this.abort(socketIO, socket);
                             }
