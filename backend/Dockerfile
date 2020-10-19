@@ -15,7 +15,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 # Install production dependencies
-RUN yarn install --production --ignore-optional --frozen-lockfile && yarn cache clean
+RUN yarn install --production --ignore-optional --frozen-lockfile && yarn cache clean && yarn add dotenv
 
 # Add user
 # RUN adduser -D comp90018
