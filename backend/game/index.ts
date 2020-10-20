@@ -2,13 +2,15 @@ import { Server } from "socket.io";
 import { GameHandler } from "./game";
 import { Player } from "./session";
 
+export let $socketIO: Server = null;
 export const handler: GameHandler = new GameHandler();
 export default (socketIO: Server) => {
+    $socketIO = socketIO;
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
         try {
             // join & welcome
-            handler.welcome(socketIO, socket);
+            handler.welcome(socket);
 
             // answer
             socket.on("answer", (content: any) => {
@@ -37,7 +39,7 @@ export default (socketIO: Server) => {
 
             // showBoard
             socket.on("showBoard", () => {
-                handler.showBoard(socketIO, socket);
+                handler.showBoard( socket);
             });
 
             // reset for debug

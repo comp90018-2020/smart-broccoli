@@ -31,7 +31,6 @@ export const formatWelcome = (playerSet: Set<Player>) => {
     const welcomeMessage: any[] = [];
     for (const [_, player] of Object.entries(Array.from(playerSet))) {
         const { id, name, pictureId } = player;
-        console.log(player);
         welcomeMessage.push({
             id: id,
             name: name,
@@ -59,3 +58,14 @@ export const formatPlayer = (player: Player) => {
         pictureId: pictureId,
     };
 };
+
+
+export const formatPlayerRecord = (player: Player) => {
+    const { id, name, pictureId, record } = player;
+    return {
+        id: id,
+        name: name,
+        pictureId: pictureId,
+        record: record
+    }
+}

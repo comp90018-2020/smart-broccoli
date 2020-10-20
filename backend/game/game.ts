@@ -5,6 +5,7 @@ import { Answer } from "./points";
 import { formatQuestion, formatWelcome, formatPlayer } from "./formatter";
 
 import { Server, Socket } from "socket.io";
+import { $socketIO } from "./index"
 
 const WAITING = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
@@ -47,19 +48,19 @@ export class GameHandler {
     async verifySocket(socket: Socket): Promise<Player> {
         if (process.env.NODE_ENV === "debug") {
             const player = await this.getUserInfo(
-                socket.handshake.query.userId
+                Number(socket.handshake.query.userId)
             );
+            player.socketId = socket.id;
             player.sessionId = 19;
             player.role = Number(player.id) === 1 ? "host" : "participant";
             return player;
         } else {
             const plain = await decrypt(socket.handshake.query.token);
-            const player = await this.getUserInfo(plain.userId);
-
-            player.socketId = socket.id;
+            const player = await this.getUserInfo(Number(plain.userId));
             const { userId, scope, role, sessionId } = await decrypt(
                 socket.handshake.query.token
             );
+            player.socketId = socket.id;
             player.sessionId = sessionId;
             player.role = role;
             return player;
@@ -86,7 +87,6 @@ export class GameHandler {
                         content.MCSelection,
                         content.TFSelection
                     );
-
                     // this.sessions[sessionId].assessAns(userId, answer);
 
                     // braodcast that one more participants answered this question
@@ -117,23 +117,7 @@ export class GameHandler {
         }
     }
 
-    // WIP: release question outcome after timeout
-    /**
-     * Everyone has answered or timeout
-     * @param socketIO
-     */
-    releaseQuestionOutcome(socketIO: Server, player: Player) {
-        const sessionId = player.sessionId;
-        const questionOutCome = {};
-        // WIP: summary question outcome here
-
-        // braodcast question outcome
-        socketIO
-            .to(sessionId.toString())
-            .emit("questionOutcome", questionOutCome);
-    }
-
-    async welcome(socketIO: Server, socket: Socket) {
+    async welcome(socket: Socket) {
         try {
             const player: Player = await this.verifySocket(socket);
             const sessionId = player.sessionId;
@@ -146,17 +130,12 @@ export class GameHandler {
             // add user to socket room
             socket.join(sessionId.toString());
             // add user to session
-            const alreadyJoined = await this.sessions[sessionId].hasParticipant(
-                userId
-            );
-            if (player.role !== "host" && !alreadyJoined) {
-                await this.sessions[sessionId].addParticipant(
-                    await this.getUserInfo(userId),
-                    socket
-                );
+            await this.sessions[sessionId].addParticipant(await this.getUserInfo(userId));
+            if (player.role !== "host") {
+                
                 // broadcast that user has joined
                 const msg = await this.getUserInfo(userId);
-                socketIO.to(sessionId.toString()).emit("playerJoin", msg);
+                socket.to(sessionId.toString()).emit("playerJoin", msg);
             }
 
             socket.emit(
@@ -197,7 +176,7 @@ export class GameHandler {
             const userId = player.sessionId;
 
             // remove this participants from session in memory
-            await this.sessions[sessionId].removeParticipant(userId, socket);
+            await this.sessions[sessionId].removeParticipant(player);
             // leave from socket room
             socket.leave(sessionId.toString());
 
@@ -333,7 +312,7 @@ export class GameHandler {
                                 this.sessions[sessionId]
                                     .hasFinalBoardReleased === false
                             ) {
-                                this.showBoard(socketIO, socket);
+                                this.showBoard(socket);
                                 this.sessions[
                                     sessionId
                                 ].hasFinalBoardReleased = true;
@@ -357,7 +336,7 @@ export class GameHandler {
         }
     }
 
-    async showBoard(socketIO: Server, socket: Socket) {
+    async showBoard(socket: Socket) {
         try {
             // NOTE: get quizId and userId from decrypted token
             // Record it somewhere (cache or socket.handshake)
@@ -371,7 +350,7 @@ export class GameHandler {
                 !this.sessions[sessionId].isCurrQuestionActive()
             ) {
                 //  broadcast Board to participants
-                this.sessions[sessionId].releaseBoard(socketIO, socket);
+                this.sessions[sessionId].releaseBoard(socket);
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {
