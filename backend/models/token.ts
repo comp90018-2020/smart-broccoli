@@ -13,6 +13,7 @@ const schema: Sequelize.ModelAttributes = {
     token: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
     },
     scope: {
         type: Sequelize.STRING,
