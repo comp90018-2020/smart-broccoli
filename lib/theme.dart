@@ -88,22 +88,29 @@ class LogoContainer extends Container {
           height: 250,
           color: SmartBroccoliColourScheme.logoContainerBackground,
           child: Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 30),
               child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                Image(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image(
                     width: 125,
                     height: 125,
-                    image: AssetImage('assets/icon.png')),
-                Text(
-                  'Smart Broccoli',
-                  style: TextStyle(
+                    image: AssetImage('assets/icon.png'),
+                  ),
+                  Text(
+                    'Smart Broccoli',
+                    style: TextStyle(
                       fontSize: 28,
                       color: Color(0xFF125E12),
                       letterSpacing: 1.2,
-                      fontFamily: 'BPreplay'),
-                )
-              ])),
+                      fontFamily: 'BPreplay',
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
         );
 }
 
