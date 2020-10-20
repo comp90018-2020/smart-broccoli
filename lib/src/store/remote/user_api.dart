@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
-import '../../data/user.dart';
-
+import 'package:smart_broccoli/src/data/user.dart';
 import 'api_base.dart';
 
 class UserApi {

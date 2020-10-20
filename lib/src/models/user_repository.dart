@@ -2,9 +2,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 
-import '../data/user.dart';
-import '../store/remote/group_api.dart';
-import '../store/remote/user_api.dart';
+import 'package:smart_broccoli/src/remote.dart';
+import 'package:smart_broccoli/src/data.dart';
 
 /// Cached provider of user profiles and profile pictures
 /// Delegates to the user API if the resource is not in the cache.

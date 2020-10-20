@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/models.dart';
 import 'package:smart_broccoli/theme.dart';
+
+import 'package:smart_broccoli/src/data.dart';
 
 /// Represents a quiz card
 class QuizCard extends StatefulWidget {

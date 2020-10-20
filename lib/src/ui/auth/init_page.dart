@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_broccoli/models.dart';
 
+import 'package:smart_broccoli/src/models.dart';
 import '../shared/page.dart';
 
 class InitialRouter extends StatefulWidget {

@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:smart_broccoli/cache.dart';
-import 'package:smart_broccoli/models.dart';
-import 'package:smart_broccoli/src/models/user_repository.dart';
-import 'package:smart_broccoli/src/store/remote/group_api.dart';
+
+import 'package:smart_broccoli/src/local.dart';
+import 'package:smart_broccoli/src/remote.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/data.dart';
 
 class MockGroupApi extends Mock implements GroupApi {}
 

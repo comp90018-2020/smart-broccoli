@@ -1,11 +1,11 @@
 import 'dart:collection';
 import 'dart:convert';
-
 import 'package:flutter/widgets.dart';
 
-import '../store/local/key_value.dart';
-import '../store/remote/group_api.dart';
-import '../data/group.dart';
+import 'package:smart_broccoli/src/local.dart';
+import 'package:smart_broccoli/src/remote.dart';
+import 'package:smart_broccoli/src/data.dart';
+
 import 'auth_state.dart';
 import 'user_repository.dart';
 
