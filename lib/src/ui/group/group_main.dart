@@ -79,10 +79,12 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                     break;
                   case UserAction.DELETE_GROUP:
                     try {
-                      await Provider.of<GroupRegistryModel>(context,
-                              listen: false)
-                          .deleteSelectedGroup();
-                      Navigator.of(context).pop();
+                      if (await _confirmDeleteGroup()) {
+                        await Provider.of<GroupRegistryModel>(context,
+                                listen: false)
+                            .deleteSelectedGroup();
+                        Navigator.of(context).pop();
+                      }
                     } catch (_) {
                       _showErrorDialogue("Cannot delete group");
                     }
@@ -110,6 +112,27 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
           MembersTab(),
         ],
       ),
+    );
+  }
+
+  Future<bool> _confirmDeleteGroup() {
+    return showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Confirm group deletion"),
+        content: Text("This cannot be undone"),
+        actions: [
+          TextButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text("OK"),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
     );
   }
 
