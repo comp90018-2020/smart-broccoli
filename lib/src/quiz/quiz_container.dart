@@ -9,7 +9,7 @@ class QuizContainer extends StatefulWidget {
       {Key key,
       this.header,
       this.padding = const EdgeInsets.only(top: 8, bottom: 8),
-      this.headerPadding = const EdgeInsets.fromLTRB(8, 16, 8, 16),
+      this.headerPadding = const EdgeInsets.fromLTRB(8, 12, 8, 16),
       this.hiddenButton = false})
       : super(key: key);
 
@@ -38,66 +38,63 @@ class _BuildQuiz extends State<QuizContainer> {
   // Builder function for a list of card tiles
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: widget.padding,
-          child: Column(
-            children: <Widget>[
-              // Header widgets
-              Padding(
-                padding: widget.headerPadding,
-                child: widget.header,
-              ),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: widget.padding,
+        child: Column(
+          children: <Widget>[
+            // Header widgets
+            Padding(
+              padding: widget.headerPadding,
+              child: widget.header,
+            ),
 
-              // The list of quiz
-              ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: 300),
-                child: Container(
-                  child: ListView.separated(
-                    // Enable Horizontal Scroll
-                    scrollDirection: Axis.horizontal,
-                    itemCount: widget.items.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        constraints:
-                            BoxConstraints(maxWidth: 200, minWidth: 180),
-                        margin: index == 0 || index == widget.items.length - 1
-                            ? EdgeInsets.only(
-                                left: index == 0 ? 20 : 0,
-                                right: index == 0 ? 0 : 20)
-                            : EdgeInsets.zero,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        child: QuizCard(
-                          'Quiz name',
-                          'Group name',
-                        ),
-                      );
-                    },
-                    // Space between the cards
-                    separatorBuilder: (context, index) {
-                      return Divider(indent: 1);
-                    },
-                  ),
+            // The list of quiz
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 300),
+              child: Container(
+                child: ListView.separated(
+                  // Enable Horizontal Scroll
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.items.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      constraints: BoxConstraints(maxWidth: 200, minWidth: 180),
+                      margin: index == 0 || index == widget.items.length - 1
+                          ? EdgeInsets.only(
+                              left: index == 0 ? 20 : 0,
+                              right: index == 0 ? 0 : 20)
+                          : EdgeInsets.zero,
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: QuizCard(
+                        'Quiz name',
+                        'Group name',
+                      ),
+                    );
+                  },
+                  // Space between the cards
+                  separatorBuilder: (context, index) {
+                    return Divider(indent: 1);
+                  },
                 ),
               ),
+            ),
 
-              // Leave some space for a hidden floating action button
-              widget.hiddenButton
-                  ? Visibility(
-                      maintainState: true,
-                      maintainAnimation: true,
-                      maintainSize: true,
-                      visible: false,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: FloatingActionButton(
-                            heroTag: null, onPressed: null),
-                      ),
-                    )
-                  : Container(),
-            ],
-          ),
+            // Leave some space for a hidden floating action button
+            widget.hiddenButton
+                ? Visibility(
+                    maintainState: true,
+                    maintainAnimation: true,
+                    maintainSize: true,
+                    visible: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child:
+                          FloatingActionButton(heroTag: null, onPressed: null),
+                    ),
+                  )
+                : Container(),
+          ],
         ),
       ),
     );
