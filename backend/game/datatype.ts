@@ -40,3 +40,11 @@ export class GameResult {
         readonly board: Player[]
     ) {}
 }
+
+export class Answer {
+    constructor(
+        readonly questionNo: number,
+        readonly MCSelection: number,
+        readonly TFSelection: boolean
+    ) {}
+}
