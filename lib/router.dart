@@ -1,20 +1,7 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
 
-import 'src/ui/about/about.dart';
-import 'src/ui/about/acknowledgements.dart';
-import 'src/ui/auth/auth_screen.dart';
-import 'src/ui/auth/init_page.dart';
-import 'src/ui/groups/group_create.dart';
-import 'src/ui/groups/group_list.dart';
-import 'src/ui/group/group_main.dart';
-import 'src/ui/session/leaderboard.dart';
-import 'src/ui/session/lobby.dart';
-import 'src/ui/session/question.dart';
-import 'src/ui/quiz/take_quiz.dart';
-import 'src/ui/quiz/manage_quiz.dart';
-import 'src/ui/quiz_creator/question_creator.dart';
-import 'src/ui/quiz_creator/quiz_creator.dart';
+import 'package:smart_broccoli/src/ui.dart';
 
 /// Defines routes and transitions
 class Routes {
