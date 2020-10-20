@@ -16,7 +16,10 @@ class MembersTab extends StatelessWidget {
                 padding: EdgeInsets.only(top: index == 0 ? 8 : 0),
                 child: ListTile(
                   // Avatar
-                  leading: UserAvatar(),
+                  leading: registry.selectedGroup.members[index].picture == null
+                      ? UserAvatar.placeholder()
+                      : UserAvatar(
+                          registry.selectedGroup.members[index].picture),
                   // Name
                   title: Text(registry.selectedGroup.members[index].name),
                   // Remove
