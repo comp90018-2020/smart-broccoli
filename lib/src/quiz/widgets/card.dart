@@ -36,82 +36,60 @@ class _QuizCardState extends State<QuizCard> {
         onTap: () {},
         child: LayoutBuilder(
           builder: (context, constraints) {
-            bool showPicture = constraints.maxHeight > 175;
+            // If the height of the picture is less than 0.4 of the viewport
+            // height, show it
+            bool showPicture = constraints.maxWidth / widget.aspectRatio <
+                MediaQuery.of(context).size.height * 0.4;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                // Quiz picture
-                showPicture
-                    ? AspectRatio(
-                        aspectRatio: widget.aspectRatio, child: Placeholder())
-                    : SizedBox(),
+                // Picture and title/group name
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Quiz picture
+                    showPicture
+                        ? AspectRatio(
+                            aspectRatio: widget.aspectRatio,
+                            child: Placeholder())
+                        : SizedBox(),
 
-                // Quiz title & Group name
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
-                    width: double.maxFinite,
-                    height: double.maxFinite,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget._quizName,
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        Text(widget._groupName, style: TextStyle(fontSize: 15)),
-                      ],
+                    // Quiz title & Group name
+                    Container(
+                      padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget._quizName,
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          Text(widget._groupName,
+                              style: TextStyle(fontSize: 15)),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
 
-                // Admin options
-                buildAdmin(),
+                // Space between
 
-                // Quiz status
-                Container(
-                    padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
-                    width: double.maxFinite,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Auto quiz icon
-                        // buildIndicator(
-                        //     Padding(
-                        //       padding:
-                        //           const EdgeInsets.symmetric(horizontal: 1.5),
-                        //       child: Icon(
-                        //         Icons.circle,
-                        //         size: 12,
-                        //         color: Colors.brown,
-                        //       ),
-                        //     ),
-                        //     Text('Smart Live', style: TextStyle(fontSize: 13))),
-                        // Live icon
-                        // buildIndicator(
-                        //     Padding(
-                        //       padding:
-                        //           const EdgeInsets.symmetric(horizontal: 1.5),
-                        //       child: Icon(
-                        //         Icons.circle,
-                        //         size: 12,
-                        //         color: Theme.of(context).backgroundColor,
-                        //       ),
-                        //     ),
-                        //     Text('Live', style: TextStyle(fontSize: 13))),
-                        // Self-paced
-                        buildIndicator(
-                          Icon(
-                            Icons.schedule,
-                            size: 15,
-                            color: Theme.of(context).backgroundColor,
-                          ),
-                          Text('Self-paced', style: TextStyle(fontSize: 13)),
-                        )
-                      ],
-                    )),
+                // Admin/quiz status
+                Column(
+                  children: [
+                    // Admin options
+                    buildAdmin(),
+
+                    // Quiz status
+                    Container(
+                        padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
+                        width: double.maxFinite,
+                        child: selfPacedIndicator())
+                  ],
+                ),
               ],
             );
           },
@@ -120,17 +98,50 @@ class _QuizCardState extends State<QuizCard> {
     );
   }
 
+  // Smart quiz indicator
+  Widget smartIndicator() => buildIndicator(
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 1.5),
+        child: Icon(
+          Icons.circle,
+          size: 12,
+          color: Colors.brown,
+        ),
+      ),
+      Text('Smart Live', style: TextStyle(fontSize: 13)));
+
+  // Live indicator
+  Widget liveIndicator() => buildIndicator(
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 1.5),
+        child: Icon(
+          Icons.circle,
+          size: 12,
+          color: Theme.of(context).backgroundColor,
+        ),
+      ),
+      Text('Live', style: TextStyle(fontSize: 13)));
+
+  // Self-paced
+  Widget selfPacedIndicator() => buildIndicator(
+        Icon(
+          Icons.schedule,
+          size: 15,
+          color: Theme.of(context).backgroundColor,
+        ),
+        Text('Self-paced', style: TextStyle(fontSize: 13)),
+      );
+
   /// Builds indicator widget
   /// |icon|text|
-  Widget buildIndicator(Widget icon, Widget text) {
-    return Row(
-      children: [
-        icon,
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0), child: text),
-      ],
-    );
-  }
+  static Widget buildIndicator(Widget icon, Widget text) => Row(
+        children: [
+          icon,
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: text),
+        ],
+      );
 
   /// Build admin options row
   Widget buildAdmin() {
@@ -144,8 +155,8 @@ class _QuizCardState extends State<QuizCard> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Activate
           quizType == QuizType.LIVE
+              // Activate live quiz
               ? Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 6),
@@ -158,6 +169,7 @@ class _QuizCardState extends State<QuizCard> {
                     ),
                   ),
                 )
+              // Toggle activeness of self-paced quiz
               : Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 6),
@@ -166,6 +178,8 @@ class _QuizCardState extends State<QuizCard> {
                         return Row(
                           children: [
                             Switch(
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
                               value: true,
                               onChanged: (bool value) {},
                             ),
@@ -186,9 +200,7 @@ class _QuizCardState extends State<QuizCard> {
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             onPressed: () {},
             elevation: 2.0,
-            child: Icon(
-              Icons.settings,
-            ),
+            child: Icon(Icons.settings, size: 20),
             shape: CircleBorder(),
           ),
         ],

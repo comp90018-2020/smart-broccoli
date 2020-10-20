@@ -22,13 +22,13 @@ class _ManageQuizState extends State<ManageQuiz> {
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        QuizContainer(items, header: quizSelector()),
+        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
 
         // Live quiz
-        QuizContainer(items, header: quizSelector()),
+        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
 
         /// Self-paced quiz
-        QuizContainer(items, header: quizSelector()),
+        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,
@@ -41,9 +41,9 @@ class _ManageQuizState extends State<ManageQuiz> {
   }
 
   /// Quiz selection dropdown
-  Widget quizSelector() {
+  Widget _groupSelector() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 8),
       constraints: BoxConstraints(maxWidth: 200),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

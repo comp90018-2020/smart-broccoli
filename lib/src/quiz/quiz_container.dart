@@ -8,7 +8,8 @@ class QuizContainer extends StatefulWidget {
   QuizContainer(this.items,
       {Key key,
       this.header,
-      this.padding = const EdgeInsets.only(top: 20, bottom: 8),
+      this.padding = const EdgeInsets.only(top: 8, bottom: 8),
+      this.headerPadding = const EdgeInsets.fromLTRB(8, 12, 8, 16),
       this.hiddenButton = false})
       : super(key: key);
 
@@ -17,6 +18,9 @@ class QuizContainer extends StatefulWidget {
 
   /// Header widget
   final Widget header;
+
+  /// Header padding
+  final EdgeInsetsGeometry headerPadding;
 
   /// Padding
   final EdgeInsetsGeometry padding;
@@ -40,7 +44,10 @@ class _BuildQuiz extends State<QuizContainer> {
         child: Column(
           children: <Widget>[
             // Header widgets
-            widget.header != null ? widget.header : Container(),
+            Padding(
+              padding: widget.headerPadding,
+              child: widget.header,
+            ),
 
             // The list of quiz
             ConstrainedBox(
@@ -58,7 +65,7 @@ class _BuildQuiz extends State<QuizContainer> {
                               left: index == 0 ? 20 : 0,
                               right: index == 0 ? 0 : 20)
                           : EdgeInsets.zero,
-                      width: MediaQuery.of(context).size.height * 0.4,
+                      width: MediaQuery.of(context).size.width * 0.4,
                       child: QuizCard(
                         'Quiz name',
                         'Group name',
