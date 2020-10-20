@@ -69,10 +69,12 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                 switch (action) {
                   case UserAction.LEAVE_GROUP:
                     try {
-                      await Provider.of<GroupRegistryModel>(context,
-                              listen: false)
-                          .leaveSelectedGroup();
-                      Navigator.of(context).pop();
+                      if (await _confirmLeaveGroup()) {
+                        await Provider.of<GroupRegistryModel>(context,
+                                listen: false)
+                            .leaveSelectedGroup();
+                        Navigator.of(context).pop();
+                      }
                     } catch (_) {
                       _showErrorDialogue("Cannot leave group");
                     }
@@ -112,6 +114,27 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
           MembersTab(),
         ],
       ),
+    );
+  }
+
+  Future<bool> _confirmLeaveGroup() {
+    return showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Confirm group departure"),
+        content: Text("You will no longer be a member of this group"),
+        actions: [
+          TextButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text("OK"),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
     );
   }
 
