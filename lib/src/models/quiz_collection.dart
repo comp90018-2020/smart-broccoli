@@ -1,11 +1,11 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 
-import 'package:flutter/material.dart';
-import 'package:smart_broccoli/cache.dart';
-import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/local.dart';
+import 'package:smart_broccoli/src/remote.dart';
 
-import '../store/remote/quiz_api.dart';
 import 'auth_state.dart';
 
 /// View model for quiz management

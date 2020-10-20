@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 
-import '../../lib/src/data/user.dart';
-import '../../lib/src/store/remote/api_base.dart';
-import '../../lib/src/store/remote/user_api.dart';
+import 'package:smart_broccoli/src/data/user.dart';
+import 'package:smart_broccoli/src/store/remote/api_base.dart';
+import 'package:smart_broccoli/src/store/remote/user_api.dart';
 
 class MockClient extends Mock implements http.Client {}
 

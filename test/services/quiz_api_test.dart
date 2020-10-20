@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
-import 'package:smart_broccoli/models.dart';
+
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/store/remote/api_base.dart';
 import 'package:smart_broccoli/src/store/remote/quiz_api.dart';
 
