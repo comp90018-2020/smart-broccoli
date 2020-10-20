@@ -1,7 +1,8 @@
-import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket, Server } from "socket.io";
+import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { rankPlayer, formatPlayerRecord } from "./formatter";
 import { $socketIO } from "./index";
+import { endSession } from "../controllers/session";
 
 export enum GameStatus {
     Pending,
@@ -44,14 +45,13 @@ export class GameSession {
     public host: Player = null;
     public playerMap: { [playerId: number]: Player } = {};
     public playerAnsOutcomes: { [key: string]: AnswerOutcome } = {};
-    private questionIdx = 0;
-    private preQuestionIdx = 0;
-    private quizStartsAt = 0;
-    private questionReleasedAt = 0;
+    public questionIndex = 0;
+    public preQuestionIndex = 0;
+    public quizStartsAt = 0;
+    private currentQuestionReleasedAt = 0;
     public readyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem(0);
-    public hasFinalBoardReleased: boolean = false;
-    public result: GameResult = null;
+    public hasFinalRankReleased: boolean = false;
 
     constructor($quiz: any, $sessionId: number) {
         this.sessionId = $sessionId;
@@ -107,17 +107,13 @@ export class GameSession {
         return participantsSet;
     }
 
-    public hasPlayerAnswered(playerId: number) {
-        return this.pointSys.answeredPlayer.has(playerId);
-    }
-
     /**
      * If a connection is lost and subsequently restored during a quiz,
      * send current question immediately (corresponding to the current question;
      * update time field).
      */
     currQuestion() {
-        if (this.questionIdx === this.preQuestionIdx) {
+        if (this.questionIndex === this.preQuestionIndex) {
             const {
                 no,
                 text,
@@ -125,14 +121,15 @@ export class GameSession {
                 options,
                 tf,
                 time,
-            } = this.quiz.questions[this.questionIdx];
+            } = this.quiz.questions[this.questionIndex];
             return {
                 id: no,
                 text: text,
                 tf: tf,
                 options: options,
                 pictureId: pictureId,
-                time: time * 1000 - (Date.now() - this.questionReleasedAt),
+                time:
+                    time * 1000 - (Date.now() - this.currentQuestionReleasedAt),
             };
         } else {
             const {
@@ -142,7 +139,7 @@ export class GameSession {
                 options,
                 tf,
                 time,
-            } = this.quiz.questions[this.preQuestionIdx];
+            } = this.quiz.questions[this.preQuestionIndex];
             return {
                 id: no,
                 text: text,
@@ -159,7 +156,7 @@ export class GameSession {
     }
 
     isCurrQuestionActive() {
-        return this.preQuestionIdx === this.questionIdx;
+        return this.preQuestionIndex === this.questionIndex;
     }
 
     getAnsOfQuestion(questionIndex: number): Answer {
@@ -179,42 +176,30 @@ export class GameSession {
         }
     }
 
-    getActiveQuesionIdx(): number {
-        return this.preQuestionIdx;
-    }
-
     getPreAnsOut(playerId: number) {
         return this.playerAnsOutcomes[playerId];
     }
 
-    canAnswer(playerId: number) {
-        return (
-            this.getActiveQuesionIdx() >
-            this.playerAnsOutcomes[playerId].questionNo
-        );
-    }
-
     nextQuestionIdx(): number {
-        if (this.questionIdx >= this.quiz.questions.length) {
+        if (this.questionIndex >= this.quiz.questions.length) {
             throw "no more question";
         } else if (!this.readyForNextQuestion) {
             throw "there is a running question";
         } else {
-            this.questionReleasedAt = Date.now();
+            this.currentQuestionReleasedAt = Date.now();
             setTimeout(() => {
-                if (this.questionIdx === this.preQuestionIdx) {
+                if (this.questionIndex === this.preQuestionIndex) {
                     this.moveToNextQuestion();
                 }
-            }, this.quiz.questions[this.questionIdx].time * 1000);
-            this.preQuestionIdx = this.questionIdx;
+            }, this.quiz.questions[this.questionIndex].time * 1000);
+            this.preQuestionIndex = this.questionIndex;
             this.readyForNextQuestion = false;
-            return this.questionIdx;
+            return this.questionIndex;
         }
     }
 
     assessAns(playerId: number, answer: Answer) {
-        const activeQuesionIdx = this.getActiveQuesionIdx();
-        const correctAns = this.getAnsOfQuestion(activeQuesionIdx);
+        const correctAns = this.getAnsOfQuestion(this.preQuestionIndex);
         const preAnsOut = this.getPreAnsOut(playerId);
         const answerOutcome: AnswerOutcome = this.checkAns(
             answer,
@@ -263,17 +248,8 @@ export class GameSession {
         }
     }
 
-    trySettingForNewQuesiton(): boolean {
-        if (this.pointSys.hasAllPlayersAnswered()) {
-            this.moveToNextQuestion();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private moveToNextQuestion() {
-        this.questionIdx = this.preQuestionIdx + 1;
+    moveToNextQuestion() {
+        this.questionIndex = this.preQuestionIndex + 1;
         this.pointSys.setForNewQuestion();
         this.readyForNextQuestion = true;
     }
@@ -316,7 +292,7 @@ export class GameSession {
                     ? null
                     : rank[record.newPos - 1];
             const quesitonOutcome = {
-                question: this.preQuestionIdx,
+                question: this.preQuestionIndex,
                 leaderBoard: rank.slice(0, 5),
                 record: this.playerMap[Number(id)].record,
                 playerAhead: playerAheadRecord,
@@ -324,7 +300,7 @@ export class GameSession {
             $socketIO.to(socketId).emit("questionOutcome", quesitonOutcome);
         }
         hostSocket.emit("questionOutcome", {
-            question: this.preQuestionIdx,
+            question: this.preQuestionIndex,
             leaderboard: rank,
         });
     }
@@ -337,23 +313,19 @@ export class GameSession {
         this.quizStartsAt = timestamp;
     }
 
-    getQuizStartsAt() {
-        return this.quizStartsAt;
-    }
-
     close(socketIO: Server, socket: Socket) {
         for (const socketId of Object.keys(
             socketIO.sockets.adapter.rooms[this.sessionId].sockets
         )) {
             socketIO.sockets.connected[socketId].disconnect();
         }
-        this.result = new GameResult(
+        const result = new GameResult(
             this.sessionId,
-            (this.questionIdx === 0 && this.readyForNextQuestion
+            (this.questionIndex === 0 && this.readyForNextQuestion
                 ? -1
                 : this.readyForNextQuestion
-                ? this.preQuestionIdx
-                : this.preQuestionIdx - 1) + 1,
+                ? this.preQuestionIndex
+                : this.preQuestionIndex - 1) + 1,
             this.quiz.questions.length,
             rankPlayer(this.playerMap)
         );
