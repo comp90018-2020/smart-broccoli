@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/theme.dart';
 
-import '../shared/page.dart';
-import '../quiz/widgets/card.dart';
+import 'package:smart_broccoli/src/ui/shared/page.dart';
+import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 import 'question.dart';
 
 /// Widget for Lobby

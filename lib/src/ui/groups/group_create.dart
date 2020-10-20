@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import '../shared/page.dart';
+import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Create group page
 class GroupCreate extends StatefulWidget {

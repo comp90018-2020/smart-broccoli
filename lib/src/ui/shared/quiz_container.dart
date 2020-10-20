@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'widgets/card.dart';
+import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 
 /// Build a list of quizzes
 class QuizContainer extends StatefulWidget {

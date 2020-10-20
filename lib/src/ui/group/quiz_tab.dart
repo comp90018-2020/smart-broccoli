@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../quiz/quiz_container.dart';
-import '../shared/tabbed_page.dart';
+
+import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
+import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 
 class QuizTab extends StatefulWidget {
   @override

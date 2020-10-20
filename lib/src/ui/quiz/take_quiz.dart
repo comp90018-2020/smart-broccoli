@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../shared/tabbed_page.dart';
-import 'quiz_container.dart';
+import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
+import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'quiz_pin_box.dart';
 
 /// Take quiz page

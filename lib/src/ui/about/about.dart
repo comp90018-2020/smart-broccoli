@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart' show launch;
 import 'package:package_info/package_info.dart' show PackageInfo;
 
-import '../shared/page.dart';
+import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Settings page.
 class AboutPage extends StatelessWidget {

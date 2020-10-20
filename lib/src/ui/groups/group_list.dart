@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import '../shared/tabbed_page.dart';
+import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
 /// Group list page
 class GroupList extends StatefulWidget {
