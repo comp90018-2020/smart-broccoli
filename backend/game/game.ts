@@ -1,17 +1,15 @@
+import { Socket } from "socket.io";
 import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { Player, GameSession, GameStatus } from "./session";
 import { Answer } from "./points";
 import { formatQuestion, formatWelcome, formatPlayer } from "./formatter";
-
-import { Server, Socket } from "socket.io";
 import { $socketIO } from "./index";
 
 const WAITING = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
 
 export class GameHandler {
-    // shaerd obj saves live quiz sess
     sessions: {
         [key: number]: GameSession;
     };
@@ -38,7 +36,7 @@ export class GameHandler {
 
     addSession(quiz: any, sessionId: number) {
         this.sessions[sessionId] = new GameSession(quiz, sessionId);
-        return this.sessions[sessionId].result;
+        return true;
     }
 
     /**
@@ -70,40 +68,34 @@ export class GameHandler {
     async answer(socket: Socket, content: any) {
         try {
             const player: Player = await this.verifySocket(socket);
-            const sessionId = player.sessionId;
-            const userId = player.id;
-            const questionId = content.questionId;
-
-            // check if already answered
+            const session = this.sessions[player.sessionId];
             if (
-                true
-                // this.sessions[sessionId].isCurrQuestionActive() &&
-                // !this.sessions[sessionId].hasPlayerAnswered(userId)
+                // current question is ready
+                session.preQuestionIndex === session.questionIndex &&
+                // this player has not answered
+                !session.pointSys.answeredPlayer.has(player.id)
             ) {
-                try {
-                    // if not answer yet, i.e. this is the first time to answer
-                    // assess answer
-                    const answer: Answer = new Answer(
-                        content.question,
-                        content.MCSelection,
-                        content.TFSelection
-                    );
-                    this.sessions[sessionId].assessAns(userId, answer);
+                // assess answer
+                const answer: Answer = new Answer(
+                    content.question,
+                    content.MCSelection,
+                    content.TFSelection
+                );
+                session.assessAns(player.id, answer);
 
-                    // braodcast that one more participants answered this question
-                    socket.to(sessionId.toString()).emit("questionAnswered", {
-                        question: questionId,
-                        count: this.sessions[sessionId].pointSys.answeredPlayer
-                            .size,
-                        total: this.sessions[sessionId].countParticipants(),
+                // braodcast that question has been answered
+                socket
+                    .to(player.sessionId.toString())
+                    .emit("questionAnswered", {
+                        question: answer.questionNo,
+                        count: session.pointSys.answeredPlayer.size,
+                        total: this.sessions[
+                            player.sessionId
+                        ].countParticipants(),
                     });
-                    this.sessions[sessionId].trySettingForNewQuesiton();
-                } catch (err) {
-                    if (process.env.NODE_EVN === "debug") {
-                        socket.send(
-                            JSON.stringify(err, Object.getOwnPropertyNames(err))
-                        );
-                    }
+
+                if (session.pointSys.hasAllPlayersAnswered()) {
+                    session.moveToNextQuestion();
                 }
             }
         } catch (error) {
@@ -120,47 +112,34 @@ export class GameHandler {
     async welcome(socket: Socket) {
         try {
             const player: Player = await this.verifySocket(socket);
-            const sessionId = player.sessionId;
-            const userId = player.id;
-            if (this.sessions[sessionId] === undefined) {
+            const session = this.sessions[player.sessionId];
+            if (session === undefined) {
                 socket.disconnect();
                 return;
             }
 
             // add user to socket room
-            socket.join(sessionId.toString());
+            socket.join(player.sessionId.toString());
             // add user to session
-            await this.sessions[sessionId].addParticipant(
-                await this.getUserInfo(userId)
-            );
+            await session.addParticipant(await this.getUserInfo(player.id));
             if (
                 player.role !== "host" &&
-                !this.sessions[sessionId].playerMap.hasOwnProperty(player.id)
+                !session.playerMap.hasOwnProperty(player.id)
             ) {
                 // broadcast that user has joined
-                const msg = await this.getUserInfo(userId);
-                socket.to(sessionId.toString()).emit("playerJoin", msg);
+                const msg = await this.getUserInfo(player.id);
+                socket.to(player.sessionId.toString()).emit("playerJoin", msg);
             }
 
-            socket.emit(
-                "welcome",
-                formatWelcome(this.sessions[sessionId].allParticipants())
-            );
+            socket.emit("welcome", formatWelcome(session.allParticipants()));
 
-            if (this.sessions[sessionId].status === GameStatus.Starting) {
+            if (session.status === GameStatus.Starting) {
                 socket.emit(
                     "starting",
-                    (
-                        this.sessions[sessionId].getQuizStartsAt() - Date.now()
-                    ).toString()
+                    (session.quizStartsAt - Date.now()).toString()
                 );
-            }
-
-            if (this.sessions[sessionId].status === GameStatus.Running) {
-                socket.emit(
-                    "nextQuestion",
-                    this.sessions[sessionId].currQuestion()
-                );
+            } else if (session.status === GameStatus.Running) {
+                socket.emit("nextQuestion", session.currQuestion());
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {
@@ -173,25 +152,24 @@ export class GameHandler {
         }
     }
 
-    async quit(socketIO: Server, socket: Socket) {
+    async quit(socket: Socket) {
         try {
             const player: Player = await this.verifySocket(socket);
-            const sessionId = player.sessionId;
-            const userId = player.sessionId;
+            const session = this.sessions[player.sessionId];
 
             // remove this participants from session in memory
-            await this.sessions[sessionId].removeParticipant(player);
+            await session.removeParticipant(player);
             // leave from socket room
-            socket.leave(sessionId.toString());
+            socket.leave(player.sessionId.toString());
 
             // WIP: Remove this participants from this quiz in DB records here
 
             // broadcast that user has left
-            socketIO
-                .to(sessionId.toString())
+            $socketIO
+                .to(player.sessionId.toString())
                 .emit(
                     "playerLeave",
-                    formatPlayer(await this.getUserInfo(userId))
+                    formatPlayer(await this.getUserInfo(player.id))
                 );
             // disconnect
             socket.disconnect();
@@ -206,33 +184,32 @@ export class GameHandler {
         }
     }
 
-    async start(socketIO: Server, socket: Socket) {
+    async start(socket: Socket) {
         try {
             const player: Player = await this.verifySocket(socket);
-            const sessionId = player.sessionId;
+            const session = this.sessions[player.sessionId];
+
             if (player.role === "host") {
-                this.sessions[sessionId].setQuizStatus(GameStatus.Starting);
-                this.sessions[sessionId].setQuizStartsAt(Date.now() + WAITING);
+                session.setQuizStatus(GameStatus.Starting);
+                session.setQuizStartsAt(Date.now() + WAITING);
                 // Broadcast that quiz will be started
-                socketIO
-                    .to(sessionId.toString())
+                $socketIO
+                    .to(player.sessionId.toString())
                     .emit(
                         "starting",
-                        (
-                            this.sessions[sessionId].getQuizStartsAt() -
-                            Date.now()
-                        ).toString()
+                        (session.quizStartsAt - Date.now()).toString()
                     );
                 // pass-correct-this-context-to-settimeout-callback
                 // https://stackoverflow.com/questions/2130241
                 setTimeout(
                     () => {
-                        this.sessions[sessionId].status = GameStatus.Running;
+                        session.status = GameStatus.Running;
                         // release the firt question
-                        this.next(socketIO, socket);
+                        this.next(socket);
                     },
-                    // this.sessions[sessionId].getQuizStartsAt() - Date.now(),
-                    1,
+                    process.env.NODE_ENV === "debug"
+                        ? 1
+                        : session.quizStartsAt - Date.now(),
                     socket
                 );
             }
@@ -247,14 +224,17 @@ export class GameHandler {
         }
     }
 
-    async abort(socketIO: Server, socket: Socket) {
+    async abort(socket: Socket) {
         try {
             const player: Player = await this.verifySocket(socket);
-            const sessionId = player.sessionId;
+            const session = this.sessions[player.sessionId];
+
             if (player.role === "host") {
                 // Broadcast that quiz has been aborted
-                socketIO.to(sessionId.toString()).emit("cancelled", null);
-                this.sessions[sessionId].close(socketIO, socket);
+                $socketIO
+                    .to(player.sessionId.toString())
+                    .emit("cancelled", null);
+                session.close($socketIO, socket);
                 this.checkEnv();
             }
         } catch (error) {
@@ -268,60 +248,46 @@ export class GameHandler {
         }
     }
 
-    async next(socketIO: Server, socket: Socket) {
+    async next(socket: Socket) {
         try {
             const player: Player = await this.verifySocket(socket);
-            const sessionId = player.sessionId;
+            const session = this.sessions[player.sessionId];
+
             if (player.role === "host") {
                 //  broadcast next question to participants
-                if (this.sessions[sessionId].status === GameStatus.Pending) {
-                    this.start(socketIO, socket);
-                } else if (
-                    this.sessions[sessionId].status === GameStatus.Starting
-                ) {
+                if (session.status === GameStatus.Pending) {
+                    this.start(socket);
+                } else if (session.status === GameStatus.Starting) {
                     // nothing to do
-                } else if (
-                    this.sessions[sessionId].status === GameStatus.Running
-                ) {
+                } else if (session.status === GameStatus.Running) {
                     try {
                         const questionIndex = this.sessions[
-                            sessionId
+                            player.sessionId
                         ].nextQuestionIdx();
                         // send question without answer to participants
                         socket
-                            .to(sessionId.toString())
+                            .to(player.sessionId.toString())
                             .emit(
                                 "nextQuestion",
-                                formatQuestion(
-                                    questionIndex,
-                                    this.sessions[sessionId],
-                                    false
-                                )
+                                formatQuestion(questionIndex, session, false)
                             );
 
                         // send question with answer to the host
-                        socketIO
+                        $socketIO
                             .to(socket.id)
                             .emit(
                                 "nextQuestion",
-                                formatQuestion(
-                                    questionIndex,
-                                    this.sessions[sessionId],
-                                    true
-                                )
+                                formatQuestion(questionIndex, session, true)
                             );
                     } catch (err) {
                         if (err === "no more question") {
-                            if (
-                                this.sessions[sessionId]
-                                    .hasFinalBoardReleased === false
-                            ) {
+                            if (session.hasFinalRankReleased === false) {
                                 this.showBoard(socket);
                                 this.sessions[
-                                    sessionId
-                                ].hasFinalBoardReleased = true;
+                                    player.sessionId
+                                ].hasFinalRankReleased = true;
                             } else {
-                                this.abort(socketIO, socket);
+                                this.abort(socket);
                             }
                         } else if (err === "there is a running question") {
                         } else {
@@ -342,19 +308,12 @@ export class GameHandler {
 
     async showBoard(socket: Socket) {
         try {
-            // NOTE: get quizId and userId from decrypted token
-            // Record it somewhere (cache or socket.handshake)
-            // * token will expire in 1 hour
-
             const player: Player = await this.verifySocket(socket);
-            const sessionId = player.sessionId;
+            const session = this.sessions[player.sessionId];
 
-            if (
-                player.role === "host" &&
-                !this.sessions[sessionId].isCurrQuestionActive()
-            ) {
+            if (player.role === "host" && !session.isCurrQuestionActive()) {
                 //  broadcast Board to participants
-                this.sessions[sessionId].releaseBoard(socket);
+                session.releaseBoard(socket);
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {

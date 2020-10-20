@@ -1,9 +1,9 @@
 import { Server } from "socket.io";
 import { GameHandler } from "./game";
-import { Player } from "./session";
 
 export let $socketIO: Server = null;
 export const handler: GameHandler = new GameHandler();
+
 export default (socketIO: Server) => {
     $socketIO = socketIO;
     socketIO.use(async (socket, next) => {
@@ -19,22 +19,22 @@ export default (socketIO: Server) => {
 
             // quit
             socket.on("quit", () => {
-                handler.quit(socketIO, socket);
+                handler.quit(socket);
             });
 
             // start
             socket.on("start", () => {
-                handler.start(socketIO, socket);
+                handler.start(socket);
             });
 
             // abort
             socket.on("abort", () => {
-                handler.abort(socketIO, socket);
+                handler.abort(socket);
             });
 
             // next question
             socket.on("next", () => {
-                handler.next(socketIO, socket);
+                handler.next(socket);
             });
 
             // showBoard
@@ -42,10 +42,12 @@ export default (socketIO: Server) => {
                 handler.showBoard(socket);
             });
 
-            // reset for debug
-            socket.on("resetForDebug", () => {
-                handler.checkEnv();
-            });
+            if (process.env.NODE_ENV === "debug") {
+                // reset for debug
+                socket.on("resetForDebug", () => {
+                    handler.checkEnv();
+                });
+            }
         } catch (err) {
             if (process.env.NODE_EVN === "debug") {
                 // https://stackoverflow.com/questions/18391212
