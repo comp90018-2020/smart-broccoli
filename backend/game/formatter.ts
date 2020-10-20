@@ -1,5 +1,12 @@
-import { GameSession, Player } from "./session";
+import { GameSession } from "./session";
+import { Player } from "./datatype";
 
+/**
+ * format question for event-> nextQuestion
+ * @param questionIndex quesiont index
+ * @param session session
+ * @param isHost is host or not
+ */
 export const formatQuestion = (
     questionIndex: number,
     session: GameSession,
@@ -11,22 +18,28 @@ export const formatQuestion = (
     if (!isHost) {
         quesionCopy.tf = null;
         if (quesionCopy.options !== null) {
-            for (const [index, option] of Object.entries(quesionCopy.options)) {
-                quesionCopy.options[index].correct = null;
+            for (const index of Object.keys(quesionCopy.options)) {
+                quesionCopy.options[Number(index)].correct = null;
             }
         }
     }
-
     return {
-        id: questionIndex,
+        no: questionIndex,
         text: quesionCopy.text,
         tf: quesionCopy.tf,
         options: quesionCopy.options,
         pictureId: quesionCopy.pictureId,
-        time: 20,
+        time:
+            process.env.NODE_EVN === "debug"
+                ? 20000
+                : session.quiz.timeLimit * 1000,
     };
 };
 
+/**
+ *  format the complete welcome message of event-> welcome
+ * @param playerSet player set
+ */
 export const formatWelcome = (playerSet: Set<Player>) => {
     const welcomeMessage: any[] = [];
     for (const [_, player] of Object.entries(Array.from(playerSet))) {
@@ -40,6 +53,10 @@ export const formatWelcome = (playerSet: Set<Player>) => {
     return welcomeMessage;
 };
 
+/**
+ * rank player from map
+ * @param playerMap player map
+ */
 export const rankPlayer = (playerMap: { [key: string]: Player }) => {
     const playersArray: Player[] = [];
     for (const [playerId, player] of Object.entries(playerMap)) {
@@ -50,8 +67,12 @@ export const rankPlayer = (playerMap: { [key: string]: Player }) => {
     return playersArray;
 };
 
+/**
+ * format one player for event-> welcome
+ * @param player a player
+ */
 export const formatPlayer = (player: Player) => {
-    const { id, name, pictureId, socketId, record } = player;
+    const { id, name, pictureId } = player;
     return {
         id: id,
         name: name,
@@ -59,6 +80,10 @@ export const formatPlayer = (player: Player) => {
     };
 };
 
+/**
+ * format a player record for event-> questionOutcome
+ * @param player a player
+ */
 export const formatPlayerRecord = (player: Player) => {
     const { id, name, pictureId, record } = player;
     return {

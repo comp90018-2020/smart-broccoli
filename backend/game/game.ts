@@ -1,12 +1,13 @@
 import { Socket } from "socket.io";
 import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
-import { Player, GameSession, GameStatus } from "./session";
+import { GameSession } from "./session";
 import { Answer } from "./points";
 import { formatQuestion, formatWelcome, formatPlayer } from "./formatter";
 import { $socketIO } from "./index";
+import { GameErr, GameStatus, Player } from "./datatype";
 
-const WAITING = 10 * 1000;
+const WAIT_TIME_BEFORE_START = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
 
 export class GameHandler {
@@ -55,7 +56,7 @@ export class GameHandler {
         } else {
             const plain = await decrypt(socket.handshake.query.token);
             const player = await this.getUserInfo(Number(plain.userId));
-            const { userId, scope, role, sessionId } = await decrypt(
+            const { role, sessionId } = await decrypt(
                 socket.handshake.query.token
             );
             player.socketId = socket.id;
@@ -70,17 +71,21 @@ export class GameHandler {
             const player: Player = await this.verifySocket(socket);
             const session = this.sessions[player.sessionId];
             if (
-                // current question is ready
-                session.preQuestionIndex === session.questionIndex &&
                 // this player has not answered
-                !session.pointSys.answeredPlayer.has(player.id)
+                !session.pointSys.answeredPlayer.has(player.id) &&
+                // the question is conducting
+                !session.isReadyForNextQuestion
             ) {
-                // assess answer
                 const answer: Answer = new Answer(
                     content.question,
                     content.MCSelection,
                     content.TFSelection
                 );
+                if (answer.questionNo != session.preQuestionIndex) {
+                    // quetion number is not right
+                    return;
+                }
+                // assess answer
                 session.assessAns(player.id, answer);
 
                 // braodcast that question has been answered
@@ -89,12 +94,14 @@ export class GameHandler {
                     .emit("questionAnswered", {
                         question: answer.questionNo,
                         count: session.pointSys.answeredPlayer.size,
-                        total: this.sessions[
-                            player.sessionId
-                        ].countParticipants(),
+                        total: session.countParticipants(),
                     });
 
-                if (session.pointSys.hasAllPlayersAnswered()) {
+                if (
+                    session.pointSys.answeredPlayer.size >=
+                    Object.keys(session.playerMap).length
+                ) {
+                    // set session state
                     session.moveToNextQuestion();
                 }
             }
@@ -113,10 +120,6 @@ export class GameHandler {
         try {
             const player: Player = await this.verifySocket(socket);
             const session = this.sessions[player.sessionId];
-            if (session === undefined) {
-                socket.disconnect();
-                return;
-            }
 
             // add user to socket room
             socket.join(player.sessionId.toString());
@@ -136,10 +139,12 @@ export class GameHandler {
             if (session.status === GameStatus.Starting) {
                 socket.emit(
                     "starting",
+                    // make it more precise
                     (session.quizStartsAt - Date.now()).toString()
                 );
             } else if (session.status === GameStatus.Running) {
-                socket.emit("nextQuestion", session.currQuestion());
+                // there is question released
+                socket.emit("nextQuestion", session.getCurrentQuestion());
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {
@@ -190,8 +195,8 @@ export class GameHandler {
             const session = this.sessions[player.sessionId];
 
             if (player.role === "host") {
-                session.setQuizStatus(GameStatus.Starting);
-                session.setQuizStartsAt(Date.now() + WAITING);
+                session.status = GameStatus.Starting;
+                session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
                 // Broadcast that quiz will be started
                 $socketIO
                     .to(player.sessionId.toString())
@@ -204,6 +209,7 @@ export class GameHandler {
                 setTimeout(
                     () => {
                         session.status = GameStatus.Running;
+                        session.isReadyForNextQuestion = true;
                         // release the firt question
                         this.next(socket);
                     },
@@ -235,6 +241,8 @@ export class GameHandler {
                     .to(player.sessionId.toString())
                     .emit("cancelled", null);
                 session.close($socketIO, socket);
+
+                // reset a sample session under debug mode
                 this.checkEnv();
             }
         } catch (error) {
@@ -258,12 +266,10 @@ export class GameHandler {
                 if (session.status === GameStatus.Pending) {
                     this.start(socket);
                 } else if (session.status === GameStatus.Starting) {
-                    // nothing to do
+                    // nothing to do, ignore this event
                 } else if (session.status === GameStatus.Running) {
                     try {
-                        const questionIndex = this.sessions[
-                            player.sessionId
-                        ].nextQuestionIdx();
+                        const questionIndex = session.nextQuestionIdx();
                         // send question without answer to participants
                         socket
                             .to(player.sessionId.toString())
@@ -280,17 +286,17 @@ export class GameHandler {
                                 formatQuestion(questionIndex, session, true)
                             );
                     } catch (err) {
-                        if (err === "no more question") {
+                        if (err === GameErr.NoMoreQuestion) {
                             if (session.hasFinalRankReleased === false) {
                                 this.showBoard(socket);
-                                this.sessions[
-                                    player.sessionId
-                                ].hasFinalRankReleased = true;
+                                session.hasFinalRankReleased = true;
                             } else {
                                 this.abort(socket);
                             }
-                        } else if (err === "there is a running question") {
+                        } else if (err === GameErr.ThereIsRunningQuestion) {
+                            console.log(err);
                         } else {
+                            console.log(err);
                         }
                     }
                 }
