@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 
-import 'package:smart_broccoli/src/remote.dart';
-import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/store/remote/api_base.dart';
+import 'package:smart_broccoli/src/store/remote/session_api.dart';
+import 'package:smart_broccoli/src/data/game.dart';
+import 'package:smart_broccoli/src/data/quiz.dart';
 
 class MockClient extends Mock implements http.Client {}
 
