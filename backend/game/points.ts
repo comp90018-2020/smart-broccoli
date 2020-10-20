@@ -1,4 +1,4 @@
-import { Player} from "./datatype";
+import { Player } from "./datatype";
 
 export class PointSystem {
     // base points for each question before apply streak factor etc
