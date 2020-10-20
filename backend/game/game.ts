@@ -102,7 +102,7 @@ export class GameHandler {
                     Object.keys(session.playerMap).length
                 ) {
                     // set session state
-                    session.moveToNextQuestion();
+                    session.setToNextQuestion();
                 }
             }
         } catch (error) {
