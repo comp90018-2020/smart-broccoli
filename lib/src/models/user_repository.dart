@@ -81,7 +81,7 @@ class UserRepository {
         '${(await getTemporaryDirectory()).toString()}/picture/$pictureId';
     try {
       // see if the image is already stored locally
-      return File(assetDir).readAsBytes();
+      return await File(assetDir).readAsBytes();
     } catch (_) {
       return null;
     }
