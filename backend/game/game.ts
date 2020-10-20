@@ -2,10 +2,9 @@ import { Socket } from "socket.io";
 import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { GameSession } from "./session";
-import { Answer } from "./points";
 import { formatQuestion, formatWelcome, formatPlayer } from "./formatter";
 import { $socketIO } from "./index";
-import { GameErr, GameStatus, Player } from "./datatype";
+import { GameErr, GameStatus, Player, Answer } from "./datatype";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const userCache: { [key: number]: Player } = {};

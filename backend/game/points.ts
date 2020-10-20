@@ -1,21 +1,4 @@
-import { Player } from "./datatype";
-
-export class AnswerOutcome {
-    constructor(
-        readonly correct: boolean,
-        readonly rank: number,
-        readonly streak: number,
-        readonly questionNo: number
-    ) {}
-}
-
-export class Answer {
-    constructor(
-        readonly questionNo: number,
-        readonly MCSelection: number,
-        readonly TFSelection: boolean
-    ) {}
-}
+import { Player, Answer } from "./datatype";
 
 export class PointSystem {
     private readonly pointsEachQuestion = 1000;
