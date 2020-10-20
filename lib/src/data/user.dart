@@ -1,6 +1,5 @@
 import 'dart:typed_data';
-
-import 'package:smart_broccoli/models.dart';
+import 'group.dart';
 
 enum UserType { REGISTERED, UNREGISTERED }
 

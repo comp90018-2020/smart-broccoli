@@ -1,5 +1,3 @@
-import 'package:smart_broccoli/models.dart';
-
 import 'user.dart';
 
 enum GroupRole { OWNER, MEMBER }
