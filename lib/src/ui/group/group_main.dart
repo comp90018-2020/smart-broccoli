@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
 
 import 'package:smart_broccoli/src/models.dart';
 
@@ -48,42 +49,48 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
 
         // More actions
         actions: [
-          PopupMenuButton(
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem(
-                child: Text('Leave group'),
-                value: UserAction.LEAVE_GROUP,
-              ),
-              PopupMenuItem(
-                child: Text('Delete group'),
-                value: UserAction.DELETE_GROUP,
-              ),
-            ],
-            onSelected: (UserAction action) async {
-              switch (action) {
-                case UserAction.LEAVE_GROUP:
-                  try {
-                    await Provider.of<GroupRegistryModel>(context,
-                            listen: false)
-                        .leaveSelectedGroup();
-                    Navigator.of(context).pop();
-                  } catch (_) {
-                    _showErrorDialogue("Cannot leave group");
-                  }
-                  break;
-                case UserAction.DELETE_GROUP:
-                  try {
-                    await Provider.of<GroupRegistryModel>(context,
-                            listen: false)
-                        .deleteSelectedGroup();
-                    Navigator.of(context).pop();
-                  } catch (_) {
-                    _showErrorDialogue("Cannot delete group");
-                  }
-                  break;
-                default:
-              }
-            },
+          Consumer<GroupRegistryModel>(
+            builder: (context, registry, child) => PopupMenuButton(
+              itemBuilder: (BuildContext context) =>
+                  registry.selectedGroup.role == GroupRole.MEMBER
+                      ? [
+                          PopupMenuItem(
+                            child: Text('Leave group'),
+                            value: UserAction.LEAVE_GROUP,
+                          )
+                        ]
+                      : [
+                          PopupMenuItem(
+                            child: Text('Delete group'),
+                            value: UserAction.DELETE_GROUP,
+                          )
+                        ],
+              onSelected: (UserAction action) async {
+                switch (action) {
+                  case UserAction.LEAVE_GROUP:
+                    try {
+                      await Provider.of<GroupRegistryModel>(context,
+                              listen: false)
+                          .leaveSelectedGroup();
+                      Navigator.of(context).pop();
+                    } catch (_) {
+                      _showErrorDialogue("Cannot leave group");
+                    }
+                    break;
+                  case UserAction.DELETE_GROUP:
+                    try {
+                      await Provider.of<GroupRegistryModel>(context,
+                              listen: false)
+                          .deleteSelectedGroup();
+                      Navigator.of(context).pop();
+                    } catch (_) {
+                      _showErrorDialogue("Cannot delete group");
+                    }
+                    break;
+                  default:
+                }
+              },
+            ),
           ),
         ],
 
