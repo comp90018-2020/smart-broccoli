@@ -1,7 +1,8 @@
 import { TokenInfo } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket, Server } from "socket.io";
-import { rankPlayer } from "./formatter";
+import { rankPlayer, formatPlayerRecord } from "./formatter";
+import{$socketIO} from "./index"
 
 export enum QuizStatus {
     Pending = 0,
@@ -41,6 +42,7 @@ export class GameSession {
     private sessionId: number;
     public quiz: any;
     public status: QuizStatus = QuizStatus.Pending;
+    private host:Player = null;
     private playerMap: { [playerId: number]: Player } = {};
     public playerAnsOutcomes: { [key: string]: AnswerOutcome } = {};
     private questionIdx = 0;
@@ -57,8 +59,16 @@ export class GameSession {
         this.quiz = $quiz;
     }
 
-    async addParticipant(player: Player, socket: Socket) {
-        if (!this.playerMap.hasOwnProperty(player.id)) {
+    async addParticipant(player: Player) {
+        if(player.role === "host"){
+            if (this.host != null){
+                $socketIO.sockets.connected[this.host.socketId].disconnect();
+            }
+            this.host = player;
+        }else{
+            if (this.playerMap.hasOwnProperty(player.id)) {
+                this.removeParticipant(player);
+            }
             ++this.pointSys.participantCount;
             this.playerMap[player.id] = player;
             if (!this.playerAnsOutcomes.hasOwnProperty(player.id)) {
@@ -70,10 +80,12 @@ export class GameSession {
                 );
             }
         }
+       
     }
 
-    async removeParticipant(playerId: number, socket: Socket) {
-        delete this.playerMap[playerId];
+    async removeParticipant(player:Player) {
+        $socketIO.sockets.connected[player.socketId].disconnect();
+        delete this.playerMap[player.id];
         --this.pointSys.participantCount;
     }
 
@@ -207,7 +219,6 @@ export class GameSession {
             correctAns,
             preAnsOut
         );
-        console.log(ansOutcome);
         // record in session that player has answered
         this.playerAnsOutcomes[playerId] = ansOutcome;
         this.pointSys.answeredPlayer.add(playerId);
@@ -278,30 +289,43 @@ export class GameSession {
         this.playerMap[playerId].record.points =
             points + this.playerMap[playerId].record.points;
         this.playerMap[playerId].record.streak = ansOutCome.streak;
-        console.log(this.playerMap);
     }
-    releaseBoard(socketIO: Server, hostSocket: Socket) {
+
+    releaseBoard(hostSocket: Socket) {
         const playersArray = rankPlayer(this.playerMap);
+        let i = 0;
+        playersArray.forEach(({id,record})=>{
+            this.playerMap[id].record.oldPos = record.newPos;
+            this.playerMap[id].record.newPos = i;
+            ++i
+        });
+        
+        const rank =[];
+        for(let i = 0; i < playersArray.length; ++i){
+            rank.push(formatPlayerRecord(playersArray[i])); 
+        }
+
         // socketIO.sockets.adapter.rooms[this.sessionId].sockets)
-        for (const [playerId, player] of Object.entries(this.playerMap)) {
-            const playerRecord = this.playerMap[Number(playerId)];
+        for (const {id, socketId, record } of Object.values(this.playerMap)) {
             const playerAheadRecord =
-                playerRecord.record.newPos === 0
+                record.newPos === null ? 
+                null :
+                (record.newPos === 0
                     ? null
-                    : playersArray[playerRecord.record.newPos - 1];
+                    : rank[record.newPos - 1]);
             const quesitonOutcome = {
                 question: this.preQuestionIdx,
-                leaderBoard: playersArray.slice(0, 5),
-                record: playersArray[Number(playerId)].record,
+                leaderBoard: rank.slice(0, 5),
+                record: this.playerMap[Number(id)].record,
                 playerAhead: playerAheadRecord,
             };
-            socketIO
-                .to(player.socketId)
+            $socketIO
+                .to(socketId)
                 .emit("questionOutcome", quesitonOutcome);
         }
         hostSocket.emit("questionOutcome", {
             question: this.preQuestionIdx,
-            leaderboard: playersArray,
+            leaderboard: rank,
         });
     }
 
