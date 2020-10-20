@@ -59,13 +59,12 @@ export const formatPlayer = (player: Player) => {
     };
 };
 
-
 export const formatPlayerRecord = (player: Player) => {
     const { id, name, pictureId, record } = player;
     return {
         id: id,
         name: name,
         pictureId: pictureId,
-        record: record
-    }
-}
+        record: record,
+    };
+};
