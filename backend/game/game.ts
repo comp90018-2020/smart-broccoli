@@ -5,7 +5,7 @@ import { Answer } from "./points";
 import { formatQuestion, formatWelcome, formatPlayer } from "./formatter";
 
 import { Server, Socket } from "socket.io";
-import { $socketIO } from "./index"
+import { $socketIO } from "./index";
 
 const WAITING = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
@@ -130,9 +130,10 @@ export class GameHandler {
             // add user to socket room
             socket.join(sessionId.toString());
             // add user to session
-            await this.sessions[sessionId].addParticipant(await this.getUserInfo(userId));
+            await this.sessions[sessionId].addParticipant(
+                await this.getUserInfo(userId)
+            );
             if (player.role !== "host") {
-                
                 // broadcast that user has joined
                 const msg = await this.getUserInfo(userId);
                 socket.to(sessionId.toString()).emit("playerJoin", msg);

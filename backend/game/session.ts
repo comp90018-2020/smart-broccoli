@@ -2,7 +2,7 @@ import { TokenInfo } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket, Server } from "socket.io";
 import { rankPlayer, formatPlayerRecord } from "./formatter";
-import{$socketIO} from "./index"
+import { $socketIO } from "./index";
 
 export enum QuizStatus {
     Pending = 0,
@@ -42,7 +42,7 @@ export class GameSession {
     private sessionId: number;
     public quiz: any;
     public status: QuizStatus = QuizStatus.Pending;
-    private host:Player = null;
+    private host: Player = null;
     private playerMap: { [playerId: number]: Player } = {};
     public playerAnsOutcomes: { [key: string]: AnswerOutcome } = {};
     private questionIdx = 0;
@@ -60,12 +60,12 @@ export class GameSession {
     }
 
     async addParticipant(player: Player) {
-        if(player.role === "host"){
-            if (this.host != null){
+        if (player.role === "host") {
+            if (this.host != null) {
                 $socketIO.sockets.connected[this.host.socketId].disconnect();
             }
             this.host = player;
-        }else{
+        } else {
             if (this.playerMap.hasOwnProperty(player.id)) {
                 this.removeParticipant(player);
             }
@@ -80,10 +80,9 @@ export class GameSession {
                 );
             }
         }
-       
     }
 
-    async removeParticipant(player:Player) {
+    async removeParticipant(player: Player) {
         $socketIO.sockets.connected[player.socketId].disconnect();
         delete this.playerMap[player.id];
         --this.pointSys.participantCount;
@@ -294,34 +293,32 @@ export class GameSession {
     releaseBoard(hostSocket: Socket) {
         const playersArray = rankPlayer(this.playerMap);
         let i = 0;
-        playersArray.forEach(({id,record})=>{
+        playersArray.forEach(({ id, record }) => {
             this.playerMap[id].record.oldPos = record.newPos;
             this.playerMap[id].record.newPos = i;
-            ++i
+            ++i;
         });
-        
-        const rank =[];
-        for(let i = 0; i < playersArray.length; ++i){
-            rank.push(formatPlayerRecord(playersArray[i])); 
+
+        const rank = [];
+        for (let i = 0; i < playersArray.length; ++i) {
+            rank.push(formatPlayerRecord(playersArray[i]));
         }
 
         // socketIO.sockets.adapter.rooms[this.sessionId].sockets)
-        for (const {id, socketId, record } of Object.values(this.playerMap)) {
+        for (const { id, socketId, record } of Object.values(this.playerMap)) {
             const playerAheadRecord =
-                record.newPos === null ? 
-                null :
-                (record.newPos === 0
+                record.newPos === null
                     ? null
-                    : rank[record.newPos - 1]);
+                    : record.newPos === 0
+                    ? null
+                    : rank[record.newPos - 1];
             const quesitonOutcome = {
                 question: this.preQuestionIdx,
                 leaderBoard: rank.slice(0, 5),
                 record: this.playerMap[Number(id)].record,
                 playerAhead: playerAheadRecord,
             };
-            $socketIO
-                .to(socketId)
-                .emit("questionOutcome", quesitonOutcome);
+            $socketIO.to(socketId).emit("questionOutcome", quesitonOutcome);
         }
         hostSocket.emit("questionOutcome", {
             question: this.preQuestionIdx,

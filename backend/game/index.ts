@@ -39,7 +39,7 @@ export default (socketIO: Server) => {
 
             // showBoard
             socket.on("showBoard", () => {
-                handler.showBoard( socket);
+                handler.showBoard(socket);
             });
 
             // reset for debug
