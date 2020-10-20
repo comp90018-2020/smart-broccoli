@@ -14,7 +14,7 @@ export default (socketIO: Server) => {
 
             // answer
             socket.on("answer", (content: any) => {
-                handler.answer(socketIO, socket, content);
+                handler.answer(socket, content);
             });
 
             // quit

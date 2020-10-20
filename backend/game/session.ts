@@ -1,17 +1,16 @@
-import { TokenInfo } from "../controllers/session";
 import { PointSystem, Answer, AnswerOutcome } from "./points";
 import { Socket, Server } from "socket.io";
 import { rankPlayer, formatPlayerRecord } from "./formatter";
 import { $socketIO } from "./index";
 
-export enum QuizStatus {
-    Pending = 0,
-    Starting = 1,
-    Running = 2,
-    Ended = 3,
+export enum GameStatus {
+    Pending,
+    Starting,
+    Running,
+    Ended,
 }
 
-export class QuizResult {
+export class GameResult {
     constructor(
         readonly sessionId: number,
         readonly questionFinshed: number,
@@ -41,9 +40,9 @@ export class Player {
 export class GameSession {
     private sessionId: number;
     public quiz: any;
-    public status: QuizStatus = QuizStatus.Pending;
-    private host: Player = null;
-    private playerMap: { [playerId: number]: Player } = {};
+    public status: GameStatus = GameStatus.Pending;
+    public host: Player = null;
+    public playerMap: { [playerId: number]: Player } = {};
     public playerAnsOutcomes: { [key: string]: AnswerOutcome } = {};
     private questionIdx = 0;
     private preQuestionIdx = 0;
@@ -52,7 +51,7 @@ export class GameSession {
     public readyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem(0);
     public hasFinalBoardReleased: boolean = false;
-    public result: QuizResult = null;
+    public result: GameResult = null;
 
     constructor($quiz: any, $sessionId: number) {
         this.sessionId = $sessionId;
@@ -75,7 +74,7 @@ export class GameSession {
                 this.playerAnsOutcomes[player.id] = new AnswerOutcome(
                     false,
                     null,
-                    -1,
+                    0,
                     -1
                 );
             }
@@ -83,9 +82,13 @@ export class GameSession {
     }
 
     async removeParticipant(player: Player) {
-        $socketIO.sockets.connected[player.socketId].disconnect();
-        delete this.playerMap[player.id];
-        --this.pointSys.participantCount;
+        if (player.socketId != this.playerMap[player.id].socketId) {
+            $socketIO.sockets.connected[
+                this.playerMap[player.id].socketId
+            ].disconnect();
+            delete this.playerMap[player.id];
+            --this.pointSys.participantCount;
+        }
     }
 
     async hasParticipant(playerId: number) {
@@ -159,20 +162,20 @@ export class GameSession {
         return this.preQuestionIdx === this.questionIdx;
     }
 
-    getAnsOfQuestion(idx: number): Answer {
-        const questionWithAns = this.quiz.questions[idx];
+    getAnsOfQuestion(questionIndex: number): Answer {
+        const { tf, options } = this.quiz.questions[questionIndex];
 
-        if (questionWithAns.options === null) {
-            return new Answer(questionWithAns.no, null, questionWithAns.tf);
+        if (options === null) {
+            return new Answer(questionIndex, null, tf);
         } else {
             let i = 0;
-            for (const option of questionWithAns.options) {
+            for (const option of options) {
                 if (option.correct) {
-                    return new Answer(questionWithAns.no, i, null);
+                    return new Answer(questionIndex, i, null);
                 }
                 ++i;
             }
-            throw `No ans in Question[${idx}], this should never happen.`;
+            throw `No ans in Question[${questionIndex}], this should never happen.`;
         }
     }
 
@@ -209,26 +212,26 @@ export class GameSession {
         }
     }
 
-    assessAns(playerId: number, ans: Answer) {
+    assessAns(playerId: number, answer: Answer) {
         const activeQuesionIdx = this.getActiveQuesionIdx();
         const correctAns = this.getAnsOfQuestion(activeQuesionIdx);
         const preAnsOut = this.getPreAnsOut(playerId);
-        const ansOutcome: AnswerOutcome = this.checkAns(
-            ans,
+        const answerOutcome: AnswerOutcome = this.checkAns(
+            answer,
             correctAns,
             preAnsOut
         );
         // record in session that player has answered
-        this.playerAnsOutcomes[playerId] = ansOutcome;
+        this.playerAnsOutcomes[playerId] = answerOutcome;
         this.pointSys.answeredPlayer.add(playerId);
-        const points = this.pointSys.getNewPoints(ansOutcome);
-        this.updateBoard(playerId, points, ansOutcome);
+        const points = this.pointSys.getNewPoints(answerOutcome);
+        this.updateBoard(playerId, points, answerOutcome);
     }
 
     checkAns(
         ans: Answer,
         correctAns: Answer,
-        preAnsOutcome: AnswerOutcome
+        preAnswerOutcome: AnswerOutcome
     ): AnswerOutcome {
         if (ans.questionNo !== correctAns.questionNo) {
             throw `This is ans for question ${ans.questionNo} not for ${correctAns.questionNo}`;
@@ -241,12 +244,12 @@ export class GameSession {
                     : ans.TFSelection === correctAns.TFSelection
                     ? true
                     : false;
-
+            console.log(correct);
             if (correct) {
                 return new AnswerOutcome(
                     correct,
                     this.pointSys.getRankForARightAns(),
-                    preAnsOutcome.streak + 1,
+                    preAnswerOutcome.streak + 1,
                     correctAns.questionNo
                 );
             } else {
@@ -278,7 +281,7 @@ export class GameSession {
     async updateBoard(
         playerId: number,
         points: number,
-        ansOutCome: AnswerOutcome
+        answerOutcome: AnswerOutcome
     ) {
         this.playerMap[playerId].record.oldPos = this.playerMap[
             playerId
@@ -287,7 +290,7 @@ export class GameSession {
         this.playerMap[playerId].record.bonusPoints = points;
         this.playerMap[playerId].record.points =
             points + this.playerMap[playerId].record.points;
-        this.playerMap[playerId].record.streak = ansOutCome.streak;
+        this.playerMap[playerId].record.streak = answerOutcome.streak;
     }
 
     releaseBoard(hostSocket: Socket) {
@@ -326,7 +329,7 @@ export class GameSession {
         });
     }
 
-    setQuizStatus(status: QuizStatus) {
+    setQuizStatus(status: GameStatus) {
         this.status = status;
     }
 
@@ -344,7 +347,7 @@ export class GameSession {
         )) {
             socketIO.sockets.connected[socketId].disconnect();
         }
-        this.result = new QuizResult(
+        this.result = new GameResult(
             this.sessionId,
             (this.questionIdx === 0 && this.readyForNextQuestion
                 ? -1

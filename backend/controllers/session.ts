@@ -10,7 +10,6 @@ import sequelize, {
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
 import { handler } from "../game/index";
-import { QuizResult } from "../game/session";
 
 // Represents a session token
 export interface TokenInfo {

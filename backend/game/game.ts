@@ -1,6 +1,6 @@
 import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
-import { Player, GameSession, QuizStatus, QuizResult } from "./session";
+import { Player, GameSession, GameStatus } from "./session";
 import { Answer } from "./points";
 import { formatQuestion, formatWelcome, formatPlayer } from "./formatter";
 
@@ -67,7 +67,7 @@ export class GameHandler {
         }
     }
 
-    async answer(socketIO: Server, socket: Socket, content: any) {
+    async answer(socket: Socket, content: any) {
         try {
             const player: Player = await this.verifySocket(socket);
             const sessionId = player.sessionId;
@@ -76,8 +76,9 @@ export class GameHandler {
 
             // check if already answered
             if (
-                this.sessions[sessionId].isCurrQuestionActive() &&
-                !this.sessions[sessionId].hasPlayerAnswered(userId)
+                true
+                // this.sessions[sessionId].isCurrQuestionActive() &&
+                // !this.sessions[sessionId].hasPlayerAnswered(userId)
             ) {
                 try {
                     // if not answer yet, i.e. this is the first time to answer
@@ -87,7 +88,7 @@ export class GameHandler {
                         content.MCSelection,
                         content.TFSelection
                     );
-                    // this.sessions[sessionId].assessAns(userId, answer);
+                    this.sessions[sessionId].assessAns(userId, answer);
 
                     // braodcast that one more participants answered this question
                     socket.to(sessionId.toString()).emit("questionAnswered", {
@@ -96,7 +97,6 @@ export class GameHandler {
                             .size,
                         total: this.sessions[sessionId].countParticipants(),
                     });
-
                     this.sessions[sessionId].trySettingForNewQuesiton();
                 } catch (err) {
                     if (process.env.NODE_EVN === "debug") {
@@ -133,7 +133,10 @@ export class GameHandler {
             await this.sessions[sessionId].addParticipant(
                 await this.getUserInfo(userId)
             );
-            if (player.role !== "host") {
+            if (
+                player.role !== "host" &&
+                !this.sessions[sessionId].playerMap.hasOwnProperty(player.id)
+            ) {
                 // broadcast that user has joined
                 const msg = await this.getUserInfo(userId);
                 socket.to(sessionId.toString()).emit("playerJoin", msg);
@@ -144,7 +147,7 @@ export class GameHandler {
                 formatWelcome(this.sessions[sessionId].allParticipants())
             );
 
-            if (this.sessions[sessionId].status === QuizStatus.Starting) {
+            if (this.sessions[sessionId].status === GameStatus.Starting) {
                 socket.emit(
                     "starting",
                     (
@@ -153,7 +156,7 @@ export class GameHandler {
                 );
             }
 
-            if (this.sessions[sessionId].status === QuizStatus.Running) {
+            if (this.sessions[sessionId].status === GameStatus.Running) {
                 socket.emit(
                     "nextQuestion",
                     this.sessions[sessionId].currQuestion()
@@ -208,7 +211,7 @@ export class GameHandler {
             const player: Player = await this.verifySocket(socket);
             const sessionId = player.sessionId;
             if (player.role === "host") {
-                this.sessions[sessionId].setQuizStatus(QuizStatus.Starting);
+                this.sessions[sessionId].setQuizStatus(GameStatus.Starting);
                 this.sessions[sessionId].setQuizStartsAt(Date.now() + WAITING);
                 // Broadcast that quiz will be started
                 socketIO
@@ -224,7 +227,7 @@ export class GameHandler {
                 // https://stackoverflow.com/questions/2130241
                 setTimeout(
                     () => {
-                        this.sessions[sessionId].status = QuizStatus.Running;
+                        this.sessions[sessionId].status = GameStatus.Running;
                         // release the firt question
                         this.next(socketIO, socket);
                     },
@@ -271,14 +274,14 @@ export class GameHandler {
             const sessionId = player.sessionId;
             if (player.role === "host") {
                 //  broadcast next question to participants
-                if (this.sessions[sessionId].status === QuizStatus.Pending) {
+                if (this.sessions[sessionId].status === GameStatus.Pending) {
                     this.start(socketIO, socket);
                 } else if (
-                    this.sessions[sessionId].status === QuizStatus.Starting
+                    this.sessions[sessionId].status === GameStatus.Starting
                 ) {
                     // nothing to do
                 } else if (
-                    this.sessions[sessionId].status === QuizStatus.Running
+                    this.sessions[sessionId].status === GameStatus.Running
                 ) {
                     try {
                         const questionIndex = this.sessions[
