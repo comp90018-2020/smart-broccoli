@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/theme.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
+import 'package:smart_broccoli/theme.dart';
+
 import 'leaderboard.dart';
 
 /// State of question

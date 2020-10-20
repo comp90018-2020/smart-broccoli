@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
 
-import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/local.dart';
 
 import 'auth_state.dart';
 import 'user_repository.dart';

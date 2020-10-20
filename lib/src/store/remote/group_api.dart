@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
-import 'api_base.dart';
 import 'package:smart_broccoli/src/data/group.dart';
 import 'package:smart_broccoli/src/data/user.dart';
+
+import 'api_base.dart';
 
 class GroupApi {
   static const GROUP_URL = ApiBase.BASE_URL + '/group';

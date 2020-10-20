@@ -1,10 +1,10 @@
+import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:fluro/fluro.dart';
 
+import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/theme.dart';
 
 void main() async {

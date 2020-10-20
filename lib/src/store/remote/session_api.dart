@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
-import 'api_base.dart';
 import 'package:smart_broccoli/src/data/game.dart';
 import 'package:smart_broccoli/src/data/quiz.dart';
+
+import 'api_base.dart';
 
 class SessionApi {
   static const SESSION_URL = ApiBase.BASE_URL + '/session';

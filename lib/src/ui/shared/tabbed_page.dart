@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'page.dart';
+
 import 'package:smart_broccoli/theme.dart';
+
+import 'page.dart';
 
 /// A tabbed page
 class CustomTabbedPage extends CustomPage {

@@ -3,8 +3,9 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
-import 'api_base.dart';
 import 'package:smart_broccoli/src/data/quiz.dart';
+
+import 'api_base.dart';
 
 class QuizApi {
   static const QUIZ_URL = ApiBase.BASE_URL + '/quiz';
