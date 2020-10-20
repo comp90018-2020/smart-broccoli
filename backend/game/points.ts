@@ -1,3 +1,5 @@
+import { Player } from "./datatype";
+
 export class AnswerOutcome {
     constructor(
         readonly correct: boolean,
@@ -21,7 +23,7 @@ export class PointSystem {
     public answeredPlayer: Set<number> = new Set([]);
     private rankOfNextRightAns: number = 0;
 
-    constructor(public participantCount: number) {
+    constructor() {
         this.setForNewQuestion();
     }
 
@@ -29,15 +31,11 @@ export class PointSystem {
         return this.rankOfNextRightAns++;
     }
 
-    public hasAllPlayersAnswered() {
-        return this.participantCount - this.answeredPlayer.size <= 0;
-    }
-
-    private getFactor(ansRes: AnswerOutcome): number {
+    private getFactor(ansRes: AnswerOutcome, totalPlayer: number): number {
         const factor: number = ansRes.correct ? 1 : 0;
         if (factor !== 0) {
             const factorStreak = (ansRes.streak - 1) * 0.1;
-            const factorRank = (1 - ansRes.rank / this.participantCount) / 2;
+            const factorRank = (1 - ansRes.rank / totalPlayer) / 2;
             return factor + (factorStreak < 1 ? factorStreak : 1) + factorRank;
         }
         return factor;
@@ -48,10 +46,12 @@ export class PointSystem {
         this.answeredPlayer = new Set([]);
     }
 
-    public getNewPoints(ansOutcome: AnswerOutcome): number {
-        // if (!this.hasAllPlayersAnswered()) {
-        //     throw "Wait for others to answer";
-        // }
-        return Math.floor(this.getFactor(ansOutcome) * this.pointsEachQuestion);
+    public getNewPoints(
+        ansOutcome: AnswerOutcome,
+        totalPlayer: number
+    ): number {
+        return Math.floor(
+            this.getFactor(ansOutcome, totalPlayer) * this.pointsEachQuestion
+        );
     }
 }
