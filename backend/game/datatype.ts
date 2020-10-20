@@ -12,6 +12,7 @@ export enum GameStatus {
 
 export class Player {
     public record: { [key: string]: any } = {};
+    public preRecord: { [key: string]: any } = {};
     constructor(
         readonly id: number,
         readonly name: string,
@@ -20,11 +21,13 @@ export class Player {
         public sessionId: number,
         public role: string
     ) {
+        this.record.questionNo = 0;
         this.record.oldPos = null;
         this.record.newPos = null;
         this.record.bonusPoints = 0;
         this.record.points = 0;
         this.record.streak = -1;
+        this.preRecord = JSON.parse(JSON.stringify(this.record));
     }
 }
 

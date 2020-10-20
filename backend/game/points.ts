@@ -31,11 +31,16 @@ export class PointSystem {
         return this.rankOfNextRightAns++;
     }
 
-    private getFactor(ansRes: AnswerOutcome, totalPlayer: number): number {
-        const factor: number = ansRes.correct ? 1 : 0;
+    private getFactor(
+        correct: boolean,
+        rank: number,
+        streak: number,
+        totalPlayer: number
+    ): number {
+        const factor: number = correct ? 1 : 0;
         if (factor !== 0) {
-            const factorStreak = (ansRes.streak - 1) * 0.1;
-            const factorRank = (1 - ansRes.rank / totalPlayer) / 2;
+            const factorStreak = (streak - 1) * 0.1;
+            const factorRank = (1 - rank / totalPlayer) / 2;
             return factor + (factorStreak < 1 ? factorStreak : 1) + factorRank;
         }
         return factor;
@@ -46,12 +51,22 @@ export class PointSystem {
         this.answeredPlayer = new Set([]);
     }
 
-    public getNewPoints(
-        ansOutcome: AnswerOutcome,
+    public getPointsAnsStreak(
+        correct: boolean,
+        player: Player,
         totalPlayer: number
-    ): number {
-        return Math.floor(
-            this.getFactor(ansOutcome, totalPlayer) * this.pointsEachQuestion
-        );
+    ) {
+        this.answeredPlayer.add(player.id);
+        return {
+            points: Math.floor(
+                this.getFactor(
+                    correct,
+                    correct ? this.getRankForARightAns() : totalPlayer,
+                    player.record.streak,
+                    totalPlayer
+                ) * this.pointsEachQuestion
+            ),
+            streak: correct ? player.record.streak + 1 : 0,
+        };
     }
 }

@@ -54,20 +54,6 @@ export const formatWelcome = (playerSet: Set<Player>) => {
 };
 
 /**
- * rank player from map
- * @param playerMap player map
- */
-export const rankPlayer = (playerMap: { [key: string]: Player }) => {
-    const playersArray: Player[] = [];
-    for (const [playerId, player] of Object.entries(playerMap)) {
-        playersArray.push(player);
-    }
-    // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
-    playersArray.sort((a, b) => (a.record.points < b.record.points ? 1 : -1));
-    return playersArray;
-};
-
-/**
  * format one player for event-> welcome
  * @param player a player
  */
@@ -86,6 +72,7 @@ export const formatPlayer = (player: Player) => {
  */
 export const formatPlayerRecord = (player: Player) => {
     const { id, name, pictureId, record } = player;
+    delete record.questionNo;
     return {
         id: id,
         name: name,
