@@ -92,7 +92,7 @@ class GroupRegistryModel extends ChangeNotifier {
   Future<void> leaveSelectedGroup() async {
     await _groupApi.leaveGroup(_authStateModel.token, _selectedGroup.id);
     _selectedGroup = null;
-    refreshJoinedGroups();
+    refreshJoinedGroups(withMembers: true);
   }
 
   Future<void> kickMemberFromSelectedGroup(int memberId) async {

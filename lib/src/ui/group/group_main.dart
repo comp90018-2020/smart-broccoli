@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:smart_broccoli/src/models.dart';
 
 import 'members_tab.dart';
 import 'quiz_tab.dart';
+
+enum UserAction { LEAVE_GROUP, DELETE_GROUP }
 
 class GroupMain extends StatefulWidget {
   @override
@@ -15,17 +20,6 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _controller = new TabController(length: 2, vsync: this);
-    _controller.addListener(_handleSelected);
-  }
-
-  // On the first tab?
-  bool _onQuizPage = true;
-
-  // Tab controller change
-  void _handleSelected() {
-    setState(() {
-      _onQuizPage = _controller.index == 0;
-    });
   }
 
   @override
@@ -53,19 +47,38 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
         ),
 
         // More actions
-        actions: _onQuizPage
-            ? []
-            : [
-                IconButton(
-                  icon: Icon(Icons.more_vert),
-                  padding: EdgeInsets.zero,
-                  splashRadius: 20,
-                  onPressed: () {},
-                )
-              ],
+        actions: [
+          PopupMenuButton(
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem(
+                child: Text('Leave group'),
+                value: UserAction.LEAVE_GROUP,
+              ),
+            ],
+            onSelected: (UserAction action) async {
+              switch (action) {
+                case UserAction.LEAVE_GROUP:
+                  try {
+                    await Provider.of<GroupRegistryModel>(context,
+                            listen: false)
+                        .leaveSelectedGroup();
+                    Navigator.of(context).pop();
+                  } catch (_) {
+                    _showCannotLeaveDialogue();
+                  }
+                  break;
+                default:
+              }
+            },
+          ),
+        ],
 
         centerTitle: true,
-        title: Text('COMP1234'),
+        title: Consumer<GroupRegistryModel>(
+            builder: (context, registry, child) =>
+                registry.selectedGroup == null
+                    ? Text('Group Name')
+                    : Text(registry.selectedGroup.name)),
       ),
 
       // Tabs
@@ -74,6 +87,22 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
         children: [
           QuizTab(),
           MembersTab(),
+        ],
+      ),
+    );
+  }
+
+  void _showCannotLeaveDialogue() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Error"),
+        content: Text("Cannot leave group"),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
         ],
       ),
     );
