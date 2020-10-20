@@ -39,7 +39,9 @@ export class PointSystem {
     ): number {
         const factor: number = correct ? 1 : 0;
         if (factor !== 0) {
+            // greater streak get greater factor
             const factorStreak = (streak - 1) * 0.1;
+            // the higher rank and the more players are, the greater factor is given
             const factorRank = (1 - rank / totalPlayer) / 2;
             return factor + (factorStreak < 1 ? factorStreak : 1) + factorRank;
         }

@@ -122,7 +122,7 @@ export class GameSession {
             setTimeout(
                 () => {
                     if (this.questionIndex === this.preQuestionIndex) {
-                        this.moveToNextQuestion();
+                        this.setToNextQuestion();
                     }
                 },
                 Object.keys(this.playerMap).length === 0
@@ -164,7 +164,7 @@ export class GameSession {
         };
     }
 
-    moveToNextQuestion() {
+    setToNextQuestion() {
         this.questionIndex = this.preQuestionIndex + 1;
         this.pointSys.setForNewQuestion();
         this.isReadyForNextQuestion = true;
