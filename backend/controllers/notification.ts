@@ -1,6 +1,6 @@
 import { Token } from "../models";
 import sendFirebaseMessage, { firebaseTokenValid } from "../helpers/message";
-import ErrorStatus from "helpers/error";
+import ErrorStatus from "../helpers/error";
 
 /**
  * Sends a message to the specified recipient.
@@ -68,11 +68,27 @@ export const addToken = async (userId: number, token: string) => {
         throw new ErrorStatus("Firebase token is not valid", 400);
     }
 
-    await Token.create({
-        token: token,
-        userId,
-        scope: "firebase",
-    });
+    try {
+        await Token.create({
+            token: token,
+            userId,
+            scope: "firebase",
+        });
+    } catch (err) {
+        if (err.parent.code === "23505") {
+            throw new ErrorStatus("Token already exists", 400);
+        }
+        throw err;
+    }
+};
+
+/**
+ * Removes token of user
+ * @param userId
+ * @param token
+ */
+export const deleteTokenOfUser = async (userId: number, token: string) => {
+    await Token.destroy({ where: { userId, token, scope: "firebase" } });
 };
 
 /**
