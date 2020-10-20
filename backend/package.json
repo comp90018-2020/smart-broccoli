@@ -23,7 +23,7 @@
     "sharp": "^0.26.2",
     "swagger-jsdoc": "^4.3.0",
     "swagger-ui-dist": "^3.35.2",
-    "socket.io":"^2.3.0"
+    "socket.io": "^2.3.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.14",
