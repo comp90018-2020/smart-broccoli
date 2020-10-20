@@ -1,20 +1,20 @@
 import 'package:fluro/fluro.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 
-import 'src/about/about.dart';
-import 'src/about/acknowledgements.dart';
-import 'src/auth/auth_screen.dart';
-import 'src/auth/init_page.dart';
-import 'src/groups/group_create.dart';
-import 'src/groups/group_list.dart';
-import 'src/group/group_main.dart';
-import 'src/session/leaderboard.dart';
-import 'src/session/lobby.dart';
-import 'src/session/question.dart';
-import 'src/quiz/take_quiz.dart';
-import 'src/quiz/manage_quiz.dart';
-import 'src/quiz_creator/question_creator.dart';
-import 'src/quiz_creator/quiz_creator.dart';
+import 'src/ui/about/about.dart';
+import 'src/ui/about/acknowledgements.dart';
+import 'src/ui/auth/auth_screen.dart';
+import 'src/ui/auth/init_page.dart';
+import 'src/ui/groups/group_create.dart';
+import 'src/ui/groups/group_list.dart';
+import 'src/ui/group/group_main.dart';
+import 'src/ui/session/leaderboard.dart';
+import 'src/ui/session/lobby.dart';
+import 'src/ui/session/question.dart';
+import 'src/ui/quiz/take_quiz.dart';
+import 'src/ui/quiz/manage_quiz.dart';
+import 'src/ui/quiz_creator/question_creator.dart';
+import 'src/ui/quiz_creator/quiz_creator.dart';
 
 /// Defines routes and transitions
 class Routes {
