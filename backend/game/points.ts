@@ -1,9 +1,11 @@
-import { Player, Answer } from "./datatype";
+import { Player} from "./datatype";
 
 export class PointSystem {
+    // base points for each question before apply streak factor etc
     private readonly pointsEachQuestion = 1000;
-
+    // set of answered player, mainly used for calculate points factor
     public answeredPlayer: Set<number> = new Set([]);
+    // the number of players that have give the right answer
     private rankOfNextRightAns: number = 0;
 
     constructor() {
