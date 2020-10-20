@@ -54,6 +54,10 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                 child: Text('Leave group'),
                 value: UserAction.LEAVE_GROUP,
               ),
+              PopupMenuItem(
+                child: Text('Delete group'),
+                value: UserAction.DELETE_GROUP,
+              ),
             ],
             onSelected: (UserAction action) async {
               switch (action) {
@@ -64,7 +68,17 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                         .leaveSelectedGroup();
                     Navigator.of(context).pop();
                   } catch (_) {
-                    _showCannotLeaveDialogue();
+                    _showErrorDialogue("Cannot leave group");
+                  }
+                  break;
+                case UserAction.DELETE_GROUP:
+                  try {
+                    await Provider.of<GroupRegistryModel>(context,
+                            listen: false)
+                        .deleteSelectedGroup();
+                    Navigator.of(context).pop();
+                  } catch (_) {
+                    _showErrorDialogue("Cannot delete group");
                   }
                   break;
                 default:
@@ -92,12 +106,12 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
     );
   }
 
-  void _showCannotLeaveDialogue() {
+  void _showErrorDialogue(String text) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text("Error"),
-        content: Text("Cannot leave group"),
+        content: Text(text),
         actions: [
           TextButton(
             child: Text("OK"),

@@ -108,7 +108,7 @@ class GroupRegistryModel extends ChangeNotifier {
     if (_selectedGroup == null) return;
     await _groupApi.deleteGroup(_authStateModel.token, _selectedGroup.id);
     _selectedGroup = null;
-    refreshCreatedGroups();
+    refreshCreatedGroups(withMembers: true);
   }
 
   /// Refresh the ListView of groups the user has joined.
