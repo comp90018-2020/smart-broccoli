@@ -69,7 +69,7 @@ export const addToken = async (userId: number, token: string) => {
     }
 
     try {
-        await Token.create({
+        await Token.upsert({
             token: token,
             userId,
             scope: "firebase",
