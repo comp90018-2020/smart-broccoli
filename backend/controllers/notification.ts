@@ -1,4 +1,4 @@
-import { Token } from "../models";
+import sequelize, { Token } from "../models";
 import sendFirebaseMessage, { firebaseTokenValid } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 
@@ -62,18 +62,42 @@ export const sendMessage = async (message: any, tokens: Token[]) => {
  * @param userId
  * @param token
  */
-export const addToken = async (userId: number, token: string) => {
+export const addToken = async (
+    userId: number,
+    token: string,
+    oldToken?: string
+) => {
     const tokenValid = await firebaseTokenValid(token);
     if (!tokenValid) {
         throw new ErrorStatus("Firebase token is not valid", 400);
     }
 
     try {
-        await Token.upsert({
-            token: token,
-            userId,
-            scope: "firebase",
-        });
+        if (!oldToken) {
+            // New token
+            await Token.upsert({
+                token: token,
+                userId,
+                scope: "firebase",
+            });
+        } else {
+            // Old token exists
+            const res = await Token.update(
+                {
+                    token,
+                },
+                {
+                    where: {
+                        userId,
+                        token: oldToken,
+                        scope: "firebase",
+                    },
+                }
+            );
+            if (res[0] != 1) {
+                throw new ErrorStatus("Old token does not exist", 400);
+            }
+        }
     } catch (err) {
         if (err.parent.code === "23505") {
             throw new ErrorStatus("Token already exists", 400);

@@ -276,6 +276,8 @@ router.post(
  *             properties:
  *               token:
  *                 type: string
+ *               oldToken:
+ *                 type: string
  *             required:
  *               - token
  *     responses:
@@ -284,12 +286,15 @@ router.post(
  */
 router.post(
     "/firebase",
-    [body("token").isString().trim()],
+    [
+        body("token").isString().trim(),
+        body("oldToken").optional().isString().trim(),
+    ],
     validate,
     auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await addToken(req.user.id, req.body.token);
+            await addToken(req.user.id, req.body.token, req.body.oldToken);
             return res.sendStatus(200);
         } catch (err) {
             return next(err);
