@@ -85,9 +85,25 @@ class SmartBroccoliTheme {
 class LogoContainer extends Container {
   LogoContainer({@required Widget child})
       : super(
-          height: 200,
+          height: 250,
           color: SmartBroccoliColourScheme.logoContainerBackground,
-          child: child,
+          child: Center(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                Image(
+                    width: 125,
+                    height: 125,
+                    image: AssetImage('assets/icon.png')),
+                Text(
+                  'Smart Broccoli',
+                  style: TextStyle(
+                      fontSize: 28,
+                      color: Color(0xFF125E12),
+                      letterSpacing: 1.2,
+                      fontFamily: 'BPreplay'),
+                )
+              ])),
         );
 }
 
