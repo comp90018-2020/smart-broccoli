@@ -1,64 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 
-class MembersTab extends StatefulWidget {
+class MembersTab extends StatelessWidget {
   @override
-  State<StatefulWidget> createState() => new _MembersTab();
-}
-
-class _MembersTab extends State<MembersTab> {
-  List<String> _users;
-
-  // Initiate timers on start up
-  @override
-  void initState() {
-    super.initState();
-    _users = getUserList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: SmartBroccoliColourScheme.membersTabBackground,
-      padding: EdgeInsets.symmetric(vertical: 12),
-      child: ListView.separated(
-        itemCount: _users.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-              dense: true,
-              // Avatar
-              leading: UserAvatar(),
-              // Name
-              title: Text(
-                _users[index],
-              ),
-              // Remove
-              trailing: IconButton(
-                icon: Icon(
-                  Icons.person_remove,
+  Widget build(BuildContext context) => Consumer<GroupRegistryModel>(
+        builder: (context, registry, child) => Container(
+          color: SmartBroccoliColourScheme.membersTabBackground,
+          child: ListView.builder(
+            itemCount: registry.selectedGroup.members.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: EdgeInsets.only(top: index == 0 ? 8 : 0),
+                child: ListTile(
+                  // Avatar
+                  leading: UserAvatar(),
+                  // Name
+                  title: Text(registry.selectedGroup.members[index].name),
+                  // Remove
+                  trailing: IconButton(
+                    icon: Icon(Icons.person_remove),
+                    splashRadius: 20,
+                    onPressed: () {},
+                  ),
                 ),
-                splashRadius: 20,
-                onPressed: () {},
-              ));
-        },
-        separatorBuilder: (BuildContext context, int index) =>
-            const Divider(color: Colors.transparent),
-      ),
-    );
-  }
-
-  List<String> getUserList() {
-    return ["HELLO", "HELLO2", "HELLO3", "HELLO4", "HELLO5"];
-  }
-
-  // I suggest a timer which get's the user list every n seconds
-  // And the list get's updated accordingly
-  void updateList() {
-    setState(
-      () {
-        _users.add("NEW PERSON");
-      },
-    );
-  }
+              );
+            },
+          ),
+        ),
+      );
 }

@@ -74,7 +74,11 @@ class _GroupListState extends State<GroupList> {
           return Card(
             child: ListTile(
               dense: true,
-              onTap: () {},
+              onTap: () {
+                Provider.of<GroupRegistryModel>(context, listen: false)
+                    .selectGroup(groups[i].id);
+                Navigator.of(context).pushNamed('/group/:id');
+              },
               title: Text(
                 groups[i].name,
                 style: TextStyle(fontSize: 16),
