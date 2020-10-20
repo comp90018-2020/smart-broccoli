@@ -37,14 +37,14 @@ export class GameSession {
             this.host = player;
         } else {
             if (this.playerMap.hasOwnProperty(player.id)) {
-                this.removeParticipant(player);
+                this.removeParticipant(player, false);
             }
             this.playerMap[player.id] = player;
         }
     }
 
-    async removeParticipant(player: Player) {
-        if (player.socketId != this.playerMap[player.id].socketId) {
+    async removeParticipant(player: Player, isForce: boolean) {
+        if (isForce || player.socketId != this.playerMap[player.id].socketId) {
             $socketIO.sockets.connected[
                 this.playerMap[player.id].socketId
             ].disconnect();

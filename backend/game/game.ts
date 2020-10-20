@@ -162,7 +162,7 @@ export class GameHandler {
             const session = this.sessions[player.sessionId];
 
             // remove this participants from session in memory
-            await session.removeParticipant(player);
+            await session.removeParticipant(player, true);
             // leave from socket room
             socket.leave(player.sessionId.toString());
 
