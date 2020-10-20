@@ -36,7 +36,7 @@ export class PointSystem {
     private getFactor(ansRes: AnswerOutcome): number {
         const factor: number = ansRes.correct ? 1 : 0;
         if (factor !== 0) {
-            const factorStreak = ansRes.streak * 0.1;
+            const factorStreak = (ansRes.streak - 1) * 0.1;
             const factorRank = (1 - ansRes.rank / this.participantCount) / 2;
             return factor + (factorStreak < 1 ? factorStreak : 1) + factorRank;
         }
