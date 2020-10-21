@@ -39,7 +39,9 @@ class _QuizCardState extends State<QuizCard> {
     return Card(
       elevation: 2,
       child: InkWell(
-        onTap: () {_startQuiz();},
+        onTap: () {
+          _startQuiz();
+        },
         child: LayoutBuilder(
           builder: (context, constraints) {
             // If the height of the picture is less than 0.4 of the viewport
@@ -104,17 +106,20 @@ class _QuizCardState extends State<QuizCard> {
     );
   }
 
-  // TODO don't forget to de select quiz once the session is over.
-  // And also that this should only be used for debug purposes.
-  void _startQuiz(){
+  /// TODO don't forget to de select quiz once the session is over.
+  /// Known Issues: An null exception is thrown for a short time
+  /// due to the time needed to select a quiz via the provider
+  /// And also that this should only be used for debug purposes.
+  /// In the real implementation this should also have a loading screen
+  /// Which should wait for the provider to fetch the needed data
+  /// Before continuing. It might be necessary to implement a loading screen Here
+  void _startQuiz() {
     QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true);
+        Provider.of<QuizCollectionModel>(context, listen: false);
     qcm.selectQuiz(widget._quiz.id);
     // Navigator to session stuff here
     Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (BuildContext context) => QuizLobby()));
-
-
   }
 
   // Smart quiz indicator

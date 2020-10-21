@@ -47,8 +47,6 @@ class _TakeQuizState extends State<TakeQuiz> {
         Provider.of<QuizCollectionModel>(context, listen: true);
     items = qcm.availableQuizzes;
 
-    // Debug code please ignore
-    if (items.length == 0) {}
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
       title: "Take Quiz",

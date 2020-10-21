@@ -18,7 +18,6 @@ void main() async {
   final AuthStateModel _authStateModel = AuthStateModel(_keyValueStore);
   final UserRepository _userRepo = UserRepository();
   AuthStateModel _asm =  AuthStateModel(_keyValueStore);
-  UserRepository user = UserRepository();
   runApp(
     MultiProvider(
       providers: [

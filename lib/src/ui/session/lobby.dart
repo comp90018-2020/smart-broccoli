@@ -61,6 +61,7 @@ class _StartLobby extends State<QuizLobby> {
   Widget build(BuildContext context) {
     QuizCollectionModel qcm =
         Provider.of<QuizCollectionModel>(context, listen: true);
+
     return CustomPage(
       title: 'Take Quiz',
 

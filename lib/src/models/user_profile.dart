@@ -24,11 +24,7 @@ class UserProfileModel extends ChangeNotifier {
   User get user => _user;
 
   /// Constructor for external use
-  UserProfileModel(this._keyValueStore, this._authStateModel, this._userRepo);
-
-  // I seperated the initiation instructions as I want to avoid adding additional
-  // Provider boilerplate code in other classes.
-  init() {
+  UserProfileModel(this._keyValueStore, this._authStateModel, this._userRepo) {
     // load last record of profile and picture
     try {
       _user = User.fromJson(json.decode(_keyValueStore.getString('user')));

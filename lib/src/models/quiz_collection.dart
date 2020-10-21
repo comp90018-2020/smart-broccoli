@@ -36,12 +36,6 @@ class QuizCollectionModel extends ChangeNotifier {
   QuizCollectionModel(this._keyValueStore, this._authStateModel,
       {QuizApi quizApi}) {
     _quizApi = quizApi ?? QuizApi();
-  }
-
-  // I seperated the initiation instructions as I want to avoid adding additional
-  // Provider boilerplate code in other classes.
-  init() {
-    // load last record of available and created quizzes from local storage
     try {
       _availableQuizzes =
           (json.decode(_keyValueStore.getString('availableQuizzes')) as List)
@@ -63,17 +57,17 @@ class QuizCollectionModel extends ChangeNotifier {
     _availableQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.MEMBER);
     print("TESTING" + _availableQuizzes.toString());
-    // TODO determine why this line is thwrowing a Exception
-    _keyValueStore.setString('availableQuizzes', json.encode(_availableQuizzes.map((quiz) => quiz.toJson())));
-    notifyListeners();
+    // TODO determine why this line is throwing a Exception
+  //  _keyValueStore.setString('availableQuizzes', json.encode(_availableQuizzes.map((quiz) => quiz.toJson())));
+  //  notifyListeners();
   }
 
   Future<void> refreshCreatedQuizzes() async {
     _createdQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.OWNER);
-    // TODO determine why this line is thwrowing a Exception
-   _keyValueStore.setString('createdQuizzes',
-   json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
-    notifyListeners();
+    // TODO determine why this line is throwing a Exception
+  // _keyValueStore.setString('createdQuizzes',
+  // json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
+  //  notifyListeners();
   }
 }

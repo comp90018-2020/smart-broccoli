@@ -14,7 +14,7 @@ class QuizTab extends StatefulWidget {
 class _QuizTab extends State<QuizTab> {
   List<Quiz> items;
 
-  // TODO change this to non hardcoded when group logic is implemented
+  // TODO change this when group logic is implemented
   int groupId = 26;
 
   @override

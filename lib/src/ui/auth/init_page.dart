@@ -16,10 +16,9 @@ class _InitialRouterState extends State<InitialRouter> {
   Widget build(BuildContext context) {
     QuizCollectionModel qcm =
         Provider.of<QuizCollectionModel>(context, listen: true);
-    GroupRegistryModel grm =
-        Provider.of<GroupRegistryModel>(context, listen: true);
-    grm.refreshCreatedGroups();
-    qcm.init();
+    // GroupRegistryModel grm = Provider.of<GroupRegistryModel>(context, listen: true);
+
+    // Debug code, remove in final
     qcm.refreshAvailableQuizzes();
     qcm.refreshCreatedQuizzes();
 
@@ -42,6 +41,7 @@ class _InitialRouterState extends State<InitialRouter> {
                   child: Text('Token: ${state.token}'),
                 ),
               ),
+              // Place holder testing buttons
               RaisedButton(
                   child: Text("Test All Quiz"),
                   onPressed: () => {
@@ -50,6 +50,7 @@ class _InitialRouterState extends State<InitialRouter> {
                             MaterialPageRoute(
                                 builder: (BuildContext context) => TakeQuiz()))
                       }),
+              // Place holder testing buttons
               RaisedButton(
                   child: Text("Test Group Quiz"),
                   onPressed: () => {
@@ -58,6 +59,7 @@ class _InitialRouterState extends State<InitialRouter> {
                             MaterialPageRoute(
                                 builder: (BuildContext context) => GroupMain()))
                       }),
+              // Place holder testing buttons
               RaisedButton(
                   child: Text("Test Group Quiz"),
                   onPressed: () => {
