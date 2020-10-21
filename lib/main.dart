@@ -16,7 +16,8 @@ void main() async {
   final KeyValueStore _keyValueStore = await SharedPrefsKeyValueStore.create();
 
   AuthStateModel _asm = AuthStateModel(_keyValueStore);
-  UserRepository user = UserRepository();
+  final AuthStateModel _authStateModel = AuthStateModel(_keyValueStore);
+  final UserRepository _userRepo = UserRepository();
 
   runApp(
     MultiProvider(
@@ -25,7 +26,11 @@ void main() async {
         ChangeNotifierProvider(
             create: (_) => QuizCollectionModel(_keyValueStore, _asm)),
         ChangeNotifierProvider(
-            create: (_) => UserProfileModel(_keyValueStore, _asm, user)),
+            create: (_) => UserProfileModel(_keyValueStore, _asm, _userRepo)),
+        ChangeNotifierProvider(
+          create: (context) =>
+              GroupRegistryModel(_keyValueStore, _authStateModel, _userRepo),
+        )
       ],
       child: MyApp(),
     ),
