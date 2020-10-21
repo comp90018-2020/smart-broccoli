@@ -1,11 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:path_provider/path_provider.dart';
-import 'package:smart_broccoli/models.dart';
-import 'package:smart_broccoli/src/store/remote/group_api.dart';
 
-import '../store/remote/user_api.dart';
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/remote.dart';
 
 /// Cached provider of user profiles and profile pictures
 /// Delegates to the user API if the resource is not in the cache.
@@ -16,7 +14,7 @@ class UserRepository {
   /// API provider for the group management service
   GroupApi _groupApi;
 
-  Map<int, User> _users;
+  Map<int, User> _users = {};
 
   UserRepository({UserApi userApi, GroupApi groupApi}) {
     _userApi = userApi ?? UserApi();
@@ -60,13 +58,16 @@ class UserRepository {
 
   Future<List<User>> getMembersOf(String token, int id) async {
     List<User> members = await _groupApi.getMembers(token, id);
-    members.forEach((member) async {
+    await Future.wait(members.map((member) async {
+      // store member in the hashmap
       _users[member.id] = member;
-      // store member in the hashmap and look for profile pic locally first
+      // and look for profile pic locally before falling back to API
       if (member.pictureId != null &&
-          (member.picture = await lookupPicLocally(member.pictureId)) == null)
-        member.picture = await _userApi.getProfilePic(token);
-    });
+          (member.picture = await lookupPicLocally(member.pictureId)) == null) {
+        member.picture = await _userApi.getProfilePicOf(token, member.id);
+        _storePicLocally(member.pictureId, member.picture);
+      }
+    }));
     return members;
   }
 
@@ -80,18 +81,22 @@ class UserRepository {
 
   Future<Uint8List> lookupPicLocally(int pictureId) async {
     String assetDir =
-        '${(await getTemporaryDirectory()).toString()}/picture/$pictureId';
+        '${(await getTemporaryDirectory()).path}/picture/$pictureId';
     try {
       // see if the image is already stored locally
-      return File(assetDir).readAsBytes();
+      return await File(assetDir).readAsBytes();
     } catch (_) {
       return null;
     }
   }
 
   Future<void> _storePicLocally(int pictureId, Uint8List bytes) async {
-    String assetDir =
-        '${(await getTemporaryDirectory()).toString()}/picture/$pictureId';
+    // ensure picture directory exists
+    final Directory picDir =
+        await Directory('${(await getTemporaryDirectory()).path}/picture')
+            .create(recursive: true);
+    // then store the asset
+    String assetDir = '${picDir.path}/$pictureId';
     try {
       File f = File(assetDir);
       f.writeAsBytes(bytes);

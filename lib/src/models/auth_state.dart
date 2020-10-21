@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:smart_broccoli/cache.dart';
+import 'package:flutter/widgets.dart';
 
-import '../store/remote/auth_api.dart';
+import 'package:smart_broccoli/src/local.dart';
+import 'package:smart_broccoli/src/remote.dart';
 
 /// View model for the authentication state of the user
 class AuthStateModel extends ChangeNotifier {

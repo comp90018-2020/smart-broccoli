@@ -6,6 +6,7 @@ class SmartBroccoliColourScheme extends ColorScheme {
   static const Color tabHolderPillText = Color(0xFF654C12);
   static const Color logoContainerBackground = Colors.white;
   static const Color inputFieldColor = Colors.white;
+  static const Color membersTabBackground = Colors.white;
 
   SmartBroccoliColourScheme()
       : super.light(
@@ -62,6 +63,10 @@ class SmartBroccoliTheme {
   /// Shape for round RaisedButton
   static final ShapeBorder raisedButtonShape =
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(20));
+
+  /// Round raised button
+  static final ShapeBorder raisedButtonShapeRound =
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(100));
 
   /// Padding for round RaisedButton
   static final EdgeInsetsGeometry raisedButtonTextPadding =
@@ -149,84 +154,10 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
         );
 }
 
-class ProfileTheme {
-  static TextStyle _tx1 = TextStyle(color: Colors.black38);
-  static TextStyle _tx2 = TextStyle(color: Colors.white);
-
-  static TextStyle get profileTS => _tx1;
-
-  static TextStyle get appBarTS => _tx2;
-
-  static Widget profileBackground(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    return Column(
-      children: <Widget>[
-        Container(
-          height: height / 5.8 + (height / 19),
-          color: Colors.green,
-        ),
-        Container(
-          color: Colors.white,
-        ),
-      ],
-    );
-  }
-
-  static BoxDecoration bd1() {
-    return BoxDecoration(
-      border: Border(
-        top: BorderSide(
-            color: Colors.black12, width: 2, style: BorderStyle.solid),
-        bottom: BorderSide(
-          color: Colors.black12,
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-        right: BorderSide(
-          color: Colors.black12,
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-      ),
-    );
-  }
-
-  static BoxDecoration bd2() {
-    return BoxDecoration(
-      border: Border(
-        right: BorderSide(
-          color: Colors.black12,
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-        bottom: BorderSide(
-          color: Colors.black12,
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-        left: BorderSide(
-          color: Colors.black12,
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-      ),
-    );
-  }
-
-  static BoxDecoration bd3() {
-    return BoxDecoration(
-      border: Border(
-        bottom: BorderSide(
-          color: Colors.black12,
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-        right: BorderSide(
-          color: Colors.black12,
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-      ),
-    );
-  }
+class UserAvatar extends CircleAvatar {
+  UserAvatar()
+      : super(
+          backgroundColor: Colors.black12,
+          maxRadius: 20,
+        );
 }

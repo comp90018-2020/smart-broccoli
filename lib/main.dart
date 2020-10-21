@@ -1,31 +1,24 @@
+import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_broccoli/cache.dart';
-import 'package:smart_broccoli/models.dart';
-import 'package:smart_broccoli/src/about/acknowledgements.dart';
-import 'package:smart_broccoli/src/profile/profile.dart';
-import 'package:smart_broccoli/src/profile/profile_main.dart';
+import 'package:smart_broccoli/router.dart';
+import 'package:smart_broccoli/src/local.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
-
-import 'src/about/about.dart';
-import 'src/auth/auth_screen.dart';
-import 'src/auth/init_page.dart';
-import 'src/groups/group_create.dart';
-import 'src/groups/group_list.dart';
-import 'src/quiz/leaderboard.dart';
-import 'src/quiz/lobby.dart';
-import 'src/quiz/question.dart';
-import 'src/quiz/quiz.dart';
-import 'src/quiz_creator/question_creator.dart';
-import 'src/quiz_creator/quiz_creator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final KeyValueStore _keyValueStore = await SharedPrefsKeyValueStore.create();
+  final AuthStateModel _authStateModel = AuthStateModel(_keyValueStore);
+  final UserRepository _userRepo = UserRepository();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthStateModel(_keyValueStore))
+        ChangeNotifierProvider(create: (_) => _authStateModel),
+        ChangeNotifierProvider(
+          create: (context) =>
+              GroupRegistryModel(_keyValueStore, _authStateModel, _userRepo),
+        )
       ],
       child: MyApp(),
     ),
@@ -40,10 +33,17 @@ class MyApp extends StatefulWidget {
 /// Main entrance class
 class _MyAppState extends State<MyApp> {
   // Key for navigator
-  final GlobalKey<NavigatorState> mainNavigator = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _mainNavigatorKey =
+      GlobalKey<NavigatorState>();
 
   // Stores previous state about whether user's authenticated
   bool inSession;
+
+  _MyAppState() {
+    final router = FluroRouter();
+    Routes.configureRoutes(router);
+    Routes.router = router;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class _MyAppState extends State<MyApp> {
     if (inSession != state.inSession) {
       // Push route if app is initialised
       if (inSession != null)
-        mainNavigator.currentState.pushNamedAndRemoveUntil(
+        _mainNavigatorKey.currentState.pushNamedAndRemoveUntil(
             state.inSession ? '/home' : '/auth', (route) => false);
       inSession = state.inSession;
     }
@@ -63,23 +63,12 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'Smart Broccoli',
       theme: SmartBroccoliTheme.themeData,
-      routes: {
-        '/auth': (context) => AuthScreen(),
-        '/home': (context) => InitialRouter(),
-        '/take_quiz': (context) => TakeQuiz(),
-        '/lobby': (context) => QuizLobby(),
-        '/question': (context) => QuizQuestion(),
-        '/leaderboard': (context) => QuizLeaderboard(),
-        '/about': (context) => AboutPage(),
-        '/about/acknowledgements': (context) => AcknowledgementsPage(),
-        '/group/home': (context) => GroupList(),
-        '/group/create': (context) => GroupCreate(),
-        '/quiz': (context) => QuizCreate(),
-        '/quiz/question': (context) => QuestionCreate(),
-        'profile': (context) => ProfileMain(),
+      navigatorKey: _mainNavigatorKey,
+      onGenerateRoute: Routes.router.generator,
+      onGenerateInitialRoutes: (route) {
+        return [Routes.router.generator(RouteSettings(name: route))];
       },
-      navigatorKey: mainNavigator,
-      initialRoute: 'profile', // state.inSession ? '/home' : '/auth',
+      initialRoute: '/profile', // state.inSession ? '/home' : '/auth',
     );
   }
 }
