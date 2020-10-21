@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-<<<<<<< HEAD:lib/src/ui/auth/init_page.dart
-=======
-import 'package:smart_broccoli/models.dart';
-import 'package:smart_broccoli/src/group/group_main.dart';
-import 'package:smart_broccoli/src/group/quiz_tab.dart';
-import 'package:smart_broccoli/src/quiz/manage_quiz.dart';
-import 'package:smart_broccoli/src/quiz/take_quiz.dart';
->>>>>>> 3d15c5b... List of quizes should now be shown on all quiz related widgets, a issue with the .toJson function on quizzes is currently being investigated:lib/src/auth/init_page.dart
 
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 class InitialRouter extends StatefulWidget {

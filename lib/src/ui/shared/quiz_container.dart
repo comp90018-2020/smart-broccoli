@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_broccoli/models.dart';
-import 'package:smart_broccoli/src/session/lobby.dart';
+import 'package:smart_broccoli/src/data/quiz.dart';
 
 import 'quiz_card.dart';
 
@@ -76,7 +75,6 @@ class _BuildQuiz extends State<QuizContainer> {
                       child: QuizCard(
                         widget.items[index].title,
                         widget.items[index].description,
-                        widget.items[index],
                       ),
                     );
                   },

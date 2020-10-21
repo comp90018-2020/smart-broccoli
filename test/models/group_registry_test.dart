@@ -1,17 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-<<<<<<< HEAD
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/remote.dart';
-=======
-import 'package:smart_broccoli/cache.dart';
-import 'package:smart_broccoli/models.dart';
-import 'package:smart_broccoli/src/models/user_repository.dart';
-import 'package:smart_broccoli/src/store/remote/group_api.dart';
->>>>>>> 24b9919... Navigation: group list (#114)
 
 class MockGroupApi extends Mock implements GroupApi {}
 
@@ -106,13 +99,9 @@ main() async {
       ],
     );
 
-<<<<<<< HEAD
-    await model.refreshJoinedGroups(withMembers: true);
-=======
     model.refreshJoinedGroups(withMembers: true);
     await untilCalled(api.getGroups(any));
     await untilCalled(api.getMembers(any, 3));
->>>>>>> 24b9919... Navigation: group list (#114)
     expect(model.joinedGroups, isA<List<Group>>());
     expect(model.joinedGroups.length, 1);
     expect(model.joinedGroups[0].members, isA<List<User>>());

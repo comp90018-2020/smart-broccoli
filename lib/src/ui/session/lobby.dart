@@ -89,8 +89,6 @@ class _StartLobby extends State<QuizLobby> {
                   child: QuizCard(
                     "Quiz name",
                     "Quiz group",
-                    null,
-                    aspectRatio: 3,
                   ),
                 ),
               ),

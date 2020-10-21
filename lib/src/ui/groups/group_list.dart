@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-<<<<<<< HEAD:lib/src/ui/groups/group_list.dart
-=======
-import 'package:smart_broccoli/models.dart';
->>>>>>> 24b9919... Navigation: group list (#114):lib/src/groups/group_list.dart
+
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';

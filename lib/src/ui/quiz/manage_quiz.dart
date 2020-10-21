@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/src/data/group.dart';
+import 'package:smart_broccoli/src/data/quiz.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
@@ -36,13 +38,16 @@ class _ManageQuizState extends State<ManageQuiz> {
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
+        QuizContainer(getQuiz(null),
+            header: _groupSelector(), hiddenButton: true),
 
         // Live quiz
-        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
+        QuizContainer(getQuiz(QuizType.LIVE),
+            header: _groupSelector(), hiddenButton: true),
 
         /// Self-paced quiz
-        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
+        QuizContainer(getQuiz(QuizType.SELF_PACED),
+            header: _groupSelector(), hiddenButton: true),
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,
@@ -100,12 +105,12 @@ class _ManageQuizState extends State<ManageQuiz> {
     List<DropdownMenuItem> res = [];
     // note that GID != i where i is the iteration index
     for (var i = 0; i < group.length; i++) {
-        res.add(DropdownMenuItem(
-            child: Center(
-              child: Text("Testing"),
-            ),
-            value: i,
-            onTap: () => updateList(i)));
+      res.add(DropdownMenuItem(
+          child: Center(
+            child: Text("Testing"),
+          ),
+          value: i,
+          onTap: () => updateList(i)));
     }
     return res;
   }
