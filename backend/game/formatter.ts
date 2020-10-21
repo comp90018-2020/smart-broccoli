@@ -38,11 +38,11 @@ export const formatQuestion = (
 
 /**
  *  format the complete welcome message of event-> welcome
- * @param playerSet player set
+ * @param playerMap player map
  */
-export const formatWelcome = (playerSet: Set<Player>) => {
+export const formatWelcome = (playerMap: { [playerId: number]: Player }) => {
     const welcomeMessage: any[] = [];
-    for (const [_, player] of Object.entries(Array.from(playerSet))) {
+    for (const [_, player] of Object.entries(playerMap)) {
         const { id, name, pictureId } = player;
         welcomeMessage.push({
             id: id,

@@ -60,14 +60,6 @@ export class GameSession {
         return Object.keys(this.playerMap).length;
     }
 
-    allParticipants() {
-        const participantsSet = new Set([]);
-        for (const [key, player] of Object.entries(this.playerMap)) {
-            participantsSet.add(player);
-        }
-        return participantsSet;
-    }
-
     getCurrentQuestion() {
         const { timeLimit } = this.quiz;
         const { text, pictureId, options, tf } = this.quiz.questions[

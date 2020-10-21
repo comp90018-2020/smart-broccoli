@@ -133,7 +133,7 @@ export class GameHandler {
                 socket.to(player.sessionId.toString()).emit("playerJoin", msg);
             }
 
-            socket.emit("welcome", formatWelcome(session.allParticipants()));
+            socket.emit("welcome", formatWelcome(session.playerMap));
 
             if (session.status === GameStatus.Starting) {
                 socket.emit(
