@@ -99,6 +99,7 @@ class GroupRegistryModel extends ChangeNotifier {
     await _groupApi.kickMember(
         _authStateModel.token, _selectedGroup.id, memberId);
     refreshSelectedGroup();
+    refreshCreatedGroups(withMembers: true);
   }
 
   /// Delete the selected group.
