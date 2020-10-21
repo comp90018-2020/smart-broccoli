@@ -80,7 +80,7 @@ class _MyAppState extends State<MyApp> {
       onGenerateInitialRoutes: (route) {
         return [Routes.router.generator(RouteSettings(name: route))];
       },
-      initialRoute: "/take_quiz", // state.inSession ? '/home' : '/auth',
+      initialRoute: state.inSession ? '/home' : '/auth', //"/take_quiz",
     );
   }
 }

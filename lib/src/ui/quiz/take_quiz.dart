@@ -42,9 +42,9 @@ class _TakeQuizState extends State<TakeQuiz> {
   @override
   Widget build(BuildContext context) {
     QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true).init();
-    qcm.refreshAvailableQuizzes();
+        Provider.of<QuizCollectionModel>(context, listen: true);
     items = qcm.availableQuizzes;
+
     // Debug code please ignore
     if (items.length == 0) {}
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
@@ -53,14 +53,14 @@ class _TakeQuizState extends State<TakeQuiz> {
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        QuizContainer(items, header: QuizPinBox(key: _buildQuizKey)),
+        QuizContainer(getQuiz(items, null), header: QuizPinBox(key: _buildQuizKey)),
 
         // Live quiz
-        QuizContainer(items, header: QuizPinBox()),
+        QuizContainer(getQuiz(items, QuizType.LIVE), header: QuizPinBox()),
 
         /// Self-paced quiz has Text to fill the vertical space
         QuizContainer(
-          items,
+          getQuiz(items, QuizType.SELF_PACED),
           header: ConstrainedBox(
               constraints: BoxConstraints(minHeight: _height ?? 175),
               child: Align(
@@ -75,5 +75,15 @@ class _TakeQuizState extends State<TakeQuiz> {
       hasDrawer: true,
       secondaryBackgroundColour: true,
     );
+  }
+
+  List<Quiz> getQuiz(List<Quiz> items, QuizType type) {
+    List<Quiz> res = [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type == type || type == null) {
+        res.add(items[i]);
+      }
+    }
+    return res;
   }
 }

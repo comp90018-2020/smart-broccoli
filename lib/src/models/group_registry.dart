@@ -40,7 +40,7 @@ class GroupRegistryModel extends ChangeNotifier {
   GroupRegistryModel(this._keyValueStore, this._authStateModel, this._userRepo,
       {GroupApi groupApi}) {
     _groupApi = groupApi ?? GroupApi();
-    // load last record of joined and created quizzes from local storage
+    // load last record of joined and created groups from local storage
     try {
       _joinedGroups =
           (json.decode(_keyValueStore.getString('joinedGroups')) as List)

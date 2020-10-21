@@ -74,9 +74,9 @@ class _BuildQuiz extends State<QuizContainer> {
                           : EdgeInsets.zero,
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: QuizCard(
-                        'Quiz name',
-                        'Group name',
-                        _route(widget.items[index])
+                        widget.items[index].title,
+                        widget.items[index].description,
+                        widget.items[index],
                       ),
                     );
                   },
@@ -106,17 +106,5 @@ class _BuildQuiz extends State<QuizContainer> {
         ),
       ),
     );
-  }
-
-  void _route(Quiz _quiz){
-    QuizCollectionModel qcm = Provider.of<QuizCollectionModel>(context, listen: true).init();
-    UserProfileModel upm = Provider.of<UserProfileModel>(context, listen: true).init();
-    qcm.selectQuiz(_quiz.id);
-
-    Navigator.of(context).pushReplacement( MaterialPageRoute(builder: (context) => QuizLobby()));
-
-
-
-
   }
 }

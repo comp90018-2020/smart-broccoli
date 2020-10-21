@@ -18,9 +18,15 @@ class _ManageQuizState extends State<ManageQuiz> {
 
   @override
   Widget build(BuildContext context) {
-    QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true).init();
+    /// Can't be placed in init since we need the context
+    /// Further testing is required to see if placing it in login in the best way
+    /// forward
+    QuizCollectionModel qcm = Provider.of<QuizCollectionModel>(context, listen: true);
+    qcm.init();
+    qcm.refreshAvailableQuizzes();
     items = qcm.availableQuizzes;
+
+
     // Debug code please ignore
     if (items.length == 0) {}
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
@@ -80,5 +86,15 @@ class _ManageQuizState extends State<ManageQuiz> {
         ],
       ),
     );
+  }
+
+  List<Quiz> getQuiz(List<Quiz> items, QuizType type) {
+    List<Quiz> res = [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type == type || type == null) {
+        res.add(items[i]);
+      }
+    }
+    return res;
   }
 }
