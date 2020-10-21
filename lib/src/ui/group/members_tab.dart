@@ -21,7 +21,9 @@ class MembersTab extends StatelessWidget {
                       : UserAvatar(
                           registry.selectedGroup.members[index].picture),
                   // Name
-                  title: Text(registry.selectedGroup.members[index].name),
+                  title: registry.selectedGroup.members[index].name == null
+                      ? Text("(anonymous member)")
+                      : Text(registry.selectedGroup.members[index].name),
                   // Remove
                   trailing: IconButton(
                     icon: Icon(Icons.person_remove),
