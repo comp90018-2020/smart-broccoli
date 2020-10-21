@@ -93,7 +93,7 @@ export class GameHandler {
                     .emit("questionAnswered", {
                         question: answer.questionNo,
                         count: session.pointSys.answeredPlayer.size,
-                        total: session.countParticipants(),
+                        total: Object.keys(session.playerMap).length,
                     });
 
                 if (
@@ -173,7 +173,7 @@ export class GameHandler {
                 .to(player.sessionId.toString())
                 .emit(
                     "playerLeave",
-                    (await this.getUserInfo(player.id)).format()
+                    (await this.getUserInfo(player.id)).profile()
                 );
             // disconnect
             socket.disconnect();

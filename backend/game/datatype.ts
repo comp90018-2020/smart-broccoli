@@ -27,19 +27,38 @@ export class Player {
         this.record.bonusPoints = 0;
         this.record.points = 0;
         this.record.streak = -1;
-        this.preRecord = JSON.parse(JSON.stringify(this.record));
+        this.preRecord = this.record.toJson();
     }
 
     /**
-     * format player for event-> welcome
+     * get profile of the player {id, name, pictureId}
      */
-    format() {
+    profile() {
         return {
             id: this.id,
             name: this.name,
             pictureId: this.pictureId,
         };
     }
+
+    /**
+     * format record for event-> questionOutcome
+     */
+    formatRecord = () => {
+        const { oldPos, newPos, bonusPoints, points, streak } = this.record;
+        return {
+            id: this.id,
+            name: this.name,
+            pictureId: this.pictureId,
+            record: {
+                oldPos: oldPos,
+                newPos: newPos,
+                bonusPoints: bonusPoints,
+                points: points,
+                streak: streak,
+            },
+        };
+    };
 }
 
 // WIP

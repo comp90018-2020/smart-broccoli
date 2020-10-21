@@ -1,6 +1,5 @@
 import { Socket, Server } from "socket.io";
 import { PointSystem } from "./points";
-import { formatPlayerRecord } from "./formatter";
 import { $socketIO } from "./index";
 import { GameErr, GameStatus, Player, GameResult, Answer } from "./datatype";
 import { endSession } from "../controllers/session";
@@ -54,10 +53,6 @@ export class GameSession {
 
     async hasParticipant(playerId: number) {
         return this.playerMap.hasOwnProperty(playerId);
-    }
-
-    countParticipants(): number {
-        return Object.keys(this.playerMap).length;
     }
 
     getCurrentQuestion() {
@@ -131,14 +126,15 @@ export class GameSession {
         const correctAnswer = this.getAnsOfQuestion(this.preQuestionIndex);
         const player = this.playerMap[playerId];
         // if this answer is correct
-        const correct =
-            correctAnswer.MCSelection !== null
-                ? answer.MCSelection === correctAnswer.MCSelection
-                    ? true
-                    : false
-                : answer.TFSelection === correctAnswer.TFSelection
-                ? true
-                : false;
+        let correct;
+        if (correctAnswer.MCSelection !== null) {
+            correct =
+                answer.MCSelection === correctAnswer.MCSelection ? true : false;
+        } else {
+            correct =
+                answer.TFSelection === correctAnswer.TFSelection ? true : false;
+        }
+
         // get points and streak
         const { points, streak } = this.pointSys.getPointsAnsStreak(
             correct,
@@ -188,7 +184,7 @@ export class GameSession {
 
         const rank = [];
         for (let i = 0; i < playersArray.length; ++i) {
-            rank.push(formatPlayerRecord(playersArray[i]));
+            rank.push(playersArray[i].formatRecord());
         }
 
         // socketIO.sockets.adapter.rooms[this.sessionId].sockets)
@@ -199,13 +195,13 @@ export class GameSession {
                     : record.newPos === 0
                     ? null
                     : rank[record.newPos - 1];
-            const quesitonOutcome = {
+            const questionOutcome = {
                 question: this.preQuestionIndex,
                 leaderBoard: rank.slice(0, 5),
                 record: this.playerMap[Number(id)].record,
                 playerAhead: playerAheadRecord,
             };
-            $socketIO.to(socketId).emit("questionOutcome", quesitonOutcome);
+            $socketIO.to(socketId).emit("questionOutcome", questionOutcome);
         }
         hostSocket.emit("questionOutcome", {
             question: this.preQuestionIndex,

@@ -12,23 +12,21 @@ export const formatQuestion = (
     session: GameSession,
     isHost: boolean
 ) => {
-    const quesionCopy = JSON.parse(
-        JSON.stringify(session.quiz.questions[questionIndex])
-    );
+    const questionCopy = session.quiz.questions[questionIndex].toJson();
     if (!isHost) {
-        quesionCopy.tf = null;
-        if (quesionCopy.options !== null) {
-            for (const index of Object.keys(quesionCopy.options)) {
-                quesionCopy.options[Number(index)].correct = null;
+        questionCopy.tf = null;
+        if (questionCopy.options !== null) {
+            for (const index of Object.keys(questionCopy.options)) {
+                questionCopy.options[Number(index)].correct = null;
             }
         }
     }
     return {
         no: questionIndex,
-        text: quesionCopy.text,
-        tf: quesionCopy.tf,
-        options: quesionCopy.options,
-        pictureId: quesionCopy.pictureId,
+        text: questionCopy.text,
+        tf: questionCopy.tf,
+        options: questionCopy.options,
+        pictureId: questionCopy.pictureId,
         time:
             process.env.NODE_EVN === "debug"
                 ? 20000
@@ -43,27 +41,7 @@ export const formatQuestion = (
 export const formatWelcome = (playerMap: { [playerId: number]: Player }) => {
     const welcomeMessage: any[] = [];
     for (const [_, player] of Object.entries(playerMap)) {
-        const { id, name, pictureId } = player;
-        welcomeMessage.push({
-            id: id,
-            name: name,
-            pictureId: pictureId,
-        });
+        welcomeMessage.push(player.profile());
     }
     return welcomeMessage;
-};
-
-/**
- * format a player record for event-> questionOutcome
- * @param player a player
- */
-export const formatPlayerRecord = (player: Player) => {
-    const { id, name, pictureId, record } = player;
-    delete record.questionNo;
-    return {
-        id: id,
-        name: name,
-        pictureId: pictureId,
-        record: record,
-    };
 };
