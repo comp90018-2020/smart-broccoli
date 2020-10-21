@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 
@@ -9,7 +10,6 @@ class AuthStateModel extends ChangeNotifier {
 
   /// Token used for the authorization header where required
   String _token;
-
   String get token {
     return _token;
   }

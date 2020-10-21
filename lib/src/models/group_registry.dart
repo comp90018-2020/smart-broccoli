@@ -1,10 +1,10 @@
 import 'dart:collection';
 import 'dart:convert';
-
 import 'package:flutter/widgets.dart';
-import 'package:smart_broccoli/src/data.dart';
+
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
+import 'package:smart_broccoli/src/data.dart';
 
 import 'auth_state.dart';
 import 'user_repository.dart';
@@ -28,14 +28,11 @@ class GroupRegistryModel extends ChangeNotifier {
   /// [selectedGroup] will have a populated `members` field
   /// [joinedGroups] and [createdGroups] do not
   Group _selectedGroup;
-
   Group get selectedGroup => _selectedGroup;
   Iterable<Group> _joinedGroups = Iterable.empty();
-
   UnmodifiableListView<Group> get joinedGroups =>
       UnmodifiableListView(_joinedGroups);
   Iterable<Group> _createdGroups = Iterable.empty();
-
   UnmodifiableListView<Group> get createdGroups =>
       UnmodifiableListView(_createdGroups);
 

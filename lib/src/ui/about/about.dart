@@ -2,9 +2,10 @@
 // https://github.com/YC/another_authenticator
 
 import 'package:flutter/material.dart';
-import 'package:package_info/package_info.dart' show PackageInfo;
-import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:url_launcher/url_launcher.dart' show launch;
+import 'package:package_info/package_info.dart' show PackageInfo;
+
+import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Settings page.
 class AboutPage extends StatelessWidget {
