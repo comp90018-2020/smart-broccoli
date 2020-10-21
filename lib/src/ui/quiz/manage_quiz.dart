@@ -14,12 +14,15 @@ class ManageQuiz extends StatefulWidget {
 
 class _ManageQuizState extends State<ManageQuiz> {
   // TODO: replace with provider inside build
-  List<String> items = ["A", "B", "C", "D", "E", "F", "G", "H"];
+  List<Quiz> items;
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<QuizCollectionModel>(context, listen: true).init();
-    Provider.of<UserProfileModel>(context, listen: true).init();
+    QuizCollectionModel qcm =
+        Provider.of<QuizCollectionModel>(context, listen: true).init();
+    items = qcm.availableQuizzes;
+    // Debug code please ignore
+    if (items.length == 0) {}
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
       title: "Manage Quiz",

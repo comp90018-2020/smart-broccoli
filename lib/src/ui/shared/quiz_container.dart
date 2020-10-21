@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/src/session/lobby.dart';
 
 import 'quiz_card.dart';
 
@@ -14,7 +17,7 @@ class QuizContainer extends StatefulWidget {
       : super(key: key);
 
   /// List of items
-  final List<String> items;
+  final List<Quiz> items;
 
   /// Header widget
   final Widget header;
@@ -69,6 +72,7 @@ class _BuildQuiz extends State<QuizContainer> {
                       child: QuizCard(
                         'Quiz name',
                         'Group name',
+                        _route(widget.items[index])
                       ),
                     );
                   },
@@ -98,5 +102,17 @@ class _BuildQuiz extends State<QuizContainer> {
         ),
       ),
     );
+  }
+
+  void _route(Quiz _quiz){
+    QuizCollectionModel qcm = Provider.of<QuizCollectionModel>(context, listen: true).init();
+    UserProfileModel upm = Provider.of<UserProfileModel>(context, listen: true).init();
+    qcm.selectQuiz(_quiz.id);
+
+    Navigator.of(context).pushReplacement( MaterialPageRoute(builder: (context) => QuizLobby()));
+
+
+
+
   }
 }

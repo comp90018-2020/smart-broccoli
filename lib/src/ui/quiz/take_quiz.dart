@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/models.dart';
 
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
@@ -19,7 +21,7 @@ class _TakeQuizState extends State<TakeQuiz> {
   double _height;
 
   // TODO: replace with provider inside build
-  List<String> items = ["A", "B", "C", "D", "E", "F", "G", "H"];
+  List<Quiz> items;
 
   @override
   void initState() {
@@ -39,6 +41,12 @@ class _TakeQuizState extends State<TakeQuiz> {
 
   @override
   Widget build(BuildContext context) {
+    QuizCollectionModel qcm =
+        Provider.of<QuizCollectionModel>(context, listen: true).init();
+    qcm.refreshAvailableQuizzes();
+    items = qcm.availableQuizzes;
+    // Debug code please ignore
+    if (items.length == 0) {}
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
       title: "Take Quiz",
