@@ -71,8 +71,9 @@ class QuizCollectionModel extends ChangeNotifier {
   Future<void> refreshCreatedQuizzes() async {
     _createdQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.OWNER);
-    _keyValueStore.setString('createdQuizzes',
-        json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
+    // TODO determine why this line is thwrowing a Exception
+   // _keyValueStore.setString('createdQuizzes',
+   //     json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
     notifyListeners();
   }
 }

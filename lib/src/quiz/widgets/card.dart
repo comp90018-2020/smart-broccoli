@@ -65,9 +65,9 @@ class _QuizCardState extends State<QuizCard> {
                       children: [
                         Text(
                           widget._quizName,
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 15),
                         ),
-                        Text(widget._groupName, style: TextStyle(fontSize: 15)),
+                        Text(widget._groupName, style: TextStyle(fontSize: 10)),
                       ],
                     ),
                   ),

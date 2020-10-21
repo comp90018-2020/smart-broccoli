@@ -12,23 +12,24 @@ class ManageQuiz extends StatefulWidget {
   State<StatefulWidget> createState() => new _ManageQuizState();
 }
 
+/// Get Quiz, we are assuming that the quizzes displayed here are quizzes where
+/// The user is the owner of
 class _ManageQuizState extends State<ManageQuiz> {
   // TODO: replace with provider inside build
   List<Quiz> items;
+  List<Group> group;
+  int gid;
 
   @override
   Widget build(BuildContext context) {
-    /// Can't be placed in init since we need the context
-    /// Further testing is required to see if placing it in login in the best way
-    /// forward
-    QuizCollectionModel qcm = Provider.of<QuizCollectionModel>(context, listen: true);
-    qcm.init();
-    qcm.refreshAvailableQuizzes();
-    items = qcm.availableQuizzes;
+    // Provider Init code
+    QuizCollectionModel qcm =
+        Provider.of<QuizCollectionModel>(context, listen: true);
+    GroupRegistryModel grm =
+        Provider.of<GroupRegistryModel>(context, listen: true);
+    group = grm.createdGroups;
+    items = qcm.createdQuizzes;
 
-
-    // Debug code please ignore
-    if (items.length == 0) {}
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
       title: "Manage Quiz",
@@ -74,10 +75,17 @@ class _ManageQuizState extends State<ManageQuiz> {
                   underline: Container(),
                   onChanged: (_) {},
                   isExpanded: true,
-                  items: [
-                    DropdownMenuItem(child: Center(child: Text('A')), value: 0),
-                    DropdownMenuItem(child: Center(child: Text('B')), value: 1)
-                  ],
+                  items: buildDropDownMenu(),
+                  /*
+                    DropdownMenuItem(
+                        child: Center(child: Text('A')),
+                        value: 0,
+                        onTap: () => updateList()),
+                    DropdownMenuItem(
+                        child: Center(child: Text('B')),
+                        value: 1,
+                        onTap: () => updateList())
+                    */
                   value: 0,
                 ),
               ),
@@ -88,11 +96,33 @@ class _ManageQuizState extends State<ManageQuiz> {
     );
   }
 
-  List<Quiz> getQuiz(List<Quiz> items, QuizType type) {
+  List<DropdownMenuItem> buildDropDownMenu() {
+    List<DropdownMenuItem> res = [];
+    // note that GID != i where i is the iteration index
+    for (var i = 0; i < group.length; i++) {
+        res.add(DropdownMenuItem(
+            child: Center(
+              child: Text("Testing"),
+            ),
+            value: i,
+            onTap: () => updateList(i)));
+    }
+    return res;
+  }
+
+  void updateList(int i) {
+    setState(() {
+      gid = group[i].id;
+    });
+  }
+
+  List<Quiz> getQuiz(QuizType type) {
     List<Quiz> res = [];
-    for (var i = 0; i < items.length; i++) {
-      if (items[i].type == type || type == null) {
-        res.add(items[i]);
+    for (var j = 0; j < items.length; j++) {
+      if ((items[j].type == type || type == null) &&
+          items[j].groupId == gid &&
+          items[j].role == GroupRole.OWNER) {
+        res.add(items[j]);
       }
     }
     return res;

@@ -22,8 +22,7 @@ class _QuizTab extends State<QuizTab> {
     /// Further testing is required to see if placing it in login in the best way
     /// forward
     QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true).init();
-    qcm.refreshAvailableQuizzes();
+    Provider.of<QuizCollectionModel>(context, listen: true);
     items = qcm.availableQuizzes;
 
     return new Scaffold(

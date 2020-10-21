@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 <<<<<<< HEAD:lib/src/ui/auth/init_page.dart
 =======
 import 'package:smart_broccoli/models.dart';
+import 'package:smart_broccoli/src/group/group_main.dart';
+import 'package:smart_broccoli/src/group/quiz_tab.dart';
 import 'package:smart_broccoli/src/quiz/manage_quiz.dart';
 import 'package:smart_broccoli/src/quiz/take_quiz.dart';
 >>>>>>> 3d15c5b... List of quizes should now be shown on all quiz related widgets, a issue with the .toJson function on quizzes is currently being investigated:lib/src/auth/init_page.dart
@@ -21,8 +23,14 @@ class _InitialRouterState extends State<InitialRouter> {
   Widget build(BuildContext context) {
     QuizCollectionModel qcm =
         Provider.of<QuizCollectionModel>(context, listen: true);
+    GroupRegistryModel grm =
+    Provider.of<GroupRegistryModel>(context, listen: true);
+    grm.refreshCreatedGroups();
     qcm.init();
     qcm.refreshAvailableQuizzes();
+    qcm.refreshCreatedQuizzes();
+
+
     return Consumer<AuthStateModel>(
       builder: (context, state, child) {
         return CustomPage(
@@ -43,12 +51,26 @@ class _InitialRouterState extends State<InitialRouter> {
                 ),
               ),
               RaisedButton(
+                  child: Text("Test All Quiz"),
                   onPressed: () => {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                                 builder: (BuildContext context) => TakeQuiz()))
                       }),
+              RaisedButton(
+                  child: Text("Test Group Quiz"),
+                  onPressed: () => {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => GroupMain()))
+                  }),
+              RaisedButton(
+                  child: Text("Test Group Quiz"),
+                  onPressed: () => {
+                    tryCatch(),
+                  }),
               Spacer(),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -65,5 +87,18 @@ class _InitialRouterState extends State<InitialRouter> {
         );
       },
     );
+  }
+
+  void tryCatch(){
+    try {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (BuildContext context) => ManageQuiz()));
+
+    } on Exception  catch(e) {
+      print('error caught: $e');
+    }
+
   }
 }
