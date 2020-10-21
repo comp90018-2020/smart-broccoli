@@ -34,7 +34,9 @@ export const formatQuestion = (
         time:
             process.env.NODE_EVN === "debug"
                 ? 20000
-                : session.quiz.timeLimit * 1000,
+                : session.quiz.timeLimit * 1000 +
+                  session.preQuestionReleasedAt -
+                  Date.now(),
     };
 };
 
