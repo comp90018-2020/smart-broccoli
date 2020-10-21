@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Represents a quiz card
@@ -19,7 +22,9 @@ class QuizCard extends StatefulWidget {
   /// Whether options are enabled
   final bool optionsEnabled;
 
-  QuizCard(this._quizName, this._groupName,
+  final Quiz _quiz;
+
+  QuizCard(this._quizName, this._groupName, this._quiz,
       {Key key, this.aspectRatio = 1.4, this.optionsEnabled = false});
 
   @override
@@ -34,7 +39,7 @@ class _QuizCardState extends State<QuizCard> {
     return Card(
       elevation: 2,
       child: InkWell(
-        onTap: () {},
+        onTap: () {_startQuiz();},
         child: LayoutBuilder(
           builder: (context, constraints) {
             // If the height of the picture is less than 0.4 of the viewport
@@ -97,6 +102,19 @@ class _QuizCardState extends State<QuizCard> {
         ),
       ),
     );
+  }
+
+  // TODO don't forget to de select quiz once the session is over.
+  // And also that this should only be used for debug purposes.
+  void _startQuiz(){
+    QuizCollectionModel qcm =
+        Provider.of<QuizCollectionModel>(context, listen: true);
+    qcm.selectQuiz(widget._quiz.id);
+    // Navigator to session stuff here
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) => QuizLobby()));
+
+
   }
 
   // Smart quiz indicator

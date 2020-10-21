@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/models.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
@@ -16,6 +18,7 @@ class QuizLobby extends StatefulWidget {
 class _StartLobby extends State<QuizLobby> {
   // Timer for countdown
   Timer _timer;
+
   // You should have a getter method here to get data from server
   int _start = 10;
 
@@ -56,6 +59,8 @@ class _StartLobby extends State<QuizLobby> {
   // Entry function
   @override
   Widget build(BuildContext context) {
+    QuizCollectionModel qcm =
+        Provider.of<QuizCollectionModel>(context, listen: true);
     return CustomPage(
       title: 'Take Quiz',
 
@@ -86,10 +91,8 @@ class _StartLobby extends State<QuizLobby> {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                       maxHeight: MediaQuery.of(context).size.height * 0.35),
-                  child: QuizCard(
-                    "Quiz name",
-                    "Quiz group",
-                  ),
+                  child: QuizCard(qcm.selectedQuiz.title,
+                      qcm.selectedQuiz.description, qcm.selectedQuiz),
                 ),
               ),
 
@@ -176,6 +179,7 @@ class _StartLobby extends State<QuizLobby> {
   }
 
   final userList = ["A", "B", "C", "D", "E", "F", "G"];
+
   // Quiz users list
   Widget _quizUsers() {
     return ListView.separated(

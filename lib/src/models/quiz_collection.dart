@@ -64,7 +64,7 @@ class QuizCollectionModel extends ChangeNotifier {
         .where((quiz) => quiz.role == GroupRole.MEMBER);
     print("TESTING" + _availableQuizzes.toString());
     // TODO determine why this line is thwrowing a Exception
-    // _keyValueStore.setString('availableQuizzes', json.encode(_availableQuizzes.map((quiz) => quiz.toJson())));
+    _keyValueStore.setString('availableQuizzes', json.encode(_availableQuizzes.map((quiz) => quiz.toJson())));
     notifyListeners();
   }
 
@@ -72,8 +72,8 @@ class QuizCollectionModel extends ChangeNotifier {
     _createdQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.OWNER);
     // TODO determine why this line is thwrowing a Exception
-   // _keyValueStore.setString('createdQuizzes',
-   //     json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
+   _keyValueStore.setString('createdQuizzes',
+   json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
     notifyListeners();
   }
 }

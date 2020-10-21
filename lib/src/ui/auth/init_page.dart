@@ -17,12 +17,11 @@ class _InitialRouterState extends State<InitialRouter> {
     QuizCollectionModel qcm =
         Provider.of<QuizCollectionModel>(context, listen: true);
     GroupRegistryModel grm =
-    Provider.of<GroupRegistryModel>(context, listen: true);
+        Provider.of<GroupRegistryModel>(context, listen: true);
     grm.refreshCreatedGroups();
     qcm.init();
     qcm.refreshAvailableQuizzes();
     qcm.refreshCreatedQuizzes();
-
 
     return Consumer<AuthStateModel>(
       builder: (context, state, child) {
@@ -54,16 +53,16 @@ class _InitialRouterState extends State<InitialRouter> {
               RaisedButton(
                   child: Text("Test Group Quiz"),
                   onPressed: () => {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => GroupMain()))
-                  }),
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (BuildContext context) => GroupMain()))
+                      }),
               RaisedButton(
                   child: Text("Test Group Quiz"),
                   onPressed: () => {
-                    tryCatch(),
-                  }),
+                        tryCatch(),
+                      }),
               Spacer(),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -82,16 +81,8 @@ class _InitialRouterState extends State<InitialRouter> {
     );
   }
 
-  void tryCatch(){
-    try {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) => ManageQuiz()));
-
-    } on Exception  catch(e) {
-      print('error caught: $e');
-    }
-
+  void tryCatch() {
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) => ManageQuiz()));
   }
 }

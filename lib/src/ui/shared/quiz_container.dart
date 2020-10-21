@@ -10,10 +10,8 @@ class QuizContainer extends StatefulWidget {
   QuizContainer(this.items,
       {Key key,
       this.header,
-
       this.padding = const EdgeInsets.only(top: 8, bottom: 8),
       this.headerPadding = const EdgeInsets.fromLTRB(8, 12, 8, 16),
-
       this.hiddenButton = false})
       : super(key: key);
 
@@ -54,7 +52,6 @@ class _BuildQuiz extends State<QuizContainer> {
               child: widget.header,
             ),
 
-
             // The list of quiz
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 300),
@@ -72,10 +69,8 @@ class _BuildQuiz extends State<QuizContainer> {
                               right: index == 0 ? 0 : 20)
                           : EdgeInsets.zero,
                       width: MediaQuery.of(context).size.width * 0.4,
-                      child: QuizCard(
-                        widget.items[index].title,
-                        widget.items[index].description,
-                      ),
+                      child: QuizCard(widget.items[index].title,
+                          widget.items[index].description, widget.items[index]),
                     );
                   },
                   // Space between the cards
