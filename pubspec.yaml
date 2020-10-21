@@ -38,8 +38,11 @@ flutter:
   assets:
     - assets/icon.png
 
-  # assets:
-  #   - assets/images/Logo_Placeholder.png
+  fonts:
+    - family: PatrickHandSC
+      fonts:
+        - asset: assets/fonts/PatrickHandSC-Regular.ttf
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
