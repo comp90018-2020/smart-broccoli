@@ -119,7 +119,6 @@ export class GameHandler {
         try {
             const player: Player = await this.verifySocket(socket);
             const session = this.sessions[player.sessionId];
-
             // add user to socket room
             socket.join(player.sessionId.toString());
             // add user to session
@@ -335,13 +334,13 @@ export class GameHandler {
         if (userCache.hasOwnProperty(userId)) {
             return userCache[userId];
         } else {
-            const res = await BackendUser.findByPk(userId, {
+            const { name, pictureId } = await BackendUser.findByPk(userId, {
                 attributes: ["name", "pictureId"],
             });
             const player = new Player(
                 userId,
-                res.name,
-                res.pictureId,
+                name,
+                pictureId,
                 null,
                 null,
                 null

@@ -12,12 +12,16 @@ export const formatQuestion = (
     session: GameSession,
     isHost: boolean
 ) => {
-    const questionCopy = session.quiz.questions[questionIndex].toJson();
+    // deep copy
+    const questionCopy = JSON.parse(
+        JSON.stringify(session.quiz.questions[questionIndex])
+    );
     if (!isHost) {
-        questionCopy.tf = null;
-        if (questionCopy.options !== null) {
-            for (const index of Object.keys(questionCopy.options)) {
-                questionCopy.options[Number(index)].correct = null;
+        if (questionCopy.tf !== null) {
+            questionCopy.tf = null;
+        } else {
+            for (const option of questionCopy.options) {
+                option.correct = null;
             }
         }
     }
