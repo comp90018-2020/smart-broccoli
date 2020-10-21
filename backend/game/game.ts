@@ -275,6 +275,10 @@ export class GameHandler {
                 } else if (session.status === GameStatus.Running) {
                     try {
                         const questionIndex = session.nextQuestionIdx();
+
+                        if (Object.keys(session.playerMap).length <= 0) {
+                            session.setToNextQuestion();
+                        }
                         // send question without answer to participants
                         socket
                             .to(player.sessionId.toString())

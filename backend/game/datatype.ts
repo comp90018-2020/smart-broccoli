@@ -1,6 +1,6 @@
 export enum GameErr {
     NoMoreQuestion = "No more question",
-    ThereIsRunningQuestion = "There is a running question",
+    ThereIsRunningQuestion = "There is player taking question",
 }
 
 export enum GameStatus {
