@@ -11,8 +11,10 @@ class QuizContainer extends StatefulWidget {
   QuizContainer(this.items,
       {Key key,
       this.header,
+
       this.padding = const EdgeInsets.only(top: 8, bottom: 8),
       this.headerPadding = const EdgeInsets.fromLTRB(8, 12, 8, 16),
+
       this.hiddenButton = false})
       : super(key: key);
 
@@ -47,10 +49,12 @@ class _BuildQuiz extends State<QuizContainer> {
         child: Column(
           children: <Widget>[
             // Header widgets
+
             Padding(
               padding: widget.headerPadding,
               child: widget.header,
             ),
+
 
             // The list of quiz
             ConstrainedBox(
