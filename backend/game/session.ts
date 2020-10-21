@@ -55,7 +55,7 @@ export class GameSession {
         return this.playerMap.hasOwnProperty(playerId);
     }
 
-    getCurrentQuestion() {
+    conductingQuestion() {
         const { timeLimit } = this.quiz;
         const { text, pictureId, options, tf } = this.quiz.questions[
             this.preQuestionIndex
