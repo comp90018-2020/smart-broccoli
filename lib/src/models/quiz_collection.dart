@@ -21,11 +21,14 @@ class QuizCollectionModel extends ChangeNotifier {
 
   /// Views subscribe to the fields below
   Quiz _selectedQuiz;
+
   Quiz get selectedQuiz => _selectedQuiz;
   Iterable<Quiz> _availableQuizzes;
+
   UnmodifiableListView<Quiz> get availableQuizzes =>
       UnmodifiableListView(_availableQuizzes);
   Iterable<Quiz> _createdQuizzes;
+
   UnmodifiableListView<Quiz> get createdQuizzes =>
       UnmodifiableListView(_createdQuizzes);
 
@@ -33,6 +36,11 @@ class QuizCollectionModel extends ChangeNotifier {
   QuizCollectionModel(this._keyValueStore, this._authStateModel,
       {QuizApi quizApi}) {
     _quizApi = quizApi ?? QuizApi();
+  }
+
+  // I seperated the initiation instructions as I want to avoid adding additional
+  // Provider boilerplate code in other classes.
+  init() {
     // load last record of available and created quizzes from local storage
     try {
       _availableQuizzes =

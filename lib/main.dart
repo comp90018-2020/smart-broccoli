@@ -3,23 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/router.dart';
+
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
+
+import 'package:smart_broccoli/src/models/user_repository.dart';
+
 import 'package:smart_broccoli/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final KeyValueStore _keyValueStore = await SharedPrefsKeyValueStore.create();
-  final AuthStateModel _authStateModel = AuthStateModel(_keyValueStore);
-  final UserRepository _userRepo = UserRepository();
+
+  AuthStateModel _asm = AuthStateModel(_keyValueStore);
+  UserRepository user = UserRepository();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => _authStateModel),
+        ChangeNotifierProvider(create: (_) => AuthStateModel(_keyValueStore)),
         ChangeNotifierProvider(
-          create: (context) =>
-              GroupRegistryModel(_keyValueStore, _authStateModel, _userRepo),
-        )
+            create: (_) => QuizCollectionModel(_keyValueStore, _asm)),
+        ChangeNotifierProvider(
+            create: (_) => UserProfileModel(_keyValueStore, _asm, user)),
       ],
       child: MyApp(),
     ),
