@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
-import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
+import { getUserSessionProfile } from "../controllers/user";
 import { GameSession } from "./session";
 import { formatQuestion, formatWelcome } from "./formatter";
 import { $socketIO } from "./index";
@@ -345,9 +345,7 @@ export class GameHandler {
         if (userCache.hasOwnProperty(userId)) {
             return userCache[userId];
         } else {
-            const { name, pictureId } = await BackendUser.findByPk(userId, {
-                attributes: ["name", "pictureId"],
-            });
+            const { name, pictureId } = await getUserSessionProfile(userId);
             const player = new Player(
                 userId,
                 name,
