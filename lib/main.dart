@@ -15,10 +15,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final KeyValueStore _keyValueStore = await SharedPrefsKeyValueStore.create();
 
-  AuthStateModel _asm = AuthStateModel(_keyValueStore);
   final AuthStateModel _authStateModel = AuthStateModel(_keyValueStore);
   final UserRepository _userRepo = UserRepository();
-
+  AuthStateModel _asm =  AuthStateModel(_keyValueStore);
+  UserRepository user = UserRepository();
   runApp(
     MultiProvider(
       providers: [
@@ -31,7 +31,7 @@ void main() async {
           create: (context) =>
               GroupRegistryModel(_keyValueStore, _authStateModel, _userRepo),
         )
-      ],
+ ],
       child: MyApp(),
     ),
   );
