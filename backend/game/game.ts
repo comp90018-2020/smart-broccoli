@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import { User as BackendUser } from "../models";
 import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { GameSession } from "./session";
-import { formatQuestion, formatWelcome, formatPlayer } from "./formatter";
+import { formatQuestion, formatWelcome } from "./formatter";
 import { $socketIO } from "./index";
 import { GameErr, GameStatus, Player, Answer } from "./datatype";
 
@@ -20,7 +20,7 @@ export class GameHandler {
     }
 
     public async checkEnv() {
-        if (process.env.NODE_ENV === "debug") {
+        if (process.env.SOCKET_MODE === "debug") {
             console.log("[-] Debug mode.");
             console.log("[*] reset a game session for debug");
             const sessionId = 19;
@@ -44,7 +44,7 @@ export class GameHandler {
      * @param socket socket
      */
     async verifySocket(socket: Socket): Promise<Player> {
-        if (process.env.NODE_ENV === "debug") {
+        if (process.env.SOCKET_MODE === "debug") {
             const player = await this.getUserInfo(
                 Number(socket.handshake.query.userId)
             );
@@ -173,7 +173,7 @@ export class GameHandler {
                 .to(player.sessionId.toString())
                 .emit(
                     "playerLeave",
-                    formatPlayer(await this.getUserInfo(player.id))
+                    (await this.getUserInfo(player.id)).format()
                 );
             // disconnect
             socket.disconnect();
@@ -212,7 +212,7 @@ export class GameHandler {
                         // release the firt question
                         this.next(socket);
                     },
-                    process.env.NODE_ENV === "debug"
+                    process.env.SOCKET_MODE === "debug"
                         ? 1
                         : session.quizStartsAt - Date.now(),
                     socket

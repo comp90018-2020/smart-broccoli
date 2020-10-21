@@ -54,19 +54,6 @@ export const formatWelcome = (playerMap: { [playerId: number]: Player }) => {
 };
 
 /**
- * format one player for event-> welcome
- * @param player a player
- */
-export const formatPlayer = (player: Player) => {
-    const { id, name, pictureId } = player;
-    return {
-        id: id,
-        name: name,
-        pictureId: pictureId,
-    };
-};
-
-/**
  * format a player record for event-> questionOutcome
  * @param player a player
  */

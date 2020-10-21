@@ -29,6 +29,17 @@ export class Player {
         this.record.streak = -1;
         this.preRecord = JSON.parse(JSON.stringify(this.record));
     }
+
+    /**
+     * format player for event-> welcome
+     */
+    format() {
+        return {
+            id: this.id,
+            name: this.name,
+            pictureId: this.pictureId,
+        };
+    }
 }
 
 // WIP

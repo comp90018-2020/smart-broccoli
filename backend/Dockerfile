@@ -13,6 +13,8 @@ COPY --from=builder /build/build /app
 WORKDIR /app
 # Set NODE_ENV to production
 ENV NODE_ENV production
+# Set SOCKET_MODE to debug
+ENV SOCKET_MODE debug
 
 # Install production dependencies
 RUN yarn install --production --ignore-optional --frozen-lockfile && yarn cache clean && yarn add dotenv
