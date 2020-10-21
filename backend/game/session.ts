@@ -83,22 +83,21 @@ export class GameSession {
     nextQuestionIdx(): number {
         if (this.questionIndex >= this.quiz.questions.length) {
             throw GameErr.NoMoreQuestion;
-        } else if (!this.isReadyForNextQuestion) {
+        } else if (
+            !this.isReadyForNextQuestion &&
+            Object.keys(this.playerMap).length > 0
+        ) {
             throw GameErr.ThereIsRunningQuestion;
         } else {
-            this.preQuestionReleasedAt = Date.now();
-            setTimeout(
-                () => {
-                    if (this.questionIndex === this.preQuestionIndex) {
-                        this.setToNextQuestion();
-                    }
-                },
-                Object.keys(this.playerMap).length === 0
-                    ? 0
-                    : this.quiz.timeLimit * 1000
-            );
+            setTimeout(() => {
+                if (this.questionIndex === this.preQuestionIndex) {
+                    this.setToNextQuestion();
+                }
+            }, this.quiz.timeLimit * 1000);
             this.preQuestionIndex = this.questionIndex;
+            this.preQuestionReleasedAt = Date.now();
             this.isReadyForNextQuestion = false;
+
             return this.questionIndex;
         }
     }
