@@ -101,10 +101,9 @@ class LogoContainer extends Container {
                   Text(
                     'Smart Broccoli',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 36,
                       color: Color(0xFF125E12),
-                      letterSpacing: 1.2,
-                      fontFamily: 'BPreplay',
+                      fontFamily: 'PatrickHandSC',
                     ),
                   )
                 ],

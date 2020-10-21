@@ -12,6 +12,11 @@ class AcknowledgementsPage extends StatelessWidget {
   static const _libs = [
     {'title': 'Broccoli Logo by Yaling Deng'},
     {
+      'title': 'Logo font: Patrick Hand SC',
+      'url':
+          'https://raw.githubusercontent.com/m4rc1e/PatrickHandSC/master/OFL.txt'
+    },
+    {
       'title': 'indexed_stack by cirnok',
       'url': 'https://gist.github.com/cirnok/e1b70f5d841e47c9d85ccdf6ae866984'
     },
