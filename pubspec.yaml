@@ -39,9 +39,9 @@ flutter:
     - assets/icon.png
 
   fonts:
-    - family: BPreplay
+    - family: PatrickHandSC
       fonts:
-        - asset: assets/fonts/BPreplayBold.otf
+        - asset: assets/fonts/PatrickHandSC-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
