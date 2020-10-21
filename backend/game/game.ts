@@ -142,7 +142,14 @@ export class GameHandler {
                 );
             } else if (session.status === GameStatus.Running) {
                 // there is question released
-                socket.emit("nextQuestion", session.conductingQuestion());
+                socket.emit(
+                    "nextQuestion",
+                    formatQuestion(
+                        session.preQuestionIndex,
+                        session,
+                        player.role === "host" ? true : false
+                    )
+                );
             }
         } catch (error) {
             if (process.env.NODE_EVN === "debug") {

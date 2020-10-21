@@ -18,7 +18,7 @@ export class GameSession {
     public questionIndex = 0;
     public preQuestionIndex = 0;
     public quizStartsAt = 0;
-    private currentQuestionReleasedAt = 0;
+    public preQuestionReleasedAt = 0;
     public isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
     public hasFinalRankReleased: boolean = false;
@@ -55,25 +55,6 @@ export class GameSession {
         return this.playerMap.hasOwnProperty(playerId);
     }
 
-    conductingQuestion() {
-        const { timeLimit } = this.quiz;
-        const { text, pictureId, options, tf } = this.quiz.questions[
-            this.preQuestionIndex
-        ];
-        return {
-            id: this.preQuestionIndex,
-            text: text,
-            tf: tf,
-            options: options,
-            pictureId: pictureId,
-            time:
-                this.preQuestionIndex === this.questionIndex
-                    ? timeLimit * 1000 -
-                      (Date.now() - this.currentQuestionReleasedAt)
-                    : 0,
-        };
-    }
-
     getQuestion(idx: number) {
         return this.quiz[idx];
     }
@@ -105,7 +86,7 @@ export class GameSession {
         } else if (!this.isReadyForNextQuestion) {
             throw GameErr.ThereIsRunningQuestion;
         } else {
-            this.currentQuestionReleasedAt = Date.now();
+            this.preQuestionReleasedAt = Date.now();
             setTimeout(
                 () => {
                     if (this.questionIndex === this.preQuestionIndex) {
