@@ -27,7 +27,8 @@ export class Player {
         this.record.bonusPoints = 0;
         this.record.points = 0;
         this.record.streak = -1;
-        this.preRecord = this.record.toJson();
+        // deep copy
+        this.preRecord = JSON.parse(JSON.stringify(this.record));
     }
 
     /**
@@ -44,7 +45,7 @@ export class Player {
     /**
      * format record for event-> questionOutcome
      */
-    formatRecord = () => {
+    formatRecord() {
         const { oldPos, newPos, bonusPoints, points, streak } = this.record;
         return {
             id: this.id,
@@ -58,7 +59,7 @@ export class Player {
                 streak: streak,
             },
         };
-    };
+    }
 }
 
 // WIP
