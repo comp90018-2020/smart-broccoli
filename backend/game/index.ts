@@ -42,7 +42,7 @@ export default (socketIO: Server) => {
                 handler.showBoard(socket);
             });
 
-            if (process.env.NODE_ENV === "debug") {
+            if (process.env.SOCKET_MODE === "debug") {
                 // reset for debug
                 socket.on("resetForDebug", () => {
                     handler.checkEnv();
