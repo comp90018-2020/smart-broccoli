@@ -1,14 +1,10 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/router.dart';
-
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
-
 import 'package:smart_broccoli/src/models/user_repository.dart';
-
 import 'package:smart_broccoli/theme.dart';
 
 void main() async {
@@ -17,7 +13,7 @@ void main() async {
 
   final AuthStateModel _authStateModel = AuthStateModel(_keyValueStore);
   final UserRepository _userRepo = UserRepository();
-  AuthStateModel _asm =  AuthStateModel(_keyValueStore);
+  AuthStateModel _asm = AuthStateModel(_keyValueStore);
   runApp(
     MultiProvider(
       providers: [
@@ -30,7 +26,7 @@ void main() async {
           create: (context) =>
               GroupRegistryModel(_keyValueStore, _authStateModel, _userRepo),
         )
- ],
+      ],
       child: MyApp(),
     ),
   );

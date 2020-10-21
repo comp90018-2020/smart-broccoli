@@ -1,10 +1,10 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "smart-broccoli",
-            "request": "launch",
-            "type": "dart"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "smart-broccoli",
+      "request": "launch",
+      "type": "dart"
+    }
+  ]
 }

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-
-import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
+import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
 class QuizTab extends StatefulWidget {
   @override
@@ -23,7 +22,7 @@ class _QuizTab extends State<QuizTab> {
     /// Further testing is required to see if placing it in login in the best way
     /// forward
     QuizCollectionModel qcm =
-    Provider.of<QuizCollectionModel>(context, listen: true);
+        Provider.of<QuizCollectionModel>(context, listen: true);
     items = qcm.availableQuizzes;
 
     return new Scaffold(

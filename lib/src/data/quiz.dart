@@ -97,9 +97,11 @@ class Quiz {
 /// Abstract class; not for instantiation.
 abstract class Question {
   Quiz _quiz;
+
   Quiz get quiz => _quiz;
 
   int _id;
+
   int get id => _id;
   String text;
   int imgId;

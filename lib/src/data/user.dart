@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'group.dart';
 
 enum UserType { REGISTERED, UNREGISTERED }

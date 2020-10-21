@@ -3,10 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data/group.dart';
 import 'package:smart_broccoli/src/data/quiz.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/theme.dart';
-
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
+import 'package:smart_broccoli/theme.dart';
 
 /// Manage quiz page
 class ManageQuiz extends StatefulWidget {

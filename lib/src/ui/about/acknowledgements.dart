@@ -1,11 +1,10 @@
 // Acknowledgements page, adapted from:
 // https://github.com/YC/another_authenticator
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart' show Divider, ListTile;
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Acknowledgements page for used libraries and code
 class AcknowledgementsPage extends StatelessWidget {

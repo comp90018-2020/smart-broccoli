@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/src/data/quiz.dart';
 import 'package:smart_broccoli/src/models.dart';
-
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
@@ -53,7 +51,8 @@ class _TakeQuizState extends State<TakeQuiz> {
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        QuizContainer(getQuiz(items, null), header: QuizPinBox(key: _buildQuizKey)),
+        QuizContainer(getQuiz(items, null),
+            header: QuizPinBox(key: _buildQuizKey)),
 
         // Live quiz
         QuizContainer(getQuiz(items, QuizType.LIVE), header: QuizPinBox()),

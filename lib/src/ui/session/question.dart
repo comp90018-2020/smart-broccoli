@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
@@ -37,6 +37,7 @@ class _QuizQuestion extends State<QuizQuestion> {
   // TODO after form change transition to the next activity or leaderboard
   Timer _timer;
   int _start = 10;
+
   void startTimer() {
     const oneSec = const Duration(seconds: 1);
     _timer = new Timer.periodic(
