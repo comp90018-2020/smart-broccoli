@@ -25,7 +25,9 @@ class QuizCollectionModel extends ChangeNotifier {
       UnmodifiableListView(_createdQuizzes);
 
   /// Constructor for external use
-  QuizCollectionModel(this._authStateModel, {QuizApi quizApi});
+  QuizCollectionModel(this._authStateModel, {QuizApi quizApi}) {
+    _quizApi = quizApi ?? QuizApi();
+  }
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
