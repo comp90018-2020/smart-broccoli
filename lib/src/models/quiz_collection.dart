@@ -22,10 +22,10 @@ class QuizCollectionModel extends ChangeNotifier {
   /// Views subscribe to the fields below
   Quiz _selectedQuiz;
   Quiz get selectedQuiz => _selectedQuiz;
-  Iterable<Quiz> _availableQuizzes;
+  Iterable<Quiz> _availableQuizzes = Iterable.empty();
   UnmodifiableListView<Quiz> get availableQuizzes =>
       UnmodifiableListView(_availableQuizzes);
-  Iterable<Quiz> _createdQuizzes;
+  Iterable<Quiz> _createdQuizzes = Iterable.empty();
   UnmodifiableListView<Quiz> get createdQuizzes =>
       UnmodifiableListView(_createdQuizzes);
 
@@ -54,16 +54,16 @@ class QuizCollectionModel extends ChangeNotifier {
   Future<void> refreshAvailableQuizzes() async {
     _availableQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.MEMBER);
-    _keyValueStore.setString('availableQuizzes',
-        json.encode(_availableQuizzes.map((quiz) => quiz.toJson())));
+    // _keyValueStore.setString('availableQuizzes',
+    //     json.encode(_availableQuizzes.map((quiz) => quiz.toJson())));
     notifyListeners();
   }
 
   Future<void> refreshCreatedQuizzes() async {
     _createdQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.OWNER);
-    _keyValueStore.setString('createdQuizzes',
-        json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
+    // _keyValueStore.setString('createdQuizzes',
+    //     json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
     notifyListeners();
   }
 }
