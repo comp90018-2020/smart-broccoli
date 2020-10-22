@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/ui/profile/promoted_profile.dart';
-import 'package:smart_broccoli/src/ui/profile/registered_profile.dart';
-
+import 'package:smart_broccoli/src/ui/profile/profile.dart';
 
 class ProfileMain extends StatelessWidget {
   // Debug value
@@ -25,7 +23,7 @@ class ProfileMain extends StatelessWidget {
         // A user which has joined but not promoted
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => RegisteredProfile(),
+            builder: (context) => Profile(ProfileType.Registered),
           ),
         );
       });
@@ -34,7 +32,7 @@ class ProfileMain extends StatelessWidget {
       Future.delayed(Duration.zero, () {
         // A promoted user
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => PromotedProfile()),
+          MaterialPageRoute(builder: (context) => Profile(ProfileType.Promoted)),
         );
       });
     }

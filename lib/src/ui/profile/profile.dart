@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/ui/profile/promoted_profile.dart';
+import 'package:smart_broccoli/src/ui/profile/util_table.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 // Profile
@@ -27,12 +27,14 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _nameController = new TextEditingController();
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
+  final TextEditingController _confirmPasswordController = new TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _nameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -133,7 +135,7 @@ class _ProfileState extends State<Profile> {
     // TODO provider update here
     if (ProfileType.Registering == widget.pType) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => PromotedProfile()),
+        MaterialPageRoute(builder: (context) => Profile(ProfileType.Promoted)),
       );
     } else {
       Navigator.of(context).pushReplacement(
@@ -184,188 +186,21 @@ class _ProfileState extends State<Profile> {
           border: TableBorder.all(width: 0.8, color: Colors.black12),
           children: [
             // Name
-            nameTableRow(),
+            NameTableRow(_isEdit,_nameController),
             // Email
             (widget.pType == ProfileType.Promoted ||
                     widget.pType == ProfileType.Registering)
-                ? emailTableRow()
+                ? EmailTableRow(_isEdit,_emailController)
                 : TableRow(children: [Container(), Container()]),
             (widget.pType == ProfileType.Registering)
-                ? passwordTableRow(true)
+                ? PasswordTable(true,_isEdit,_passwordController)
                 : TableRow(children: [Container(), Container()]),
             (widget.pType == ProfileType.Registering)
-                ? passwordTableRow2(true)
+                ? PasswordConfirmTable(true,_isEdit,_confirmPasswordController)
                 : TableRow(children: [Container(), Container()]),
           ],
         ),
       ),
-    );
-  }
-
-  /// I can't find a more elegant way of abstracting the Table Rows away since
-  /// These table rows need the edit varible.
-
-  TableRow nameTableRow() {
-    return TableRow(children: [
-      _paddedCell(Text('NAME', style: TextStyle(color: Colors.black38)),
-          padding: EdgeInsets.only(left: 16)),
-      _paddedCell(
-        TextFormField(
-          readOnly: !_isEdit,
-          textAlignVertical: TextAlignVertical.center,
-          decoration: InputDecoration(
-              contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(color: Colors.black38),
-              suffixIcon: IconButton(
-                icon: _isEdit ? Icon(Icons.clear) : Icon(null),
-                onPressed: () {},
-              ),
-              border: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              hintText: 'John Smith'),
-          controller: _nameController,
-        ),
-        padding: EdgeInsets.only(left: 16),
-      ),
-    ]);
-  }
-
-  TableRow emailTableRow() {
-    return TableRow(
-      children: [
-        _paddedCell(Text('EMAIL', style: TextStyle(color: Colors.black38)),
-            padding: EdgeInsets.only(left: 16)),
-        _paddedCell(
-          TextFormField(
-            textAlignVertical: TextAlignVertical.center,
-            readOnly: !_isEdit,
-            decoration: InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                hintStyle: TextStyle(color: Colors.black38),
-                border: InputBorder.none,
-                suffixIcon: IconButton(
-                  icon: _isEdit ? Icon(Icons.clear) : Icon(null),
-                  onPressed: () {},
-                ),
-                // A space
-                focusedBorder: InputBorder.none,
-                hintText: 'name@example.com'),
-            controller: _emailController,
-          ),
-          padding: EdgeInsets.only(left: 16),
-        ),
-      ],
-    );
-  }
-
-  TableRow passwordTableRow(bool show) {
-    return TableRow(
-      children: show
-          ? [
-              _paddedCell(
-                  Text('Password', style: TextStyle(color: Colors.black38)),
-                  padding: EdgeInsets.only(left: 16)),
-              _paddedCell(
-                TextFormField(
-                  obscureText: true,
-                  textAlignVertical: TextAlignVertical.center,
-                  //readOnly: true,
-
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                      hintStyle: TextStyle(color: Colors.black38),
-                      border: InputBorder.none,
-                      suffixIcon: IconButton(
-                        icon: _isEdit ? Icon(Icons.clear) : Icon(null),
-                        onPressed: () {},
-                      ),
-                      // A space
-                      focusedBorder: InputBorder.none,
-                      hintText: 'password'),
-                  controller: _passwordController,
-                ),
-                padding: EdgeInsets.only(left: 16),
-              ),
-            ]
-          : [
-              _paddedCell(
-                TextFormField(
-                  obscureText: true,
-                  textAlignVertical: TextAlignVertical.center,
-                  //readOnly: true,
-
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                      hintStyle: TextStyle(color: Colors.black38),
-                      border: InputBorder.none,
-                      suffixIcon: IconButton(
-                        icon: _isEdit ? Icon(Icons.clear) : Icon(null),
-                        onPressed: () {},
-                      ),
-                      // A space
-                      focusedBorder: InputBorder.none,
-                      hintText: 'password'),
-                  controller: _passwordController,
-                ),
-                padding: EdgeInsets.only(left: 16),
-              ),
-            ],
-    );
-  }
-
-  TableRow passwordTableRow2(bool show) {
-    return TableRow(
-      children: show
-          ? [
-              _paddedCell(
-                  Text('Confirm Password',
-                      style: TextStyle(color: Colors.black38)),
-                  padding: EdgeInsets.only(left: 16)),
-              _paddedCell(
-                TextFormField(
-                  obscureText: true,
-                  textAlignVertical: TextAlignVertical.center,
-                  //readOnly: true,
-
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                      hintStyle: TextStyle(color: Colors.black38),
-                      border: InputBorder.none,
-                      suffixIcon: IconButton(
-                        icon: _isEdit ? Icon(Icons.clear) : Icon(null),
-                        onPressed: () {},
-                      ),
-                      // A space
-                      focusedBorder: InputBorder.none,
-                      hintText: 'Confirm password'),
-                  controller: _passwordController,
-                ),
-                padding: EdgeInsets.only(left: 16),
-              ),
-            ]
-          : [
-              _paddedCell(
-                TextFormField(
-                  obscureText: true,
-                  textAlignVertical: TextAlignVertical.center,
-                  //readOnly: true,
-
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                      hintStyle: TextStyle(color: Colors.black38),
-                      border: InputBorder.none,
-                      suffixIcon: IconButton(
-                        icon: _isEdit ? Icon(Icons.clear) : Icon(null),
-                        onPressed: () {},
-                      ),
-                      // A space
-                      focusedBorder: InputBorder.none,
-                      hintText: 'Confirm password'),
-                  controller: _passwordController,
-                ),
-                padding: EdgeInsets.only(left: 16),
-              ),
-            ],
     );
   }
 
@@ -399,8 +234,8 @@ class _ProfileState extends State<Profile> {
                   },
                   border: TableBorder.all(width: 0.8, color: Colors.black12),
                   children: [
-                    passwordTableRow(false),
-                    passwordTableRow2(false),
+                    PasswordTable(false,_isEdit,_passwordController),
+                    PasswordConfirmTable(false,_isEdit,_confirmPasswordController)
                   ],
                 ),
               ),
