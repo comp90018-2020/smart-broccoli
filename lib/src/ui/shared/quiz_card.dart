@@ -168,6 +168,7 @@ class _QuizCardState extends State<QuizCard> {
                     child: RaisedButton(
                       onPressed: () {},
                       color: Theme.of(context).accentColor,
+                      textColor: Theme.of(context).colorScheme.onBackground,
                       child: Text('Activate'),
                       padding: EdgeInsets.zero,
                       shape: SmartBroccoliTheme.raisedButtonShape,
@@ -189,7 +190,7 @@ class _QuizCardState extends State<QuizCard> {
                               onChanged: (bool value) {},
                             ),
                             Container(
-                                child: Text('Active'),
+                                child: Text('Visible'),
                                 transform: Matrix4.translationValues(-3, 0, 0))
                           ],
                         );
@@ -205,7 +206,11 @@ class _QuizCardState extends State<QuizCard> {
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             onPressed: () {},
             elevation: 2.0,
-            child: Icon(Icons.settings, size: 20),
+            child: Icon(
+              Icons.settings,
+              size: 20,
+              color: Theme.of(context).colorScheme.onBackground,
+            ),
             shape: CircleBorder(),
           ),
         ],
