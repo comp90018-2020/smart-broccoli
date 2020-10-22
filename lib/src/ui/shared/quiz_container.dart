@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:smart_broccoli/src/data.dart';
+
 import 'quiz_card.dart';
 
 /// Build a list of quizzes
@@ -14,7 +16,7 @@ class QuizContainer extends StatefulWidget {
       : super(key: key);
 
   /// List of items
-  final List<String> items;
+  final List<Quiz> items;
 
   /// Header widget
   final Widget header;
@@ -66,10 +68,7 @@ class _BuildQuiz extends State<QuizContainer> {
                               right: index == 0 ? 0 : 20)
                           : EdgeInsets.zero,
                       width: MediaQuery.of(context).size.width * 0.4,
-                      child: QuizCard(
-                        'Quiz name',
-                        'Group name',
-                      ),
+                      child: QuizCard(widget.items[index]),
                     );
                   },
                   // Space between the cards

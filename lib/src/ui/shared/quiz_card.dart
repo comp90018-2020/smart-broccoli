@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Represents a quiz card
 class QuizCard extends StatefulWidget {
-  // TODO: change attributes to Group/Quiz
-  /// Quiz name
-  final String _quizName;
+  final Quiz _quiz;
 
-  // TODO: change attributes to Group/Quiz
-  /// Group name
-  final String _groupName;
-
-  // Aspect ratio
+  /// Aspect ratio
   final double aspectRatio;
 
   /// Whether options are enabled
   final bool optionsEnabled;
 
-  QuizCard(this._quizName, this._groupName,
+  QuizCard(this._quiz,
       {Key key, this.aspectRatio = 1.4, this.optionsEnabled = false});
 
   @override
@@ -27,10 +23,20 @@ class QuizCard extends StatefulWidget {
 }
 
 class _QuizCardState extends State<QuizCard> {
-  bool admin = true;
-  QuizType quizType = QuizType.SELF_PACED;
+  String title;
+  String groupName;
+  bool admin;
+  QuizType quizType;
 
   Widget build(BuildContext context) {
+    title = widget._quiz.title;
+    groupName = Provider.of<GroupRegistryModel>(context)
+            .groupIdMap[widget._quiz.groupId]
+            ?.name ??
+        "Group ID: ${widget._quiz.groupId}";
+    admin = widget._quiz.role == GroupRole.OWNER;
+    quizType = widget._quiz.type;
+
     return Card(
       elevation: 2,
       child: InkWell(
@@ -64,12 +70,8 @@ class _QuizCardState extends State<QuizCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            widget._quizName,
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          Text(widget._groupName,
-                              style: TextStyle(fontSize: 15)),
+                          Text(title, style: TextStyle(fontSize: 20)),
+                          Text(groupName, style: TextStyle(fontSize: 15)),
                         ],
                       ),
                     ),
@@ -86,9 +88,12 @@ class _QuizCardState extends State<QuizCard> {
 
                     // Quiz status
                     Container(
-                        padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
-                        width: double.maxFinite,
-                        child: selfPacedIndicator())
+                      padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
+                      width: double.maxFinite,
+                      child: quizType == QuizType.LIVE
+                          ? liveIndicator()
+                          : selfPacedIndicator(),
+                    )
                   ],
                 ),
               ],
