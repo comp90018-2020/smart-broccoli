@@ -336,6 +336,8 @@ export const getQuiz = async (userId: number, quizId: number) => {
             return {
                 ...question.toJSON,
                 tf: null,
+                // Number of correct answers
+                numCorrect: question.numCorrect,
                 // Possibly null for truefalse
                 options: question.options
                     ? question.options.map((opt) => {

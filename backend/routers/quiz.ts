@@ -89,6 +89,8 @@ import {
  *           type: number
  *         tf:
  *           type: boolean
+ *         numCorrect:
+ *           type: number
  *         options:
  *           type: array
  *           items:
