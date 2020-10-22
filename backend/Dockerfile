@@ -17,7 +17,7 @@ ENV NODE_ENV production
 ENV SOCKET_MODE debug
 
 # Install production dependencies
-RUN yarn install --production --ignore-optional --frozen-lockfile && yarn cache clean && yarn add dotenv
+RUN yarn install --production --ignore-optional --frozen-lockfile && yarn cache clean
 
 # Add user
 # RUN adduser -D comp90018
