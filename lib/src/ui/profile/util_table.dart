@@ -70,41 +70,6 @@ class EmailTableRow extends TableRow {
       );
 }
 
-class emailTableRow extends TableRow {
-  emailTableRow(bool isEdit, TextEditingController _nameController)
-      : super(
-          children: [
-            _paddedCell(Text('EMAIL', style: TextStyle(color: Colors.black38)),
-                padding: EdgeInsets.only(left: 16)),
-            _paddedCell(
-              TextFormField(
-                textAlignVertical: TextAlignVertical.center,
-                readOnly: !isEdit,
-                decoration: InputDecoration(
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: TextStyle(color: Colors.black38),
-                    border: InputBorder.none,
-                    suffixIcon: IconButton(
-                      icon: isEdit ? Icon(Icons.clear) : Icon(null),
-                      onPressed: () {},
-                    ),
-                    // A space
-                    focusedBorder: InputBorder.none,
-                    hintText: 'name@example.com'),
-                controller: _nameController,
-              ),
-              padding: EdgeInsets.only(left: 16),
-            ),
-          ],
-        );
-
-  static Widget _paddedCell(Widget child,
-          {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
-      TableCell(
-        child: Padding(padding: padding, child: Expanded(child: child)),
-      );
-}
-
 class PasswordTable extends TableRow {
   PasswordTable(
       bool show, bool isEdit, TextEditingController _passwordController)
@@ -118,8 +83,6 @@ class PasswordTable extends TableRow {
                     TextFormField(
                       obscureText: true,
                       textAlignVertical: TextAlignVertical.center,
-//readOnly: true,
-
                       decoration: InputDecoration(
                           contentPadding: EdgeInsets.zero,
                           hintStyle: TextStyle(color: Colors.black38),
@@ -128,7 +91,6 @@ class PasswordTable extends TableRow {
                             icon: isEdit ? Icon(Icons.clear) : Icon(null),
                             onPressed: () {},
                           ),
-// A space
                           focusedBorder: InputBorder.none,
                           hintText: 'password'),
                       controller: _passwordController,
@@ -140,9 +102,8 @@ class PasswordTable extends TableRow {
                   _paddedCell(
                     TextFormField(
                       obscureText: true,
-                      textAlignVertical: TextAlignVertical.center,
-//readOnly: true,
-
+                      textAlignVertical:
+                          TextAlignVertical.center, //readOnly: true
                       decoration: InputDecoration(
                           contentPadding: EdgeInsets.zero,
                           hintStyle: TextStyle(color: Colors.black38),
@@ -151,7 +112,6 @@ class PasswordTable extends TableRow {
                             icon: isEdit ? Icon(Icons.clear) : Icon(null),
                             onPressed: () {},
                           ),
-// A space
                           focusedBorder: InputBorder.none,
                           hintText: 'password'),
                       controller: _passwordController,
@@ -231,4 +191,3 @@ class PasswordConfirmTable extends TableRow {
         child: Padding(padding: padding, child: Expanded(child: child)),
       );
 }
-

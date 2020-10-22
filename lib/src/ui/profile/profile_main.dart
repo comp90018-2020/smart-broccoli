@@ -32,7 +32,8 @@ class ProfileMain extends StatelessWidget {
       Future.delayed(Duration.zero, () {
         // A promoted user
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => Profile(ProfileType.Promoted)),
+          MaterialPageRoute(
+              builder: (context) => Profile(ProfileType.Promoted)),
         );
       });
     }

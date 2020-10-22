@@ -27,7 +27,8 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _nameController = new TextEditingController();
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
-  final TextEditingController _confirmPasswordController = new TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      new TextEditingController();
 
   @override
   void dispose() {
@@ -186,30 +187,24 @@ class _ProfileState extends State<Profile> {
           border: TableBorder.all(width: 0.8, color: Colors.black12),
           children: [
             // Name
-            NameTableRow(_isEdit,_nameController),
+            NameTableRow(_isEdit, _nameController),
             // Email
             (widget.pType == ProfileType.Promoted ||
                     widget.pType == ProfileType.Registering)
-                ? EmailTableRow(_isEdit,_emailController)
+                ? EmailTableRow(_isEdit, _emailController)
                 : TableRow(children: [Container(), Container()]),
             (widget.pType == ProfileType.Registering)
-                ? PasswordTable(true,_isEdit,_passwordController)
+                ? PasswordTable(true, _isEdit, _passwordController)
                 : TableRow(children: [Container(), Container()]),
             (widget.pType == ProfileType.Registering)
-                ? PasswordConfirmTable(true,_isEdit,_confirmPasswordController)
+                ? PasswordConfirmTable(
+                    true, _isEdit, _confirmPasswordController)
                 : TableRow(children: [Container(), Container()]),
           ],
         ),
       ),
     );
   }
-
-  /// Creates a padded table cell
-  Widget _paddedCell(Widget child,
-          {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
-      TableCell(
-        child: Padding(padding: padding, child: Expanded(child: child)),
-      );
 
   void _showLoginFailedDialogue() {
     showDialog(
@@ -234,8 +229,9 @@ class _ProfileState extends State<Profile> {
                   },
                   border: TableBorder.all(width: 0.8, color: Colors.black12),
                   children: [
-                    PasswordTable(false,_isEdit,_passwordController),
-                    PasswordConfirmTable(false,_isEdit,_confirmPasswordController)
+                    PasswordTable(false, _isEdit, _passwordController),
+                    PasswordConfirmTable(
+                        false, _isEdit, _confirmPasswordController)
                   ],
                 ),
               ),
