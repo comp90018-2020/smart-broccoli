@@ -1,5 +1,5 @@
 {
     "watch": ["game", "routers", "controllers"],
     "ext": "ts",
-    "exec": "npm run devstart"      
+    "exec": "npm run prettier && npm run devstart"      
 }
