@@ -1,35 +1,43 @@
 // import 'package:flutter/cupertino.dart';
+// import 'package:flutter/material.dart';
+
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import '../data/user.dart';
+import '../socket_data/user.dart';
+import '../socket_data/tuple.dart';
+import '../socket_data/record.dart';
+import '../socket_data/question.dart';
+import '../socket_data/outcome_host.dart';
+import '../socket_data/outcome_user.dart';
+
 
 enum SessionState {
   PENDING,    // in lobby and waiting (unknown how long to start)
   STARTING,   // the quiz will start in a known number of seconds
   QUESTION,   // the quiz is currently on a question
-  OUTCOME,    // between questions (leaderboard)
+  OUTCOME,    // between questions (LeaderBoard)
   FINISHED,
   ABORTED,
 }
 
 void main(){
   GameSessionModel test = new GameSessionModel();
-  test.connect(1, 1);
-
+  test.connect(2, 1);
+  // test.startQuiz();
 }
 
 class GameSessionModel {
   // URL of server
-  static const String SERVER_URL = 'http://127.0.0.1:3000';
+  static const String SERVER_URL = 'https://fuzzybroccoli.com';
 
-  List<User> players = [];            // all players currently in session (id, name)
+  List<User> players = [];     // all players currently in session (id, name)
+  int startCountDown;
+  Question question;
+  OutcomeHost outcomeHost;
+  OutcomeUser outcomeUser;
+  List<int> questionAnswered = [];
+  int userRole;
   SessionState state;
-  // datatype_define_myself(not json) _leaderboard;
-  // List<List> _playerRecordJSON;
-  // List<List> _playerAnsweredJSON;      //No. players who have answered current question
-  // var _playerAheadRecordJSON = jsonEncode(null);
-  // int _currentQuestion;
-  // int _timeUntilStart;
 
   /// The socket which we enclose
   IO.Socket socket;
@@ -49,97 +57,122 @@ class GameSessionModel {
     socket.opts['query']['userId'] = userId;
     print(socket.opts);
     socket.connect();
+    userRole = userId;
 
-    // Print on connection
-    // socket.on('connect', (_) {
-    //   print('connected');
-    //
-    //   notifyListeners();
-    // });
+    socket.on('connect', (message) {
+      print('connected');
+      // notifyListeners();
+    });
 
     socket.on('welcome', (message) {
       print('welcome');
       print(message);
       message.forEach((player) => players.add(User.fromJson(player)));
-      state = SessionState.PENDING;
       print(players);
-      // notifyListener
+      // notifyListeners();
     });
-    //
-    // socket.on('playerJoin', (message) {
-    //   print("playerJoin");
-    //   print(message);
-    //   _players.add(message);
-    //   _session_State = 'PENDING';
-    //   notifyListeners();
-    // });
-    //
-    // socket.on('playerLeave', (message) {
-    //   print("playerLeave");
-    //   print(message);
-    //   // change fields
-    //   _players.remove(jsonDecode(message)); // mia
-    //   notifyListeners();
-    // });
-    //
-    // socket.on('starting', (message) {
-    //   print("starting");
-    //   print(message);
-    //   // change fields
-    //   _session_State = 'STARTING';
-    //   _timeUntilStart = (int) message; // ms mia
-    //   notifyListeners();
-    // });
-    //
-    // socket.on('cancelled', (message) {
-    //   print("cancelled");
-    //   print(message);
-    //   // change fields
-    //   _session_State = 'FINISHED';
-    //   // notifyListeners();
-    // });
-    //
-    // socket.on('nextQuestion', (message) {
-    //   print("nextQuestion: ");
-    //   print(message);
-    //   // change fields
-    //   _session_State = 'QUESTION';
-    //   _currentQuestion = message.question; // mia
-    //   notifyListeners();
-    // });
-    //
-    // socket.on('questionAnswered', (message) {
-    //   print("questionAnswered: ");
-    //   print(message);
-    //   // change fields
-    //   _playerAnsweredJSON.append(message.user); //mia
-    //   notifyListeners();
-    // });
-    //
-    // socket.on('questionOutcome', (message) {
-    //   print("questionOutcome: ");
-    //   print(message);
-    //   // change fields
-    //   _session_State = 'OUTCOME';
-    //   _leaderboardJSON.append(message); // mia
-    //   _leaderboardJSON.sort(); //mia
-    //   _playerRecordJSON.refresh(message); // mia
-    //   _playerAheadRecordJSON.refresh(message); // mia ??
-    //   notifyListeners();
-    // });
+
+    socket.on('playerJoin', (message) {
+      print("playerJoin");
+      print(message);
+      players.add(User.fromJson(message));
+      print(players);
+      // notifyListeners();
+    });
+
+    socket.on('playerLeave', (message) {
+      print("playerLeave");
+      print(message);
+      for(User player in players) {
+        if(User.fromJson(message).id == player.id){
+          players.remove(player);
+          break;
+        }
+      }
+      print(players);
+      // notifyListeners();
+    });
+
+    socket.on('starting', (message) {
+      print("starting");
+      print(message);
+      startCountDown = int.parse(message);
+      print(startCountDown);
+      // notifyListeners();
+    });
+
+    socket.on('cancelled', (message) {
+      print("cancelled");
+      // notifyListeners();
+    });
+
+    socket.on('nextQuestion', (message) {
+      print("nextQuestion");
+      print(message);
+      question = Question(message);
+      print(question);
+      // notifyListeners();
+    });
+
+    socket.on('questionAnswered', (message) {
+      print("questionAnswered");
+      print(message);
+      questionAnswered.add(message['question']);
+      questionAnswered.add(message['count']);
+      questionAnswered.add(message['total']);
+      print(questionAnswered);
+      // notifyListeners();
+    });
+
+    socket.on('questionOutcome', (message) {
+      print("questionOutcome: ");
+      print(message);
+      if( userRole == 1) {
+        outcomeHost = OutcomeHost(message);
+        print(outcomeHost);
+      }
+      else {
+        outcomeUser = OutcomeUser(message);
+        print(outcomeUser);
+      }
+      // notifyListeners();
+    });
 
     // socket.emit("answer");
-
     // socket.emit("start");
-    //
     // socket.emit("next");
-    //
     // socket.emit("showBoard");
-    //
     // socket.emit("quit");
-    //
     // socket.emit("abort");
   }
+
+  /// host action
+  void startQuiz(){
+    socket.emit('start');
+  }
+
+  void abortQuiz(){
+    socket.emit('abort');
+  }
+
+  void nextQuestion(){
+    socket.emit('next');
+  }
+
+  void showLeaderBoard(){
+    socket.emit('showBoard');
+  }
+
+  /// participant action
+  void quitQuiz(){
+    socket.emit('quit');
+  }
+
+  void answerQuestion(dynamic answer){
+    socket.emit('answer', answer);
+  }
+
+
 
   /// Subscribe to socket event
   void _subscribe(String event, dynamic Function(dynamic) handler) {
@@ -163,41 +196,12 @@ class GameSessionModel {
     socket.disconnect();
   }
 
-  /// host action
-  void Start_Quiz(int userId){
-    // check if need to verify user id
-    socket.emit('start');
-  }
-
-  void Abort_Quiz(int userId){
-    socket.emit('abort');
-  }
-
-  void Next_Question(int userId){
-    socket.emit('next');
-  }
-
-  void Show_Leaderboard(int userId){
-    socket.emit('showBoard');
-  }
-
-  /// participant action
-  void Quit_Quiz(int userId){
-    socket.emit('quit');
-  }
-
-  void Answer_Question(int userId, dynamic answer){
-    socket.emit('answer', answer);
-  }
-
 /// get data from socket
-
-
 // String receive_from_socket(String event, dynamic data){
-//
-// }
-//
-// void send_to_socket(String event, dynamic data){
-//
-// }
+// //
+// // }
+// //
+// // void send_to_socket(String event, dynamic data){
+// //
+// // }
 }
