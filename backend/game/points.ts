@@ -35,7 +35,7 @@ export class PointSystem {
 
     public setForNewQuestion() {
         this.rankOfNextRightAns = 0;
-        this.answeredPlayers = new Set([]);
+        this.answeredPlayers.clear();
     }
 
     public getPointsAnsStreak(
