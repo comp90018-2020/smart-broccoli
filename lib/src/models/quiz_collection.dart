@@ -33,18 +33,40 @@ class QuizCollectionModel extends ChangeNotifier {
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
+    try {
+      _selectedQuiz.picture =
+          await _quizApi.getQuizPicture(_authStateModel.token, id);
+    } catch (_) {
+      // cannot obtain picture; move on
+    }
     notifyListeners();
   }
 
   Future<void> refreshAvailableQuizzes() async {
     _availableQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.MEMBER);
+    await Future.wait(_availableQuizzes.map((Quiz quiz) async {
+      try {
+        quiz.picture =
+            await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
+      } catch (_) {
+        // cannot obtain picture; move on
+      }
+    }));
     notifyListeners();
   }
 
   Future<void> refreshCreatedQuizzes() async {
     _createdQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.OWNER);
+    await Future.wait(_createdQuizzes.map((Quiz quiz) async {
+      try {
+        quiz.picture =
+            await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
+      } catch (_) {
+        // cannot obtain picture; move on
+      }
+    }));
     notifyListeners();
   }
 }
