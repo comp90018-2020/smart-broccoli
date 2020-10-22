@@ -164,7 +164,7 @@ class _QuizCardState extends State<QuizCard> {
               // Activate live quiz
               ? Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(right: 6),
+                    padding: const EdgeInsets.only(left: 10, right: 6),
                     child: RaisedButton(
                       onPressed: () {},
                       color: Theme.of(context).accentColor,
