@@ -4,7 +4,7 @@ export class PointSystem {
     // base points for each question before apply streak factor etc
     private readonly pointsEachQuestion = 1000;
     // set of answered player, mainly used for calculate points factor
-    public answeredPlayer: Set<number> = new Set([]);
+    public answeredPlayers: Set<number> = new Set([]);
     // the number of players that have give the right answer
     private rankOfNextRightAns: number = 0;
 
@@ -35,7 +35,7 @@ export class PointSystem {
 
     public setForNewQuestion() {
         this.rankOfNextRightAns = 0;
-        this.answeredPlayer = new Set([]);
+        this.answeredPlayers = new Set([]);
     }
 
     public getPointsAnsStreak(
@@ -43,7 +43,7 @@ export class PointSystem {
         player: Player,
         totalPlayer: number
     ) {
-        this.answeredPlayer.add(player.id);
+        this.answeredPlayers.add(player.id);
         return {
             points: Math.floor(
                 this.getFactor(
