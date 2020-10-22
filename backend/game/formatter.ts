@@ -32,7 +32,7 @@ export const formatQuestion = (
         options: questionCopy.options,
         pictureId: questionCopy.pictureId,
         time:
-            process.env.NODE_EVN === "debug"
+            process.env.SOCKET_MODE === "debug"
                 ? 20000
                 : session.quiz.timeLimit * 1000 +
                   session.preQuestionReleasedAt -
