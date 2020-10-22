@@ -72,7 +72,7 @@ export class GameHandler {
             const session = this.sessions[player.sessionId];
             if (
                 // this player has not answered
-                !session.pointSys.answeredPlayer.has(player.id) &&
+                !session.pointSys.answeredPlayers.has(player.id) &&
                 // the question is conducting
                 !session.isReadyForNextQuestion
             ) {
@@ -93,12 +93,12 @@ export class GameHandler {
                     .to(player.sessionId.toString())
                     .emit("questionAnswered", {
                         question: answer.questionNo,
-                        count: session.pointSys.answeredPlayer.size,
+                        count: session.pointSys.answeredPlayers.size,
                         total: Object.keys(session.playerMap).length,
                     });
 
                 if (
-                    session.pointSys.answeredPlayer.size >=
+                    session.pointSys.answeredPlayers.size >=
                     Object.keys(session.playerMap).length
                 ) {
                     // set session state
