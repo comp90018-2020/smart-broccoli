@@ -124,16 +124,16 @@ export class GameHandler {
             const session = this.sessions[player.sessionId];
             // add user to socket room
             socket.join(player.sessionId.toString());
-            // add user to session
-            await session.addParticipant(player);
             if (
                 player.role !== "host" &&
                 !session.playerMap.hasOwnProperty(player.id)
             ) {
-                // broadcast that user has joined
-                const msg = await this.getUserInfo(player.id);
-                socket.to(player.sessionId.toString()).emit("playerJoin", msg);
+                socket
+                    .to(player.sessionId.toString())
+                    .emit("playerJoin", player.profile());
             }
+            // add user to session
+            session.addParticipant(player);
 
             socket.emit("welcome", formatWelcome(session.playerMap));
 
@@ -180,10 +180,7 @@ export class GameHandler {
             // broadcast that user has left
             $socketIO
                 .to(player.sessionId.toString())
-                .emit(
-                    "playerLeave",
-                    (await this.getUserInfo(player.id)).profile()
-                );
+                .emit("playerLeave", player.profile());
             // disconnect
             socket.disconnect();
         } catch (error) {
