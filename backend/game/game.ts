@@ -202,7 +202,10 @@ export class GameHandler {
             const player: Player = await this.verifySocket(socket);
             const session = this.sessions[player.sessionId];
 
-            if (player.role === "host") {
+            if (
+                player.role === "host" &&
+                session.status == GameStatus.Pending
+            ) {
                 session.status = GameStatus.Starting;
                 session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
                 // Broadcast that quiz will be started
