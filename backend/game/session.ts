@@ -30,7 +30,6 @@ export class GameSession {
     }
 
     async addParticipant(player: Player) {
-        console.log("try add", player.socketId, player.role);
         if (player.role === "host") {
             if (
                 this.host != null &&
@@ -40,13 +39,11 @@ export class GameSession {
                 $socketIO.sockets.connected[this.host.socketId].disconnect();
             }
             this.host = player;
-            console.log("new host", player.socketId);
         } else {
             if (this.playerMap.hasOwnProperty(player.id)) {
                 this.removeParticipant(player, false);
             }
             this.playerMap[player.id] = player;
-            console.log("participant", player.socketId);
         }
     }
 
