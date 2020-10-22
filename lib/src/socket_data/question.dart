@@ -10,7 +10,11 @@ class Question {
     this.no = json['no'];
     this.text = json['text'];
     this.pictureId = json['pictureId'];
-    this.options = Question_Mod(json);
+    if(json['options'] == null)
+    {
+      this.options = null;
+    }
+    else {this.options = Question_Mod(json);}
     this.tf = json['tf'];
     this.time = json['time'];
   }
