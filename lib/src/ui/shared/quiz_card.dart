@@ -61,7 +61,11 @@ class _QuizCardState extends State<QuizCard> {
                     showPicture
                         ? AspectRatio(
                             aspectRatio: widget.aspectRatio,
-                            child: Placeholder())
+                            child: widget._quiz.picture == null
+                                ? Placeholder()
+                                : Image.memory(widget._quiz.picture,
+                                    fit: BoxFit.cover),
+                          )
                         : SizedBox(),
 
                     // Quiz title & Group name
