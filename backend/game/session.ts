@@ -30,21 +30,34 @@ export class GameSession {
     }
 
     async addParticipant(player: Player) {
+        console.log("try add", player.socketId, player.role);
         if (player.role === "host") {
-            if (this.host != null && this.host.socketId != player.socketId) {
+            if (
+                this.host != null &&
+                this.host.socketId != player.socketId &&
+                $socketIO.sockets.connected.hasOwnProperty(this.host.socketId)
+            ) {
                 $socketIO.sockets.connected[this.host.socketId].disconnect();
             }
             this.host = player;
+            console.log("new host", player.socketId);
         } else {
             if (this.playerMap.hasOwnProperty(player.id)) {
                 this.removeParticipant(player, false);
             }
             this.playerMap[player.id] = player;
+            console.log("participant", player.socketId);
         }
     }
 
     async removeParticipant(player: Player, isForce: boolean) {
-        if (isForce || player.socketId != this.playerMap[player.id].socketId) {
+        if (
+            (isForce ||
+                player.socketId != this.playerMap[player.id].socketId) &&
+            $socketIO.sockets.connected.hasOwnProperty(
+                this.playerMap[player.id].socketId
+            )
+        ) {
             $socketIO.sockets.connected[
                 this.playerMap[player.id].socketId
             ].disconnect();

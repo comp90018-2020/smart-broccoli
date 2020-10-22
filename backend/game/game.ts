@@ -46,27 +46,24 @@ export class GameHandler {
      */
     async verifySocket(socket: Socket): Promise<Player> {
         if (process.env.SOCKET_MODE === "debug") {
+            const userId = Number(socket.handshake.query.userId);
             const player = new Player(
-                socket.handshake.query.userId,
-                socket.handshake.query.userId,
+                userId,
+                userId.toString(),
                 null,
-                null,
-                null,
-                null
+                socket.id,
+                19,
+                Number(userId) === 1 ? "host" : "participant"
             );
-            player.socketId = socket.id;
-            player.sessionId = 19;
-            player.role = Number(player.id) === 1 ? "host" : "participant";
             return player;
         } else {
             const plain = await decrypt(socket.handshake.query.token);
-            const player = await this.getUserInfo(Number(plain.userId));
-            const { role, sessionId } = await decrypt(
-                socket.handshake.query.token
+            const player = await this.getUserInfo(
+                plain.userId,
+                socket.id,
+                plain.sessionId,
+                plain.role
             );
-            player.socketId = socket.id;
-            player.sessionId = sessionId;
-            player.role = role;
             return player;
         }
     }
@@ -128,7 +125,7 @@ export class GameHandler {
             // add user to socket room
             socket.join(player.sessionId.toString());
             // add user to session
-            await session.addParticipant(await this.getUserInfo(player.id));
+            await session.addParticipant(player);
             if (
                 player.role !== "host" &&
                 !session.playerMap.hasOwnProperty(player.id)
@@ -347,7 +344,12 @@ export class GameHandler {
         }
     }
 
-    async getUserInfo(userId: number): Promise<Player> {
+    async getUserInfo(
+        userId: number,
+        socketId?: string,
+        sessionId?: number,
+        role?: string
+    ): Promise<Player> {
         if (userCache.hasOwnProperty(userId)) {
             return userCache[userId];
         } else {
@@ -356,9 +358,9 @@ export class GameHandler {
                 userId,
                 name,
                 pictureId,
-                null,
-                null,
-                null
+                socketId,
+                sessionId,
+                role
             );
             userCache[userId] = player;
             return player;
