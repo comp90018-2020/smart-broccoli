@@ -1,9 +1,7 @@
 import 'dart:collection';
-import 'dart:convert';
 import 'package:flutter/widgets.dart';
 
 import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 
 import 'auth_state.dart';
@@ -16,9 +14,6 @@ class QuizCollectionModel extends ChangeNotifier {
   /// API provider for the user profile service
   QuizApi _quizApi;
 
-  /// Local storage service
-  final KeyValueStore _keyValueStore;
-
   /// Views subscribe to the fields below
   Quiz _selectedQuiz;
   Quiz get selectedQuiz => _selectedQuiz;
@@ -30,21 +25,7 @@ class QuizCollectionModel extends ChangeNotifier {
       UnmodifiableListView(_createdQuizzes);
 
   /// Constructor for external use
-  QuizCollectionModel(this._keyValueStore, this._authStateModel,
-      {QuizApi quizApi}) {
-    _quizApi = quizApi ?? QuizApi();
-    // load last record of available and created quizzes from local storage
-    try {
-      _availableQuizzes =
-          (json.decode(_keyValueStore.getString('availableQuizzes')) as List)
-              .map((repr) => Quiz.fromJson(repr));
-    } catch (_) {}
-    try {
-      _createdQuizzes =
-          (json.decode(_keyValueStore.getString('createdQuizzes')) as List)
-              .map((repr) => Quiz.fromJson(repr));
-    } catch (_) {}
-  }
+  QuizCollectionModel(this._authStateModel, {QuizApi quizApi});
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
@@ -54,16 +35,12 @@ class QuizCollectionModel extends ChangeNotifier {
   Future<void> refreshAvailableQuizzes() async {
     _availableQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.MEMBER);
-    // _keyValueStore.setString('availableQuizzes',
-    //     json.encode(_availableQuizzes.map((quiz) => quiz.toJson())));
     notifyListeners();
   }
 
   Future<void> refreshCreatedQuizzes() async {
     _createdQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
         .where((quiz) => quiz.role == GroupRole.OWNER);
-    // _keyValueStore.setString('createdQuizzes',
-    //     json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
     notifyListeners();
   }
 }

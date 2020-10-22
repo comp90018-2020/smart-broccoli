@@ -19,8 +19,7 @@ void main() async {
           create: (context) => GroupRegistryModel(_authStateModel, _userRepo),
         ),
         ChangeNotifierProvider(
-          create: (context) =>
-              QuizCollectionModel(_keyValueStore, _authStateModel),
+          create: (context) => QuizCollectionModel(_authStateModel),
         )
       ],
       child: MyApp(),
