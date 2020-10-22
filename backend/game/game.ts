@@ -81,7 +81,7 @@ export class GameHandler {
                     content.MCSelection,
                     content.TFSelection
                 );
-                if (answer.questionNo != session.preQuestionIndex) {
+                if (answer.questionNo != session.questionIndex) {
                     // quetion number is not right
                     return;
                 }
@@ -146,7 +146,7 @@ export class GameHandler {
                 socket.emit(
                     "nextQuestion",
                     formatQuestion(
-                        session.preQuestionIndex,
+                        session.questionIndex,
                         session,
                         player.role === "host" ? true : false
                     )
