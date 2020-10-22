@@ -25,18 +25,17 @@ export const formatQuestion = (
             }
         }
     }
+    const remainingTime =
+        session.quiz.timeLimit * 1000 +
+        session.preQuestionReleasedAt -
+        Date.now();
     return {
         no: questionIndex,
         text: questionCopy.text,
         tf: questionCopy.tf,
         options: questionCopy.options,
         pictureId: questionCopy.pictureId,
-        time:
-            process.env.SOCKET_MODE === "debug"
-                ? 20000
-                : session.quiz.timeLimit * 1000 +
-                  session.preQuestionReleasedAt -
-                  Date.now(),
+        time: remainingTime < 0 ? 0 : remainingTime,
     };
 };
 
