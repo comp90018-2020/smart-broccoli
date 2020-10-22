@@ -48,9 +48,11 @@ export class Player {
     formatRecord() {
         const { oldPos, newPos, bonusPoints, points, streak } = this.record;
         return {
-            id: this.id,
-            name: this.name,
-            pictureId: this.pictureId,
+            player: {
+                id: this.id,
+                name: this.name,
+                pictureId: this.pictureId,
+            },
             record: {
                 oldPos: oldPos,
                 newPos: newPos,
