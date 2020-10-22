@@ -26,7 +26,7 @@ export class Player {
         this.record.newPos = null;
         this.record.bonusPoints = 0;
         this.record.points = 0;
-        this.record.streak = -1;
+        this.record.streak = 0;
         // deep copy
         this.preRecord = JSON.parse(JSON.stringify(this.record));
     }
