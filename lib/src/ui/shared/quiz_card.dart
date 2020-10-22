@@ -165,14 +165,22 @@ class _QuizCardState extends State<QuizCard> {
               ? Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10, right: 6),
-                    child: RaisedButton(
-                      onPressed: () {},
-                      color: Theme.of(context).accentColor,
-                      textColor: Theme.of(context).colorScheme.onBackground,
-                      child: Text('Activate'),
-                      padding: EdgeInsets.zero,
-                      shape: SmartBroccoliTheme.raisedButtonShape,
-                    ),
+                    child: widget.quiz.isActive
+                        ? OutlineButton(
+                            onPressed: null,
+                            child: Text('Activated'),
+                            padding: EdgeInsets.zero,
+                            shape: SmartBroccoliTheme.raisedButtonShape,
+                          )
+                        : RaisedButton(
+                            onPressed: () {},
+                            color: Theme.of(context).accentColor,
+                            textColor:
+                                Theme.of(context).colorScheme.onBackground,
+                            child: Text('Activate'),
+                            padding: EdgeInsets.zero,
+                            shape: SmartBroccoliTheme.raisedButtonShape,
+                          ),
                   ),
                 )
               // Toggle activeness of self-paced quiz
