@@ -16,8 +16,8 @@ export class GameSession {
     public host: Player = null;
     // players info, user id to map
     public playerMap: { [playerId: number]: Player } = {};
+    public nextQuestionIndex = 0;
     public questionIndex = 0;
-    public preQuestionIndex = 0;
     public quizStartsAt = 0;
     public preQuestionReleasedAt = 0;
     public isReadyForNextQuestion: boolean = true;
@@ -56,12 +56,8 @@ export class GameSession {
         return this.playerMap.hasOwnProperty(playerId);
     }
 
-    getQuestion(idx: number) {
-        return this.quiz[idx];
-    }
-
     isCurrQuestionActive() {
-        return this.preQuestionIndex === this.questionIndex;
+        return this.questionIndex === this.nextQuestionIndex;
     }
 
     getAnsOfQuestion(questionIndex: number): Answer {
@@ -82,7 +78,7 @@ export class GameSession {
     }
 
     nextQuestionIdx(): number {
-        if (this.questionIndex >= this.quiz.questions.length) {
+        if (this.nextQuestionIndex >= this.quiz.questions.length) {
             throw GameErr.NoMoreQuestion;
         } else if (
             !this.isReadyForNextQuestion &&
@@ -91,20 +87,20 @@ export class GameSession {
             throw GameErr.ThereIsRunningQuestion;
         } else {
             setTimeout(() => {
-                if (this.questionIndex === this.preQuestionIndex) {
+                if (this.nextQuestionIndex === this.questionIndex) {
                     this.setToNextQuestion();
                 }
             }, this.quiz.timeLimit * 1000);
-            this.preQuestionIndex = this.questionIndex;
+            this.questionIndex = this.nextQuestionIndex;
             this.preQuestionReleasedAt = Date.now();
             this.isReadyForNextQuestion = false;
 
-            return this.questionIndex;
+            return this.nextQuestionIndex;
         }
     }
 
     assessAns(playerId: number, answer: Answer) {
-        const correctAnswer = this.getAnsOfQuestion(this.preQuestionIndex);
+        const correctAnswer = this.getAnsOfQuestion(this.questionIndex);
         const player = this.playerMap[playerId];
         // if this answer is correct
         let correct;
@@ -134,7 +130,7 @@ export class GameSession {
     }
 
     setToNextQuestion() {
-        this.questionIndex = this.preQuestionIndex + 1;
+        this.nextQuestionIndex = this.questionIndex + 1;
         this.pointSys.setForNewQuestion();
         this.isReadyForNextQuestion = true;
     }
@@ -177,7 +173,7 @@ export class GameSession {
                     ? null
                     : rank[record.newPos - 1];
             const questionOutcome = {
-                question: this.preQuestionIndex,
+                question: this.questionIndex,
                 leaderBoard: rank.slice(0, 5),
                 record: this.playerMap[Number(id)].record,
                 playerAhead: playerAheadRecord,
@@ -185,7 +181,7 @@ export class GameSession {
             $socketIO.to(socketId).emit("questionOutcome", questionOutcome);
         }
         hostSocket.emit("questionOutcome", {
-            question: this.preQuestionIndex,
+            question: this.questionIndex,
             leaderboard: rank,
         });
     }
