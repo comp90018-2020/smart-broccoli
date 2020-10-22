@@ -7,7 +7,7 @@ import 'package:smart_broccoli/theme.dart';
 
 /// Represents a quiz card
 class QuizCard extends StatefulWidget {
-  final Quiz _quiz;
+  final Quiz quiz;
 
   /// Aspect ratio
   final double aspectRatio;
@@ -15,7 +15,7 @@ class QuizCard extends StatefulWidget {
   /// Whether options are enabled
   final bool optionsEnabled;
 
-  QuizCard(this._quiz,
+  QuizCard(this.quiz,
       {Key key, this.aspectRatio = 1.4, this.optionsEnabled = false});
 
   @override
@@ -23,90 +23,85 @@ class QuizCard extends StatefulWidget {
 }
 
 class _QuizCardState extends State<QuizCard> {
-  String title;
-  String groupName;
-  bool admin;
-  QuizType quizType;
+  @override
+  Widget build(BuildContext context) => Card(
+        elevation: 2,
+        child: InkWell(
+          onTap: () {},
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // If the height of the picture is less than 0.4 of the viewport
+              // height, show it
+              bool showPicture = constraints.maxWidth / widget.aspectRatio <
+                  MediaQuery.of(context).size.height * 0.4;
 
-  Widget build(BuildContext context) {
-    title = widget._quiz.title;
-    groupName = Provider.of<GroupRegistryModel>(context)
-            .getGroup(widget._quiz.groupId)
-            ?.name ??
-        "Group ID: ${widget._quiz.groupId}";
-    admin = widget._quiz.role == GroupRole.OWNER;
-    quizType = widget._quiz.type;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Picture and title/group name
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Quiz picture
+                      showPicture
+                          ? AspectRatio(
+                              aspectRatio: widget.aspectRatio,
+                              child: widget.quiz.picture == null
+                                  ? Placeholder()
+                                  : Image.memory(widget.quiz.picture,
+                                      fit: BoxFit.cover),
+                            )
+                          : SizedBox(),
 
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: () {},
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // If the height of the picture is less than 0.4 of the viewport
-            // height, show it
-            bool showPicture = constraints.maxWidth / widget.aspectRatio <
-                MediaQuery.of(context).size.height * 0.4;
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                // Picture and title/group name
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Quiz picture
-                    showPicture
-                        ? AspectRatio(
-                            aspectRatio: widget.aspectRatio,
-                            child: widget._quiz.picture == null
-                                ? Placeholder()
-                                : Image.memory(widget._quiz.picture,
-                                    fit: BoxFit.cover),
-                          )
-                        : SizedBox(),
-
-                    // Quiz title & Group name
-                    Container(
-                      padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(title, style: TextStyle(fontSize: 20)),
-                          Text(groupName, style: TextStyle(fontSize: 15)),
-                        ],
+                      // Quiz title & Group name
+                      Container(
+                        padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.quiz.title,
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              Provider.of<GroupRegistryModel>(context)
+                                      .getGroup(widget.quiz.groupId)
+                                      ?.name ??
+                                  "Group ID: ${widget.quiz.groupId}",
+                              style: TextStyle(fontSize: 15),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
 
-                // Space between
+                  // Space between
 
-                // Admin/quiz status
-                Column(
-                  children: [
-                    // Admin options
-                    buildAdmin(),
+                  // Admin/quiz status
+                  Column(
+                    children: [
+                      // Admin options
+                      buildAdmin(),
 
-                    // Quiz status
-                    Container(
-                      padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
-                      width: double.maxFinite,
-                      child: quizType == QuizType.LIVE
-                          ? liveIndicator()
-                          : selfPacedIndicator(),
-                    )
-                  ],
-                ),
-              ],
-            );
-          },
+                      // Quiz status
+                      Container(
+                        padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
+                        width: double.maxFinite,
+                        child: widget.quiz.type == QuizType.LIVE
+                            ? liveIndicator()
+                            : selfPacedIndicator(),
+                      )
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   // Smart quiz indicator
   Widget smartIndicator() => buildIndicator(
@@ -156,7 +151,7 @@ class _QuizCardState extends State<QuizCard> {
   /// Build admin options row
   Widget buildAdmin() {
     // Not admin, no box
-    if (!admin) {
+    if (widget.quiz.role != GroupRole.OWNER) {
       return Container();
     }
 
@@ -165,7 +160,7 @@ class _QuizCardState extends State<QuizCard> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          quizType == QuizType.LIVE
+          widget.quiz.type == QuizType.LIVE
               // Activate live quiz
               ? Expanded(
                   child: Padding(
