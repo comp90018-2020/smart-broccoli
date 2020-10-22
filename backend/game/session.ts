@@ -2,13 +2,14 @@ import { Socket, Server } from "socket.io";
 import { PointSystem } from "./points";
 import { $socketIO } from "./index";
 import { GameErr, GameStatus, Player, GameResult, Answer } from "./datatype";
+import Quiz from "../models/quiz";
 import { endSession } from "../controllers/session";
 
 export class GameSession {
     // session id from controller
     private sessionId: number;
     // quiz from database
-    public quiz: any;
+    public quiz: Quiz;
     // game status
     public status: GameStatus = GameStatus.Pending;
     // host info
@@ -23,7 +24,7 @@ export class GameSession {
     public pointSys: PointSystem = new PointSystem();
     public hasFinalRankReleased: boolean = false;
 
-    constructor($quiz: any, $sessionId: number) {
+    constructor($quiz: Quiz, $sessionId: number) {
         this.sessionId = $sessionId;
         this.quiz = $quiz;
     }
