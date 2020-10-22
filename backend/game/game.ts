@@ -108,7 +108,7 @@ export class GameHandler {
                 }
             }
         } catch (error) {
-            if (process.env.NODE_EVN === "debug") {
+            if (process.env.SOCKET_MODE === "debug") {
                 // https://stackoverflow.com/questions/18391212
                 socket.send(
                     JSON.stringify(error, Object.getOwnPropertyNames(error))
@@ -155,7 +155,7 @@ export class GameHandler {
                 );
             }
         } catch (error) {
-            if (process.env.NODE_EVN === "debug") {
+            if (process.env.SOCKET_MODE === "debug") {
                 // https://stackoverflow.com/questions/18391212
                 socket.send(
                     JSON.stringify(error, Object.getOwnPropertyNames(error))
@@ -187,7 +187,7 @@ export class GameHandler {
             // disconnect
             socket.disconnect();
         } catch (error) {
-            if (process.env.NODE_EVN === "debug") {
+            if (process.env.SOCKET_MODE === "debug") {
                 // https://stackoverflow.com/questions/18391212
                 socket.send(
                     JSON.stringify(error, Object.getOwnPropertyNames(error))
@@ -228,7 +228,7 @@ export class GameHandler {
                 );
             }
         } catch (error) {
-            if (process.env.NODE_EVN === "debug") {
+            if (process.env.SOCKET_MODE === "debug") {
                 // https://stackoverflow.com/questions/18391212
                 socket.send(
                     JSON.stringify(error, Object.getOwnPropertyNames(error))
@@ -254,7 +254,7 @@ export class GameHandler {
                 this.checkEnv();
             }
         } catch (error) {
-            if (process.env.NODE_EVN === "debug") {
+            if (process.env.SOCKET_MODE === "debug") {
                 // https://stackoverflow.com/questions/18391212
                 socket.send(
                     JSON.stringify(error, Object.getOwnPropertyNames(error))
@@ -314,7 +314,7 @@ export class GameHandler {
                 }
             }
         } catch (error) {
-            if (process.env.NODE_EVN === "debug") {
+            if (process.env.SOCKET_MODE === "debug") {
                 // https://stackoverflow.com/questions/18391212
                 socket.send(
                     JSON.stringify(error, Object.getOwnPropertyNames(error))
@@ -334,7 +334,7 @@ export class GameHandler {
                 session.releaseBoard(socket);
             }
         } catch (error) {
-            if (process.env.NODE_EVN === "debug") {
+            if (process.env.SOCKET_MODE === "debug") {
                 // https://stackoverflow.com/questions/18391212
                 socket.send(
                     JSON.stringify(error, Object.getOwnPropertyNames(error))

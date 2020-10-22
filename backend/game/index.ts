@@ -49,7 +49,7 @@ export default (socketIO: Server) => {
                 });
             }
         } catch (err) {
-            if (process.env.NODE_EVN === "debug") {
+            if (process.env.SOCKET_MODE === "debug") {
                 // https://stackoverflow.com/questions/18391212
                 socket.send(
                     JSON.stringify(err, Object.getOwnPropertyNames(err))
