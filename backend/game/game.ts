@@ -46,8 +46,13 @@ export class GameHandler {
      */
     async verifySocket(socket: Socket): Promise<Player> {
         if (process.env.SOCKET_MODE === "debug") {
-            const player = await this.getUserInfo(
-                Number(socket.handshake.query.userId)
+            const player = new Player(
+                socket.handshake.query.userId,
+                socket.handshake.query.userId,
+                null,
+                null,
+                null,
+                null
             );
             player.socketId = socket.id;
             player.sessionId = 19;
