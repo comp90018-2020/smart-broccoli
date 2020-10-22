@@ -115,7 +115,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
         body: TabBarView(
           controller: _controller,
           children: [
-            QuizTab(),
+            QuizTab(widget.groupId),
             MembersTab(widget.groupId),
           ],
         ),

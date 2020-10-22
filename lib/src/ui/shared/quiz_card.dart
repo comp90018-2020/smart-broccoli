@@ -31,7 +31,7 @@ class _QuizCardState extends State<QuizCard> {
   Widget build(BuildContext context) {
     title = widget._quiz.title;
     groupName = Provider.of<GroupRegistryModel>(context)
-            .groupIdMap[widget._quiz.groupId]
+            .getGroup(widget._quiz.groupId)
             ?.name ??
         "Group ID: ${widget._quiz.groupId}";
     admin = widget._quiz.role == GroupRole.OWNER;

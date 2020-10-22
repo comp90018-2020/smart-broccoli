@@ -1,61 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 
-class QuizTab extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => new _QuizTab();
-}
+class QuizTab extends StatelessWidget {
+  final int groupId;
 
-class _QuizTab extends State<QuizTab> {
+  QuizTab(this.groupId);
+
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    Provider.of<QuizCollectionModel>(context).refreshAvailableQuizzes();
+    Provider.of<QuizCollectionModel>(context).refreshCreatedQuizzes();
+    return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Container(
-        child: CustomTabbedPage(
-          secondaryBackgroundColour: true,
-          title: "YES",
-          tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-          tabViews: [
-            QuizContainer(
-              [
-                // placeholders
-                Quiz.fromJson({'title': 'Foo', 'groupId': 1}),
-                Quiz.fromJson({'title': 'Bar', 'groupId': 2}),
-                Quiz.fromJson({'title': 'Baz', 'groupId': 3}),
-              ],
-              hiddenButton: true,
-            ),
-            QuizContainer(
-              [
-                // placeholders
-                Quiz.fromJson({'title': 'Quick', 'groupId': 1}),
-                Quiz.fromJson({'title': 'Brown', 'groupId': 2}),
-                Quiz.fromJson({'title': 'Fox', 'groupId': 3}),
-              ],
-              hiddenButton: true,
-            ),
-            QuizContainer(
-              [
-                // placeholders
-                Quiz.fromJson({'title': 'Over', 'groupId': 1}),
-                Quiz.fromJson({'title': 'Lazy', 'groupId': 2}),
-                Quiz.fromJson({'title': 'Dog', 'groupId': 3}),
-              ],
-              hiddenButton: true,
-            ),
-          ],
-          hasDrawer: false,
-          primary: false,
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {},
-            label: Text('CREATE QUIZ'),
-            icon: Icon(Icons.add),
-          ),
-        ),
+        child: Consumer2<GroupRegistryModel, QuizCollectionModel>(
+            builder: (context, registry, collection, child) {
+          final Group group = registry.getGroup(groupId);
+
+          return group == null
+              ? Container()
+              : CustomTabbedPage(
+                  secondaryBackgroundColour: true,
+                  title: "YES",
+                  tabs: [
+                    Tab(text: "ALL"),
+                    Tab(text: "LIVE"),
+                    Tab(text: "SELF-PACED")
+                  ],
+                  tabViews: [
+                    // all quizzes
+                    QuizContainer(
+                      (group.role == GroupRole.OWNER
+                              ? collection.createdQuizzes
+                              : collection.availableQuizzes)
+                          .where((Quiz quiz) => quiz.groupId == group.id)
+                          .toList(),
+                      hiddenButton: true,
+                    ),
+
+                    // live quizzes
+                    QuizContainer(
+                      (group.role == GroupRole.OWNER
+                              ? collection.createdQuizzes
+                              : collection.availableQuizzes)
+                          .where((Quiz quiz) =>
+                              quiz.groupId == group.id &&
+                              quiz.type == QuizType.LIVE)
+                          .toList(),
+                      hiddenButton: true,
+                    ),
+
+                    // self-paced quizzes
+                    QuizContainer(
+                      (group.role == GroupRole.OWNER
+                              ? collection.createdQuizzes
+                              : collection.availableQuizzes)
+                          .where((Quiz quiz) =>
+                              quiz.groupId == group.id &&
+                              quiz.type == QuizType.SELF_PACED)
+                          .toList(),
+                      hiddenButton: true,
+                    ),
+                  ],
+                  hasDrawer: false,
+                  primary: false,
+                  floatingActionButton: FloatingActionButton.extended(
+                    onPressed: () {},
+                    label: Text('CREATE QUIZ'),
+                    icon: Icon(Icons.add),
+                  ),
+                );
+        }),
       ),
     );
   }
