@@ -5,6 +5,7 @@ import { GameSession } from "./session";
 import { formatQuestion, formatWelcome } from "./formatter";
 import { $socketIO } from "./index";
 import { GameErr, GameStatus, Player, Answer } from "./datatype";
+import Quiz from "../models/quiz";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
@@ -34,7 +35,7 @@ export class GameHandler {
         }
     }
 
-    addSession(quiz: any, sessionId: number) {
+    addSession(quiz: Quiz, sessionId: number) {
         this.sessions[sessionId] = new GameSession(quiz, sessionId);
         return true;
     }
