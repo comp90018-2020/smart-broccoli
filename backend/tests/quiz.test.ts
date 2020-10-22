@@ -69,8 +69,8 @@ describe("Quiz", () => {
         expect(res.body.questions[0]).to.have.property("type");
         expect(res.body.questions[0]).to.have.property("text");
         expect(res.body.questions[0].type).to.equal(QUESTION_TF.type);
-        expect(res.body.questions[0].type).to.equal(QUESTION_TF.type);
-        expect(res.body.questions[1].text).to.equal(QUESTION_CHOICE.text);
+        expect(res.body.questions[0].text).to.equal(QUESTION_TF.text);
+        expect(res.body.questions[1].type).to.equal(QUESTION_CHOICE.type);
         expect(res.body.questions[1].text).to.equal(QUESTION_CHOICE.text);
         expect(res.body.questions[1].numCorrect).to.equal(1);
     });
