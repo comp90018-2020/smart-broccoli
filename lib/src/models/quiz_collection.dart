@@ -27,6 +27,8 @@ class QuizCollectionModel extends ChangeNotifier {
   /// Constructor for external use
   QuizCollectionModel(this._authStateModel, {QuizApi quizApi}) {
     _quizApi = quizApi ?? QuizApi();
+    refreshAvailableQuizzes();
+    refreshCreatedQuizzes();
   }
 
   Future<void> selectQuiz(int id) async {
