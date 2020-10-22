@@ -186,8 +186,13 @@ class _QuizCardState extends State<QuizCard> {
                             Switch(
                               materialTapTargetSize:
                                   MaterialTapTargetSize.shrinkWrap,
-                              value: true,
-                              onChanged: (bool value) {},
+                              value: widget.quiz.isActive,
+                              onChanged: (bool value) {
+                                widget.quiz.isActive = value;
+                                Provider.of<QuizCollectionModel>(context,
+                                        listen: false)
+                                    .updateQuiz(widget.quiz);
+                              },
                             ),
                             Container(
                                 child: Text('Visible'),
