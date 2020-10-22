@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/src/data/quiz.dart';
 import 'package:smart_broccoli/src/models.dart';
-
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
@@ -41,19 +39,25 @@ class _TakeQuizState extends State<TakeQuiz> {
     });
   }
 
+  // See : https://stackoverflow.com/questions/58371874/what-is-diffrence-between-didchangedependencies-and-initstate
   @override
-  Widget build(BuildContext context) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     QuizCollectionModel qcm =
         Provider.of<QuizCollectionModel>(context, listen: true);
     items = qcm.availableQuizzes;
+  }
 
+  @override
+  Widget build(BuildContext context) {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
       title: "Take Quiz",
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        QuizContainer(getQuiz(items, null), header: QuizPinBox(key: _buildQuizKey)),
+        QuizContainer(getQuiz(items, null),
+            header: QuizPinBox(key: _buildQuizKey)),
 
         // Live quiz
         QuizContainer(getQuiz(items, QuizType.LIVE), header: QuizPinBox()),

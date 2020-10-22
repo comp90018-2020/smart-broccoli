@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-
-import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
+import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
 class QuizTab extends StatefulWidget {
   @override
@@ -17,13 +16,22 @@ class _QuizTab extends State<QuizTab> {
   // TODO change this when group logic is implemented
   int groupId = 26;
 
+  // See : https://stackoverflow.com/questions/58371874/what-is-diffrence-between-didchangedependencies-and-initstate
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    QuizCollectionModel qcm =
+        Provider.of<QuizCollectionModel>(context, listen: true);
+    items = qcm.availableQuizzes;
+  }
+
   @override
   Widget build(BuildContext context) {
     /// Can't be placed in init since we need the context
     /// Further testing is required to see if placing it in login in the best way
     /// forward
     QuizCollectionModel qcm =
-    Provider.of<QuizCollectionModel>(context, listen: true);
+        Provider.of<QuizCollectionModel>(context, listen: true);
     items = qcm.availableQuizzes;
 
     return new Scaffold(

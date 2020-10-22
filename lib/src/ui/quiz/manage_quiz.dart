@@ -3,10 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data/group.dart';
 import 'package:smart_broccoli/src/data/quiz.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/theme.dart';
-
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
+import 'package:smart_broccoli/theme.dart';
 
 /// Manage quiz page
 class ManageQuiz extends StatefulWidget {
@@ -22,16 +21,21 @@ class _ManageQuizState extends State<ManageQuiz> {
   List<Group> group;
   int gid;
 
+  // See : https://stackoverflow.com/questions/58371874/what-is-diffrence-between-didchangedependencies-and-initstate
   @override
-  Widget build(BuildContext context) {
-    // Provider Init code
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     QuizCollectionModel qcm =
         Provider.of<QuizCollectionModel>(context, listen: true);
     GroupRegistryModel grm =
         Provider.of<GroupRegistryModel>(context, listen: true);
     group = grm.createdGroups;
     items = qcm.createdQuizzes;
+    gid = group[0].id;
+  }
 
+  @override
+  Widget build(BuildContext context) {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
       title: "Manage Quiz",
@@ -52,11 +56,22 @@ class _ManageQuizState extends State<ManageQuiz> {
       hasDrawer: true,
       secondaryBackgroundColour: true,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () {
+          _createQuiz();
+        },
         label: Text('CREATE QUIZ'),
         icon: Icon(Icons.add),
       ),
     );
+  }
+
+  /// TODO add create quiz functionality here
+  /// Define group affiliation with the gid varible
+  void _createQuiz() {
+    // QuizCollectionModel qcm =
+    //     Provider.of<QuizCollectionModel>(context, listen: true);
+    // GroupRegistryModel grm =
+    //     Provider.of<GroupRegistryModel>(context, listen: true);
   }
 
   /// Quiz selection dropdown
@@ -77,6 +92,7 @@ class _ManageQuizState extends State<ManageQuiz> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: DropdownButton(
+                  value: 1,
                   underline: Container(),
                   onChanged: (_) {},
                   isExpanded: true,
@@ -91,7 +107,6 @@ class _ManageQuizState extends State<ManageQuiz> {
                         value: 1,
                         onTap: () => updateList())
                     */
-                  value: 0,
                 ),
               ),
             ),

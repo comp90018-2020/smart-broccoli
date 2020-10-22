@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui.dart';
@@ -33,7 +32,13 @@ class QuizCard extends StatefulWidget {
 
 class _QuizCardState extends State<QuizCard> {
   bool admin = true;
-  QuizType quizType = QuizType.SELF_PACED;
+  QuizType quizType;
+
+  @override
+  void initState() {
+    super.initState();
+    quizType = widget._quiz.type;
+  }
 
   Widget build(BuildContext context) {
     return Card(
@@ -95,7 +100,9 @@ class _QuizCardState extends State<QuizCard> {
                     Container(
                         padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
                         width: double.maxFinite,
-                        child: selfPacedIndicator())
+                        child: (widget._quiz.type == QuizType.SELF_PACED)
+                            ? selfPacedIndicator()
+                            : liveIndicator())
                   ],
                 ),
               ],
