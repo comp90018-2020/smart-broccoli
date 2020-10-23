@@ -11,8 +11,11 @@ class QuizCollectionModel extends ChangeNotifier {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
 
-  /// API provider for the user profile service
+  /// API provider for the quiz service
   QuizApi _quizApi;
+
+  /// API provider for the session service
+  SessionApi _sessionApi;
 
   /// Views subscribe to the fields below
   Quiz _selectedQuiz;
@@ -23,10 +26,14 @@ class QuizCollectionModel extends ChangeNotifier {
   Iterable<Quiz> _createdQuizzes = Iterable.empty();
   UnmodifiableListView<Quiz> get createdQuizzes =>
       UnmodifiableListView(_createdQuizzes);
+  GameSession _currentSession;
+  GameSession get currentSession => _currentSession;
 
   /// Constructor for external use
-  QuizCollectionModel(this._authStateModel, {QuizApi quizApi}) {
+  QuizCollectionModel(this._authStateModel,
+      {QuizApi quizApi, SessionApi sessionApi}) {
     _quizApi = quizApi ?? QuizApi();
+    _sessionApi = sessionApi ?? SessionApi();
     refreshAvailableQuizzes();
     refreshCreatedQuizzes();
   }
@@ -44,6 +51,12 @@ class QuizCollectionModel extends ChangeNotifier {
 
   Future<void> updateQuiz(Quiz quiz) async {
     await _quizApi.updateQuiz(_authStateModel.token, quiz);
+    notifyListeners();
+  }
+
+  Future<void> startQuizSession(Quiz quiz, GameSessionType type) async {
+    _currentSession =
+        await _sessionApi.createSession(_authStateModel.token, quiz.id, type);
     notifyListeners();
   }
 
