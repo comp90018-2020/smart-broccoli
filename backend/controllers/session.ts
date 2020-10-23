@@ -9,6 +9,7 @@ import sequelize, {
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
+import { quizPictureProcessor } from "helpers/upload";
 
 // Represents a session token
 interface SessionToken {
@@ -309,8 +310,8 @@ export const joinSession = async (userId: number, code: string) => {
     const session = await Session.findOne({
         where: { code, state: { [Op.not]: "ended" } },
         include: [
+            // Get group
             {
-                // Get group
                 model: Group,
                 attributes: ["id", "name", "defaultGroup", "code"],
                 required: true,
@@ -323,6 +324,11 @@ export const joinSession = async (userId: number, code: string) => {
                         required: true,
                     },
                 ],
+            },
+            // Get quiz
+            {
+                model: Quiz,
+                attributes: ["type"],
             },
             // Has user joined before?
             {
@@ -346,7 +352,12 @@ export const joinSession = async (userId: number, code: string) => {
         await session.Users[0].SessionParticipant.update({
             state: "joined",
         });
-    } else if (session.Users.length === 0 && session.state === "waiting") {
+    } else if (
+        // In waiting state OR in active state and is live quiz
+        session.Users.length === 0 &&
+        (session.state === "waiting" ||
+            (session.state === "active" && session.Quiz.type === "live"))
+    ) {
         // Create association
         await SessionParticipant.create({
             sessionId: session.id,
