@@ -6,33 +6,37 @@ import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 
 class MembersTab extends StatelessWidget {
+  final Group group;
+
+  MembersTab(this.group);
+
   @override
   Widget build(BuildContext context) => Container(
         color: SmartBroccoliColourScheme.membersTabBackground,
         child: Consumer<GroupRegistryModel>(
           builder: (context, registry, child) => ListView.builder(
             padding: EdgeInsets.symmetric(vertical: 8),
-            itemCount: registry.selectedGroup.members.length,
+            itemCount: group.members.length,
             itemBuilder: (BuildContext context, int index) => ListTile(
               // Avatar
-              leading: registry.selectedGroup.members[index].picture == null
+              leading: group.members[index].picture == null
                   ? UserAvatar.placeholder()
-                  : UserAvatar(registry.selectedGroup.members[index].picture),
+                  : UserAvatar(group.members[index].picture),
               // Name
-              title: registry.selectedGroup.members[index].name == null
+              title: group.members[index].name == null
                   ? Text("(anonymous member)")
-                  : Text(registry.selectedGroup.members[index].name),
+                  : Text(group.members[index].name),
               // Remove
-              trailing: registry.selectedGroup.role == GroupRole.OWNER
+              trailing: group.role == GroupRole.OWNER
                   ? IconButton(
                       icon: Icon(Icons.person_remove),
                       splashRadius: 20,
                       onPressed: () async {
-                        if (await _confirmKickMember(context,
-                            registry.selectedGroup.members[index].name))
+                        if (await _confirmKickMember(
+                            context, group.members[index].name))
                           try {
-                            await registry.kickMemberFromSelectedGroup(
-                                registry.selectedGroup.members[index].id);
+                            await registry.kickMemberFromGroup(
+                                group, group.members[index].id);
                           } catch (_) {
                             _showKickFailedDialogue(context);
                           }

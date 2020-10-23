@@ -22,6 +22,8 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
   // Main tab controller
   TabController _controller;
 
+  Group _group;
+
   void initState() {
     super.initState();
     _controller = new TabController(length: 2, vsync: this);
@@ -29,8 +31,8 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<GroupRegistryModel>(context, listen: false)
-        .selectGroup(widget.groupId);
+    _group = Provider.of<GroupRegistryModel>(context, listen: false)
+        .getGroup(widget.groupId);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
 
@@ -58,7 +60,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
           Consumer<GroupRegistryModel>(
             builder: (context, registry, child) => PopupMenuButton(
               itemBuilder: (BuildContext context) =>
-                  registry.selectedGroup.role == GroupRole.MEMBER
+                  _group.role == GroupRole.MEMBER
                       ? [
                           PopupMenuItem(
                             child: Text('Leave group'),
@@ -78,7 +80,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                       if (await _confirmLeaveGroup()) {
                         await Provider.of<GroupRegistryModel>(context,
                                 listen: false)
-                            .leaveSelectedGroup();
+                            .leaveGroup(_group);
                         Navigator.of(context).pop();
                       }
                     } catch (_) {
@@ -90,7 +92,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                       if (await _confirmDeleteGroup()) {
                         await Provider.of<GroupRegistryModel>(context,
                                 listen: false)
-                            .deleteSelectedGroup();
+                            .deleteGroup(_group);
                         Navigator.of(context).pop();
                       }
                     } catch (_) {
@@ -107,9 +109,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
         centerTitle: true,
         title: Consumer<GroupRegistryModel>(
             builder: (context, registry, child) =>
-                registry.selectedGroup == null
-                    ? Text('Group Name')
-                    : Text(registry.selectedGroup.name)),
+                _group == null ? Text('Group Name') : Text(_group.name)),
       ),
 
       // Tabs
@@ -117,7 +117,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
         controller: _controller,
         children: [
           QuizTab(),
-          MembersTab(),
+          MembersTab(_group),
         ],
       ),
     );
