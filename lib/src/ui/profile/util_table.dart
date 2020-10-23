@@ -29,9 +29,9 @@ class NameTableRow extends TableRow {
         );
 
   static Widget _paddedCell(Widget child,
-          {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
+      {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
       TableCell(
-        child: Padding(padding: padding, child: Expanded(child: child)),
+        child: Padding(padding: padding, child: child),
       );
 }
 
@@ -66,15 +66,14 @@ class EmailTableRow extends TableRow {
   static Widget _paddedCell(Widget child,
           {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
       TableCell(
-        child: Padding(padding: padding, child: Expanded(child: child)),
+        child: Padding(padding: padding, child: child),
       );
 }
 
 class PasswordTable extends TableRow {
-  PasswordTable(
-      bool show, bool isEdit, TextEditingController _passwordController)
+  PasswordTable(bool isEdit, TextEditingController _passwordController)
       : super(
-          children: show
+          children: isEdit
               ? [
                   _paddedCell(
                       Text('Password', style: TextStyle(color: Colors.black38)),
@@ -88,7 +87,7 @@ class PasswordTable extends TableRow {
                           hintStyle: TextStyle(color: Colors.black38),
                           border: InputBorder.none,
                           suffixIcon: IconButton(
-                            icon: isEdit ? Icon(Icons.clear) : Icon(null),
+                            icon: Icon(Icons.clear),
                             onPressed: () {},
                           ),
                           focusedBorder: InputBorder.none,
@@ -98,41 +97,20 @@ class PasswordTable extends TableRow {
                     padding: EdgeInsets.only(left: 16),
                   ),
                 ]
-              : [
-                  _paddedCell(
-                    TextFormField(
-                      obscureText: true,
-                      textAlignVertical:
-                          TextAlignVertical.center, //readOnly: true
-                      decoration: InputDecoration(
-                          contentPadding: EdgeInsets.zero,
-                          hintStyle: TextStyle(color: Colors.black38),
-                          border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: isEdit ? Icon(Icons.clear) : Icon(null),
-                            onPressed: () {},
-                          ),
-                          focusedBorder: InputBorder.none,
-                          hintText: 'password'),
-                      controller: _passwordController,
-                    ),
-                    padding: EdgeInsets.only(left: 16),
-                  ),
-                ],
+              : [Container(), Container()],
         );
 
   static Widget _paddedCell(Widget child,
-          {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
+      {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
       TableCell(
-        child: Padding(padding: padding, child: Expanded(child: child)),
+        child: Padding(padding: padding, child: child),
       );
 }
 
 class PasswordConfirmTable extends TableRow {
-  PasswordConfirmTable(
-      bool show, bool isEdit, TextEditingController _passwordController)
+  PasswordConfirmTable(bool isEdit, TextEditingController _passwordController)
       : super(
-          children: show
+          children: isEdit
               ? [
                   _paddedCell(
                       Text('Confirm Password',
@@ -149,7 +127,7 @@ class PasswordConfirmTable extends TableRow {
                           hintStyle: TextStyle(color: Colors.black38),
                           border: InputBorder.none,
                           suffixIcon: IconButton(
-                            icon: isEdit ? Icon(Icons.clear) : Icon(null),
+                            icon: Icon(Icons.clear),
                             onPressed: () {},
                           ),
                           // A space
@@ -160,34 +138,12 @@ class PasswordConfirmTable extends TableRow {
                     padding: EdgeInsets.only(left: 16),
                   ),
                 ]
-              : [
-                  _paddedCell(
-                    TextFormField(
-                      obscureText: true,
-                      textAlignVertical: TextAlignVertical.center,
-                      //readOnly: true,
-
-                      decoration: InputDecoration(
-                          contentPadding: EdgeInsets.zero,
-                          hintStyle: TextStyle(color: Colors.black38),
-                          border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: isEdit ? Icon(Icons.clear) : Icon(null),
-                            onPressed: () {},
-                          ),
-                          // A space
-                          focusedBorder: InputBorder.none,
-                          hintText: 'Confirm password'),
-                      controller: _passwordController,
-                    ),
-                    padding: EdgeInsets.only(left: 16),
-                  ),
-                ],
+              : [Container(), Container()],
         );
 
   static Widget _paddedCell(Widget child,
-          {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
+      {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
       TableCell(
-        child: Padding(padding: padding, child: Expanded(child: child)),
+        child: Padding(padding: padding, child: child),
       );
 }
