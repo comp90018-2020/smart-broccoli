@@ -141,7 +141,11 @@ describe("Quiz", () => {
             email: "b@b.com",
         });
         const group = await createGroup(userAdmin.id, "foo");
-        const quiz = await createQuiz(userAdmin.id, group.id, QUIZ);
+        // Active self-paced
+        const quiz = await createQuiz(userAdmin.id, group.id, {
+            ...QUIZ,
+            active: true,
+        });
 
         // Admin
         const res = await agent
@@ -180,18 +184,25 @@ describe("Quiz", () => {
         const user1 = await registerAndLogin(USER);
         const user2 = await registerAndLogin({ ...USER, email: "b@b.foo" });
 
-        // Group 1 owned by user 1
+        // Group 1 owned by user 1 (self-paced)
         const group1 = await createGroup(user1.id, "foo");
-        const quiz1 = await createQuiz(user1.id, group1.id, QUIZ);
+        const quiz1 = await createQuiz(user1.id, group1.id, {
+            ...QUIZ,
+            type: "live",
+        });
 
-        // Group 2 owned by user 2 with user 1
+        // Group 2 owned by user 2 with user 1 (live)
         const group2 = await createGroup(user2.id, "bar");
-        const quiz2 = await createQuiz(user2.id, group2.id, QUIZ);
+        const quiz2 = await createQuiz(user2.id, group2.id, {
+            ...QUIZ,
+            active: true,
+            type: "self paced",
+        });
         await joinGroup(user1.id, { name: "bar" });
 
         // Take quiz
         const ownedQuiz = await agent
-            .get(`/quiz?role=member`)
+            .get("/quiz?role=member")
             .set("Authorization", `Bearer ${user1.token}`);
         expect(ownedQuiz.status).to.equal(200);
         expect(ownedQuiz.body).to.be.an("array");
@@ -201,7 +212,7 @@ describe("Quiz", () => {
 
         // Managed
         const managedQuiz = await agent
-            .get(`/quiz?role=owner`)
+            .get("/quiz?role=owner")
             .set("Authorization", `Bearer ${user1.token}`);
         expect(managedQuiz.status).to.equal(200);
         expect(managedQuiz.body).to.be.an("array");
@@ -211,7 +222,7 @@ describe("Quiz", () => {
 
         // All
         const allQuiz = await agent
-            .get(`/quiz`)
+            .get("/quiz")
             .set("Authorization", `Bearer ${user1.token}`);
         expect(allQuiz.status).to.equal(200);
         expect(allQuiz.body).to.be.an("array");
@@ -271,6 +282,7 @@ describe("Quiz", () => {
         const group = await createGroup(userOwner.id, "foo");
         const quiz = await createQuiz(userOwner.id, group.id, {
             ...QUIZ,
+            type: "self paced",
             active: true,
         });
         await joinGroup(userMember.id, { code: group.code });

@@ -9,7 +9,6 @@ import sequelize, {
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
-import { quizPictureProcessor } from "helpers/upload";
 
 // Represents a session token
 interface SessionToken {

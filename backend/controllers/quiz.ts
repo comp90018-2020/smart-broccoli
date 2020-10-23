@@ -119,7 +119,7 @@ export const createQuiz = async (userId: number, info: any) => {
     if (info.active !== undefined) {
         quiz.active = info.active;
     } else {
-        quiz.active = quiz.type === "live" ? true : false;
+        quiz.active = false;
     }
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
@@ -260,26 +260,19 @@ export const getAllQuiz = async (
 
     return groups
         .map((group) => {
+            const role = group.Users[0].UserGroup.role;
+
             return group.Quizzes.filter((quiz) => {
-                if (group.Users[0].UserGroup.role === "member") {
-                    // Live quizzes that are waiting or active
-                    if (quiz.type === "live") {
-                        return (
-                            quiz.Sessions.length > 0 &&
-                            quiz.Sessions.find(
-                                (session) =>
-                                    session.state === "waiting" ||
-                                    session.state === "active"
-                            )
-                        );
-                    }
-                    // Members are allowed to active quizzes only
+                // Members are allowed to see active quizzes only
+                if (role === "member") {
                     return quiz.active;
                 }
+                // For owners
+                return true;
             }).map((quiz) => {
                 return {
                     ...quiz.toJSON(),
-                    role: group.Users[0].UserGroup.role,
+                    role,
                     // Whether user has completed quiz
                     complete:
                         quiz.Sessions.find(
