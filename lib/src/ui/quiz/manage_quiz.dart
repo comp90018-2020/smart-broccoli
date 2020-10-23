@@ -39,7 +39,9 @@ class _ManageQuizState extends State<ManageQuiz> {
       hasDrawer: true,
       secondaryBackgroundColour: true,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).pushNamed('/quiz');
+        },
         label: Text('CREATE QUIZ'),
         icon: Icon(Icons.add),
       ),

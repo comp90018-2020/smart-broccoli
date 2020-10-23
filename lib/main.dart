@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
       onGenerateInitialRoutes: (route) {
         return [Routes.router.generator(RouteSettings(name: route))];
       },
-      initialRoute: state.inSession ? '/group/home' : '/auth',
+      initialRoute: state.inSession ? '/manage_quiz' : '/manage_quiz',
     );
   }
 }

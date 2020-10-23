@@ -210,7 +210,11 @@ class _QuizCreateState extends State<QuizCreate> {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           spacing: 3,
                           children: [Icon(Icons.add), Text('ADD QUESTION')]),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/quiz/question');
+                      },
+
+
                     ),
                   ),
                 )
