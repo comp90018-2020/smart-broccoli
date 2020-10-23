@@ -2,20 +2,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'profile_picture.dart';
-import 'promoting_profile.dart';
+import 'profile_promoting.dart';
 import 'table_items.dart';
 
-class JoinedProfile extends StatefulWidget {
+class ProfileJoined extends StatefulWidget {
   /// Whether fields are in edit mode
   final bool _isEdit;
 
-  JoinedProfile(this._isEdit);
+  ProfileJoined(this._isEdit);
 
   @override
-  State<StatefulWidget> createState() => new _JoinedProfileState();
+  State<StatefulWidget> createState() => new _ProfileJoinedState();
 }
 
-class _JoinedProfileState extends State<JoinedProfile> {
+class _ProfileJoinedState extends State<ProfileJoined> {
   final TextEditingController _nameController = new TextEditingController();
 
   @override
@@ -70,7 +70,7 @@ class _JoinedProfileState extends State<JoinedProfile> {
   // Code to promote a joined user to a registered user
   void initRegister() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => PromotingProfile()),
+      MaterialPageRoute(builder: (context) => ProfilePromoting()),
     );
   }
 }

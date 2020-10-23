@@ -5,17 +5,17 @@ import 'profile_picture.dart';
 import 'table_items.dart';
 
 /// Profile page for listed users
-class RegisteredProfile extends StatefulWidget {
+class ProfileRegistered extends StatefulWidget {
   /// Whether fields are in edit mode
   final bool _isEdit;
 
-  RegisteredProfile(this._isEdit);
+  ProfileRegistered(this._isEdit);
 
   @override
-  State<StatefulWidget> createState() => new _RegisteredProfileState();
+  State<StatefulWidget> createState() => new _ProfileRegisteredState();
 }
 
-class _RegisteredProfileState extends State<RegisteredProfile> {
+class _ProfileRegisteredState extends State<ProfileRegistered> {
   final TextEditingController _nameController = new TextEditingController();
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();

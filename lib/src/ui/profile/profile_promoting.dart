@@ -6,14 +6,14 @@ import 'profile_picture.dart';
 import 'table_items.dart';
 
 // Profile
-class PromotingProfile extends StatefulWidget {
-  PromotingProfile();
+class ProfilePromoting extends StatefulWidget {
+  ProfilePromoting();
 
   @override
-  State<StatefulWidget> createState() => new _PromotingProfileState();
+  State<StatefulWidget> createState() => new _ProfilePromotingState();
 }
 
-class _PromotingProfileState extends State<PromotingProfile> {
+class _ProfilePromotingState extends State<ProfilePromoting> {
   final TextEditingController _nameController = new TextEditingController();
   final TextEditingController _emailController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();

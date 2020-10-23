@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
-import 'registered_profile.dart';
-import 'joined_profile.dart';
+import 'profile_registered.dart';
+import 'profile_joined.dart';
 
 /// Container for profile page elements
 class ProfileMain extends StatefulWidget {
@@ -40,7 +40,7 @@ class _ProfileMainState extends State<ProfileMain> {
       child: SingleChildScrollView(
         // TODO: provider here
         child:
-            !isRegistered ? JoinedProfile(_isEdit) : RegisteredProfile(_isEdit),
+            !isRegistered ? ProfileJoined(_isEdit) : ProfileRegistered(_isEdit),
       ),
     );
   }
