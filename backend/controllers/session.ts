@@ -251,6 +251,12 @@ export const createSession = async (userId: number, opts: any) => {
     });
 
     return await sequelize.transaction(async (transaction) => {
+        // Change live quiz to active state
+        if (quiz.type === "live") {
+            quiz.active = true;
+            await quiz.save({ transaction });
+        }
+
         // Save session
         await session.save({ transaction });
 
@@ -442,15 +448,22 @@ export const endSession = async (
     progress: { userId: number; data: any; state?: string }[]
 ) => {
     try {
+        const session = await Session.findByPk(sessionId);
+        const quiz = await Quiz.findByPk(session.quizId);
+
         await sequelize.transaction(async (transaction) => {
+            // If live quiz, deactivate
+            if (quiz.type === "live") {
+                await quiz.update({ active: false }, { transaction });
+            }
+
             // Session has ended
-            await Session.update(
+            await session.update(
                 {
                     state: "ended",
                     code: null,
                 },
                 {
-                    where: { id: sessionId },
                     transaction,
                 }
             );
