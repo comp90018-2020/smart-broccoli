@@ -61,8 +61,15 @@ class GroupRegistryModel extends ChangeNotifier {
 
   /// Kick a member from a group.
   Future<void> kickMemberFromGroup(Group group, int memberId) async {
+    // kick the member
     await _groupApi.kickMember(_authStateModel.token, group.id, memberId);
-    refreshCreatedGroups();
+    // fetch the updated group and save it to the map
+    _createdGroups[group.id] =
+        await _groupApi.getGroup(_authStateModel.token, group.id);
+    // fetch the members list
+    _createdGroups[group.id].members =
+        await _userRepo.getMembersOf(_authStateModel.token, group.id);
+    notifyListeners();
   }
 
   /// Delete a group.
