@@ -112,32 +112,32 @@ class CustomPage extends StatelessWidget {
                                   ),
                                   // Name/email
                                   Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 18),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text('name',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyText1),
-                                            Text('email',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyText2),
-                                          ],
-                                        ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 18),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text('name',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText1),
+                                          Text('email',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText2),
+                                        ],
                                       ),
-
+                                    ),
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.chevron_right,
                                         color: Colors.grey[700]),
-                                    onPressed: () => _navigateToNamed(context, '/profile'),
+                                    onPressed: () =>
+                                        _navigateToNamed(context, '/profile'),
                                   )
                                 ]),
                           ),
