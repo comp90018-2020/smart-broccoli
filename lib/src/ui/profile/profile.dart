@@ -186,20 +186,19 @@ class _ProfileState extends State<Profile> {
               backgroundColor: Colors.black12,
               child: _image != null
                   ? ClipOval(
-
-                child: Image.file(
-                  _image,
-                  fit: BoxFit.cover,
-                  width: 80.0,
-                  height: 80.0,
-                ),
-              )
+                      child: Image.file(
+                        _image,
+                        fit: BoxFit.cover,
+                        width: 80.0,
+                        height: 80.0,
+                      ),
+                    )
                   : Container(
-                child: Icon(
-                  Icons.camera_alt,
-                  color: Colors.black12,
-                ),
-              ),
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: Colors.black12,
+                      ),
+                    ),
             ),
           ),
         ),
