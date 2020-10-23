@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:smart_broccoli/src/ui/profile/util_table.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
@@ -29,6 +32,9 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _passwordController = new TextEditingController();
   final TextEditingController _confirmPasswordController =
       new TextEditingController();
+
+  File _image;
+  final picker = ImagePicker();
 
   @override
   void dispose() {
@@ -116,7 +122,7 @@ class _ProfileState extends State<Profile> {
     return new SizedBox(
       width: 150,
       child: RaisedButton(
-          onPressed: () => _showLoginFailedDialogue(),
+          onPressed: () => _showChangedPasswordDialogue(),
           child: Text("Change Password")),
     );
   }
@@ -165,13 +171,83 @@ class _ProfileState extends State<Profile> {
           left: 0,
           right: 0,
           bottom: 0,
-          child: CircleAvatar(
-            backgroundColor: Colors.black12,
-            radius: 40,
+
+          /// See https://medium.com/fabcoding/adding-an-image-picker-in-a-flutter-app-pick-images-using-camera-and-gallery-photos-7f016365d856
+          /// on how I implemented image changes
+          child: GestureDetector(
+            onTap: () {
+              if (_isEdit) {
+                _showPicker(context);
+              }
+            },
+            child: CircleAvatar(
+              child: Image.file(
+                _image,
+                fit: BoxFit.fitHeight,
+              ),
+              backgroundColor: Colors.black12,
+              radius: 40,
+            ),
           ),
         ),
       ],
     );
+  }
+
+  void _showPicker(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Photo Library'),
+                      onTap: () {
+                        _imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  new ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () {
+                      _imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Future _imgFromCamera() async {
+    final pickedFile =
+        await picker.getImage(source: ImageSource.camera, imageQuality: 50);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
+  Future _imgFromGallery() async {
+    final pickedFile =
+        await picker.getImage(source: ImageSource.gallery, imageQuality: 50);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
   }
 
   // Body
@@ -206,7 +282,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  void _showLoginFailedDialogue() {
+  void _showChangedPasswordDialogue() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
