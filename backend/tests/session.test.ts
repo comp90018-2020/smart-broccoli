@@ -228,6 +228,7 @@ describe("Session", () => {
         const group = await createGroup(userOwner.id, "foo");
         const quiz = await createQuiz(userOwner.id, group.id, {
             ...QUIZ,
+            active: true,
             type: "self paced",
         });
         await joinGroup(userMember1.id, { code: group.code });
@@ -313,6 +314,7 @@ describe("Session", () => {
         const group = await createGroup(userOwner.id, "foo");
         const quiz = await createQuiz(userOwner.id, group.id, {
             ...QUIZ,
+            active: true,
             type: "self paced",
         });
 
@@ -375,19 +377,30 @@ describe("Session", () => {
             ...USER,
             email: "c@c.com",
         });
+        const userMember3 = await registerAndLogin({
+            ...USER,
+            email: "d@d.com",
+        });
         const group = await createGroup(userOwner.id, "foo");
-        const quiz = await createQuiz(userOwner.id, group.id, QUIZ);
+        const quiz = await createQuiz(userOwner.id, group.id, {
+            ...QUIZ,
+            type: "self paced",
+            active: true,
+        });
+        await joinGroup(userMember1.id, { code: group.code });
+        await joinGroup(userMember2.id, { code: group.code });
+        await joinGroup(userMember3.id, { code: group.code });
 
-        // Owner starts live session
-        const session = await createSession(userOwner.id, {
+        // User 1 start group session
+        const session = await createSession(userMember1.id, {
             quizId: quiz.id,
-            isGroup: false,
+            isGroup: true,
         });
 
-        // User 1 join session
-        await joinSession(userMember1.id, session.session.code);
-        // User 1 leave session
-        await leaveSession(session.session.id, userMember1.id);
+        // User 2 join session
+        await joinSession(userMember2.id, session.session.code);
+        // User 2 leave session
+        await leaveSession(session.session.id, userMember2.id);
 
         // Session activates
         await activateSession(session.session.id);
@@ -395,7 +408,7 @@ describe("Session", () => {
         // User join session
         const res = await agent
             .post("/session/join")
-            .set("Authorization", `Bearer ${userMember2.token}`)
+            .set("Authorization", `Bearer ${userMember3.token}`)
             .send({ code: session.session.code });
         expect(res.status).to.equal(400);
     });

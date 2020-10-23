@@ -232,6 +232,12 @@ export const createSession = async (userId: number, opts: any) => {
     if (role === "member" && quiz.type === "live") {
         throw new ErrorStatus("Users cannot start live quiz", 400);
     }
+    if (role === "member" && quiz.type === "self paced" && !quiz.active) {
+        throw new ErrorStatus(
+            "Users cannot start inactive self-paced quiz",
+            400
+        );
+    }
 
     // Initial state of quiz
     let state = "waiting";
