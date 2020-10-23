@@ -181,10 +181,12 @@ class _ProfileState extends State<Profile> {
               }
             },
             child: CircleAvatar(
-              child: Image.file(
-                _image,
-                fit: BoxFit.fitHeight,
-              ),
+              child: (_image != null)
+                  ? Image.file(
+                      _image,
+                      fit: BoxFit.fitHeight,
+                    )
+                  : Container(),
               backgroundColor: Colors.black12,
               radius: 40,
             ),
