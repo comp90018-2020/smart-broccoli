@@ -33,6 +33,7 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _confirmPasswordController =
       new TextEditingController();
 
+  // TODO, provider should be used to initialise image
   File _image;
   final picker = ImagePicker();
 
