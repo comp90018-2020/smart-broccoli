@@ -33,20 +33,10 @@ class _JoinedProfileState extends State<JoinedProfile> {
         // Table
         Container(
           padding: const EdgeInsets.all(24),
-          child: Material(
-            type: MaterialType.card,
-            elevation: 3,
-            child: Table(
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              columnWidths: const {
-                0: FlexColumnWidth(0.3),
-                1: FlexColumnWidth(0.7)
-              },
-              border: TableBorder.all(width: 0.8, color: Colors.black12),
-              children: [
-                NameTableRow(widget._isEdit, _nameController),
-              ],
-            ),
+          child: TableCard(
+            [
+              NameTableRow(widget._isEdit, _nameController),
+            ],
           ),
         ),
         // Promote user

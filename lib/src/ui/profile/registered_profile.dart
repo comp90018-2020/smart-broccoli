@@ -40,21 +40,11 @@ class _RegisteredProfileState extends State<RegisteredProfile> {
         // Name/email
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: Material(
-            type: MaterialType.card,
-            elevation: 3,
-            child: Table(
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              columnWidths: const {
-                0: FlexColumnWidth(0.3),
-                1: FlexColumnWidth(0.7)
-              },
-              border: TableBorder.all(width: 0.8, color: Colors.black12),
-              children: [
-                NameTableRow(widget._isEdit, _nameController),
-                EmailTableRow(widget._isEdit, _emailController),
-              ],
-            ),
+          child: TableCard(
+            [
+              NameTableRow(widget._isEdit, _nameController),
+              EmailTableRow(widget._isEdit, _emailController),
+            ],
           ),
         ),
 
@@ -70,22 +60,12 @@ class _RegisteredProfileState extends State<RegisteredProfile> {
                   child: Text('Change password',
                       style: Theme.of(context).textTheme.headline6),
                 ),
-                Material(
-                  type: MaterialType.card,
-                  elevation: 3,
-                  child: Table(
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    columnWidths: const {
-                      0: FlexColumnWidth(0.3),
-                      1: FlexColumnWidth(0.7)
-                    },
-                    border: TableBorder.all(width: 0.8, color: Colors.black12),
-                    children: [
-                      PasswordTableRow(widget._isEdit, _passwordController),
-                      PasswordConfirmTableRow(
-                          widget._isEdit, _confirmPasswordController),
-                    ],
-                  ),
+                TableCard(
+                  [
+                    PasswordTableRow(widget._isEdit, _passwordController),
+                    PasswordConfirmTableRow(
+                        widget._isEdit, _confirmPasswordController),
+                  ],
                 ),
               ],
             ),

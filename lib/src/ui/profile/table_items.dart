@@ -1,6 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+/// Table used by profile pages
+class TableCard extends Material {
+  TableCard(List<TableRow> children)
+      : super(
+          type: MaterialType.card,
+          elevation: 3,
+          child: Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: const {
+              0: FlexColumnWidth(0.3),
+              1: FlexColumnWidth(0.7)
+            },
+            border: TableBorder.all(width: 0.8, color: Colors.black12),
+            children: children,
+          ),
+        );
+}
+
 /// Name row
 class NameTableRow extends TableRow {
   NameTableRow(bool isEdit, TextEditingController _nameController)

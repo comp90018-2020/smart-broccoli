@@ -42,23 +42,13 @@ class _PromotingProfileState extends State<PromotingProfile> {
             // Form
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              child: Material(
-                type: MaterialType.card,
-                elevation: 3,
-                child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  columnWidths: const {
-                    0: FlexColumnWidth(0.3),
-                    1: FlexColumnWidth(0.7)
-                  },
-                  border: TableBorder.all(width: 0.8, color: Colors.black12),
-                  children: [
-                    NameTableRow(true, _nameController),
-                    EmailTableRow(true, _emailController),
-                    PasswordTableRow(true, _passwordController),
-                    PasswordConfirmTableRow(true, _confirmPasswordController),
-                  ],
-                ),
+              child: TableCard(
+                [
+                  NameTableRow(true, _nameController),
+                  EmailTableRow(true, _emailController),
+                  PasswordTableRow(true, _passwordController),
+                  PasswordConfirmTableRow(true, _confirmPasswordController),
+                ],
               ),
             ),
             // Submit button
