@@ -113,6 +113,6 @@ class Routes {
     router.define(profile, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return ProfileMain();
-    }));
+    }), transitionType: TransitionType.inFromLeft);
   }
 }
