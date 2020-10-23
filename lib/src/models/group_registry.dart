@@ -47,16 +47,15 @@ class GroupRegistryModel extends ChangeNotifier {
   }
 
   /// Refresh the code to join a group (ask server for new one).
-  Future<Group> refreshGroupCode(Group group) async {
-    return await _groupApi.refreshCode(_authStateModel.token, group.id);
+  Future<void> refreshGroupCode(Group group) async {
+    await _groupApi.refreshCode(_authStateModel.token, group.id);
+    refreshCreatedGroups();
   }
 
   /// Update a group.
-  Future<Group> updateGroup(Group group) async {
-    Group updated = await _groupApi.updateGroup(
-        _authStateModel.token, group.id, group.name);
+  Future<void> updateGroup(Group group) async {
+    await _groupApi.updateGroup(_authStateModel.token, group.id, group.name);
     refreshCreatedGroups();
-    return updated;
   }
 
   /// Leave a group.
@@ -115,20 +114,17 @@ class GroupRegistryModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Create and return a new group.
+  /// Create a new group.
   ///
   /// This callback refreshes [createdGroups].
-  Future<Group> createGroup(String name) async {
-    Group group = await _groupApi.createGroup(_authStateModel.token, name);
+  Future<void> createGroup(String name) async {
+    await _groupApi.createGroup(_authStateModel.token, name);
     refreshCreatedGroups();
-    return group;
   }
 
   /// Join a group.
-  Future<Group> joinGroup({String name, String code}) async {
-    Group group = await _groupApi.joinGroup(_authStateModel.token,
-        name: name, code: code);
+  Future<void> joinGroup({String name, String code}) async {
+    await _groupApi.joinGroup(_authStateModel.token, name: name, code: code);
     refreshJoinedGroups();
-    return group;
   }
 }
