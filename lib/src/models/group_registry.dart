@@ -1,8 +1,6 @@
 import 'dart:collection';
-import 'dart:convert';
 import 'package:flutter/widgets.dart';
 
-import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 import 'package:smart_broccoli/src/data.dart';
 
@@ -20,9 +18,6 @@ class GroupRegistryModel extends ChangeNotifier {
   /// Cached provider for user profile service
   final UserRepository _userRepo;
 
-  /// Local storage service
-  final KeyValueStore _keyValueStore;
-
   /// Views subscribe to the fields below
   ///
   /// [selectedGroup] will have a populated `members` field
@@ -37,20 +32,9 @@ class GroupRegistryModel extends ChangeNotifier {
       UnmodifiableListView(_createdGroups);
 
   /// Constructor for external use
-  GroupRegistryModel(this._keyValueStore, this._authStateModel, this._userRepo,
+  GroupRegistryModel(this._authStateModel, this._userRepo,
       {GroupApi groupApi}) {
     _groupApi = groupApi ?? GroupApi();
-    // load last record of joined and created quizzes from local storage
-    try {
-      _joinedGroups =
-          (json.decode(_keyValueStore.getString('joinedGroups')) as List)
-              .map((repr) => Group.fromJson(repr));
-    } catch (_) {}
-    try {
-      _createdGroups =
-          (json.decode(_keyValueStore.getString('createdGroups')) as List)
-              .map((repr) => Group.fromJson(repr));
-    } catch (_) {}
   }
 
   /// Select a group.
@@ -124,8 +108,6 @@ class GroupRegistryModel extends ChangeNotifier {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       });
-    // _keyValueStore.setString('joinedGroups',
-    //     json.encode(_joinedGroups.map((group) => group.toJson())));
     notifyListeners();
   }
 
@@ -141,8 +123,6 @@ class GroupRegistryModel extends ChangeNotifier {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       });
-    // _keyValueStore.setString('createdGroups',
-    //     json.encode(_createdGroups.map((group) => group.toJson())));
     notifyListeners();
   }
 

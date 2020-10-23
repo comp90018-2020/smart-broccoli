@@ -17,8 +17,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => _authStateModel),
         ChangeNotifierProvider(
-          create: (context) =>
-              GroupRegistryModel(_keyValueStore, _authStateModel, _userRepo),
+          create: (context) => GroupRegistryModel(_authStateModel, _userRepo),
         )
       ],
       child: MyApp(),

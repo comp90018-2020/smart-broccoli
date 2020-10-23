@@ -15,7 +15,7 @@ main() async {
     final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(groupApi: api);
     final GroupRegistryModel model =
-        GroupRegistryModel(kv, am, repo, groupApi: api);
+        GroupRegistryModel(am, repo, groupApi: api);
 
     when(api.getGroups(any)).thenAnswer(
       (_) async => [
@@ -64,7 +64,7 @@ main() async {
     final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(groupApi: api);
     final GroupRegistryModel model =
-        GroupRegistryModel(kv, am, repo, groupApi: api);
+        GroupRegistryModel(am, repo, groupApi: api);
 
     when(api.getGroups(any)).thenAnswer(
       (_) async => [
