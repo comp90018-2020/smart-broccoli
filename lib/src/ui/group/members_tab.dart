@@ -7,10 +7,10 @@ import 'package:smart_broccoli/theme.dart';
 
 class MembersTab extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Consumer<GroupRegistryModel>(
-        builder: (context, registry, child) => Container(
-          color: SmartBroccoliColourScheme.membersTabBackground,
-          child: ListView.builder(
+  Widget build(BuildContext context) => Container(
+        color: SmartBroccoliColourScheme.membersTabBackground,
+        child: Consumer<GroupRegistryModel>(
+          builder: (context, registry, child) => ListView.builder(
             itemCount: registry.selectedGroup.members.length,
             itemBuilder: (BuildContext context, int index) {
               return Padding(
