@@ -64,8 +64,12 @@ class UserRepository {
       // and look for profile pic locally before falling back to API
       if (member.pictureId != null &&
           (member.picture = await lookupPicLocally(member.pictureId)) == null) {
-        member.picture = await _userApi.getProfilePicOf(token, member.id);
-        _storePicLocally(member.pictureId, member.picture);
+        try {
+          member.picture = await _userApi.getProfilePicOf(token, member.id);
+          _storePicLocally(member.pictureId, member.picture);
+        } catch (_) {
+          // if unable to get the profie pic from the API, simply move on
+        }
       }
     }));
     return members;

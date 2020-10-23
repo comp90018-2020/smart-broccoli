@@ -76,7 +76,7 @@ class Routes {
     // Group
     router.define(group, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
-      return GroupMain();
+      return GroupMain(int.parse(params["id"][0]));
     }));
 
     // Quiz

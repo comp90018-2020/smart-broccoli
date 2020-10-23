@@ -74,7 +74,9 @@ class _GroupListState extends State<GroupList> {
           return Card(
             child: ListTile(
               dense: true,
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).pushNamed('/group/${groups[i].id}');
+              },
               title: Text(
                 groups[i].name,
                 style: TextStyle(fontSize: 16),

@@ -15,7 +15,7 @@ main() async {
     final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(groupApi: api);
     final GroupRegistryModel model =
-        GroupRegistryModel(kv, am, repo, groupApi: api);
+        GroupRegistryModel(am, repo, groupApi: api);
 
     when(api.getGroups(any)).thenAnswer(
       (_) async => [
@@ -49,8 +49,8 @@ main() async {
       ],
     );
 
-    model.refreshJoinedGroups();
-    model.refreshCreatedGroups();
+    model.refreshJoinedGroups(withMembers: false);
+    model.refreshCreatedGroups(withMembers: false);
     await untilCalled(api.getGroups(any));
     expect(model.joinedGroups, isA<List<Group>>());
     expect(model.createdGroups, isA<List<Group>>());
@@ -64,7 +64,7 @@ main() async {
     final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(groupApi: api);
     final GroupRegistryModel model =
-        GroupRegistryModel(kv, am, repo, groupApi: api);
+        GroupRegistryModel(am, repo, groupApi: api);
 
     when(api.getGroups(any)).thenAnswer(
       (_) async => [

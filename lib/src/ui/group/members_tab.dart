@@ -1,64 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 
-class MembersTab extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => new _MembersTab();
-}
+class MembersTab extends StatelessWidget {
+  final int groupId;
 
-class _MembersTab extends State<MembersTab> {
-  List<String> _users;
-
-  // Initiate timers on start up
-  @override
-  void initState() {
-    super.initState();
-    _users = getUserList();
-  }
+  MembersTab(this.groupId);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: SmartBroccoliColourScheme.membersTabBackground,
-      padding: EdgeInsets.symmetric(vertical: 12),
-      child: ListView.separated(
-        itemCount: _users.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-              dense: true,
-              // Avatar
-              leading: UserAvatar(),
-              // Name
-              title: Text(
-                _users[index],
+  Widget build(BuildContext context) => Container(
+        color: SmartBroccoliColourScheme.membersTabBackground,
+        child: Consumer<GroupRegistryModel>(
+          builder: (context, registry, child) {
+            Group group = registry.getGroup(groupId);
+            return ListView.builder(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              itemCount: group.members.length,
+              itemBuilder: (BuildContext context, int index) => ListTile(
+                // Avatar
+                leading: group.members[index].picture == null
+                    ? UserAvatar.placeholder()
+                    : UserAvatar(group.members[index].picture),
+                // Name
+                title: group.members[index].name == null
+                    ? Text("(anonymous member)")
+                    : Text(group.members[index].name),
+                // Remove
+                trailing: group.role == GroupRole.OWNER
+                    ? IconButton(
+                        icon: Icon(Icons.person_remove),
+                        splashRadius: 20,
+                        onPressed: () async {
+                          if (await _confirmKickMember(
+                              context, group.members[index].name))
+                            try {
+                              await registry.kickMemberFromGroup(
+                                  group, group.members[index].id);
+                            } catch (_) {
+                              _showKickFailedDialogue(context);
+                            }
+                        },
+                      )
+                    : null,
               ),
-              // Remove
-              trailing: IconButton(
-                icon: Icon(
-                  Icons.person_remove,
-                ),
-                splashRadius: 20,
-                onPressed: () {},
-              ));
-        },
-        separatorBuilder: (BuildContext context, int index) =>
-            const Divider(color: Colors.transparent),
+            );
+          },
+        ),
+      );
+
+  Future<bool> _confirmKickMember(BuildContext context, String name) {
+    return showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Confirm kick member"),
+        content: Text(
+            "${name == null ? 'The member' : name} will no longer be a " +
+                "member of the group"),
+        actions: [
+          TextButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text("OK"),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
       ),
+      barrierDismissible: false,
     );
   }
 
-  List<String> getUserList() {
-    return ["HELLO", "HELLO2", "HELLO3", "HELLO4", "HELLO5"];
-  }
-
-  // I suggest a timer which get's the user list every n seconds
-  // And the list get's updated accordingly
-  void updateList() {
-    setState(
-      () {
-        _users.add("NEW PERSON");
-      },
+  void _showKickFailedDialogue(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Error"),
+        content: Text("Cannot kick member"),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
+      ),
     );
   }
 }
