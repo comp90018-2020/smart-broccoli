@@ -49,8 +49,8 @@ main() async {
       ],
     );
 
-    model.refreshJoinedGroups();
-    model.refreshCreatedGroups();
+    model.refreshJoinedGroups(withMembers: false);
+    model.refreshCreatedGroups(withMembers: false);
     await untilCalled(api.getGroups(any));
     expect(model.joinedGroups, isA<List<Group>>());
     expect(model.createdGroups, isA<List<Group>>());
