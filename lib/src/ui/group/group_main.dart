@@ -22,106 +22,104 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
   // Main tab controller
   TabController _controller;
 
-  Group _group;
-
   void initState() {
     super.initState();
     _controller = new TabController(length: 2, vsync: this);
   }
 
   @override
-  Widget build(BuildContext context) {
-    _group = Provider.of<GroupRegistryModel>(context, listen: false)
-        .getGroup(widget.groupId);
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.background,
 
-      appBar: AppBar(
-        bottom: new TabBar(
+        appBar: AppBar(
+          bottom: new TabBar(
+            controller: _controller,
+            labelColor: Colors.white,
+            indicator: UnderlineTabIndicator(),
+            tabs: [
+              Tab(child: Text("Quizzes")),
+              Tab(child: Text("Members")),
+            ],
+          ),
+
+          // Close button
+          leading: new IconButton(
+            icon: new Icon(Icons.close),
+            enableFeedback: false,
+            splashRadius: 20,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+
+          // More actions
+          actions: [
+            Consumer<GroupRegistryModel>(builder: (context, registry, child) {
+              Group group = registry.getGroup(widget.groupId);
+              return PopupMenuButton(
+                itemBuilder: (BuildContext context) =>
+                    group.role == GroupRole.MEMBER
+                        ? [
+                            PopupMenuItem(
+                              child: Text('Leave group'),
+                              value: UserAction.LEAVE_GROUP,
+                            )
+                          ]
+                        : [
+                            PopupMenuItem(
+                              child: Text('Delete group'),
+                              value: UserAction.DELETE_GROUP,
+                            )
+                          ],
+                onSelected: (UserAction action) async {
+                  switch (action) {
+                    case UserAction.LEAVE_GROUP:
+                      try {
+                        if (await _confirmLeaveGroup()) {
+                          await Provider.of<GroupRegistryModel>(context,
+                                  listen: false)
+                              .leaveGroup(group);
+                          Navigator.of(context).pop();
+                        }
+                      } catch (_) {
+                        _showErrorDialogue("Cannot leave group");
+                      }
+                      break;
+                    case UserAction.DELETE_GROUP:
+                      try {
+                        if (await _confirmDeleteGroup()) {
+                          await Provider.of<GroupRegistryModel>(context,
+                                  listen: false)
+                              .deleteGroup(group);
+                          Navigator.of(context).pop();
+                        }
+                      } catch (_) {
+                        _showErrorDialogue("Cannot delete group");
+                      }
+                      break;
+                    default:
+                  }
+                },
+              );
+            }),
+          ],
+
+          centerTitle: true,
+          title: Consumer<GroupRegistryModel>(
+            builder: (context, registry, child) {
+              Group group = registry.getGroup(widget.groupId);
+              return group == null ? Text('Group Name') : Text(group.name);
+            },
+          ),
+        ),
+
+        // Tabs
+        body: TabBarView(
           controller: _controller,
-          labelColor: Colors.white,
-          indicator: UnderlineTabIndicator(),
-          tabs: [
-            Tab(child: Text("Quizzes")),
-            Tab(child: Text("Members")),
+          children: [
+            QuizTab(),
+            MembersTab(widget.groupId),
           ],
         ),
-
-        // Close button
-        leading: new IconButton(
-          icon: new Icon(Icons.close),
-          enableFeedback: false,
-          splashRadius: 20,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-
-        // More actions
-        actions: [
-          Consumer<GroupRegistryModel>(
-            builder: (context, registry, child) => PopupMenuButton(
-              itemBuilder: (BuildContext context) =>
-                  _group.role == GroupRole.MEMBER
-                      ? [
-                          PopupMenuItem(
-                            child: Text('Leave group'),
-                            value: UserAction.LEAVE_GROUP,
-                          )
-                        ]
-                      : [
-                          PopupMenuItem(
-                            child: Text('Delete group'),
-                            value: UserAction.DELETE_GROUP,
-                          )
-                        ],
-              onSelected: (UserAction action) async {
-                switch (action) {
-                  case UserAction.LEAVE_GROUP:
-                    try {
-                      if (await _confirmLeaveGroup()) {
-                        await Provider.of<GroupRegistryModel>(context,
-                                listen: false)
-                            .leaveGroup(_group);
-                        Navigator.of(context).pop();
-                      }
-                    } catch (_) {
-                      _showErrorDialogue("Cannot leave group");
-                    }
-                    break;
-                  case UserAction.DELETE_GROUP:
-                    try {
-                      if (await _confirmDeleteGroup()) {
-                        await Provider.of<GroupRegistryModel>(context,
-                                listen: false)
-                            .deleteGroup(_group);
-                        Navigator.of(context).pop();
-                      }
-                    } catch (_) {
-                      _showErrorDialogue("Cannot delete group");
-                    }
-                    break;
-                  default:
-                }
-              },
-            ),
-          ),
-        ],
-
-        centerTitle: true,
-        title: Consumer<GroupRegistryModel>(
-            builder: (context, registry, child) =>
-                _group == null ? Text('Group Name') : Text(_group.name)),
-      ),
-
-      // Tabs
-      body: TabBarView(
-        controller: _controller,
-        children: [
-          QuizTab(),
-          MembersTab(_group.id),
-        ],
-      ),
-    );
-  }
+      );
 
   Future<bool> _confirmLeaveGroup() {
     return showDialog(
