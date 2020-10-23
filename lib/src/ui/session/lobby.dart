@@ -92,8 +92,7 @@ class _StartLobby extends State<QuizLobby> {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                       maxHeight: MediaQuery.of(context).size.height * 0.35),
-                  child: QuizCard(qcm.selectedQuiz.title,
-                      qcm.selectedQuiz.description, qcm.selectedQuiz),
+                  child: QuizCard(qcm.selectedQuiz),
                 ),
               ),
 

@@ -8,12 +8,6 @@ import 'package:smart_broccoli/theme.dart';
 /// Represents a quiz card
 class QuizCard extends StatefulWidget {
   // TODO: change attributes to Group/Quiz
-  /// Quiz name
-  final String _quizName;
-
-  // TODO: change attributes to Group/Quiz
-  /// Group name
-  final String _groupName;
 
   // Aspect ratio
   final double aspectRatio;
@@ -23,7 +17,7 @@ class QuizCard extends StatefulWidget {
 
   final Quiz _quiz;
 
-  QuizCard(this._quizName, this._groupName, this._quiz,
+  QuizCard(this._quiz,
       {Key key, this.aspectRatio = 1.4, this.optionsEnabled = false});
 
   @override
@@ -77,10 +71,10 @@ class _QuizCardState extends State<QuizCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget._quizName,
+                            widget._quiz.title,
                             style: TextStyle(fontSize: 20),
                           ),
-                          Text(widget._groupName,
+                          Text(widget._quiz.description,
                               style: TextStyle(fontSize: 15)),
                         ],
                       ),

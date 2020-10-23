@@ -68,8 +68,7 @@ class _BuildQuiz extends State<QuizContainer> {
                               right: index == 0 ? 0 : 20)
                           : EdgeInsets.zero,
                       width: MediaQuery.of(context).size.width * 0.4,
-                      child: QuizCard(widget.items[index].title,
-                          widget.items[index].description, widget.items[index]),
+                      child: QuizCard(widget.items[index]),
                     );
                   },
                   // Space between the cards
