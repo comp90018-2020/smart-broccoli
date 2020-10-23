@@ -259,10 +259,21 @@ export const getAllQuiz = async (
     return groups
         .map((group) => {
             return group.Quizzes.filter((quiz) => {
-                // Members are not allowed to get non active quizzes
-                return !(
-                    !quiz.active && group.Users[0].UserGroup.role === "member"
-                );
+                if (group.Users[0].UserGroup.role === "member") {
+                    // Live quizzes that are waiting or active
+                    if (quiz.type === "live") {
+                        return (
+                            quiz.Sessions.length > 0 &&
+                            quiz.Sessions.find(
+                                (session) =>
+                                    session.state === "waiting" ||
+                                    session.state === "active"
+                            )
+                        );
+                    }
+                    // Members are allowed to active quizzes only
+                    return quiz.active;
+                }
             }).map((quiz) => {
                 return {
                     ...quiz.toJSON(),
