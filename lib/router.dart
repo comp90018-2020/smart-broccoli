@@ -19,7 +19,7 @@ class Routes {
   static String groupCreate = "/group/create";
   static String quiz = "/quiz";
   static String quizQuestion = "/quiz/question";
-  static String profile = "/profile";
+  static const String profile = "/profile";
 
   /// Static router
   static FluroRouter router;
