@@ -39,6 +39,16 @@ class GroupRegistryModel extends ChangeNotifier {
     _groupApi = groupApi ?? GroupApi();
   }
 
+  /// Get a group.
+  ///
+  /// First, look in `_joinedGroups` and `_createdGroups`. If not found, fall
+  /// back to the API.
+  Future<Group> getGroup(int id) async {
+    if (_joinedGroups.containsKey(id)) return _joinedGroups[id];
+    if (_createdGroups.containsKey(id)) return _createdGroups[id];
+    return await _groupApi.getGroup(_authStateModel.token, id);
+  }
+
   /// Select a group.
   ///
   /// Make [selectedGroup] point to the group with [id]. This callback also
