@@ -116,8 +116,10 @@ export const createQuiz = async (userId: number, info: any) => {
         type: info.type,
         title: info.title,
     });
-    if (info.active !== undefined && info.type !== "live") {
+    if (info.active !== undefined) {
         quiz.active = info.active;
+    } else {
+        quiz.active = quiz.type === "live" ? true : false;
     }
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
