@@ -354,7 +354,7 @@ export const joinSession = async (userId: number, code: string) => {
         ],
     });
     if (!session) {
-        throw new ErrorStatus("Cannot found session with code", 404);
+        throw new ErrorStatus("Cannot find session with code", 404);
     }
 
     // Update SessionParticipant
