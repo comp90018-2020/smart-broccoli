@@ -185,7 +185,7 @@ export class GameSession {
             const questionOutcome = {
                 question: this.questionIndex,
                 leaderBoard: rank.slice(0, 5),
-                record: this.playerMap[Number(id)].formatRecord(),
+                record: this.playerMap[Number(id)].formatRecord().record,
                 playerAhead: playerAheadRecord,
             };
             $socketIO.to(socketId).emit("questionOutcome", questionOutcome);
