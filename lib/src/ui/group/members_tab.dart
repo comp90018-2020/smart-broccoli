@@ -11,40 +11,35 @@ class MembersTab extends StatelessWidget {
         color: SmartBroccoliColourScheme.membersTabBackground,
         child: Consumer<GroupRegistryModel>(
           builder: (context, registry, child) => ListView.builder(
+            padding: EdgeInsets.symmetric(vertical: 8),
             itemCount: registry.selectedGroup.members.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Padding(
-                padding: EdgeInsets.only(top: index == 0 ? 8 : 0),
-                child: ListTile(
-                  // Avatar
-                  leading: registry.selectedGroup.members[index].picture == null
-                      ? UserAvatar.placeholder()
-                      : UserAvatar(
-                          registry.selectedGroup.members[index].picture),
-                  // Name
-                  title: registry.selectedGroup.members[index].name == null
-                      ? Text("(anonymous member)")
-                      : Text(registry.selectedGroup.members[index].name),
-                  // Remove
-                  trailing: registry.selectedGroup.role == GroupRole.OWNER
-                      ? IconButton(
-                          icon: Icon(Icons.person_remove),
-                          splashRadius: 20,
-                          onPressed: () async {
-                            if (await _confirmKickMember(context,
-                                registry.selectedGroup.members[index].name))
-                              try {
-                                await registry.kickMemberFromSelectedGroup(
-                                    registry.selectedGroup.members[index].id);
-                              } catch (_) {
-                                _showKickFailedDialogue(context);
-                              }
-                          },
-                        )
-                      : null,
-                ),
-              );
-            },
+            itemBuilder: (BuildContext context, int index) => ListTile(
+              // Avatar
+              leading: registry.selectedGroup.members[index].picture == null
+                  ? UserAvatar.placeholder()
+                  : UserAvatar(registry.selectedGroup.members[index].picture),
+              // Name
+              title: registry.selectedGroup.members[index].name == null
+                  ? Text("(anonymous member)")
+                  : Text(registry.selectedGroup.members[index].name),
+              // Remove
+              trailing: registry.selectedGroup.role == GroupRole.OWNER
+                  ? IconButton(
+                      icon: Icon(Icons.person_remove),
+                      splashRadius: 20,
+                      onPressed: () async {
+                        if (await _confirmKickMember(context,
+                            registry.selectedGroup.members[index].name))
+                          try {
+                            await registry.kickMemberFromSelectedGroup(
+                                registry.selectedGroup.members[index].id);
+                          } catch (_) {
+                            _showKickFailedDialogue(context);
+                          }
+                      },
+                    )
+                  : null,
+            ),
           ),
         ),
       );
