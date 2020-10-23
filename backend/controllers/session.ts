@@ -454,13 +454,16 @@ export const endSession = async (
     progress: { userId: number; data: any; state?: string }[]
 ) => {
     try {
-        const session = await Session.findByPk(sessionId);
-        const quiz = await Quiz.findByPk(session.quizId);
+        const session = await Session.findByPk(sessionId, {
+            // @ts-ignore
+            include: { model: "Quiz", attributes: ["id", "type"] },
+            attributes: ["id"]
+        });
 
         await sequelize.transaction(async (transaction) => {
             // If live quiz, deactivate
-            if (quiz.type === "live") {
-                await quiz.update({ active: false }, { transaction });
+            if (session.Quiz.type === "live") {
+                await session.Quiz.update({ active: false }, { transaction });
             }
 
             // Session has ended
