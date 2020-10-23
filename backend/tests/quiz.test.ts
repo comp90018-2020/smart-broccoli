@@ -261,6 +261,34 @@ describe("Quiz", () => {
         expect(res.status).to.equal(200);
     });
 
+    it("Quiz picture retrieval - member self-paced", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, {
+            ...QUIZ,
+            active: true,
+        });
+        await joinGroup(userMember.id, { code: group.code });
+
+        // Update
+        await agent
+            .put(`/quiz/${quiz.id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${userOwner.token}`);
+
+        const res = await agent
+            .get(`/quiz/${quiz.id}/picture`)
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(res.status).to.equal(200);
+    });
+
     it("Delete quiz picture", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
