@@ -29,7 +29,7 @@ class NameTableRow extends TableRow {
         );
 
   static Widget _paddedCell(Widget child,
-      {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
+          {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
       TableCell(
         child: Padding(padding: padding, child: child),
       );
@@ -101,7 +101,7 @@ class PasswordTable extends TableRow {
         );
 
   static Widget _paddedCell(Widget child,
-      {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
+          {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
       TableCell(
         child: Padding(padding: padding, child: child),
       );
@@ -142,7 +142,7 @@ class PasswordConfirmTable extends TableRow {
         );
 
   static Widget _paddedCell(Widget child,
-      {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
+          {EdgeInsetsGeometry padding = EdgeInsets.zero}) =>
       TableCell(
         child: Padding(padding: padding, child: child),
       );

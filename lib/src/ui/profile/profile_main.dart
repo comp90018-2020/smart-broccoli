@@ -1,15 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/profile/promoted_profile.dart';
 import 'package:smart_broccoli/src/ui/profile/registered_profile.dart';
 
-class ProfileMain extends StatelessWidget {
-  // Debug value
-  final bool isRegistered = true;
+class ProfileMain extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => new _ProfileMainState();
+}
 
-  ProfileMain() {
-    /// Provider Code here
-    /// Defaults to true
+class _ProfileMainState extends State<ProfileMain> {
+  bool isRegistered;
+
+  @override
+  void didChangeDependencies() {
+    isRegistered = false;
+    super.didChangeDependencies();
+    QuizCollectionModel qcm =
+        Provider.of<QuizCollectionModel>(context, listen: true);
+
   }
 
   /// The job of this class is to be a tmp widget to determine which Profile
@@ -18,26 +28,8 @@ class ProfileMain extends StatelessWidget {
   /// Widgets in Profile.dart
   @override
   Widget build(BuildContext context) {
-    if (isRegistered) {
-      // Wait for rendering to complete
-      Future.delayed(Duration.zero, () {
-        // A user which has joined but not promoted
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => RegisteredProfile(),
-          ),
-        );
-      });
-    } else {
-      // Wait for rendering to complete
-      Future.delayed(Duration.zero, () {
-        // A promoted user
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-              builder: (context) => PromotedProfile()),
-        );
-      });
-    }
-    return new Scaffold();
+    return new Scaffold(
+      body: isRegistered ? RegisteredProfile() : PromotedProfile()
+    );
   }
 }
