@@ -14,16 +14,16 @@ class Question {
     {
       this.options = null;
     }
-    else {this.options = Question_Mod(json);}
+    else {this.options = questionMod(json);}
     this.tf = json['tf'];
     this.time = json['time'];
   }
 
-  List<Option> Question_Mod(Map<String, dynamic> json)
+  List<Option> questionMod(Map<String, dynamic> json)
   {
     List<Option> options = [];
-    List temp_opt = (json['options'] as List);
-    for(var values in temp_opt)
+    List tempOpt = (json['options'] as List);
+    for(var values in tempOpt)
     {
       //Option temp = new Option.fromJson(values);
       Option temp = Option.fromJson(values);

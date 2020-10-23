@@ -10,21 +10,24 @@ class OutcomeUser {
 
   OutcomeUser(Map<String, dynamic> json){
     this.question = json['question'];
-    this.leaderBoard = OutcomeUser_Mod(json);
-    this.record = Record.fromJson(json['record']);
-    this.playerAhead = Tuple.fromJson(json['playerAhead']);
+    this.leaderBoard = outcomeUserMod(json);
 
+    if(json['record'] == null) {this.record = null;}
+    else {this.record = Record.fromJson(json['record']);}
+
+    if(json['playerAhead'] == null) {this.playerAhead = null;}
+    else {this.playerAhead = Tuple.fromJson(json['playerAhead']);}
   }
 
-  List<Tuple> OutcomeUser_Mod(Map<String, dynamic> json)
+  List<Tuple> outcomeUserMod(Map<String, dynamic> json)
   {
     List<Tuple> tuples = [];
-    List temp_tuple = (json['leaderboard'] as List);
-    for(var values in temp_tuple)
+    List tempTuple = (json['leaderboard'] as List);
+    for(var values in tempTuple)
     {
       Tuple temp = Tuple.fromJson(values);
       tuples.add(temp);
-    };
+    }
     return tuples;
   }
 
