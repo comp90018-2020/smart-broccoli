@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/src/models.dart';
 
 /// A page extending scaffold
@@ -114,27 +113,32 @@ class CustomPage extends StatelessWidget {
                                   // Name/email
                                   Expanded(
                                       child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 18),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text('name',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText1),
-                                        Text('email',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText2),
-                                      ],
-                                    ),
-                                  )),
-                                  Icon(Icons.chevron_right,
-                                      color: Colors.grey[700])
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 18),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text('name',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText1),
+                                            Text('email',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText2),
+                                          ],
+                                        ),
+                                      ),
+
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.chevron_right,
+                                        color: Colors.grey[700]),
+                                    onPressed: () => _navigateToNamed(context, '/profile'),
+                                  )
                                 ]),
                           ),
                           Expanded(child: Container())
