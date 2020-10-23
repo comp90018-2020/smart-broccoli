@@ -1,35 +1,47 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/profile/promoted_profile.dart';
-import 'package:smart_broccoli/src/ui/profile/registered_profile.dart';
+import 'package:flutter/cupertino.dart';
 
+import 'package:smart_broccoli/src/ui/shared/page.dart';
+import 'registered_profile.dart';
+import 'joined_profile.dart';
+
+/// Container for profile page elements
 class ProfileMain extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _ProfileMainState();
 }
 
 class _ProfileMainState extends State<ProfileMain> {
-  bool isRegistered;
+  final bool isRegistered = false;
 
-  @override
-  void didChangeDependencies() {
-    isRegistered = false;
-    super.didChangeDependencies();
-    QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true);
+  /// Whether edit mode is activated
+  bool _isEdit = false;
 
-  }
-
-  /// The job of this class is to be a tmp widget to determine which Profile
-  /// Widget to display The classes are layed out this way to allow for
-  /// Future expansion on different profile types alongside their common
-  /// Widgets in Profile.dart
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: isRegistered ? RegisteredProfile() : PromotedProfile()
+    return CustomPage(
+      title: "Profile",
+      hasDrawer: true,
+
+      // Save/edit
+      appbarActions: [
+        CupertinoButton(
+          child: Text(_isEdit ? "Save" : "Edit",
+              style: TextStyle(color: Colors.white)),
+          onPressed: () {
+            setState(() {
+              _isEdit = !_isEdit;
+            });
+          },
+        )
+      ],
+
+      // Render appropriate page
+      child: SingleChildScrollView(
+        // TODO: provider here
+        child:
+            !isRegistered ? JoinedProfile(_isEdit) : RegisteredProfile(_isEdit),
+      ),
     );
   }
 }

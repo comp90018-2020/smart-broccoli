@@ -1,12 +1,14 @@
 // Profile
+// References:
+// https://medium.com/fabcoding/adding-an-image-picker-in-a-flutter-app-pick-images-using-camera-and-gallery-photos-7f016365d856
 import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfilePicture extends StatefulWidget {
+  /// Whether picture is editable
   final bool isEdit;
+
   ProfilePicture(this.isEdit);
 
   @override
@@ -28,7 +30,7 @@ class _ProfilePictureState extends State<ProfilePicture> {
                 color: Theme.of(context).backgroundColor,
                 height: MediaQuery.of(context).size.height * 0.18),
             // White container which is half the width of the profile picture
-            Container(color: Colors.white, height: 40),
+            Container(color: Colors.white, height: 50),
           ],
         ),
         // Profile picture
@@ -36,17 +38,14 @@ class _ProfilePictureState extends State<ProfilePicture> {
           left: 0,
           right: 0,
           bottom: 0,
-
-          /// See https://medium.com/fabcoding/adding-an-image-picker-in-a-flutter-app-pick-images-using-camera-and-gallery-photos-7f016365d856
-          /// on how I implemented image changes
           child: GestureDetector(
-            onTap: () {
-              if (widget.isEdit) {
-                _showPicker(context);
-              }
-            },
+            onTap: widget.isEdit
+                ? () {
+                    _showPicker(context);
+                  }
+                : null,
             child: CircleAvatar(
-              radius: 40,
+              radius: 50,
               backgroundColor: Colors.black12,
               child: _image != null
                   ? ClipOval(
@@ -60,6 +59,7 @@ class _ProfilePictureState extends State<ProfilePicture> {
                   : Container(
                       child: Icon(
                         Icons.camera_alt,
+                        size: 35,
                         color: Colors.black12,
                       ),
                     ),
@@ -70,53 +70,49 @@ class _ProfilePictureState extends State<ProfilePicture> {
     );
   }
 
-  void _showPicker(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return SafeArea(
-            child: Container(
-              child: new Wrap(
-                children: <Widget>[
-                  new ListTile(
-                      leading: new Icon(Icons.photo_library),
-                      title: new Text('Photo Library'),
-                      onTap: () {
-                        _imgFromGallery();
-                        Navigator.of(context).pop();
-                      }),
-                  new ListTile(
-                    leading: new Icon(Icons.photo_camera),
-                    title: new Text('Camera'),
-                    onTap: () {
-                      _imgFromCamera();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
+  // Image picker (from gallery/camera)
+  Future<void> _showPicker(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text("Select upload method"),
+          children: [
+            SimpleDialogOption(
+              child: Row(children: [
+                Icon(Icons.picture_in_picture),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Text("From gallery"),
+                )
+              ]),
+              onPressed: () {
+                _openPictureSelector(ImageSource.gallery);
+                Navigator.of(context).pop();
+              },
             ),
-          );
-        });
+            SimpleDialogOption(
+              child: Row(children: [
+                Icon(Icons.camera),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Text("Use camera"),
+                )
+              ]),
+              onPressed: () {
+                _openPictureSelector(ImageSource.camera);
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
   }
 
-  Future _imgFromCamera() async {
-    final pickedFile =
-        await picker.getImage(source: ImageSource.camera, imageQuality: 50);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      } else {
-        print('No image selected.');
-      }
-    });
-  }
-
-  Future _imgFromGallery() async {
-    final pickedFile =
-        await picker.getImage(source: ImageSource.gallery, imageQuality: 50);
-
+  // Selector (from package)
+  void _openPictureSelector(ImageSource source) async {
+    PickedFile pickedFile = await picker.getImage(source: source);
     setState(() {
       if (pickedFile != null) {
         _image = File(pickedFile.path);
