@@ -17,17 +17,10 @@ class JoinedProfile extends StatefulWidget {
 
 class _JoinedProfileState extends State<JoinedProfile> {
   final TextEditingController _nameController = new TextEditingController();
-  final TextEditingController _emailController = new TextEditingController();
-  final TextEditingController _passwordController = new TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      new TextEditingController();
 
   @override
   void dispose() {
-    _emailController.dispose();
     _nameController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
