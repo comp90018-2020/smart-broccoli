@@ -10,6 +10,10 @@ import 'quiz_tab.dart';
 enum UserAction { LEAVE_GROUP, DELETE_GROUP }
 
 class GroupMain extends StatefulWidget {
+  final int groupId;
+
+  GroupMain(this.groupId);
+
   @override
   State<StatefulWidget> createState() => new _GroupMain();
 }
@@ -25,6 +29,8 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<GroupRegistryModel>(context, listen: false)
+        .selectGroup(widget.groupId);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
 

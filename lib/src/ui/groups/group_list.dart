@@ -75,9 +75,7 @@ class _GroupListState extends State<GroupList> {
             child: ListTile(
               dense: true,
               onTap: () {
-                Provider.of<GroupRegistryModel>(context, listen: false)
-                    .selectGroup(groups[i].id);
-                Navigator.of(context).pushNamed('/group/:id');
+                Navigator.of(context).pushNamed('/group/${groups[i].id}');
               },
               title: Text(
                 groups[i].name,
