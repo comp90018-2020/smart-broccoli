@@ -21,9 +21,6 @@ class GroupRegistryModel extends ChangeNotifier {
   // Internal storage
   Map<int, Group> _joinedGroups = {};
   Map<int, Group> _createdGroups = {};
-  Group _selectedGroup;
-
-  Group get selectedGroup => _selectedGroup;
 
   /// List of groups which the user has joined
   UnmodifiableListView<Group> get joinedGroups =>
@@ -49,63 +46,35 @@ class GroupRegistryModel extends ChangeNotifier {
     return await _groupApi.getGroup(_authStateModel.token, id);
   }
 
-  /// Select a group.
-  ///
-  /// Make [selectedGroup] point to the group with [id]. This callback also
-  /// populates the `members` field the group.
-  Future<void> selectGroup(int id) async {
-    _selectedGroup = await _groupApi.getGroup(_authStateModel.token, id);
-    // profile pics are fetched transparently by `UserRepository.getMembersOf`
-    _selectedGroup.members =
-        await _userRepo.getMembersOf(_authStateModel.token, id);
-    notifyListeners();
+  /// Refresh the code to join a group (ask server for new one).
+  Future<Group> refreshGroupCode(Group group) async {
+    return await _groupApi.refreshCode(_authStateModel.token, group.id);
   }
 
-  /// Refresh the group currently selected ([selectedGroup] points to this).
-  ///
-  /// This callback also refreshes the `members` field the group. If no group
-  /// is currently selected, this callback has no effect.
-  Future<void> refreshSelectedGroup() async {
-    if (_selectedGroup != null) selectGroup(_selectedGroup.id);
+  /// Update a group.
+  Future<Group> updateGroup(Group group) async {
+    Group updated = await _groupApi.updateGroup(
+        _authStateModel.token, group.id, group.name);
+    refreshCreatedGroups();
+    return updated;
   }
 
-  /// Refresh the code to join the selected group (ask server for new one).
-  Future<void> refreshSelectedGroupCode() async {
-    await _groupApi.refreshCode(_authStateModel.token, _selectedGroup.id);
-    refreshSelectedGroup();
+  /// Leave a group.
+  Future<void> leaveGroup(Group group) async {
+    await _groupApi.leaveGroup(_authStateModel.token, group.id);
+    refreshJoinedGroups();
   }
 
-  /// Update the name of the group currently selected.
-  Future<void> updateSelectedGroup(String name) async {
-    await _groupApi.updateGroup(_authStateModel.token, _selectedGroup.id, name);
-    refreshSelectedGroup();
+  /// Kick a member from a group.
+  Future<void> kickMemberFromGroup(Group group, int memberId) async {
+    await _groupApi.kickMember(_authStateModel.token, group.id, memberId);
     refreshCreatedGroups();
   }
 
-  /// Leave the selected group.
-  ///
-  /// No group will subsequently be selected (i.e. [selectedGroup] is `null`).
-  Future<void> leaveSelectedGroup() async {
-    await _groupApi.leaveGroup(_authStateModel.token, _selectedGroup.id);
-    _selectedGroup = null;
-    refreshJoinedGroups(withMembers: true);
-  }
-
-  Future<void> kickMemberFromSelectedGroup(int memberId) async {
-    await _groupApi.kickMember(
-        _authStateModel.token, _selectedGroup.id, memberId);
-    refreshSelectedGroup();
-    refreshCreatedGroups(withMembers: true);
-  }
-
-  /// Delete the selected group.
-  ///
-  /// No group will subsequently be selected (i.e. [selectedGroup] is `null`).
-  Future<void> deleteSelectedGroup() async {
-    if (_selectedGroup == null) return;
-    await _groupApi.deleteGroup(_authStateModel.token, _selectedGroup.id);
-    _selectedGroup = null;
-    refreshCreatedGroups(withMembers: true);
+  /// Delete a group.
+  Future<void> deleteGroup(Group group) async {
+    await _groupApi.deleteGroup(_authStateModel.token, group.id);
+    refreshCreatedGroups();
   }
 
   /// Refresh the ListView of groups the user has joined.
@@ -146,21 +115,20 @@ class GroupRegistryModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Create a new group.
+  /// Create and return a new group.
   ///
   /// This callback refreshes [createdGroups].
-  Future<void> createGroup(String name) async {
-    await _groupApi.createGroup(_authStateModel.token, name);
-    refreshCreatedGroups(withMembers: true);
+  Future<Group> createGroup(String name) async {
+    Group group = await _groupApi.createGroup(_authStateModel.token, name);
+    refreshCreatedGroups();
+    return group;
   }
 
   /// Join a group.
-  ///
-  /// The group will subsequently be selected (i.e. is [selectedGroup]).
-  Future<void> joinGroup({String name, String code}) async {
+  Future<Group> joinGroup({String name, String code}) async {
     Group group = await _groupApi.joinGroup(_authStateModel.token,
         name: name, code: code);
-    selectGroup(group.id);
-    refreshJoinedGroups(withMembers: true);
+    refreshJoinedGroups();
+    return group;
   }
 }
