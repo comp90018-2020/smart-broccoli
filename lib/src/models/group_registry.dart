@@ -18,18 +18,20 @@ class GroupRegistryModel extends ChangeNotifier {
   /// Cached provider for user profile service
   final UserRepository _userRepo;
 
-  /// Views subscribe to the fields below
-  ///
-  /// [selectedGroup] will have a populated `members` field
-  /// [joinedGroups] and [createdGroups] do not
+  // Internal storage
+  Map<int, Group> _joinedGroups = {};
+  Map<int, Group> _createdGroups = {};
   Group _selectedGroup;
+
   Group get selectedGroup => _selectedGroup;
-  Iterable<Group> _joinedGroups = Iterable.empty();
+
+  /// List of groups which the user has joined
   UnmodifiableListView<Group> get joinedGroups =>
-      UnmodifiableListView(_joinedGroups);
-  Iterable<Group> _createdGroups = Iterable.empty();
+      UnmodifiableListView(_joinedGroups.values);
+
+  /// List of groups which the user has created
   UnmodifiableListView<Group> get createdGroups =>
-      UnmodifiableListView(_createdGroups);
+      UnmodifiableListView(_createdGroups.values);
 
   /// Constructor for external use
   GroupRegistryModel(this._authStateModel, this._userRepo,
@@ -98,13 +100,17 @@ class GroupRegistryModel extends ChangeNotifier {
 
   /// Refresh the ListView of groups the user has joined.
   ///
-  /// This callback only populates the `members` field of each group if the
-  /// optional [withMembers] parameter is `true`.
-  Future<void> refreshJoinedGroups({bool withMembers = false}) async {
-    _joinedGroups = (await _groupApi.getGroups(_authStateModel.token))
-        .where((group) => group.role == GroupRole.MEMBER);
+  /// This callback does not populate the `members` field of each group if the
+  /// optional [withMembers] parameter is `false`.
+  Future<void> refreshJoinedGroups({bool withMembers = true}) async {
+    // fetch from API and save into map
+    _joinedGroups = Map.fromIterable(
+        (await _groupApi.getGroups(_authStateModel.token))
+            .where((group) => group.role == GroupRole.MEMBER),
+        key: (group) => group.id);
+    // fetch members of each group
     if (withMembers)
-      await Future.forEach(_joinedGroups, (group) async {
+      await Future.forEach(_joinedGroups.values, (group) async {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       });
@@ -113,13 +119,17 @@ class GroupRegistryModel extends ChangeNotifier {
 
   /// Refresh the ListView of groups the user has created.
   ///
-  /// This callback only populates the `members` field of each group if the
-  /// optional [withMembers] parameter is `true`.
-  Future<void> refreshCreatedGroups({bool withMembers = false}) async {
-    _createdGroups = (await _groupApi.getGroups(_authStateModel.token))
-        .where((group) => group.role == GroupRole.OWNER);
+  /// This callback does not populate the `members` field of each group if the
+  /// optional [withMembers] parameter is `false`.
+  Future<void> refreshCreatedGroups({bool withMembers = true}) async {
+    // fetch from API and save into map
+    _createdGroups = Map.fromIterable(
+        (await _groupApi.getGroups(_authStateModel.token))
+            .where((group) => group.role == GroupRole.OWNER),
+        key: (group) => group.id);
+    // fetch members of each group
     if (withMembers)
-      await Future.forEach(_createdGroups, (group) async {
+      await Future.forEach(_createdGroups.values, (group) async {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       });
