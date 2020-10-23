@@ -1,11 +1,8 @@
 // import 'package:flutter/cupertino.dart';
 // import 'package:flutter/material.dart';
 
-import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../socket_data/user.dart';
-import '../socket_data/tuple.dart';
-import '../socket_data/record.dart';
 import '../socket_data/question.dart';
 import '../socket_data/outcome_host.dart';
 import '../socket_data/outcome_user.dart';
@@ -127,6 +124,7 @@ class GameSessionModel {
     socket.on('questionOutcome', (message) {
       print("questionOutcome: ");
       print(message);
+      print(userRole);
       if( userRole == 1) {
         outcomeHost = OutcomeHost(message);
         print(outcomeHost);
@@ -137,13 +135,6 @@ class GameSessionModel {
       }
       // notifyListeners();
     });
-
-    // socket.emit("answer");
-    // socket.emit("start");
-    // socket.emit("next");
-    // socket.emit("showBoard");
-    // socket.emit("quit");
-    // socket.emit("abort");
   }
 
   /// host action
@@ -173,28 +164,27 @@ class GameSessionModel {
   }
 
 
-
-  /// Subscribe to socket event
-  void _subscribe(String event, dynamic Function(dynamic) handler) {
-    if (socket.disconnected) {
-      throw new Exception("Socket is not connected");
-    }
-    print('$event has been called');
-    socket.on(event, handler);
-  }
-
-  /// Emit data to socket
-  void _emit(String event, [dynamic data]) {
-    if (socket.disconnected) {
-      throw new Exception("Socket is not connected");
-    }
-    socket.emit(data);
-  }
-
-  /// Close and dispose all event listeners
-  void _disconnect() {
-    socket.disconnect();
-  }
+  // /// Subscribe to socket event
+  // void _subscribe(String event, dynamic Function(dynamic) handler) {
+  //   if (socket.disconnected) {
+  //     throw new Exception("Socket is not connected");
+  //   }
+  //   print('$event has been called');
+  //   socket.on(event, handler);
+  // }
+  //
+  // /// Emit data to socket
+  // void _emit(String event, [dynamic data]) {
+  //   if (socket.disconnected) {
+  //     throw new Exception("Socket is not connected");
+  //   }
+  //   socket.emit(data);
+  // }
+  //
+  // /// Close and dispose all event listeners
+  // void _disconnect() {
+  //   socket.disconnect();
+  // }
 
 /// get data from socket
 // String receive_from_socket(String event, dynamic data){
