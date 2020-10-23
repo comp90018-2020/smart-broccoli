@@ -95,46 +95,46 @@ class CustomPage extends StatelessWidget {
                     child: DrawerHeader(
                       padding: const EdgeInsets.all(16),
                       child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
                         onTap: () {
                           _navigateToNamed(context, '/profile');
                         },
                         child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              // User picture
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    borderRadius: BorderRadius.circular(100)),
-                                width: 50,
-                                height: 50,
-                              ),
-                              // Name/email
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 18),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('name',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText1),
-                                      Text('email',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText2),
-                                    ],
-                                  ),
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            // User picture
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(100)),
+                              width: 50,
+                              height: 50,
+                            ),
+                            // Name/email
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 18),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('name',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText1),
+                                    Text('email',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2),
+                                  ],
                                 ),
                               ),
-                              Icon(Icons.chevron_right,
-                                  color: Colors.grey[700]),
-                            ]),
+                            ),
+                            Icon(Icons.chevron_right, color: Colors.grey[700]),
+                          ],
+                        ),
                       ),
                     ),
                   ),
