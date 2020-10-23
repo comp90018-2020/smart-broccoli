@@ -54,10 +54,17 @@ class QuizCollectionModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> startQuizSession(Quiz quiz, GameSessionType type) async {
-    _currentSession =
-        await _sessionApi.createSession(_authStateModel.token, quiz.id, type);
+  Future<void> refreshCurrentSession() async {
+    _currentSession = await _sessionApi.getSession(_authStateModel.token);
     notifyListeners();
+  }
+
+  Future<void> startQuizSession(Quiz quiz, GameSessionType type) async {
+    await _sessionApi.joinSession(
+        _authStateModel.token,
+        (await _sessionApi.createSession(_authStateModel.token, quiz.id, type))
+            .joinCode);
+    refreshCurrentSession();
   }
 
   Future<void> refreshAvailableQuizzes() async {
