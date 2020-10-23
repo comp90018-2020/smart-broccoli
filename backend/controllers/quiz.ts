@@ -172,11 +172,6 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
     }
     if (info.type) {
         quiz.type = info.type;
-
-        // Live quizzes should be automatically active (listed)
-        if (info.type === "live") {
-            quiz.active = true;
-        }
     }
     if (info.groupId) {
         quiz.groupId = info.groupId;
