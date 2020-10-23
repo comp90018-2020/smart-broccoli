@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/src/models.dart';
 
 /// A page extending scaffold
@@ -94,51 +93,48 @@ class CustomPage extends StatelessWidget {
                   SizedBox(
                     height: 130,
                     child: DrawerHeader(
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  // User picture
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.green,
-                                        borderRadius:
-                                            BorderRadius.circular(100)),
-                                    width: 50,
-                                    height: 50,
-                                  ),
-                                  // Name/email
-                                  Expanded(
-                                      child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 18),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text('name',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText1),
-                                        Text('email',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText2),
-                                      ],
-                                    ),
-                                  )),
-                                  Icon(Icons.chevron_right,
-                                      color: Colors.grey[700])
-                                ]),
-                          ),
-                          Expanded(child: Container())
-                        ],
+                      padding: const EdgeInsets.all(16),
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          _navigateToNamed(context, '/profile');
+                        },
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            // User picture
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(100)),
+                              width: 50,
+                              height: 50,
+                            ),
+                            // Name/email
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 18),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('name',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText1),
+                                    Text('email',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Icon(Icons.chevron_right, color: Colors.grey[700]),
+                          ],
+                        ),
                       ),
                     ),
                   ),

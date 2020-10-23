@@ -1,6 +1,5 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
-
 import 'package:smart_broccoli/src/ui.dart';
 
 /// Defines routes and transitions
@@ -19,6 +18,7 @@ class Routes {
   static String groupCreate = "/group/create";
   static String quiz = "/quiz";
   static String quizQuestion = "/quiz/question";
+  static const String profile = "/profile";
 
   /// Static router
   static FluroRouter router;
@@ -108,5 +108,11 @@ class Routes {
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return QuizLeaderboard();
     }));
+
+    // Profile
+    router.define(profile, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return ProfileMain();
+    }), transitionType: TransitionType.inFromLeft);
   }
 }
