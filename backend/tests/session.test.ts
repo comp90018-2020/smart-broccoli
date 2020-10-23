@@ -85,6 +85,26 @@ describe("Session", () => {
         expect(token.role).to.equal("host");
     });
 
+    it("Create session twice", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, QUIZ);
+
+        // Owner starts live session
+        await createSession(userOwner.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+
+        // Start again
+        const res = await agent
+            .post("/session")
+            .set("Authorization", `Bearer ${userOwner.token}`)
+            .send({ quizId: quiz.id, isGroup: false });
+        expect(res.status).to.equal(400);
+    });
+
     it("Get session", async () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
@@ -437,7 +457,7 @@ describe("Session", () => {
             .post("/session/join")
             .set("Authorization", `Bearer ${userMember.token}`)
             .send({ code: session.session.code });
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400);
     });
 
     it("Use token to get user info", async () => {

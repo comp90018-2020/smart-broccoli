@@ -77,7 +77,7 @@ export const sessionHasUser = async (sessionId: number, userId: number) => {
 const isInSession = async (userId: number) => {
     // Find active/waiting sessions which user has not left
     // @ts-ignore
-    const count: number = Session.count({
+    const count: number = await Session.count({
         where: {
             state: {
                 [Op.or]: ["active", "waiting"],
@@ -457,7 +457,7 @@ export const endSession = async (
         const session = await Session.findByPk(sessionId, {
             // @ts-ignore
             include: { model: "Quiz", attributes: ["id", "type"] },
-            attributes: ["id"]
+            attributes: ["id"],
         });
 
         await sequelize.transaction(async (transaction) => {
