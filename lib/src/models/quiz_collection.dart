@@ -58,7 +58,7 @@ class QuizCollectionModel extends ChangeNotifier {
         .where((quiz) => quiz.role == GroupRole.MEMBER);
     // TODO determine why this line is throwing a Exception
     //  _keyValueStore.setString('availableQuizzes', json.encode(_availableQuizzes.map((quiz) => quiz.toJson())));
-    //  notifyListeners();
+    notifyListeners();
   }
 
   Future<void> refreshCreatedQuizzes() async {
@@ -67,6 +67,12 @@ class QuizCollectionModel extends ChangeNotifier {
     // TODO determine why this line is throwing a Exception
     // _keyValueStore.setString('createdQuizzes',
     // json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
-    //  notifyListeners();
+    notifyListeners();
+  }
+
+  // This function creates a quiz, provided a Quiz Data structure and a groupid
+  Future<void> createQuiz(Quiz _quiz) async{
+    await _quizApi.createQuiz(_authStateModel.token, _quiz);
+    notifyListeners();
   }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data/group.dart';
 import 'package:smart_broccoli/src/data/quiz.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -68,10 +69,9 @@ class _ManageQuizState extends State<ManageQuiz> {
   /// TODO add create quiz functionality here
   /// Define group affiliation with the gid varible
   void _createQuiz() {
-    // QuizCollectionModel qcm =
-    //     Provider.of<QuizCollectionModel>(context, listen: true);
-    // GroupRegistryModel grm =
-    //     Provider.of<GroupRegistryModel>(context, listen: true);
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => QuizCreate(),
+    ));
   }
 
   /// Quiz selection dropdown
@@ -97,16 +97,6 @@ class _ManageQuizState extends State<ManageQuiz> {
                   onChanged: (_) {},
                   isExpanded: true,
                   items: buildDropDownMenu(),
-                  /*
-                    DropdownMenuItem(
-                        child: Center(child: Text('A')),
-                        value: 0,
-                        onTap: () => updateList()),
-                    DropdownMenuItem(
-                        child: Center(child: Text('B')),
-                        value: 1,
-                        onTap: () => updateList())
-                    */
                 ),
               ),
             ),
