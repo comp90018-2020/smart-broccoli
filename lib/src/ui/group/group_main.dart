@@ -117,7 +117,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
         controller: _controller,
         children: [
           QuizTab(),
-          MembersTab(_group),
+          MembersTab(_group.id),
         ],
       ),
     );
