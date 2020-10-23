@@ -175,11 +175,14 @@ class _QuizCardState extends State<QuizCard> {
                         : RaisedButton(
                             onPressed: () async {
                               if (!await _confirmActivateLiveQuiz()) return;
-                              widget.quiz.isActive = true;
-                              // TODO: replace with start session callback
-                              Provider.of<QuizCollectionModel>(context,
-                                      listen: false)
-                                  .updateQuiz(widget.quiz);
+                              try {
+                                Provider.of<QuizCollectionModel>(context,
+                                        listen: false)
+                                    .startQuizSession(widget.quiz,
+                                        GameSessionType.INDIVIDUAL);
+                              } catch (_) {
+                                _showActivateLiveQuizError();
+                              }
                             },
                             color: Theme.of(context).accentColor,
                             textColor:
@@ -257,6 +260,22 @@ class _QuizCardState extends State<QuizCard> {
         ],
       ),
       barrierDismissible: false,
+    );
+  }
+
+  Future<void> _showActivateLiveQuizError() async {
+    return showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Error"),
+        content: Text("Cannot start live session"),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
+      ),
     );
   }
 }
