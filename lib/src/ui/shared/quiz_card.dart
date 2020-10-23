@@ -173,7 +173,14 @@ class _QuizCardState extends State<QuizCard> {
                             shape: SmartBroccoliTheme.raisedButtonShape,
                           )
                         : RaisedButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              if (!await _confirmActivateLiveQuiz()) return;
+                              widget.quiz.isActive = true;
+                              // TODO: replace with start session callback
+                              Provider.of<QuizCollectionModel>(context,
+                                      listen: false)
+                                  .updateQuiz(widget.quiz);
+                            },
                             color: Theme.of(context).accentColor,
                             textColor:
                                 Theme.of(context).colorScheme.onBackground,
@@ -228,6 +235,28 @@ class _QuizCardState extends State<QuizCard> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<bool> _confirmActivateLiveQuiz() async {
+    return showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Confirm start session"),
+        content: Text(
+            "You are about to start a live session for the quiz: ${widget.quiz.title}"),
+        actions: [
+          TextButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text("OK"),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
     );
   }
 }
