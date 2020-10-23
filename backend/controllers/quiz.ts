@@ -31,7 +31,11 @@ export const getQuizAndRole = async (
             ? {
                   ...options,
                   attributes: options.attributes
-                      ? [...(options.attributes as string[]), "groupId"]
+                      ? [
+                            ...(options.attributes as string[]),
+                            "groupId",
+                            "active",
+                        ]
                       : options.attributes,
               }
             : undefined
@@ -112,8 +116,10 @@ export const createQuiz = async (userId: number, info: any) => {
         type: info.type,
         title: info.title,
     });
-    if (info.active !== undefined && info.type !== "live") {
+    if (info.active !== undefined) {
         quiz.active = info.active;
+    } else {
+        quiz.active = false;
     }
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
@@ -166,10 +172,6 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
     }
     if (info.type) {
         quiz.type = info.type;
-    }
-    // Live quizzes should be automatically active (listed)
-    if (info.type === "live") {
-        quiz.active = true;
     }
     if (info.groupId) {
         quiz.groupId = info.groupId;
@@ -253,15 +255,19 @@ export const getAllQuiz = async (
 
     return groups
         .map((group) => {
+            const role = group.Users[0].UserGroup.role;
+
             return group.Quizzes.filter((quiz) => {
-                // Members are not allowed to get non active quizzes
-                return !(
-                    !quiz.active && group.Users[0].UserGroup.role === "member"
-                );
+                // Members are allowed to see active quizzes only
+                if (role === "member") {
+                    return quiz.active;
+                }
+                // For owners
+                return true;
             }).map((quiz) => {
                 return {
                     ...quiz.toJSON(),
-                    role: group.Users[0].UserGroup.role,
+                    role,
                     // Whether user has completed quiz
                     complete:
                         quiz.Sessions.find(

@@ -1,4 +1,4 @@
-import { Group, User } from "models";
+import { Group, Quiz, User } from "models";
 import Sequelize, { Optional } from "sequelize";
 
 // Represents quiz session
@@ -63,6 +63,7 @@ export default class Session
 
     public readonly Users?: User[];
     public readonly Group?: Group;
+    public readonly Quiz?: Quiz;
 
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;

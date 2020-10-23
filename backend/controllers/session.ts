@@ -77,7 +77,7 @@ export const sessionHasUser = async (sessionId: number, userId: number) => {
 const isInSession = async (userId: number) => {
     // Find active/waiting sessions which user has not left
     // @ts-ignore
-    const count: number = Session.count({
+    const count: number = await Session.count({
         where: {
             state: {
                 [Op.or]: ["active", "waiting"],
@@ -232,6 +232,12 @@ export const createSession = async (userId: number, opts: any) => {
     if (role === "member" && quiz.type === "live") {
         throw new ErrorStatus("Users cannot start live quiz", 400);
     }
+    if (role === "member" && quiz.type === "self paced" && !quiz.active) {
+        throw new ErrorStatus(
+            "Users cannot start inactive self-paced quiz",
+            400
+        );
+    }
 
     // Initial state of quiz
     let state = "waiting";
@@ -251,6 +257,12 @@ export const createSession = async (userId: number, opts: any) => {
     });
 
     return await sequelize.transaction(async (transaction) => {
+        // Change live quiz to active state
+        if (quiz.type === "live") {
+            quiz.active = true;
+            await quiz.save({ transaction });
+        }
+
         // Save session
         await session.save({ transaction });
 
@@ -309,8 +321,8 @@ export const joinSession = async (userId: number, code: string) => {
     const session = await Session.findOne({
         where: { code, state: { [Op.not]: "ended" } },
         include: [
+            // Get group
             {
-                // Get group
                 model: Group,
                 attributes: ["id", "name", "defaultGroup", "code"],
                 required: true,
@@ -323,6 +335,11 @@ export const joinSession = async (userId: number, code: string) => {
                         required: true,
                     },
                 ],
+            },
+            // Get quiz
+            {
+                model: Quiz,
+                attributes: ["type"],
             },
             // Has user joined before?
             {
@@ -337,7 +354,7 @@ export const joinSession = async (userId: number, code: string) => {
         ],
     });
     if (!session) {
-        throw new ErrorStatus("Cannot found session with code", 404);
+        throw new ErrorStatus("Cannot find session with code", 404);
     }
 
     // Update SessionParticipant
@@ -346,7 +363,12 @@ export const joinSession = async (userId: number, code: string) => {
         await session.Users[0].SessionParticipant.update({
             state: "joined",
         });
-    } else if (session.Users.length === 0 && session.state === "waiting") {
+    } else if (
+        // In waiting state OR in active state and is live quiz
+        session.Users.length === 0 &&
+        (session.state === "waiting" ||
+            (session.state === "active" && session.Quiz.type === "live"))
+    ) {
         // Create association
         await SessionParticipant.create({
             sessionId: session.id,
@@ -432,15 +454,25 @@ export const endSession = async (
     progress: { userId: number; data: any; state?: string }[]
 ) => {
     try {
+        const session = await Session.findByPk(sessionId, {
+            // @ts-ignore
+            include: { model: "Quiz", attributes: ["id", "type"] },
+            attributes: ["id"],
+        });
+
         await sequelize.transaction(async (transaction) => {
+            // If live quiz, deactivate
+            if (session.Quiz.type === "live") {
+                await session.Quiz.update({ active: false }, { transaction });
+            }
+
             // Session has ended
-            await Session.update(
+            await session.update(
                 {
                     state: "ended",
                     code: null,
                 },
                 {
-                    where: { id: sessionId },
                     transaction,
                 }
             );
