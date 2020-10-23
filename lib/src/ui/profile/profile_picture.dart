@@ -83,7 +83,7 @@ class _ProfilePictureState extends State<ProfilePicture> {
                 Icon(Icons.picture_in_picture),
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
-                  child: Text("From gallery"),
+                  child: const Text("From gallery"),
                 )
               ]),
               onPressed: () {
@@ -96,7 +96,7 @@ class _ProfilePictureState extends State<ProfilePicture> {
                 Icon(Icons.camera),
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
-                  child: Text("Use camera"),
+                  child: const Text("Use camera"),
                 )
               ]),
               onPressed: () {

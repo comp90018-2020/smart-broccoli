@@ -27,7 +27,7 @@ class _ProfileMainState extends State<ProfileMain> {
       appbarActions: [
         CupertinoButton(
           child: Text(_isEdit ? "Save" : "Edit",
-              style: TextStyle(color: Colors.white)),
+              style: const TextStyle(color: Colors.white)),
           onPressed: () {
             setState(() {
               _isEdit = !_isEdit;

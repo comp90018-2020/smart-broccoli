@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'profile_picture.dart';
-import 'util_table.dart';
+import 'table_items.dart';
 
 /// Profile page for listed users
 class RegisteredProfile extends StatefulWidget {

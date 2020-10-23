@@ -6,17 +6,19 @@ class NameTableRow extends TableRow {
   NameTableRow(bool isEdit, TextEditingController _nameController)
       : super(
           children: [
-            _paddedCell(Text('NAME', style: TextStyle(color: Colors.black38)),
-                padding: EdgeInsets.only(left: 16)),
+            _paddedCell(
+                const Text('NAME',
+                    style: const TextStyle(color: Colors.black38)),
+                padding: const EdgeInsets.only(left: 16)),
             _paddedCell(
               TextFormField(
                 readOnly: !isEdit,
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                     contentPadding: EdgeInsets.zero,
-                    hintStyle: TextStyle(color: Colors.black38),
+                    hintStyle: const TextStyle(color: Colors.black38),
                     suffixIcon: IconButton(
-                      icon: isEdit ? Icon(Icons.clear) : Icon(null),
+                      icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
                       onPressed: () {},
                     ),
                     border: InputBorder.none,
@@ -24,7 +26,7 @@ class NameTableRow extends TableRow {
                     hintText: 'John Smith'),
                 controller: _nameController,
               ),
-              padding: EdgeInsets.only(left: 16),
+              padding: const EdgeInsets.only(left: 16),
             ),
           ],
         );
@@ -35,18 +37,19 @@ class EmailTableRow extends TableRow {
   EmailTableRow(bool isEdit, TextEditingController _nameController)
       : super(
           children: [
-            _paddedCell(Text('EMAIL', style: TextStyle(color: Colors.black38)),
-                padding: EdgeInsets.only(left: 16)),
+            _paddedCell(
+                const Text('EMAIL', style: TextStyle(color: Colors.black38)),
+                padding: const EdgeInsets.only(left: 16)),
             _paddedCell(
               TextFormField(
                 textAlignVertical: TextAlignVertical.center,
                 readOnly: !isEdit,
                 decoration: InputDecoration(
                     contentPadding: EdgeInsets.zero,
-                    hintStyle: TextStyle(color: Colors.black38),
+                    hintStyle: const TextStyle(color: Colors.black38),
                     border: InputBorder.none,
                     suffixIcon: IconButton(
-                      icon: isEdit ? Icon(Icons.clear) : Icon(null),
+                      icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
                       onPressed: () {},
                     ),
                     // A space
@@ -54,7 +57,7 @@ class EmailTableRow extends TableRow {
                     hintText: 'name@example.com'),
                 controller: _nameController,
               ),
-              padding: EdgeInsets.only(left: 16),
+              padding: const EdgeInsets.only(left: 16),
             ),
           ],
         );
@@ -66,7 +69,7 @@ class PasswordTableRow extends TableRow {
       : super(
           children: [
             _paddedCell(
-                Text('Password', style: TextStyle(color: Colors.black38)),
+                Text('Password', style: const TextStyle(color: Colors.black38)),
                 padding: const EdgeInsets.only(left: 16)),
             _paddedCell(
               TextFormField(
@@ -74,17 +77,17 @@ class PasswordTableRow extends TableRow {
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                     contentPadding: EdgeInsets.zero,
-                    hintStyle: TextStyle(color: Colors.black38),
+                    hintStyle: const TextStyle(color: Colors.black38),
                     border: InputBorder.none,
                     suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
+                      icon: const Icon(Icons.clear),
                       onPressed: () {},
                     ),
                     focusedBorder: InputBorder.none,
                     hintText: 'Password'),
                 controller: _passwordController,
               ),
-              padding: EdgeInsets.only(left: 16),
+              padding: const EdgeInsets.only(left: 16),
             ),
           ],
         );
@@ -98,18 +101,18 @@ class PasswordConfirmTableRow extends TableRow {
           children: [
             _paddedCell(
                 Text('Confirm Password',
-                    style: TextStyle(color: Colors.black38)),
-                padding: EdgeInsets.only(left: 16)),
+                    style: const TextStyle(color: Colors.black38)),
+                padding: const EdgeInsets.only(left: 16)),
             _paddedCell(
               TextFormField(
                 obscureText: true,
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                     contentPadding: EdgeInsets.zero,
-                    hintStyle: TextStyle(color: Colors.black38),
+                    hintStyle: const TextStyle(color: Colors.black38),
                     border: InputBorder.none,
                     suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
+                      icon: const Icon(Icons.clear),
                       onPressed: () {},
                     ),
                     // A space
@@ -117,7 +120,7 @@ class PasswordConfirmTableRow extends TableRow {
                     hintText: 'Confirm password'),
                 controller: _passwordController,
               ),
-              padding: EdgeInsets.only(left: 16),
+              padding: const EdgeInsets.only(left: 16),
             ),
           ],
         );

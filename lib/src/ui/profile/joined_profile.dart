@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'profile_picture.dart';
 import 'promoting_profile.dart';
-import 'util_table.dart';
+import 'table_items.dart';
 
 class JoinedProfile extends StatefulWidget {
   /// Whether fields are in edit mode
@@ -75,7 +75,7 @@ class _JoinedProfileState extends State<JoinedProfile> {
                       width: 150,
                       child: RaisedButton(
                           onPressed: () => initRegister(),
-                          child: Text("Register")),
+                          child: const Text("Register")),
                     ),
                   ],
                 ),

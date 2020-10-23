@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'profile_picture.dart';
-import 'util_table.dart';
+import 'table_items.dart';
 
 // Profile
 class PromotingProfile extends StatefulWidget {
@@ -66,7 +66,7 @@ class _PromotingProfileState extends State<PromotingProfile> {
               width: 150,
               child: RaisedButton(
                 onPressed: () => initPromote(),
-                child: Text("Submit"),
+                child: const Text("Submit"),
               ),
             ),
           ],
