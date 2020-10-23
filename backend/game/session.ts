@@ -184,7 +184,7 @@ export class GameSession {
                     : rank[record.newPos - 1];
             const questionOutcome = {
                 question: this.questionIndex,
-                leaderBoard: rank.slice(0, 5),
+                leaderboard: rank.slice(0, 5),
                 record: this.playerMap[Number(id)].formatRecord().record,
                 playerAhead: playerAheadRecord,
             };
