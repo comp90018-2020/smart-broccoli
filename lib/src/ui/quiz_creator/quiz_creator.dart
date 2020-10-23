@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui.dart';
@@ -45,7 +44,7 @@ class _QuizCreateState extends State<QuizCreate> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     GroupRegistryModel grm =
-    Provider.of<GroupRegistryModel>(context, listen: true);
+        Provider.of<GroupRegistryModel>(context, listen: true);
     group = grm.createdGroups;
     // Init a place holder quiz
     model = Quiz("placeholder", group[0].id, QuizType.LIVE);
@@ -73,7 +72,9 @@ class _QuizCreateState extends State<QuizCreate> {
         ),
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
-          onPressed: () {_createQuiz();},
+          onPressed: () {
+            _createQuiz();
+          },
           child: Text(
             'Save',
             style: TextStyle(color: Colors.white, fontSize: 16),
@@ -229,7 +230,9 @@ class _QuizCreateState extends State<QuizCreate> {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           spacing: 3,
                           children: [Icon(Icons.add), Text('ADD QUESTION')]),
-                      onPressed: () {addQuestion();},
+                      onPressed: () {
+                        addQuestion();
+                      },
                     ),
                   ),
                 )
@@ -242,12 +245,11 @@ class _QuizCreateState extends State<QuizCreate> {
   }
 
   // Not yet Implemented TODO implement
-  void addQuestion(){
+  void addQuestion() {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (context) => QuestionCreate(),
     ));
   }
-
 
   List<DropdownMenuItem> buildDropDownMenu() {
     List<DropdownMenuItem> res = [];
@@ -266,7 +268,7 @@ class _QuizCreateState extends State<QuizCreate> {
   void updateList(int i) {
     model.groupId = group[i].id;
     setState(() {
-       showGroup = i;
+      showGroup = i;
     });
   }
 
@@ -315,9 +317,9 @@ class _QuizCreateState extends State<QuizCreate> {
     });
   }
 
-  void _createQuiz(){
+  void _createQuiz() {
     QuizCollectionModel qcm =
-    Provider.of<QuizCollectionModel>(context, listen: false);
+        Provider.of<QuizCollectionModel>(context, listen: false);
     qcm.createQuiz(model);
   }
 }
