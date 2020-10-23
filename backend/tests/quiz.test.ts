@@ -415,4 +415,84 @@ describe("Quiz", () => {
             .send();
         expect(res.status).to.equal(204);
     });
+
+    it("Quiz picture retrieval - Inactive", async () => {
+        const agent = supertest(app);
+
+        // Login as registered
+        const userOwner = await registerAndLogin(USER);
+
+        // Create group/quiz
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, {
+            ...QUIZ,
+            type: "self paced",
+            active: false,
+        });
+        // Set quiz picture
+        await agent
+            .put(`/quiz/${quiz.id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${userOwner.token}`);
+
+        // Login as member
+        const userMember = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        // Join group
+        await joinGroup(userMember.id, { code: group.code });
+
+        // Get all quiz and picture
+        const resAll = await agent.get("/quiz")
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(resAll.status).to.equal(200);
+        expect(resAll.body).to.have.lengthOf(0);
+        const res = await agent
+            .get(`/quiz/${quiz.id}/picture`)
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(res.status).to.equal(403);
+    });
+
+    it("Quiz picture retrieval - Active", async () => {
+        const agent = supertest(app);
+
+        // Login as registered
+        const userOwner = await registerAndLogin(USER);
+
+        // Create group/quiz
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, {
+            ...QUIZ,
+            type: "self paced",
+            active: true,
+        });
+        // Set quiz picture
+        await agent
+            .put(`/quiz/${quiz.id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${userOwner.token}`);
+
+        // Login as member
+        const userMember = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        // Join group
+        await joinGroup(userMember.id, { code: group.code });
+
+        // Get all quiz and picture
+        const resAll = await agent.get("/quiz")
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(resAll.status).to.equal(200);
+        expect(resAll.body).to.have.lengthOf(1);
+        const res = await agent
+            .get(`/quiz/${quiz.id}/picture`)
+            .set("Authorization", `Bearer ${userMember.token}`);
+        expect(res.status).to.equal(200);
+    });
 });
