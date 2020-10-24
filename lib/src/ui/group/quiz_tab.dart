@@ -60,13 +60,14 @@ class QuizTab extends StatelessWidget {
                   floatingActionButton: group.role == GroupRole.OWNER
                       ? FloatingActionButton.extended(
                           onPressed: () => Navigator.of(context)
-                              .pushNamed('/group/$groupId/quiz'),
+                              .pushNamed('/quiz'),
                           label: Text('CREATE QUIZ'),
                           icon: Icon(Icons.add),
                         )
                       : null,
                 );
         }),
+
       ),
     );
   }

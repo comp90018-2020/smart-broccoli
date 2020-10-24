@@ -7,6 +7,7 @@ import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'picture.dart';
+import 'package:smart_broccoli/src/ui/groups/group_create.dart';
 
 class QuizCreate extends StatefulWidget {
   final int groupId;
@@ -18,6 +19,8 @@ class QuizCreate extends StatefulWidget {
 }
 
 class _QuizCreateState extends State<QuizCreate> {
+
+  final TextEditingController controller = TextEditingController();
   // Key for form
   final _formKey = GlobalKey<FormState>();
 
@@ -83,6 +86,7 @@ class _QuizCreateState extends State<QuizCreate> {
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
                   child: TextField(
+                    controller: controller,
                     decoration: InputDecoration(
                       labelText: 'Quiz name',
                     ),
@@ -249,6 +253,23 @@ class _QuizCreateState extends State<QuizCreate> {
               ],
             ),
           )
+        ],
+      ),
+    );
+  }
+
+
+  void _showUnsuccessful(String title, String body) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
         ],
       ),
     );
