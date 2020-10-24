@@ -64,10 +64,18 @@ class QuizCollectionModel extends ChangeNotifier {
     if (quiz.type != QuizType.SELF_PACED)
       throw ArgumentError('Quiz must be self-paced to use this method');
     if (quiz.isActive == active) return;
+
     try {
+      // Set quiz state, immediate UI feedback
       quiz.isActive = active;
       notifyListeners();
-      await _quizApi.updateQuiz(_authStateModel.token, quiz);
+      // Perform operation
+      var updated = await _quizApi.updateQuiz(_authStateModel.token, quiz);
+      // If result is different
+      if (quiz.isActive != updated.isActive) {
+        quiz.isActive = updated.isActive;
+        notifyListeners();
+      }
     } catch (err) {
       await refreshQuiz(quiz.id);
       throw err;
