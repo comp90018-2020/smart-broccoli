@@ -33,4 +33,5 @@ class OutcomeUser {
 
     return tuples;
   }
+
 }

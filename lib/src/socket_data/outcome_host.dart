@@ -22,4 +22,6 @@ class OutcomeHost {
 
     return tuples;
   }
+
 }
+
