@@ -80,19 +80,17 @@ class _BuildQuiz extends State<QuizContainer> {
             ),
 
             // Leave some space for a hidden floating action button
-            widget.hiddenButton
-                ? Visibility(
-                    maintainState: true,
-                    maintainAnimation: true,
-                    maintainSize: true,
-                    visible: false,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child:
-                          FloatingActionButton(heroTag: null, onPressed: null),
-                    ),
-                  )
-                : Container(),
+            if (widget.hiddenButton)
+              Visibility(
+                maintainState: true,
+                maintainAnimation: true,
+                maintainSize: true,
+                visible: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: FloatingActionButton(heroTag: null, onPressed: null),
+                ),
+              )
           ],
         ),
       ),
