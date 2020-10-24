@@ -132,8 +132,7 @@ class GroupRegistryModel extends ChangeNotifier {
       _joinedGroups[group.id] = group;
     }
     // fetch quizzes
-    if (withQuizzes)
-      await _quizCollectionModel.refreshGroupQuizzes(id, group.role);
+    if (withQuizzes) await _quizCollectionModel.refreshGroupQuizzes(id);
     // fetch members
     if (withMembers)
       group.members =

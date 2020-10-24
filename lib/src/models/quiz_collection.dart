@@ -144,11 +144,11 @@ class QuizCollectionModel extends ChangeNotifier {
   }
 
   /// Refreshes specific group's quizzes.
-  Future<void> refreshGroupQuizzes(int groupId, GroupRole role) async {
+  Future<void> refreshGroupQuizzes(int groupId) async {
     var quizzes =
         await _quizApi.getGroupQuizzes(_authStateModel.token, groupId);
     await Future.forEach(quizzes, (quiz) {
-      if (role == GroupRole.OWNER) {
+      if (quiz.role == GroupRole.OWNER) {
         _createdQuizzes[quiz.id] = quiz;
       } else {
         _availableQuizzes[quiz.id] = quiz;
