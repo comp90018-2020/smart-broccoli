@@ -85,7 +85,7 @@ class _QuizCardState extends State<QuizCard> {
                   Column(
                     children: [
                       // Admin options
-                      buildAdmin(),
+                      if (widget.quiz.role == GroupRole.OWNER) buildAdmin(),
 
                       // Quiz status
                       Container(
@@ -151,11 +151,6 @@ class _QuizCardState extends State<QuizCard> {
 
   /// Build admin options row
   Widget buildAdmin() {
-    // Not admin, no box
-    if (widget.quiz.role != GroupRole.OWNER) {
-      return Container();
-    }
-
     return Padding(
       padding: const EdgeInsets.only(right: 10),
       child: Row(

@@ -63,15 +63,18 @@ class _ManageQuizState extends State<ManageQuiz> {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: DropdownButton(
-                  underline: Container(),
-                  onChanged: (_) {},
-                  isExpanded: true,
-                  items: [
-                    DropdownMenuItem(child: Center(child: Text('A')), value: 0),
-                    DropdownMenuItem(child: Center(child: Text('B')), value: 1)
-                  ],
-                  value: 0,
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton(
+                    onChanged: (_) {},
+                    isExpanded: true,
+                    items: [
+                      DropdownMenuItem(
+                          child: Center(child: Text('A')), value: 0),
+                      DropdownMenuItem(
+                          child: Center(child: Text('B')), value: 1)
+                    ],
+                    value: 0,
+                  ),
                 ),
               ),
             ),
