@@ -49,6 +49,20 @@ class QuizCollectionModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Activate a self-paced quiz
+  Future<void> setQuizActivation(Quiz quiz, bool active) async {
+    if (quiz.type != QuizType.SELF_PACED)
+      throw ArgumentError('Quiz must be self-paced to use this method');
+    if (quiz.isActive == active) return;
+    try {
+      quiz.isActive = active;
+      _quizApi.updateQuiz(_authStateModel.token, quiz);
+      notifyListeners();
+    } catch (_) {
+      quiz.isActive = !active;
+    }
+  }
+
   Future<void> updateQuiz(Quiz quiz) async {
     await _quizApi.updateQuiz(_authStateModel.token, quiz);
     notifyListeners();
