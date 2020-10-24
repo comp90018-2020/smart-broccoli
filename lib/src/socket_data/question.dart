@@ -20,12 +20,10 @@ class Question {
     this.time = json['time'];
   }
 
-  List<Option> questionMod(Map<String, dynamic> json)
-  {
+  List<Option> questionMod(Map<String, dynamic> json) {
     List<Option> options = [];
     List tempOpt = (json['options'] as List);
-    for(var values in tempOpt)
-    {
+    for (var values in tempOpt) {
       //Option temp = new Option.fromJson(values);
       Option temp = Option.fromJson(values);
       //temp.fromJson(values);
@@ -33,7 +31,6 @@ class Question {
     }
     return options;
   }
-
 }
 
 class Option {

@@ -9,19 +9,17 @@ class OutcomeHost {
     this.leaderBoard = outcomeHostMod(json);
   }
 
-
-  List<Tuple> outcomeHostMod(Map<String, dynamic> json)
-  {
+  List<Tuple> outcomeHostMod(Map<String, dynamic> json) {
     List<Tuple> tuples = [];
     List tempTuple = (json['leaderboard'] as List);
-    for(var values in tempTuple)
-    {
+    for (var values in tempTuple) {
       Tuple temp = Tuple.fromJson(values);
       tuples.add(temp);
     }
 
     return tuples;
   }
+
 
 }
 
