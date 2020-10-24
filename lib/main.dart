@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
       // Push route if app is initialised
       if (inSession != null)
         _mainNavigatorKey.currentState.pushNamedAndRemoveUntil(
-            state.inSession ? '/home' : '/auth', (route) => false);
+            state.inSession ? '/group/home' : '/auth', (route) => false);
       inSession = state.inSession;
     }
 
