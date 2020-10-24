@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/models.dart';
 
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -89,10 +90,11 @@ class _StartLobby extends State<QuizLobby> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                 margin: EdgeInsets.only(bottom: 12),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.35),
-                  child: QuizCard(qcm.selectedQuiz),
+
+                child: QuizCard(
+                  // placeholder
+                  Quiz.fromJson({'title': 'Quiz title', 'groupId': 1}),
+                  aspectRatio: 3,
                 ),
               ),
 

@@ -59,15 +59,6 @@ class _InitialRouterState extends State<InitialRouter> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (BuildContext context) => GroupMain()))
-                      }),
-              // Place holder testing buttons
-              RaisedButton(
-                  child: Text("Test Group Quiz"),
-                  onPressed: () => {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
                                 builder: (BuildContext context) =>
                                     ManageQuiz())),
                       }),

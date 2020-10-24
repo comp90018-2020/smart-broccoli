@@ -8,14 +8,17 @@ import 'package:smart_broccoli/src/remote.dart';
 
 class MockGroupApi extends Mock implements GroupApi {}
 
+class MockQuizApi extends Mock implements QuizApi {}
+
 main() async {
   test('Refresh groups', () async {
     final GroupApi api = MockGroupApi();
     final KeyValueStore kv = MainMemKeyValueStore(init: {"token": "abc"});
     final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(groupApi: api);
+    final QuizCollectionModel qcm = QuizCollectionModel(am);
     final GroupRegistryModel model =
-        GroupRegistryModel(kv, am, repo, groupApi: api);
+        GroupRegistryModel(am, repo, qcm, groupApi: api);
 
     when(api.getGroups(any)).thenAnswer(
       (_) async => [
@@ -49,8 +52,8 @@ main() async {
       ],
     );
 
-    model.refreshJoinedGroups();
-    model.refreshCreatedGroups();
+    model.refreshJoinedGroups(withMembers: false);
+    model.refreshCreatedGroups(withMembers: false);
     await untilCalled(api.getGroups(any));
     expect(model.joinedGroups, isA<List<Group>>());
     expect(model.createdGroups, isA<List<Group>>());
@@ -63,8 +66,9 @@ main() async {
     final KeyValueStore kv = MainMemKeyValueStore(init: {"token": "abc"});
     final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(groupApi: api);
+    final QuizCollectionModel qcm = QuizCollectionModel(am);
     final GroupRegistryModel model =
-        GroupRegistryModel(kv, am, repo, groupApi: api);
+        GroupRegistryModel(am, repo, qcm, groupApi: api);
 
     when(api.getGroups(any)).thenAnswer(
       (_) async => [

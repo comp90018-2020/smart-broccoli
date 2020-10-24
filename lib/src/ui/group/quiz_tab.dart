@@ -5,56 +5,67 @@ import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
-class QuizTab extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => new _QuizTab();
-}
+class QuizTab extends StatelessWidget {
+  final int groupId;
 
-class _QuizTab extends State<QuizTab> {
-  List<Quiz> items;
-
-  // TODO change this when group logic is implemented
-  int groupId = 26;
-
-  // See : https://stackoverflow.com/questions/58371874/what-is-diffrence-between-didchangedependencies-and-initstate
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true);
-    items = qcm.availableQuizzes;
-  }
+  QuizTab(this.groupId);
 
   @override
   Widget build(BuildContext context) {
-    /// Can't be placed in init since we need the context
-    /// Further testing is required to see if placing it in login in the best way
-    /// forward
-    QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true);
-    items = qcm.availableQuizzes;
-
-    return new Scaffold(
+    return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Container(
-        child: CustomTabbedPage(
-          secondaryBackgroundColour: true,
-          title: "YES",
-          tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-          tabViews: [
-            QuizContainer(getQuiz(items, null), hiddenButton: true),
-            QuizContainer(getQuiz(items, QuizType.LIVE), hiddenButton: true),
-            QuizContainer(getQuiz(items, QuizType.SELF_PACED),
-                hiddenButton: true),
-          ],
-          hasDrawer: false,
-          primary: false,
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {},
-            label: Text('CREATE QUIZ'),
-            icon: Icon(Icons.add),
-          ),
-        ),
+        child: Consumer2<GroupRegistryModel, QuizCollectionModel>(
+            builder: (context, registry, collection, child) {
+          final Group group = registry.getGroup(groupId);
+
+          return group == null
+              ? Container()
+              : CustomTabbedPage(
+                  secondaryBackgroundColour: true,
+                  title: "YES",
+                  tabs: [
+                    Tab(text: "ALL"),
+                    Tab(text: "LIVE"),
+                    Tab(text: "SELF-PACED")
+                  ],
+                  tabViews: [
+                    // all quizzes
+                    QuizContainer(
+                      collection.getQuizzesWhere(groupId: group.id).toList(),
+                      hiddenButton: true,
+                    ),
+
+                    // live quizzes
+                    QuizContainer(
+                      collection
+                          .getQuizzesWhere(
+                              groupId: group.id, type: QuizType.LIVE)
+                          .toList(),
+                      hiddenButton: true,
+                    ),
+
+                    // self-paced quizzes
+                    QuizContainer(
+                      collection
+                          .getQuizzesWhere(
+                              groupId: group.id, type: QuizType.SELF_PACED)
+                          .toList(),
+                      hiddenButton: true,
+                    ),
+                  ],
+                  hasDrawer: false,
+                  primary: false,
+                  floatingActionButton: group.role == GroupRole.OWNER
+                      ? FloatingActionButton.extended(
+                          onPressed: () => Navigator.of(context)
+                              .pushNamed('/group/$groupId/quiz'),
+                          label: Text('CREATE QUIZ'),
+                          icon: Icon(Icons.add),
+                        )
+                      : null,
+                );
+        }),
       ),
     );
   }

@@ -500,6 +500,7 @@ export const getGroupQuizzes = async (userId: number, groupId: number) => {
     return quizzes.map((quiz) => {
         return {
             ...quiz.toJSON(),
+            role,
             // Whether user has completed quiz
             complete:
                 quiz.Sessions.find(

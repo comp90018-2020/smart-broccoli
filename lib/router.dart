@@ -1,24 +1,26 @@
 import 'package:fluro/fluro.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/ui.dart';
-import 'package:flutter/cupertino.dart';
 
 /// Defines routes and transitions
 class Routes {
-  static String root = "/home";
-  static String auth = "/auth";
-  static String takeQuiz = "/take_quiz";
-  static String manageQuiz = "/manage_quiz";
-  static String sessionLobby = "/session/lobby";
-  static String sessionQuestion = "/session/question";
-  static String sessionLeaderboard = "/session/leaderboard";
-  static String about = "/about";
-  static String acknowledgements = "/about/acknowledgements";
-  static String group = "/group/:id";
-  static String groupHome = "/group/home";
-  static String groupCreate = "/group/create";
-  static String quiz = "/quiz";
-  static String quizQuestion = "/quiz/question";
+  static const String root = "/home";
+  static const String auth = "/auth";
+  static const String takeQuiz = "/take_quiz";
+  static const String manageQuiz = "/manage_quiz";
+  static const String sessionLobby = "/session/lobby";
+  static const String sessionQuestion = "/session/question";
+  static const String sessionLeaderboard = "/session/leaderboard";
+  static const String about = "/about";
+  static const String acknowledgements = "/about/acknowledgements";
+  static const String group = "/group/:id";
+  static const String groupCreateQuiz = "/group/:id/quiz";
+  static const String groupHome = "/group/home";
+  static const String groupCreate = "/group/create";
+  static const String quiz = "/quiz";
+  static const String quizQuestion = "/quiz/question";
+  static const String profile = "/profile";
 
   /// Static router
   static FluroRouter router;
@@ -76,7 +78,13 @@ class Routes {
     // Group
     router.define(group, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
-      return GroupMain();
+      return GroupMain(int.parse(params["id"][0]));
+    }));
+
+    // Create quiz for specific group
+    router.define(groupCreateQuiz, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return QuizCreate(groupId: int.parse(params["id"][0]));
     }));
 
     // Quiz
@@ -108,5 +116,11 @@ class Routes {
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return QuizLeaderboard();
     }));
+
+    // Profile
+    router.define(profile, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return ProfileMain();
+    }), transitionType: TransitionType.inFromLeft);
   }
 }

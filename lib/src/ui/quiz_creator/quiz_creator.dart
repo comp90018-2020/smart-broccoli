@@ -11,11 +11,9 @@ import 'package:smart_broccoli/theme.dart';
 import 'picture.dart';
 
 class QuizCreate extends StatefulWidget {
-  /// In the future we might want to show the group which the user clicked
-  /// create quiz on, this is here for this purpose.
-  // final int groupID;
+  final int groupId;
 
-  QuizCreate({Key key}) : super(key: key);
+  QuizCreate({this.groupId, Key key}) : super(key: key);
 
   @override
   _QuizCreateState createState() => _QuizCreateState();
@@ -318,8 +316,10 @@ class _QuizCreateState extends State<QuizCreate> {
   }
 
   void _createQuiz() {
+    /*
     QuizCollectionModel qcm =
         Provider.of<QuizCollectionModel>(context, listen: false);
     qcm.createQuiz(model);
+     */
   }
 }
