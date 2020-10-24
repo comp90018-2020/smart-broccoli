@@ -25,7 +25,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshGroup(widget.groupId);
+        .refreshGroup(widget.groupId, withMembers: true, withQuizzes: true);
     super.didChangeDependencies();
   }
 
