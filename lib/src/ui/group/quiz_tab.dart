@@ -13,11 +13,6 @@ class QuizTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<QuizCollectionModel>(context, listen: false)
-        .refreshAvailableQuizzes();
-    Provider.of<QuizCollectionModel>(context, listen: false)
-        .refreshCreatedQuizzes();
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Container(

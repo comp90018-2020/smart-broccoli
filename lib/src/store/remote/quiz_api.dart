@@ -36,6 +36,22 @@ class QuizApi {
     throw Exception('Unable to get quizzes: unknown error occurred');
   }
 
+  /// Return a list of all quizzes of a group.
+  Future<List<Quiz>> getGroupQuizzes(String token, int groupId) async {
+    http.Response response = await _http.get(
+        ApiBase.BASE_URL + "/group/$groupId/quiz",
+        headers: ApiBase.headers(authToken: token));
+
+    if (response.statusCode == 200)
+      return (json.decode(response.body) as List)
+          .map((repr) => Quiz.fromJson(repr))
+          .toList();
+
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw Exception('Unable to get quizzes: unknown error occurred');
+  }
+
   /// Return the quiz with specified [id].
   Future<Quiz> getQuiz(String token, int id) async {
     http.Response response = await _http.get('$QUIZ_URL/$id',

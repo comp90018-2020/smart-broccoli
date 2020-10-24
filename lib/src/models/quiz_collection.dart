@@ -20,12 +20,14 @@ class QuizCollectionModel extends ChangeNotifier {
   /// Views subscribe to the fields below
   Quiz _selectedQuiz;
   Quiz get selectedQuiz => _selectedQuiz;
-  Iterable<Quiz> _availableQuizzes = Iterable.empty();
+
+  Map<int, Quiz> _availableQuizzes = {};
+  Map<int, Quiz> _createdQuizzes = {};
+
   UnmodifiableListView<Quiz> get availableQuizzes =>
-      UnmodifiableListView(_availableQuizzes);
-  Iterable<Quiz> _createdQuizzes = Iterable.empty();
+      UnmodifiableListView(_availableQuizzes.values);
   UnmodifiableListView<Quiz> get createdQuizzes =>
-      UnmodifiableListView(_createdQuizzes);
+      UnmodifiableListView(_createdQuizzes.values);
   GameSession _currentSession;
   GameSession get currentSession => _currentSession;
 
@@ -39,10 +41,12 @@ class QuizCollectionModel extends ChangeNotifier {
   }
 
   UnmodifiableListView<Quiz> getQuizzesWhere({int groupId, QuizType type}) =>
-      UnmodifiableListView([..._availableQuizzes, ..._createdQuizzes].where(
-          (quiz) =>
-              (groupId == null || quiz.groupId == groupId) &&
-              (type == null || quiz.type == type)));
+      UnmodifiableListView([
+        ..._availableQuizzes.values,
+        ..._createdQuizzes.values
+      ].where((quiz) =>
+          (groupId == null || quiz.groupId == groupId) &&
+          (type == null || quiz.type == type)));
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
@@ -60,12 +64,21 @@ class QuizCollectionModel extends ChangeNotifier {
     if (quiz.type != QuizType.SELF_PACED)
       throw ArgumentError('Quiz must be self-paced to use this method');
     if (quiz.isActive == active) return;
+
     try {
+      // Set quiz state, immediate UI feedback
       quiz.isActive = active;
-      _quizApi.updateQuiz(_authStateModel.token, quiz);
       notifyListeners();
-    } catch (_) {
-      quiz.isActive = !active;
+      // Perform operation
+      var updated = await _quizApi.updateQuiz(_authStateModel.token, quiz);
+      // If result is different
+      if (quiz.isActive != updated.isActive) {
+        quiz.isActive = updated.isActive;
+        notifyListeners();
+      }
+    } catch (err) {
+      await refreshQuiz(quiz.id);
+      throw err;
     }
   }
 
@@ -87,10 +100,23 @@ class QuizCollectionModel extends ChangeNotifier {
     refreshCurrentSession();
   }
 
+  /// Refreshes the specified quiz
+  Future<void> refreshQuiz(int quizId) async {
+    var quiz = await _quizApi.getQuiz(_authStateModel.token, quizId);
+    if (quiz.role == GroupRole.OWNER) {
+      _createdQuizzes[quiz.id] = quiz;
+    } else {
+      _availableQuizzes[quiz.id] = quiz;
+    }
+    notifyListeners();
+  }
+
   Future<void> refreshAvailableQuizzes() async {
-    _availableQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
-        .where((quiz) => quiz.role == GroupRole.MEMBER);
-    await Future.wait(_availableQuizzes.map((Quiz quiz) async {
+    _availableQuizzes = Map.fromIterable(
+        (await _quizApi.getQuizzes(_authStateModel.token))
+            .where((quiz) => quiz.role == GroupRole.MEMBER),
+        key: (quiz) => quiz.id);
+    await Future.wait(_availableQuizzes.values.map((Quiz quiz) async {
       try {
         quiz.picture =
             await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
@@ -102,9 +128,11 @@ class QuizCollectionModel extends ChangeNotifier {
   }
 
   Future<void> refreshCreatedQuizzes() async {
-    _createdQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
-        .where((quiz) => quiz.role == GroupRole.OWNER);
-    await Future.wait(_createdQuizzes.map((Quiz quiz) async {
+    _createdQuizzes = Map.fromIterable(
+        (await _quizApi.getQuizzes(_authStateModel.token))
+            .where((quiz) => quiz.role == GroupRole.OWNER),
+        key: (quiz) => quiz.id);
+    await Future.wait(_createdQuizzes.values.map((Quiz quiz) async {
       try {
         quiz.picture =
             await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
@@ -113,5 +141,18 @@ class QuizCollectionModel extends ChangeNotifier {
       }
     }));
     notifyListeners();
+  }
+
+  /// Refreshes specific group's quizzes.
+  Future<void> refreshGroupQuizzes(int groupId) async {
+    var quizzes =
+        await _quizApi.getGroupQuizzes(_authStateModel.token, groupId);
+    await Future.forEach(quizzes, (quiz) {
+      if (quiz.role == GroupRole.OWNER) {
+        _createdQuizzes[quiz.id] = quiz;
+      } else {
+        _availableQuizzes[quiz.id] = quiz;
+      }
+    });
   }
 }
