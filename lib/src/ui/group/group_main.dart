@@ -7,7 +7,7 @@ import 'package:smart_broccoli/src/models.dart';
 import 'members_tab.dart';
 import 'quiz_tab.dart';
 
-enum UserAction { LEAVE_GROUP, DELETE_GROUP }
+enum UserAction { LEAVE_GROUP, RENAME_GROUP, DELETE_GROUP }
 
 class GroupMain extends StatefulWidget {
   final int groupId;
@@ -65,6 +65,10 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                           ]
                         : [
                             PopupMenuItem(
+                              child: Text('Rename group'),
+                              value: UserAction.RENAME_GROUP,
+                            ),
+                            PopupMenuItem(
                               child: Text('Delete group'),
                               value: UserAction.DELETE_GROUP,
                             )
@@ -81,6 +85,19 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                         }
                       } catch (_) {
                         _showErrorDialogue("Cannot leave group");
+                      }
+                      break;
+                    case UserAction.RENAME_GROUP:
+                      String newName = await _editNameDialogue();
+                      if (newName == null) break;
+                      try {
+                        await Provider.of<GroupRegistryModel>(context,
+                                listen: false)
+                            .renameGroup(group, newName);
+                      } on GroupCreateException {
+                        _showErrorDialogue("Name already in use: $newName");
+                      } catch (_) {
+                        _showErrorDialogue("Cannot rename group to: $newName");
                       }
                       break;
                     case UserAction.DELETE_GROUP:
@@ -139,6 +156,37 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
         ],
       ),
       barrierDismissible: false,
+    );
+  }
+
+  Future<String> _editNameDialogue() async {
+    TextEditingController controller = TextEditingController();
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Rename group"),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'New name',
+            prefixIcon: Icon(Icons.people),
+          ),
+          onSubmitted: (_) => Navigator.of(context).pop(controller.text),
+        ),
+        actions: <Widget>[
+          TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              }),
+          TextButton(
+            child: Text("Rename"),
+            onPressed: () {
+              Navigator.of(context).pop(controller.text);
+            },
+          )
+        ],
+      ),
     );
   }
 
