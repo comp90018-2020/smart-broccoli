@@ -13,7 +13,7 @@ void main() async {
   final AuthStateModel authStateModel = AuthStateModel(keyValueStore);
   final UserRepository userRepo = UserRepository(picStash);
   final QuizCollectionModel quizCollectionModel =
-      QuizCollectionModel(authStateModel);
+      QuizCollectionModel(authStateModel, picStash);
   final GroupRegistryModel groupRegistryModel =
       GroupRegistryModel(authStateModel, userRepo, quizCollectionModel);
 

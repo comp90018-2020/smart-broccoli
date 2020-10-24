@@ -19,7 +19,7 @@ main() async {
     final KeyValueStore kv = MainMemKeyValueStore(init: {"token": "abc"});
     final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(ps, groupApi: api);
-    final QuizCollectionModel qcm = QuizCollectionModel(am);
+    final QuizCollectionModel qcm = QuizCollectionModel(am, ps);
     final GroupRegistryModel model =
         GroupRegistryModel(am, repo, qcm, groupApi: api);
 
@@ -70,7 +70,7 @@ main() async {
     final KeyValueStore kv = MainMemKeyValueStore(init: {"token": "abc"});
     final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(ps, groupApi: api);
-    final QuizCollectionModel qcm = QuizCollectionModel(am);
+    final QuizCollectionModel qcm = QuizCollectionModel(am, ps);
     final GroupRegistryModel model =
         GroupRegistryModel(am, repo, qcm, groupApi: api);
 

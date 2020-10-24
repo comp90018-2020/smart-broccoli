@@ -1,7 +1,9 @@
 import 'dart:collection';
+import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 
 import 'auth_state.dart';
@@ -16,6 +18,9 @@ class QuizCollectionModel extends ChangeNotifier {
 
   /// API provider for the session service
   SessionApi _sessionApi;
+
+  /// Picture storage service
+  final PictureStash _picStash;
 
   /// Views subscribe to the fields below
   Quiz _selectedQuiz;
@@ -32,7 +37,7 @@ class QuizCollectionModel extends ChangeNotifier {
   GameSession get currentSession => _currentSession;
 
   /// Constructor for external use
-  QuizCollectionModel(this._authStateModel,
+  QuizCollectionModel(this._authStateModel, this._picStash,
       {QuizApi quizApi, SessionApi sessionApi}) {
     _quizApi = quizApi ?? QuizApi();
     _sessionApi = sessionApi ?? SessionApi();
@@ -145,14 +150,26 @@ class QuizCollectionModel extends ChangeNotifier {
 
   /// Refreshes specific group's quizzes.
   Future<void> refreshGroupQuizzes(int groupId) async {
-    var quizzes =
+    List<Quiz> quizzes =
         await _quizApi.getGroupQuizzes(_authStateModel.token, groupId);
-    await Future.forEach(quizzes, (quiz) {
-      if (quiz.role == GroupRole.OWNER) {
+    await Future.wait(quizzes.map((quiz) async {
+      if (quiz.role == GroupRole.OWNER)
         _createdQuizzes[quiz.id] = quiz;
-      } else {
+      else
         _availableQuizzes[quiz.id] = quiz;
-      }
-    });
+      await getQuizPicture(quiz);
+    }));
+  }
+
+  /// Load the picture of a quiz into the `picture` field of a [quiz].
+  Future<void> getQuizPicture(Quiz quiz) async {
+    if (quiz.pictureId == null) return;
+    // if stored locally, no need to use the API
+    if ((quiz.picture = await _picStash.getPic(quiz.pictureId)) != null) return;
+    // otherwise, fetch via the API
+    quiz.picture =
+        await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
+    // save it for next time
+    _picStash.storePic(quiz.pictureId, quiz.picture);
   }
 }
