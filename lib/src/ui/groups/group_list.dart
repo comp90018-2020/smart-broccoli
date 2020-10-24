@@ -72,63 +72,58 @@ class _GroupListState extends State<GroupList> {
         child: ListView.builder(
           itemCount: groups.length,
           padding: EdgeInsets.symmetric(vertical: 16.0),
-          itemBuilder: (context, i) {
-            return Card(
-              child: ListTile(
-                dense: true,
-                onTap: () =>
-                    Navigator.of(context).pushNamed('/group/${groups[i].id}'),
-                title: Text(
-                  groups[i].name,
-                  style: TextStyle(fontSize: 16),
-                ),
-                subtitle: groups[i].members == null
-                    ? null
-                    : Row(
-                        children: [
-                          Icon(Icons.person),
-                          Text('${groups[i].members.length} member'
-                              '${groups[i].members.length > 1 ? "s" : ""}'),
-                        ],
-                      ),
+          itemBuilder: (context, i) => Card(
+            child: ListTile(
+              dense: true,
+              onTap: () =>
+                  Navigator.of(context).pushNamed('/group/${groups[i].id}'),
+              title: Text(
+                groups[i].name,
+                style: TextStyle(fontSize: 16),
               ),
-            );
-          },
+              subtitle: groups[i].members == null
+                  ? null
+                  : Row(
+                      children: [
+                        Icon(Icons.person),
+                        Text('${groups[i].members.length} member'
+                            '${groups[i].members.length > 1 ? "s" : ""}'),
+                      ],
+                    ),
+            ),
+          ),
         ),
       );
 
   /// The join group dialog
   Future<String> joinDialog() async {
     TextEditingController controller = TextEditingController();
-
     return showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Join group"),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'Name of group',
-              prefixIcon: Icon(Icons.people),
-            ),
-            onSubmitted: (_) => Navigator.of(context).pop(controller.text),
+      builder: (context) => AlertDialog(
+        title: Text("Join group"),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Name of group',
+            prefixIcon: Icon(Icons.people),
           ),
-          actions: <Widget>[
-            TextButton(
-                child: Text("Cancel"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                }),
-            TextButton(
-              child: Text("Join"),
+          onSubmitted: (_) => Navigator.of(context).pop(controller.text),
+        ),
+        actions: <Widget>[
+          TextButton(
+              child: Text("Cancel"),
               onPressed: () {
-                Navigator.of(context).pop(controller.text);
-              },
-            )
-          ],
-        );
-      },
+                Navigator.of(context).pop();
+              }),
+          TextButton(
+            child: Text("Join"),
+            onPressed: () {
+              Navigator.of(context).pop(controller.text);
+            },
+          )
+        ],
+      ),
     );
   }
 
