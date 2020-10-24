@@ -1,11 +1,11 @@
 # Builder
-FROM node:14-alpine as builder
+FROM node:15-alpine as builder
 # Copy files to build directory and navigate to build directory
 COPY . /build
 # Install dependencies and build app
 RUN cd /build && yarn install --ignore-optional && yarn run build
 
-FROM node:14-alpine
+FROM node:15-alpine
 
 # Copy files
 COPY --from=builder /build/build /app
