@@ -19,7 +19,4 @@ class OutcomeHost {
 
     return tuples;
   }
-
-
 }
-
