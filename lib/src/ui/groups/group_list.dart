@@ -16,85 +16,86 @@ class _GroupListState extends State<GroupList> {
   int tab = 0;
 
   @override
-  Widget build(BuildContext context) {
+  void didChangeDependencies() {
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshJoinedGroups(withMembers: true);
+        .refreshJoinedGroups();
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups(withMembers: true);
-    return new CustomTabbedPage(
-      title: "Groups",
-      tabs: [Tab(text: "JOINED"), Tab(text: "CREATED")],
-      hasDrawer: true,
-      secondaryBackgroundColour: true,
-
-      // Handle tab tap
-      tabTap: (value) {
-        setState(() {
-          tab = value;
-        });
-      },
-
-      // Tabs
-      tabViews: [
-        Consumer<GroupRegistryModel>(
-          builder: (context, registry, child) =>
-              buildGroupList(registry.joinedGroups),
-        ),
-        Consumer<GroupRegistryModel>(
-          builder: (context, registry, child) =>
-              buildGroupList(registry.createdGroups),
-        )
-      ],
-
-      // Action buttons
-      floatingActionButton: tab == 0
-          ? FloatingActionButton.extended(
-              onPressed: _joinGroup,
-              label: Text('JOIN GROUP'),
-              icon: Icon(Icons.add),
-            )
-          : FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.of(context).pushNamed('/group/create');
-              },
-              label: Text('CREATE GROUP'),
-              icon: Icon(Icons.group_add),
-            ),
-    );
+        .refreshCreatedGroups();
+    super.didChangeDependencies();
   }
+
+  @override
+  Widget build(BuildContext context) => CustomTabbedPage(
+        title: "Groups",
+        tabs: [Tab(text: "JOINED"), Tab(text: "CREATED")],
+        hasDrawer: true,
+        secondaryBackgroundColour: true,
+
+        // Handle tab tap
+        tabTap: (value) {
+          setState(() {
+            tab = value;
+          });
+        },
+
+        // Tabs
+        tabViews: [
+          Consumer<GroupRegistryModel>(
+            builder: (context, registry, child) =>
+                buildGroupList(registry.joinedGroups),
+          ),
+          Consumer<GroupRegistryModel>(
+            builder: (context, registry, child) =>
+                buildGroupList(registry.createdGroups),
+          )
+        ],
+
+        // Action buttons
+        floatingActionButton: tab == 0
+            ? FloatingActionButton.extended(
+                onPressed: _joinGroup,
+                label: Text('JOIN GROUP'),
+                icon: Icon(Icons.add),
+              )
+            : FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/group/create');
+                },
+                label: Text('CREATE GROUP'),
+                icon: Icon(Icons.group_add),
+              ),
+      );
 
   // Builds a list of groups
-  Widget buildGroupList(List<Group> groups) {
-    return FractionallySizedBox(
-      widthFactor: 0.85,
-      child: ListView.builder(
-        itemCount: groups.length,
-        padding: EdgeInsets.symmetric(vertical: 16.0),
-        itemBuilder: (context, i) {
-          return Card(
-            child: ListTile(
-              dense: true,
-              onTap: () =>
-                  Navigator.of(context).pushNamed('/group/${groups[i].id}'),
-              title: Text(
-                groups[i].name,
-                style: TextStyle(fontSize: 16),
+  Widget buildGroupList(List<Group> groups) => FractionallySizedBox(
+        widthFactor: 0.85,
+        child: ListView.builder(
+          itemCount: groups.length,
+          padding: EdgeInsets.symmetric(vertical: 16.0),
+          itemBuilder: (context, i) {
+            return Card(
+              child: ListTile(
+                dense: true,
+                onTap: () =>
+                    Navigator.of(context).pushNamed('/group/${groups[i].id}'),
+                title: Text(
+                  groups[i].name,
+                  style: TextStyle(fontSize: 16),
+                ),
+                subtitle: groups[i].members == null
+                    ? null
+                    : Row(
+                        children: [
+                          Icon(Icons.person),
+                          Text('${groups[i].members.length} member'
+                              '${groups[i].members.length > 1 ? "s" : ""}'),
+                        ],
+                      ),
               ),
-              subtitle: groups[i].members == null
-                  ? null
-                  : Row(
-                      children: [
-                        Icon(Icons.person),
-                        Text('${groups[i].members.length} member'
-                            '${groups[i].members.length > 1 ? "s" : ""}'),
-                      ],
-                    ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+            );
+          },
+        ),
+      );
 
   /// The join group dialog
   Future<String> joinDialog() async {
