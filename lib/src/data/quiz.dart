@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'game.dart';
 import 'group.dart';
 
@@ -11,6 +13,9 @@ enum QuizType { LIVE, SELF_PACED }
 class Quiz {
   /// ID of the quiz (for quizzes fetched from server only)
   final int id;
+
+  final int pictureId;
+  Uint8List picture;
 
   /// User's role. This field is non-null for quizzes in the list returned by
   /// `getQuizzes`; however, it will be null for a quiz returned by `getQuiz`
@@ -33,12 +38,13 @@ class Quiz {
           bool isActive,
           int timeLimit,
           List<Question> questions}) =>
-      Quiz._internal(null, GroupRole.OWNER, title, groupId, type, description,
-          isActive, timeLimit, questions, null);
+      Quiz._internal(null, null, GroupRole.OWNER, title, groupId, type,
+          description, isActive, timeLimit, questions, null);
 
   /// Constructor for internal use only
   Quiz._internal(
       this.id,
+      this.pictureId,
       this.role,
       this.title,
       this.groupId,
@@ -57,6 +63,7 @@ class Quiz {
     });
     Quiz quiz = Quiz._internal(
         json['id'],
+        json['pictureId'],
         json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
         json['title'],
         json['groupId'],

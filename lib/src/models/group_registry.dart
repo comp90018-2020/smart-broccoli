@@ -1,8 +1,9 @@
 import 'dart:collection';
 import 'package:flutter/widgets.dart';
 
-import 'package:smart_broccoli/src/remote.dart';
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/remote.dart';
 
 import 'auth_state.dart';
 import 'user_repository.dart';
@@ -11,6 +12,9 @@ import 'user_repository.dart';
 class GroupRegistryModel extends ChangeNotifier {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
+
+  /// QuizCollectionModel to obtain quizzes for group
+  final QuizCollectionModel _quizCollectionModel;
 
   /// API provider for the user profile service
   GroupApi _groupApi;
@@ -31,7 +35,8 @@ class GroupRegistryModel extends ChangeNotifier {
       UnmodifiableListView(_createdGroups.values);
 
   /// Constructor for external use
-  GroupRegistryModel(this._authStateModel, this._userRepo,
+  GroupRegistryModel(
+      this._authStateModel, this._userRepo, this._quizCollectionModel,
       {GroupApi groupApi}) {
     _groupApi = groupApi ?? GroupApi();
   }
@@ -47,10 +52,17 @@ class GroupRegistryModel extends ChangeNotifier {
     refreshCreatedGroups();
   }
 
-  /// Update a group.
-  Future<void> updateGroup(Group group) async {
-    await _groupApi.updateGroup(_authStateModel.token, group.id, group.name);
-    refreshCreatedGroups();
+  /// Rename a group.
+  Future<void> renameGroup(Group group, String newName) async {
+    // rename the group
+    await _groupApi.updateGroup(_authStateModel.token, group.id, newName);
+    // fetch the updated group and save it to the map
+    _createdGroups[group.id] =
+        await _groupApi.getGroup(_authStateModel.token, group.id);
+    // fetch the members list
+    _createdGroups[group.id].members =
+        await _userRepo.getMembersOf(_authStateModel.token, group.id);
+    notifyListeners();
   }
 
   /// Leave a group.
@@ -90,10 +102,10 @@ class GroupRegistryModel extends ChangeNotifier {
         key: (group) => group.id);
     // fetch members of each group
     if (withMembers)
-      await Future.forEach(_joinedGroups.values, (group) async {
+      await Future.wait(_joinedGroups.values.map((group) async {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
-      });
+      }));
     notifyListeners();
   }
 
@@ -109,10 +121,29 @@ class GroupRegistryModel extends ChangeNotifier {
         key: (group) => group.id);
     // fetch members of each group
     if (withMembers)
-      await Future.forEach(_createdGroups.values, (group) async {
+      await Future.wait(_createdGroups.values.map((group) async {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
-      });
+      }));
+    notifyListeners();
+  }
+
+  /// Refreshes the specified group.
+  Future<void> refreshGroup(int id,
+      {bool withMembers = true, bool withQuizzes = true}) async {
+    // fetch group
+    var group = await _groupApi.getGroup(_authStateModel.token, id);
+    if (group.role == GroupRole.OWNER) {
+      _createdGroups[group.id] = group;
+    } else {
+      _joinedGroups[group.id] = group;
+    }
+    // fetch quizzes
+    if (withQuizzes) await _quizCollectionModel.refreshGroupQuizzes(id);
+    // fetch members
+    if (withMembers)
+      group.members =
+          await _userRepo.getMembersOf(_authStateModel.token, group.id);
     notifyListeners();
   }
 

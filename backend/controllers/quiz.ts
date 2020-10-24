@@ -354,6 +354,7 @@ export const getQuiz = async (userId: number, quizId: number) => {
 
     return {
         ...quiz.toJSON(),
+        role,
         // Whether user has completed quiz
         complete:
             quiz.Sessions.find(

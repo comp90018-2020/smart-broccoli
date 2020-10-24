@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/theme.dart';
 
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
+import 'package:smart_broccoli/theme.dart';
 
 /// Manage quiz page
 class ManageQuiz extends StatefulWidget {
@@ -12,7 +13,12 @@ class ManageQuiz extends StatefulWidget {
 
 class _ManageQuizState extends State<ManageQuiz> {
   // TODO: replace with provider inside build
-  List<String> items = ["A", "B", "C", "D", "E", "F", "G", "H"];
+  List<Quiz> items = [
+    // placeholders
+    Quiz.fromJson({'title': 'Foo', 'groupId': 1}),
+    Quiz.fromJson({'title': 'Bar', 'groupId': 2}),
+    Quiz.fromJson({'title': 'Baz', 'groupId': 3}),
+  ];
 
   @override
   Widget build(BuildContext context) {

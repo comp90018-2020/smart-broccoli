@@ -9,7 +9,9 @@ import 'package:smart_broccoli/theme.dart';
 import 'picture.dart';
 
 class QuizCreate extends StatefulWidget {
-  QuizCreate({Key key}) : super(key: key);
+  final int groupId;
+
+  QuizCreate({this.groupId, Key key}) : super(key: key);
 
   @override
   _QuizCreateState createState() => _QuizCreateState();

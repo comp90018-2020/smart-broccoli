@@ -1,9 +1,7 @@
 import 'dart:collection';
-import 'dart:convert';
 import 'package:flutter/widgets.dart';
 
 import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 
 import 'auth_state.dart';
@@ -13,57 +11,148 @@ class QuizCollectionModel extends ChangeNotifier {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
 
-  /// API provider for the user profile service
+  /// API provider for the quiz service
   QuizApi _quizApi;
 
-  /// Local storage service
-  final KeyValueStore _keyValueStore;
+  /// API provider for the session service
+  SessionApi _sessionApi;
 
   /// Views subscribe to the fields below
   Quiz _selectedQuiz;
   Quiz get selectedQuiz => _selectedQuiz;
-  Iterable<Quiz> _availableQuizzes;
+
+  Map<int, Quiz> _availableQuizzes = {};
+  Map<int, Quiz> _createdQuizzes = {};
+
   UnmodifiableListView<Quiz> get availableQuizzes =>
-      UnmodifiableListView(_availableQuizzes);
-  Iterable<Quiz> _createdQuizzes;
+      UnmodifiableListView(_availableQuizzes.values);
   UnmodifiableListView<Quiz> get createdQuizzes =>
-      UnmodifiableListView(_createdQuizzes);
+      UnmodifiableListView(_createdQuizzes.values);
+  GameSession _currentSession;
+  GameSession get currentSession => _currentSession;
 
   /// Constructor for external use
-  QuizCollectionModel(this._keyValueStore, this._authStateModel,
-      {QuizApi quizApi}) {
+  QuizCollectionModel(this._authStateModel,
+      {QuizApi quizApi, SessionApi sessionApi}) {
     _quizApi = quizApi ?? QuizApi();
-    // load last record of available and created quizzes from local storage
-    try {
-      _availableQuizzes =
-          (json.decode(_keyValueStore.getString('availableQuizzes')) as List)
-              .map((repr) => Quiz.fromJson(repr));
-    } catch (_) {}
-    try {
-      _createdQuizzes =
-          (json.decode(_keyValueStore.getString('createdQuizzes')) as List)
-              .map((repr) => Quiz.fromJson(repr));
-    } catch (_) {}
+    _sessionApi = sessionApi ?? SessionApi();
+    refreshAvailableQuizzes();
+    refreshCreatedQuizzes();
   }
+
+  UnmodifiableListView<Quiz> getQuizzesWhere({int groupId, QuizType type}) =>
+      UnmodifiableListView([
+        ..._availableQuizzes.values,
+        ..._createdQuizzes.values
+      ].where((quiz) =>
+          (groupId == null || quiz.groupId == groupId) &&
+          (type == null || quiz.type == type)));
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
+    try {
+      _selectedQuiz.picture =
+          await _quizApi.getQuizPicture(_authStateModel.token, id);
+    } catch (_) {
+      // cannot obtain picture; move on
+    }
+    notifyListeners();
+  }
+
+  /// Activate a self-paced quiz
+  Future<void> setQuizActivation(Quiz quiz, bool active) async {
+    if (quiz.type != QuizType.SELF_PACED)
+      throw ArgumentError('Quiz must be self-paced to use this method');
+    if (quiz.isActive == active) return;
+
+    try {
+      // Set quiz state, immediate UI feedback
+      quiz.isActive = active;
+      notifyListeners();
+      // Perform operation
+      var updated = await _quizApi.updateQuiz(_authStateModel.token, quiz);
+      // If result is different
+      if (quiz.isActive != updated.isActive) {
+        quiz.isActive = updated.isActive;
+        notifyListeners();
+      }
+    } catch (err) {
+      await refreshQuiz(quiz.id);
+      throw err;
+    }
+  }
+
+  Future<void> updateQuiz(Quiz quiz) async {
+    await _quizApi.updateQuiz(_authStateModel.token, quiz);
+    notifyListeners();
+  }
+
+  Future<void> refreshCurrentSession() async {
+    _currentSession = await _sessionApi.getSession(_authStateModel.token);
+    notifyListeners();
+  }
+
+  Future<void> startQuizSession(Quiz quiz, GameSessionType type) async {
+    await _sessionApi.joinSession(
+        _authStateModel.token,
+        (await _sessionApi.createSession(_authStateModel.token, quiz.id, type))
+            .joinCode);
+    refreshCurrentSession();
+  }
+
+  /// Refreshes the specified quiz
+  Future<void> refreshQuiz(int quizId) async {
+    var quiz = await _quizApi.getQuiz(_authStateModel.token, quizId);
+    if (quiz.role == GroupRole.OWNER) {
+      _createdQuizzes[quiz.id] = quiz;
+    } else {
+      _availableQuizzes[quiz.id] = quiz;
+    }
     notifyListeners();
   }
 
   Future<void> refreshAvailableQuizzes() async {
-    _availableQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
-        .where((quiz) => quiz.role == GroupRole.MEMBER);
-    _keyValueStore.setString('availableQuizzes',
-        json.encode(_availableQuizzes.map((quiz) => quiz.toJson())));
+    _availableQuizzes = Map.fromIterable(
+        (await _quizApi.getQuizzes(_authStateModel.token))
+            .where((quiz) => quiz.role == GroupRole.MEMBER),
+        key: (quiz) => quiz.id);
+    await Future.wait(_availableQuizzes.values.map((Quiz quiz) async {
+      try {
+        quiz.picture =
+            await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
+      } catch (_) {
+        // cannot obtain picture; move on
+      }
+    }));
     notifyListeners();
   }
 
   Future<void> refreshCreatedQuizzes() async {
-    _createdQuizzes = (await _quizApi.getQuizzes(_authStateModel.token))
-        .where((quiz) => quiz.role == GroupRole.OWNER);
-    _keyValueStore.setString('createdQuizzes',
-        json.encode(_createdQuizzes.map((quiz) => quiz.toJson())));
+    _createdQuizzes = Map.fromIterable(
+        (await _quizApi.getQuizzes(_authStateModel.token))
+            .where((quiz) => quiz.role == GroupRole.OWNER),
+        key: (quiz) => quiz.id);
+    await Future.wait(_createdQuizzes.values.map((Quiz quiz) async {
+      try {
+        quiz.picture =
+            await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
+      } catch (_) {
+        // cannot obtain picture; move on
+      }
+    }));
     notifyListeners();
+  }
+
+  /// Refreshes specific group's quizzes.
+  Future<void> refreshGroupQuizzes(int groupId) async {
+    var quizzes =
+        await _quizApi.getGroupQuizzes(_authStateModel.token, groupId);
+    await Future.forEach(quizzes, (quiz) {
+      if (quiz.role == GroupRole.OWNER) {
+        _createdQuizzes[quiz.id] = quiz;
+      } else {
+        _availableQuizzes[quiz.id] = quiz;
+      }
+    });
   }
 }
