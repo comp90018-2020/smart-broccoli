@@ -90,10 +90,10 @@ class GroupRegistryModel extends ChangeNotifier {
         key: (group) => group.id);
     // fetch members of each group
     if (withMembers)
-      await Future.forEach(_joinedGroups.values, (group) async {
+      await Future.wait(_joinedGroups.values.map((group) async {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
-      });
+      }));
     notifyListeners();
   }
 
@@ -109,10 +109,10 @@ class GroupRegistryModel extends ChangeNotifier {
         key: (group) => group.id);
     // fetch members of each group
     if (withMembers)
-      await Future.forEach(_createdGroups.values, (group) async {
+      await Future.wait(_createdGroups.values.map((group) async {
         group.members =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
-      });
+      }));
     notifyListeners();
   }
 
