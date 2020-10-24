@@ -23,47 +23,45 @@ class _ManageQuizState extends State<ManageQuiz> {
   List<Group> group;
   int gid;
 
-  // See : https://stackoverflow.com/questions/58371874/what-is-diffrence-between-didchangedependencies-and-initstate
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true);
-    GroupRegistryModel grm =
-        Provider.of<GroupRegistryModel>(context, listen: true);
-    group = grm.createdGroups;
-    items = qcm.createdQuizzes;
-    gid = group[0].id;
-  }
-
   @override
   Widget build(BuildContext context) {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
-    return CustomTabbedPage(
-      title: "Manage Quiz",
-      tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-      tabViews: [
-        // All quizzes
-        QuizContainer(getQuiz(null),
-            header: _groupSelector(), hiddenButton: true),
+    return Consumer2<QuizCollectionModel, GroupRegistryModel>(
+      builder: (context, collection, registry, child) {
+        collection.refreshCreatedQuizzes();
+        registry.refreshCreatedGroups();
+        items = collection.createdQuizzes;
+        group = registry.createdGroups;
+        print(items.toString());
+        print(group.toString());
+        gid = 0;
+        return CustomTabbedPage(
+          title: "Manage Quiz",
+          tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
+          tabViews: [
+            // All quizzes
+            QuizContainer(getQuiz(null),
+                header: _groupSelector(), hiddenButton: true),
 
-        // Live quiz
-        QuizContainer(getQuiz(QuizType.LIVE),
-            header: _groupSelector(), hiddenButton: true),
+            // Live quiz
+            QuizContainer(getQuiz(QuizType.LIVE),
+                header: _groupSelector(), hiddenButton: true),
 
-        /// Self-paced quiz
-        QuizContainer(getQuiz(QuizType.SELF_PACED),
-            header: _groupSelector(), hiddenButton: true),
-      ],
-      hasDrawer: true,
-      secondaryBackgroundColour: true,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _createQuiz();
-        },
-        label: Text('CREATE QUIZ'),
-        icon: Icon(Icons.add),
-      ),
+            /// Self-paced quiz
+            QuizContainer(getQuiz(QuizType.SELF_PACED),
+                header: _groupSelector(), hiddenButton: true),
+          ],
+          hasDrawer: true,
+          secondaryBackgroundColour: true,
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {
+              _createQuiz();
+            },
+            label: Text('CREATE QUIZ'),
+            icon: Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 
@@ -93,7 +91,7 @@ class _ManageQuizState extends State<ManageQuiz> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: DropdownButton(
-                  value: 1,
+                  value: gid,
                   underline: Container(),
                   onChanged: (_) {},
                   isExpanded: true,
@@ -113,7 +111,7 @@ class _ManageQuizState extends State<ManageQuiz> {
     for (var i = 0; i < group.length; i++) {
       res.add(DropdownMenuItem(
           child: Center(
-            child: Text("Testing"),
+            child: Text(group[i].name),
           ),
           value: i,
           onTap: () => updateList(i)));
@@ -123,7 +121,7 @@ class _ManageQuizState extends State<ManageQuiz> {
 
   void updateList(int i) {
     setState(() {
-      gid = group[i].id;
+      gid = i;
     });
   }
 
@@ -131,7 +129,7 @@ class _ManageQuizState extends State<ManageQuiz> {
     List<Quiz> res = [];
     for (var j = 0; j < items.length; j++) {
       if ((items[j].type == type || type == null) &&
-          items[j].groupId == gid &&
+          items[j].groupId == group[gid].id &&
           items[j].role == GroupRole.OWNER) {
         res.add(items[j]);
       }

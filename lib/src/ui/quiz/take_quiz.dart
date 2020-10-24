@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
@@ -53,43 +52,40 @@ class _TakeQuizState extends State<TakeQuiz> {
   @override
   Widget build(BuildContext context) {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
-    return CustomTabbedPage(
-      title: "Take Quiz",
-      tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-      tabViews: [
-        // All quizzes
-        QuizContainer(getQuiz(items, null),
-            header: QuizPinBox(key: _buildQuizKey)),
+    return Consumer2<QuizCollectionModel, GroupRegistryModel>(
+      builder: (context, collection, registry, child) {
+        return CustomTabbedPage(
+          title: "Take Quiz",
+          tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
+          tabViews: [
+            // All quizzes
+            QuizContainer(collection.getQuizzesWhere(groupId: null, type: null),
+                header: QuizPinBox(key: _buildQuizKey)),
 
-        // Live quiz
-        QuizContainer(getQuiz(items, QuizType.LIVE), header: QuizPinBox()),
+            // Live quiz
+            QuizContainer(
+                collection.getQuizzesWhere(groupId: null, type: QuizType.LIVE),
+                header: QuizPinBox()),
 
-        /// Self-paced quiz has Text to fill the vertical space
-        QuizContainer(
-          getQuiz(items, QuizType.SELF_PACED),
-          header: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: _height ?? 175),
-              child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Take a self-paced quiz...\nHave some fun',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
-                  ))),
-        )
-      ],
-      hasDrawer: true,
-      secondaryBackgroundColour: true,
+            /// Self-paced quiz has Text to fill the vertical space
+            QuizContainer(
+              collection.getQuizzesWhere(
+                  groupId: null, type: QuizType.SELF_PACED),
+              header: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: _height ?? 175),
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Take a self-paced quiz...\nHave some fun',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
+                      ))),
+            )
+          ],
+          hasDrawer: true,
+          secondaryBackgroundColour: true,
+        );
+      },
     );
-  }
-
-  List<Quiz> getQuiz(List<Quiz> items, QuizType type) {
-    List<Quiz> res = [];
-    for (var i = 0; i < items.length; i++) {
-      if (items[i].type == type || type == null) {
-        res.add(items[i]);
-      }
-    }
-    return res;
   }
 }
