@@ -136,10 +136,8 @@ class GroupRegistryModel extends ChangeNotifier {
       await _quizCollectionModel.refreshGroupQuizzes(id, group.role);
     // fetch members
     if (withMembers)
-      await Future.forEach(_createdGroups.values, (group) async {
-        group.members =
-            await _userRepo.getMembersOf(_authStateModel.token, group.id);
-      });
+      group.members =
+          await _userRepo.getMembersOf(_authStateModel.token, group.id);
     notifyListeners();
   }
 
