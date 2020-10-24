@@ -171,4 +171,11 @@ class QuizCollectionModel extends ChangeNotifier {
     // save it for next time
     _picStash.storePic(quiz.pictureId, quiz.picture);
   }
+
+  Future<void> createQuiz(Quiz quiz) async {
+    await _quizApi.createQuiz(_authStateModel.token, quiz);
+    notifyListeners();
+  }
+
+
 }

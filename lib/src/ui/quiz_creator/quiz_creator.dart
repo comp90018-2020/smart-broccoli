@@ -1,11 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
+import 'package:smart_broccoli/src/data/quiz.dart';
 
+
+import '../../models.dart';
 import 'picture.dart';
 import 'package:smart_broccoli/src/ui/groups/group_create.dart';
 
@@ -20,9 +24,11 @@ class QuizCreate extends StatefulWidget {
 
 class _QuizCreateState extends State<QuizCreate> {
 
-  final TextEditingController controller = TextEditingController();
-  // Key for form
+
   final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController quizNameController = TextEditingController();
+  // Key for form
 
   // Text controller for seconds per question
   var timerTextController = TextEditingController();
@@ -33,8 +39,16 @@ class _QuizCreateState extends State<QuizCreate> {
   // The current picked file
   String picturePath;
 
+  String selectedGroupName;
+
+  Group selectedGroup;
+
   @override
   Widget build(BuildContext context) {
+
+    Provider.of<GroupRegistryModel>(context, listen: false)
+        .refreshCreatedGroups(withMembers: true);
+
     return CustomPage(
       title: "Quiz",
       secondaryBackgroundColour: true,
@@ -86,7 +100,7 @@ class _QuizCreateState extends State<QuizCreate> {
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
                   child: TextField(
-                    controller: controller,
+                    controller: quizNameController,
                     decoration: InputDecoration(
                       labelText: 'Quiz name',
                     ),
@@ -128,18 +142,10 @@ class _QuizCreateState extends State<QuizCreate> {
                             Icons.people,
                             color: Colors.grey,
                           ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: DropdownButton(
-                                  isExpanded: true,
-                                  items: [
-                                    DropdownMenuItem(child: Text('X')),
-                                    DropdownMenuItem(child: Text('Y'))
-                                  ],
-                                  onChanged: (_) {}),
-                            ),
-                          ),
+                          Consumer<GroupRegistryModel>(
+                            builder: (context, registry, child) =>
+                                buildGroupList(registry.createdGroups),
+                          )
                         ],
                       ),
                     ),
@@ -232,6 +238,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
   // Used to represent questions
   Widget _questionCard(int index, Question question) {
+
     return Card(
       margin: EdgeInsets.symmetric(vertical: 4),
       child: Column(
@@ -258,6 +265,54 @@ class _QuizCreateState extends State<QuizCreate> {
     );
   }
 
+  Widget buildGroupList(List<Group> groups) {
+    return
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: DropdownButton(
+
+              isExpanded: true,
+              value: selectedGroupName,
+              items: groups.map((group) {
+                    return DropdownMenuItem<String>(
+                    value: group.name,
+                    child: Text(group.name),
+                    );
+                    }).toList(),
+              onChanged: (String groupName) {
+                setState(() {
+                  selectedGroupName = groupName;
+                  for (var group in groups) {
+                    if (group.name == groupName) {
+                      selectedGroup = group;
+                    }
+                  }
+
+
+
+                });
+                
+
+              }),
+        ),
+      );
+  }
+
+
+
+/*
+  void _createQuiz() async {
+    if (quizNameController.text == "")
+      return _showUnsuccessful("Cannot create group", "Name required");
+    try {
+      await Provider.of<QuizCollectionModel>(context, listen: false)
+          .createQuiz(new Quiz(quizNameController.text, groupId, type));
+      Navigator.of(context).pop();
+    } on GroupCreateException {
+      _showUnsuccessful("Cannot create group", "Name already in use");
+    }
+  }*/
 
   void _showUnsuccessful(String title, String body) {
     showDialog(
