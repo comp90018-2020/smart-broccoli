@@ -14,7 +14,7 @@ void main() async {
   final QuizCollectionModel quizCollectionModel =
       QuizCollectionModel(authStateModel);
   final GroupRegistryModel groupRegistryModel =
-      GroupRegistryModel(authStateModel, quizCollectionModel, userRepo);
+      GroupRegistryModel(authStateModel, userRepo, quizCollectionModel);
 
   runApp(
     MultiProvider(

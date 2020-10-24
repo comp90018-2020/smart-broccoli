@@ -36,7 +36,7 @@ class GroupRegistryModel extends ChangeNotifier {
 
   /// Constructor for external use
   GroupRegistryModel(
-      this._authStateModel, this._quizCollectionModel, this._userRepo,
+      this._authStateModel, this._userRepo,this._quizCollectionModel,
       {GroupApi groupApi}) {
     _groupApi = groupApi ?? GroupApi();
   }
