@@ -38,34 +38,24 @@ class QuizTab extends StatelessWidget {
                   tabViews: [
                     // all quizzes
                     QuizContainer(
-                      (group.role == GroupRole.OWNER
-                              ? collection.createdQuizzes
-                              : collection.availableQuizzes)
-                          .where((Quiz quiz) => quiz.groupId == group.id)
-                          .toList(),
+                      collection.getQuizzesWhere(groupId: group.id).toList(),
                       hiddenButton: true,
                     ),
 
                     // live quizzes
                     QuizContainer(
-                      (group.role == GroupRole.OWNER
-                              ? collection.createdQuizzes
-                              : collection.availableQuizzes)
-                          .where((Quiz quiz) =>
-                              quiz.groupId == group.id &&
-                              quiz.type == QuizType.LIVE)
+                      collection
+                          .getQuizzesWhere(
+                              groupId: group.id, type: QuizType.LIVE)
                           .toList(),
                       hiddenButton: true,
                     ),
 
                     // self-paced quizzes
                     QuizContainer(
-                      (group.role == GroupRole.OWNER
-                              ? collection.createdQuizzes
-                              : collection.availableQuizzes)
-                          .where((Quiz quiz) =>
-                              quiz.groupId == group.id &&
-                              quiz.type == QuizType.SELF_PACED)
+                      collection
+                          .getQuizzesWhere(
+                              groupId: group.id, type: QuizType.SELF_PACED)
                           .toList(),
                       hiddenButton: true,
                     ),
