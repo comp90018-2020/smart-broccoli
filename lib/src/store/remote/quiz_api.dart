@@ -38,7 +38,8 @@ class QuizApi {
 
   /// Return a list of all quizzes of a group.
   Future<List<Quiz>> getGroupQuizzes(String token, int groupId) async {
-    http.Response response = await _http.get("/group/$groupId/quiz",
+    http.Response response = await _http.get(
+        ApiBase.BASE_URL + "/group/$groupId/quiz",
         headers: ApiBase.headers(authToken: token));
 
     if (response.statusCode == 200)
