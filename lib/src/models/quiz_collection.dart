@@ -1,8 +1,4 @@
 import 'dart:collection';
-import 'dart:convert';
-
-import 'package:flutter/widgets.dart';
-
 
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/data.dart';
@@ -26,15 +22,16 @@ class QuizCollectionModel extends ChangeNotifier {
 
   Quiz get selectedQuiz => _selectedQuiz;
 
-
   Map<int, Quiz> _availableQuizzes = {};
   Map<int, Quiz> _createdQuizzes = {};
 
   UnmodifiableListView<Quiz> get availableQuizzes =>
       UnmodifiableListView(_availableQuizzes.values);
+
   UnmodifiableListView<Quiz> get createdQuizzes =>
       UnmodifiableListView(_createdQuizzes.values);
   GameSession _currentSession;
+
   GameSession get currentSession => _currentSession;
 
   /// Constructor for external use

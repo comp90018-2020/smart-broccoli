@@ -1,10 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
-import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
@@ -26,27 +23,11 @@ class _QuizCreateState extends State<QuizCreate> {
   // Text controller for seconds per question
   var timerTextController = TextEditingController();
 
-  // TODO
-  /// The current model creates place holder quiz data structures with varible
-  /// changes using getters and setters
-  Quiz model;
+  // TODO: replace with cloned quiz
+  Quiz model = Quiz("placeholder", 0, QuizType.LIVE);
 
   // The current picked file
   String picturePath;
-
-  List<Group> group;
-
-  int showGroup = 0;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    GroupRegistryModel grm =
-        Provider.of<GroupRegistryModel>(context, listen: true);
-    group = grm.createdGroups;
-    // Init a place holder quiz
-    model = Quiz("placeholder", group[0].id, QuizType.LIVE);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +51,7 @@ class _QuizCreateState extends State<QuizCreate> {
         ),
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
-          onPressed: () {
-            _createQuiz();
-          },
+          onPressed: () {},
           child: Text(
             'Save',
             style: TextStyle(color: Colors.white, fontSize: 16),
@@ -148,9 +127,11 @@ class _QuizCreateState extends State<QuizCreate> {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8.0),
                               child: DropdownButton(
-                                  value: showGroup,
                                   isExpanded: true,
-                                  items: buildDropDownMenu(),
+                                  items: [
+                                    DropdownMenuItem(child: Text('X')),
+                                    DropdownMenuItem(child: Text('Y'))
+                                  ],
                                   onChanged: (_) {}),
                             ),
                           ),
@@ -228,9 +209,7 @@ class _QuizCreateState extends State<QuizCreate> {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           spacing: 3,
                           children: [Icon(Icons.add), Text('ADD QUESTION')]),
-                      onPressed: () {
-                        addQuestion();
-                      },
+                      onPressed: () {},
                     ),
                   ),
                 )
@@ -240,34 +219,6 @@ class _QuizCreateState extends State<QuizCreate> {
         ),
       ),
     );
-  }
-
-  // Not yet Implemented TODO implement
-  void addQuestion() {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (context) => QuestionCreate(),
-    ));
-  }
-
-  List<DropdownMenuItem> buildDropDownMenu() {
-    List<DropdownMenuItem> res = [];
-    // note that GID != i where i is the iteration index
-    for (var i = 0; i < group.length; i++) {
-      res.add(DropdownMenuItem(
-          child: Center(
-            child: Text(group[i].name),
-          ),
-          value: i,
-          onTap: () => updateList(i)));
-    }
-    return res;
-  }
-
-  void updateList(int i) {
-    model.groupId = group[i].id;
-    setState(() {
-      showGroup = i;
-    });
   }
 
   // Used to represent questions
@@ -313,13 +264,5 @@ class _QuizCreateState extends State<QuizCreate> {
         });
       }
     });
-  }
-
-  void _createQuiz() {
-    /*
-    QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: false);
-    qcm.createQuiz(model);
-     */
   }
 }
