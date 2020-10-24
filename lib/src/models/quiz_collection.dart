@@ -66,10 +66,11 @@ class QuizCollectionModel extends ChangeNotifier {
     if (quiz.isActive == active) return;
     try {
       quiz.isActive = active;
-      _quizApi.updateQuiz(_authStateModel.token, quiz);
       notifyListeners();
-    } catch (_) {
-      quiz.isActive = !active;
+      await _quizApi.updateQuiz(_authStateModel.token, quiz);
+    } catch (err) {
+      await refreshQuiz(quiz.id);
+      throw err;
     }
   }
 
@@ -89,6 +90,17 @@ class QuizCollectionModel extends ChangeNotifier {
         (await _sessionApi.createSession(_authStateModel.token, quiz.id, type))
             .joinCode);
     refreshCurrentSession();
+  }
+
+  /// Refreshes the specified quiz
+  Future<void> refreshQuiz(int quizId) async {
+    var quiz = await _quizApi.getQuiz(_authStateModel.token, quizId);
+    if (quiz.role == GroupRole.OWNER) {
+      _createdQuizzes[quiz.id] = quiz;
+    } else {
+      _availableQuizzes[quiz.id] = quiz;
+    }
+    notifyListeners();
   }
 
   Future<void> refreshAvailableQuizzes() async {

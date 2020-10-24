@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Represents a quiz card
@@ -181,7 +182,8 @@ class _QuizCardState extends State<QuizCard> {
                                     .startQuizSession(widget.quiz,
                                         GameSessionType.INDIVIDUAL);
                               } catch (_) {
-                                _showActivateLiveQuizError();
+                                showErrorDialog(
+                                    context, "Cannot start live session");
                               }
                             },
                             color: Theme.of(context).accentColor,
@@ -202,14 +204,20 @@ class _QuizCardState extends State<QuizCard> {
                         return Row(
                           children: [
                             Switch(
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                              value: widget.quiz.isActive,
-                              onChanged: (bool value) =>
-                                  Provider.of<QuizCollectionModel>(context,
-                                          listen: false)
-                                      .setQuizActivation(widget.quiz, value),
-                            ),
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                value: widget.quiz.isActive,
+                                onChanged: (bool value) async {
+                                  try {
+                                    await Provider.of<QuizCollectionModel>(
+                                            context,
+                                            listen: false)
+                                        .setQuizActivation(widget.quiz, value);
+                                  } catch (_) {
+                                    showErrorDialog(
+                                        context, "Cannot update quiz status");
+                                  }
+                                }),
                             Container(
                                 child: Text('Visible'),
                                 transform: Matrix4.translationValues(-3, 0, 0))
@@ -258,22 +266,6 @@ class _QuizCardState extends State<QuizCard> {
         ],
       ),
       barrierDismissible: false,
-    );
-  }
-
-  Future<void> _showActivateLiveQuizError() async {
-    return showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Error"),
-        content: Text("Cannot start live session"),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: Navigator.of(context).pop,
-          ),
-        ],
-      ),
     );
   }
 }
