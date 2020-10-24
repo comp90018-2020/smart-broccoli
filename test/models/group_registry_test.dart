@@ -10,12 +10,15 @@ class MockGroupApi extends Mock implements GroupApi {}
 
 class MockQuizApi extends Mock implements QuizApi {}
 
+class MockPicStash extends Mock implements PictureStash {}
+
 main() async {
   test('Refresh groups', () async {
     final GroupApi api = MockGroupApi();
+    final PictureStash ps = MockPicStash();
     final KeyValueStore kv = MainMemKeyValueStore(init: {"token": "abc"});
     final AuthStateModel am = AuthStateModel(kv);
-    final UserRepository repo = UserRepository(groupApi: api);
+    final UserRepository repo = UserRepository(ps, groupApi: api);
     final QuizCollectionModel qcm = QuizCollectionModel(am);
     final GroupRegistryModel model =
         GroupRegistryModel(am, repo, qcm, groupApi: api);
@@ -63,9 +66,10 @@ main() async {
 
   test('Refresh with fetch members', () async {
     final GroupApi api = MockGroupApi();
+    final PictureStash ps = MockPicStash();
     final KeyValueStore kv = MainMemKeyValueStore(init: {"token": "abc"});
     final AuthStateModel am = AuthStateModel(kv);
-    final UserRepository repo = UserRepository(groupApi: api);
+    final UserRepository repo = UserRepository(ps, groupApi: api);
     final QuizCollectionModel qcm = QuizCollectionModel(am);
     final GroupRegistryModel model =
         GroupRegistryModel(am, repo, qcm, groupApi: api);

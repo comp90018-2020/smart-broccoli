@@ -18,16 +18,20 @@ class UserProfileModel extends ChangeNotifier {
   /// Local storage service
   KeyValueStore _keyValueStore;
 
+  /// Picture storage service
+  final PictureStash _picStash;
+
   /// Views subscribe to the fields below
   User _user;
   User get user => _user;
 
   /// Constructor for external use
-  UserProfileModel(this._keyValueStore, this._authStateModel, this._userRepo) {
+  UserProfileModel(this._keyValueStore, this._authStateModel, this._userRepo,
+      this._picStash) {
     // load last record of profile and picture
     try {
       _user = User.fromJson(json.decode(_keyValueStore.getString('user')));
-      if (_user?.pictureId != null) _userRepo.lookupPicLocally(_user.pictureId);
+      if (_user?.pictureId != null) _picStash.getPic(_user.pictureId);
     } catch (_) {}
   }
 
