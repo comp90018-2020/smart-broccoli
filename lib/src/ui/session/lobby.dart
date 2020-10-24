@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -60,9 +58,6 @@ class _StartLobby extends State<QuizLobby> {
   // Entry function
   @override
   Widget build(BuildContext context) {
-    QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true);
-
     return CustomPage(
       title: 'Take Quiz',
 
