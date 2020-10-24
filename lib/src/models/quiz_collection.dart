@@ -38,6 +38,12 @@ class QuizCollectionModel extends ChangeNotifier {
     refreshCreatedQuizzes();
   }
 
+  UnmodifiableListView<Quiz> getQuizzesWhere({int groupId, QuizType type}) =>
+      UnmodifiableListView([..._availableQuizzes, ..._createdQuizzes].where(
+          (quiz) =>
+              (groupId == null || quiz.groupId == groupId) &&
+              (type == null || quiz.type == type)));
+
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
     try {
