@@ -6,15 +6,16 @@ class Question {
   bool tf;
   int time;
 
-  Question(Map<String, dynamic> json){
+  Question(Map<String, dynamic> json) {
     this.no = json['no'];
     this.text = json['text'];
     this.pictureId = json['pictureId'];
-    if(json['options'] == null)
-    {
+    if (json['options'] == null) {
       this.options = null;
+    } else {
+      this.options = questionMod(json);
     }
-    else {this.options = questionMod(json);}
+
     this.tf = json['tf'];
     this.time = json['time'];
   }
@@ -29,10 +30,9 @@ class Question {
       Option temp = Option.fromJson(values);
       //temp.fromJson(values);
       options.add(temp);
-    };
+    }
     return options;
   }
-
 }
 
 class Option {
@@ -40,9 +40,7 @@ class Option {
 
   Option._internal(this.text);
 
-  factory Option.fromJson(Map<String, dynamic> json) =>
-      Option._internal(
+  factory Option.fromJson(Map<String, dynamic> json) => Option._internal(
         json['text'],
       );
 }
-

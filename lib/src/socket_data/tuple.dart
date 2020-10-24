@@ -7,10 +7,8 @@ class Tuple {
 
   Tuple._internal(this.player, this.record);
 
-  factory Tuple.fromJson(Map<String, dynamic> json) =>
-      Tuple._internal(
+  factory Tuple.fromJson(Map<String, dynamic> json) => Tuple._internal(
         User.fromJson(json['player']),
         Record.fromJson(json['record']),
       );
 }
-

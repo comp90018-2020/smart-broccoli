@@ -5,10 +5,10 @@ class Record {
   final int points;
   final int streak;
 
-  Record._internal(this.oldPos, this.newPos, this.bonusPoints, this.points, this.streak);
+  Record._internal(
+      this.oldPos, this.newPos, this.bonusPoints, this.points, this.streak);
 
-  factory Record.fromJson(Map<String, dynamic> json) =>
-      Record._internal(
+  factory Record.fromJson(Map<String, dynamic> json) => Record._internal(
         json['oldPos'],
         json['newPos'],
         json['bonusPoints'],
@@ -16,4 +16,3 @@ class Record {
         json['streak'],
       );
 }
-

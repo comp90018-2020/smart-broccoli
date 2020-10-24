@@ -7,8 +7,7 @@ class OutcomeUser {
   Record record;
   Tuple playerAhead;
 
-
-  OutcomeUser(Map<String, dynamic> json){
+  OutcomeUser(Map<String, dynamic> json) {
     this.question = json['question'];
     this.leaderBoard = outcomeUserMod(json);
 
@@ -28,7 +27,10 @@ class OutcomeUser {
       Tuple temp = Tuple.fromJson(values);
       tuples.add(temp);
     }
+
+    this.record = Record.fromJson(json['record']);
+    this.playerAhead = Tuple.fromJson(json['playerAhead']);
+
     return tuples;
   }
-
 }

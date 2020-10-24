@@ -7,17 +7,16 @@ import '../socket_data/question.dart';
 import '../socket_data/outcome_host.dart';
 import '../socket_data/outcome_user.dart';
 
-
 enum SessionState {
-  PENDING,    // in lobby and waiting (unknown how long to start)
-  STARTING,   // the quiz will start in a known number of seconds
-  QUESTION,   // the quiz is currently on a question
-  OUTCOME,    // between questions (LeaderBoard)
+  PENDING, // in lobby and waiting (unknown how long to start)
+  STARTING, // the quiz will start in a known number of seconds
+  QUESTION, // the quiz is currently on a question
+  OUTCOME, // between questions (LeaderBoard)
   FINISHED,
   ABORTED,
 }
 
-void main(){
+void main() {
   GameSessionModel test = new GameSessionModel();
   test.connect(2, 1);
   // test.startQuiz();
@@ -27,7 +26,7 @@ class GameSessionModel {
   // URL of server
   static const String SERVER_URL = 'https://fuzzybroccoli.com';
 
-  List<User> players = [];     // all players currently in session (id, name)
+  List<User> players = []; // all players currently in session (id, name)
   int startCountDown;
   Question question;
   OutcomeHost outcomeHost;
@@ -48,7 +47,8 @@ class GameSessionModel {
 
   /// Connect to socket with headers
   /// TODO: change to token
-  void connect(int userId, int sessionId) {     //change to token
+  void connect(int userId, int sessionId) {
+    //change to token
     // Set query
     socket.opts['query'] = {};
     socket.opts['query']['userId'] = userId;
@@ -80,8 +80,8 @@ class GameSessionModel {
     socket.on('playerLeave', (message) {
       print("playerLeave");
       print(message);
-      for(User player in players) {
-        if(User.fromJson(message).id == player.id){
+      for (User player in players) {
+        if (User.fromJson(message).id == player.id) {
           players.remove(player);
           break;
         }
@@ -125,11 +125,10 @@ class GameSessionModel {
       print("questionOutcome: ");
       print(message);
       print(userRole);
-      if( userRole == 1) {
+      if (userRole == 1) {
         outcomeHost = OutcomeHost(message);
         print(outcomeHost);
-      }
-      else {
+      } else {
         outcomeUser = OutcomeUser(message);
         print(outcomeUser);
       }
@@ -138,28 +137,28 @@ class GameSessionModel {
   }
 
   /// host action
-  void startQuiz(){
+  void startQuiz() {
     socket.emit('start');
   }
 
-  void abortQuiz(){
+  void abortQuiz() {
     socket.emit('abort');
   }
 
-  void nextQuestion(){
+  void nextQuestion() {
     socket.emit('next');
   }
 
-  void showLeaderBoard(){
+  void showLeaderBoard() {
     socket.emit('showBoard');
   }
 
   /// participant action
-  void quitQuiz(){
+  void quitQuiz() {
     socket.emit('quit');
   }
 
-  void answerQuestion(dynamic answer){
+  void answerQuestion(dynamic answer) {
     socket.emit('answer', answer);
   }
 
@@ -186,7 +185,7 @@ class GameSessionModel {
   //   socket.disconnect();
   // }
 
-/// get data from socket
+  /// get data from socket
 // String receive_from_socket(String event, dynamic data){
 // //
 // // }

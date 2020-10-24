@@ -4,10 +4,11 @@ class OutcomeHost {
   int question;
   List<Tuple> leaderBoard;
 
-  OutcomeHost(Map<String, dynamic> json){
+  OutcomeHost(Map<String, dynamic> json) {
     this.question = json['question'];
     this.leaderBoard = outcomeHostMod(json);
   }
+
 
   List<Tuple> outcomeHostMod(Map<String, dynamic> json)
   {
@@ -18,7 +19,7 @@ class OutcomeHost {
       Tuple temp = Tuple.fromJson(values);
       tuples.add(temp);
     }
+
     return tuples;
   }
-
 }
