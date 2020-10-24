@@ -9,10 +9,11 @@ import 'package:smart_broccoli/theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final KeyValueStore keyValueStore = await SharedPrefsKeyValueStore.create();
+  final PictureStash picStash = await PictureStash.create();
   final AuthStateModel authStateModel = AuthStateModel(keyValueStore);
-  final UserRepository userRepo = UserRepository();
+  final UserRepository userRepo = UserRepository(picStash);
   final QuizCollectionModel quizCollectionModel =
-      QuizCollectionModel(authStateModel);
+      QuizCollectionModel(authStateModel, picStash);
   final GroupRegistryModel groupRegistryModel =
       GroupRegistryModel(authStateModel, userRepo, quizCollectionModel);
 
