@@ -129,7 +129,7 @@ class _GroupListState extends State<GroupList> {
 
   void _joinGroup() async {
     final String groupName = await joinDialog();
-    if (groupName == "") return;
+    if (groupName == null) return;
     try {
       await Provider.of<GroupRegistryModel>(context, listen: false)
           .joinGroup(name: groupName);
