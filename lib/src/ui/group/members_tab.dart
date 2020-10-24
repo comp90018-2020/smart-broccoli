@@ -25,9 +25,7 @@ class MembersTab extends StatelessWidget {
                     ? UserAvatar.placeholder()
                     : UserAvatar(group.members[index].picture),
                 // Name
-                title: group.members[index].name == null
-                    ? Text("(anonymous member)")
-                    : Text(group.members[index].name),
+                title: Text(group.members[index].name),
                 // Remove
                 trailing: group.role == GroupRole.OWNER
                     ? IconButton(

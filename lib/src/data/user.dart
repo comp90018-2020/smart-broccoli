@@ -8,12 +8,14 @@ class User {
   final int id;
   final int pictureId;
   final String email;
-  final String name;
+  final String _name;
+  String get name => _name != null ? _name : "(anonymous member)";
+
   final GroupRole groupRole;
 
   Uint8List picture;
 
-  User._internal(this.type, this.id, this.pictureId, this.email, this.name,
+  User._internal(this.type, this.id, this.pictureId, this.email, this._name,
       this.groupRole, this.picture);
 
   factory User.fromJson(Map<String, dynamic> json, {Uint8List picture}) =>
