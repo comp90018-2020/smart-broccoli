@@ -22,6 +22,13 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
   // Main tab controller
   TabController _controller;
 
+  @override
+  void didChangeDependencies() {
+    Provider.of<GroupRegistryModel>(context, listen: false)
+        .refreshGroup(widget.groupId);
+    super.didChangeDependencies();
+  }
+
   void initState() {
     super.initState();
     _controller = new TabController(length: 2, vsync: this);
