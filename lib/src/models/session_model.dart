@@ -162,7 +162,6 @@ class GameSessionModel {
     socket.emit('answer', answer);
   }
 
-
   // /// Subscribe to socket event
   // void _subscribe(String event, dynamic Function(dynamic) handler) {
   //   if (socket.disconnected) {
