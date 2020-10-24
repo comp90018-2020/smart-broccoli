@@ -1,9 +1,9 @@
 import 'dart:collection';
 import 'package:flutter/widgets.dart';
-import 'package:smart_broccoli/src/models.dart';
 
-import 'package:smart_broccoli/src/remote.dart';
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/remote.dart';
 
 import 'auth_state.dart';
 import 'user_repository.dart';
