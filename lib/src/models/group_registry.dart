@@ -47,10 +47,17 @@ class GroupRegistryModel extends ChangeNotifier {
     refreshCreatedGroups();
   }
 
-  /// Update a group.
-  Future<void> updateGroup(Group group) async {
-    await _groupApi.updateGroup(_authStateModel.token, group.id, group.name);
-    refreshCreatedGroups();
+  /// Rename a group.
+  Future<void> renameGroup(Group group, String newName) async {
+    // rename the group
+    await _groupApi.updateGroup(_authStateModel.token, group.id, newName);
+    // fetch the updated group and save it to the map
+    _createdGroups[group.id] =
+        await _groupApi.getGroup(_authStateModel.token, group.id);
+    // fetch the members list
+    _createdGroups[group.id].members =
+        await _userRepo.getMembersOf(_authStateModel.token, group.id);
+    notifyListeners();
   }
 
   /// Leave a group.
