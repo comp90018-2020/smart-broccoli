@@ -103,12 +103,11 @@ class Quiz {
 /// `Quiz` instances hold a list of this class.
 /// Abstract class; not for instantiation.
 abstract class Question {
-  int _id;
-  int get id => _id;
+  final int id;
   String text;
   int imgId;
 
-  Question(this._id, this.text, this.imgId);
+  Question(this.id, this.text, this.imgId);
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{'id': id, 'text': text, 'imgId': imgId};
