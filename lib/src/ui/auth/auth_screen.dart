@@ -38,12 +38,13 @@ class _AuthScreenState extends State<AuthScreen> {
 
               // Tabs
               TabHolder(
+                  constraints: BoxConstraints(maxWidth: 225),
                   onTap: (index) {
                     setState(() {
                       _tabIndex = index;
                     });
                   },
-                  margin: const EdgeInsets.only(top: 35, bottom: 35),
+                  margin: const EdgeInsets.only(top: 35, bottom: 25),
                   tabs: [Tab(text: "LOGIN"), Tab(text: "SIGN UP")]),
 
               // Tab contents
@@ -51,8 +52,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 padding: const EdgeInsets.only(bottom: 10),
                 child: FractionallySizedBox(
                     widthFactor: 0.7,
-                    child: AnimatedIndexedStack(
-                        index: _tabIndex, children: [Login(), Register()])),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 300),
+                        child: AnimatedIndexedStack(
+                            index: _tabIndex, children: [Login(), Register()]),
+                      ),
+                    )),
               ),
             ],
           ),

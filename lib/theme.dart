@@ -122,19 +122,46 @@ class TabHolder extends FractionallySizedBox {
       {@required List<Tab> tabs,
       double widthFactor = 0.5,
       EdgeInsetsGeometry margin = EdgeInsets.zero,
+      BoxConstraints constraints,
       void Function(int) onTap})
       : super(
+          // Width factor of parent
           widthFactor: widthFactor,
-          child: Container(
-            margin: margin,
-            decoration: const BoxDecoration(
-              color: SmartBroccoliColourScheme.tabHolderBackground,
-              borderRadius: BorderRadius.all(Radius.circular(25)),
-            ),
-            child: TabBar(
-              tabs: tabs,
-              onTap: onTap,
-            ),
+          child: constraints != null
+              // Apply horizontal width constraint
+              ? Center(
+                  child: Container(
+                    constraints: constraints,
+                    child: _TabInner(
+                      tabs: tabs,
+                      margin: margin,
+                      onTap: onTap,
+                    ),
+                  ),
+                )
+              : _TabInner(
+                  tabs: tabs,
+                  margin: margin,
+                  onTap: onTap,
+                ),
+        );
+}
+
+/// Inner element without width constraints
+class _TabInner extends Container {
+  _TabInner(
+      {@required List<Tab> tabs,
+      EdgeInsetsGeometry margin = EdgeInsets.zero,
+      void Function(int) onTap})
+      : super(
+          margin: margin,
+          decoration: const BoxDecoration(
+            color: SmartBroccoliColourScheme.tabHolderBackground,
+            borderRadius: BorderRadius.all(Radius.circular(25)),
+          ),
+          child: TabBar(
+            tabs: tabs,
+            onTap: onTap,
           ),
         );
 }
