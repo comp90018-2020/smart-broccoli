@@ -209,7 +209,7 @@ main() async {
     expect(members[2].id, 3);
     expect(members[0].name, "Harald Søndergaard");
     expect(members[1].name, "Aaron Harwood");
-    expect(members[2].name, null);
+    expect(members[2].name, "(anonymous member)");
     expect(members[0].groupRole, GroupRole.OWNER);
     expect(members[1].groupRole, GroupRole.MEMBER);
     expect(members[2].groupRole, GroupRole.MEMBER);

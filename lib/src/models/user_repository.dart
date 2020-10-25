@@ -1,8 +1,7 @@
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 
 /// Cached provider of user profiles and profile pictures
@@ -14,9 +13,12 @@ class UserRepository {
   /// API provider for the group management service
   GroupApi _groupApi;
 
+  /// Picture storage service
+  final PictureStash _picStash;
+
   Map<int, User> _users = {};
 
-  UserRepository({UserApi userApi, GroupApi groupApi}) {
+  UserRepository(this._picStash, {UserApi userApi, GroupApi groupApi}) {
     _userApi = userApi ?? UserApi();
     _groupApi = groupApi ?? GroupApi();
   }
@@ -26,11 +28,11 @@ class UserRepository {
     // no picture; return straight away
     if (user.pictureId == null) return user;
     // otherwise, check whether picture has already been cached
-    if ((user.picture = await lookupPicLocally(user.pictureId)) != null)
+    if ((user.picture = await _picStash.getPic(user.pictureId)) != null)
       return user;
     // if not, use the API then cache the picture (in background) for next time
     user.picture = await _userApi.getProfilePic(token);
-    _storePicLocally(user.pictureId, user.picture); // no need to await
+    _picStash.storePic(user.pictureId, user.picture); // no need to await
     return user;
   }
 
@@ -42,11 +44,11 @@ class UserRepository {
     // no picture; return straight away
     if (_users[id].pictureId == null) return _users[id];
     // otherwise, check whether picture has already been cached
-    if ((_users[id].picture = await lookupPicLocally(_users[id].pictureId)) !=
+    if ((_users[id].picture = await _picStash.getPic(_users[id].pictureId)) !=
         null) return _users[id];
     // if not, use the API then cache the picture (in background) for next time
     _users[id].picture = await _userApi.getProfilePic(token);
-    _storePicLocally(
+    _picStash.storePic(
         _users[id].pictureId, _users[id].picture); // no need to await
     return _users[id];
   }
@@ -63,10 +65,10 @@ class UserRepository {
       _users[member.id] = member;
       // and look for profile pic locally before falling back to API
       if (member.pictureId != null &&
-          (member.picture = await lookupPicLocally(member.pictureId)) == null) {
+          (member.picture = await _picStash.getPic(member.pictureId)) == null) {
         try {
           member.picture = await _userApi.getProfilePicOf(token, member.id);
-          _storePicLocally(member.pictureId, member.picture);
+          _picStash.storePic(member.pictureId, member.picture);
         } catch (_) {
           // if unable to get the profie pic from the API, simply move on
         }
@@ -78,32 +80,8 @@ class UserRepository {
   Future<Uint8List> getProfilePicOf(String token, int id) async {
     Uint8List bytes;
     if (_users.containsKey(id) &&
-        (bytes = await lookupPicLocally(_users[id].pictureId)) != null)
+        (bytes = await _picStash.getPic(_users[id].pictureId)) != null)
       return bytes;
     return await _userApi.getProfilePicOf(token, id);
-  }
-
-  Future<Uint8List> lookupPicLocally(int pictureId) async {
-    String assetDir =
-        '${(await getTemporaryDirectory()).path}/picture/$pictureId';
-    try {
-      // see if the image is already stored locally
-      return await File(assetDir).readAsBytes();
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<void> _storePicLocally(int pictureId, Uint8List bytes) async {
-    // ensure picture directory exists
-    final Directory picDir =
-        await Directory('${(await getTemporaryDirectory()).path}/picture')
-            .create(recursive: true);
-    // then store the asset
-    String assetDir = '${picDir.path}/$pictureId';
-    try {
-      File f = File(assetDir);
-      f.writeAsBytes(bytes);
-    } catch (_) {}
   }
 }
