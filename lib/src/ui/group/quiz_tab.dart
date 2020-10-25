@@ -69,15 +69,4 @@ class QuizTab extends StatelessWidget {
       ),
     );
   }
-
-  List<Quiz> getQuiz(List<Quiz> items, QuizType type) {
-    List<Quiz> res = [];
-    for (var i = 0; i < items.length; i++) {
-      if (items[i].groupId == groupId &&
-          (items[i].type == type || type == null)) {
-        res.add(items[i]);
-      }
-    }
-    return res;
-  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
@@ -34,7 +35,6 @@ class _QuizCardState extends State<QuizCard> {
               // height, show it
               bool showPicture = constraints.maxWidth / widget.aspectRatio <
                   MediaQuery.of(context).size.height * 0.4;
-
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
