@@ -62,6 +62,11 @@ class GroupRegistryModel extends ChangeNotifier {
     // fetch the members list
     _createdGroups[group.id].members =
         await _userRepo.getMembersOf(_authStateModel.token, group.id);
+    // If the member list is empty TODO verify if this is allowed
+    if(_createdGroups[group.id].members == null){
+      _createdGroups[group.id].members = [];
+
+    }
     notifyListeners();
   }
 
