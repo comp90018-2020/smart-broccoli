@@ -14,7 +14,6 @@ class GroupCreate extends StatefulWidget {
 
 class _GroupCreateState extends State<GroupCreate> {
   final TextEditingController controller = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return new CustomPage(
