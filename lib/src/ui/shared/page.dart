@@ -90,60 +90,61 @@ class CustomPage extends StatelessWidget {
                 // Important: Remove any padding from the ListView.
                 padding: EdgeInsets.zero,
                 children: <Widget>[
-                  SizedBox(
-                    height: 130,
-                    child: DrawerHeader(
-                      padding: const EdgeInsets.all(16),
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () {
-                          _navigateToNamed(context, '/profile');
-                        },
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            // User picture
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(100)),
-                              width: 50,
-                              height: 50,
-                            ),
-                            // Name/email
-                            Expanded(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 18),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('name',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText1),
-                                    Text('email',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2),
-                                  ],
-                                ),
+                  Container(
+                    // Margin adapted from drawer_header.dart
+                    margin: EdgeInsets.only(
+                        top: MediaQuery.of(context).padding.top),
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        _navigateToNamed(context, '/profile');
+                      },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          // User picture
+                          Container(
+                            decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(100)),
+                            width: 50,
+                            height: 50,
+                          ),
+                          // Name/email
+                          Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 18),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('name',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1),
+                                  Text('email',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText2),
+                                ],
                               ),
                             ),
-                            Icon(Icons.chevron_right, color: Colors.grey[700]),
-                          ],
-                        ),
+                          ),
+                          Icon(Icons.chevron_right, color: Colors.grey[700]),
+                        ],
                       ),
                     ),
                   ),
+                  Divider(),
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.question_answer),
                     title: Text('TAKE QUIZ',
-                        style:
-                            TextStyle(color: Theme.of(context).primaryColor)),
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColorDark)),
                     onTap: () {
                       _navigateToNamed(context, '/take_quiz');
                     },
@@ -152,8 +153,8 @@ class CustomPage extends StatelessWidget {
                     dense: true,
                     leading: const Icon(Icons.edit),
                     title: Text('MANAGE QUIZ',
-                        style:
-                            TextStyle(color: Theme.of(context).primaryColor)),
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColorDark)),
                     onTap: () {
                       _navigateToNamed(context, '/manage_quiz');
                     },
@@ -162,8 +163,8 @@ class CustomPage extends StatelessWidget {
                     dense: true,
                     leading: const Icon(Icons.people),
                     title: Text('GROUPS',
-                        style:
-                            TextStyle(color: Theme.of(context).primaryColor)),
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColorDark)),
                     onTap: () {
                       _navigateToNamed(context, '/group/home');
                     },
