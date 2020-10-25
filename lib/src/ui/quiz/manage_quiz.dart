@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/data/group.dart';
@@ -29,28 +28,34 @@ class _ManageQuizState extends State<ManageQuiz> {
     return Consumer2<QuizCollectionModel, GroupRegistryModel>(
       builder: (context, collection, registry, child) {
         group = registry.createdGroups;
-
         return CustomTabbedPage(
           title: "Manage Quiz",
           tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
           tabViews: [
             // All quizzes
             QuizContainer(
-                collection.getQuizzesWhere(groupId: group[gid].id, type: null),
+                (group.length != 0)
+                    ? collection.getQuizzesWhere(
+                        groupId: group[gid].id, type: null)
+                    : [],
                 header: _groupSelector(),
                 hiddenButton: true),
 
             // Live quiz
             QuizContainer(
-                collection.getQuizzesWhere(
-                    groupId: group[gid].id, type: QuizType.LIVE),
+                (group.length != 0)
+                    ? collection.getQuizzesWhere(
+                        groupId: group[gid].id, type: QuizType.LIVE)
+                    : [],
                 header: _groupSelector(),
                 hiddenButton: true),
 
             /// Self-paced quiz
             QuizContainer(
-                collection.getQuizzesWhere(
-                    groupId: group[gid].id, type: QuizType.SELF_PACED),
+                (group.length != 0)
+                    ? collection.getQuizzesWhere(
+                        groupId: group[gid].id, type: QuizType.SELF_PACED)
+                    : [],
                 header: _groupSelector(),
                 hiddenButton: true),
           ],
@@ -106,14 +111,25 @@ class _ManageQuizState extends State<ManageQuiz> {
 
   List<DropdownMenuItem> buildDropDownMenu() {
     List<DropdownMenuItem> res = [];
-    // note that GID != i where i is the iteration index
-    for (var i = 0; i < group.length; i++) {
+    /// Defensive programming to avoid an error in an event of there being no
+    /// groups
+    if (group.length == 0) {
       res.add(DropdownMenuItem(
           child: Center(
-            child: Text(group[i].name),
+            child: Text(" "),
           ),
-          value: i,
-          onTap: () => updateList(i)));
+          value: 0,
+          onTap: () => {}));
+    } else {
+      // note that GID != i where i is the iteration index
+      for (var i = 0; i < group.length; i++) {
+        res.add(DropdownMenuItem(
+            child: Center(
+              child: Text(group[i].name),
+            ),
+            value: i,
+            onTap: () => updateList(i)));
+      }
     }
     return res;
   }
