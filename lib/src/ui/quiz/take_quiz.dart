@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
@@ -23,8 +22,6 @@ class _TakeQuizState extends State<TakeQuiz> {
 
   // TODO: replace with provider inside build
 
-  List<Quiz> items;
-
   @override
   void initState() {
     super.initState();
@@ -39,15 +36,6 @@ class _TakeQuizState extends State<TakeQuiz> {
         });
       }
     });
-  }
-
-  // See : https://stackoverflow.com/questions/58371874/what-is-diffrence-between-didchangedependencies-and-initstate
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    QuizCollectionModel qcm =
-        Provider.of<QuizCollectionModel>(context, listen: true);
-    items = qcm.availableQuizzes;
   }
 
   @override
