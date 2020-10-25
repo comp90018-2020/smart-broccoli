@@ -289,41 +289,46 @@ class _QuizCreateState extends State<QuizCreate> {
   Widget _questionCard(int index, Question question) {
     var questionTextI = index +1;
 
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 4),
+    return GestureDetector(
+      onTap: (){
 
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.maxFinite,
-            child: AspectRatio(aspectRatio: 2, child:
+      },
+      child: Card(
+        margin: EdgeInsets.symmetric(vertical: 4),
+
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: provideImage(question),
-                    fit: BoxFit.fitWidth,
-                    alignment: Alignment.topCenter,
-                  ),
-                )
-            )
+              width: double.maxFinite,
+              child: AspectRatio(aspectRatio: 2, child:
+              Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: provideImage(question),
+                      fit: BoxFit.fitWidth,
+                      alignment: Alignment.topCenter,
+                    ),
+                  )
+              )
 
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Question $questionTextI',
-                    style: Theme.of(context).textTheme.headline6),
-                Text(question.text)
-              ],
-            ),
-          )
-        ],
-      ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Question $questionTextI',
+                      style: Theme.of(context).textTheme.headline6),
+                  Text(question.text)
+                ],
+              ),
+            )
+          ],
+        ),
+      )
     );
   }
 
