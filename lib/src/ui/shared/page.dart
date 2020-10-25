@@ -57,6 +57,9 @@ class CustomPage extends StatelessWidget {
       },
     );
 
+    // refresh profile to show in drawer
+    if (hasDrawer) Provider.of<UserProfileModel>(context).refreshUser();
+
     return Scaffold(
       backgroundColor: this.secondaryBackgroundColour
           ? Theme.of(context).backgroundColor
@@ -119,19 +122,21 @@ class CustomPage extends StatelessWidget {
                             child: Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 18),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('name',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyText1),
-                                  Text('email',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyText2),
-                                ],
+                              child: Consumer<UserProfileModel>(
+                                builder: (context, profile, child) => Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(profile.user?.name ?? "",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText1),
+                                    Text(profile.user?.email ?? "",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
