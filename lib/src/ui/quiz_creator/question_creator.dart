@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
+import 'package:flutter/foundation.dart';
+
 
 import 'picture.dart';
 
@@ -13,17 +15,35 @@ class QuestionArgs {
   final Question question;
 
   QuestionArgs(this.questionNumber, this.question);
+
 }
 
 /// Question create page
 class QuestionCreate extends StatefulWidget {
-  QuestionCreate({Key key}) : super(key: key);
+
+  final Quiz passedQuiz;
+
+  QuestionCreate( {Key key, @required this.passedQuiz}) : super(key: key);
+
 
   @override
   _QuestionCreateState createState() => _QuestionCreateState();
 }
 
 class _QuestionCreateState extends State<QuestionCreate> {
+
+  void printPassedQ(){
+    print("Checking status of widget");
+    print(widget.passedQuiz);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    printPassedQ();
+  }
+  var questionTextController  = TextEditingController();
   // Text controllers for answer
   // TODO: initial state needs to be created
   var _optionTextControllers = <TextEditingController>[];
@@ -31,9 +51,13 @@ class _QuestionCreateState extends State<QuestionCreate> {
   // The current picked file
   String picturePath;
 
+
   // Should be cloned (to allow discard of changes)
   MCQuestion question = MCQuestion(null, 'Text', []);
   int questionNumber = 1;
+
+
+
 
   @override
   void dispose() {
@@ -65,7 +89,20 @@ class _QuestionCreateState extends State<QuestionCreate> {
         ),
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
-          onPressed: () {},
+          onPressed: () {
+            print(widget.passedQuiz);
+
+            if (questionTextController.text == ""){
+              return _showUnsuccessful("Cannot create question", "Question text required");
+            }
+            if (question.options.length < 2){
+              return _showUnsuccessful("Cannot create question", "At least two possible answers are required");
+            }
+
+ 
+            widget.passedQuiz.questions.add(MCQuestion(widget.passedQuiz,questionTextController.text, question.options, imgId: picturePath));
+            Navigator.pop(context, widget.passedQuiz);
+          },
           child: Text(
             'Save',
             style: TextStyle(color: Colors.white, fontSize: 16),
@@ -97,6 +134,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: TextField(
+                    controller: questionTextController,
                     decoration: InputDecoration(
                       labelText: 'Question text',
                     ),
@@ -165,6 +203,22 @@ class _QuestionCreateState extends State<QuestionCreate> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showUnsuccessful(String title, String body) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+            child: Text("OK"),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
       ),
     );
   }

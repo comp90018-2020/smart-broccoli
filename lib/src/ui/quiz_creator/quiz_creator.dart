@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/ui.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
@@ -35,13 +38,22 @@ class _QuizCreateState extends State<QuizCreate> {
 
   // TODO: replace with cloned quiz
   Quiz model = Quiz("placeholder", 0, QuizType.LIVE);
+  
 
   // The current picked file
   String picturePath;
 
-  String selectedGroupName;
+  String selectedGroupTitle;
 
   Group selectedGroup;
+
+  int selectedTime;
+
+  QuizType selectedQuizType = QuizType.LIVE;
+  
+  
+
+  List<Question> selectedQuestions = new List<Question>();
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +81,9 @@ class _QuizCreateState extends State<QuizCreate> {
         ),
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
-          onPressed: () {},
+          onPressed: () {
+            _createQuiz();
+          },
           child: Text(
             'Save',
             style: TextStyle(color: Colors.white, fontSize: 16),
@@ -143,8 +157,10 @@ class _QuizCreateState extends State<QuizCreate> {
                             color: Colors.grey,
                           ),
                           Consumer<GroupRegistryModel>(
-                            builder: (context, registry, child) =>
-                                buildGroupList(registry.createdGroups),
+                            builder: (context, registry, child) {
+                              return buildGroupList(registry.createdGroups);
+                            }
+                                ,
                           )
                         ],
                       ),
@@ -163,10 +179,10 @@ class _QuizCreateState extends State<QuizCreate> {
                         dense: true,
                         title: const Text('LIVE'),
                         value: QuizType.LIVE,
-                        groupValue: model.type,
+                        groupValue: selectedQuizType,
                         onChanged: (QuizType value) {
                           setState(() {
-                            model.type = value;
+                            selectedQuizType = value;
                           });
                         },
                       ),
@@ -174,10 +190,10 @@ class _QuizCreateState extends State<QuizCreate> {
                         dense: true,
                         title: const Text('SELF-PACED'),
                         value: QuizType.SELF_PACED,
-                        groupValue: model.type,
+                        groupValue: selectedQuizType,
                         onChanged: (QuizType value) {
                           setState(() {
-                            model.type = value;
+                            selectedQuizType = value;
                           });
                         },
                       ),
@@ -203,9 +219,9 @@ class _QuizCreateState extends State<QuizCreate> {
                   scrollDirection: Axis.vertical,
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  itemCount: 2,
+                  itemCount: questionsInQuiz(),
                   itemBuilder: (BuildContext context, int index) {
-                    return _questionCard(index, MCQuestion(null, 'Hello', []));
+                    return _questionCard(index, selectedQuestions.elementAt(index));
                   },
                 ),
 
@@ -221,10 +237,8 @@ class _QuizCreateState extends State<QuizCreate> {
                           spacing: 3,
                           children: [Icon(Icons.add), Text('ADD QUESTION')]),
                       onPressed: () {
-                        Navigator.of(context).pushNamed('/quiz/question');
+                        _navigateAndDisplaySelection(context);
                       },
-
-
                     ),
                   ),
                 )
@@ -236,25 +250,73 @@ class _QuizCreateState extends State<QuizCreate> {
     );
   }
 
+  int questionsInQuiz(){
+
+    if(selectedQuestions == null){
+      return 0;
+    }else if(selectedQuestions.isEmpty){
+      return 0;
+    }else if (selectedQuestions.isNotEmpty){
+      return selectedQuestions.length;
+    }
+  }
+
+
+  _navigateAndDisplaySelection(BuildContext context) async {
+    // Navigator returns a Future that completes after calling
+    dynamic result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QuestionCreate(passedQuiz: new Quiz(quizNameController.text, selectedGroup.id, selectedQuizType, description: "No description", isActive: false, timeLimit: selectedTime, questions: selectedQuestions)),
+      ),
+    );
+
+    setState(() {
+
+     selectedGroup.id = result.groupId;
+     
+     selectedTime = result.timeLimit;
+
+     selectedQuizType = result.type;
+     
+     selectedQuestions = result.questions;
+
+    });
+  }
+
+
   // Used to represent questions
   Widget _questionCard(int index, Question question) {
+    var questionTextI = index +1;
 
     return Card(
       margin: EdgeInsets.symmetric(vertical: 4),
+
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: double.maxFinite,
-            child: AspectRatio(aspectRatio: 3, child: Placeholder()),
+            child: AspectRatio(aspectRatio: 2, child:
+            Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: provideImage(question),
+                    fit: BoxFit.fitWidth,
+                    alignment: Alignment.topCenter,
+                  ),
+                )
+            )
+
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Question $index',
+                Text('Question $questionTextI',
                     style: Theme.of(context).textTheme.headline6),
                 Text(question.text)
               ],
@@ -265,7 +327,28 @@ class _QuizCreateState extends State<QuizCreate> {
     );
   }
 
+  AssetImage provideImage (Question question){
+    print(question.imgId);
+    if(question.imgId == null){
+      return AssetImage('assets/icon.png');
+    }
+    else{
+      return AssetImage(question.imgId);
+    }
+
+  }
+
   Widget buildGroupList(List<Group> groups) {
+    if(groups.length >0){
+      selectedGroupTitle = groups[0].name;
+      for (var group in groups) {
+        if (group.name == groups[0].name) {
+          selectedGroup = group;
+        }
+      }
+
+
+    }
     return
       Expanded(
         child: Padding(
@@ -273,7 +356,7 @@ class _QuizCreateState extends State<QuizCreate> {
           child: DropdownButton(
 
               isExpanded: true,
-              value: selectedGroupName,
+              value: selectedGroupTitle,
               items: groups.map((group) {
                     return DropdownMenuItem<String>(
                     value: group.name,
@@ -282,18 +365,13 @@ class _QuizCreateState extends State<QuizCreate> {
                     }).toList(),
               onChanged: (String groupName) {
                 setState(() {
-                  selectedGroupName = groupName;
+                  selectedGroupTitle = groupName;
                   for (var group in groups) {
                     if (group.name == groupName) {
                       selectedGroup = group;
                     }
                   }
-
-
-
                 });
-                
-
               }),
         ),
       );
@@ -301,18 +379,16 @@ class _QuizCreateState extends State<QuizCreate> {
 
 
 
-/*
   void _createQuiz() async {
     if (quizNameController.text == "")
-      return _showUnsuccessful("Cannot create group", "Name required");
+      return _showUnsuccessful("Cannot create quiz", "Name required");
     try {
-      await Provider.of<QuizCollectionModel>(context, listen: false)
-          .createQuiz(new Quiz(quizNameController.text, groupId, type));
+      await Provider.of<QuizCollectionModel>(context, listen: false).createQuiz(new Quiz(quizNameController.text, selectedGroup.id, selectedQuizType, description: "No description", isActive: false, timeLimit: selectedTime, questions: selectedQuestions));
       Navigator.of(context).pop();
     } on GroupCreateException {
       _showUnsuccessful("Cannot create group", "Name already in use");
     }
-  }*/
+  }
 
   void _showUnsuccessful(String title, String body) {
     showDialog(
@@ -340,7 +416,7 @@ class _QuizCreateState extends State<QuizCreate> {
         }).then((value) {
       if (value != null && value is int) {
         setState(() {
-          model.timeLimit = value;
+          selectedTime = value;
           timerTextController.text = value.toString() + " seconds";
         });
       }

@@ -30,7 +30,7 @@ class Quiz {
   final List<GameSession> sessions;
 
   int timeLimit;
-  List<Question> questions;
+  List<Question> questions = List<Question>();
 
   /// Construtor for use when user creates a new quiz
   factory Quiz(String title, int groupId, QuizType type,
@@ -109,7 +109,7 @@ abstract class Question {
   int _id;
   int get id => _id;
   String text;
-  int imgId;
+  String imgId;
 
   Question(this._quiz, this._id, this.text, this.imgId);
 
@@ -132,11 +132,11 @@ class TFQuestion extends Question {
   bool answer;
 
   /// Constructor for use when user creates a new true/false question
-  TFQuestion(Quiz quiz, String text, this.answer, {int imgId})
+  TFQuestion(Quiz quiz, String text, this.answer, {String imgId})
       : super(quiz, null, text, imgId);
 
   /// Constructor for internal use only
-  TFQuestion._internal(Quiz quiz, int id, String text, int imgId, this.answer)
+  TFQuestion._internal(Quiz quiz, int id, String text, String imgId, this.answer)
       : super(quiz, id, text, imgId);
 
   factory TFQuestion.fromJson(Quiz quiz, Map<String, dynamic> json) =>
@@ -160,11 +160,11 @@ class MCQuestion extends Question {
   List<QuestionOption> options;
 
   /// Constructor for use when user creates a new multiple choice question
-  MCQuestion(Quiz quiz, String text, this.options, {int imgId})
+  MCQuestion(Quiz quiz, String text, this.options, {String imgId})
       : super(quiz, null, text, imgId);
 
   /// Constructor for internal use only
-  MCQuestion._internal(Quiz quiz, int id, String text, int imgId,
+  MCQuestion._internal(Quiz quiz, int id, String text, String imgId,
       {this.options})
       : super(quiz, id, text, imgId);
 
