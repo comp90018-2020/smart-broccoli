@@ -40,8 +40,6 @@ class QuizCollectionModel extends ChangeNotifier {
       {QuizApi quizApi, SessionApi sessionApi}) {
     _quizApi = quizApi ?? QuizApi();
     _sessionApi = sessionApi ?? SessionApi();
-    refreshAvailableQuizzes();
-    refreshCreatedQuizzes();
   }
 
   UnmodifiableListView<Quiz> getQuizzesWhere({int groupId, QuizType type}) =>
