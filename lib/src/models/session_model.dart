@@ -1,11 +1,12 @@
 // import 'package:flutter/cupertino.dart';
 // import 'package:flutter/material.dart';
 
+import 'package:smart_broccoli/src/data.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import '../socket_data/user.dart';
-import '../socket_data/question.dart';
-import '../socket_data/outcome_host.dart';
-import '../socket_data/outcome_user.dart';
+import '../socket_data/user.dart' as USER;
+import '../socket_data/question.dart' as QUESTION;
+import '../socket_data/outcome.dart' as OUTCOME;
+import '../data/group.dart';
 
 enum SessionState {
   PENDING, // in lobby and waiting (unknown how long to start)
@@ -26,13 +27,13 @@ class GameSessionModel {
   // URL of server
   static const String SERVER_URL = 'https://fuzzybroccoli.com';
 
-  List<User> players = []; // all players currently in session (id, name)
+  List<USER.User> players = []; // all players currently in session (id, name)
   int startCountDown;
-  Question question;
-  OutcomeHost outcomeHost;
-  OutcomeUser outcomeUser;
+  QUESTION.Question question;
+  OUTCOME.OutcomeHost outcomeHost;
+  OUTCOME.OutcomeUser outcomeUser;
   List<int> questionAnswered = [];
-  int userRole;
+  GroupRole userRole;
   SessionState state;
 
   /// The socket which we enclose
@@ -54,7 +55,6 @@ class GameSessionModel {
     socket.opts['query']['userId'] = userId;
     print(socket.opts);
     socket.connect();
-    userRole = userId;
 
     socket.on('connect', (message) {
       print('connected');
@@ -64,7 +64,7 @@ class GameSessionModel {
     socket.on('welcome', (message) {
       print('welcome');
       print(message);
-      message.forEach((player) => players.add(User.fromJson(player)));
+      message.forEach((player) => players.add(USER.User.fromJson(player)));
       print(players);
       // notifyListeners();
     });
@@ -72,7 +72,7 @@ class GameSessionModel {
     socket.on('playerJoin', (message) {
       print("playerJoin");
       print(message);
-      players.add(User.fromJson(message));
+      players.add(USER.User.fromJson(message));
       print(players);
       // notifyListeners();
     });
@@ -80,7 +80,7 @@ class GameSessionModel {
     socket.on('playerLeave', (message) {
       print("playerLeave");
       print(message);
-      for (User player in players) {
+      for (USER.User player in players) {
         if (User.fromJson(message).id == player.id) {
           players.remove(player);
           break;
@@ -106,7 +106,7 @@ class GameSessionModel {
     socket.on('nextQuestion', (message) {
       print("nextQuestion");
       print(message);
-      question = Question(message);
+      question = QUESTION.Question(message);
       print(question);
       // notifyListeners();
     });
@@ -125,11 +125,11 @@ class GameSessionModel {
       print("questionOutcome: ");
       print(message);
       print(userRole);
-      if (userRole == 1) {
-        outcomeHost = OutcomeHost(message);
+      if (userRole == GroupRole.OWNER) {
+        outcomeHost = OUTCOME.OutcomeHost(message);
         print(outcomeHost);
       } else {
-        outcomeUser = OutcomeUser(message);
+        outcomeUser = OUTCOME.OutcomeUser(message);
         print(outcomeUser);
       }
       // notifyListeners();
