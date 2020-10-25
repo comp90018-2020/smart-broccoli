@@ -5,8 +5,7 @@ import { GameSession } from "./session";
 import { formatQuestion, formatWelcome } from "./formatter";
 import { $socketIO } from "./index";
 import { GameErr, GameStatus, Player, Answer } from "./datatype";
-import Quiz from "../models/quiz";
-import { Question } from "models";
+import { Quiz, Question } from "../models";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
