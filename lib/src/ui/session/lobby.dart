@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 import 'package:smart_broccoli/theme.dart';
-
 import 'question.dart';
+import 'vertical_clip.dart';
 
 /// Widget for Lobby
 class QuizLobby extends StatefulWidget {
@@ -65,7 +64,7 @@ class _StartLobby extends State<QuizLobby> {
       background: [
         Container(
           child: ClipPath(
-            clipper: _BackgroundClipper(),
+            clipper: VerticalBackgroundClipper(),
             child: Container(
               color: Theme.of(context).colorScheme.background,
             ),
@@ -88,7 +87,7 @@ class _StartLobby extends State<QuizLobby> {
                 child: QuizCard(
                   // placeholder
                   Quiz.fromJson({'title': 'Quiz title', 'groupId': 1}),
-                  aspectRatio: 3,
+                  aspectRatio: 2.3,
                 ),
               ),
 
@@ -204,22 +203,5 @@ class _StartLobby extends State<QuizLobby> {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => QuizQuestion()),
     );
-  }
-}
-
-// Used to clip the background
-class _BackgroundClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    path.lineTo(0, size.height / 4);
-    path.lineTo(size.width, size.height / 4);
-    path.lineTo(size.width, 0);
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return true;
   }
 }
