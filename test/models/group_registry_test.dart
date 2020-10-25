@@ -107,9 +107,7 @@ main() async {
       ],
     );
 
-    model.refreshJoinedGroups(withMembers: true);
-    await untilCalled(api.getGroups(any));
-    await untilCalled(api.getMembers(any, 3));
+    await model.refreshJoinedGroups(withMembers: true);
     expect(model.joinedGroups, isA<List<Group>>());
     expect(model.joinedGroups.length, 1);
     expect(model.joinedGroups[0].members, isA<List<User>>());
