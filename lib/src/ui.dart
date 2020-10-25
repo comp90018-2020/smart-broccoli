@@ -8,6 +8,7 @@ export 'ui/group/group_main.dart';
 export 'ui/session/leaderboard.dart';
 export 'ui/session/lobby.dart';
 export 'ui/session/question.dart';
+export 'ui/session/start_quiz.dart';
 export 'ui/quiz/take_quiz.dart';
 export 'ui/quiz/manage_quiz.dart';
 export 'ui/quiz_creator/question_creator.dart';
