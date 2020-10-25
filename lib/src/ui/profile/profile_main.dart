@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'profile_registered.dart';
@@ -37,10 +40,12 @@ class _ProfileMainState extends State<ProfileMain> {
       ],
 
       // Render appropriate page
-      child: SingleChildScrollView(
-        // TODO: provider here
-        child:
-            !isRegistered ? ProfileJoined(_isEdit) : ProfileRegistered(_isEdit),
+      child: Consumer<UserProfileModel>(
+        builder: (context, profile, child) => SingleChildScrollView(
+          child: profile.user.type == UserType.UNREGISTERED
+              ? ProfileJoined(_isEdit)
+              : ProfileRegistered(_isEdit),
+        ),
       ),
     );
   }
