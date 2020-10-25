@@ -30,66 +30,68 @@ class _StartQuizState extends State<StartQuiz> {
       ],
 
       // Body
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8, left: 30, right: 30),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            // Quiz card
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              margin: EdgeInsets.only(bottom: 12),
-              child: QuizCard(
-                // placeholder
-                Quiz.fromJson({'title': 'Quiz title', 'groupId': 1}),
-                aspectRatio: 2.3,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8, left: 30, right: 30),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              // Quiz card
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                margin: EdgeInsets.only(bottom: 12),
+                child: QuizCard(
+                  // placeholder
+                  Quiz.fromJson({'title': 'Quiz title', 'groupId': 1}),
+                  aspectRatio: 2.3,
+                ),
               ),
-            ),
 
-            Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 14),
-              child: Center(
-                  child: Text(
-                "Choose how to take this quiz",
-                style: TextStyle(fontSize: 16),
-              )),
-            ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 14),
+                child: Center(
+                    child: Text(
+                  "Choose how to take this quiz",
+                  style: TextStyle(fontSize: 16),
+                )),
+              ),
 
-            // Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: RaisedButton(
-                    onPressed: () {},
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.people,
-                          size: 48,
-                        ),
-                        Text('With others'),
-                      ],
+              // Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: RaisedButton(
+                      onPressed: () {},
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.people,
+                            size: 48,
+                          ),
+                          Text('With others'),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: RaisedButton(
-                    onPressed: () {},
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.person,
-                          size: 48,
-                        ),
-                        Text('Solo'),
-                      ],
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: RaisedButton(
+                      onPressed: () {},
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.person,
+                            size: 48,
+                          ),
+                          Text('Solo'),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
