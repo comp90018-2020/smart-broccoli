@@ -11,6 +11,7 @@ class Routes {
   static const String sessionLobby = "/session/lobby";
   static const String sessionQuestion = "/session/question";
   static const String sessionLeaderboard = "/session/leaderboard";
+  static const String sessionStart = "/session/start";
   static const String about = "/about";
   static const String acknowledgements = "/about/acknowledgements";
   static const String group = "/group/:id";
@@ -114,6 +115,12 @@ class Routes {
     router.define(sessionLeaderboard, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return QuizLeaderboard();
+    }));
+
+    // Session start
+    router.define(sessionStart, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return StartQuiz();
     }));
 
     // Profile
