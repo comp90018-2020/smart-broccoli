@@ -1,13 +1,14 @@
 import 'user.dart';
 import 'record.dart';
 
-class Tuple {
+class UserOutcome {
   final User player;
   final Record record;
 
-  Tuple._internal(this.player, this.record);
+  UserOutcome._internal(this.player, this.record);
 
-  factory Tuple.fromJson(Map<String, dynamic> json) => Tuple._internal(
+  factory UserOutcome.fromJson(Map<String, dynamic> json) =>
+      UserOutcome._internal(
         User.fromJson(json['player']),
         Record.fromJson(json['record']),
       );
