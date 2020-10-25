@@ -25,6 +25,7 @@ class SmartBroccoliTheme {
   static final ThemeData themeData = ThemeData(
     backgroundColor: Color(0xFF4CAF50),
     primaryColor: Color(0xFF4CAF50),
+    primaryColorDark: Color(0xFF419644),
     accentColor: Colors.green,
     colorScheme: SmartBroccoliColourScheme(),
     buttonTheme: ButtonThemeData(
