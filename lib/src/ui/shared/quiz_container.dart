@@ -46,7 +46,6 @@ class _BuildQuiz extends State<QuizContainer> {
         child: Column(
           children: <Widget>[
             // Header widgets
-
             Padding(
               padding: widget.headerPadding,
               child: widget.header,

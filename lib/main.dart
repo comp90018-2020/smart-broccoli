@@ -4,12 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/models/user_repository.dart';
 import 'package:smart_broccoli/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   final KeyValueStore keyValueStore = await SharedPrefsKeyValueStore.create();
   final PictureStash picStash = await PictureStash.create();
   final AuthStateModel authStateModel = AuthStateModel(keyValueStore);
@@ -74,7 +72,7 @@ class _MyAppState extends State<MyApp> {
       onGenerateInitialRoutes: (route) {
         return [Routes.router.generator(RouteSettings(name: route))];
       },
-      initialRoute: state.inSession ? '/home' : '/auth', //"/take_quiz",
+      initialRoute: state.inSession ? '/group/home' : '/auth',
     );
   }
 }

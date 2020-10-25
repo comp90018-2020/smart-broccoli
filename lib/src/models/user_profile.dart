@@ -23,7 +23,6 @@ class UserProfileModel extends ChangeNotifier {
 
   /// Views subscribe to the fields below
   User _user;
-
   User get user => _user;
 
   /// Constructor for external use

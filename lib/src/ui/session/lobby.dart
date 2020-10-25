@@ -16,7 +16,6 @@ class QuizLobby extends StatefulWidget {
 class _StartLobby extends State<QuizLobby> {
   // Timer for countdown
   Timer _timer;
-
   // You should have a getter method here to get data from server
   int _start = 10;
 
@@ -174,7 +173,6 @@ class _StartLobby extends State<QuizLobby> {
   }
 
   final userList = ["A", "B", "C", "D", "E", "F", "G"];
-
   // Quiz users list
   Widget _quizUsers() {
     return ListView.separated(

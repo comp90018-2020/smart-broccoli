@@ -23,7 +23,6 @@ class QuizCollectionModel extends ChangeNotifier {
 
   /// Views subscribe to the fields below
   Quiz _selectedQuiz;
-
   Quiz get selectedQuiz => _selectedQuiz;
 
   Map<int, Quiz> _availableQuizzes = {};
@@ -31,11 +30,9 @@ class QuizCollectionModel extends ChangeNotifier {
 
   UnmodifiableListView<Quiz> get availableQuizzes =>
       UnmodifiableListView(_availableQuizzes.values);
-
   UnmodifiableListView<Quiz> get createdQuizzes =>
       UnmodifiableListView(_createdQuizzes.values);
   GameSession _currentSession;
-
   GameSession get currentSession => _currentSession;
 
   /// Constructor for external use
