@@ -87,6 +87,7 @@ class _QuizCreateState extends State<QuizCreate> {
           child: Text(
             'Save',
             style: TextStyle(color: Colors.white, fontSize: 16),
+
           ),
         ),
       ],
