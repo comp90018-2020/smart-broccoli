@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/models.dart';
 
 import 'profile_picture.dart';
 import 'table_items.dart';
@@ -21,6 +23,15 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
   final TextEditingController _passwordController = new TextEditingController();
   final TextEditingController _confirmPasswordController =
       new TextEditingController();
+
+  @override
+  void initState() {
+    _nameController.text =
+        Provider.of<UserProfileModel>(context, listen: false).user?.name;
+    _emailController.text =
+        Provider.of<UserProfileModel>(context, listen: false).user?.email;
+    super.initState();
+  }
 
   @override
   void dispose() {

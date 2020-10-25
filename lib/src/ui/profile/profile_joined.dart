@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models/user_profile.dart';
 
 import 'profile_picture.dart';
 import 'profile_promoting.dart';
@@ -17,6 +20,14 @@ class ProfileJoined extends StatefulWidget {
 
 class _ProfileJoinedState extends State<ProfileJoined> {
   final TextEditingController _nameController = new TextEditingController();
+
+  @override
+  void initState() {
+    final User user =
+        Provider.of<UserProfileModel>(context, listen: false).user;
+    _nameController.text = user == null || user.isAnonymous ? "" : user.name;
+    super.initState();
+  }
 
   @override
   void dispose() {

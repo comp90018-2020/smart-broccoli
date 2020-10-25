@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/models.dart';
 
 /// Table used by profile pages
 class TableCard extends Material {
@@ -29,10 +31,11 @@ class NameTableRow extends TableRow {
                     style: const TextStyle(color: Colors.black38)),
                 padding: const EdgeInsets.only(left: 16)),
             _paddedCell(
-              TextFormField(
-                readOnly: !isEdit,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: InputDecoration(
+              Consumer<UserProfileModel>(
+                builder: (context, profile, child) => TextFormField(
+                  readOnly: !isEdit,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
                     contentPadding: EdgeInsets.zero,
                     hintStyle: const TextStyle(color: Colors.black38),
                     suffixIcon: IconButton(
@@ -41,8 +44,12 @@ class NameTableRow extends TableRow {
                     ),
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    hintText: 'John Smith'),
-                controller: _nameController,
+                    hintText: profile.user != null && profile.user.isAnonymous
+                        ? "(anonymous)"
+                        : null,
+                  ),
+                  controller: _nameController,
+                ),
               ),
               padding: const EdgeInsets.only(left: 16),
             ),
@@ -52,7 +59,7 @@ class NameTableRow extends TableRow {
 
 /// Email row
 class EmailTableRow extends TableRow {
-  EmailTableRow(bool isEdit, TextEditingController _nameController)
+  EmailTableRow(bool isEdit, TextEditingController _emailController)
       : super(
           children: [
             _paddedCell(
@@ -63,17 +70,17 @@ class EmailTableRow extends TableRow {
                 textAlignVertical: TextAlignVertical.center,
                 readOnly: !isEdit,
                 decoration: InputDecoration(
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: const TextStyle(color: Colors.black38),
-                    border: InputBorder.none,
-                    suffixIcon: IconButton(
-                      icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
-                      onPressed: () {},
-                    ),
-                    // A space
-                    focusedBorder: InputBorder.none,
-                    hintText: 'name@example.com'),
-                controller: _nameController,
+                  contentPadding: EdgeInsets.zero,
+                  hintStyle: const TextStyle(color: Colors.black38),
+                  border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
+                    onPressed: () {},
+                  ),
+                  // A space
+                  focusedBorder: InputBorder.none,
+                ),
+                controller: _emailController,
               ),
               padding: const EdgeInsets.only(left: 16),
             ),
