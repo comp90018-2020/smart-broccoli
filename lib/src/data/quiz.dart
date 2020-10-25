@@ -112,7 +112,7 @@ abstract class Question {
   String text;
   int pictureId;
 
-  Question(this.id, this.no, this.text, this.pictureId);
+  Question({this.id, this.no, this.text, this.pictureId});
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -134,11 +134,11 @@ class TFQuestion extends Question {
 
   /// Constructor for use when user creates a new true/false question
   TFQuestion(String text, this.answer, {int pictureId})
-      : super(null, null, text, pictureId);
+      : super(text: text, pictureId: pictureId);
 
   /// Constructor for internal use only
   TFQuestion._internal(int id, int no, String text, int pictureId, this.answer)
-      : super(id, no, text, pictureId);
+      : super(id: id, no: no, text: text, pictureId: pictureId);
 
   factory TFQuestion.fromJson(Map<String, dynamic> json) =>
       TFQuestion._internal(
@@ -162,12 +162,12 @@ class MCQuestion extends Question {
 
   /// Constructor for use when user creates a new multiple choice question
   MCQuestion(String text, this.options, {int pictureId})
-      : super(null, null, text, pictureId);
+      : super(text: text, pictureId: pictureId);
 
   /// Constructor for internal use only
   MCQuestion._internal(int id, int no, String text, int pictureId,
       {this.options})
-      : super(id, no, text, pictureId);
+      : super(id: id, no: no, text: text, pictureId: pictureId);
 
   factory MCQuestion.fromJson(Map<String, dynamic> json) =>
       MCQuestion._internal(
