@@ -34,13 +34,7 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Column(
             children: <Widget>[
               // Title (logo/application name)
-              LogoContainer(
-                child: Center(
-                    // child: Image(
-                    //     image:
-                    //         AssetImage('assets/images/Logo_Placeholder.png')),
-                    ),
-              ),
+              LogoContainer(),
 
               // Tabs
               TabHolder(

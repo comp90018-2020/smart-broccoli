@@ -86,7 +86,7 @@ class SmartBroccoliTheme {
 
 /// Widget to hold the app logo on auth screen
 class LogoContainer extends Container {
-  LogoContainer({@required Widget child})
+  LogoContainer()
       : super(
           height: 250,
           color: SmartBroccoliColourScheme.logoContainerBackground,
