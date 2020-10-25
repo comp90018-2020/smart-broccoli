@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/data/quiz.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 
