@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 
@@ -135,7 +136,11 @@ class CustomPage extends StatelessWidget {
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyText1),
-                                    Text(profile.user?.email ?? "",
+                                    Text(
+                                        profile.user?.type ==
+                                                UserType.UNREGISTERED
+                                            ? "Unregistered"
+                                            : profile.user?.email,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyText2),
