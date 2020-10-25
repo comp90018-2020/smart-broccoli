@@ -1,6 +1,6 @@
 import 'dart:collection';
-import 'package:flutter/widgets.dart';
 
+import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/remote.dart';
@@ -63,9 +63,8 @@ class GroupRegistryModel extends ChangeNotifier {
     _createdGroups[group.id].members =
         await _userRepo.getMembersOf(_authStateModel.token, group.id);
     // If the member list is empty TODO verify if this is allowed
-    if(_createdGroups[group.id].members == null){
+    if (_createdGroups[group.id].members == null) {
       _createdGroups[group.id].members = [];
-
     }
     notifyListeners();
   }
