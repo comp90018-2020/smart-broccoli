@@ -110,12 +110,17 @@ abstract class Question {
   final int no;
 
   String text;
-  int imgId;
+  int pictureId;
 
-  Question(this.id, this.no, this.text, this.imgId);
+  Question(this.id, this.no, this.text, this.pictureId);
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{'id': id, 'no': no, 'text': text, 'imgId': imgId};
+    return <String, dynamic>{
+      'id': id,
+      'no': no,
+      'text': text,
+      'pictureId': pictureId
+    };
   }
 }
 
@@ -128,16 +133,16 @@ class TFQuestion extends Question {
   bool answer;
 
   /// Constructor for use when user creates a new true/false question
-  TFQuestion(String text, this.answer, {int imgId})
-      : super(null, null, text, imgId);
+  TFQuestion(String text, this.answer, {int pictureId})
+      : super(null, null, text, pictureId);
 
   /// Constructor for internal use only
-  TFQuestion._internal(int id, int no, String text, int imgId, this.answer)
-      : super(id, no, text, imgId);
+  TFQuestion._internal(int id, int no, String text, int pictureId, this.answer)
+      : super(id, no, text, pictureId);
 
   factory TFQuestion.fromJson(Map<String, dynamic> json) =>
       TFQuestion._internal(
-          json['id'], json['no'], json['text'], json['imgid'], json['tf']);
+          json['id'], json['no'], json['text'], json['pictureId'], json['tf']);
 
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
@@ -156,15 +161,17 @@ class MCQuestion extends Question {
   List<QuestionOption> options;
 
   /// Constructor for use when user creates a new multiple choice question
-  MCQuestion(String text, this.options, {int imgId})
-      : super(null, null, text, imgId);
+  MCQuestion(String text, this.options, {int pictureId})
+      : super(null, null, text, pictureId);
 
   /// Constructor for internal use only
-  MCQuestion._internal(int id, int no, String text, int imgId, {this.options})
-      : super(id, no, text, imgId);
+  MCQuestion._internal(int id, int no, String text, int pictureId,
+      {this.options})
+      : super(id, no, text, pictureId);
 
   factory MCQuestion.fromJson(Map<String, dynamic> json) =>
-      MCQuestion._internal(json['id'], json['no'], json['text'], json['imgid'],
+      MCQuestion._internal(
+          json['id'], json['no'], json['text'], json['pictureId'],
           options: (json['options'] as List)
               .map((option) => QuestionOption.fromJson(option))
               .toList());
