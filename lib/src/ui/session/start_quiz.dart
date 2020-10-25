@@ -46,21 +46,49 @@ class _StartQuizState extends State<StartQuiz> {
               ),
             ),
 
-            // Buttons
             Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: RaisedButton(
-                onPressed: () {},
-                child: Text('Take quiz with others'),
-              ),
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Center(
+                  child: Text(
+                "Choose how to take this quiz",
+                style: TextStyle(fontSize: 16),
+              )),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: RaisedButton(
-                onPressed: () {},
-                child: Text('Take alone'),
-              ),
-            )
+
+            // Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: RaisedButton(
+                    onPressed: () {},
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.people,
+                          size: 48,
+                        ),
+                        Text('With others'),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: RaisedButton(
+                    onPressed: () {},
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.person,
+                          size: 48,
+                        ),
+                        Text('Solo'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
