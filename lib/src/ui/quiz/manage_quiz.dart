@@ -111,6 +111,7 @@ class _ManageQuizState extends State<ManageQuiz> {
 
   List<DropdownMenuItem> buildDropDownMenu() {
     List<DropdownMenuItem> res = [];
+
     /// Defensive programming to avoid an error in an event of there being no
     /// groups
     if (group.length == 0) {
