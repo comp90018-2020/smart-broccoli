@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/theme.dart';
 
 /// A page extending scaffold
 /// Supports tabs, drawer
@@ -58,7 +59,8 @@ class CustomPage extends StatelessWidget {
     );
 
     // refresh profile to show in drawer
-    if (hasDrawer) Provider.of<UserProfileModel>(context).refreshUser();
+    if (hasDrawer)
+      Provider.of<UserProfileModel>(context, listen: false).refreshUser();
 
     return Scaffold(
       backgroundColor: this.secondaryBackgroundColour
@@ -110,12 +112,14 @@ class CustomPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           // User picture
-                          Container(
-                            decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(100)),
-                            width: 50,
-                            height: 50,
+                          Consumer<UserProfileModel>(
+                            builder: (context, profile, child) =>
+                                profile.user.picture == null
+                                    ? UserAvatar.placeholder(maxRadius: 30)
+                                    : UserAvatar(
+                                        profile.user.picture,
+                                        maxRadius: 30,
+                                      ),
                           ),
                           // Name/email
                           Expanded(

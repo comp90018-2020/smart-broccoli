@@ -208,14 +208,14 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
 }
 
 class UserAvatar extends CircleAvatar {
-  UserAvatar(Uint8List image)
+  UserAvatar(Uint8List image, {double maxRadius: 20})
       : super(
           backgroundImage: MemoryImage(image),
-          maxRadius: 20,
+          maxRadius: maxRadius,
         );
-  UserAvatar.placeholder()
+  UserAvatar.placeholder({double maxRadius: 20})
       : super(
           backgroundColor: Colors.black12,
-          maxRadius: 20,
+          maxRadius: maxRadius,
         );
 }
