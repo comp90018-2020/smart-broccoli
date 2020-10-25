@@ -47,7 +47,7 @@ class _StartQuizState extends State<StartQuiz> {
             ),
 
             Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(top: 8, bottom: 14),
               child: Center(
                   child: Text(
                 "Choose how to take this quiz",
