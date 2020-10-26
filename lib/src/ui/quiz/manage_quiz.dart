@@ -23,50 +23,59 @@ class _ManageQuizState extends State<ManageQuiz> {
   @override
   Widget build(BuildContext context) {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
-    return Consumer2<QuizCollectionModel, GroupRegistryModel>(
-      builder: (context, collection, registry, child) {
-        return CustomTabbedPage(
-          title: "Manage Quiz",
-          tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-          tabViews: [
-            // All quizzes
-            QuizContainer(
-                (registry.createdGroups != 0)
-                    ? collection.getQuizzesWhere(
-                        groupId: registry.createdGroups[gid].id)
-                    : [],
-                header: _groupSelector(registry.createdGroups),
-                hiddenButton: true),
+    return CustomTabbedPage(
+      title: "Manage Quiz",
+      tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
+      tabViews: [
+        Consumer2<QuizCollectionModel, GroupRegistryModel>(
+            builder: (context, collection, registry, child) {
+          // All quizzes
+          return QuizContainer(
+              (registry.createdGroups != 0)
+                  ? collection.getQuizzesWhere(
+                      groupId: registry.createdGroups[gid].id)
+                  : [],
+              header: _groupSelector(registry.createdGroups),
+              hiddenButton: true);
+        }),
 
-            // Live quiz
-            QuizContainer(
-                (registry.createdGroups.length != 0)
-                    ? collection.getQuizzesWhere(
-                        groupId: registry.createdGroups[gid].id,
-                        type: QuizType.LIVE)
-                    : [],
-                header: _groupSelector(registry.createdGroups),
-                hiddenButton: true),
+        // Live quiz
+        Consumer2<QuizCollectionModel, GroupRegistryModel>(
+            builder: (context, collection, registry, child) {
+          // All quizzes
+          return QuizContainer(
+              (registry.createdGroups.length != 0)
+                  ? collection.getQuizzesWhere(
+                      groupId: registry.createdGroups[gid].id,
+                      type: QuizType.LIVE)
+                  : [],
+              header: _groupSelector(registry.createdGroups),
+              hiddenButton: true);
+        }),
 
-            /// Self-paced quiz
-            QuizContainer(
-                (registry.createdGroups != 0)
-                    ? collection.getQuizzesWhere(
-                        groupId: registry.createdGroups[gid].id,
-                        type: QuizType.SELF_PACED)
-                    : [],
-                header: _groupSelector(registry.createdGroups),
-                hiddenButton: true),
-          ],
-          hasDrawer: true,
-          secondaryBackgroundColour: true,
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {},
-            label: Text('CREATE QUIZ'),
-            icon: Icon(Icons.add),
-          ),
-        );
-      },
+        Consumer2<QuizCollectionModel, GroupRegistryModel>(
+          builder: (context, collection, registry, child) {
+            return
+
+                /// Self-paced quiz
+                QuizContainer(
+                    (registry.createdGroups != 0)
+                        ? collection.getQuizzesWhere(
+                            groupId: registry.createdGroups[gid].id,
+                            type: QuizType.SELF_PACED)
+                        : [],
+                    header: _groupSelector(registry.createdGroups),
+                    hiddenButton: true);
+          },
+        ),
+      ],
+      hasDrawer: true,
+      secondaryBackgroundColour: true,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {},
+        label: Text('CREATE QUIZ'),
+        icon: Icon(Icons.add),
+      ),
     );
   }
 

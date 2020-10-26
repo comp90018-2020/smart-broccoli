@@ -40,23 +40,30 @@ class _TakeQuizState extends State<TakeQuiz> {
 
   @override
   Widget build(BuildContext context) {
-    // Somewhat wasteful to have multiple widgets, but that's how tabs work
-    return Consumer<QuizCollectionModel>(
-      builder: (context, collection, child) {
-        return CustomTabbedPage(
-          title: "Take Quiz",
-          tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-          tabViews: [
-            // All quizzes
-            QuizContainer(collection.getQuizzesWhere(),
-                header: QuizPinBox(key: _buildQuizKey)),
+    return CustomTabbedPage(
+      title: "Take Quiz",
+      tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
+      tabViews: [
+        // All quizzes
+        // Somewhat wasteful to have multiple widgets, but that's how tabs work
+        Consumer<QuizCollectionModel>(
+            builder: (context, collection, child) {
+              return QuizContainer(collection.getQuizzesWhere(),
+                  header: QuizPinBox(key: _buildQuizKey));
+            }),
 
-            // Live quiz
-            QuizContainer(collection.getQuizzesWhere(type: QuizType.LIVE),
-                header: QuizPinBox()),
+        // Live quiz
+        Consumer<QuizCollectionModel>(
+          builder: (context, collection, child) {
+            return QuizContainer(
+                collection.getQuizzesWhere(type: QuizType.LIVE),
+                header: QuizPinBox());
+          },),
 
-            /// Self-paced quiz has Text to fill the vertical space
-            QuizContainer(
+        /// Self-paced quiz has Text to fill the vertical space
+        Consumer<QuizCollectionModel>(
+          builder: (context, collection, child) {
+            return QuizContainer(
               collection.getQuizzesWhere(type: QuizType.SELF_PACED),
               header: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: _height ?? 175),
@@ -67,12 +74,12 @@ class _TakeQuizState extends State<TakeQuiz> {
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white),
                       ))),
-            )
-          ],
-          hasDrawer: true,
-          secondaryBackgroundColour: true,
-        );
-      },
+            );
+          },),
+      ],
+      hasDrawer: true,
+      secondaryBackgroundColour: true,
     );
   }
+
 }
