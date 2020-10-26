@@ -107,10 +107,10 @@ class UserApi {
         'PUT', Uri.parse('$USER_URL/profile/picture'))
       ..headers.addAll(
           ApiBase.headers(contentType: 'multipart/form-data', authToken: token))
-      ..files.add(http.MultipartFile.fromBytes('avatar', bytes));
+      ..files.add(
+          http.MultipartFile.fromBytes('avatar', bytes, filename: 'avatar'));
 
     final http.StreamedResponse response = await request.send();
-
     if (response.statusCode == 200) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
