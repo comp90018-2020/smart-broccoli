@@ -38,6 +38,7 @@ export interface QuizAttributes {
     description?: string;
     groupId: number;
     type: string;
+    isGroup?: boolean;
     active: boolean;
     pictureId?: number;
     timeLimit?: number;
@@ -55,6 +56,7 @@ export default class Quiz
     public readonly id!: number;
     public groupId: number;
     public type: string;
+    public isGroup?: boolean;
     public active: boolean;
     public timeLimit?: number;
     public pictureId?: number;

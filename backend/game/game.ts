@@ -3,8 +3,8 @@ import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { getUserSessionProfile } from "../controllers/user";
 import { GameSession } from "./session";
 import { formatQuestion, formatWelcome } from "./formatter";
-import { $socketIO } from "./index";
-import { Role, Res, GameStatus, Player, Answer } from "./datatype";
+import { socketIO_ } from "./index";
+import { Role, Res, GameStatus, Player, Answer, QuizType } from "./datatype";
 import { Quiz, Question } from "../models";
 import { endSession } from "../controllers/session";
 import { QuizAttributes } from "models/quiz";
@@ -36,6 +36,7 @@ export class GameHandler {
                 active: true,
                 description: "Test Quiz",
                 type: "live",
+                isGroup: false,
                 timeLimit: 20,
                 groupId: 2,
                 pictureId: null,
@@ -80,6 +81,7 @@ export class GameHandler {
                     },
                 ],
             };
+
             this.sessions[sessionId] = new GameSession(
                 quiz,
                 sessionId,
@@ -97,12 +99,21 @@ export class GameHandler {
     ) {
         // @ts-ignore
         const quizJSON: QuizAttributes = quiz.toJSON();
-        this.sessions[sessionId] = new GameSession(
+        const newSession = new GameSession(
             quizJSON,
             sessionId,
             quizType,
             isGroup
         );
+
+        if (newSession.type === QuizType.SelfPaced_Group) {
+            this.start(null, newSession, null);
+        } else if (newSession.type === QuizType.Live_Group) {
+            // haha we dont have it!
+            return false;
+        }
+
+        this.sessions[sessionId] = newSession;
         return true;
     }
 
@@ -110,7 +121,12 @@ export class GameHandler {
      *  Verify socket connection using jwt token
      * @param socket socket
      */
-    async verifySocket(socket: Socket): Promise<Player> {
+    async createPlayer(
+        socket: Socket,
+        userId: number,
+        sessionId: number,
+        role: string
+    ): Promise<Player> {
         if (process.env.SOCKET_MODE === "debug") {
             const userId = Number(socket.handshake.query.userId);
             const player = new Player(
@@ -123,22 +139,23 @@ export class GameHandler {
             );
             return player;
         } else {
-            const plain = await decrypt(socket.handshake.query.token);
             const player = await this.getUserInfo(
-                plain.userId,
+                userId,
                 socket.id,
-                plain.sessionId,
-                plain.role
+                sessionId,
+                role
             );
             return player;
         }
     }
 
-    async answer(socket: Socket, content: any) {
+    async answer(
+        socket: Socket,
+        content: any,
+        session: GameSession,
+        player: Player
+    ) {
         try {
-            const player: Player = await this.verifySocket(socket);
-            const session = this.sessions[player.sessionId];
-
             // create answer from emit
             const answer: Answer = new Answer(
                 content.question,
@@ -185,11 +202,8 @@ export class GameHandler {
         }
     }
 
-    async welcome(socket: Socket) {
+    async welcome(socket: Socket, session: GameSession, player: Player) {
         try {
-            const player: Player = await this.verifySocket(socket);
-            const session = this.sessions[player.sessionId];
-
             if (
                 player.role !== Role.host &&
                 !session.playerMap.hasOwnProperty(player.id)
@@ -246,7 +260,12 @@ export class GameHandler {
                     const correctAnswer = session.getAnsOfQuestion(
                         session.questionIndex
                     );
-                    this.emitCorrectAnswer(session, player, correctAnswer);
+                    this.emitCorrectAnswer(
+                        socket,
+                        session,
+                        player,
+                        correctAnswer
+                    );
                 }
             } else {
                 // otherwise ignore
@@ -261,17 +280,14 @@ export class GameHandler {
         if (
             pastPlayer != null &&
             pastPlayer.socketId != player.socketId &&
-            $socketIO.sockets.connected.hasOwnProperty(pastPlayer.socketId)
+            socketIO_.sockets.connected.hasOwnProperty(pastPlayer.socketId)
         ) {
-            $socketIO.sockets.connected[pastPlayer.socketId].disconnect();
+            socketIO_.sockets.connected[pastPlayer.socketId].disconnect();
         }
     }
 
-    async quit(socket: Socket) {
+    async quit(socket: Socket, session: GameSession, player: Player) {
         try {
-            const player: Player = await this.verifySocket(socket);
-            const session = this.sessions[player.sessionId];
-
             // remove this participants from session in memory
             delete session.playerMap[player.id];
             // leave from socket room
@@ -288,11 +304,33 @@ export class GameHandler {
         }
     }
 
-    async start(socket: Socket) {
+    startWithoutHost(session: GameSession) {
         try {
-            const player: Player = await this.verifySocket(socket);
-            const session = this.sessions[player.sessionId];
+            // set game status to starting
+            session.status = GameStatus.Starting;
+            // set the start time
+            session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
+            setTimeout(
+                () => {
+                    // after time out
+                    session.status = GameStatus.Running;
+                    session.setToNextQuestion();
+                    // release the firt question
+                    this.nextWithoutHost();
+                },
+                process.env.SOCKET_MODE === "debug"
+                    ? 1
+                    : session.quizStartsAt - Date.now()
+            );
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
+    nextWithoutHost() {}
+
+    async start(socket: Socket, session: GameSession, player: Player) {
+        try {
             if (
                 // if is host
                 player.role === Role.host &&
@@ -304,7 +342,7 @@ export class GameHandler {
                 // set the start time
                 session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
                 // Broadcast that quiz will be started
-                $socketIO
+                socketIO_
                     .to(player.sessionId.toString())
                     .emit(
                         "starting",
@@ -316,7 +354,7 @@ export class GameHandler {
                         session.status = GameStatus.Running;
                         session.setToNextQuestion();
                         // release the firt question
-                        this.next(socket);
+                        this.next(socket, session, player);
                     },
                     process.env.SOCKET_MODE === "debug"
                         ? 1
@@ -330,14 +368,11 @@ export class GameHandler {
         }
     }
 
-    async abort(socket: Socket) {
+    async abort(socket: Socket, session: GameSession, player: Player) {
         try {
-            const player: Player = await this.verifySocket(socket);
-            const session = this.sessions[player.sessionId];
-
             if (player.role === Role.host) {
                 // Broadcast that quiz has been aborted
-                $socketIO
+                socketIO_
                     .to(player.sessionId.toString())
                     .emit("cancelled", null);
 
@@ -354,19 +389,16 @@ export class GameHandler {
 
     endSession(session: GameSession) {
         for (const socketId of Object.keys(
-            $socketIO.sockets.adapter.rooms[session.id.toString()].sockets
+            socketIO_.sockets.adapter.rooms[session.id.toString()].sockets
         )) {
             // loop over socket in the room
             // and disconnect them
-            $socketIO.sockets.connected[socketId].disconnect();
+            socketIO_.sockets.connected[socketId].disconnect();
         }
     }
 
-    async next(socket: Socket) {
+    async next(socket: Socket, session: GameSession, player: Player) {
         try {
-            const player: Player = await this.verifySocket(socket);
-            const session = this.sessions[player.sessionId];
-
             if (
                 player.role === Role.host &&
                 session.status === GameStatus.Running
@@ -423,11 +455,12 @@ export class GameHandler {
     }
 
     emitCorrectAnswer(
+        socket: Socket,
         session: GameSession,
         player: Player,
         correctAnswer: Answer
     ) {
-        $socketIO.sockets.connected[player.socketId].emit("correctAnswer", {
+        socket.emit("correctAnswer", {
             answer: correctAnswer,
             record: player.formatRecord().record,
         });
@@ -440,17 +473,15 @@ export class GameHandler {
     ) {
         for (const player of Object.values(session.playerMap)) {
             this.emitCorrectAnswer(
+                socket,
                 session,
                 player,
                 session.getAnsOfQuestion(questoinIndex)
             );
         }
     }
-    async showBoard(socket: Socket) {
+    async showBoard(socket: Socket, session: GameSession, player: Player) {
         try {
-            const player: Player = await this.verifySocket(socket);
-            const session = this.sessions[player.sessionId];
-
             if (
                 player.role === Role.host &&
                 session.questionIndex !== session.nextQuestionIndex
@@ -475,7 +506,7 @@ export class GameHandler {
                         playerAhead: playerAheadRecord,
                     };
                     // emit questionOutcome to participants
-                    $socketIO
+                    socketIO_
                         .to(socketId)
                         .emit("questionOutcome", questionOutcome);
                 }
@@ -499,7 +530,15 @@ export class GameHandler {
         role?: string
     ): Promise<Player> {
         if (userCache.hasOwnProperty(userId)) {
-            return userCache[userId];
+            const { name, pictureId, socketId, role } = userCache[userId];
+            return new Player(
+                userId,
+                name,
+                pictureId,
+                socketId,
+                sessionId,
+                role
+            );
         } else {
             const { name, pictureId } = await getUserSessionProfile(userId);
             const player = new Player(

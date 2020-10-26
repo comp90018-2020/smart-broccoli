@@ -17,10 +17,10 @@ export enum GameStatus {
 }
 
 export enum QuizType {
-    SelfPaced_Group,
-    SelfPaced_NotGroup,
-    Live_Group,
-    Live_NotGroup,
+    SelfPaced_Group = "Self-Paced Group",
+    SelfPaced_NotGroup = "Self-Paced Not Group",
+    Live_Group = "Live Group",
+    Live_NotGroup = "Live Not Group",
 }
 
 export class Player {
