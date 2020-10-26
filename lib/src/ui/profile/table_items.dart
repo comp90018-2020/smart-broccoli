@@ -24,7 +24,7 @@ class TableCard extends Material {
 /// Name row
 class NameTableRow extends TableRow {
   NameTableRow(bool isEdit, TextEditingController _nameController,
-      {void Function(String) onFieldSubmitted})
+      {TextInputAction textInputAction, void Function(String) onFieldSubmitted})
       : super(
           children: [
             _paddedCell(
@@ -50,6 +50,7 @@ class NameTableRow extends TableRow {
                         : null,
                   ),
                   controller: _nameController,
+                  textInputAction: textInputAction,
                   onFieldSubmitted: onFieldSubmitted,
                 ),
               ),
@@ -62,7 +63,7 @@ class NameTableRow extends TableRow {
 /// Email row
 class EmailTableRow extends TableRow {
   EmailTableRow(bool isEdit, TextEditingController _emailController,
-      {void Function(String) onFieldSubmitted})
+      {TextInputAction textInputAction, void Function(String) onFieldSubmitted})
       : super(
           children: [
             _paddedCell(
@@ -84,6 +85,7 @@ class EmailTableRow extends TableRow {
                   focusedBorder: InputBorder.none,
                 ),
                 controller: _emailController,
+                textInputAction: textInputAction,
                 onFieldSubmitted: onFieldSubmitted,
               ),
               padding: const EdgeInsets.only(left: 16),
@@ -95,7 +97,7 @@ class EmailTableRow extends TableRow {
 /// Password row
 class PasswordTableRow extends TableRow {
   PasswordTableRow(bool isEdit, TextEditingController _passwordController,
-      {void Function(String) onFieldSubmitted})
+      {TextInputAction textInputAction, void Function(String) onFieldSubmitted})
       : super(
           children: [
             _paddedCell(
@@ -116,6 +118,7 @@ class PasswordTableRow extends TableRow {
                     focusedBorder: InputBorder.none,
                     hintText: 'Password'),
                 controller: _passwordController,
+                textInputAction: textInputAction,
                 onFieldSubmitted: onFieldSubmitted,
               ),
               padding: const EdgeInsets.only(left: 16),
@@ -128,7 +131,7 @@ class PasswordTableRow extends TableRow {
 class PasswordConfirmTableRow extends TableRow {
   PasswordConfirmTableRow(
       bool isEdit, TextEditingController _passwordController,
-      {void Function(String) onFieldSubmitted})
+      {TextInputAction textInputAction, void Function(String) onFieldSubmitted})
       : super(
           children: [
             _paddedCell(
@@ -151,6 +154,7 @@ class PasswordConfirmTableRow extends TableRow {
                     focusedBorder: InputBorder.none,
                     hintText: 'Confirm password'),
                 controller: _passwordController,
+                textInputAction: textInputAction,
                 onFieldSubmitted: onFieldSubmitted,
               ),
               padding: const EdgeInsets.only(left: 16),
