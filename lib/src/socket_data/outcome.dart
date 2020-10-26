@@ -7,7 +7,7 @@ class Outcome {
   Outcome._internal(this.question, this.leaderboard);
   factory Outcome.fromJson(Map<String, dynamic> json) => Outcome._internal(
         json['question'],
-        (json['leaderboard'] as List).map((e) => UserRank.fromJson(e)),
+        (json['leaderboard'] as List).map((e) => UserRank.fromJson(e)).toList(),
       );
 }
 
@@ -20,7 +20,9 @@ class OutcomeUser extends Outcome {
   factory OutcomeUser.fromJson(Map<String, dynamic> json) =>
       OutcomeUser._internal(
           json['question'],
-          json['leaderboard'].map((e) => UserRank.fromJson(e)),
+          (json['leaderboard'] as List)
+              .map((e) => UserRank.fromJson(e))
+              .toList(),
           Record.fromJson(json['record']),
           json['playerAhead'] ?? UserRank.fromJson(json['playerAhead']));
 }
