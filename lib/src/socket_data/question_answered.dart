@@ -7,8 +7,8 @@ class QuestionAnswered {
 
   factory QuestionAnswered.fromJson(Map<String, dynamic> json) =>
       QuestionAnswered._internal(
-    json['question'],
-    json['count'],
-    json['total'],
-  );
+        json['question'],
+        json['count'],
+        json['total'],
+      );
 }
