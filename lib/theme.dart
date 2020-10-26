@@ -121,7 +121,7 @@ class TabHolder extends StatelessWidget {
   /// List of tabs
   final List<Tab> tabs;
 
-  /// Horizontal width factor (relative ot parent)
+  /// Horizontal width factor (relative to parent)
   final double widthFactor;
 
   /// Margin
