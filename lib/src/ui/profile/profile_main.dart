@@ -66,6 +66,9 @@ class _ProfileMainState extends State<ProfileMain> {
                 _showSuccessDialogue();
               } catch (_) {
                 showErrorDialog(context, "Cannot update profile");
+              } finally {
+                _passwordController.clear();
+                _confirmPasswordController.clear();
               }
             }
             setState(() {
