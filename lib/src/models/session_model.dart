@@ -73,11 +73,11 @@ class GameSessionModel {
       role = message['role'];
 
       //need to check
-      if( 'pending' == message['state'] )
+      if ('pending' == message['state'])
         state = SessionState.PENDING;
-      else if( 'starting' == message['state'] )
+      else if ('starting' == message['state'])
         state = SessionState.STARTING;
-      else if( 'running' == message['state'] )
+      else if ('running' == message['state'])
         state = SessionState.QUESTION;
       else
         state = SessionState.ABORTED;
