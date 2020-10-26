@@ -7,6 +7,7 @@ import { $socketIO } from "./index";
 import { Role, Res, GameStatus, Player, Answer } from "./datatype";
 import { Quiz, Question } from "../models";
 import { endSession } from "../controllers/session";
+import { QuizAttributes } from "models/quiz";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
@@ -29,7 +30,7 @@ export class GameHandler {
             if (this.sessions.hasOwnProperty(sessionId)) {
                 delete this.sessions[sessionId];
             }
-            const quiz = new Quiz({
+            const quiz: QuizAttributes = {
                 id: 19,
                 title: "Fruits Master",
                 active: true,
@@ -39,7 +40,7 @@ export class GameHandler {
                 groupId: 2,
                 pictureId: null,
                 questions: [
-                    new Question({
+                    {
                         id: 32,
                         text: "Is potato fruit?",
                         type: "truefalse",
@@ -48,8 +49,8 @@ export class GameHandler {
                         quizId: 19,
                         pictureId: null,
                         numCorrect: 1,
-                    }),
-                    new Question({
+                    },
+                    {
                         id: 33,
                         text: "A, B, C, D?",
                         type: "choice",
@@ -62,8 +63,8 @@ export class GameHandler {
                             { correct: false, text: "D" },
                         ],
                         numCorrect: 1,
-                    }),
-                    new Question({
+                    },
+                    {
                         id: 34,
                         text: "Which one is fruit?",
                         type: "choice",
@@ -76,15 +77,18 @@ export class GameHandler {
                             { text: "cola", correct: false },
                         ],
                         numCorrect: 2,
-                    }),
+                    },
                 ],
-            });
+            };
+            console.log(quiz);
             this.sessions[sessionId] = new GameSession(quiz, sessionId);
         }
     }
 
     addSession(quiz: Quiz, sessionId: number) {
-        this.sessions[sessionId] = new GameSession(quiz, sessionId);
+        // @ts-ignore
+        const quizJSON: QuizAttributes = quiz.toJSON();
+        this.sessions[sessionId] = new GameSession(quizJSON, sessionId);
         return true;
     }
 

@@ -13,7 +13,7 @@ export const formatQuestion = (
     isHost: boolean
 ) => {
     // deep copy
-    const questionCopy: any = session.quiz.questions[questionIndex].toJSON();
+    const questionCopy: any = session.quiz.questions[questionIndex];
     if (!isHost) {
         if (questionCopy.tf !== null) {
             questionCopy.tf = null;

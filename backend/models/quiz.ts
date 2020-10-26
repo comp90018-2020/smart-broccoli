@@ -1,5 +1,6 @@
-import { Picture, Question, Session } from "models";
 import Sequelize, { Optional } from "sequelize";
+import { Picture, Question, Session } from "models";
+import { QuestionAttributes } from "./question";
 
 const schema: Sequelize.ModelAttributes = {
     id: {
@@ -31,7 +32,7 @@ const schema: Sequelize.ModelAttributes = {
     },
 };
 
-interface QuizAttributes {
+export interface QuizAttributes {
     id?: number;
     title?: string;
     description?: string;
@@ -40,7 +41,7 @@ interface QuizAttributes {
     active: boolean;
     pictureId?: number;
     timeLimit?: number;
-    questions?: Question[];
+    questions?: QuestionAttributes[];
 }
 interface QuizCreationAttributes
     extends Optional<QuizAttributes, "id" | "active"> {}

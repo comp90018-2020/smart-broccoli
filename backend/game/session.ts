@@ -1,12 +1,12 @@
 import { PointSystem } from "./points";
 import { Res, GameStatus, Player, Answer } from "./datatype";
-import Quiz from "../models/quiz";
+import { QuizAttributes } from "../models/quiz";
 
 export class GameSession {
     // session id from controller
     public sessionId: number;
     // quiz from database
-    public quiz: Quiz;
+    public quiz: QuizAttributes;
     // game status
     public status: GameStatus = GameStatus.Pending;
     // host info
@@ -20,7 +20,7 @@ export class GameSession {
     public isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
 
-    constructor($quiz: Quiz, $sessionId: number) {
+    constructor($quiz: QuizAttributes, $sessionId: number) {
         this.sessionId = $sessionId;
         this.quiz = $quiz;
     }

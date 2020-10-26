@@ -43,7 +43,7 @@ export interface OptionAttributes {
     text: string;
 }
 
-interface QuestionAttributes {
+export interface QuestionAttributes {
     id: number;
     quizId: number;
     text?: string;
