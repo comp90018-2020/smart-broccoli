@@ -10,24 +10,23 @@ class Question {
     this.no = json['no'];
     this.text = json['text'];
     this.pictureId = json['pictureId'];
+
     if (json['options'] == null) {
       this.options = null;
     } else {
-      this.options = questionMod(json);
+      this.options = parse(json);
     }
 
     this.tf = json['tf'];
     this.time = json['time'];
   }
 
-  List<Option> questionMod(Map<String, dynamic> json) {
+  List<Option> parse(Map<String, dynamic> json) {
     List<Option> options = [];
-    List tempOpt = (json['options'] as List);
-    for (var values in tempOpt) {
-      //Option temp = new Option.fromJson(values);
-      Option temp = Option.fromJson(values);
-      //temp.fromJson(values);
-      options.add(temp);
+    List opts = (json['options'] as List);
+    for (var values in opts) {
+      Option opt = Option.fromJson(values);
+      options.add(opt);
     }
 
     return options;

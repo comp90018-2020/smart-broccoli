@@ -1,11 +1,11 @@
 import 'user_outcome.dart';
 import 'record.dart';
 
-class OutcomeHost {
+class Outcome {
   int question;
   List<UserOutcome> leaderBoard;
 
-  OutcomeHost(Map<String, dynamic> json) {
+  Outcome(Map<String, dynamic> json) {
     this.question = json['question'];
     this.leaderBoard = parse(json);
   }
@@ -22,7 +22,7 @@ class OutcomeHost {
   }
 }
 
-class OutcomeUser extends OutcomeHost {
+class OutcomeUser extends Outcome {
   Record record;
   UserOutcome playerAhead;
 
