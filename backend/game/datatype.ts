@@ -16,6 +16,13 @@ export enum GameStatus {
     Ended = "ended",
 }
 
+export enum QuizType {
+    SelfPaced_Group,
+    SelfPaced_NotGroup,
+    Live_Group,
+    Live_NotGroup
+}
+
 export class Player {
     public record: { [key: string]: any } = {};
     public preRecord: { [key: string]: any } = {};
@@ -75,5 +82,5 @@ export class Answer {
         readonly questionNo: number,
         readonly MCSelection: number,
         readonly TFSelection: boolean
-    ) {}
+    ) { }
 }

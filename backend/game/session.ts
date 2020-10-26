@@ -1,10 +1,12 @@
 import { PointSystem } from "./points";
-import { Res, GameStatus, Player, Answer } from "./datatype";
+import { Res, GameStatus,QuizType,  Player, Answer } from "./datatype";
 import { QuizAttributes } from "../models/quiz";
+
 
 export class GameSession {
     // session id from controller
-    public sessionId: number;
+    public id: number;
+    public type : QuizType;
     // quiz from database
     public quiz: QuizAttributes;
     // game status
@@ -20,9 +22,23 @@ export class GameSession {
     public isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
 
-    constructor($quiz: QuizAttributes, $sessionId: number) {
-        this.sessionId = $sessionId;
+    constructor($quiz: QuizAttributes, $sessionId: number, sessionType: string, isGroup:boolean) {
+        this.id = $sessionId;
         this.quiz = $quiz;
+        if(isGroup){
+            // "live", "self paced"
+            if (sessionType === "live") {
+                this.type = QuizType.Live_Group;
+            } else {
+                this.type = QuizType.SelfPaced_Group;
+            }
+        }else{
+            if (sessionType === "live") {
+                this.type = QuizType.Live_NotGroup;
+            } else {
+                this.type = QuizType.SelfPaced_NotGroup;
+            }
+        }
     }
 
     getAnsOfQuestion(questionIndex: number): Answer {
@@ -43,7 +59,7 @@ export class GameSession {
     }
 
     nextQuestionIdx(): [Res, number] {
-        const {questions} = this.quiz;
+        const { questions } = this.quiz;
         if (this.nextQuestionIndex >= this.quiz.questions.length) {
             return [Res.NoMoreQuestion, -1];
         } else if (

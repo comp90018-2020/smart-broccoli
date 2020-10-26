@@ -79,16 +79,17 @@ export class GameHandler {
                         numCorrect: 2,
                     },
                 ],
+
             };
-            console.log(quiz);
-            this.sessions[sessionId] = new GameSession(quiz, sessionId);
+            this.sessions[sessionId] = new GameSession(quiz, sessionId, "live", false);
         }
     }
 
-    addSession(quiz: Quiz, sessionId: number) {
+    addSession(quiz: Quiz, sessionId: number, quizType: string, isGroup: boolean) {
+
         // @ts-ignore
         const quizJSON: QuizAttributes = quiz.toJSON();
-        this.sessions[sessionId] = new GameSession(quizJSON, sessionId);
+        this.sessions[sessionId] = new GameSession(quizJSON, sessionId, quizType, isGroup);
         return true;
     }
 
@@ -329,7 +330,7 @@ export class GameHandler {
 
     endSession(session: GameSession) {
         for (const socketId of Object.keys(
-            $socketIO.sockets.adapter.rooms[session.sessionId.toString()]
+            $socketIO.sockets.adapter.rooms[session.id.toString()]
                 .sockets
         )) {
             // loop over socket in the room
