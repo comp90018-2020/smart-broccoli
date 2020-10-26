@@ -63,8 +63,7 @@ class GameSessionModel {
       print('welcome');
       print(message);
       List users = message as List;
-      players = Map.fromIterable(
-          users.map((u) => SocketUser.User.fromJson(u)),
+      players = Map.fromIterable(users.map((u) => SocketUser.User.fromJson(u)),
           key: (u) => u.id);
       print(players);
 
@@ -127,10 +126,10 @@ class GameSessionModel {
       print(message);
       print(userRole);
       if (userRole == GroupRole.OWNER) {
-        outcome = Outcome(message);
+        outcome = Outcome.fromJson(message);
         print(outcome);
       } else {
-        outcome = OutcomeUser(message);
+        outcome = OutcomeUser.fromJson(message);
         print(outcome);
       }
       // notifyListeners();
