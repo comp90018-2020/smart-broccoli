@@ -4,7 +4,6 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
-
 import 'quiz_pin_box.dart';
 
 /// Take quiz page
@@ -19,8 +18,6 @@ class _TakeQuizState extends State<TakeQuiz> {
 
   // Height of pin box
   double _height;
-
-  // TODO: replace with provider inside build
 
   @override
   void initState() {
@@ -45,9 +42,8 @@ class _TakeQuizState extends State<TakeQuiz> {
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        // Somewhat wasteful to have multiple widgets, but that's how tabs work
         Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          return QuizContainer(collection.getQuizzesWhere(),
+          return QuizContainer(collection.getAvailableQuizzesWhere(),
               header: QuizPinBox(key: _buildQuizKey));
         }),
 
@@ -60,12 +56,13 @@ class _TakeQuizState extends State<TakeQuiz> {
           },
         ),
 
-        /// Self-paced quiz has Text to fill the vertical space
+        /// Self-paced quiz
         Consumer<QuizCollectionModel>(
           builder: (context, collection, child) {
             return QuizContainer(
               collection.getQuizzesWhere(type: QuizType.SELF_PACED),
               header: ConstrainedBox(
+                  // Has text to fill up vertical space
                   constraints: BoxConstraints(minHeight: _height ?? 175),
                   child: Align(
                       alignment: Alignment.center,

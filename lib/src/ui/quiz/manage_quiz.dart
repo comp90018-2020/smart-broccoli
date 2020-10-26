@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/data/group.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
@@ -16,16 +15,16 @@ class ManageQuiz extends StatefulWidget {
 /// Get Quiz, we are assuming that the quizzes displayed here are quizzes where
 /// The user is the owner of
 class _ManageQuizState extends State<ManageQuiz> {
-  // TODO: replace with provider inside build
-  int gid;
+  // The group that is selected
+  int _groupId;
 
-  // See : https://stackoverflow.com/questions/58371874/what-is-diffrence-between-didchangedependencies-and-initstate
+  // See : https://stackoverflow.com/questions/58371874
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Provider.of<QuizCollectionModel>(context, listen: true)
+    Provider.of<QuizCollectionModel>(context, listen: false)
         .refreshCreatedQuizzes();
-    Provider.of<GroupRegistryModel>(context, listen: true)
+    Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups();
   }
 
@@ -36,33 +35,29 @@ class _ManageQuizState extends State<ManageQuiz> {
       title: "Manage Quiz",
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
-        Consumer2<QuizCollectionModel, GroupRegistryModel>(
-            builder: (context, collection, registry, child) {
+        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
           // All quizzes
-          return QuizContainer(collection.getCreatedQuizzesWhere(groupId: gid),
-              header: _groupSelector(registry.createdGroups),
+          return QuizContainer(
+              collection.getCreatedQuizzesWhere(groupId: _groupId),
+              header: _groupSelector(),
               hiddenButton: true);
         }),
-
-        // Live quiz
-        Consumer2<QuizCollectionModel, GroupRegistryModel>(
-            builder: (context, collection, registry, child) {
-          // All quizzes
-          return QuizContainer(collection.getCreatedQuizzesWhere(groupId: gid),
-              header: _groupSelector(registry.createdGroups),
+        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+          // Live quiz
+          return QuizContainer(
+              collection.getCreatedQuizzesWhere(
+                  groupId: _groupId, type: QuizType.LIVE),
+              header: _groupSelector(),
               hiddenButton: true);
         }),
-
-        Consumer2<QuizCollectionModel, GroupRegistryModel>(
-          builder: (context, collection, registry, child) {
-            return
-
-                /// Self-paced quiz
-                QuizContainer(collection.getCreatedQuizzesWhere(groupId: gid),
-                    header: _groupSelector(registry.createdGroups),
-                    hiddenButton: true);
-          },
-        ),
+        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+          /// Self-paced quiz
+          return QuizContainer(
+              collection.getCreatedQuizzesWhere(
+                  groupId: _groupId, type: QuizType.SELF_PACED),
+              header: _groupSelector(),
+              hiddenButton: true);
+        }),
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,
@@ -75,7 +70,7 @@ class _ManageQuizState extends State<ManageQuiz> {
   }
 
   /// Quiz selection dropdown
-  Widget _groupSelector(List<Group> group) {
+  Widget _groupSelector() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
       constraints: BoxConstraints(maxWidth: 200),
@@ -91,18 +86,29 @@ class _ManageQuizState extends State<ManageQuiz> {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton(
-                    value: gid,
+                child: DropdownButtonHideUnderline(child:
+                    Consumer<GroupRegistryModel>(
+                        builder: (context, collection, child) {
+                  return DropdownButton(
+                    value: _groupId,
                     underline: Container(),
+                    // Update current selected group
                     onChanged: (i) {
-                      updateList(i);
+                      setState(() {
+                        _groupId = i;
+                      });
                     },
                     isExpanded: true,
-                    items: [makeItem(null, "All Groups")] +
-                        group.map((e) => makeItem(e.id, e.name)).toList(),
-                  ),
-                ),
+                    items: [
+                      // All groups
+                      makeItem(null, "All Groups"),
+                      // Each created group
+                      ...collection.createdGroups
+                          .map((group) => makeItem(group.id, group.name))
+                          .toList()
+                    ],
+                  );
+                })),
               ),
             ),
           ),
@@ -111,6 +117,7 @@ class _ManageQuizState extends State<ManageQuiz> {
     );
   }
 
+  /// Creates a DropdownMenuItem representing a group
   DropdownMenuItem makeItem(int id, String name) {
     return DropdownMenuItem(
       child: Center(
@@ -118,39 +125,5 @@ class _ManageQuizState extends State<ManageQuiz> {
       ),
       value: id,
     );
-  }
-
-  List<DropdownMenuItem> buildDropDownMenu(List<Group> group) {
-    List<DropdownMenuItem> res = [];
-
-    /// Defensive programming to avoid an error in an event of there being no
-    /// groups
-    if (group.length == 0) {
-      res.add(DropdownMenuItem(
-          child: Center(
-            child: Text(" "),
-          ),
-          value: 0,
-          onTap: () => {}));
-    } else {
-      // note that GID != i where i is the iteration index
-      for (var i = 0; i < group.length; i++) {
-        res.add(
-          DropdownMenuItem(
-            child: Center(
-              child: Text(group[i].name),
-            ),
-            value: i,
-          ),
-        );
-      }
-    }
-    return res;
-  }
-
-  void updateList(int i) {
-    setState(() {
-      gid = i;
-    });
   }
 }
