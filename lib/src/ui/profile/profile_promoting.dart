@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/models/user_profile.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'profile_picture.dart';
@@ -32,7 +35,7 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
   @override
   Widget build(BuildContext context) {
     return CustomPage(
-      title: "Promote user",
+      title: "Register account",
       hasDrawer: false,
       child: SingleChildScrollView(
         child: Column(
@@ -66,7 +69,19 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
   }
 
   // Code to promote profile to a joined profile
-  void initPromote() {
-    Navigator.of(context).pop();
+  void initPromote() async {
+    if (_nameController.text.isEmpty || _emailController.text.isEmpty)
+      return await showErrorDialog(context, "All fields are required");
+    if (_passwordController.text != _confirmPasswordController.text)
+      return await showErrorDialog(context, "Passwords do not match");
+    try {
+      await Provider.of<UserProfileModel>(context, listen: false).promoteUser(
+          _emailController.text,
+          _passwordController.text,
+          _nameController.text);
+      Navigator.of(context).pop();
+    } catch (_) {
+      showErrorDialog(context, "Cannot register profile");
+    }
   }
 }

@@ -41,6 +41,10 @@ class AuthStateModel extends ChangeNotifier {
     await _authApi.register(email, password, name);
   }
 
+  Future<void> promote(String email, String password, String name) async {
+    await _authApi.promote(email, password, name);
+  }
+
   Future<void> login(String email, String password) async {
     String token = await _authApi.login(email, password);
     this._token = token;

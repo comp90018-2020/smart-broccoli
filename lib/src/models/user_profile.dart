@@ -58,4 +58,9 @@ class UserProfileModel extends ChangeNotifier {
     await _userApi.setProfilePic(_authStateModel.token, bytes);
     refreshUser();
   }
+
+  Future<void> promoteUser(String email, String password, String name) async {
+    await _authStateModel.promote(email, password, name);
+    refreshUser();
+  }
 }
