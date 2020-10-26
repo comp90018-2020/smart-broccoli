@@ -20,6 +20,14 @@ class _TakeQuizState extends State<TakeQuiz> {
   double _height;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update available quizzes
+    Provider.of<QuizCollectionModel>(context, listen: false)
+        .refreshAvailableQuizzes();
+  }
+
+  @override
   void initState() {
     super.initState();
 
@@ -51,7 +59,7 @@ class _TakeQuizState extends State<TakeQuiz> {
         Consumer<QuizCollectionModel>(
           builder: (context, collection, child) {
             return QuizContainer(
-                collection.getQuizzesWhere(type: QuizType.LIVE),
+                collection.getAvailableQuizzesWhere(type: QuizType.LIVE),
                 header: QuizPinBox());
           },
         ),
@@ -60,7 +68,7 @@ class _TakeQuizState extends State<TakeQuiz> {
         Consumer<QuizCollectionModel>(
           builder: (context, collection, child) {
             return QuizContainer(
-              collection.getQuizzesWhere(type: QuizType.SELF_PACED),
+              collection.getAvailableQuizzesWhere(type: QuizType.SELF_PACED),
               header: ConstrainedBox(
                   // Has text to fill up vertical space
                   constraints: BoxConstraints(minHeight: _height ?? 175),

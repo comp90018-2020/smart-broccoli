@@ -22,8 +22,10 @@ class _ManageQuizState extends State<ManageQuiz> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Update created quizzes
     Provider.of<QuizCollectionModel>(context, listen: false)
         .refreshCreatedQuizzes();
+    // Update group list
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups();
   }
