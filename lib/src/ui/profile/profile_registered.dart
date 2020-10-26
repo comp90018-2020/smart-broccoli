@@ -44,8 +44,18 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: TableCard(
             [
-              NameTableRow(widget._isEdit, widget._nameController),
-              EmailTableRow(widget._isEdit, widget._emailController),
+              NameTableRow(
+                widget._isEdit,
+                widget._nameController,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+              ),
+              EmailTableRow(
+                widget._isEdit,
+                widget._emailController,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+              ),
             ],
           ),
         ),
@@ -65,9 +75,16 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
                 TableCard(
                   [
                     PasswordTableRow(
-                        widget._isEdit, widget._passwordController),
+                      widget._isEdit,
+                      widget._passwordController,
+                      textInputAction: TextInputAction.next,
+                      onFieldSubmitted: (_) =>
+                          FocusScope.of(context).nextFocus(),
+                    ),
                     PasswordConfirmTableRow(
-                        widget._isEdit, widget._confirmPasswordController),
+                      widget._isEdit,
+                      widget._confirmPasswordController,
+                    ),
                   ],
                 ),
               ],
