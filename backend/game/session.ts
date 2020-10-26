@@ -1,12 +1,11 @@
 import { PointSystem } from "./points";
-import { Res, GameStatus,QuizType,  Player, Answer } from "./datatype";
+import { Res, GameStatus, QuizType, Player, Answer } from "./datatype";
 import { QuizAttributes } from "../models/quiz";
-
 
 export class GameSession {
     // session id from controller
     public id: number;
-    public type : QuizType;
+    public type: QuizType;
     // quiz from database
     public quiz: QuizAttributes;
     // game status
@@ -22,17 +21,22 @@ export class GameSession {
     public isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
 
-    constructor($quiz: QuizAttributes, $sessionId: number, sessionType: string, isGroup:boolean) {
+    constructor(
+        $quiz: QuizAttributes,
+        $sessionId: number,
+        sessionType: string,
+        isGroup: boolean
+    ) {
         this.id = $sessionId;
         this.quiz = $quiz;
-        if(isGroup){
+        if (isGroup) {
             // "live", "self paced"
             if (sessionType === "live") {
                 this.type = QuizType.Live_Group;
             } else {
                 this.type = QuizType.SelfPaced_Group;
             }
-        }else{
+        } else {
             if (sessionType === "live") {
                 this.type = QuizType.Live_NotGroup;
             } else {

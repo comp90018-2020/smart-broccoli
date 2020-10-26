@@ -79,17 +79,30 @@ export class GameHandler {
                         numCorrect: 2,
                     },
                 ],
-
             };
-            this.sessions[sessionId] = new GameSession(quiz, sessionId, "live", false);
+            this.sessions[sessionId] = new GameSession(
+                quiz,
+                sessionId,
+                "live",
+                false
+            );
         }
     }
 
-    addSession(quiz: Quiz, sessionId: number, quizType: string, isGroup: boolean) {
-
+    addSession(
+        quiz: Quiz,
+        sessionId: number,
+        quizType: string,
+        isGroup: boolean
+    ) {
         // @ts-ignore
         const quizJSON: QuizAttributes = quiz.toJSON();
-        this.sessions[sessionId] = new GameSession(quizJSON, sessionId, quizType, isGroup);
+        this.sessions[sessionId] = new GameSession(
+            quizJSON,
+            sessionId,
+            quizType,
+            isGroup
+        );
         return true;
     }
 
@@ -330,8 +343,7 @@ export class GameHandler {
 
     endSession(session: GameSession) {
         for (const socketId of Object.keys(
-            $socketIO.sockets.adapter.rooms[session.id.toString()]
-                .sockets
+            $socketIO.sockets.adapter.rooms[session.id.toString()].sockets
         )) {
             // loop over socket in the room
             // and disconnect them
@@ -380,6 +392,21 @@ export class GameHandler {
         }
     }
 
+    releaseCorrectAnswer(session: GameSession) {
+        const correctAnswer = {};
+
+        for (const socketId of Object.keys(
+            $socketIO.sockets.adapter.rooms[session.id.toString()].sockets
+        )) {
+            // loop over socket in the room
+            // broadcast the correct answer
+            const correctAnswer = {};
+            $socketIO.sockets.connected[socketId].emit(
+                "correctAnswer",
+                correctAnswer
+            );
+        }
+    }
     async showBoard(socket: Socket) {
         try {
             const player: Player = await this.verifySocket(socket);

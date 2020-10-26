@@ -12,8 +12,8 @@ export const formatQuestion = (
     session: GameSession,
     isHost: boolean
 ) => {
-    // deep copy
-    const questionCopy: any = session.quiz.questions[questionIndex];
+    const questions = session.quiz.questions;
+    const questionCopy: any = questions[questionIndex];
     if (!isHost) {
         if (questionCopy.tf !== null) {
             questionCopy.tf = null;
@@ -34,6 +34,8 @@ export const formatQuestion = (
         options: questionCopy.options,
         pictureId: questionCopy.pictureId,
         time: remainingTime < 0 ? 0 : remainingTime,
+        totalQuestions: questions.length,
+        numCorrect: questionCopy.numCorrect,
     };
 };
 

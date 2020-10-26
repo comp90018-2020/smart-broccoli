@@ -300,7 +300,7 @@ export const createSession = async (userId: number, opts: any) => {
         });
 
         // pass quiz and session to socket
-        handler.addSession(quiz, session.id , session.type, session.isGroup);
+        handler.addSession(quiz, session.id, session.type, session.isGroup);
 
         return { session, token };
     });

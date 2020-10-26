@@ -20,7 +20,7 @@ export enum QuizType {
     SelfPaced_Group,
     SelfPaced_NotGroup,
     Live_Group,
-    Live_NotGroup
+    Live_NotGroup,
 }
 
 export class Player {
@@ -82,5 +82,5 @@ export class Answer {
         readonly questionNo: number,
         readonly MCSelection: number,
         readonly TFSelection: boolean
-    ) { }
+    ) {}
 }
