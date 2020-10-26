@@ -31,14 +31,19 @@ export const formatQuestion = (
         session.preQuestionReleasedAt -
         Date.now();
     return {
-        no: questionIndex,
-        text: questionCopy.text,
-        tf: questionCopy.tf,
-        options: questionCopy.options,
-        pictureId: questionCopy.pictureId,
-        time: remainingTime < 0 ? 0 : remainingTime,
+        question: {
+            no: questionIndex,
+            text: questionCopy.text,
+            tf: questionCopy.tf,
+            options: questionCopy.options,
+            pictureId: questionCopy.pictureId,
+            numCorrect: questionCopy.numCorrect,
+        },
+        time:
+            remainingTime < 0 || session.isReadyForNextQuestion
+                ? 0
+                : remainingTime,
         totalQuestions: questions.length,
-        numCorrect: questionCopy.numCorrect,
     };
 };
 

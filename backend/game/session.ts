@@ -63,7 +63,7 @@ export class GameSession {
         }
     }
 
-    nextQuestionIdx(): [Res, number] {
+    getNextQuestionIndex(): [Res, number] {
         const { questions } = this.quiz;
         if (this.nextQuestionIndex >= this.quiz.questions.length) {
             return [Res.NoMoreQuestion, -1];

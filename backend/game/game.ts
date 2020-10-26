@@ -237,6 +237,17 @@ export class GameHandler {
                         player.role === Role.host ? true : false
                     )
                 );
+
+                if (
+                    session.isReadyForNextQuestion &&
+                    session.questionIndex >= 0 &&
+                    session.questionIndex < session.quiz.questions.length
+                ) {
+                    const correctAnswer = session.getAnsOfQuestion(
+                        session.questionIndex
+                    );
+                    this.emitCorrectAnswer(session, player, correctAnswer);
+                }
             } else {
                 // otherwise ignore
             }
@@ -361,7 +372,7 @@ export class GameHandler {
                 session.status === GameStatus.Running
             ) {
                 // try to get the index of next question
-                const [res, questionIndex] = session.nextQuestionIdx();
+                const [res, questionIndex] = session.getNextQuestionIndex();
                 if (res === Res.Success) {
                     // allow host move to next question if currentlly there is
                     // no player in the
@@ -390,6 +401,7 @@ export class GameHandler {
                             ) {
                                 session.setToNextQuestion();
                                 this.releaseCorrectAnswer(
+                                    socket,
                                     session,
                                     questionIndex
                                 );
@@ -410,17 +422,27 @@ export class GameHandler {
         }
     }
 
-    releaseCorrectAnswer(session: GameSession, questoinIndex: number) {
-        const correctAnswer = session.getAnsOfQuestion(questoinIndex);
+    emitCorrectAnswer(
+        session: GameSession,
+        player: Player,
+        correctAnswer: Answer
+    ) {
+        $socketIO.sockets.connected[player.socketId].emit("correctAnswer", {
+            answer: correctAnswer,
+            record: player.formatRecord().record,
+        });
+    }
 
-        for (const socketId of Object.keys(
-            $socketIO.sockets.adapter.rooms[session.id.toString()].sockets
-        )) {
-            // loop over socket in the room
-            // broadcast the correct answer
-            $socketIO.sockets.connected[socketId].emit(
-                "correctAnswer",
-                correctAnswer
+    releaseCorrectAnswer(
+        socket: Socket,
+        session: GameSession,
+        questoinIndex: number
+    ) {
+        for (const player of Object.values(session.playerMap)) {
+            this.emitCorrectAnswer(
+                session,
+                player,
+                session.getAnsOfQuestion(questoinIndex)
             );
         }
     }
