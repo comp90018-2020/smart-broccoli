@@ -4,6 +4,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/models.dart';
 
 class ProfilePicture extends StatefulWidget {
   /// Whether picture is editable
@@ -44,25 +46,27 @@ class _ProfilePictureState extends State<ProfilePicture> {
                     _showPicker(context);
                   }
                 : null,
-            child: CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.black12,
-              child: _image != null
-                  ? ClipOval(
-                      child: Image.file(
-                        _image,
-                        fit: BoxFit.cover,
-                        width: 80.0,
-                        height: 80.0,
+            child: Consumer<UserProfileModel>(
+              builder: (context, profile, child) => CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.black12,
+                child: profile.user.picture != null
+                    ? ClipOval(
+                        child: Image.memory(
+                          profile.user.picture,
+                          fit: BoxFit.cover,
+                          width: 100.0,
+                          height: 100.0,
+                        ),
+                      )
+                    : Container(
+                        child: Icon(
+                          Icons.camera_alt,
+                          size: 35,
+                          color: Colors.black12,
+                        ),
                       ),
-                    )
-                  : Container(
-                      child: Icon(
-                        Icons.camera_alt,
-                        size: 35,
-                        color: Colors.black12,
-                      ),
-                    ),
+              ),
             ),
           ),
         ),
