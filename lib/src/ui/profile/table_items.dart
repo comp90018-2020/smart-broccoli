@@ -40,7 +40,7 @@ class NameTableRow extends TableRow {
                     hintStyle: const TextStyle(color: Colors.black38),
                     suffixIcon: IconButton(
                       icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
-                      onPressed: () {},
+                      onPressed: _nameController.clear,
                     ),
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -75,7 +75,7 @@ class EmailTableRow extends TableRow {
                   border: InputBorder.none,
                   suffixIcon: IconButton(
                     icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
-                    onPressed: () {},
+                    onPressed: _emailController.clear,
                   ),
                   // A space
                   focusedBorder: InputBorder.none,
@@ -106,7 +106,7 @@ class PasswordTableRow extends TableRow {
                     border: InputBorder.none,
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.clear),
-                      onPressed: () {},
+                      onPressed: _passwordController.clear,
                     ),
                     focusedBorder: InputBorder.none,
                     hintText: 'Password'),
@@ -138,7 +138,7 @@ class PasswordConfirmTableRow extends TableRow {
                     border: InputBorder.none,
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.clear),
-                      onPressed: () {},
+                      onPressed: _passwordController.clear,
                     ),
                     // A space
                     focusedBorder: InputBorder.none,
