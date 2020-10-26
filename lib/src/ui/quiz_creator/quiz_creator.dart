@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
@@ -10,6 +9,11 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:smart_broccoli/src/data/quiz.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/material.dart';
+
+import 'package:smart_broccoli/theme.dart';
 
 
 import '../../models.dart';
@@ -60,6 +64,13 @@ class _QuizCreateState extends State<QuizCreate> {
 
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups(withMembers: true);
+
+    try{
+
+    }catch(e, stacktrace){
+      print(e);
+      print(stacktrace);
+    }
 
     return CustomPage(
       title: "Quiz",
@@ -308,14 +319,11 @@ class _QuizCreateState extends State<QuizCreate> {
               width: double.maxFinite,
               child: AspectRatio(aspectRatio: 2, child:
               Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: provideImage(question),
-                      fit: BoxFit.fitWidth,
-                      alignment: Alignment.topCenter,
-                    ),
-                  )
-              )
+                width: double.maxFinite,
+                child: question.imgId == null
+                    ? Icon(Icons.insert_photo_outlined, size: 100)
+                    : Image.file(File (question.imgId), fit: BoxFit.cover),
+              ),
 
               ),
             ),

@@ -57,6 +57,11 @@ class _QuestionCreateState extends State<QuestionCreate> {
       questionTextController  = TextEditingController(text: question.text);
       _optionTextControllers = <TextEditingController>[];
 
+      for (var i = 0; i < question.options.length; i++) {
+
+         _optionTextControllers.add(TextEditingController(text: question.options[i].text));
+      }
+
 
       //Case od creating a new question
      }else{
@@ -96,7 +101,16 @@ class _QuestionCreateState extends State<QuestionCreate> {
           icon: Icon(Icons.delete),
           padding: EdgeInsets.zero,
           splashRadius: 20,
-          onPressed: () {},
+          onPressed: () {
+
+            if(widget.passedQuestionIndex == null){
+
+            }else{
+              widget.passedQuiz.questions.removeAt( widget.passedQuestionIndex);
+            }
+            Navigator.pop(context, widget.passedQuiz);
+
+          },
         ),
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
@@ -142,7 +156,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
-                    'Question $questionNumber',
+                    'Question',
                     style: new TextStyle(
                       fontSize: 17.0,
                       fontWeight: FontWeight.normal,
@@ -190,7 +204,6 @@ class _QuestionCreateState extends State<QuestionCreate> {
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: question.options.length,
                   itemBuilder: (BuildContext context, int index) {
-                    _optionTextControllers.add(TextEditingController(text: question.options[index].text));
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6.0),
                       child: _optionCard(index, question.options[index]),
@@ -258,9 +271,6 @@ class _QuestionCreateState extends State<QuestionCreate> {
           children: <Widget>[
             // Answer text
             TextFormField(
-              onChanged: (text){
-                question.options[index].text = text;
-              },
                 controller: _optionTextControllers[index],
                 decoration: InputDecoration(labelText: 'Answer')),
 
