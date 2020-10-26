@@ -5,6 +5,7 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
+import 'package:smart_broccoli/src/ui/quiz_creator/quiz_creator.dart';
 
 /// Represents a quiz card
 class QuizCard extends StatefulWidget {
@@ -50,7 +51,11 @@ class _QuizCardState extends State<QuizCard> {
                           ? AspectRatio(
                               aspectRatio: widget.aspectRatio,
                               child: widget.quiz.picture == null
-                                  ? Placeholder()
+                                  ? FractionallySizedBox(
+                                      widthFactor: 0.8,
+                                      heightFactor: 0.8,
+                                      child: Image(
+                                          image: AssetImage('assets/icon.png')))
                                   : Image.memory(widget.quiz.picture,
                                       fit: BoxFit.cover),
                             )
@@ -228,7 +233,9 @@ class _QuizCardState extends State<QuizCard> {
             height: 36,
             color: Theme.of(context).accentColor,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            onPressed: () {},
+            onPressed: () {
+              editQuiz(context);
+            },
             elevation: 2.0,
             child: Icon(
               Icons.settings,
@@ -241,6 +248,17 @@ class _QuizCardState extends State<QuizCard> {
       ),
     );
   }
+
+  editQuiz(BuildContext context) async {
+    // Navigator returns a Future that completes after calling
+    dynamic result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QuizCreate(),
+      ),
+    );
+  }
+
 
   Future<bool> _confirmActivateLiveQuiz() async {
     return showDialog(

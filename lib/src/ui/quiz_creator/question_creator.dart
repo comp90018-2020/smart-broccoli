@@ -32,8 +32,6 @@ class QuestionCreate extends StatefulWidget {
 
 class _QuestionCreateState extends State<QuestionCreate> {
 
-
-
   MCQuestion question;
   var questionTextController;
   List<TextEditingController> _optionTextControllers;
@@ -67,12 +65,13 @@ class _QuestionCreateState extends State<QuestionCreate> {
      }else{
       print("here");
       questionNumber = widget.passedQuiz.questions.length;
-      question = MCQuestion(null, 'Text', [], imgId: null);
+      question = MCQuestion('Text', [], pictureId: null);
       questionTextController  = TextEditingController();
       _optionTextControllers = <TextEditingController>[];
     }
 
   }
+
 
 
   @override
@@ -176,12 +175,12 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 ),
 
                 // Question image
-                PictureCard(question.imgId, (path) {
+                PictureCard(null, (path) {
 
-                  print(question.imgId);
-                  setState(() {
-                    question.imgId = path;
-                  });
+                  print(question.pictureId);
+                  /*setState(() {
+                    question.pictureId = path;
+                  });*/
                 }),
 
                 // Answers heading

@@ -54,8 +54,6 @@ class _QuizCreateState extends State<QuizCreate> {
   int selectedTime;
 
   QuizType selectedQuizType = QuizType.LIVE;
-  
-  
 
   List<Question> selectedQuestions = new List<Question>();
 
@@ -234,6 +232,7 @@ class _QuizCreateState extends State<QuizCreate> {
                   itemCount: questionsInQuiz(),
                   itemBuilder: (BuildContext context, int index) {
                     return _questionCard(index, selectedQuestions.elementAt(index), context);
+
                   },
                 ),
 
@@ -249,7 +248,7 @@ class _QuizCreateState extends State<QuizCreate> {
                           spacing: 3,
                           children: [Icon(Icons.add), Text('ADD QUESTION')]),
                       onPressed: () {
-                        create_edit_question(context);
+                        createEditQuestion(context);
                       },
                     ),
                   ),
@@ -274,7 +273,7 @@ class _QuizCreateState extends State<QuizCreate> {
   }
 
 
-  create_edit_question(BuildContext context, {int questionIndex}) async {
+  createEditQuestion(BuildContext context, {int questionIndex}) async {
     // Navigator returns a Future that completes after calling
     dynamic result = await Navigator.push(
       context,
@@ -305,7 +304,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
     return GestureDetector(
       onTap: (){
-        create_edit_question(context, questionIndex: index);
+        createEditQuestion(context, questionIndex: index);
 
       },
       child: Card(
@@ -320,9 +319,9 @@ class _QuizCreateState extends State<QuizCreate> {
               child: AspectRatio(aspectRatio: 2, child:
               Container(
                 width: double.maxFinite,
-                child: question.imgId == null
+                child: question.pictureId == null
                     ? Icon(Icons.insert_photo_outlined, size: 100)
-                    : Image.file(File (question.imgId), fit: BoxFit.cover),
+                    : Icon(Icons.insert_photo_outlined, size: 100),
               ),
 
               ),
@@ -344,16 +343,6 @@ class _QuizCreateState extends State<QuizCreate> {
     );
   }
 
-  AssetImage provideImage (Question question){
-    print(question.imgId);
-    if(question.imgId == null){
-      return AssetImage('assets/icon.png');
-    }
-    else{
-      return AssetImage(question.imgId);
-    }
-
-  }
 
   Widget buildGroupList(List<Group> groups) {
     if(groups.length >0){

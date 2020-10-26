@@ -224,6 +224,8 @@ describe("Session", () => {
         expect(quizRes.body).to.have.property("questions");
         expect(quizRes.body.questions).to.have.lengthOf(2);
         expect(quizRes.body).to.have.property("Sessions");
+        expect(quizRes.body.questions[1]).to.have.property("numCorrect");
+        expect(quizRes.body.questions[1].numCorrect).to.equal(1);
         expect(quizRes.body.Sessions).to.have.lengthOf(1);
 
         const groupQuizRes = await agent
