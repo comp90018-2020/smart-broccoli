@@ -20,6 +20,19 @@ class _ManageQuizState extends State<ManageQuiz> {
   // TODO: replace with provider inside build
   int gid = 0;
 
+  // See : https://stackoverflow.com/questions/58371874/what-is-diffrence-between-didchangedependencies-and-initstate
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    QuizCollectionModel qcm =
+    Provider.of<QuizCollectionModel>(context, listen: true);
+    qcm.refreshAvailableQuizzes();
+    qcm.refreshCreatedQuizzes();
+    GroupRegistryModel grm =
+    Provider.of<GroupRegistryModel>(context, listen: true);
+    grm.refreshCreatedGroups();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
