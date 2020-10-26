@@ -21,9 +21,7 @@ class QuizCollectionModel extends ChangeNotifier {
   /// Picture storage service
   final PictureStash _picStash;
 
-  /// Views subscribe to the fields below
   Quiz _selectedQuiz;
-
   Quiz get selectedQuiz => _selectedQuiz;
 
   Map<int, Quiz> _availableQuizzes = {};
@@ -31,11 +29,10 @@ class QuizCollectionModel extends ChangeNotifier {
 
   UnmodifiableListView<Quiz> get availableQuizzes =>
       UnmodifiableListView(_availableQuizzes.values);
-
   UnmodifiableListView<Quiz> get createdQuizzes =>
       UnmodifiableListView(_createdQuizzes.values);
-  GameSession _currentSession;
 
+  GameSession _currentSession;
   GameSession get currentSession => _currentSession;
 
   /// Constructor for external use
@@ -53,11 +50,17 @@ class QuizCollectionModel extends ChangeNotifier {
           (groupId == null || quiz.groupId == groupId) &&
           (type == null || quiz.type == type)));
 
+  UnmodifiableListView<Quiz> getAvailableQuizzesWhere(
+          {int groupId, QuizType type}) =>
+      _availableQuizzes.values.where((quiz) =>
+          (groupId == null || quiz.groupId == groupId) &&
+          (type == null || quiz.type == type));
+
   UnmodifiableListView<Quiz> getCreatedQuizzesWhere(
           {int groupId, QuizType type}) =>
-      UnmodifiableListView([..._createdQuizzes.values].where((quiz) =>
+      _createdQuizzes.values.where((quiz) =>
           (groupId == null || quiz.groupId == groupId) &&
-          (type == null || quiz.type == type)));
+          (type == null || quiz.type == type));
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
