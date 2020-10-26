@@ -1,4 +1,4 @@
-import 'user_outcome.dart';
+import 'user_rank.dart';
 import 'record.dart';
 
 class Outcome {
@@ -7,7 +7,7 @@ class Outcome {
   Outcome._internal(this.question, this.leaderboard);
   factory Outcome.fromJson(Map<String, dynamic> json) => Outcome._internal(
         json['question'],
-        json['leaderboard'].map((e) => UserRank.fromJson(e)),
+        (json['leaderboard'] as List).map((e) => UserRank.fromJson(e)),
       );
 }
 
