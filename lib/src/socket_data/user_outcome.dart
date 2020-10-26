@@ -1,14 +1,14 @@
 import 'user.dart';
 import 'record.dart';
 
-class UserOutcome {
+class UserRank {
   final User player;
   final Record record;
 
-  UserOutcome._internal(this.player, this.record);
+  UserRank._internal(this.player, this.record);
 
-  factory UserOutcome.fromJson(Map<String, dynamic> json) =>
-      UserOutcome._internal(
+  factory UserRank.fromJson(Map<String, dynamic> json) =>
+      UserRank._internal(
         User.fromJson(json['player']),
         Record.fromJson(json['record']),
       );

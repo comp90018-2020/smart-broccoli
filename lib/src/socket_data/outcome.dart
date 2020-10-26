@@ -3,40 +3,31 @@ import 'record.dart';
 
 class Outcome {
   int question;
-  List<UserOutcome> leaderBoard;
+  List<UserRank> leaderBoard;
 
-  Outcome(Map<String, dynamic> json) {
-    this.question = json['question'];
-    this.leaderBoard = parse(json);
-  }
+  Outcome._internal(
+      this.question, this.leaderBoard);
 
-  List<UserOutcome> parse(Map<String, dynamic> json) {
-    List<UserOutcome> userOutcomes = [];
-    List leaderBoard = (json['leaderboard'] as List);
-    for (var value in leaderBoard) {
-      UserOutcome outcome = UserOutcome.fromJson(value);
-      userOutcomes.add(outcome);
-    }
+  factory Outcome.fromJson(Map<String, dynamic> json) => Outcome._internal(
+    json['question'],
+    (json['leaderboard'] as List).map((e) => UserRank.fromJson(e)),
+  );
 
-    return userOutcomes;
-  }
 }
 
 class OutcomeUser extends Outcome {
   Record record;
-  UserOutcome playerAhead;
+  UserRank playerAhead;
 
-  OutcomeUser(Map<String, dynamic> json) : super(json) {
-    if (json['record'] == null) {
-      this.record = null;
-    } else {
-      this.record = Record.fromJson(json['record']);
-    }
+  Outcome._internal(this.question, this.leaderBoard);
 
-    if (json['playerAhead'] == null) {
-      this.playerAhead = null;
-    } else {
-      this.playerAhead = UserOutcome.fromJson(json['playerAhead']);
-    }
+  OutcomeUser(Map<String, dynamic> json) : super(question, leaderBoard) {
+
+    this.record = Record.fromJson(json['record']);
+    this.playerAhead = (json['playerAhead'] == null)
+        ? null
+        : UserRank.fromJson(json['playerAhead']);
   }
 }
+
+
