@@ -1,9 +1,8 @@
 import { Socket, Server } from "socket.io";
 import { PointSystem } from "./points";
 import { $socketIO } from "./index";
-import { GameErr, GameStatus, Player, GameResult, Answer } from "./datatype";
+import { GameErr, GameStatus, Player, Answer } from "./datatype";
 import Quiz from "../models/quiz";
-import { endSession } from "../controllers/session";
 
 export class GameSession {
     // session id from controller

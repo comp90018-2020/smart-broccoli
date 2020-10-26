@@ -5,7 +5,7 @@ import { GameSession } from "./session";
 import { formatQuestion, formatWelcome } from "./formatter";
 import { $socketIO } from "./index";
 import { GameErr, GameStatus, Player, Answer } from "./datatype";
-import Quiz from "../models/quiz";
+import { Quiz, Question } from "../models";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
@@ -28,9 +28,53 @@ export class GameHandler {
             if (this.sessions.hasOwnProperty(sessionId)) {
                 delete this.sessions[sessionId];
             }
-            const quiz = JSON.parse(
-                '{"id":19,"title":"Fruits Master","active":true,"description":"Test Quiz","type":"live","timeLimit":20,"createdAt":"2020-10-15T07:42:47.905Z","updatedAt":"2020-10-15T07:42:47.905Z","pictureId":null,"groupId":2,"questions":[{"id":32,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.927Z","updatedAt":"2020-10-15T07:42:47.927Z","quizId":19,"pictureId":null},{"id":33,"text":"Is potato fruit?","type":"truefalse","tf":true,"options":null,"createdAt":"2020-10-15T07:42:47.935Z","updatedAt":"2020-10-15T07:42:47.935Z","quizId":19,"pictureId":null},{"id":34,"text":"Which one is fruit?","type":"choice","tf":null,"options":[{"text":"apple","correct":true},{"text":"Apple","correct":false},{"text":"rice","correct":false},{"text":"cola","correct":false}],"createdAt":"2020-10-15T07:42:47.939Z","updatedAt":"2020-10-15T07:42:47.939Z","quizId":19,"pictureId":null}]}'
-            );
+            const quiz = new Quiz({
+                id: 19,
+                title: "Fruits Master",
+                active: true,
+                description: "Test Quiz",
+                type: "live",
+                timeLimit: 20,
+                groupId: 2,
+                pictureId: null,
+                questions: [
+                    new Question({
+                        id: 32,
+                        text: "Is potato fruit?",
+                        type: "truefalse",
+                        tf: true,
+                        options: null,
+                        quizId: 19,
+                        pictureId: null,
+                    }),
+                    new Question({
+                        id: 33,
+                        text: "A, B, C, D?",
+                        type: "choice",
+                        tf: null,
+                        quizId: 19,
+                        options: [
+                            { correct: true, text: "A" },
+                            { correct: false, text: "B" },
+                            { correct: false, text: "C" },
+                            { correct: false, text: "D" },
+                        ],
+                    }),
+                    new Question({
+                        id: 34,
+                        text: "Which ones is fruit?",
+                        type: "choice",
+                        tf: null,
+                        quizId: 19,
+                        options: [
+                            { text: "apple", correct: true },
+                            { text: "Apple", correct: true },
+                            { text: "rice", correct: false },
+                            { text: "cola", correct: false },
+                        ],
+                    }),
+                ],
+            });
             this.sessions[sessionId] = new GameSession(quiz, sessionId);
         }
     }
