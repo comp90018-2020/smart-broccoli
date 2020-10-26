@@ -1,7 +1,7 @@
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/socket_data/question_answered.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import '../socket_data/user.dart' as userType;
+import '../socket_data/user.dart' as SocketUser;
 import '../socket_data/question.dart' as questionType;
 import '../socket_data/outcome.dart';
 import '../data/group.dart';
@@ -25,11 +25,10 @@ class GameSessionModel {
   // URL of server
   static const String SERVER_URL = 'https://fuzzybroccoli.com';
 
-  List<userType.User> players = []; // all players currently in session (id, name)
+  Map<int, SocketUser.User> players = {};
   int startCountDown;
   questionType.Question question;
   Outcome outcome;
-  // OutcomeUser outcomeUser;
   // List<int> questionAnswered = [];
   QuestionAnswered questionAnswered;
   GroupRole userRole;
@@ -63,7 +62,10 @@ class GameSessionModel {
     socket.on('welcome', (message) {
       print('welcome');
       print(message);
-      message.forEach((player) => players.add(userType.User.fromJson(player)));
+      List users = message as List;
+      players = Map.fromIterable(
+          users.map((u) => SocketUser.User.fromJson(u)),
+          key: (u) => u.id);
       print(players);
 
       // notifyListeners();
@@ -72,7 +74,8 @@ class GameSessionModel {
     socket.on('playerJoin', (message) {
       print("playerJoin");
       print(message);
-      players.add(userType.User.fromJson(message));
+      var user = SocketUser.User.fromJson(message);
+      players[user.id] = user;
       print(players);
       // notifyListeners();
     });
@@ -80,12 +83,8 @@ class GameSessionModel {
     socket.on('playerLeave', (message) {
       print("playerLeave");
       print(message);
-      for (userType.User player in players) {
-        if (User.fromJson(message).id == player.id) {
-          players.remove(player);
-          break;
-        }
-      }
+      var user = SocketUser.User.fromJson(message);
+      players.remove(user.id);
       print(players);
       // notifyListeners();
     });
