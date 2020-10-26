@@ -66,7 +66,7 @@ export default class Question
     public pictureId?: number;
     public Picture?: Picture;
 
-    public readonly id!: number;
+    public readonly id: number;
     public readonly quizId: number;
     public readonly numCorrect: number;
 

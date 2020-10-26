@@ -1,5 +1,5 @@
 import { GameSession } from "./session";
-import { Player } from "./datatype";
+import { GameStatus, Player } from "./datatype";
 
 /**
  * format question for event-> nextQuestion
@@ -41,10 +41,18 @@ export const formatQuestion = (
  *  format the complete welcome message of event-> welcome
  * @param playerMap player map
  */
-export const formatWelcome = (playerMap: { [playerId: number]: Player }) => {
-    const welcomeMessage: any[] = [];
+export const formatWelcome = (
+    role: string,
+    gameStatus: GameStatus,
+    playerMap: { [playerId: number]: Player }
+) => {
+    const players: any[] = [];
     for (const [_, player] of Object.entries(playerMap)) {
-        welcomeMessage.push(player.profile());
+        players.push(player.profile());
     }
-    return welcomeMessage;
+    return {
+        players: players,
+        role: role,
+        status: gameStatus,
+    };
 };

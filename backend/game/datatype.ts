@@ -10,10 +10,10 @@ export enum Role {
 }
 
 export enum GameStatus {
-    Pending,
-    Starting,
-    Running,
-    Ended,
+    Pending = "pending",
+    Starting = "starting",
+    Running = "running",
+    Ended = "ended",
 }
 
 export class Player {

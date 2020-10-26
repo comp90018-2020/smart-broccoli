@@ -47,6 +47,7 @@ export class GameHandler {
                         options: null,
                         quizId: 19,
                         pictureId: null,
+                        numCorrect: 1,
                     }),
                     new Question({
                         id: 33,
@@ -60,10 +61,11 @@ export class GameHandler {
                             { correct: false, text: "C" },
                             { correct: false, text: "D" },
                         ],
+                        numCorrect: 1,
                     }),
                     new Question({
                         id: 34,
-                        text: "Which ones is fruit?",
+                        text: "Which one is fruit?",
                         type: "choice",
                         tf: null,
                         quizId: 19,
@@ -73,6 +75,7 @@ export class GameHandler {
                             { text: "rice", correct: false },
                             { text: "cola", correct: false },
                         ],
+                        numCorrect: 2,
                     }),
                 ],
             });
@@ -195,7 +198,10 @@ export class GameHandler {
             }
 
             // emit welcome event
-            socket.emit("welcome", formatWelcome(session.playerMap));
+            socket.emit(
+                "welcome",
+                formatWelcome(player.role, session.status, session.playerMap)
+            );
 
             if (session.status === GameStatus.Starting) {
                 // if game is starting, emit starting
@@ -442,6 +448,7 @@ export class GameHandler {
 export const sendErr = (error: any, socket: Socket) => {
     if (process.env.SOCKET_MODE === "debug") {
         // https://stackoverflow.com/questions/18391212
+        console.log(error);
         socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
     }
 };
