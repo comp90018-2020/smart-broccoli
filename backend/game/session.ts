@@ -1,12 +1,10 @@
-import { Socket, Server } from "socket.io";
 import { PointSystem } from "./points";
-import { $socketIO } from "./index";
-import { GameErr, GameStatus, Player, Answer } from "./datatype";
+import { Res, GameStatus, Player, Answer } from "./datatype";
 import Quiz from "../models/quiz";
 
 export class GameSession {
     // session id from controller
-    private sessionId: number;
+    public sessionId: number;
     // quiz from database
     public quiz: Quiz;
     // game status
@@ -21,52 +19,10 @@ export class GameSession {
     public preQuestionReleasedAt = 0;
     public isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
-    public hasFinalRankReleased: boolean = false;
 
     constructor($quiz: Quiz, $sessionId: number) {
         this.sessionId = $sessionId;
         this.quiz = $quiz;
-    }
-
-    async addParticipant(player: Player) {
-        if (player.role === "host") {
-            if (
-                this.host != null &&
-                this.host.socketId != player.socketId &&
-                $socketIO.sockets.connected.hasOwnProperty(this.host.socketId)
-            ) {
-                $socketIO.sockets.connected[this.host.socketId].disconnect();
-            }
-            this.host = player;
-        } else {
-            if (this.playerMap.hasOwnProperty(player.id)) {
-                this.removeParticipant(player, false);
-            }
-            this.playerMap[player.id] = player;
-        }
-    }
-
-    async removeParticipant(player: Player, isForce: boolean) {
-        if (
-            (isForce ||
-                player.socketId != this.playerMap[player.id].socketId) &&
-            $socketIO.sockets.connected.hasOwnProperty(
-                this.playerMap[player.id].socketId
-            )
-        ) {
-            $socketIO.sockets.connected[
-                this.playerMap[player.id].socketId
-            ].disconnect();
-            delete this.playerMap[player.id];
-        }
-    }
-
-    async hasParticipant(playerId: number) {
-        return this.playerMap.hasOwnProperty(playerId);
-    }
-
-    isCurrQuestionActive() {
-        return this.questionIndex === this.nextQuestionIndex;
     }
 
     getAnsOfQuestion(questionIndex: number): Answer {
@@ -86,14 +42,14 @@ export class GameSession {
         }
     }
 
-    nextQuestionIdx(): number {
+    nextQuestionIdx(): [Res, number] {
         if (this.nextQuestionIndex >= this.quiz.questions.length) {
-            throw GameErr.NoMoreQuestion;
+            return [Res.NoMoreQuestion, -1];
         } else if (
             !this.isReadyForNextQuestion &&
             Object.keys(this.playerMap).length > 0
         ) {
-            throw GameErr.ThereIsRunningQuestion;
+            return [Res.ThereIsRunningQuestion, -1];
         } else {
             setTimeout(() => {
                 if (this.nextQuestionIndex === this.questionIndex) {
@@ -104,14 +60,14 @@ export class GameSession {
             this.preQuestionReleasedAt = Date.now();
             this.isReadyForNextQuestion = false;
 
-            return this.nextQuestionIndex;
+            return [Res.Success, this.nextQuestionIndex];
         }
     }
 
     assessAns(playerId: number, answer: Answer) {
         const correctAnswer = this.getAnsOfQuestion(this.questionIndex);
         const player = this.playerMap[playerId];
-        // if this answer is correct
+
         let correct;
         if (correctAnswer.MCSelection !== null) {
             correct =
@@ -156,16 +112,11 @@ export class GameSession {
         for (const [rank, player] of Object.entries(playersArray)) {
             this.playerMap[player.id].record.newPos = Number(rank);
         }
-        return playersArray;
-    }
-
-    releaseBoard(hostSocket: Socket) {
-        const playersArray = this.rankPlayers();
-        let i = 0;
+        let order = 0;
         playersArray.forEach(({ id, record }) => {
             this.playerMap[id].record.oldPos = record.newPos;
-            this.playerMap[id].record.newPos = i;
-            ++i;
+            this.playerMap[id].record.newPos = order;
+            ++order;
         });
 
         const rank = [];
@@ -173,45 +124,6 @@ export class GameSession {
             rank.push(playersArray[i].formatRecord());
         }
 
-        // socketIO.sockets.adapter.rooms[this.sessionId].sockets)
-        for (const { id, socketId, record } of Object.values(this.playerMap)) {
-            const playerAheadRecord =
-                record.newPos === null
-                    ? null
-                    : record.newPos === 0
-                    ? null
-                    : rank[record.newPos - 1];
-            const questionOutcome = {
-                question: this.questionIndex,
-                leaderboard: rank.slice(0, 5),
-                record: this.playerMap[Number(id)].formatRecord().record,
-                playerAhead: playerAheadRecord,
-            };
-            $socketIO.to(socketId).emit("questionOutcome", questionOutcome);
-        }
-        hostSocket.emit("questionOutcome", {
-            question: this.questionIndex,
-            leaderboard: rank,
-        });
-    }
-
-    close(socketIO: Server, socket: Socket) {
-        for (const socketId of Object.keys(
-            socketIO.sockets.adapter.rooms[this.sessionId].sockets
-        )) {
-            socketIO.sockets.connected[socketId].disconnect();
-        }
-
-        // WIP: endSession()
-        // const result = new GameResult(
-        //     this.sessionId,
-        //     (this.questionIndex === 0 && this.readyForNextQuestion
-        //         ? -1
-        //         : this.readyForNextQuestion
-        //         ? this.preQuestionIndex
-        //         : this.preQuestionIndex - 1) + 1,
-        //     this.quiz.questions.length,
-        //     rankPlayer(this.playerMap)
-        // );
+        return rank;
     }
 }

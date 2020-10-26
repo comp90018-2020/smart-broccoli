@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { GameHandler } from "./game";
+import { GameHandler, sendErr } from "./game";
 
 export let $socketIO: Server = null;
 export const handler: GameHandler = new GameHandler();
@@ -49,12 +49,7 @@ export default (socketIO: Server) => {
                 });
             }
         } catch (err) {
-            if (process.env.SOCKET_MODE === "debug") {
-                // https://stackoverflow.com/questions/18391212
-                socket.send(
-                    JSON.stringify(err, Object.getOwnPropertyNames(err))
-                );
-            }
+            sendErr(err, socket);
             socket.disconnect();
         }
 

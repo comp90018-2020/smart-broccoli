@@ -1,6 +1,12 @@
-export enum GameErr {
+export enum Res {
+    Success = "succss",
     NoMoreQuestion = "No more question",
     ThereIsRunningQuestion = "There is player taking question",
+}
+
+export enum Role {
+    host = "host",
+    player = "participant",
 }
 
 export enum GameStatus {
@@ -62,16 +68,6 @@ export class Player {
             },
         };
     }
-}
-
-// WIP
-export class GameResult {
-    constructor(
-        readonly sessionId: number,
-        readonly questionFinshed: number,
-        readonly questionTotal: number,
-        readonly board: Player[]
-    ) {}
 }
 
 export class Answer {

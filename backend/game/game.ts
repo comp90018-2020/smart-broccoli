@@ -4,8 +4,9 @@ import { getUserSessionProfile } from "../controllers/user";
 import { GameSession } from "./session";
 import { formatQuestion, formatWelcome } from "./formatter";
 import { $socketIO } from "./index";
-import { GameErr, GameStatus, Player, Answer } from "./datatype";
+import { Role, Res, GameStatus, Player, Answer } from "./datatype";
 import { Quiz, Question } from "../models";
+import { endSession } from "../controllers/session";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const userCache: { [key: number]: Player } = {};
@@ -97,7 +98,7 @@ export class GameHandler {
                 null,
                 socket.id,
                 19,
-                Number(userId) === 1 ? "host" : "participant"
+                Number(userId) === 1 ? Role.host : Role.player
             );
             return player;
         } else {
@@ -116,21 +117,27 @@ export class GameHandler {
         try {
             const player: Player = await this.verifySocket(socket);
             const session = this.sessions[player.sessionId];
+
+            // create answer from emit
+            const answer: Answer = new Answer(
+                content.question,
+                content.MCSelection,
+                content.TFSelection
+            );
+
+            if (answer.questionNo == session.questionIndex) {
+                // ignore the emit with not matched quetion number
+                return;
+            }
+
             if (
-                // this player has not answered
-                !session.pointSys.answeredPlayers.has(player.id) &&
-                // the question is conducting
-                !session.isReadyForNextQuestion
+                // is player
+                player.role === Role.player &&
+                // and there is a conducting question
+                !session.isReadyForNextQuestion &&
+                // and this player has not answered
+                !session.pointSys.answeredPlayers.has(player.id)
             ) {
-                const answer: Answer = new Answer(
-                    content.question,
-                    content.MCSelection,
-                    content.TFSelection
-                );
-                if (answer.questionNo != session.questionIndex) {
-                    // quetion number is not right
-                    return;
-                }
                 // assess answer
                 session.assessAns(player.id, answer);
 
@@ -152,12 +159,7 @@ export class GameHandler {
                 }
             }
         } catch (error) {
-            if (process.env.SOCKET_MODE === "debug") {
-                // https://stackoverflow.com/questions/18391212
-                socket.send(
-                    JSON.stringify(error, Object.getOwnPropertyNames(error))
-                );
-            }
+            sendErr(error, socket);
             socket.disconnect();
         }
     }
@@ -166,46 +168,67 @@ export class GameHandler {
         try {
             const player: Player = await this.verifySocket(socket);
             const session = this.sessions[player.sessionId];
-            // add user to socket room
-            socket.join(player.sessionId.toString());
+
             if (
-                player.role !== "host" &&
+                player.role !== Role.host &&
                 !session.playerMap.hasOwnProperty(player.id)
             ) {
+                // if not host, emit playerJoin
                 socket
                     .to(player.sessionId.toString())
                     .emit("playerJoin", player.profile());
             }
-            // add user to session
-            session.addParticipant(player);
 
+            // add user to socket room
+            socket.join(player.sessionId.toString());
+            // add user to session
+            if (player.role === Role.host) {
+                this.disconnectPast(session, session.host, player);
+                session.host = player;
+            } else {
+                this.disconnectPast(
+                    session,
+                    session.playerMap[player.id],
+                    player
+                );
+                session.playerMap[player.id] = player;
+            }
+
+            // emit welcome event
             socket.emit("welcome", formatWelcome(session.playerMap));
 
             if (session.status === GameStatus.Starting) {
+                // if game is starting, emit starting
                 socket.emit(
                     "starting",
-                    // make it more precise
                     (session.quizStartsAt - Date.now()).toString()
                 );
             } else if (session.status === GameStatus.Running) {
-                // there is question released
+                // if game is running, emit nextQuestion
                 socket.emit(
                     "nextQuestion",
                     formatQuestion(
                         session.questionIndex,
                         session,
-                        player.role === "host" ? true : false
+                        player.role === Role.host ? true : false
                     )
                 );
+            } else {
+                // otherwise ignore
             }
         } catch (error) {
-            if (process.env.SOCKET_MODE === "debug") {
-                // https://stackoverflow.com/questions/18391212
-                socket.send(
-                    JSON.stringify(error, Object.getOwnPropertyNames(error))
-                );
-            }
+            sendErr(error, socket);
             socket.disconnect();
+        }
+    }
+
+    disconnectPast(session: GameSession, pastPlayer: Player, player: Player) {
+        if (
+            pastPlayer != null &&
+            pastPlayer.socketId != player.socketId &&
+            $socketIO.sockets.connected.hasOwnProperty(pastPlayer.socketId)
+        ) {
+            $socketIO.sockets.connected[pastPlayer.socketId].disconnect();
         }
     }
 
@@ -215,25 +238,17 @@ export class GameHandler {
             const session = this.sessions[player.sessionId];
 
             // remove this participants from session in memory
-            await session.removeParticipant(player, true);
+            delete session.playerMap[player.id];
             // leave from socket room
             socket.leave(player.sessionId.toString());
-
-            // WIP: Remove this participants from this quiz in DB records here
-
-            // broadcast that user has left
-            $socketIO
+            // broadcast to other players
+            socket
                 .to(player.sessionId.toString())
                 .emit("playerLeave", player.profile());
             // disconnect
             socket.disconnect();
         } catch (error) {
-            if (process.env.SOCKET_MODE === "debug") {
-                // https://stackoverflow.com/questions/18391212
-                socket.send(
-                    JSON.stringify(error, Object.getOwnPropertyNames(error))
-                );
-            }
+            sendErr(error, socket);
             socket.disconnect();
         }
     }
@@ -244,10 +259,14 @@ export class GameHandler {
             const session = this.sessions[player.sessionId];
 
             if (
-                player.role === "host" &&
+                // if is host
+                player.role === Role.host &&
+                // and game is pending
                 session.status == GameStatus.Pending
             ) {
+                // set game status to starting
                 session.status = GameStatus.Starting;
+                // set the start time
                 session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
                 // Broadcast that quiz will be started
                 $socketIO
@@ -256,12 +275,11 @@ export class GameHandler {
                         "starting",
                         (session.quizStartsAt - Date.now()).toString()
                     );
-                // pass-correct-this-context-to-settimeout-callback
-                // https://stackoverflow.com/questions/2130241
                 setTimeout(
                     () => {
+                        // after time out
                         session.status = GameStatus.Running;
-                        session.isReadyForNextQuestion = true;
+                        session.setToNextQuestion();
                         // release the firt question
                         this.next(socket);
                     },
@@ -272,12 +290,7 @@ export class GameHandler {
                 );
             }
         } catch (error) {
-            if (process.env.SOCKET_MODE === "debug") {
-                // https://stackoverflow.com/questions/18391212
-                socket.send(
-                    JSON.stringify(error, Object.getOwnPropertyNames(error))
-                );
-            }
+            sendErr(error, socket);
             socket.disconnect();
         }
     }
@@ -287,24 +300,31 @@ export class GameHandler {
             const player: Player = await this.verifySocket(socket);
             const session = this.sessions[player.sessionId];
 
-            if (player.role === "host") {
+            if (player.role === Role.host) {
                 // Broadcast that quiz has been aborted
                 $socketIO
                     .to(player.sessionId.toString())
                     .emit("cancelled", null);
-                session.close($socketIO, socket);
 
-                // reset a sample session under debug mode
+                // end this session
+                this.endSession(session);
+                // reset a sample session if is debug mode
                 this.checkEnv();
             }
         } catch (error) {
-            if (process.env.SOCKET_MODE === "debug") {
-                // https://stackoverflow.com/questions/18391212
-                socket.send(
-                    JSON.stringify(error, Object.getOwnPropertyNames(error))
-                );
-            }
+            sendErr(error, socket);
             socket.disconnect();
+        }
+    }
+
+    endSession(session: GameSession) {
+        for (const socketId of Object.keys(
+            $socketIO.sockets.adapter.rooms[session.sessionId.toString()]
+                .sockets
+        )) {
+            // loop over socket in the room
+            // and disconnect them
+            $socketIO.sockets.connected[socketId].disconnect();
         }
     }
 
@@ -313,57 +333,38 @@ export class GameHandler {
             const player: Player = await this.verifySocket(socket);
             const session = this.sessions[player.sessionId];
 
-            if (player.role === "host") {
-                //  broadcast next question to participants
-                if (session.status === GameStatus.Pending) {
-                    this.start(socket);
-                } else if (session.status === GameStatus.Starting) {
-                    // nothing to do, ignore this event
-                } else if (session.status === GameStatus.Running) {
-                    try {
-                        const questionIndex = session.nextQuestionIdx();
-
-                        if (Object.keys(session.playerMap).length <= 0) {
-                            session.setToNextQuestion();
-                        }
-                        // send question without answer to participants
-                        socket
-                            .to(player.sessionId.toString())
-                            .emit(
-                                "nextQuestion",
-                                formatQuestion(questionIndex, session, false)
-                            );
-
-                        // send question with answer to the host
-                        $socketIO
-                            .to(socket.id)
-                            .emit(
-                                "nextQuestion",
-                                formatQuestion(questionIndex, session, true)
-                            );
-                    } catch (err) {
-                        if (err === GameErr.NoMoreQuestion) {
-                            if (session.hasFinalRankReleased === false) {
-                                this.showBoard(socket);
-                                session.hasFinalRankReleased = true;
-                            } else {
-                                this.abort(socket);
-                            }
-                        } else if (err === GameErr.ThereIsRunningQuestion) {
-                            console.log(err);
-                        } else {
-                            console.log(err);
-                        }
+            if (
+                player.role === Role.host &&
+                session.status === GameStatus.Running
+            ) {
+                // try to get the index of next question
+                const [res, questionIndex] = session.nextQuestionIdx();
+                if (res === Res.Success) {
+                    // allow host move to next question if currentlly there is
+                    // no player in the
+                    if (Object.keys(session.playerMap).length <= 0) {
+                        session.setToNextQuestion();
                     }
+                    // send question without answer to participants
+                    socket
+                        .to(player.sessionId.toString())
+                        .emit(
+                            "nextQuestion",
+                            formatQuestion(questionIndex, session, false)
+                        );
+
+                    // send question with answer to the host
+                    socket.emit(
+                        "nextQuestion",
+                        formatQuestion(questionIndex, session, true)
+                    );
+                } else {
+                    // if failed to get next question index, print log
+                    console.log(res);
                 }
             }
         } catch (error) {
-            if (process.env.SOCKET_MODE === "debug") {
-                // https://stackoverflow.com/questions/18391212
-                socket.send(
-                    JSON.stringify(error, Object.getOwnPropertyNames(error))
-                );
-            }
+            sendErr(error, socket);
             socket.disconnect();
         }
     }
@@ -373,17 +374,43 @@ export class GameHandler {
             const player: Player = await this.verifySocket(socket);
             const session = this.sessions[player.sessionId];
 
-            if (player.role === "host" && !session.isCurrQuestionActive()) {
-                //  broadcast Board to participants
-                session.releaseBoard(socket);
+            if (
+                player.role === Role.host &&
+                session.questionIndex !== session.nextQuestionIndex
+            ) {
+                //  get ranked records of players
+                const rank = session.rankPlayers();
+
+                for (const { id, socketId, record } of Object.values(
+                    session.playerMap
+                )) {
+                    // get player ahead
+                    const playerAheadRecord =
+                        record.newPos === null || record.newPos === 0
+                            ? null
+                            : rank[record.newPos - 1];
+                    // form question outcome
+                    const questionOutcome = {
+                        question: session.questionIndex,
+                        leaderboard: rank.slice(0, 5),
+                        record: session.playerMap[Number(id)].formatRecord()
+                            .record,
+                        playerAhead: playerAheadRecord,
+                    };
+                    // emit questionOutcome to participants
+                    $socketIO
+                        .to(socketId)
+                        .emit("questionOutcome", questionOutcome);
+                }
+
+                // emit questionOutcome to the host
+                socket.emit("questionOutcome", {
+                    question: session.questionIndex,
+                    leaderboard: rank,
+                });
             }
         } catch (error) {
-            if (process.env.SOCKET_MODE === "debug") {
-                // https://stackoverflow.com/questions/18391212
-                socket.send(
-                    JSON.stringify(error, Object.getOwnPropertyNames(error))
-                );
-            }
+            sendErr(error, socket);
             socket.disconnect();
         }
     }
@@ -411,3 +438,10 @@ export class GameHandler {
         }
     }
 }
+
+export const sendErr = (error: any, socket: Socket) => {
+    if (process.env.SOCKET_MODE === "debug") {
+        // https://stackoverflow.com/questions/18391212
+        socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    }
+};
