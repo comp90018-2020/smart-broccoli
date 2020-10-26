@@ -12,27 +12,22 @@ class ProfileJoined extends StatefulWidget {
   /// Whether fields are in edit mode
   final bool _isEdit;
 
-  ProfileJoined(this._isEdit);
+  final TextEditingController _nameController;
+
+  ProfileJoined(this._isEdit, this._nameController);
 
   @override
   State<StatefulWidget> createState() => new _ProfileJoinedState();
 }
 
 class _ProfileJoinedState extends State<ProfileJoined> {
-  final TextEditingController _nameController = new TextEditingController();
-
   @override
   void initState() {
     final User user =
         Provider.of<UserProfileModel>(context, listen: false).user;
-    _nameController.text = user == null || user.isAnonymous ? "" : user.name;
+    widget._nameController.text =
+        user == null || user.isAnonymous ? "" : user.name;
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
   }
 
   @override
@@ -46,7 +41,7 @@ class _ProfileJoinedState extends State<ProfileJoined> {
           padding: const EdgeInsets.all(24),
           child: TableCard(
             [
-              NameTableRow(widget._isEdit, _nameController),
+              NameTableRow(widget._isEdit, widget._nameController),
             ],
           ),
         ),

@@ -11,35 +11,26 @@ class ProfileRegistered extends StatefulWidget {
   /// Whether fields are in edit mode
   final bool _isEdit;
 
-  ProfileRegistered(this._isEdit);
+  final TextEditingController _nameController;
+  final TextEditingController _emailController;
+  final TextEditingController _passwordController;
+  final TextEditingController _confirmPasswordController;
+
+  ProfileRegistered(this._isEdit, this._nameController, this._emailController,
+      this._passwordController, this._confirmPasswordController);
 
   @override
   State<StatefulWidget> createState() => new _ProfileRegisteredState();
 }
 
 class _ProfileRegisteredState extends State<ProfileRegistered> {
-  final TextEditingController _nameController = new TextEditingController();
-  final TextEditingController _emailController = new TextEditingController();
-  final TextEditingController _passwordController = new TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      new TextEditingController();
-
   @override
   void initState() {
-    _nameController.text =
+    widget._nameController.text =
         Provider.of<UserProfileModel>(context, listen: false).user?.name;
-    _emailController.text =
+    widget._emailController.text =
         Provider.of<UserProfileModel>(context, listen: false).user?.email;
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _nameController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
   }
 
   @override
@@ -53,8 +44,8 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: TableCard(
             [
-              NameTableRow(widget._isEdit, _nameController),
-              EmailTableRow(widget._isEdit, _emailController),
+              NameTableRow(widget._isEdit, widget._nameController),
+              EmailTableRow(widget._isEdit, widget._emailController),
             ],
           ),
         ),
@@ -73,9 +64,10 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
                 ),
                 TableCard(
                   [
-                    PasswordTableRow(widget._isEdit, _passwordController),
+                    PasswordTableRow(
+                        widget._isEdit, widget._passwordController),
                     PasswordConfirmTableRow(
-                        widget._isEdit, _confirmPasswordController),
+                        widget._isEdit, widget._confirmPasswordController),
                   ],
                 ),
               ],
