@@ -32,6 +32,8 @@ class Quiz {
   int timeLimit;
   List<Question> questions;
 
+  final bool complete;
+
   /// Construtor for use when user creates a new quiz
   factory Quiz(String title, int groupId, QuizType type,
           {String description,
@@ -39,21 +41,23 @@ class Quiz {
           int timeLimit,
           List<Question> questions}) =>
       Quiz._internal(null, null, GroupRole.OWNER, title, groupId, type,
-          description, isActive, timeLimit, questions, null);
+          description, isActive, timeLimit, questions, null, false);
 
   /// Constructor for internal use only
   Quiz._internal(
-      this.id,
-      this.pictureId,
-      this.role,
-      this.title,
-      this.groupId,
-      this.type,
-      this.description,
-      this.isActive,
-      this.timeLimit,
-      this.questions,
-      this.sessions);
+    this.id,
+    this.pictureId,
+    this.role,
+    this.title,
+    this.groupId,
+    this.type,
+    this.description,
+    this.isActive,
+    this.timeLimit,
+    this.questions,
+    this.sessions,
+    this.complete,
+  );
 
   factory Quiz.fromJson(Map<String, dynamic> json) {
     final Iterable sessions = (json['Sessions'] as List)?.map((session) {
@@ -72,7 +76,8 @@ class Quiz {
         json['active'],
         json['timeLimit'],
         null,
-        sessions != null ? List.unmodifiable(sessions) : null);
+        sessions != null ? List.unmodifiable(sessions) : null,
+        json['complete']);
     quiz.questions = (json['questions'] as List)
         ?.map((question) => question['type'] == 'truefalse'
             ? TFQuestion.fromJson(question)
@@ -91,6 +96,7 @@ class Quiz {
       'description': description,
       'active': isActive,
       'timeLimit': timeLimit,
+      'complete': complete
     };
     if (questions != null)
       json['questions'] =
