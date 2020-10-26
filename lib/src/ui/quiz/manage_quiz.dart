@@ -17,7 +17,7 @@ class ManageQuiz extends StatefulWidget {
 /// The user is the owner of
 class _ManageQuizState extends State<ManageQuiz> {
   // TODO: replace with provider inside build
-  int gid = null;
+  int gid;
 
   // See : https://stackoverflow.com/questions/58371874/what-is-diffrence-between-didchangedependencies-and-initstate
   @override
@@ -93,13 +93,15 @@ class _ManageQuizState extends State<ManageQuiz> {
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton(
-                      value: gid,
-                      underline: Container(),
-                      onChanged: (i) {
-                        updateList(i);
-                      },
-                      isExpanded: true,
-                      items: [makeItem(null,"All Groups")] + group.map((e) => makeItem(e.id,e.name)).toList(),),
+                    value: gid,
+                    underline: Container(),
+                    onChanged: (i) {
+                      updateList(i);
+                    },
+                    isExpanded: true,
+                    items: [makeItem(null, "All Groups")] +
+                        group.map((e) => makeItem(e.id, e.name)).toList(),
+                  ),
                 ),
               ),
             ),
