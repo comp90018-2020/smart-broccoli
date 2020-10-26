@@ -50,7 +50,11 @@ class _QuizCardState extends State<QuizCard> {
                           ? AspectRatio(
                               aspectRatio: widget.aspectRatio,
                               child: widget.quiz.picture == null
-                                  ? Placeholder()
+                                  ? FractionallySizedBox(
+                                      widthFactor: 0.8,
+                                      heightFactor: 0.8,
+                                      child: Image(
+                                          image: AssetImage('assets/icon.png')))
                                   : Image.memory(widget.quiz.picture,
                                       fit: BoxFit.cover),
                             )

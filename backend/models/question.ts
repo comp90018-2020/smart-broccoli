@@ -1,5 +1,5 @@
 import { Picture } from "models";
-import Sequelize from "sequelize";
+import Sequelize, { Optional } from "sequelize";
 
 const schema: Sequelize.ModelAttributes = {
     id: {
@@ -23,6 +23,19 @@ const schema: Sequelize.ModelAttributes = {
         type: Sequelize.JSONB,
         allowNull: true,
     },
+    // Number of correct answers
+    numCorrect: {
+        type: Sequelize.VIRTUAL,
+        get() {
+            if (this.getDataValue("type") === "truefalse") return 1;
+            return this.getDataValue("options").reduce(
+                (accumulator: number, value: OptionAttributes) =>
+                    // Accumulate when correct
+                    accumulator + (value.correct ? 1 : 0),
+                0
+            );
+        },
+    },
 };
 
 export interface OptionAttributes {
@@ -31,17 +44,20 @@ export interface OptionAttributes {
 }
 
 interface QuestionAttributes {
-    id?: number;
+    id: number;
     quizId: number;
     text?: string;
     type: string;
     tf?: boolean;
     options?: OptionAttributes[];
     pictureId?: number;
+    numCorrect: number;
 }
+interface QuestionCreationAttributes
+    extends Optional<QuestionAttributes, "id" | "numCorrect"> {}
 
 export default class Question
-    extends Sequelize.Model<QuestionAttributes>
+    extends Sequelize.Model<QuestionAttributes, QuestionCreationAttributes>
     implements QuestionAttributes {
     public text?: string;
     public type!: string;
@@ -52,6 +68,7 @@ export default class Question
 
     public readonly id!: number;
     public readonly quizId: number;
+    public readonly numCorrect: number;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {

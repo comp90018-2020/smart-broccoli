@@ -32,7 +32,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
   String picturePath;
 
   // Should be cloned (to allow discard of changes)
-  MCQuestion question = MCQuestion(null, 'Text', []);
+  MCQuestion question = MCQuestion('Text', []);
   int questionNumber = 1;
 
   @override

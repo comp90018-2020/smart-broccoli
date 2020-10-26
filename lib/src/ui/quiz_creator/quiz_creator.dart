@@ -195,7 +195,7 @@ class _QuizCreateState extends State<QuizCreate> {
                   shrinkWrap: true,
                   itemCount: 2,
                   itemBuilder: (BuildContext context, int index) {
-                    return _questionCard(index, MCQuestion(null, 'Hello', []));
+                    return _questionCard(index, MCQuestion('Hello', []));
                   },
                 ),
 
