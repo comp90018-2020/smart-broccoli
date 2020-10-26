@@ -1,16 +1,18 @@
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/socket_data/correct_answer.dart';
 import 'package:smart_broccoli/src/socket_data/question_answered.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../socket_data/user.dart' as SocketUser;
-import '../socket_data/question.dart' as questionType;
+import '../socket_data/question.dart';
 import '../socket_data/outcome.dart';
 import '../data/group.dart';
 
 enum SessionState {
   PENDING, // in lobby and waiting (unknown how long to start)
   STARTING, // the quiz will start in a known number of seconds
-  QUESTION, // the quiz is currently on a question
-  OUTCOME, // between questions (LeaderBoard)
+  QUESTION,
+  ANSWER,
+  OUTCOME,
   FINISHED,
   ABORTED,
 }
@@ -27,11 +29,14 @@ class GameSessionModel {
 
   Map<int, SocketUser.User> players = {};
   int startCountDown;
-  questionType.Question question;
+  NextQuestion nextQues;
+  int time;
+  int totalQuestion;
   Outcome outcome;
-  // List<int> questionAnswered = [];
   QuestionAnswered questionAnswered;
-  GroupRole userRole;
+  CorrectAnswer correctAnswer;
+  GroupRole role;
+  Answer answer;
   SessionState state;
 
   /// The socket which we enclose
@@ -62,19 +67,32 @@ class GameSessionModel {
     socket.on('welcome', (message) {
       print('welcome');
       print(message);
-      List users = message as List;
+      List users = message['players'] as List;
       players = Map.fromIterable(users.map((u) => SocketUser.User.fromJson(u)),
           key: (u) => u.id);
+      role = message['role'];
+
+      //need to check
+      if( 'pending' == message['state'] )
+        state = SessionState.PENDING;
+      else if( 'starting' == message['state'] )
+        state = SessionState.STARTING;
+      else if( 'running' == message['state'] )
+        state = SessionState.QUESTION;
+      else
+        state = SessionState.ABORTED;
+
       print(players);
-      state = SessionState.PENDING;
+      print(role);
+      print(state);
       // notifyListeners();
     });
 
     socket.on('playerJoin', (message) {
-      print("playerJoin");
       print(message);
       var user = SocketUser.User.fromJson(message);
       players[user.id] = user;
+      print("playerJoin");
       print(players);
       // notifyListeners();
     });
@@ -108,8 +126,8 @@ class GameSessionModel {
     socket.on('nextQuestion', (message) {
       print("nextQuestion");
       print(message);
-      question = questionType.Question(message);
-      print(question);
+      nextQues = NextQuestion.fromJson(message);
+      print(nextQues);
       state = SessionState.QUESTION;
       // notifyListeners();
     });
@@ -117,20 +135,26 @@ class GameSessionModel {
     socket.on('questionAnswered', (message) {
       print("questionAnswered");
       print(message);
-      // questionAnswered.add(message['question']);
-      // questionAnswered.add(message['count']);
-      // questionAnswered.add(message['total']);
       questionAnswered = QuestionAnswered.fromJson(message);
       print(questionAnswered);
       state = SessionState.QUESTION;
       // notifyListeners();
     });
 
+    socket.on('correctAnswer', (message) {
+      print("questionAnswered");
+      print(message);
+      correctAnswer = CorrectAnswer.fromJson(message);
+      print(correctAnswer);
+      state = SessionState.ANSWER;
+      // notifyListeners();
+    });
+
     socket.on('questionOutcome', (message) {
       print("questionOutcome: ");
       print(message);
-      print(userRole);
-      if (userRole == GroupRole.OWNER) {
+      print(role);
+      if (role == GroupRole.OWNER) {
         outcome = Outcome.fromJson(message);
         print(outcome);
       } else {
@@ -139,6 +163,10 @@ class GameSessionModel {
       }
       state = SessionState.OUTCOME;
       // notifyListeners();
+    });
+
+    socket.on('disconnect', (message) {
+      socket.clearListeners();
     });
   }
 
@@ -166,9 +194,8 @@ class GameSessionModel {
     socket.disconnect();
   }
 
-  void answerQuestion(int questionNo, {List<int> mc, bool tf}) {
-    socket.emit('answer',
-        {'question': questionNo, 'MCSelection': mc, 'TFSelection': tf});
+  void answerQuestion() {
+    socket.emit('answer', answer.toJson());
   }
 
   // /// Subscribe to socket event
