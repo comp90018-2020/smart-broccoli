@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
+import 'package:smart_broccoli/src/remote.dart';
 
 import 'auth_state.dart';
 import 'user_repository.dart';
@@ -21,13 +23,17 @@ class UserProfileModel extends ChangeNotifier {
   /// Picture storage service
   final PictureStash _picStash;
 
+  UserApi _userApi;
+
   /// Views subscribe to the fields below
   User _user;
   User get user => _user;
 
   /// Constructor for external use
-  UserProfileModel(this._keyValueStore, this._authStateModel, this._userRepo,
-      this._picStash) {
+  UserProfileModel(
+      this._keyValueStore, this._authStateModel, this._userRepo, this._picStash,
+      {UserApi userApi}) {
+    _userApi = userApi ?? UserApi();
     // load last record of profile and picture
     try {
       _user = User.fromJson(json.decode(_keyValueStore.getString('user')));
@@ -46,5 +52,10 @@ class UserProfileModel extends ChangeNotifier {
         email: email, password: password, name: name);
     _keyValueStore.setString('user', json.encode(_user.toJson()));
     notifyListeners();
+  }
+
+  Future<void> updateProfilePic(Uint8List bytes) async {
+    await _userApi.setProfilePic(_authStateModel.token, bytes);
+    refreshUser();
   }
 }

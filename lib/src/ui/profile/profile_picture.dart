@@ -1,11 +1,13 @@
 // Profile
 // References:
 // https://medium.com/fabcoding/adding-an-image-picker-in-a-flutter-app-pick-images-using-camera-and-gallery-photos-7f016365d856
-import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 class ProfilePicture extends StatefulWidget {
   /// Whether picture is editable
@@ -18,7 +20,6 @@ class ProfilePicture extends StatefulWidget {
 }
 
 class _ProfilePictureState extends State<ProfilePicture> {
-  File _image;
   final picker = ImagePicker();
 
   @override
@@ -117,12 +118,12 @@ class _ProfilePictureState extends State<ProfilePicture> {
   // Selector (from package)
   void _openPictureSelector(ImageSource source) async {
     PickedFile pickedFile = await picker.getImage(source: source);
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      } else {
-        print('No image selected.');
-      }
-    });
+    if (pickedFile == null) return;
+    try {
+      await Provider.of<UserProfileModel>(context, listen: false)
+          .updateProfilePic(await pickedFile.readAsBytes());
+    } catch (_) {
+      showErrorDialog(context, "Cannot update profile picture");
+    }
   }
 }
