@@ -22,15 +22,23 @@ class QuestionArgs {
 class QuestionCreate extends StatefulWidget {
 
   final Quiz passedQuiz;
+  final int passedQuestionIndex;
 
-  QuestionCreate( {Key key, @required this.passedQuiz}) : super(key: key);
-
+  QuestionCreate( {Key key, @required this.passedQuiz, this.passedQuestionIndex}) : super(key: key);
 
   @override
   _QuestionCreateState createState() => _QuestionCreateState();
 }
 
 class _QuestionCreateState extends State<QuestionCreate> {
+
+
+
+  MCQuestion question;
+  var questionTextController;
+  List<TextEditingController> _optionTextControllers;
+  int questionNumber;
+  String tempImgId;
 
   void printPassedQ(){
     print("Checking status of widget");
@@ -39,24 +47,27 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
   @override
   void initState() {
+    printPassedQ();
     // TODO: implement initState
     super.initState();
-    printPassedQ();
+    //Case of editing a question
+    if(widget.passedQuestionIndex != null){
+      questionNumber = widget.passedQuestionIndex + 1;
+      question = widget.passedQuiz.questions[widget.passedQuestionIndex];
+      questionTextController  = TextEditingController(text: question.text);
+      _optionTextControllers = <TextEditingController>[];
+
+
+      //Case od creating a new question
+     }else{
+      print("here");
+      questionNumber = widget.passedQuiz.questions.length;
+      question = MCQuestion(null, 'Text', [], imgId: null);
+      questionTextController  = TextEditingController();
+      _optionTextControllers = <TextEditingController>[];
+    }
+
   }
-  var questionTextController  = TextEditingController();
-  // Text controllers for answer
-  // TODO: initial state needs to be created
-  var _optionTextControllers = <TextEditingController>[];
-
-  // The current picked file
-  String picturePath;
-
-
-  // Should be cloned (to allow discard of changes)
-  MCQuestion question = MCQuestion(null, 'Text', []);
-  int questionNumber = 1;
-
-
 
 
   @override
@@ -99,8 +110,17 @@ class _QuestionCreateState extends State<QuestionCreate> {
               return _showUnsuccessful("Cannot create question", "At least two possible answers are required");
             }
 
- 
-            widget.passedQuiz.questions.add(MCQuestion(widget.passedQuiz,questionTextController.text, question.options, imgId: picturePath));
+            question.text = questionTextController.text;
+
+            for (var i = 0; i < _optionTextControllers.length; i++) {
+              question.options[i].text = _optionTextControllers[i].text;
+            }
+
+            if(widget.passedQuestionIndex == null){
+              widget.passedQuiz.questions.add(question);
+            }else{
+              widget.passedQuiz.questions[widget.passedQuestionIndex] = question;
+            }
             Navigator.pop(context, widget.passedQuiz);
           },
           child: Text(
@@ -142,9 +162,11 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 ),
 
                 // Question image
-                PictureCard(picturePath, (path) {
+                PictureCard(question.imgId, (path) {
+
+                  print(question.imgId);
                   setState(() {
-                    picturePath = path;
+                    question.imgId = path;
                   });
                 }),
 
@@ -168,6 +190,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: question.options.length,
                   itemBuilder: (BuildContext context, int index) {
+                    _optionTextControllers.add(TextEditingController(text: question.options[index].text));
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6.0),
                       child: _optionCard(index, question.options[index]),
@@ -235,6 +258,9 @@ class _QuestionCreateState extends State<QuestionCreate> {
           children: <Widget>[
             // Answer text
             TextFormField(
+              onChanged: (text){
+                question.options[index].text = text;
+              },
                 controller: _optionTextControllers[index],
                 decoration: InputDecoration(labelText: 'Answer')),
 

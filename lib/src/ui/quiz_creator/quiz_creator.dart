@@ -222,7 +222,7 @@ class _QuizCreateState extends State<QuizCreate> {
                   shrinkWrap: true,
                   itemCount: questionsInQuiz(),
                   itemBuilder: (BuildContext context, int index) {
-                    return _questionCard(index, selectedQuestions.elementAt(index));
+                    return _questionCard(index, selectedQuestions.elementAt(index), context);
                   },
                 ),
 
@@ -238,7 +238,7 @@ class _QuizCreateState extends State<QuizCreate> {
                           spacing: 3,
                           children: [Icon(Icons.add), Text('ADD QUESTION')]),
                       onPressed: () {
-                        _navigateAndDisplaySelection(context);
+                        create_edit_question(context);
                       },
                     ),
                   ),
@@ -263,12 +263,12 @@ class _QuizCreateState extends State<QuizCreate> {
   }
 
 
-  _navigateAndDisplaySelection(BuildContext context) async {
+  create_edit_question(BuildContext context, {int questionIndex}) async {
     // Navigator returns a Future that completes after calling
     dynamic result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => QuestionCreate(passedQuiz: new Quiz(quizNameController.text, selectedGroup.id, selectedQuizType, description: "No description", isActive: false, timeLimit: selectedTime, questions: selectedQuestions)),
+        builder: (context) => QuestionCreate(passedQuiz: new Quiz(quizNameController.text, selectedGroup.id, selectedQuizType, description: "No description", isActive: false, timeLimit: selectedTime, questions: selectedQuestions), passedQuestionIndex: questionIndex),
       ),
     );
 
@@ -287,11 +287,14 @@ class _QuizCreateState extends State<QuizCreate> {
 
 
   // Used to represent questions
-  Widget _questionCard(int index, Question question) {
+  Widget _questionCard(int index, Question question, BuildContext context) {
+
+
     var questionTextI = index +1;
 
     return GestureDetector(
       onTap: (){
+        create_edit_question(context, questionIndex: index);
 
       },
       child: Card(
@@ -382,8 +385,6 @@ class _QuizCreateState extends State<QuizCreate> {
         ),
       );
   }
-
-
 
   void _createQuiz() async {
     if (quizNameController.text == "")
