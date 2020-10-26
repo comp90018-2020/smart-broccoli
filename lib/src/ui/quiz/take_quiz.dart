@@ -46,11 +46,10 @@ class _TakeQuizState extends State<TakeQuiz> {
       tabViews: [
         // All quizzes
         // Somewhat wasteful to have multiple widgets, but that's how tabs work
-        Consumer<QuizCollectionModel>(
-            builder: (context, collection, child) {
-              return QuizContainer(collection.getQuizzesWhere(),
-                  header: QuizPinBox(key: _buildQuizKey));
-            }),
+        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+          return QuizContainer(collection.getQuizzesWhere(),
+              header: QuizPinBox(key: _buildQuizKey));
+        }),
 
         // Live quiz
         Consumer<QuizCollectionModel>(
@@ -58,7 +57,8 @@ class _TakeQuizState extends State<TakeQuiz> {
             return QuizContainer(
                 collection.getQuizzesWhere(type: QuizType.LIVE),
                 header: QuizPinBox());
-          },),
+          },
+        ),
 
         /// Self-paced quiz has Text to fill the vertical space
         Consumer<QuizCollectionModel>(
@@ -75,11 +75,11 @@ class _TakeQuizState extends State<TakeQuiz> {
                         style: TextStyle(color: Colors.white),
                       ))),
             );
-          },),
+          },
+        ),
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,
     );
   }
-
 }

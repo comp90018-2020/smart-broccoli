@@ -1,6 +1,6 @@
 import 'dart:collection';
-import 'package:flutter/widgets.dart';
 
+import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
@@ -23,6 +23,7 @@ class QuizCollectionModel extends ChangeNotifier {
 
   /// Views subscribe to the fields below
   Quiz _selectedQuiz;
+
   Quiz get selectedQuiz => _selectedQuiz;
 
   Map<int, Quiz> _availableQuizzes = {};
@@ -30,9 +31,11 @@ class QuizCollectionModel extends ChangeNotifier {
 
   UnmodifiableListView<Quiz> get availableQuizzes =>
       UnmodifiableListView(_availableQuizzes.values);
+
   UnmodifiableListView<Quiz> get createdQuizzes =>
       UnmodifiableListView(_createdQuizzes.values);
   GameSession _currentSession;
+
   GameSession get currentSession => _currentSession;
 
   /// Constructor for external use
@@ -50,11 +53,10 @@ class QuizCollectionModel extends ChangeNotifier {
           (groupId == null || quiz.groupId == groupId) &&
           (type == null || quiz.type == type)));
 
-  UnmodifiableListView<Quiz> getCreatedQuizzesWhere({int groupId, QuizType type}) =>
-      UnmodifiableListView([
-        ..._createdQuizzes.values
-      ].where((quiz) =>
-      (groupId == null || quiz.groupId == groupId) &&
+  UnmodifiableListView<Quiz> getCreatedQuizzesWhere(
+          {int groupId, QuizType type}) =>
+      UnmodifiableListView([..._createdQuizzes.values].where((quiz) =>
+          (groupId == null || quiz.groupId == groupId) &&
           (type == null || quiz.type == type)));
 
   Future<void> selectQuiz(int id) async {
