@@ -42,7 +42,7 @@ class AuthStateModel extends ChangeNotifier {
   }
 
   Future<void> promote(String email, String password, String name) async {
-    await _authApi.promote(email, password, name);
+    await _authApi.promote(_token, email, password, name);
   }
 
   Future<void> login(String email, String password) async {
