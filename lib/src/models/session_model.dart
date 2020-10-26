@@ -66,7 +66,7 @@ class GameSessionModel {
       players = Map.fromIterable(users.map((u) => SocketUser.User.fromJson(u)),
           key: (u) => u.id);
       print(players);
-
+      state = SessionState.PENDING;
       // notifyListeners();
     });
 
@@ -93,12 +93,15 @@ class GameSessionModel {
       print(message);
       startCountDown = int.parse(message);
       print(startCountDown);
+      state = SessionState.STARTING;
       // notifyListeners();
     });
 
     socket.on('cancelled', (message) {
       // socket.disconnected;
       print("cancelled");
+      socket.disconnect();
+      state = SessionState.ABORTED;
       // notifyListeners();
     });
 
@@ -107,6 +110,7 @@ class GameSessionModel {
       print(message);
       question = questionType.Question(message);
       print(question);
+      state = SessionState.QUESTION;
       // notifyListeners();
     });
 
@@ -118,6 +122,7 @@ class GameSessionModel {
       // questionAnswered.add(message['total']);
       questionAnswered = QuestionAnswered.fromJson(message);
       print(questionAnswered);
+      state = SessionState.QUESTION;
       // notifyListeners();
     });
 
@@ -132,6 +137,7 @@ class GameSessionModel {
         outcome = OutcomeUser.fromJson(message);
         print(outcome);
       }
+      state = SessionState.OUTCOME;
       // notifyListeners();
     });
   }
@@ -143,6 +149,7 @@ class GameSessionModel {
 
   void abortQuiz() {
     socket.emit('abort');
+    socket.disconnect();
   }
 
   void nextQuestion() {
@@ -156,10 +163,12 @@ class GameSessionModel {
   /// participant action
   void quitQuiz() {
     socket.emit('quit');
+    socket.disconnect();
   }
 
-  void answerQuestion(dynamic answer) {
-    socket.emit('answer', answer);
+  void answerQuestion(int questionNo, {List<int> mc, bool tf}) {
+    socket.emit('answer',
+        {'question': questionNo, 'MCSelection': mc, 'TFSelection': tf});
   }
 
   // /// Subscribe to socket event
