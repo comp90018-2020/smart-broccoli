@@ -24,5 +24,7 @@ class OutcomeUser extends Outcome {
               .map((e) => UserRank.fromJson(e))
               .toList(),
           Record.fromJson(json['record']),
-          json['playerAhead'] ?? UserRank.fromJson(json['playerAhead']));
+          json['playerAhead'] == null
+              ? null
+              : UserRank.fromJson(json['playerAhead']));
 }
