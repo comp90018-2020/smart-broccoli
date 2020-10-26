@@ -80,7 +80,11 @@ export class Player {
 export class Answer {
     constructor(
         readonly questionNo: number,
-        readonly MCSelection: number,
+        readonly MCSelection: number[],
         readonly TFSelection: boolean
-    ) {}
+    ) {
+        if (MCSelection !== null) {
+            this.MCSelection = this.MCSelection.sort();
+        }
+    }
 }

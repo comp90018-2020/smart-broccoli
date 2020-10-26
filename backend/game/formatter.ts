@@ -12,8 +12,11 @@ export const formatQuestion = (
     session: GameSession,
     isHost: boolean
 ) => {
+    // @ts-ignore
     const questions = session.quiz.questions;
-    const questionCopy: any = questions[questionIndex];
+    const questionCopy: any = JSON.parse(
+        JSON.stringify(questions[questionIndex])
+    );
     if (!isHost) {
         if (questionCopy.tf !== null) {
             questionCopy.tf = null;

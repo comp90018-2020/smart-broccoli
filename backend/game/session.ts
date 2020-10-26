@@ -14,8 +14,8 @@ export class GameSession {
     public host: Player = null;
     // players info, user id to map
     public playerMap: { [playerId: number]: Player } = {};
-    public nextQuestionIndex = 0;
-    public questionIndex = 0;
+    public nextQuestionIndex = -1;
+    public questionIndex = -1;
     public quizStartsAt = 0;
     public preQuestionReleasedAt = 0;
     public isReadyForNextQuestion: boolean = true;
@@ -52,13 +52,14 @@ export class GameSession {
             return new Answer(questionIndex, null, tf);
         } else {
             let i = 0;
+            const correctOptions: number[] = [];
             for (const option of options) {
                 if (option.correct) {
-                    return new Answer(questionIndex, i, null);
+                    correctOptions.push(i);
                 }
                 ++i;
             }
-            throw `No ans in Question[${questionIndex}], this should never happen.`;
+            return new Answer(questionIndex, correctOptions, null);
         }
     }
 
@@ -72,11 +73,6 @@ export class GameSession {
         ) {
             return [Res.ThereIsRunningQuestion, -1];
         } else {
-            setTimeout(() => {
-                if (this.nextQuestionIndex === this.questionIndex) {
-                    this.setToNextQuestion();
-                }
-            }, this.quiz.timeLimit * 1000);
             this.questionIndex = this.nextQuestionIndex;
             this.preQuestionReleasedAt = Date.now();
             this.isReadyForNextQuestion = false;
@@ -92,7 +88,8 @@ export class GameSession {
         let correct;
         if (correctAnswer.MCSelection !== null) {
             correct =
-                answer.MCSelection === correctAnswer.MCSelection ? true : false;
+                JSON.stringify(answer.MCSelection) ===
+                JSON.stringify(correctAnswer.MCSelection);
         } else {
             correct =
                 answer.TFSelection === correctAnswer.TFSelection ? true : false;
