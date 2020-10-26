@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'profile_registered.dart';
@@ -44,7 +45,29 @@ class _ProfileMainState extends State<ProfileMain> {
         CupertinoButton(
           child: Text(_isEdit ? "Save" : "Edit",
               style: const TextStyle(color: Colors.white)),
-          onPressed: () {
+          onPressed: () async {
+            if (_isEdit) {
+              try {
+                // password fields must be empty or match
+                if (_passwordController.text != _confirmPasswordController.text)
+                  return showErrorDialog(context, "Passwords do not match");
+                await Provider.of<UserProfileModel>(context, listen: false)
+                    .updateUser(
+                  name: _nameController.text.isEmpty
+                      ? null
+                      : _nameController.text,
+                  email: _emailController.text.isEmpty
+                      ? null
+                      : _emailController.text,
+                  password: _passwordController.text.isEmpty
+                      ? null
+                      : _passwordController.text,
+                );
+                _showSuccessDialogue();
+              } catch (_) {
+                showErrorDialog(context, "Cannot update profile");
+              }
+            }
             setState(() {
               _isEdit = !_isEdit;
             });
@@ -68,4 +91,18 @@ class _ProfileMainState extends State<ProfileMain> {
       ),
     );
   }
+
+  Future<void> _showSuccessDialogue() async => showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("Success"),
+          content: Text("Profile updated"),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: Navigator.of(context).pop,
+            ),
+          ],
+        ),
+      );
 }
