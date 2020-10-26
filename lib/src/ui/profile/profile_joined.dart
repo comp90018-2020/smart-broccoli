@@ -3,30 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models/user_profile.dart';
+import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'profile_picture.dart';
 import 'profile_promoting.dart';
 import 'table_items.dart';
 
-class ProfileJoined extends StatefulWidget {
-  /// Whether fields are in edit mode
-  final bool _isEdit;
-
-  final TextEditingController _nameController;
-
-  ProfileJoined(this._isEdit, this._nameController);
+class ProfileJoined extends StatefulWidget implements ProfileEditor {
+  ProfileJoined({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => new _ProfileJoinedState();
 }
 
-class _ProfileJoinedState extends State<ProfileJoined> {
+class _ProfileJoinedState extends ProfileEditorState {
+  final _nameController = TextEditingController();
+
+  bool _isEdit = false;
+
   @override
   void initState() {
     final User user =
         Provider.of<UserProfileModel>(context, listen: false).user;
-    widget._nameController.text =
-        user == null || user.isAnonymous ? "" : user.name;
+    _nameController.text = user == null || user.isAnonymous ? "" : user.name;
     super.initState();
   }
 
@@ -35,20 +35,20 @@ class _ProfileJoinedState extends State<ProfileJoined> {
     return Column(
       children: [
         // Profile picture
-        ProfilePicture(widget._isEdit),
+        ProfilePicture(_isEdit),
         // Table
         Container(
           padding: const EdgeInsets.all(24),
           child: TableCard(
             [
-              NameTableRow(widget._isEdit, widget._nameController),
+              NameTableRow(_isEdit, _nameController),
             ],
           ),
         ),
         // Promote user
         AnimatedSwitcher(
           duration: Duration(milliseconds: 100),
-          child: widget._isEdit
+          child: _isEdit
               ? Container()
               : Column(
                   children: [
@@ -71,6 +71,28 @@ class _ProfileJoinedState extends State<ProfileJoined> {
         )
       ],
     );
+  }
+
+  @override
+  void enableEdit() {
+    setState(() {
+      _isEdit = true;
+    });
+  }
+
+  @override
+  Future<bool> commitChanges() async {
+    try {
+      await Provider.of<UserProfileModel>(context, listen: false).updateUser(
+          name: _nameController.text.isEmpty ? null : _nameController.text);
+      setState(() {
+        _isEdit = false;
+      });
+      return true;
+    } catch (_) {
+      showErrorDialog(context, "Cannot update profile");
+      return false;
+    }
   }
 
   // Code to promote a joined user to a registered user

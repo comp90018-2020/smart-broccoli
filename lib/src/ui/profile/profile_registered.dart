@@ -2,33 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'profile_picture.dart';
 import 'table_items.dart';
 
 /// Profile page for listed users
-class ProfileRegistered extends StatefulWidget {
-  /// Whether fields are in edit mode
-  final bool _isEdit;
-
-  final TextEditingController _nameController;
-  final TextEditingController _emailController;
-  final TextEditingController _passwordController;
-  final TextEditingController _confirmPasswordController;
-
-  ProfileRegistered(this._isEdit, this._nameController, this._emailController,
-      this._passwordController, this._confirmPasswordController);
+class ProfileRegistered extends StatefulWidget implements ProfileEditor {
+  ProfileRegistered({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => new _ProfileRegisteredState();
 }
 
-class _ProfileRegisteredState extends State<ProfileRegistered> {
+class _ProfileRegisteredState extends ProfileEditorState {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  bool _isEdit = false;
+
   @override
   void initState() {
-    widget._nameController.text =
+    _nameController.text =
         Provider.of<UserProfileModel>(context, listen: false).user?.name;
-    widget._emailController.text =
+    _emailController.text =
         Provider.of<UserProfileModel>(context, listen: false).user?.email;
     super.initState();
   }
@@ -37,7 +38,7 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ProfilePicture(widget._isEdit),
+        ProfilePicture(_isEdit),
 
         // Name/email
         Container(
@@ -45,14 +46,14 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
           child: TableCard(
             [
               NameTableRow(
-                widget._isEdit,
-                widget._nameController,
+                _isEdit,
+                _nameController,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
               ),
               EmailTableRow(
-                widget._isEdit,
-                widget._emailController,
+                _isEdit,
+                _emailController,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
               ),
@@ -61,7 +62,7 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
         ),
 
         // Password
-        if (widget._isEdit)
+        if (_isEdit)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
             child: Column(
@@ -75,15 +76,15 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
                 TableCard(
                   [
                     PasswordTableRow(
-                      widget._isEdit,
-                      widget._passwordController,
+                      _isEdit,
+                      _passwordController,
                       textInputAction: TextInputAction.next,
                       onFieldSubmitted: (_) =>
                           FocusScope.of(context).nextFocus(),
                     ),
                     PasswordConfirmTableRow(
-                      widget._isEdit,
-                      widget._confirmPasswordController,
+                      _isEdit,
+                      _confirmPasswordController,
                     ),
                   ],
                 ),
@@ -92,5 +93,43 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
           ),
       ],
     );
+  }
+
+  @override
+  void enableEdit() {
+    setState(() {
+      _isEdit = true;
+    });
+  }
+
+  @override
+  Future<bool> commitChanges() async {
+    if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
+      showErrorDialog(context, "Name and email fields are both required");
+      return false;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      showErrorDialog(context, "Passwords do not match");
+      return false;
+    }
+
+    try {
+      await Provider.of<UserProfileModel>(context, listen: false).updateUser(
+          name: _nameController.text,
+          password: _passwordController.text.isEmpty
+              ? null
+              : _passwordController.text,
+          email: _emailController.text);
+      _passwordController.clear();
+      _confirmPasswordController.clear();
+      setState(() {
+        _isEdit = false;
+      });
+      return true;
+    } catch (_) {
+      showErrorDialog(context, "Cannot update profile");
+      return false;
+    }
   }
 }
