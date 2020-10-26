@@ -18,8 +18,6 @@ class ManageQuiz extends StatefulWidget {
 /// The user is the owner of
 class _ManageQuizState extends State<ManageQuiz> {
   // TODO: replace with provider inside build
-  List<Quiz> items;
-  List<Group> group;
   int gid = 0;
 
   @override
@@ -27,44 +25,43 @@ class _ManageQuizState extends State<ManageQuiz> {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return Consumer2<QuizCollectionModel, GroupRegistryModel>(
       builder: (context, collection, registry, child) {
-        group = registry.createdGroups;
         return CustomTabbedPage(
           title: "Manage Quiz",
           tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
           tabViews: [
             // All quizzes
             QuizContainer(
-                (group.length != 0)
+                (registry.createdGroups != 0)
                     ? collection.getQuizzesWhere(
-                        groupId: group[gid].id, type: null)
+                        groupId: registry.createdGroups[gid].id)
                     : [],
-                header: _groupSelector(),
+                header: _groupSelector(registry.createdGroups),
                 hiddenButton: true),
 
             // Live quiz
             QuizContainer(
-                (group.length != 0)
+                (registry.createdGroups.length != 0)
                     ? collection.getQuizzesWhere(
-                        groupId: group[gid].id, type: QuizType.LIVE)
+                        groupId: registry.createdGroups[gid].id,
+                        type: QuizType.LIVE)
                     : [],
-                header: _groupSelector(),
+                header: _groupSelector(registry.createdGroups),
                 hiddenButton: true),
 
             /// Self-paced quiz
             QuizContainer(
-                (group.length != 0)
+                (registry.createdGroups != 0)
                     ? collection.getQuizzesWhere(
-                        groupId: group[gid].id, type: QuizType.SELF_PACED)
+                        groupId: registry.createdGroups[gid].id,
+                        type: QuizType.SELF_PACED)
                     : [],
-                header: _groupSelector(),
+                header: _groupSelector(registry.createdGroups),
                 hiddenButton: true),
           ],
           hasDrawer: true,
           secondaryBackgroundColour: true,
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {
-              _createQuiz();
-            },
+            onPressed: () {},
             label: Text('CREATE QUIZ'),
             icon: Icon(Icons.add),
           ),
@@ -73,12 +70,8 @@ class _ManageQuizState extends State<ManageQuiz> {
     );
   }
 
-  /// Route to create quiz here
-  /// Define group affiliation with the gid varible
-  void _createQuiz() {}
-
   /// Quiz selection dropdown
-  Widget _groupSelector() {
+  Widget _groupSelector(List<Group> group) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
       constraints: BoxConstraints(maxWidth: 200),
@@ -94,12 +87,16 @@ class _ManageQuizState extends State<ManageQuiz> {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: DropdownButton(
-                  value: gid,
-                  underline: Container(),
-                  onChanged: (_) {},
-                  isExpanded: true,
-                  items: buildDropDownMenu(),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton(
+                    value: gid,
+                    underline: Container(),
+                    onChanged: (i) {
+                      updateList(i);
+                    },
+                    isExpanded: true,
+                    items: buildDropDownMenu(group),
+                  ),
                 ),
               ),
             ),
@@ -109,7 +106,7 @@ class _ManageQuizState extends State<ManageQuiz> {
     );
   }
 
-  List<DropdownMenuItem> buildDropDownMenu() {
+  List<DropdownMenuItem> buildDropDownMenu(List<Group> group) {
     List<DropdownMenuItem> res = [];
 
     /// Defensive programming to avoid an error in an event of there being no
@@ -124,12 +121,14 @@ class _ManageQuizState extends State<ManageQuiz> {
     } else {
       // note that GID != i where i is the iteration index
       for (var i = 0; i < group.length; i++) {
-        res.add(DropdownMenuItem(
+        res.add(
+          DropdownMenuItem(
             child: Center(
               child: Text(group[i].name),
             ),
             value: i,
-            onTap: () => updateList(i)));
+          ),
+        );
       }
     }
     return res;
