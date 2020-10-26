@@ -102,11 +102,12 @@ class UserApi {
   /// Set the profile pic of a user.
   ///
   /// This method takes the image as a list of bytes.
-  /// TODO: missing headers
   Future<void> setProfilePic(String token, Uint8List bytes) async {
-    final http.MultipartRequest request =
-        http.MultipartRequest('PUT', Uri.parse('$USER_URL/profile/picture'))
-          ..files.add(http.MultipartFile.fromBytes('avatar', bytes));
+    final http.MultipartRequest request = http.MultipartRequest(
+        'PUT', Uri.parse('$USER_URL/profile/picture'))
+      ..headers.addAll(
+          ApiBase.headers(contentType: 'multipart/form-data', authToken: token))
+      ..files.add(http.MultipartFile.fromBytes('avatar', bytes));
 
     final http.StreamedResponse response = await request.send();
 
