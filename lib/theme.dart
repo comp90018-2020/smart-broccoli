@@ -117,53 +117,54 @@ class LogoContainer extends Container {
 }
 
 /// Widget to create sliding-pill-style tabs
-class TabHolder extends FractionallySizedBox {
-  TabHolder(
-      {@required List<Tab> tabs,
-      double widthFactor = 0.5,
-      EdgeInsetsGeometry margin = EdgeInsets.zero,
-      BoxConstraints constraints,
-      void Function(int) onTap})
-      : super(
-          // Width factor of parent
-          widthFactor: widthFactor,
-          child: constraints != null
-              // Apply horizontal width constraint
-              ? Center(
-                  child: Container(
-                    constraints: constraints,
-                    child: _TabInner(
-                      tabs: tabs,
-                      margin: margin,
-                      onTap: onTap,
-                    ),
-                  ),
-                )
-              : _TabInner(
-                  tabs: tabs,
-                  margin: margin,
-                  onTap: onTap,
-                ),
-        );
-}
+class TabHolder extends StatelessWidget {
+  /// List of tabs
+  final List<Tab> tabs;
 
-/// Inner element without width constraints
-class _TabInner extends Container {
-  _TabInner(
-      {@required List<Tab> tabs,
-      EdgeInsetsGeometry margin = EdgeInsets.zero,
-      void Function(int) onTap})
-      : super(
-          margin: margin,
-          decoration: const BoxDecoration(
-            color: SmartBroccoliColourScheme.tabHolderBackground,
-            borderRadius: BorderRadius.all(Radius.circular(25)),
-          ),
-          child: TabBar(
-            tabs: tabs,
-            onTap: onTap,
-          ),
-        );
+  /// Horizontal width factor (relative ot parent)
+  final double widthFactor;
+
+  /// Margin
+  final EdgeInsetsGeometry margin;
+
+  /// Horizontal width constraint
+  final BoxConstraints constraints;
+
+  /// Tab tap
+  final void Function(int) onTap;
+
+  TabHolder(
+      {@required this.tabs,
+      this.widthFactor = 0.5,
+      this.margin = EdgeInsets.zero,
+      this.constraints,
+      this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget inner = Container(
+      margin: margin,
+      decoration: const BoxDecoration(
+        color: SmartBroccoliColourScheme.tabHolderBackground,
+        borderRadius: BorderRadius.all(Radius.circular(25)),
+      ),
+      child: TabBar(
+        tabs: tabs,
+        onTap: onTap,
+      ),
+    );
+
+    return FractionallySizedBox(
+      // Width factor of parent
+      widthFactor: widthFactor,
+      child: constraints != null
+          // Apply horizontal width constraint
+          ? Center(
+              child: Container(constraints: constraints, child: inner),
+            )
+          : inner,
+    );
+  }
 }
 
 class AnswerColours {
