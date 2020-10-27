@@ -59,10 +59,6 @@ class CustomPage extends StatelessWidget {
       },
     );
 
-    // refresh profile to show in drawer
-    if (hasDrawer)
-      Provider.of<UserProfileModel>(context, listen: false).refreshUser();
-
     return Scaffold(
       backgroundColor: this.secondaryBackgroundColour
           ? Theme.of(context).backgroundColor
