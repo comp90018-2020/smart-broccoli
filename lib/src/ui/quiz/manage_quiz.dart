@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -11,14 +12,23 @@ class ManageQuiz extends StatefulWidget {
   State<StatefulWidget> createState() => new _ManageQuizState();
 }
 
+/// Get Quiz, we are assuming that the quizzes displayed here are quizzes where
+/// The user is the owner of
 class _ManageQuizState extends State<ManageQuiz> {
-  // TODO: replace with provider inside build
-  List<Quiz> items = [
-    // placeholders
-    Quiz.fromJson({'title': 'Foo', 'groupId': 1}),
-    Quiz.fromJson({'title': 'Bar', 'groupId': 2}),
-    Quiz.fromJson({'title': 'Baz', 'groupId': 3}),
-  ];
+  // The group that is selected
+  int _groupId;
+
+  // See : https://stackoverflow.com/questions/58371874
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update created quizzes
+    Provider.of<QuizCollectionModel>(context, listen: false)
+        .refreshCreatedQuizzes();
+    // Update group list
+    Provider.of<GroupRegistryModel>(context, listen: false)
+        .refreshCreatedGroups();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,14 +37,29 @@ class _ManageQuizState extends State<ManageQuiz> {
       title: "Manage Quiz",
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
-        // All quizzes
-        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
-
-        // Live quiz
-        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
-
-        /// Self-paced quiz
-        QuizContainer(items, header: _groupSelector(), hiddenButton: true),
+        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+          // All quizzes
+          return QuizContainer(
+              collection.getCreatedQuizzesWhere(groupId: _groupId),
+              header: _groupSelector(),
+              hiddenButton: true);
+        }),
+        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+          // Live quiz
+          return QuizContainer(
+              collection.getCreatedQuizzesWhere(
+                  groupId: _groupId, type: QuizType.LIVE),
+              header: _groupSelector(),
+              hiddenButton: true);
+        }),
+        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+          /// Self-paced quiz
+          return QuizContainer(
+              collection.getCreatedQuizzesWhere(
+                  groupId: _groupId, type: QuizType.SELF_PACED),
+              header: _groupSelector(),
+              hiddenButton: true);
+        }),
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,
@@ -63,24 +88,43 @@ class _ManageQuizState extends State<ManageQuiz> {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton(
-                    onChanged: (_) {},
+                child: DropdownButtonHideUnderline(child:
+                    Consumer<GroupRegistryModel>(
+                        builder: (context, collection, child) {
+                  return DropdownButton(
+                    value: _groupId,
+                    underline: Container(),
+                    // Update current selected group
+                    onChanged: (i) {
+                      setState(() {
+                        _groupId = i;
+                      });
+                    },
                     isExpanded: true,
                     items: [
-                      DropdownMenuItem(
-                          child: Center(child: Text('A')), value: 0),
-                      DropdownMenuItem(
-                          child: Center(child: Text('B')), value: 1)
+                      // All groups
+                      makeItem(null, "All Groups"),
+                      // Each created group
+                      ...collection.createdGroups
+                          .map((group) => makeItem(group.id, group.name))
                     ],
-                    value: 0,
-                  ),
-                ),
+                  );
+                })),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  /// Creates a DropdownMenuItem representing a group
+  DropdownMenuItem makeItem(int id, String name) {
+    return DropdownMenuItem(
+      child: Center(
+        child: Text(name),
+      ),
+      value: id,
     );
   }
 }

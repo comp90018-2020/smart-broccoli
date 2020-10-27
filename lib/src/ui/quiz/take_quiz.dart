@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
-
 import 'quiz_pin_box.dart';
 
 /// Take quiz page
@@ -19,13 +19,13 @@ class _TakeQuizState extends State<TakeQuiz> {
   // Height of pin box
   double _height;
 
-  // TODO: replace with provider inside build
-  List<Quiz> items = [
-    // placeholders
-    Quiz.fromJson({'title': 'Foo', 'groupId': 1}),
-    Quiz.fromJson({'title': 'Bar', 'groupId': 2}),
-    Quiz.fromJson({'title': 'Baz', 'groupId': 3}),
-  ];
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update available quizzes
+    Provider.of<QuizCollectionModel>(context, listen: false)
+        .refreshAvailableQuizzes();
+  }
 
   @override
   void initState() {
@@ -45,30 +45,43 @@ class _TakeQuizState extends State<TakeQuiz> {
 
   @override
   Widget build(BuildContext context) {
-    // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
       title: "Take Quiz",
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         // All quizzes
-        QuizContainer(items, header: QuizPinBox(key: _buildQuizKey)),
+        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+          return QuizContainer(collection.getAvailableQuizzesWhere(),
+              header: QuizPinBox(key: _buildQuizKey));
+        }),
 
         // Live quiz
-        QuizContainer(items, header: QuizPinBox()),
+        Consumer<QuizCollectionModel>(
+          builder: (context, collection, child) {
+            return QuizContainer(
+                collection.getAvailableQuizzesWhere(type: QuizType.LIVE),
+                header: QuizPinBox());
+          },
+        ),
 
-        /// Self-paced quiz has Text to fill the vertical space
-        QuizContainer(
-          items,
-          header: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: _height ?? 175),
-              child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Take a self-paced quiz...\nHave some fun',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
-                  ))),
-        )
+        /// Self-paced quiz
+        Consumer<QuizCollectionModel>(
+          builder: (context, collection, child) {
+            return QuizContainer(
+              collection.getAvailableQuizzesWhere(type: QuizType.SELF_PACED),
+              header: ConstrainedBox(
+                  // Has text to fill up vertical space
+                  constraints: BoxConstraints(minHeight: _height ?? 175),
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Take a self-paced quiz...\nHave some fun',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
+                      ))),
+            );
+          },
+        ),
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,

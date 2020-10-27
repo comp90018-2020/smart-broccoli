@@ -1,10 +1,8 @@
 import 'dart:collection';
 import 'package:flutter/widgets.dart';
-
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
-
 import 'auth_state.dart';
 
 /// View model for quiz management
@@ -21,17 +19,12 @@ class QuizCollectionModel extends ChangeNotifier {
   /// Picture storage service
   final PictureStash _picStash;
 
-  /// Views subscribe to the fields below
   Quiz _selectedQuiz;
   Quiz get selectedQuiz => _selectedQuiz;
 
   Map<int, Quiz> _availableQuizzes = {};
   Map<int, Quiz> _createdQuizzes = {};
 
-  UnmodifiableListView<Quiz> get availableQuizzes =>
-      UnmodifiableListView(_availableQuizzes.values);
-  UnmodifiableListView<Quiz> get createdQuizzes =>
-      UnmodifiableListView(_createdQuizzes.values);
   GameSession _currentSession;
   GameSession get currentSession => _currentSession;
 
@@ -40,15 +33,28 @@ class QuizCollectionModel extends ChangeNotifier {
       {QuizApi quizApi, SessionApi sessionApi}) {
     _quizApi = quizApi ?? QuizApi();
     _sessionApi = sessionApi ?? SessionApi();
-    refreshAvailableQuizzes();
-    refreshCreatedQuizzes();
   }
 
+  /// Gets all quizzes
   UnmodifiableListView<Quiz> getQuizzesWhere({int groupId, QuizType type}) =>
       UnmodifiableListView([
         ..._availableQuizzes.values,
         ..._createdQuizzes.values
       ].where((quiz) =>
+          (groupId == null || quiz.groupId == groupId) &&
+          (type == null || quiz.type == type)));
+
+  /// Gets available (user accessible) quizzes
+  UnmodifiableListView<Quiz> getAvailableQuizzesWhere(
+          {int groupId, QuizType type}) =>
+      UnmodifiableListView(_availableQuizzes.values.where((quiz) =>
+          (groupId == null || quiz.groupId == groupId) &&
+          (type == null || quiz.type == type)));
+
+  /// Gets created (user managed) quizzes
+  UnmodifiableListView<Quiz> getCreatedQuizzesWhere(
+          {int groupId, QuizType type}) =>
+      UnmodifiableListView(_createdQuizzes.values.where((quiz) =>
           (groupId == null || quiz.groupId == groupId) &&
           (type == null || quiz.type == type)));
 
