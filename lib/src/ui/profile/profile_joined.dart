@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models/user_profile.dart';
 import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
