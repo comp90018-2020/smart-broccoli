@@ -36,7 +36,6 @@ class _QuizCreateState extends State<QuizCreate> {
   final _formKey = GlobalKey<FormState>();
   var  quizNameController;
   var timerTextController;
-  String picturePath;
   String selectedGroupTitle;
   bool isDefaultGrpSelected = false;
 
@@ -155,9 +154,9 @@ class _QuizCreateState extends State<QuizCreate> {
                 ),
 
                 // Picture selection
-                PictureCard(picturePath, (path) {
+                PictureCard(model.picturePath, (path) {
                   setState(() {
-                    picturePath = path;
+                    model.picturePath = path;
                   });
                 }),
 

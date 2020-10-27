@@ -4,6 +4,10 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 import 'auth_state.dart';
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/services.dart' show rootBundle;
 
 /// View model for quiz management
 class QuizCollectionModel extends ChangeNotifier {
@@ -95,10 +99,23 @@ class QuizCollectionModel extends ChangeNotifier {
   Future<void> createQuiz(Quiz quiz) async {
     var returnedQuiz =  await _quizApi.createQuiz(_authStateModel.token, quiz);
 
+    Uint8List imageDataUint;
+    if(quiz.picturePath != null){
+      ByteData imageDataByte = (await rootBundle.load(returnedQuiz.picturePath));
+      imageDataUint = imageDataUint.buffer.asUint8List();
+      _quizApi.setQuizPicture(_authStateModel.token, returnedQuiz, imageDataUint);
+    }
 
-    /*_quizApi.setQuestionPicture(token, quizId, questionId, bytes) //readAsBytes
-    _quizApi.setQuizPicture(token, quiz, bytes)*/
-    //call a function for upload of a picture
+
+
+
+
+
+
+/*
+    _quizApi.setQuestionPicture(token, quizId, questionId, bytes)
+*/
+
     notifyListeners();
   }
 
