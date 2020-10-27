@@ -2,7 +2,6 @@ import { Socket } from "socket.io";
 import { getUserSessionProfile } from "../controllers/user";
 import { GameSession } from "./session";
 import { formatQuestion, formatWelcome } from "./formatter";
-import { _socketIO } from "./index";
 import {
     Event,
     Role,
@@ -13,10 +12,10 @@ import {
     GameType,
 } from "./datatype";
 import { QuizAttributes } from "models/quiz";
-import { runInThisContext } from "vm";
+import { _socketIO } from "./index";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
-const boardShowTime = 5 * 1000;
+const BoardShowTime = 5 * 1000;
 const playerCache: { [userId: number]: Player } = {};
 const socketPlayerMapCache: { [socketId: string]: Player } = {};
 
@@ -43,8 +42,8 @@ export class GameHandler {
                 title: "Fruits Master",
                 active: true,
                 description: "Test Quiz",
-                type: "live",
-                isGroup: false,
+                type: "self paced",
+                isGroup: true,
                 timeLimit: 20,
                 groupId: 2,
                 pictureId: null,
@@ -102,14 +101,6 @@ export class GameHandler {
         // @ts-ignore
         // const quizJSON: QuizAttributes = quiz.toJSON();
         const newSession = new GameSession(quiz, sessionId, quizType, isGroup);
-
-        if (newSession.type === GameType.SelfPaced_Group) {
-            this.start(newSession, null);
-        } else if (newSession.type === GameType.Live_Group) {
-            // haha we dont have it!
-            return false;
-        }
-
         this.sessions[sessionId] = newSession;
         return true;
     }
@@ -193,19 +184,20 @@ export class GameHandler {
                 ) {
                     // set session state
                     session.setToNextQuestion();
+
+                    if (session.type == GameType.SelfPaced_Group) {
+                        this.next(session);
+                    }
                 }
             }
         } catch (error) {
-            sendErr(error, player.socketId);
+            sendErr(error, player === undefined ? undefined : player.socketId);
         }
     }
 
     async welcome(socket: Socket, session: GameSession, player: Player) {
         try {
-            if (
-                player.role !== Role.host &&
-                !session.playerMap.hasOwnProperty(player.id)
-            ) {
+            if (!session.playerMap.hasOwnProperty(player.id)) {
                 // if not host, emit playerJoin
                 emitToRoom(
                     whichRoom(session, Role.all),
@@ -215,7 +207,6 @@ export class GameHandler {
             }
 
             // add user to socket room
-            console.log(player.role);
             socket.join(whichRoom(session, player.role));
             socket.join(whichRoom(session, Role.all));
             // add user to session
@@ -238,8 +229,33 @@ export class GameHandler {
                 formatWelcome(player.role, session.status, session.playerMap)
             );
 
-            if (session.status === GameStatus.Starting) {
+            if (
+                session.type === GameType.SelfPaced_Group &&
+                (session.status === GameStatus.Pending ||
+                    session.status === GameStatus.Starting)
+            ) {
+                // extends time
+                emitToRoom(
+                    whichRoom(session, Role.all),
+                    Event.starting,
+                    WAIT_TIME_BEFORE_START.toString()
+                );
+                session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
+
+                setTimeout(
+                    () => {
+                        if (Date.now() > session.quizStartsAt) {
+                            session.status = GameStatus.Running;
+                            session.setToNextQuestion();
+                            this.next(session);
+                        }
+                    },
+                    WAIT_TIME_BEFORE_START + 1,
+                    session
+                );
+            } else if (session.status === GameStatus.Starting) {
                 // if game is starting,
+
                 emitToOne(
                     socket.id,
                     Event.starting,
@@ -271,7 +287,7 @@ export class GameHandler {
                 // otherwise ignore
             }
         } catch (error) {
-            sendErr(error, player.socketId);
+            sendErr(error, player === undefined ? undefined : player.socketId);
         }
     }
 
@@ -301,37 +317,18 @@ export class GameHandler {
             // disconnect
             socket.disconnect();
         } catch (error) {
-            sendErr(error, player.socketId);
+            sendErr(error, player === undefined ? undefined : player.socketId);
         }
     }
-
-    startWithoutHost(session: GameSession) {
-        try {
-            // set game status to starting
-            session.status = GameStatus.Starting;
-            // set the start time
-            session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
-            setTimeout(
-                () => {
-                    // after time out
-                    session.status = GameStatus.Running;
-                    session.setToNextQuestion();
-                    // release the firt question
-                    this.nextWithoutHost();
-                },
-                process.env.SOCKET_MODE === "debug"
-                    ? 1
-                    : session.quizStartsAt - Date.now()
-            );
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    nextWithoutHost() {}
 
     async start(session: GameSession, player: Player) {
         try {
+            if (
+                session.type === GameType.SelfPaced_Group &&
+                player !== undefined
+            ) {
+                return;
+            }
             if (
                 // and game is pending
                 session.status == GameStatus.Pending &&
@@ -364,13 +361,22 @@ export class GameHandler {
                 );
             }
         } catch (error) {
-            sendErr(error, player.socketId);
+            sendErr(error, player === undefined ? undefined : player.socketId);
         }
     }
 
-    async abort(socket: Socket, session: GameSession, player: Player) {
+    async abort(session: GameSession, player?: Player) {
         try {
-            if (player.role === Role.host) {
+            if (
+                session.type === GameType.SelfPaced_Group &&
+                player !== undefined
+            ) {
+                return;
+            }
+            if (
+                session.type === GameType.SelfPaced_Group ||
+                player.role === Role.host
+            ) {
                 // Broadcast that quiz has been aborted
                 emitToRoom(whichRoom(session, Role.all), Event.cancelled, null);
                 // end this session
@@ -379,25 +385,34 @@ export class GameHandler {
                 this.checkEnv();
             }
         } catch (error) {
-            sendErr(error, player.socketId);
+            sendErr(error, player === undefined ? undefined : player.socketId);
         }
     }
 
     endSession(session: GameSession) {
-        for (const socketId of Object.keys(
-            _socketIO.sockets.adapter.rooms[whichRoom(session, Role.all)]
-                .sockets
-        )) {
-            // loop over socket in the room
-            // and disconnect them
-            if (_socketIO.sockets.connected.hasOwnProperty(socketId)) {
-                _socketIO.sockets.connected[socketId].disconnect();
+        if (_socketIO !== undefined) {
+            for (const socketId of Object.keys(
+                _socketIO.sockets.adapter.rooms[whichRoom(session, Role.all)]
+                    .sockets
+            )) {
+                // loop over socket in the room
+                // and disconnect them
+                if (_socketIO.sockets.connected.hasOwnProperty(socketId)) {
+                    _socketIO.sockets.connected[socketId].disconnect();
+                }
             }
         }
     }
 
-    async next(session: GameSession, player: Player) {
+    async next(session: GameSession, player?: Player) {
         try {
+            if (
+                session.type === GameType.SelfPaced_Group &&
+                player !== undefined
+            ) {
+                return;
+            }
+
             if (
                 // if no host or player is host
                 (session.type === GameType.SelfPaced_Group ||
@@ -407,13 +422,6 @@ export class GameHandler {
                 // try to get the index of next question
                 const [res, questionIndex] = session.getNextQuestionIndex();
                 if (res === Res.Success) {
-                    // allow host move to next question if currentlly there is
-                    // no player in the
-                    // if (Object.keys(session.playerMap).length <= 0) {
-                    //     session.setToNextQuestion();
-                    // }
-                    // send question without answer to participants
-
                     emitToRoom(
                         whichRoom(session, Role.player),
                         Event.nextQuestion,
@@ -450,7 +458,7 @@ export class GameHandler {
                 }
             }
         } catch (error) {
-            sendErr(error, player.socketId);
+            sendErr(error, player === undefined ? undefined : player.socketId);
         }
     }
 
@@ -462,23 +470,36 @@ export class GameHandler {
     }
 
     releaseCorrectAnswer(session: GameSession, questoinIndex: number) {
-        if (session.questionIndex >= session.quiz.questions.length - 1) {
-            emitToRoom(whichRoom(session, Role.all), Event.end, null);
-        }
         for (const player of Object.values(session.playerMap)) {
             this.emitCorrectAnswer(
                 player,
                 session.getAnsOfQuestion(questoinIndex)
             );
         }
+
         if (session.type === GameType.SelfPaced_Group) {
-            setTimeout(() => {
-                this.showBoard(session, null);
-            }, boardShowTime);
+            this.showBoard(session);
+        }
+
+        if (session.questionIndex >= session.quiz.questions.length - 1) {
+            emitToRoom(whichRoom(session, Role.all), Event.end, null);
+
+            if (session.type === GameType.SelfPaced_Group) {
+                setTimeout(() => {
+                    this.abort(session);
+                }, BoardShowTime * 10);
+            }
         }
     }
-    async showBoard(session: GameSession, player: Player) {
+    async showBoard(session: GameSession, player?: Player) {
         try {
+            if (
+                session.type === GameType.SelfPaced_Group &&
+                player !== undefined
+            ) {
+                return;
+            }
+
             if (
                 session.isReadyForNextQuestion &&
                 (session.type === GameType.SelfPaced_Group ||
@@ -507,21 +528,35 @@ export class GameHandler {
 
                     emitToOne(socketId, Event.questionOutcome, questionOutcome);
                 }
-                // if () {
-                //     // session.questionIndex < session.quiz.questions.length - 1 &&
-                // }
-                // emit questionOutcome to the host
-                emitToRoom(
-                    whichRoom(session, Role.host),
-                    Event.questionOutcome,
-                    {
-                        question: session.questionIndex,
-                        leaderboard: rank,
+                if (session.type === GameType.SelfPaced_Group) {
+                    if (
+                        session.questionIndex <
+                        session.quiz.questions.length - 1
+                    ) {
+                        setTimeout(() => {
+                            if (session.isReadyForNextQuestion) {
+                                this.next(session);
+                            }
+                        }, BoardShowTime);
+                    } else {
+                        setTimeout(() => {
+                            this.abort(session);
+                        }, BoardShowTime * 10);
                     }
-                );
+                } else {
+                    //  emit questionOutcome to the host
+                    emitToRoom(
+                        whichRoom(session, Role.host),
+                        Event.questionOutcome,
+                        {
+                            question: session.questionIndex,
+                            leaderboard: rank,
+                        }
+                    );
+                }
             }
         } catch (error) {
-            sendErr(error, player.socketId);
+            sendErr(error, player === undefined ? undefined : player.socketId);
         }
     }
 
@@ -561,7 +596,10 @@ export const sendErr = (error: any, socketId: string) => {
     console.log(error);
     if (process.env.SOCKET_MODE === "debug") {
         // https://stackoverflow.com/questions/18391212
-        if (_socketIO.sockets.connected.hasOwnProperty(socketId)) {
+        if (
+            socketId !== null &&
+            _socketIO.sockets.connected.hasOwnProperty(socketId)
+        ) {
             _socketIO.sockets.connected[socketId].send(
                 JSON.stringify(error, Object.getOwnPropertyNames(error))
             );
@@ -575,7 +613,9 @@ export const whichRoom = (session: GameSession, role: string) => {
 };
 
 export const emitToOne = (socketId: string, event: Event, content: any) => {
-    _socketIO.sockets.connected[socketId].emit(event, content);
+    if (_socketIO.sockets.connected.hasOwnProperty(socketId)) {
+        _socketIO.sockets.connected[socketId].emit(event, content);
+    }
 };
 
 export const emitToRoom = (roomName: string, event: Event, content: any) => {

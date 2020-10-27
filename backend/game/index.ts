@@ -4,13 +4,14 @@ import { sessionTokenDecrypt } from "../controllers/session";
 import { Player, Role } from "./datatype";
 import { GameSession } from "./session";
 
-export let _socketIO: Server = null;
 export const handler: GameHandler = new GameHandler();
 const socketSessionMap: { [socketId: string]: GameSession } = {};
 const socketPlayerMap: { [socketId: string]: Player } = {};
 
+export let _socketIO: Server;
 export default (socketIO: Server) => {
     _socketIO = socketIO;
+    //@ts-ignore
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
         try {
@@ -36,7 +37,7 @@ export default (socketIO: Server) => {
 
             // abort
             socket.on("abort", () => {
-                handler.abort(socket, session, player);
+                handler.abort(session, player);
             });
 
             // next question
