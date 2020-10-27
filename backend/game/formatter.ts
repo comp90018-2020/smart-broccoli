@@ -1,5 +1,6 @@
 import { GameSession } from "./session";
 import { GameStatus, Player } from "./datatype";
+import { Session } from "models";
 
 /**
  * format question for event-> nextQuestion
@@ -65,4 +66,24 @@ export const formatWelcome = (
         role: role,
         status: gameStatus,
     };
+};
+
+export const formatQuestionOutcome = (
+    session: GameSession,
+    player: Player,
+    rank: any[]
+) => {
+    const { id, socketId, record } = player;
+    const playerAheadRecord =
+        record.newPos === null || record.newPos === 0
+            ? null
+            : rank[record.newPos - 1];
+    // form question outcome
+    const questionOutcome = {
+        question: session.questionIndex,
+        leaderboard: rank.slice(0, 5),
+        record: session.playerMap[Number(id)].formatRecord().record,
+        playerAhead: playerAheadRecord,
+    };
+    return questionOutcome;
 };

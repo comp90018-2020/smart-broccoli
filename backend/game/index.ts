@@ -42,12 +42,12 @@ export default (socketIO: Server) => {
 
             // next question
             socket.on("next", () => {
-                handler.next(session, player);
+                handler.next(session, session.getQuestionIndex(), player);
             });
 
             // showBoard
             socket.on("showBoard", () => {
-                handler.showBoard(session, player);
+                handler.showBoard(session, session.questionIndex, player);
             });
 
             if (process.env.SOCKET_MODE === "debug") {

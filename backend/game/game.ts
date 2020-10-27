@@ -1,7 +1,11 @@
 import { Socket } from "socket.io";
 import { getUserSessionProfile } from "../controllers/user";
 import { GameSession } from "./session";
-import { formatQuestion, formatWelcome } from "./formatter";
+import {
+    formatQuestion,
+    formatWelcome,
+    formatQuestionOutcome,
+} from "./formatter";
 import {
     Event,
     Role,
@@ -42,7 +46,7 @@ export class GameHandler {
                 active: true,
                 description: "Test Quiz",
                 type: "self paced",
-                isGroup: false,
+                isGroup: true,
                 timeLimit: 20,
                 groupId: 2,
                 pictureId: null,
@@ -152,19 +156,12 @@ export class GameHandler {
                 content.TFSelection
             );
 
-            if (answer.questionNo !== session.questionIndex) {
+            if (session.isAnswerNoCorrect(answer)) {
                 // ignore the emit with not matched quetion number
                 return;
             }
 
-            if (
-                // is player
-                player.role === Role.player &&
-                // and there is a conducting question
-                !session.isReadyForNextQuestion &&
-                // and this player has not answered
-                !session.pointSys.answeredPlayers.has(player.id)
-            ) {
+            if (session.canAnswer(player)) {
                 // assess answer
                 session.assessAns(player.id, answer);
 
@@ -179,15 +176,12 @@ export class GameHandler {
                     }
                 );
 
-                if (
-                    session.pointSys.answeredPlayers.size >=
-                    Object.keys(session.playerMap).length
-                ) {
+                if (session.hasAllPlayerAnswered()) {
                     // set session state
-                    session.setToNextQuestion();
+                    session.setToNextQuestion(session.getQuestionIndex());
 
-                    if (session.type == GameType.SelfPaced_Group) {
-                        this.next(session);
+                    if (session.isSelfPacedGroup()) {
+                        this.next(session, session.getQuestionIndex() + 1);
                     }
                 }
             }
@@ -198,7 +192,7 @@ export class GameHandler {
 
     async welcome(socket: Socket, session: GameSession, player: Player) {
         try {
-            if (!session.playerMap.hasOwnProperty(player.id)) {
+            if (!session.hasUser(player)) {
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.playerJoin,
@@ -212,60 +206,61 @@ export class GameHandler {
             // add user to session
             if (player.role === Role.host) {
                 this.disconnectPast(session, session.host, player);
-                session.host = player;
+                session.setHost(player);
             } else {
                 this.disconnectPast(
                     session,
-                    session.playerMap[player.id],
+                    session.getPlayer(player.id),
                     player
                 );
-                session.playerMap[player.id] = player;
+                session.setPlayer(player);
             }
 
             // emit welcome event
             emitToOne(
                 socket.id,
                 Event.welcome,
-                formatWelcome(player.role, session.status, session.playerMap)
+                formatWelcome(
+                    player.role,
+                    session.getStatus(),
+                    session.playerMap
+                )
             );
 
-            if (
-                session.type === GameType.SelfPaced_Group &&
-                (session.status === GameStatus.Pending ||
-                    session.status === GameStatus.Starting)
-            ) {
+            if (session.isSelfPacedGroupAndHasNotStarted()) {
                 // extends time
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.starting,
                     WAIT_TIME_BEFORE_START.toString()
                 );
-                session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
 
+                session.setStatus(GameStatus.Starting);
                 setTimeout(
-                    () => {
-                        if (Date.now() > session.quizStartsAt) {
-                            session.status = GameStatus.Running;
-                            session.setToNextQuestion();
-                            this.next(session);
+                    (session: GameSession) => {
+                        if (
+                            session.is(GameStatus.Starting) &&
+                            session.canReleaseTheFirstQuestion()
+                        ) {
+                            session.setStatus(GameStatus.Running);
+                            session.setToNextQuestion(0);
+                            this.next(session, 0);
                         }
                     },
-                    WAIT_TIME_BEFORE_START + 1,
+                    WAIT_TIME_BEFORE_START,
                     session
                 );
             } else {
-                if (session.status === GameStatus.Pending) {
-                    if (session.type == GameType.SelfPaced_NotGroup) {
-                        this.start(session, player);
-                    }
-                } else if (session.status === GameStatus.Starting) {
+                if (session.isSelfPacedNotGroupAndPending()) {
+                    this.start(session, player);
+                } else if (session.is(GameStatus.Starting)) {
                     // if game is starting,
                     emitToOne(
                         socket.id,
                         Event.starting,
                         (session.quizStartsAt - Date.now()).toString()
                     );
-                } else if (session.status === GameStatus.Running) {
+                } else if (session.is(GameStatus.Running)) {
                     // if game is running, emit nextQuestion
                     emitToOne(
                         player.socketId,
@@ -277,11 +272,7 @@ export class GameHandler {
                         )
                     );
 
-                    if (
-                        session.isReadyForNextQuestion &&
-                        session.questionIndex >= 0 &&
-                        session.questionIndex < session.quiz.questions.length
-                    ) {
+                    if (session.canEmitCorrectAnswer()) {
                         const correctAnswer = session.getAnsOfQuestion(
                             session.questionIndex
                         );
@@ -328,26 +319,13 @@ export class GameHandler {
 
     async start(session: GameSession, player: Player) {
         try {
-            if (
-                session.type === GameType.SelfPaced_Group &&
-                player !== undefined
-            ) {
+            if (session.isEmitValid(player)) {
                 return;
             }
-            if (
-                // and game is pending
-                session.status == GameStatus.Pending &&
-                // if no host or player is host
-                (session.type === GameType.SelfPaced_Group ||
-                    session.type === GameType.SelfPaced_NotGroup ||
-                    player.role === Role.host)
-            ) {
+            if (session.canStart(player)) {
                 // set game status to starting
-                session.status = GameStatus.Starting;
-                // set the start time
-                session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
+                session.setStatus(GameStatus.Starting);
                 // Broadcast that quiz will be started
-
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.starting,
@@ -356,10 +334,10 @@ export class GameHandler {
                 setTimeout(
                     () => {
                         // after time out
-                        session.status = GameStatus.Running;
-                        session.setToNextQuestion();
+                        session.setStatus(GameStatus.Running);
+                        session.setToNextQuestion(0);
                         // release the firt question
-                        this.next(session, player);
+                        this.next(session, 0, player);
                     },
                     process.env.SOCKET_MODE === "debug"
                         ? 1
@@ -373,16 +351,10 @@ export class GameHandler {
 
     async abort(session: GameSession, player?: Player) {
         try {
-            if (
-                session.type === GameType.SelfPaced_Group &&
-                player !== undefined
-            ) {
+            if (session.isEmitValid(player)) {
                 return;
             }
-            if (
-                session.type === GameType.SelfPaced_Group ||
-                player.role === Role.host
-            ) {
+            if (session.canAbort(player)) {
                 // Broadcast that quiz has been aborted
                 emitToRoom(whichRoom(session, Role.all), Event.cancelled, null);
                 // end this session
@@ -415,54 +387,40 @@ export class GameHandler {
         }
     }
 
-    async next(session: GameSession, player?: Player) {
+    async next(
+        session: GameSession,
+        nextQuestionIndex: number,
+        player?: Player
+    ) {
         try {
-            if (
-                session.type === GameType.SelfPaced_Group &&
-                player !== undefined
-            ) {
+            if (session.isEmitValid(player)) {
                 return;
             }
 
-            if (
-                session.isReadyForNextQuestion &&
-                session.status === GameStatus.Running &&
-                // if no host or player is host
-                (session.type === GameType.SelfPaced_Group ||
-                    session.type === GameType.SelfPaced_NotGroup ||
-                    player.role === Role.host)
-            ) {
-                // try to get the index of next question
-                const [res, questionIndex] = session.getNextQuestionIndex();
-                if (res === Res.Success) {
+            if (session.canReleaseNextQuestion(player, nextQuestionIndex)) {
+                emitToRoom(
+                    whichRoom(session, Role.player),
+                    Event.nextQuestion,
+                    formatQuestion(nextQuestionIndex, session, false)
+                );
+                if (!session.isSelfPaced()) {
+                    // send question with answer to the host
                     emitToRoom(
-                        whichRoom(session, Role.player),
+                        whichRoom(session, Role.host),
                         Event.nextQuestion,
-                        formatQuestion(questionIndex, session, false)
+                        formatQuestion(nextQuestionIndex, session, true)
                     );
-                    if (
-                        session.type !== GameType.SelfPaced_Group &&
-                        session.type !== GameType.SelfPaced_NotGroup
-                    ) {
-                        // send question with answer to the host
-                        emitToRoom(
-                            whichRoom(session, Role.host),
-                            Event.nextQuestion,
-                            formatQuestion(questionIndex, session, true)
-                        );
-                    }
-                    setTimeout(() => {
-                        if (
-                            session.nextQuestionIndex === session.questionIndex
-                        ) {
-                            session.setToNextQuestion();
+                }
+                setTimeout(
+                    (questionIndex: number) => {
+                        if (session.canSetToNextQuestion(questionIndex)) {
                             this.releaseCorrectAnswer(session, questionIndex);
                         }
-                    }, session.quiz.timeLimit * 1000);
-                } else {
-                    // if failed to get next question index, print log
-                    console.log(res);
-                }
+                        // }, session.quiz.timeLimit * 1000);
+                    },
+                    1000,
+                    nextQuestionIndex
+                );
             }
         } catch (error) {
             sendErr(error, player === undefined ? undefined : player.socketId);
@@ -484,78 +442,56 @@ export class GameHandler {
             );
         }
 
-        if (session.type === GameType.SelfPaced_Group) {
-            this.showBoard(session);
-        } else if (session.type == GameType.SelfPaced_NotGroup) {
-            if (session.questionIndex < session.quiz.questions.length - 1) {
-                setTimeout(() => {
-                    if (session.isReadyForNextQuestion) {
-                        this.next(session);
-                    }
-                }, BoardShowTime);
-            } else {
-                setTimeout(() => {
-                    this.abort(session);
-                }, BoardShowTime * 10);
-            }
-        }
+        if (session.hasMoreQuestions()) {
+            session.setToNextQuestion(questoinIndex + 1);
 
-        if (session.questionIndex >= session.quiz.questions.length - 1) {
+            if (session.isSelfPacedGroup()) {
+                this.showBoard(session, questoinIndex);
+            } else if (session.isSelfPacedNotGroup()) {
+                setTimeout(() => {
+                    this.next(session, questoinIndex + 1);
+                }, BoardShowTime);
+            }
+        } else {
             emitToRoom(whichRoom(session, Role.all), Event.end, null);
             this.abort(session);
         }
     }
-    async showBoard(session: GameSession, player?: Player) {
+    async showBoard(
+        session: GameSession,
+        questionIndex: number,
+        player?: Player
+    ) {
         try {
-            if (
-                session.type === GameType.SelfPaced_Group &&
-                player !== undefined
-            ) {
+            if (session.isEmitValid(player)) {
                 return;
             }
 
-            if (
-                session.isReadyForNextQuestion &&
-                (session.type === GameType.SelfPaced_Group ||
-                    player.role === Role.host)
-            ) {
+            if (session.canShowBoard(player)) {
                 //  get ranked records of players
                 const rank = session.rankPlayers();
 
-                for (const { id, socketId, record } of Object.values(
-                    session.playerMap
-                )) {
-                    // get player ahead
-                    const playerAheadRecord =
-                        record.newPos === null || record.newPos === 0
-                            ? null
-                            : rank[record.newPos - 1];
-                    // form question outcome
-                    const questionOutcome = {
-                        question: session.questionIndex,
-                        leaderboard: rank.slice(0, 5),
-                        record: session.playerMap[Number(id)].formatRecord()
-                            .record,
-                        playerAhead: playerAheadRecord,
-                    };
-                    // emit questionOutcome to participants
-
-                    emitToOne(socketId, Event.questionOutcome, questionOutcome);
+                for (const player of Object.values(session.playerMap)) {
+                    emitToOne(
+                        player.socketId,
+                        Event.questionOutcome,
+                        formatQuestionOutcome(session, player, rank)
+                    );
                 }
-                if (session.type === GameType.SelfPaced_Group) {
-                    if (
-                        session.questionIndex <
-                        session.quiz.questions.length - 1
-                    ) {
+                if (session.isSelfPacedGroup()) {
+                    if (session.hasMoreQuestions()) {
                         setTimeout(() => {
-                            if (session.isReadyForNextQuestion) {
-                                this.next(session);
-                            }
+                            this.next(session, questionIndex + 1);
                         }, BoardShowTime);
                     } else {
+                        emitToRoom(
+                            whichRoom(session, Role.all),
+                            Event.end,
+                            null
+                        );
                         setTimeout(() => {
                             this.abort(session);
-                        }, BoardShowTime * 10);
+                        }, BoardShowTime);
                     }
                 } else {
                     //  emit questionOutcome to the host
