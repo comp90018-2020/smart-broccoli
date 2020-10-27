@@ -3,9 +3,9 @@ import 'package:smart_broccoli/src/socket_data/correct_answer.dart';
 import 'package:smart_broccoli/src/socket_data/question_answered.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../socket_data/user.dart' as SocketUser;
-import '../socket_data/question.dart';
 import '../socket_data/outcome.dart';
 import '../data/group.dart';
+import 'package:flutter/widgets.dart';
 
 enum SessionState {
   PENDING, // in lobby and waiting (unknown how long to start)
@@ -23,13 +23,13 @@ void main() {
   // test.startQuiz();
 }
 
-class GameSessionModel {
+class GameSessionModel extends ChangeNotifier{
   // URL of server
   static const String SERVER_URL = 'https://fuzzybroccoli.com';
 
   Map<int, SocketUser.User> players = {};
   int startCountDown;
-  NextQuestion nextQues;
+  Question question;
   int time;
   int totalQuestion;
   Outcome outcome;
@@ -61,7 +61,7 @@ class GameSessionModel {
 
     socket.on('connect', (message) {
       print('connected');
-      // notifyListeners();
+      notifyListeners();
     });
 
     socket.on('welcome', (message) {
@@ -79,13 +79,15 @@ class GameSessionModel {
         state = SessionState.STARTING;
       else if ('running' == message['state'])
         state = SessionState.QUESTION;
+      else if ('ended' == message['state'])
+        state = SessionState.OUTCOME;
       else
         state = SessionState.ABORTED;
 
       print(players);
       print(role);
       print(state);
-      // notifyListeners();
+      notifyListeners();
     });
 
     socket.on('playerJoin', (message) {
@@ -94,7 +96,6 @@ class GameSessionModel {
       players[user.id] = user;
       print("playerJoin");
       print(players);
-      // notifyListeners();
     });
 
     socket.on('playerLeave', (message) {
@@ -103,7 +104,6 @@ class GameSessionModel {
       var user = SocketUser.User.fromJson(message);
       players.remove(user.id);
       print(players);
-      // notifyListeners();
     });
 
     socket.on('starting', (message) {
@@ -112,7 +112,7 @@ class GameSessionModel {
       startCountDown = int.parse(message);
       print(startCountDown);
       state = SessionState.STARTING;
-      // notifyListeners();
+      notifyListeners();
     });
 
     socket.on('cancelled', (message) {
@@ -120,16 +120,25 @@ class GameSessionModel {
       print("cancelled");
       socket.disconnect();
       state = SessionState.ABORTED;
-      // notifyListeners();
+      notifyListeners();
     });
 
     socket.on('nextQuestion', (message) {
       print("nextQuestion");
       print(message);
-      nextQues = NextQuestion.fromJson(message);
-      print(nextQues);
+      if(message['question']['options'] == null)
+        question = TFQuestion.fromJson(message['question']);
+      else
+        question = MCQuestion.fromJson(message['question']);
+      time = message['time'];
+      totalQuestion = message['totalQuestion'];
+
+      print(question);
+      print(time);
+      print(totalQuestion);
+
       state = SessionState.QUESTION;
-      // notifyListeners();
+      notifyListeners();
     });
 
     socket.on('questionAnswered', (message) {
@@ -138,7 +147,7 @@ class GameSessionModel {
       questionAnswered = QuestionAnswered.fromJson(message);
       print(questionAnswered);
       state = SessionState.QUESTION;
-      // notifyListeners();
+      notifyListeners();
     });
 
     socket.on('correctAnswer', (message) {
@@ -147,7 +156,7 @@ class GameSessionModel {
       correctAnswer = CorrectAnswer.fromJson(message);
       print(correctAnswer);
       state = SessionState.ANSWER;
-      // notifyListeners();
+      notifyListeners();
     });
 
     socket.on('questionOutcome', (message) {
@@ -162,7 +171,7 @@ class GameSessionModel {
         print(outcome);
       }
       state = SessionState.OUTCOME;
-      // notifyListeners();
+      notifyListeners();
     });
 
     socket.on('disconnect', (message) {
