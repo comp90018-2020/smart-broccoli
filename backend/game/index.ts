@@ -21,7 +21,7 @@ export default (socketIO: Server) => {
 
             // answer
             socket.on("answer", (content: any) => {
-                handler.answer(socket, content, session, player);
+                handler.answer(content, session, player);
             });
 
             // quit
@@ -31,7 +31,7 @@ export default (socketIO: Server) => {
 
             // start
             socket.on("start", () => {
-                handler.start(socket, session, player);
+                handler.start(session, player);
             });
 
             // abort
@@ -41,12 +41,12 @@ export default (socketIO: Server) => {
 
             // next question
             socket.on("next", () => {
-                handler.next(socket, session, player);
+                handler.next(session, player);
             });
 
             // showBoard
             socket.on("showBoard", () => {
-                handler.showBoard(socket, session, player);
+                handler.showBoard(session, player);
             });
 
             if (process.env.SOCKET_MODE === "debug") {
@@ -57,7 +57,7 @@ export default (socketIO: Server) => {
             }
         } catch (err) {
             delete _socketIO.sockets.connected[socket.id];
-            sendErr(err, socket);
+            sendErr(err, socket.id);
         }
 
         return next();

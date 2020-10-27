@@ -12,10 +12,7 @@ import {
     Answer,
     QuizType,
 } from "./datatype";
-import { Quiz, Question } from "../models";
-import { endSession } from "../controllers/session";
 import { QuizAttributes } from "models/quiz";
-import { emit } from "process";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const playerCache: { [userId: number]: Player } = {};
@@ -105,7 +102,7 @@ export class GameHandler {
         const newSession = new GameSession(quiz, sessionId, quizType, isGroup);
 
         if (newSession.type === QuizType.SelfPaced_Group) {
-            this.start(null, newSession, null);
+            this.start(newSession, null);
         } else if (newSession.type === QuizType.Live_Group) {
             // haha we dont have it!
             return false;
@@ -152,12 +149,7 @@ export class GameHandler {
         }
     }
 
-    async answer(
-        socket: Socket,
-        content: any,
-        session: GameSession,
-        player: Player
-    ) {
+    async answer(content: any, session: GameSession, player: Player) {
         try {
             // create answer from emit
             const answer: Answer = new Answer(
@@ -202,7 +194,7 @@ export class GameHandler {
                 }
             }
         } catch (error) {
-            sendErr(error, socket);
+            sendErr(error, player.socketId);
         }
     }
 
@@ -244,11 +236,16 @@ export class GameHandler {
             );
 
             if (session.status === GameStatus.Starting) {
-                // if game is starting, emit startingom(Role.all, Event.starting,  (session.quizStartsAt - Date.now()).toString())
+                // if game is starting,
+                emitToOne(
+                    socket.id,
+                    Event.starting,
+                    (session.quizStartsAt - Date.now()).toString()
+                );
             } else if (session.status === GameStatus.Running) {
                 // if game is running, emit nextQuestion
                 emitToOne(
-                    socket.id,
+                    player.socketId,
                     Event.nextQuestion,
                     formatQuestion(
                         session.questionIndex,
@@ -271,7 +268,7 @@ export class GameHandler {
                 // otherwise ignore
             }
         } catch (error) {
-            sendErr(error, socket);
+            sendErr(error, player.socketId);
         }
     }
 
@@ -301,7 +298,7 @@ export class GameHandler {
             // disconnect
             socket.disconnect();
         } catch (error) {
-            sendErr(error, socket);
+            sendErr(error, player.socketId);
         }
     }
 
@@ -330,7 +327,7 @@ export class GameHandler {
 
     nextWithoutHost() {}
 
-    async start(socket: Socket, session: GameSession, player: Player) {
+    async start(session: GameSession, player: Player) {
         try {
             if (
                 // if no host or player is host
@@ -355,16 +352,15 @@ export class GameHandler {
                         session.status = GameStatus.Running;
                         session.setToNextQuestion();
                         // release the firt question
-                        this.next(socket, session, player);
+                        this.next(session, player);
                     },
                     process.env.SOCKET_MODE === "debug"
                         ? 1
-                        : session.quizStartsAt - Date.now(),
-                    socket
+                        : session.quizStartsAt - Date.now()
                 );
             }
         } catch (error) {
-            sendErr(error, socket);
+            sendErr(error, player.socketId);
         }
     }
 
@@ -379,7 +375,7 @@ export class GameHandler {
                 this.checkEnv();
             }
         } catch (error) {
-            sendErr(error, socket);
+            sendErr(error, player.socketId);
         }
     }
 
@@ -396,7 +392,7 @@ export class GameHandler {
         }
     }
 
-    async next(socket: Socket, session: GameSession, player: Player) {
+    async next(session: GameSession, player: Player) {
         try {
             if (
                 // if no host or player is host
@@ -447,7 +443,7 @@ export class GameHandler {
                 }
             }
         } catch (error) {
-            sendErr(error, socket);
+            sendErr(error, player.socketId);
         }
     }
 
@@ -466,7 +462,7 @@ export class GameHandler {
             );
         }
     }
-    async showBoard(socket: Socket, session: GameSession, player: Player) {
+    async showBoard(session: GameSession, player: Player) {
         try {
             if (
                 player.role === Role.host &&
@@ -511,7 +507,7 @@ export class GameHandler {
                 );
             }
         } catch (error) {
-            sendErr(error, socket);
+            sendErr(error, player.socketId);
         }
     }
 
@@ -547,12 +543,16 @@ export class GameHandler {
     }
 }
 
-export const sendErr = (error: any, socket: Socket) => {
+export const sendErr = (error: any, socketId: string) => {
     console.log(error);
-    if (process.env.SOCKET_MODE === "debug" || socket !== null) {
+    if (process.env.SOCKET_MODE === "debug") {
         // https://stackoverflow.com/questions/18391212
-        socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
-        socket.disconnect();
+        if (_socketIO.sockets.connected.hasOwnProperty(socketId)) {
+            _socketIO.sockets.connected[socketId].send(
+                JSON.stringify(error, Object.getOwnPropertyNames(error))
+            );
+            _socketIO.sockets.connected[socketId].disconnect();
+        }
     }
 };
 
