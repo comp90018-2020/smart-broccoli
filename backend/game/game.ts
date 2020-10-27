@@ -388,7 +388,9 @@ export class GameHandler {
         )) {
             // loop over socket in the room
             // and disconnect them
-            socketIO_.sockets.connected[socketId].disconnect();
+            if (socketIO_.sockets.connected.hasOwnProperty(socketId)) {
+                socketIO_.sockets.connected[socketId].disconnect();
+            }
         }
     }
 
