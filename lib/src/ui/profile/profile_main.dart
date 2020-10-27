@@ -65,12 +65,15 @@ class _ProfileMainState extends State<ProfileMain> {
       ],
 
       // Render appropriate page
-      child: Consumer<UserProfileModel>(
-        builder: (context, profile, child) => SingleChildScrollView(
-          child: profile.user.type == UserType.UNREGISTERED
-              ? ProfileJoined(profile, _isEdit, key: key)
-              : ProfileRegistered(profile, _isEdit, key: key),
-        ),
+      child: SingleChildScrollView(
+        child: Consumer<UserProfileModel>(builder: (context, profile, child) {
+          if (profile.user?.type == UserType.UNREGISTERED)
+            return ProfileJoined(profile, _isEdit, key: key);
+          else if (profile.user?.type == UserType.REGISTERED)
+            return ProfileRegistered(profile, _isEdit, key: key);
+          else
+            return Container();
+        }),
       ),
     );
   }
