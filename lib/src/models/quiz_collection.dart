@@ -86,6 +86,17 @@ class QuizCollectionModel extends ChangeNotifier {
     }
   }
 
+  Future<void> createQuiz(Quiz quiz) async {
+    await _quizApi.createQuiz(_authStateModel.token, quiz);
+    notifyListeners();
+  }
+
+  Future<void> deleteQuiz(Quiz quiz) async {
+    await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
+    _createdQuizzes.remove(quiz.id);
+    notifyListeners();
+  }
+
   Future<void> updateQuiz(Quiz quiz) async {
     await _quizApi.updateQuiz(_authStateModel.token, quiz);
     notifyListeners();
@@ -172,10 +183,7 @@ class QuizCollectionModel extends ChangeNotifier {
     _picStash.storePic(quiz.pictureId, quiz.picture);
   }
 
-  Future<void> createQuiz(Quiz quiz) async {
-    await _quizApi.createQuiz(_authStateModel.token, quiz);
-    notifyListeners();
-  }
+
 
 
 

@@ -50,7 +50,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
       quizNameController = TextEditingController(text: model.title);
 
-      timerTextController = TextEditingController(text: model.timeLimit.toString());
+      timerTextController = TextEditingController(text: model.timeLimit.toString() + " seconds");
 
 
 //Creation of a new quiz
@@ -62,7 +62,7 @@ class _QuizCreateState extends State<QuizCreate> {
       // Key for form
 
       // Text controller for seconds per question
-      timerTextController = TextEditingController();
+      timerTextController = TextEditingController(text: "30 seconds");
 
 
       model.type = QuizType.LIVE;
@@ -103,19 +103,24 @@ class _QuizCreateState extends State<QuizCreate> {
           icon: Icon(Icons.delete),
           padding: EdgeInsets.zero,
           splashRadius: 20,
-          onPressed: () {},
+          onPressed: () {
+            if (model.id != null){
+              _deleteQuiz();
+
+            }else{
+              Navigator.pop(context);
+            }
+          },
         ),
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
           onPressed: () {
-
             if (model.id != null){
               _saveQuiz();
             }
             else{
               _createQuiz();
             }
-
           },
           child: Text(
             'Save',
@@ -472,6 +477,16 @@ class _QuizCreateState extends State<QuizCreate> {
         });
       }
     });
+  }
+
+  void _deleteQuiz() async {
+    try {
+      await Provider.of<QuizCollectionModel>(context, listen: false).deleteQuiz(model);
+      Navigator.of(context).pop();
+    } catch (e) {
+      print(e);
+      _showUnsuccessful("Cannot save changes in the quiz", e);
+    }
   }
 
 }
