@@ -1,3 +1,14 @@
+export enum Event {
+    welcome = "welcome",
+    starting = "starting",
+    questionAnswered = "questionAnswered",
+    playerJoin = "playerJoin",
+    playerLeave = "playerLeave",
+    nextQuestion = "nextQuestion",
+    correctAnswer = "correctAnswer",
+    questionOutcome = "questionOutcome",
+    cancelled = "cancelled",
+}
 export enum Res {
     Success = "success",
     NoMoreQuestion = "No more question",
@@ -7,6 +18,7 @@ export enum Res {
 export enum Role {
     host = "host",
     player = "participant",
+    all = "all above",
 }
 
 export enum GameStatus {

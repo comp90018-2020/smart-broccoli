@@ -1,24 +1,20 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { GameHandler, sendErr } from "./game";
 import { sessionTokenDecrypt } from "../controllers/session";
 import { Player, Role } from "./datatype";
+import { GameSession } from "./session";
 
 export let _socketIO: Server = null;
 export const handler: GameHandler = new GameHandler();
+const socketSessionMap: { [socketId: string]: GameSession } = {};
+const socketPlayerMap: { [socketId: string]: Player } = {};
 
 export default (socketIO: Server) => {
     _socketIO = socketIO;
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
         try {
-            const { userId, sessionId, role } = await decrypt(socket);
-            const player: Player = await handler.createPlayer(
-                socket,
-                userId,
-                sessionId,
-                role
-            );
-            const session = handler.sessions[Number(sessionId)];
+            const [session, player] = await verify(socket);
 
             // join & welcome
             handler.welcome(socket, session, player);
@@ -60,6 +56,7 @@ export default (socketIO: Server) => {
                 });
             }
         } catch (err) {
+            delete _socketIO.sockets.connected[socket.id];
             sendErr(err, socket);
         }
 
@@ -79,4 +76,23 @@ const decrypt = async (socket: SocketIO.Socket) => {
         );
         return { userId, sessionId, role };
     }
+};
+
+const verify = async (socket: Socket): Promise<[GameSession, Player]> => {
+    // @ts-ignore
+    if (!_socketIO.sockets.connected.hasOwnProperty()) {
+        _socketIO.sockets.connected[socket.id] = socket;
+    }
+    let session: GameSession;
+    let player: Player;
+    if (!socketSessionMap.hasOwnProperty(socket.id)) {
+        const { userId, sessionId, role } = await decrypt(socket);
+        session = handler.sessions[Number(sessionId)];
+
+        player = await handler.createPlayer(socket, userId, sessionId, role);
+    } else {
+        session = socketSessionMap[socket.id];
+        player = socketPlayerMap[socket.id];
+    }
+    return [session, player];
 };
