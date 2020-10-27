@@ -104,6 +104,12 @@ class _ProfileRegisteredState extends ProfileEditorState {
       return false;
     }
 
+    if (_passwordController.text.isNotEmpty &&
+        _passwordController.text.length < 8) {
+      showErrorDialog(context, "Password must be at least 8 characters");
+      return false;
+    }
+
     if (_passwordController.text != _confirmPasswordController.text) {
       showErrorDialog(context, "Passwords do not match");
       return false;

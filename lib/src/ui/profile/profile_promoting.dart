@@ -80,6 +80,9 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
       return await showErrorDialog(context, "All fields are required");
     if (!EmailValidator.validate(_emailController.text))
       return await showErrorDialog(context, "Invalid email");
+    if (_passwordController.text.length < 8)
+      return await showErrorDialog(
+          context, "Password must be at least 8 characters");
     if (_passwordController.text != _confirmPasswordController.text)
       return await showErrorDialog(context, "Passwords do not match");
     try {
