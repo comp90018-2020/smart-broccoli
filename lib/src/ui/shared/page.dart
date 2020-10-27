@@ -123,39 +123,41 @@ class CustomPage extends StatelessWidget {
                             child: Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 18),
-                              child: FutureBuilder(
-                                future: Provider.of<UserProfileModel>(context,
-                                        listen: true)
-                                    .getUser(forceRefresh: false),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<User> snapshot) {
-                                  return Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: snapshot.hasData
-                                        ? [
-                                            Text(snapshot.data.name,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyText1),
-                                            Text(
-                                                snapshot.data.type ==
-                                                        UserType.UNREGISTERED
-                                                    ? "Unregistered"
-                                                    : snapshot.data.email,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyText2),
-                                          ]
-                                        : [
-                                            Text('Unknown User',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyText1)
-                                          ],
-                                  );
-                                },
+                              child: Consumer<UserProfileModel>(
+                                builder: (context, profile, child) =>
+                                    FutureBuilder(
+                                  future: profile.getUser(forceRefresh: false),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<User> snapshot) {
+                                    return Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: snapshot.hasData
+                                          ? [
+                                              Text(snapshot.data.name,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyText1),
+                                              Text(
+                                                  snapshot.data.type ==
+                                                          UserType.UNREGISTERED
+                                                      ? "Unregistered"
+                                                      : snapshot.data.email,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyText2),
+                                            ]
+                                          : [
+                                              Text('Unknown User',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyText1)
+                                            ],
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),
