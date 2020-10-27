@@ -22,7 +22,7 @@ void main() async {
       QuizCollectionModel(authStateModel, picStash);
   final GroupRegistryModel groupRegistryModel =
       GroupRegistryModel(authStateModel, userRepo, quizCollectionModel);
-  final GameSessionModel gameSessionModel = GameSessionModel();
+  final GameSessionModel gameSessionModel = GameSessionModel(authStateModel);
 
   runApp(
     MultiProvider(

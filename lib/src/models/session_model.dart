@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/models/auth_state.dart';
 import 'package:smart_broccoli/src/models/model_change.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -18,6 +19,10 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   // URL of server
   static const String SERVER_URL = 'https://fuzzybroccoli.com';
 
+  /// AuthStateModel object used to obtain token for requests
+  final AuthStateModel _authStateModel;
+
+  GameSession session;
   Map<int, SocketUser> players = {};
   int startCountDown;
   Question question;
@@ -33,11 +38,23 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
-  GameSessionModel() {
+  GameSessionModel(this._authStateModel) {
     socket = IO.io(SERVER_URL, {
       'autoConnect': false,
       'transports': ['websocket']
     });
+  }
+
+  Future<void> refreshSession() {
+    // TODO: implement
+  }
+
+  Future<void> createSession(Quiz quiz) {
+    // TODO: implement
+  }
+
+  Future<void> joinSession(GameSession session) {
+    // TODO: implement
   }
 
   /// Connect to socket with headers
