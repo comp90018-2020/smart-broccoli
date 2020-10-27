@@ -31,8 +31,8 @@ class UserRepository {
     if ((user.picture = await _picStash.getPic(user.pictureId)) != null)
       return user;
     // if not, use the API then cache the picture (in background) for next time
-    user.picture = await _userApi.getProfilePic(token);
-    _picStash.storePic(user.pictureId, user.picture); // no need to await
+    var picture = await _userApi.getProfilePic(token);
+    user.picture = await _picStash.storePic(user.pictureId, picture);
     return user;
   }
 
@@ -47,9 +47,9 @@ class UserRepository {
     if ((_users[id].picture = await _picStash.getPic(_users[id].pictureId)) !=
         null) return _users[id];
     // if not, use the API then cache the picture (in background) for next time
-    _users[id].picture = await _userApi.getProfilePic(token);
-    _picStash.storePic(
-        _users[id].pictureId, _users[id].picture); // no need to await
+    var picture = await _userApi.getProfilePic(token);
+    _users[id].picture =
+        await _picStash.storePic(_users[id].pictureId, picture);
     return _users[id];
   }
 
@@ -67,21 +67,13 @@ class UserRepository {
       if (member.pictureId != null &&
           (member.picture = await _picStash.getPic(member.pictureId)) == null) {
         try {
-          member.picture = await _userApi.getProfilePicOf(token, member.id);
-          _picStash.storePic(member.pictureId, member.picture);
+          var picture = await _userApi.getProfilePicOf(token, member.id);
+          member.picture = await _picStash.storePic(member.pictureId, picture);
         } catch (_) {
           // if unable to get the profie pic from the API, simply move on
         }
       }
     }));
     return members;
-  }
-
-  Future<Uint8List> getProfilePicOf(String token, int id) async {
-    Uint8List bytes;
-    if (_users.containsKey(id) &&
-        (bytes = await _picStash.getPic(_users[id].pictureId)) != null)
-      return bytes;
-    return await _userApi.getProfilePicOf(token, id);
   }
 }

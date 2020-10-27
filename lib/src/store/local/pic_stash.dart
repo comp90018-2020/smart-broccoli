@@ -17,17 +17,16 @@ class PictureStash {
   /// Retrieve a picture with specified [id] from local storage.
   ///
   /// If the picture does not exist, return null.
-  Future<Uint8List> getPic(int id) async {
+  Future<String> getPic(int id) async {
     String assetDir = '$_baseDir/picture/$id';
-    try {
-      return await File(assetDir).readAsBytes();
-    } catch (_) {
-      return null;
+    if (await File(assetDir).exists()) {
+      return assetDir;
     }
+    return null;
   }
 
   /// Save a picture with specified [id] to local storage.
-  Future<void> storePic(int id, Uint8List bytes) async {
+  Future<String> storePic(int id, Uint8List bytes) async {
     // ensure picture directory exists
     final Directory picDir =
         await Directory('$_baseDir/picture').create(recursive: true);
@@ -36,7 +35,10 @@ class PictureStash {
     try {
       File f = File(assetDir);
       f.writeAsBytes(bytes);
-    } catch (_) {}
+      return assetDir;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Clear all pictures from local storage.
