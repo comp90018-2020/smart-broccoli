@@ -75,10 +75,12 @@ class CustomPage extends StatelessWidget {
                   BoxShadow(color: Colors.white, offset: const Offset(0, .2))
                 ]),
                 child: AppBar(
-                    title: Text(this.title),
-                    centerTitle: true,
-                    elevation: 0,
-                    actions: appbarActions),
+                  title: Text(this.title),
+                  centerTitle: true,
+                  elevation: 0,
+                  leading: appbarLeading,
+                  actions: appbarActions,
+                ),
               ),
             )
           : null,
