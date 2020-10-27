@@ -95,22 +95,19 @@ class _QuizCardState extends State<QuizCard> {
                       Container(
                         padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             widget.quiz.type == QuizType.LIVE
                                 ? liveIndicator()
                                 : selfPacedIndicator(),
-                            ...widget.quiz.complete
-                                ? [
-                                    Spacer(),
-                                    Text(
-                                      'Complete',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ]
-                                : [],
+                            if (widget.quiz.complete)
+                              Text(
+                                'Complete',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                           ],
                         ),
                       )
