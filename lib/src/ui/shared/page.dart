@@ -59,6 +59,9 @@ class CustomPage extends StatelessWidget {
       },
     );
 
+    // Provider.of<UserProfileModel>(context, listen: false)
+    //     .refreshUser(force: false);
+
     return Scaffold(
       backgroundColor: this.secondaryBackgroundColour
           ? Theme.of(context).backgroundColor
@@ -111,7 +114,7 @@ class CustomPage extends StatelessWidget {
                           // User picture
                           Consumer<UserProfileModel>(
                             builder: (context, profile, child) =>
-                                profile.user.picture == null
+                                profile.user?.picture == null
                                     ? UserAvatar.placeholder(maxRadius: 30)
                                     : UserAvatar(
                                         profile.user.picture,
@@ -136,7 +139,7 @@ class CustomPage extends StatelessWidget {
                                         profile.user?.type ==
                                                 UserType.UNREGISTERED
                                             ? "Unregistered"
-                                            : profile.user?.email,
+                                            : profile.user?.email ?? "Unknown",
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyText2),

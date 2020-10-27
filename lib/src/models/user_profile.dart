@@ -35,13 +35,19 @@ class UserProfileModel extends ChangeNotifier {
       {UserApi userApi}) {
     _userApi = userApi ?? UserApi();
     // load last record of profile and picture
-    try {
-      _user = User.fromJson(json.decode(_keyValueStore.getString('user')));
+    var userJson = _keyValueStore.getString('user');
+    if (userJson != null) {
+      _user = User.fromJson(json.decode(userJson));
       if (_user?.pictureId != null) _picStash.getPic(_user.pictureId);
-    } catch (_) {}
+    }
   }
 
-  Future<void> refreshUser() async {
+  Future<void> refreshUser({bool force = false}) async {
+    // If user is already loaded
+    if (!force && _user != null) {
+      return null;
+    }
+
     _user = await _userRepo.getUser(_authStateModel.token);
     _keyValueStore.setString('user', json.encode(_user.toJson()));
     notifyListeners();
