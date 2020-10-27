@@ -1,19 +1,18 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
-
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
-
+import 'profile_editor.dart';
 import 'profile_picture.dart';
 import 'table_items.dart';
 
 /// Profile page for listed users
 class ProfileRegistered extends ProfileEditor {
-  ProfileRegistered(UserProfileModel profile, bool isEdit, {Key key})
-      : super(profile, isEdit, key: key);
+  ProfileRegistered(User user, bool isEdit, {Key key})
+      : super(user, isEdit, key: key);
 
   @override
   State<StatefulWidget> createState() => new _ProfileRegisteredState();
@@ -117,7 +116,7 @@ class _ProfileRegisteredState extends ProfileEditorState {
     }
 
     try {
-      await widget.profile.updateUser(
+      await Provider.of<UserProfileModel>(context, listen: false).updateUser(
           name: _nameController.text,
           password: _passwordController.text.isEmpty
               ? null
@@ -137,8 +136,8 @@ class _ProfileRegisteredState extends ProfileEditorState {
 
   @override
   Future<void> discardChanges() async {
-    _nameController.text = widget.profile.user?.name;
-    _emailController.text = widget.profile.user?.email;
+    _nameController.text = widget.user.name;
+    _emailController.text = widget.user.email;
     _passwordController.clear();
     _confirmPasswordController.clear();
   }

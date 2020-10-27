@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/src/models/user_profile.dart';
+import 'package:smart_broccoli/src/data.dart';
 
 /// Interface for pages which edit the user's profile
 abstract class ProfileEditor extends StatefulWidget {
-  final UserProfileModel profile;
+  final User user;
   final bool isEdit;
 
-  ProfileEditor(this.profile, this.isEdit, {Key key}) : super(key: key);
+  ProfileEditor(this.user, this.isEdit, {Key key}) : super(key: key);
 }
 
 /// Inferface for state of ProfileEditor to implement

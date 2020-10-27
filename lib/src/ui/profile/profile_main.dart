@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/profile/profile_picture.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'profile_editor.dart';
@@ -66,15 +67,20 @@ class _ProfileMainState extends State<ProfileMain> {
 
       // Render appropriate page
       child: SingleChildScrollView(
-        child: Consumer<UserProfileModel>(builder: (context, profile, child) {
-          if (profile.user?.type == UserType.UNREGISTERED)
-            return ProfileJoined(profile, _isEdit, key: key);
-          else if (profile.user?.type == UserType.REGISTERED)
-            return ProfileRegistered(profile, _isEdit, key: key);
-          else
-            return Container();
-        }),
-      ),
+          child: FutureBuilder(
+              future:
+                  Provider.of<UserProfileModel>(context).getUser(force: true),
+              builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+                if (!snapshot.hasData)
+                  return Column(children: [
+                    // Placeholder profile picture
+                    ProfilePicture(false),
+                  ]);
+
+                return snapshot.data.type == UserType.UNREGISTERED
+                    ? ProfileJoined(snapshot.data, _isEdit, key: key)
+                    : ProfileRegistered(snapshot.data, _isEdit, key: key);
+              })),
     );
   }
 
