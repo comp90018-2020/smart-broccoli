@@ -52,8 +52,8 @@ class _ProfileMainState extends State<ProfileMain> {
       child: Consumer<UserProfileModel>(
         builder: (context, profile, child) => SingleChildScrollView(
           child: profile.user.type == UserType.UNREGISTERED
-              ? ProfileJoined(_isEdit, key: key)
-              : ProfileRegistered(_isEdit, key: key),
+              ? ProfileJoined(profile, _isEdit, key: key)
+              : ProfileRegistered(profile, _isEdit, key: key),
         ),
       ),
     );

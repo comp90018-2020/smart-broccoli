@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
@@ -10,7 +10,8 @@ import 'table_items.dart';
 
 /// Profile page for listed users
 class ProfileRegistered extends ProfileEditor {
-  ProfileRegistered(bool isEdit, {Key key}) : super(isEdit, key: key);
+  ProfileRegistered(UserProfileModel profile, bool isEdit, {Key key})
+      : super(profile, isEdit, key: key);
 
   @override
   State<StatefulWidget> createState() => new _ProfileRegisteredState();
@@ -25,10 +26,8 @@ class _ProfileRegisteredState extends ProfileEditorState {
 
   @override
   void initState() {
-    _nameController.text =
-        Provider.of<UserProfileModel>(context, listen: false).user?.name;
-    _emailController.text =
-        Provider.of<UserProfileModel>(context, listen: false).user?.email;
+    _nameController.text = widget.profile.user?.name;
+    _emailController.text = widget.profile.user?.email;
     super.initState();
   }
 
@@ -106,7 +105,7 @@ class _ProfileRegisteredState extends ProfileEditorState {
     }
 
     try {
-      await Provider.of<UserProfileModel>(context, listen: false).updateUser(
+      await widget.profile.updateUser(
           name: _nameController.text,
           password: _passwordController.text.isEmpty
               ? null

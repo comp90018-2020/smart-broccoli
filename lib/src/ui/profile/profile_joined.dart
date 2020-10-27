@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models/user_profile.dart';
 import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
@@ -11,7 +11,8 @@ import 'profile_promoting.dart';
 import 'table_items.dart';
 
 class ProfileJoined extends ProfileEditor {
-  ProfileJoined(bool isEdit, {Key key}) : super(isEdit, key: key);
+  ProfileJoined(UserProfileModel profile, bool isEdit, {Key key})
+      : super(profile, isEdit, key: key);
 
   @override
   State<StatefulWidget> createState() => new _ProfileJoinedState();
@@ -22,8 +23,7 @@ class _ProfileJoinedState extends ProfileEditorState {
 
   @override
   void initState() {
-    final User user =
-        Provider.of<UserProfileModel>(context, listen: false).user;
+    final User user = widget.profile.user;
     _nameController.text = user == null || user.isAnonymous ? "" : user.name;
     super.initState();
   }
@@ -74,7 +74,7 @@ class _ProfileJoinedState extends ProfileEditorState {
   @override
   Future<bool> commitChanges() async {
     try {
-      await Provider.of<UserProfileModel>(context, listen: false).updateUser(
+      await widget.profile.updateUser(
           name: _nameController.text.isEmpty ? null : _nameController.text);
       return true;
     } catch (_) {
