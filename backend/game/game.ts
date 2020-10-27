@@ -198,7 +198,6 @@ export class GameHandler {
             }
         } catch (error) {
             sendErr(error, socket);
-            socket.disconnect();
         }
     }
 
@@ -272,7 +271,6 @@ export class GameHandler {
             }
         } catch (error) {
             sendErr(error, socket);
-            socket.disconnect();
         }
     }
 
@@ -300,7 +298,6 @@ export class GameHandler {
             socket.disconnect();
         } catch (error) {
             sendErr(error, socket);
-            socket.disconnect();
         }
     }
 
@@ -364,7 +361,6 @@ export class GameHandler {
             }
         } catch (error) {
             sendErr(error, socket);
-            socket.disconnect();
         }
     }
 
@@ -383,7 +379,6 @@ export class GameHandler {
             }
         } catch (error) {
             sendErr(error, socket);
-            socket.disconnect();
         }
     }
 
@@ -450,7 +445,6 @@ export class GameHandler {
             }
         } catch (error) {
             sendErr(error, socket);
-            socket.disconnect();
         }
     }
 
@@ -519,7 +513,6 @@ export class GameHandler {
             }
         } catch (error) {
             sendErr(error, socket);
-            socket.disconnect();
         }
     }
 
@@ -556,9 +549,10 @@ export class GameHandler {
 }
 
 export const sendErr = (error: any, socket: Socket) => {
-    if (process.env.SOCKET_MODE === "debug") {
+    if (process.env.SOCKET_MODE === "debug" || socket !== null) {
         // https://stackoverflow.com/questions/18391212
         console.log(error);
         socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        socket.disconnect();
     }
 };

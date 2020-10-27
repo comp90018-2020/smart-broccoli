@@ -61,7 +61,6 @@ export default (socketIO: Server) => {
             }
         } catch (err) {
             sendErr(err, socket);
-            socket.disconnect();
         }
 
         return next();
