@@ -69,8 +69,8 @@ class _ProfileMainState extends State<ProfileMain> {
       // Render appropriate page
       child: SingleChildScrollView(
           child: FutureBuilder(
-              future:
-                  Provider.of<UserProfileModel>(context).getUser(force: true),
+              future: Provider.of<UserProfileModel>(context)
+                  .getUser(forceRefresh: true),
               builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
                 if (!snapshot.hasData)
                   return Column(children: [

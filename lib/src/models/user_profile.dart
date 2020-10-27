@@ -43,9 +43,9 @@ class UserProfileModel extends ChangeNotifier {
   }
 
   /// UI function to get user
-  Future<User> getUser({bool force = false}) async {
+  Future<User> getUser({bool forceRefresh = false}) async {
     // If in cache and we don't force refresh
-    if (!force && user != null) {
+    if (!forceRefresh && user != null) {
       return user;
     }
     return await _refreshUser(notify: true);
