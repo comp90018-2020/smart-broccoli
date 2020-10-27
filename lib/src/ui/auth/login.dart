@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 
+import 'name_prompt.dart';
+
 // Login tab
 class Login extends StatefulWidget {
   Login({Key key}) : super(key: key);
@@ -123,8 +125,8 @@ class _LoginState extends State<Login> {
               child: MaterialButton(
                 textColor: Theme.of(context).colorScheme.onBackground,
                 child: const Text('SKIP LOGIN'),
-                onPressed:
-                    Provider.of<AuthStateModel>(context, listen: false).join,
+                onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => NamePrompt())),
               ),
             ),
           ],
