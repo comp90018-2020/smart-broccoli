@@ -111,6 +111,7 @@ class UserApi {
           http.MultipartFile.fromBytes('avatar', bytes, filename: 'avatar'));
 
     final http.StreamedResponse response = await request.send();
+
     if (response.statusCode == 200) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
