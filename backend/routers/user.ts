@@ -15,6 +15,10 @@ import {
     getUserProfile,
 } from "../controllers/user";
 import { auth } from "./middleware/auth";
+import {
+    updateNotificationSettigns,
+    updateNotificationState,
+} from "../controllers/notification";
 
 /**
  * @swagger
@@ -298,6 +302,65 @@ router.get(
             // Read and serve
             const file = fs.readFileSync(`${picture.destination}.thumb`);
             res.end(file, "binary");
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /user/state:
+ *   put:
+ *     summary: Update user availability/state
+ *     tags:
+ *       - User
+ *     parameters:
+ *       - in: body
+ *         name: free
+ *         schema:
+ *           type: boolean
+ *         required: true
+ *     responses:
+ *       '200':
+ *         description: OK
+ */
+router.put(
+    "/state",
+    [body("free").isBoolean()],
+    validate,
+    auth(),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await updateNotificationState(req.user.id, req.body);
+            return res.sendStatus(200);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /user/notification:
+ *   put:
+ *     summary: Update user notification settings
+ *     tags:
+ *       - User
+ *     responses:
+ *       '200':
+ *         description: OK
+ */
+router.put(
+    "/notification",
+    auth(),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const saved = await updateNotificationSettigns(
+                req.user.id,
+                req.body
+            );
+            return res.json(saved);
         } catch (err) {
             return next(err);
         }

@@ -34,6 +34,14 @@ export default class UserState
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {
             sequelize,
+            indexes: [
+                {
+                    name: "unique_state_user",
+                    unique: true,
+                    // @ts-ignore
+                    fields: [sequelize.col("userId")],
+                },
+            ],
         });
     }
 }

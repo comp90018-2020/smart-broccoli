@@ -115,5 +115,5 @@ export {
     Session,
     SessionParticipant,
     NotificationSettings,
-    UserState
+    UserState,
 };

@@ -1,4 +1,4 @@
-import sequelize, { Token, User, UserState } from "../models";
+import { NotificationSettings, Token, UserState } from "../models";
 import sendFirebaseMessage, { firebaseTokenValid } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 
@@ -137,9 +137,30 @@ export const updateToken = async (token: Token, newValue: string) => {
  * Update user's notification state.
  * @param opts
  */
-export const updateNotificationState = async (userId: number, opts: { free: boolean }) => {
-    await UserState.upsert({
+export const updateNotificationState = async (
+    userId: number,
+    opts: { free: boolean }
+) => {
+    try {
+        const [record] = await UserState.upsert({
+            userId,
+            free: opts.free
+        }, { returning: true });
+        return record;
+    } catch (err) {
+        // console.log(err);
+    }
+
+};
+
+/**
+ * Updates user's notification settings.
+ * @param userId
+ * @param opts
+ */
+export const updateNotificationSettigns = async (userId: number, opts: any) => {
+    return await NotificationSettings.upsert({
         userId,
-        free: opts.free
+        ...opts,
     });
 };
