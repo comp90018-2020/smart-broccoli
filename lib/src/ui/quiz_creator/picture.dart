@@ -1,8 +1,12 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/theme.dart';
+
+import '../../data.dart';
+import '../../models.dart';
 
 /// Widget for pictures
 ///
@@ -11,10 +15,14 @@ class PictureCard extends StatefulWidget {
   /// The image file to display
   final String picturePath;
 
+  final Quiz quiz;
+
   /// Callback for upload
   final void Function(String) updatePicture;
 
-  PictureCard(this.picturePath, this.updatePicture);
+
+
+  PictureCard(this.picturePath, this.updatePicture, {this.quiz});
 
   @override
   State createState() => _PictureCardState();
@@ -25,7 +33,19 @@ class _PictureCardState extends State<PictureCard> {
   final picker = ImagePicker();
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {/*
+    if (widget.quiz.pictureId != null)  {
+      Provider.of<QuizCollectionModel>(context, listen: false).getQuizPicture(
+          widget.quiz).then((value) =>{
+      });
+    }*/
+
     return Container(
       height: 175,
       child: Card(
@@ -35,9 +55,7 @@ class _PictureCardState extends State<PictureCard> {
             // Picture
             Container(
               width: double.maxFinite,
-              child: widget.picturePath == null
-                  ? Icon(Icons.insert_photo_outlined, size: 100)
-                  : Image.file(File(widget.picturePath), fit: BoxFit.cover),
+              child: assemblePicture(widget.quiz, widget.picturePath)
             ),
 
             // Update picture (top right)
@@ -63,6 +81,17 @@ class _PictureCardState extends State<PictureCard> {
         elevation: 5,
       ),
     );
+  }
+
+   assemblePicture(Quiz quiz, String picturePath ){
+    if (quiz.picturePath != null) {
+      return Image.file(File(widget.picturePath), fit: BoxFit.cover);
+    }
+    else if(quiz.pictureId != null){
+        return Image.memory(quiz.picture, fit: BoxFit.cover);
+    }else{
+      return Icon(Icons.insert_photo_outlined, size: 100);
+    }
   }
 
   void _openPictureSelector(BuildContext context, ImageSource source) async {

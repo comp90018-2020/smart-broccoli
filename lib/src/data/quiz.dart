@@ -97,7 +97,8 @@ class Quiz {
       'description': description,
       'active': isActive,
       'timeLimit': timeLimit,
-      'complete': complete
+      'complete': complete,
+      'pictureId': pictureId,
     };
     if (questions != null)
       json['questions'] =

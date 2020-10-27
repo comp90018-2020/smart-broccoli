@@ -38,8 +38,15 @@ class _QuestionCreateState extends State<QuestionCreate> {
   int questionNumber;
   String tempImgId;
 
+  void printPassedQ(){
+    print("Checking status of widget");
+    print(widget.passedQuiz);
+  }
+
   @override
   void initState() {
+    printPassedQ();
+    // TODO: implement initState
     super.initState();
     //Case of editing a question
     if(widget.passedQuestionIndex != null){
@@ -49,11 +56,14 @@ class _QuestionCreateState extends State<QuestionCreate> {
       _optionTextControllers = <TextEditingController>[];
 
       for (var i = 0; i < question.options.length; i++) {
+
          _optionTextControllers.add(TextEditingController(text: question.options[i].text));
       }
 
-      //Case of creating a new question
+
+      //Case od creating a new question
      }else{
+      print("here");
       questionNumber = widget.passedQuiz.questions.length;
       question = MCQuestion('Text', [], pictureId: null);
       questionTextController  = TextEditingController();
@@ -91,7 +101,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
           padding: EdgeInsets.zero,
           splashRadius: 20,
           onPressed: () {
-            //Checking whether question is edited oc created
+
             if(widget.passedQuestionIndex == null){
 
             }else{
@@ -104,6 +114,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
           onPressed: () {
+            print(widget.passedQuiz);
 
             if (questionTextController.text == ""){
               return _showUnsuccessful("Cannot create question", "Question text required");

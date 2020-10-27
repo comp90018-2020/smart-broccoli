@@ -62,8 +62,11 @@ class _QuizCreateState extends State<QuizCreate> {
       model.questions = new List<Question>();
     }
 
+
+
     super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +87,9 @@ class _QuizCreateState extends State<QuizCreate> {
 
       // Close icon
       appbarLeading: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          Navigator.pop(context);
+        },
         child: Icon(Icons.close),
       ),
 
@@ -154,11 +159,11 @@ class _QuizCreateState extends State<QuizCreate> {
                 ),
 
                 // Picture selection
-                PictureCard(model.picturePath, (path) {
+                PictureCard(model.picturePath,  (path) {
                   setState(() {
                     model.picturePath = path;
                   });
-                }),
+                }, quiz: model),
 
                 // Seconds selection
                 Padding(
@@ -373,6 +378,14 @@ class _QuizCreateState extends State<QuizCreate> {
         ),
       )
     );
+  }
+
+  setPictureForCard (Question question){
+
+    if (question.pictureId == null){
+
+    }
+
   }
 
 
