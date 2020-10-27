@@ -70,7 +70,12 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
 
   // Code to promote profile to a joined profile
   void initPromote() async {
-    if (_nameController.text.isEmpty || _emailController.text.isEmpty)
+    if ([
+      _nameController,
+      _emailController,
+      _passwordController,
+      _confirmPasswordController
+    ].any((controller) => controller.text.isEmpty))
       return await showErrorDialog(context, "All fields are required");
     if (_passwordController.text != _confirmPasswordController.text)
       return await showErrorDialog(context, "Passwords do not match");
