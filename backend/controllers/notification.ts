@@ -1,4 +1,4 @@
-import sequelize, { Token } from "../models";
+import sequelize, { Token, User, UserState } from "../models";
 import sendFirebaseMessage, { firebaseTokenValid } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 
@@ -131,4 +131,15 @@ export const removeToken = async (token: Token) => {
 export const updateToken = async (token: Token, newValue: string) => {
     token.token = newValue;
     await token.save();
+};
+
+/**
+ * Update user's notification state.
+ * @param opts
+ */
+export const updateNotificationState = async (userId: number, opts: { free: boolean }) => {
+    await UserState.upsert({
+        userId,
+        free: opts.free
+    });
 };

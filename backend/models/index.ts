@@ -11,8 +11,8 @@ import Group from "./group";
 import UserGroup from "./user_group";
 import Session from "./session";
 import SessionParticipant from "./session_participant";
-import NotificationSettings from "./user_notification_settings";
-import UserState from "./user_state";
+import NotificationSettings from "./notification_settings";
+import UserState from "./notification_user_state";
 
 // Initiate sequelize instance
 const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
@@ -50,7 +50,7 @@ User.belongsTo(Picture, {
 // User has notification settings
 User.hasOne(NotificationSettings, { foreignKey: "userId" });
 // User has state
-User.hasMany(UserState, { foreignKey: "userId" });
+User.hasOne(UserState, { foreignKey: "userId" });
 
 // Quiz has picture
 Quiz.belongsTo(Picture, {
@@ -114,4 +114,6 @@ export {
     Picture,
     Session,
     SessionParticipant,
+    NotificationSettings,
+    UserState
 };
