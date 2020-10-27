@@ -133,7 +133,7 @@ class CustomPage extends StatelessWidget {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    children: (snapshot.hasData == true)
+                                    children: snapshot.hasData
                                         ? [
                                             Text(snapshot.data.name,
                                                 style: Theme.of(context)
