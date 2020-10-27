@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/models/model_change.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import 'package:smart_broccoli/src/data.dart';
@@ -13,7 +14,7 @@ enum SessionState {
   ABORTED,
 }
 
-class GameSessionModel extends ChangeNotifier {
+class GameSessionModel extends ChangeNotifier implements AuthChange {
   // URL of server
   static const String SERVER_URL = 'https://fuzzybroccoli.com';
 
@@ -198,5 +199,21 @@ class GameSessionModel extends ChangeNotifier {
 
   void answerQuestion() {
     socket.emit('answer', answer.toJson());
+  }
+
+  @override
+  void authUpdated() {
+    players.clear();
+    startCountDown = null;
+    question = null;
+    time = null;
+    totalQuestion = null;
+    outcome = null;
+    questionAnswered = null;
+    correctAnswer = null;
+    role = null;
+    answer = null;
+    state = null;
+    socket = null;
   }
 }

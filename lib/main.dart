@@ -5,6 +5,7 @@ import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/theme.dart';
 
 void main() async {
@@ -21,6 +22,7 @@ void main() async {
       QuizCollectionModel(authStateModel, picStash);
   final GroupRegistryModel groupRegistryModel =
       GroupRegistryModel(authStateModel, userRepo, quizCollectionModel);
+  final GameSessionModel gameSessionModel = GameSessionModel();
 
   runApp(
     MultiProvider(
@@ -39,6 +41,11 @@ void main() async {
           create: (_) => groupRegistryModel,
           update: (_, authModel, groupRegistryModel) =>
               groupRegistryModel..authUpdated(),
+        ),
+        ChangeNotifierProxyProvider<AuthStateModel, GameSessionModel>(
+          create: (_) => gameSessionModel,
+          update: (_, authModel, gameSessionModel) =>
+              gameSessionModel..authUpdated(),
         ),
       ],
       child: MyApp(),
