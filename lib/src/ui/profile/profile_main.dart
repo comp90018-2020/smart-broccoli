@@ -26,7 +26,19 @@ class _ProfileMainState extends State<ProfileMain> {
   Widget build(BuildContext context) {
     return CustomPage(
       title: "Profile",
-      hasDrawer: true,
+      hasDrawer: !_isEdit,
+
+      // discard changes
+      appbarLeading: _isEdit
+          ? IconButton(
+              icon: Icon(Icons.close),
+              enableFeedback: false,
+              splashRadius: 20,
+              onPressed: () => setState(() {
+                _isEdit = false;
+              }),
+            )
+          : null,
 
       // Save/edit
       appbarActions: [
