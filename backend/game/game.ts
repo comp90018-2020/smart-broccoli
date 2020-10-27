@@ -199,7 +199,6 @@ export class GameHandler {
     async welcome(socket: Socket, session: GameSession, player: Player) {
         try {
             if (!session.playerMap.hasOwnProperty(player.id)) {
-                // if not host, emit playerJoin
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.playerJoin,
@@ -503,10 +502,7 @@ export class GameHandler {
 
         if (session.questionIndex >= session.quiz.questions.length - 1) {
             emitToRoom(whichRoom(session, Role.all), Event.end, null);
-
-            if (session.type === GameType.SelfPaced_Group) {
-                this.abort(session);
-            }
+            this.abort(session);
         }
     }
     async showBoard(session: GameSession, player?: Player) {
