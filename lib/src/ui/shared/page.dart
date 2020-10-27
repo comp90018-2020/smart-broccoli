@@ -111,7 +111,7 @@ class CustomPage extends StatelessWidget {
                           // User picture
                           Consumer<UserProfileModel>(
                             builder: (context, profile, child) =>
-                                profile.user.picture == null
+                                profile.user?.picture == null
                                     ? UserAvatar.placeholder(maxRadius: 30)
                                     : UserAvatar(
                                         profile.user.picture,
@@ -124,23 +124,39 @@ class CustomPage extends StatelessWidget {
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 18),
                               child: Consumer<UserProfileModel>(
-                                builder: (context, profile, child) => Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(profile.user?.name ?? "",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText1),
-                                    Text(
-                                        profile.user?.type ==
-                                                UserType.UNREGISTERED
-                                            ? "Unregistered"
-                                            : profile.user?.email,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2),
-                                  ],
+                                builder: (context, profile, child) =>
+                                    FutureBuilder(
+                                  future: profile.getUser(forceRefresh: false),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<User> snapshot) {
+                                    return Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: snapshot.hasData
+                                          ? [
+                                              Text(snapshot.data.name,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyText1),
+                                              Text(
+                                                  snapshot.data.type ==
+                                                          UserType.UNREGISTERED
+                                                      ? "Unregistered"
+                                                      : snapshot.data.email,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyText2),
+                                            ]
+                                          : [
+                                              Text('Unknown User',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyText1)
+                                            ],
+                                    );
+                                  },
                                 ),
                               ),
                             ),

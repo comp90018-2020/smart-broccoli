@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-
 import 'package:smart_broccoli/src/ui/shared/page.dart';
+
 import 'profile_editor.dart';
 import 'profile_registered.dart';
 import 'profile_joined.dart';
+import 'profile_picture.dart';
 
 /// Container for profile page elements
 class ProfileMain extends StatefulWidget {
@@ -65,13 +67,23 @@ class _ProfileMainState extends State<ProfileMain> {
       ],
 
       // Render appropriate page
-      child: Consumer<UserProfileModel>(
-        builder: (context, profile, child) => SingleChildScrollView(
-          child: profile.user.type == UserType.UNREGISTERED
-              ? ProfileJoined(profile, _isEdit, key: key)
-              : ProfileRegistered(profile, _isEdit, key: key),
-        ),
-      ),
+      child: SingleChildScrollView(
+          child: Consumer<UserProfileModel>(
+        builder: (context, profile, child) => FutureBuilder(
+            future: Provider.of<UserProfileModel>(context)
+                .getUser(forceRefresh: true),
+            builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+              if (!snapshot.hasData)
+                return Column(children: [
+                  // Placeholder profile picture
+                  ProfilePicture(false),
+                ]);
+
+              return snapshot.data.type == UserType.UNREGISTERED
+                  ? ProfileJoined(snapshot.data, _isEdit, key: key)
+                  : ProfileRegistered(snapshot.data, _isEdit, key: key);
+            }),
+      )),
     );
   }
 
