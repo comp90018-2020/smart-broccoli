@@ -148,9 +148,12 @@ class QuizApi {
   /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
   Future<void> setQuizPicture(String token, Quiz quiz, Uint8List bytes) async {
-    final http.MultipartRequest request =
-        http.MultipartRequest('PUT', Uri.parse('$QUIZ_URL/${quiz.id}/picture'))
-          ..files.add(http.MultipartFile.fromBytes('picture', bytes));
+    final http.MultipartRequest request = http.MultipartRequest(
+        'PUT', Uri.parse('$QUIZ_URL/${quiz.id}/picture'))
+      ..headers.addAll(
+          ApiBase.headers(contentType: 'multipart/form-data', authToken: token))
+      ..files.add(
+          http.MultipartFile.fromBytes('picture', bytes, filename: 'picture'));
 
     final http.StreamedResponse response = await request.send();
 
@@ -196,7 +199,10 @@ class QuizApi {
       String token, int quizId, int questionId, Uint8List bytes) async {
     final http.MultipartRequest request = http.MultipartRequest(
         'PUT', Uri.parse('$QUIZ_URL/$quizId/question/$questionId/picture'))
-      ..files.add(http.MultipartFile.fromBytes('picture', bytes));
+      ..headers.addAll(
+          ApiBase.headers(contentType: 'multipart/form-data', authToken: token))
+      ..files.add(
+          http.MultipartFile.fromBytes('picture', bytes, filename: 'picture'));
 
     final http.StreamedResponse response = await request.send();
 
