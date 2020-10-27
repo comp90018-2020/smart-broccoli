@@ -17,12 +17,6 @@ enum SessionState {
   ABORTED,
 }
 
-void main() {
-  GameSessionModel test = new GameSessionModel();
-  test.connect(2, 1);
-  // test.startQuiz();
-}
-
 class GameSessionModel extends ChangeNotifier {
   // URL of server
   static const String SERVER_URL = 'https://fuzzybroccoli.com';
@@ -51,11 +45,11 @@ class GameSessionModel extends ChangeNotifier {
 
   /// Connect to socket with headers
   /// TODO: change to token
-  void connect(int userId, int sessionId) {
+  void connect(String token) {
     //change to token
     // Set query
     socket.opts['query'] = {};
-    socket.opts['query']['userId'] = userId;
+    socket.opts['query']['token'] = token;
     print(socket.opts);
     socket.connect();
 
@@ -70,17 +64,18 @@ class GameSessionModel extends ChangeNotifier {
       List users = message['players'] as List;
       players = Map.fromIterable(users.map((u) => SocketUser.User.fromJson(u)),
           key: (u) => u.id);
-      role = message['role'];
+      if ('participant' == message['role'])
+        role = GroupRole.MEMBER;
+      else
+        role = GroupRole.OWNER;
 
       //need to check
-      if ('pending' == message['state'])
+      if ('pending' == message['status'])
         state = SessionState.PENDING;
-      else if ('starting' == message['state'])
+      else if ('starting' == message['status'])
         state = SessionState.STARTING;
-      else if ('running' == message['state'])
+      else if ('running' == message['status'])
         state = SessionState.QUESTION;
-      else if ('ended' == message['state'])
-        state = SessionState.OUTCOME;
       else
         state = SessionState.ABORTED;
 
@@ -116,7 +111,6 @@ class GameSessionModel extends ChangeNotifier {
     });
 
     socket.on('cancelled', (message) {
-      // socket.disconnected;
       print("cancelled");
       socket.disconnect();
       state = SessionState.ABORTED;
@@ -131,7 +125,7 @@ class GameSessionModel extends ChangeNotifier {
       else
         question = MCQuestion.fromJson(message['question']);
       time = message['time'];
-      totalQuestion = message['totalQuestion'];
+      totalQuestion = message['totalQuestions'];
 
       print(question);
       print(time);
@@ -151,7 +145,7 @@ class GameSessionModel extends ChangeNotifier {
     });
 
     socket.on('correctAnswer', (message) {
-      print("questionAnswered");
+      print("correctAnswer");
       print(message);
       correctAnswer = CorrectAnswer.fromJson(message);
       print(correctAnswer);
@@ -172,6 +166,11 @@ class GameSessionModel extends ChangeNotifier {
       }
       state = SessionState.OUTCOME;
       notifyListeners();
+    });
+
+    socket.on('end', (_) {
+      print('end');
+      state = SessionState.FINISHED;
     });
 
     socket.on('disconnect', (message) {
@@ -206,35 +205,4 @@ class GameSessionModel extends ChangeNotifier {
   void answerQuestion() {
     socket.emit('answer', answer.toJson());
   }
-
-  // /// Subscribe to socket event
-  // void _subscribe(String event, dynamic Function(dynamic) handler) {
-  //   if (socket.disconnected) {
-  //     throw new Exception("Socket is not connected");
-  //   }
-  //   print('$event has been called');
-  //   socket.on(event, handler);
-  // }
-  //
-  // /// Emit data to socket
-  // void _emit(String event, [dynamic data]) {
-  //   if (socket.disconnected) {
-  //     throw new Exception("Socket is not connected");
-  //   }
-  //   socket.emit(data);
-  // }
-  //
-  // /// Close and dispose all event listeners
-  // void _disconnect() {
-  //   socket.disconnect();
-  // }
-
-  /// get data from socket
-// String receive_from_socket(String event, dynamic data){
-// //
-// // }
-// //
-// // void send_to_socket(String event, dynamic data){
-// //
-// // }
 }
