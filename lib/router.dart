@@ -25,6 +25,7 @@ class BroccoliRouter {
   // Auth/user
   static const String root = "/home";
   static const String auth = "/auth";
+  static const String join = "/join";
   static const String profile = "/profile";
 
   // Quiz pages
@@ -67,6 +68,12 @@ class BroccoliRouter {
     router.define(auth, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return AuthScreen();
+    }));
+
+    // Join (set name)
+    router.define(auth, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return NamePrompt();
     }));
 
     // Take quiz

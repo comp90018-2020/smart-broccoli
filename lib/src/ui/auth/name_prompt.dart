@@ -78,8 +78,7 @@ class _NamePromptState extends State<NamePrompt> {
                       width: double.infinity,
                       child: RaisedButton(
                         child: const Text("JOIN"),
-                        disabledColor:
-                            SmartBroccoliColourScheme.disabledButtonColor,
+                        disabledColor: Theme.of(context).disabledColor,
                         disabledTextColor:
                             SmartBroccoliColourScheme.disabledButtonTextColor,
                         onPressed: _nameEmpty
