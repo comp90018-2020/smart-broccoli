@@ -461,6 +461,9 @@ export class GameHandler {
     }
 
     releaseCorrectAnswer(session: GameSession, questoinIndex: number) {
+        if (session.questionIndex >= session.quiz.questions.length - 1) {
+            emitToRoom(whichRoom(session, Role.all), Event.end, null);
+        }
         for (const player of Object.values(session.playerMap)) {
             this.emitCorrectAnswer(
                 player,

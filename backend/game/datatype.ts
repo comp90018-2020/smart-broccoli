@@ -8,7 +8,9 @@ export enum Event {
     correctAnswer = "correctAnswer",
     questionOutcome = "questionOutcome",
     cancelled = "cancelled",
+    end = "end",
 }
+
 export enum Res {
     Success = "success",
     NoMoreQuestion = "No more question",
