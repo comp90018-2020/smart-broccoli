@@ -1,6 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:smart_broccoli/src/data.dart';
 
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
@@ -125,6 +126,9 @@ class _ProfileRegisteredState extends ProfileEditorState {
       _passwordController.clear();
       _confirmPasswordController.clear();
       return true;
+    } on RegistrationConflictException {
+      showErrorDialog(context, "Email already in use");
+      return false;
     } catch (_) {
       showErrorDialog(context, "Cannot update profile");
       return false;

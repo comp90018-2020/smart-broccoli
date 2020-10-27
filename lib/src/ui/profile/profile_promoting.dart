@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models/user_profile.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
@@ -91,6 +92,8 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
           _passwordController.text,
           _nameController.text);
       Navigator.of(context).pop();
+    } on RegistrationConflictException {
+      showErrorDialog(context, "Email already in use");
     } catch (_) {
       showErrorDialog(context, "Cannot register profile");
     }
