@@ -34,25 +34,23 @@ class NameTableRow extends TableRow {
                     style: const TextStyle(color: Colors.black38)),
                 padding: const EdgeInsets.only(left: 16)),
             _paddedCell(
-              Consumer<UserProfileModel>(
-                builder: (context, profile, child) => TextFormField(
-                  readOnly: !isEdit,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: const TextStyle(color: Colors.black38),
-                    suffixIcon: IconButton(
-                      icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
-                      onPressed: _nameController.clear,
-                    ),
-                    border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    hintText: hintText,
+              TextFormField(
+                readOnly: !isEdit,
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.zero,
+                  hintStyle: const TextStyle(color: Colors.black38),
+                  suffixIcon: IconButton(
+                    icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
+                    onPressed: _nameController.clear,
                   ),
-                  controller: _nameController,
-                  textInputAction: textInputAction,
-                  onFieldSubmitted: onFieldSubmitted,
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  hintText: hintText,
                 ),
+                controller: _nameController,
+                textInputAction: textInputAction,
+                onFieldSubmitted: onFieldSubmitted,
               ),
               padding: const EdgeInsets.only(left: 16),
             ),
