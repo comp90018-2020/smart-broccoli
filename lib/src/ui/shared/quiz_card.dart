@@ -234,7 +234,7 @@ class _QuizCardState extends State<QuizCard> {
             color: Theme.of(context).accentColor,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             onPressed: () {
-              editQuiz(context);
+              editQuiz(context, widget.quiz);
             },
             elevation: 2.0,
             child: Icon(
@@ -249,12 +249,12 @@ class _QuizCardState extends State<QuizCard> {
     );
   }
 
-  editQuiz(BuildContext context) async {
+  editQuiz(BuildContext context, Quiz quiz) async {
     // Navigator returns a Future that completes after calling
     dynamic result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => QuizCreate(),
+        builder: (context) => QuizCreate(passedQuiz: quiz),
       ),
     );
   }

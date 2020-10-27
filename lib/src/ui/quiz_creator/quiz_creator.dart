@@ -22,8 +22,9 @@ import 'package:smart_broccoli/src/ui/groups/group_create.dart';
 
 class QuizCreate extends StatefulWidget {
   final int groupId;
+  final Quiz passedQuiz;
 
-  QuizCreate({this.groupId, Key key}) : super(key: key);
+  QuizCreate({this.groupId, Key key, this.passedQuiz}) : super(key: key);
 
   @override
   _QuizCreateState createState() => _QuizCreateState();
@@ -31,31 +32,47 @@ class QuizCreate extends StatefulWidget {
 
 class _QuizCreateState extends State<QuizCreate> {
 
-
+  Quiz model;
   final _formKey = GlobalKey<FormState>();
-
-  final TextEditingController quizNameController = TextEditingController();
-  // Key for form
-
-  // Text controller for seconds per question
-  var timerTextController = TextEditingController();
-
-  // TODO: replace with cloned quiz
-  Quiz model = Quiz("placeholder", 0, QuizType.LIVE);
-  
-
-  // The current picked file
+  var  quizNameController;
+  var timerTextController;
   String picturePath;
-
   String selectedGroupTitle;
 
-  Group selectedGroup;
+  @override
+  void initState() {
+    // TODO: implement initState
+//Editing existing quiz
+    if(widget.passedQuiz != null){
+//Cloning a quiz so that the original reference is not mutated if not saved
+      Map<String, dynamic> quizJson = widget.passedQuiz.toJson();
+      model = Quiz.fromJson(quizJson);
 
-  int selectedTime;
+      quizNameController = TextEditingController(text: model.title);
 
-  QuizType selectedQuizType = QuizType.LIVE;
+      timerTextController = TextEditingController(text: model.timeLimit.toString());
 
-  List<Question> selectedQuestions = new List<Question>();
+
+//Creation of a new quiz
+    }else{
+      // TODO: replace with cloned quiz
+      model = Quiz("placeholder", 0, QuizType.LIVE);
+
+      quizNameController = TextEditingController();
+      // Key for form
+
+      // Text controller for seconds per question
+      timerTextController = TextEditingController();
+
+
+      model.type = QuizType.LIVE;
+
+      model.questions = new List<Question>();
+
+    }
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +108,14 @@ class _QuizCreateState extends State<QuizCreate> {
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
           onPressed: () {
-            _createQuiz();
+
+            if (model.id != null){
+              _saveQuiz();
+            }
+            else{
+              _createQuiz();
+            }
+
           },
           child: Text(
             'Save',
@@ -189,10 +213,10 @@ class _QuizCreateState extends State<QuizCreate> {
                         dense: true,
                         title: const Text('LIVE'),
                         value: QuizType.LIVE,
-                        groupValue: selectedQuizType,
+                        groupValue: model.type,
                         onChanged: (QuizType value) {
                           setState(() {
-                            selectedQuizType = value;
+                            model.type = value;
                           });
                         },
                       ),
@@ -200,10 +224,10 @@ class _QuizCreateState extends State<QuizCreate> {
                         dense: true,
                         title: const Text('SELF-PACED'),
                         value: QuizType.SELF_PACED,
-                        groupValue: selectedQuizType,
+                        groupValue: model.type,
                         onChanged: (QuizType value) {
                           setState(() {
-                            selectedQuizType = value;
+                            model.type = value;
                           });
                         },
                       ),
@@ -231,7 +255,7 @@ class _QuizCreateState extends State<QuizCreate> {
                   shrinkWrap: true,
                   itemCount: questionsInQuiz(),
                   itemBuilder: (BuildContext context, int index) {
-                    return _questionCard(index, selectedQuestions.elementAt(index), context);
+                    return _questionCard(index, model.questions.elementAt(index), context);
 
                   },
                 ),
@@ -263,36 +287,41 @@ class _QuizCreateState extends State<QuizCreate> {
 
   int questionsInQuiz(){
 
-    if(selectedQuestions == null){
+    if(model.questions == null){
       return 0;
-    }else if(selectedQuestions.isEmpty){
+    }else if(model.questions.isEmpty){
       return 0;
-    }else if (selectedQuestions.isNotEmpty){
-      return selectedQuestions.length;
+    }else if (model.questions.isNotEmpty){
+      return model.questions.length;
     }
   }
 
 
   createEditQuestion(BuildContext context, {int questionIndex}) async {
+
+    fromControllersToModel();
+
+    //Clone for quiz questions so that original copy does not get mutated in case changes are not saved
+    Map<String, dynamic> quizJson = model.toJson();
+    Quiz quizClone = Quiz.fromJson(quizJson);
+
+
     // Navigator returns a Future that completes after calling
     dynamic result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => QuestionCreate(passedQuiz: new Quiz(quizNameController.text, selectedGroup.id, selectedQuizType, description: "No description", isActive: false, timeLimit: selectedTime, questions: selectedQuestions), passedQuestionIndex: questionIndex),
+        builder: (context) => QuestionCreate(passedQuiz: quizClone, passedQuestionIndex: questionIndex),
       ),
     );
 
     setState(() {
-
-     selectedGroup.id = result.groupId;
-     
-     selectedTime = result.timeLimit;
-
-     selectedQuizType = result.type;
-     
-     selectedQuestions = result.questions;
-
+     model = result;
     });
+
+  }
+
+  void fromControllersToModel() {
+    model.title = quizNameController.text;
   }
 
 
@@ -349,7 +378,7 @@ class _QuizCreateState extends State<QuizCreate> {
       selectedGroupTitle = groups[0].name;
       for (var group in groups) {
         if (group.name == groups[0].name) {
-          selectedGroup = group;
+          model.groupId = group.id;
         }
       }
 
@@ -374,7 +403,7 @@ class _QuizCreateState extends State<QuizCreate> {
                   selectedGroupTitle = groupName;
                   for (var group in groups) {
                     if (group.name == groupName) {
-                      selectedGroup = group;
+                      model.groupId = group.id;
                     }
                   }
                 });
@@ -384,14 +413,32 @@ class _QuizCreateState extends State<QuizCreate> {
   }
 
   void _createQuiz() async {
+    fromControllersToModel();
+
     if (quizNameController.text == "")
       return _showUnsuccessful("Cannot create quiz", "Name required");
     try {
-      await Provider.of<QuizCollectionModel>(context, listen: false).createQuiz(new Quiz(quizNameController.text, selectedGroup.id, selectedQuizType, description: "No description", isActive: false, timeLimit: selectedTime, questions: selectedQuestions));
+      await Provider.of<QuizCollectionModel>(context, listen: false).createQuiz(model);
       Navigator.of(context).pop();
-    } on GroupCreateException {
-      _showUnsuccessful("Cannot create group", "Name already in use");
+    } catch (e) {
+      print(e);
+      _showUnsuccessful("Cannot create quiz", e);
     }
+  }
+
+
+  void _saveQuiz() async{
+    fromControllersToModel();
+    if (quizNameController.text == "")
+      return _showUnsuccessful("Cannot create quiz", "Name required");
+    try {
+      await Provider.of<QuizCollectionModel>(context, listen: false).updateQuiz(model);
+      Navigator.of(context).pop();
+    } catch (e) {
+      print(e);
+      _showUnsuccessful("Cannot save changes in the quiz", e);
+    }
+
   }
 
   void _showUnsuccessful(String title, String body) {
@@ -420,10 +467,11 @@ class _QuizCreateState extends State<QuizCreate> {
         }).then((value) {
       if (value != null && value is int) {
         setState(() {
-          selectedTime = value;
+          model.timeLimit = value;
           timerTextController.text = value.toString() + " seconds";
         });
       }
     });
   }
+
 }
