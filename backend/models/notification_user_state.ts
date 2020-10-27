@@ -24,7 +24,7 @@ interface UserStateAttributes {
 interface UserStateCreationAttributes
     extends Optional<UserStateAttributes, "id"> {}
 
-export default class UserGroup
+export default class UserState
     extends Sequelize.Model<UserStateAttributes, UserStateCreationAttributes>
     implements UserStateAttributes {
     public readonly id!: number;
