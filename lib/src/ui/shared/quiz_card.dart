@@ -94,10 +94,22 @@ class _QuizCardState extends State<QuizCard> {
                       // Quiz status
                       Container(
                         padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
-                        width: double.maxFinite,
-                        child: widget.quiz.type == QuizType.LIVE
-                            ? liveIndicator()
-                            : selfPacedIndicator(),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            widget.quiz.type == QuizType.LIVE
+                                ? liveIndicator()
+                                : selfPacedIndicator(),
+                            if (widget.quiz.complete)
+                              Text(
+                                'Complete',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                          ],
+                        ),
                       )
                     ],
                   ),
