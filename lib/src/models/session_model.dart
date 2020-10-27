@@ -23,7 +23,7 @@ void main() {
   // test.startQuiz();
 }
 
-class GameSessionModel extends ChangeNotifier{
+class GameSessionModel extends ChangeNotifier {
   // URL of server
   static const String SERVER_URL = 'https://fuzzybroccoli.com';
 
@@ -126,7 +126,7 @@ class GameSessionModel extends ChangeNotifier{
     socket.on('nextQuestion', (message) {
       print("nextQuestion");
       print(message);
-      if(message['question']['options'] == null)
+      if (message['question']['options'] == null)
         question = TFQuestion.fromJson(message['question']);
       else
         question = MCQuestion.fromJson(message['question']);
