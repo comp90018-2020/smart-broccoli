@@ -48,11 +48,11 @@ class UserProfileModel extends ChangeNotifier {
     if (!forceRefresh && user != null) {
       return user;
     }
-    return await _refreshUser(notify: true);
+    return await _refreshUser();
   }
 
   /// Asks _userRepo to retrieve user and image from API
-  Future<User> _refreshUser({bool notify = true}) async {
+  Future<User> _refreshUser() async {
     _user = await _userRepo.getUser(_authStateModel.token);
     _keyValueStore.setString('user', json.encode(_user.toJson()));
     return _user;
