@@ -27,7 +27,6 @@ export enum GameStatus {
     Pending = "pending",
     Starting = "starting",
     Running = "running",
-    Ended = "ended",
 }
 
 export enum GameType {

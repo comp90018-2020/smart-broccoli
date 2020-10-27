@@ -340,6 +340,7 @@ export class GameHandler {
                 session.status == GameStatus.Pending &&
                 // if no host or player is host
                 (session.type === GameType.SelfPaced_Group ||
+                    session.type === GameType.SelfPaced_NotGroup ||
                     player.role === Role.host)
             ) {
                 // set game status to starting
@@ -426,10 +427,11 @@ export class GameHandler {
 
             if (
                 session.isReadyForNextQuestion &&
+                session.status === GameStatus.Running &&
                 // if no host or player is host
                 (session.type === GameType.SelfPaced_Group ||
-                    player.role === Role.host) &&
-                session.status === GameStatus.Running
+                    session.type === GameType.SelfPaced_NotGroup ||
+                    player.role === Role.host)
             ) {
                 // try to get the index of next question
                 const [res, questionIndex] = session.getNextQuestionIndex();
@@ -439,7 +441,10 @@ export class GameHandler {
                         Event.nextQuestion,
                         formatQuestion(questionIndex, session, false)
                     );
-                    if (session.type !== GameType.SelfPaced_Group) {
+                    if (
+                        session.type !== GameType.SelfPaced_Group &&
+                        session.type !== GameType.SelfPaced_NotGroup
+                    ) {
                         // send question with answer to the host
                         emitToRoom(
                             whichRoom(session, Role.host),
@@ -453,10 +458,6 @@ export class GameHandler {
                         ) {
                             session.setToNextQuestion();
                             this.releaseCorrectAnswer(session, questionIndex);
-
-                            if (session.type === GameType.SelfPaced_NotGroup) {
-                                this.showBoard(session, player);
-                            }
                         }
                     }, session.quiz.timeLimit * 1000);
                 } else {
@@ -486,15 +487,25 @@ export class GameHandler {
 
         if (session.type === GameType.SelfPaced_Group) {
             this.showBoard(session);
+        } else if (session.type == GameType.SelfPaced_NotGroup) {
+            if (session.questionIndex < session.quiz.questions.length - 1) {
+                setTimeout(() => {
+                    if (session.isReadyForNextQuestion) {
+                        this.next(session);
+                    }
+                }, BoardShowTime);
+            } else {
+                setTimeout(() => {
+                    this.abort(session);
+                }, BoardShowTime * 10);
+            }
         }
 
         if (session.questionIndex >= session.quiz.questions.length - 1) {
             emitToRoom(whichRoom(session, Role.all), Event.end, null);
 
             if (session.type === GameType.SelfPaced_Group) {
-                setTimeout(() => {
-                    this.abort(session);
-                }, BoardShowTime * 10);
+                this.abort(session);
             }
         }
     }
