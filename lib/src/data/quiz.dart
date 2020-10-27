@@ -16,6 +16,7 @@ class Quiz {
 
   final int pictureId;
   Uint8List picture;
+  String pictureLocation;
 
   /// User's role. This field is non-null for quizzes in the list returned by
   /// `getQuizzes`; however, it will be null for a quiz returned by `getQuiz`

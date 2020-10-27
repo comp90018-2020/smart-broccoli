@@ -93,7 +93,12 @@ class QuizCollectionModel extends ChangeNotifier {
   }
 
   Future<void> createQuiz(Quiz quiz) async {
-    await _quizApi.createQuiz(_authStateModel.token, quiz);
+    var returnedQuiz =  await _quizApi.createQuiz(_authStateModel.token, quiz);
+
+
+    /*_quizApi.setQuestionPicture(token, quizId, questionId, bytes) //readAsBytes
+    _quizApi.setQuizPicture(token, quiz, bytes)*/
+    //call a function for upload of a picture
     notifyListeners();
   }
 

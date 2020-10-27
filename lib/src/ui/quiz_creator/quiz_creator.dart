@@ -40,22 +40,15 @@ class _QuizCreateState extends State<QuizCreate> {
   String selectedGroupTitle;
   bool isDefaultGrpSelected = false;
 
-
-
-  //Setting up default selected gtoup
-
   @override
   void initState() {
-    //Setting up groups selected from default
 
     //Editing existing quiz
     if(widget.passedQuiz != null){
       //Cloning a quiz so that the original reference is not mutated if not saved
       Map<String, dynamic> quizJson = widget.passedQuiz.toJson();
       model = Quiz.fromJson(quizJson);
-
       quizNameController = TextEditingController(text: model.title);
-
       timerTextController = TextEditingController(text: model.timeLimit.toString() + " seconds");
 
 
@@ -63,18 +56,11 @@ class _QuizCreateState extends State<QuizCreate> {
     }else{
       // TODO: replace with cloned quiz
       model = Quiz("placeholder", 0, QuizType.LIVE);
-
       quizNameController = TextEditingController();
-      // Key for form
-
       // Text controller for seconds per question
       timerTextController = TextEditingController(text: "30 seconds");
-
-
       model.type = QuizType.LIVE;
-
       model.questions = new List<Question>();
-
     }
 
     super.initState();
@@ -109,12 +95,14 @@ class _QuizCreateState extends State<QuizCreate> {
           icon: Icon(Icons.delete),
           padding: EdgeInsets.zero,
           splashRadius: 20,
-          onPressed: () {
-            if (model.id != null){
-              _deleteQuiz();
+          onPressed:  () async {
 
-            }else{
-              Navigator.pop(context);
+            if( await _confirmDeleteQuiz(context) == true){
+              if (model.id != null){
+                _deleteQuiz();
+              }else{
+                Navigator.pop(context);
+              }
             }
           },
         ),
@@ -325,7 +313,7 @@ class _QuizCreateState extends State<QuizCreate> {
       ),
     );
 
-    //Check whether transition was not caused by the back button
+    //Null that is returned if transition is initiated by the back button
     if(result!= null){
       setState(() {
         model = result;
@@ -335,6 +323,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
   }
 
+  //Transfer recent change to model
   void fromControllersToModel() {
     model.title = quizNameController.text;
   }
@@ -389,7 +378,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
 
   Widget buildGroupList(List<Group> groups) {
-
+    //Seeting up initial value of the group
     if(isDefaultGrpSelected == false) {
 
       if(widget.passedQuiz == null && widget.groupId == null){
@@ -515,6 +504,27 @@ class _QuizCreateState extends State<QuizCreate> {
       print(e);
       _showUnsuccessful("Cannot save changes in the quiz", e);
     }
+  }
+
+  Future<bool> _confirmDeleteQuiz(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Confirm quiz deletion"),
+        content: Text("This cannot be undone"),
+        actions: [
+          TextButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text("OK"),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
   }
 
 }
