@@ -501,11 +501,7 @@ export class GameHandler {
                     };
                     // emit questionOutcome to participants
 
-                    emitToOne(
-                        player.socketId,
-                        Event.questionOutcome,
-                        questionOutcome
-                    );
+                    emitToOne(socketId, Event.questionOutcome, questionOutcome);
                 }
                 // if () {
                 //     // session.questionIndex < session.quiz.questions.length - 1 &&
