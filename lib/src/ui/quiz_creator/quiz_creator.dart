@@ -38,13 +38,25 @@ class _QuizCreateState extends State<QuizCreate> {
   var timerTextController;
   String picturePath;
   String selectedGroupTitle;
+  bool isDefaultGrpSelected = false;
+
+
+
+  //Setting up default selected gtoup
+
+
+
+
+
+
 
   @override
   void initState() {
-    // TODO: implement initState
-//Editing existing quiz
+    //Setting up groups selected from default
+
+    //Editing existing quiz
     if(widget.passedQuiz != null){
-//Cloning a quiz so that the original reference is not mutated if not saved
+      //Cloning a quiz so that the original reference is not mutated if not saved
       Map<String, dynamic> quizJson = widget.passedQuiz.toJson();
       model = Quiz.fromJson(quizJson);
 
@@ -53,7 +65,7 @@ class _QuizCreateState extends State<QuizCreate> {
       timerTextController = TextEditingController(text: model.timeLimit.toString() + " seconds");
 
 
-//Creation of a new quiz
+    //Creation of a new quiz
     }else{
       // TODO: replace with cloned quiz
       model = Quiz("placeholder", 0, QuizType.LIVE);
@@ -379,16 +391,17 @@ class _QuizCreateState extends State<QuizCreate> {
 
 
   Widget buildGroupList(List<Group> groups) {
-    if(groups.length >0){
+
+    if(isDefaultGrpSelected == false) {
       selectedGroupTitle = groups[0].name;
       for (var group in groups) {
         if (group.name == groups[0].name) {
           model.groupId = group.id;
         }
       }
-
-
+      isDefaultGrpSelected = true;
     }
+
     return
       Expanded(
         child: Padding(
