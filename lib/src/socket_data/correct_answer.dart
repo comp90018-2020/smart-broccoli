@@ -15,7 +15,7 @@ class CorrectAnswer {
 
 class Answer {
   int question;
-  List<int> mcSelection;
+  List<dynamic> mcSelection;
   bool tfSelection;
 
   Answer._internal(this.question, this.mcSelection, this.tfSelection);
