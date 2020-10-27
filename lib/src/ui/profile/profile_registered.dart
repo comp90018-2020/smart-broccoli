@@ -9,8 +9,8 @@ import 'profile_picture.dart';
 import 'table_items.dart';
 
 /// Profile page for listed users
-class ProfileRegistered extends StatefulWidget implements ProfileEditor {
-  ProfileRegistered({Key key}) : super(key: key);
+class ProfileRegistered extends ProfileEditor {
+  ProfileRegistered(bool isEdit, {Key key}) : super(isEdit, key: key);
 
   @override
   State<StatefulWidget> createState() => new _ProfileRegisteredState();
@@ -22,8 +22,6 @@ class _ProfileRegisteredState extends ProfileEditorState {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-
-  bool _isEdit = false;
 
   @override
   void initState() {
@@ -38,7 +36,7 @@ class _ProfileRegisteredState extends ProfileEditorState {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ProfilePicture(_isEdit),
+        ProfilePicture(widget.isEdit),
 
         // Name/email
         Container(
@@ -46,13 +44,13 @@ class _ProfileRegisteredState extends ProfileEditorState {
           child: TableCard(
             [
               NameTableRow(
-                _isEdit,
+                widget.isEdit,
                 _nameController,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
               ),
               EmailTableRow(
-                _isEdit,
+                widget.isEdit,
                 _emailController,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
@@ -62,7 +60,7 @@ class _ProfileRegisteredState extends ProfileEditorState {
         ),
 
         // Password
-        if (_isEdit)
+        if (widget.isEdit)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
             child: Column(
@@ -76,14 +74,14 @@ class _ProfileRegisteredState extends ProfileEditorState {
                 TableCard(
                   [
                     PasswordTableRow(
-                      _isEdit,
+                      widget.isEdit,
                       _passwordController,
                       textInputAction: TextInputAction.next,
                       onFieldSubmitted: (_) =>
                           FocusScope.of(context).nextFocus(),
                     ),
                     PasswordConfirmTableRow(
-                      _isEdit,
+                      widget.isEdit,
                       _confirmPasswordController,
                     ),
                   ],
@@ -93,13 +91,6 @@ class _ProfileRegisteredState extends ProfileEditorState {
           ),
       ],
     );
-  }
-
-  @override
-  void enableEdit() {
-    setState(() {
-      _isEdit = true;
-    });
   }
 
   @override
@@ -123,9 +114,6 @@ class _ProfileRegisteredState extends ProfileEditorState {
           email: _emailController.text);
       _passwordController.clear();
       _confirmPasswordController.clear();
-      setState(() {
-        _isEdit = false;
-      });
       return true;
     } catch (_) {
       showErrorDialog(context, "Cannot update profile");

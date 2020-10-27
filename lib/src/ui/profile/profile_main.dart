@@ -40,7 +40,6 @@ class _ProfileMainState extends State<ProfileMain> {
                 _isEdit = false;
               });
             } else if (!_isEdit) {
-              key.currentState.enableEdit();
               setState(() {
                 _isEdit = true;
               });
@@ -53,8 +52,8 @@ class _ProfileMainState extends State<ProfileMain> {
       child: Consumer<UserProfileModel>(
         builder: (context, profile, child) => SingleChildScrollView(
           child: profile.user.type == UserType.UNREGISTERED
-              ? ProfileJoined(key: key)
-              : ProfileRegistered(key: key),
+              ? ProfileJoined(_isEdit, key: key)
+              : ProfileRegistered(_isEdit, key: key),
         ),
       ),
     );

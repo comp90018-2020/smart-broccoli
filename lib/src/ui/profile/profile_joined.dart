@@ -10,8 +10,8 @@ import 'profile_picture.dart';
 import 'profile_promoting.dart';
 import 'table_items.dart';
 
-class ProfileJoined extends StatefulWidget implements ProfileEditor {
-  ProfileJoined({Key key}) : super(key: key);
+class ProfileJoined extends ProfileEditor {
+  ProfileJoined(bool isEdit, {Key key}) : super(isEdit, key: key);
 
   @override
   State<StatefulWidget> createState() => new _ProfileJoinedState();
@@ -19,8 +19,6 @@ class ProfileJoined extends StatefulWidget implements ProfileEditor {
 
 class _ProfileJoinedState extends ProfileEditorState {
   final _nameController = TextEditingController();
-
-  bool _isEdit = false;
 
   @override
   void initState() {
@@ -35,20 +33,20 @@ class _ProfileJoinedState extends ProfileEditorState {
     return Column(
       children: [
         // Profile picture
-        ProfilePicture(_isEdit),
+        ProfilePicture(widget.isEdit),
         // Table
         Container(
           padding: const EdgeInsets.all(24),
           child: TableCard(
             [
-              NameTableRow(_isEdit, _nameController),
+              NameTableRow(widget.isEdit, _nameController),
             ],
           ),
         ),
         // Promote user
         AnimatedSwitcher(
           duration: Duration(milliseconds: 100),
-          child: _isEdit
+          child: widget.isEdit
               ? Container()
               : Column(
                   children: [
@@ -74,20 +72,10 @@ class _ProfileJoinedState extends ProfileEditorState {
   }
 
   @override
-  void enableEdit() {
-    setState(() {
-      _isEdit = true;
-    });
-  }
-
-  @override
   Future<bool> commitChanges() async {
     try {
       await Provider.of<UserProfileModel>(context, listen: false).updateUser(
           name: _nameController.text.isEmpty ? null : _nameController.text);
-      setState(() {
-        _isEdit = false;
-      });
       return true;
     } catch (_) {
       showErrorDialog(context, "Cannot update profile");
