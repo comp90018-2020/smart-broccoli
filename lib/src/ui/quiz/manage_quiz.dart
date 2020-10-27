@@ -107,7 +107,6 @@ class _ManageQuizState extends State<ManageQuiz> {
                       // Each created group
                       ...collection.createdGroups
                           .map((group) => makeItem(group.id, group.name))
-                          .toList()
                     ],
                   );
                 })),
