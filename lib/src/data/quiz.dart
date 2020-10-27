@@ -165,19 +165,21 @@ class TFQuestion extends Question {
 /// synchronised with the server to finalise any changes.
 class MCQuestion extends Question {
   List<QuestionOption> options;
+  int numCorrect;
 
   /// Constructor for use when user creates a new multiple choice question
-  MCQuestion(String text, this.options, {int pictureId})
+  MCQuestion(String text, this.options, {int pictureId, this.numCorrect})
       : super(text: text, pictureId: pictureId);
 
   /// Constructor for internal use only
   MCQuestion._internal(int id, int no, String text, int pictureId,
-      {this.options})
+      {this.options, this.numCorrect})
       : super(id: id, no: no, text: text, pictureId: pictureId);
 
   factory MCQuestion.fromJson(Map<String, dynamic> json) =>
       MCQuestion._internal(
           json['id'], json['no'], json['text'], json['pictureId'],
+          numCorrect: json['numCorrect'],
           options: (json['options'] as List)
               .map((option) => QuestionOption.fromJson(option))
               .toList());

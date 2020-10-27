@@ -20,6 +20,7 @@ dependencies:
   image_picker: ^0.6.7+11
   numberpicker: ^1.2.1
   fluro: ^1.7.3
+  socket_io_client: ^0.9.11
 
 dev_dependencies:
   flutter_test:
