@@ -12,4 +12,5 @@ abstract class ProfileEditor extends StatefulWidget {
 /// Inferface for state of ProfileEditor to implement
 abstract class ProfileEditorState extends State<ProfileEditor> {
   Future<bool> commitChanges();
+  Future<void> discardChanges();
 }

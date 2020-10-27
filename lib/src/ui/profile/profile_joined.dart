@@ -23,8 +23,7 @@ class _ProfileJoinedState extends ProfileEditorState {
 
   @override
   void initState() {
-    final User user = widget.profile.user;
-    _nameController.text = user == null || user.isAnonymous ? "" : user.name;
+    discardChanges();
     super.initState();
   }
 
@@ -86,6 +85,14 @@ class _ProfileJoinedState extends ProfileEditorState {
       showErrorDialog(context, "Cannot update profile");
       return false;
     }
+  }
+
+  @override
+  Future<void> discardChanges() async {
+    _nameController.text =
+        widget.profile.user == null || widget.profile.user.isAnonymous
+            ? ""
+            : widget.profile.user.name;
   }
 
   // Code to promote a joined user to a registered user

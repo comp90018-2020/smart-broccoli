@@ -39,6 +39,7 @@ class _ProfileMainState extends State<ProfileMain> {
                 setState(() {
                   _isEdit = false;
                 });
+                key.currentState.discardChanges();
               },
             )
           : null,

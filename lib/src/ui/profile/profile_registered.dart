@@ -26,8 +26,7 @@ class _ProfileRegisteredState extends ProfileEditorState {
 
   @override
   void initState() {
-    _nameController.text = widget.profile.user?.name;
-    _emailController.text = widget.profile.user?.email;
+    discardChanges();
     super.initState();
   }
 
@@ -118,5 +117,13 @@ class _ProfileRegisteredState extends ProfileEditorState {
       showErrorDialog(context, "Cannot update profile");
       return false;
     }
+  }
+
+  @override
+  Future<void> discardChanges() async {
+    _nameController.text = widget.profile.user?.name;
+    _emailController.text = widget.profile.user?.email;
+    _passwordController.clear();
+    _confirmPasswordController.clear();
   }
 }
