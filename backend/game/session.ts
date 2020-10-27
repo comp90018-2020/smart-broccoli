@@ -1,11 +1,11 @@
 import { PointSystem } from "./points";
-import { Res, GameStatus, QuizType, Player, Answer } from "./datatype";
+import { Res, GameStatus, GameType, Player, Answer } from "./datatype";
 import { QuizAttributes } from "../models/quiz";
 
 export class GameSession {
     // session id from controller
     public id: number;
-    public type: QuizType;
+    public type: GameType;
     // quiz from database
     public quiz: QuizAttributes;
     // game status
@@ -32,15 +32,15 @@ export class GameSession {
         if (isGroup) {
             // "live", "self paced"
             if (sessionType === "live") {
-                this.type = QuizType.Live_Group;
+                this.type = GameType.Live_Group;
             } else {
-                this.type = QuizType.SelfPaced_Group;
+                this.type = GameType.SelfPaced_Group;
             }
         } else {
             if (sessionType === "live") {
-                this.type = QuizType.Live_NotGroup;
+                this.type = GameType.Live_NotGroup;
             } else {
-                this.type = QuizType.SelfPaced_NotGroup;
+                this.type = GameType.SelfPaced_NotGroup;
             }
         }
     }

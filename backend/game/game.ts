@@ -10,11 +10,13 @@ import {
     GameStatus,
     Player,
     Answer,
-    QuizType,
+    GameType,
 } from "./datatype";
 import { QuizAttributes } from "models/quiz";
+import { runInThisContext } from "vm";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
+const boardShowTime = 5 * 1000;
 const playerCache: { [userId: number]: Player } = {};
 const socketPlayerMapCache: { [socketId: string]: Player } = {};
 
@@ -101,9 +103,9 @@ export class GameHandler {
         // const quizJSON: QuizAttributes = quiz.toJSON();
         const newSession = new GameSession(quiz, sessionId, quizType, isGroup);
 
-        if (newSession.type === QuizType.SelfPaced_Group) {
+        if (newSession.type === GameType.SelfPaced_Group) {
             this.start(newSession, null);
-        } else if (newSession.type === QuizType.Live_Group) {
+        } else if (newSession.type === GameType.Live_Group) {
             // haha we dont have it!
             return false;
         }
@@ -330,10 +332,11 @@ export class GameHandler {
     async start(session: GameSession, player: Player) {
         try {
             if (
-                // if no host or player is host
-                (player === null || player.role === Role.host) &&
                 // and game is pending
-                session.status == GameStatus.Pending
+                session.status == GameStatus.Pending &&
+                // if no host or player is host
+                (session.type === GameType.SelfPaced_Group ||
+                    player.role === Role.host)
             ) {
                 // set game status to starting
                 session.status = GameStatus.Starting;
@@ -342,7 +345,7 @@ export class GameHandler {
                 // Broadcast that quiz will be started
 
                 emitToRoom(
-                    whichRoom(session, Role.player),
+                    whichRoom(session, Role.all),
                     Event.starting,
                     (session.quizStartsAt - Date.now()).toString()
                 );
@@ -396,7 +399,8 @@ export class GameHandler {
         try {
             if (
                 // if no host or player is host
-                (player === null || player.role === Role.host) &&
+                (session.type === GameType.SelfPaced_Group ||
+                    player.role === Role.host) &&
                 session.status === GameStatus.Running
             ) {
                 // try to get the index of next question
@@ -414,12 +418,14 @@ export class GameHandler {
                         Event.nextQuestion,
                         formatQuestion(questionIndex, session, false)
                     );
-                    // send question with answer to the host
-                    emitToRoom(
-                        whichRoom(session, Role.host),
-                        Event.nextQuestion,
-                        formatQuestion(questionIndex, session, true)
-                    );
+                    if (session.type !== GameType.SelfPaced_Group) {
+                        // send question with answer to the host
+                        emitToRoom(
+                            whichRoom(session, Role.host),
+                            Event.nextQuestion,
+                            formatQuestion(questionIndex, session, true)
+                        );
+                    }
                     setTimeout(
                         () => {
                             if (
@@ -461,12 +467,18 @@ export class GameHandler {
                 session.getAnsOfQuestion(questoinIndex)
             );
         }
+        if (session.type === GameType.SelfPaced_Group) {
+            setTimeout(() => {
+                this.showBoard(session, null);
+            }, boardShowTime);
+        }
     }
     async showBoard(session: GameSession, player: Player) {
         try {
             if (
-                player.role === Role.host &&
-                session.questionIndex !== session.nextQuestionIndex
+                session.isReadyForNextQuestion &&
+                (session.type === GameType.SelfPaced_Group ||
+                    player.role === Role.host)
             ) {
                 //  get ranked records of players
                 const rank = session.rankPlayers();
@@ -489,13 +501,15 @@ export class GameHandler {
                     };
                     // emit questionOutcome to participants
 
-                    emitToRoom(
-                        whichRoom(session, Role.player),
+                    emitToOne(
+                        player.socketId,
                         Event.questionOutcome,
                         questionOutcome
                     );
                 }
-
+                // if () {
+                //     // session.questionIndex < session.quiz.questions.length - 1 &&
+                // }
                 // emit questionOutcome to the host
                 emitToRoom(
                     whichRoom(session, Role.host),
@@ -565,5 +579,7 @@ export const emitToOne = (socketId: string, event: Event, content: any) => {
 };
 
 export const emitToRoom = (roomName: string, event: Event, content: any) => {
-    _socketIO.to(roomName).emit(event, content);
+    if (_socketIO.sockets.adapter.rooms.hasOwnProperty(roomName)) {
+        _socketIO.to(roomName).emit(event, content);
+    }
 };

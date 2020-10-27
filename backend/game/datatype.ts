@@ -28,7 +28,7 @@ export enum GameStatus {
     Ended = "ended",
 }
 
-export enum QuizType {
+export enum GameType {
     SelfPaced_Group = "Self-Paced Group",
     SelfPaced_NotGroup = "Self-Paced Not Group",
     Live_Group = "Live Group",
