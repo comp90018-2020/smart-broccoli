@@ -39,13 +39,7 @@ class _PictureCardState extends State<PictureCard> {
   }
 
   @override
-  Widget build(BuildContext context) {/*
-    if (widget.quiz.pictureId != null)  {
-      Provider.of<QuizCollectionModel>(context, listen: false).getQuizPicture(
-          widget.quiz).then((value) =>{
-      });
-    }*/
-
+  Widget build(BuildContext context) {
     return Container(
       height: 175,
       child: Card(

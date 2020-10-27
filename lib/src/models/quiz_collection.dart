@@ -101,11 +101,11 @@ class QuizCollectionModel extends ChangeNotifier {
 
     Uint8List imageDataUint;
     if(quiz.picturePath != null){
-      rootBundle.load(quiz.picturePath).then((value){
-        imageDataUint = value.buffer.asUint8List();
-        _quizApi.setQuizPicture(_authStateModel.token, returnedQuiz, imageDataUint);
-      });
-      ;
+      var rootBundleData = await rootBundle.load(quiz.picturePath);
+
+      imageDataUint = rootBundleData.buffer.asUint8List();
+      await _quizApi.setQuizPicture(_authStateModel.token, returnedQuiz, imageDataUint);
+      await getQuizPicture(returnedQuiz);
     }
 
 /*
