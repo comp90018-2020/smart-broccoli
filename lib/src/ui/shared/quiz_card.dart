@@ -254,7 +254,7 @@ class _QuizCardState extends State<QuizCard> {
     dynamic result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => QuizCreate(passedQuiz: quiz),
+        builder: (context) => QuizCreate(passedQuiz: quiz, groupId: widget.quiz.groupId),
       ),
     );
   }

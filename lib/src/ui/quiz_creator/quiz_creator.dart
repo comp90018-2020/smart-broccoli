@@ -44,12 +44,6 @@ class _QuizCreateState extends State<QuizCreate> {
 
   //Setting up default selected gtoup
 
-
-
-
-
-
-
   @override
   void initState() {
     //Setting up groups selected from default
@@ -393,13 +387,21 @@ class _QuizCreateState extends State<QuizCreate> {
   Widget buildGroupList(List<Group> groups) {
 
     if(isDefaultGrpSelected == false) {
-      selectedGroupTitle = groups[0].name;
+      if(widget.passedQuiz == null){
+        model.groupId = widget.groupId;
+
+      }else{
+        model.groupId = widget.passedQuiz.groupId;
+      }
+
       for (var group in groups) {
-        if (group.name == groups[0].name) {
-          model.groupId = group.id;
+        if (model.groupId == group.id) {
+          selectedGroupTitle = group.name;
         }
       }
+
       isDefaultGrpSelected = true;
+
     }
 
     return
@@ -419,9 +421,9 @@ class _QuizCreateState extends State<QuizCreate> {
               onChanged: (String groupName) {
                 setState(() {
                   selectedGroupTitle = groupName;
-                  for (var group in groups) {
-                    if (group.name == groupName) {
-                      model.groupId = group.id;
+                  for (var i = 0; i < groups.length; i++) {
+                    if (groupName == groups[i].name){
+                      model.groupId = groups[i].id;
                     }
                   }
                 });
