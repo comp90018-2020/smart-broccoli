@@ -160,7 +160,7 @@ export class GameHandler {
                 content.TFSelection
             );
 
-            if (answer.questionNo == session.questionIndex) {
+            if (answer.questionNo !== session.questionIndex) {
                 // ignore the emit with not matched quetion number
                 return;
             }
@@ -215,6 +215,7 @@ export class GameHandler {
             }
 
             // add user to socket room
+            console.log(player.role);
             socket.join(whichRoom(session, player.role));
             socket.join(whichRoom(session, Role.all));
             // add user to session

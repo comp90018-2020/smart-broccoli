@@ -6,10 +6,7 @@
       "request": "launch",
       "name": "Launch Program",
       "program": "${workspaceFolder}/server.ts",
-      "preLaunchTask": [
-        "tsc: build - tsconfig.json",
-        "exit"
-      ],
+      "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": [
         "${workspaceFolder}/build/**/*.js"
       ]
