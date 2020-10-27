@@ -2,9 +2,11 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+
 import 'profile_editor.dart';
 import 'profile_picture.dart';
 import 'table_items.dart';

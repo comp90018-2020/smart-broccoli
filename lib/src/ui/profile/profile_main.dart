@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/profile/profile_picture.dart';
-
 import 'package:smart_broccoli/src/ui/shared/page.dart';
+
 import 'profile_editor.dart';
 import 'profile_registered.dart';
 import 'profile_joined.dart';
+import 'profile_picture.dart';
 
 /// Container for profile page elements
 class ProfileMain extends StatefulWidget {

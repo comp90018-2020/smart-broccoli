@@ -2,11 +2,12 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/models/user_profile.dart';
-import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
+
 import 'profile_picture.dart';
 import 'table_items.dart';
 

@@ -4,12 +4,12 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'profile_picture.dart';
 import 'profile_promoting.dart';
 import 'table_items.dart';
+import 'profile_editor.dart';
 
 class ProfileJoined extends ProfileEditor {
   ProfileJoined(User user, bool isEdit, {Key key})
