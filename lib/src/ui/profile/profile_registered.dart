@@ -1,55 +1,66 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:smart_broccoli/src/data.dart';
+
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'profile_picture.dart';
 import 'table_items.dart';
 
 /// Profile page for listed users
-class ProfileRegistered extends StatefulWidget {
-  /// Whether fields are in edit mode
-  final bool _isEdit;
-
-  ProfileRegistered(this._isEdit);
+class ProfileRegistered extends ProfileEditor {
+  ProfileRegistered(UserProfileModel profile, bool isEdit, {Key key})
+      : super(profile, isEdit, key: key);
 
   @override
   State<StatefulWidget> createState() => new _ProfileRegisteredState();
 }
 
-class _ProfileRegisteredState extends State<ProfileRegistered> {
-  final TextEditingController _nameController = new TextEditingController();
-  final TextEditingController _emailController = new TextEditingController();
-  final TextEditingController _passwordController = new TextEditingController();
+class _ProfileRegisteredState extends ProfileEditorState {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
-      new TextEditingController();
+      TextEditingController();
 
   @override
-  void dispose() {
-    _emailController.dispose();
-    _nameController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
+  void initState() {
+    discardChanges();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ProfilePicture(widget._isEdit),
+        ProfilePicture(widget.isEdit),
 
         // Name/email
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: TableCard(
             [
-              NameTableRow(widget._isEdit, _nameController),
-              EmailTableRow(widget._isEdit, _emailController),
+              NameTableRow(
+                widget.isEdit,
+                _nameController,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+              ),
+              EmailTableRow(
+                widget.isEdit,
+                _emailController,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+              ),
             ],
           ),
         ),
 
         // Password
-        if (widget._isEdit)
+        if (widget.isEdit)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
             child: Column(
@@ -62,9 +73,17 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
                 ),
                 TableCard(
                   [
-                    PasswordTableRow(widget._isEdit, _passwordController),
+                    PasswordTableRow(
+                      widget.isEdit,
+                      _passwordController,
+                      textInputAction: TextInputAction.next,
+                      onFieldSubmitted: (_) =>
+                          FocusScope.of(context).nextFocus(),
+                    ),
                     PasswordConfirmTableRow(
-                        widget._isEdit, _confirmPasswordController),
+                      widget.isEdit,
+                      _confirmPasswordController,
+                    ),
                   ],
                 ),
               ],
@@ -72,5 +91,55 @@ class _ProfileRegisteredState extends State<ProfileRegistered> {
           ),
       ],
     );
+  }
+
+  @override
+  Future<bool> commitChanges() async {
+    if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
+      showErrorDialog(context, "Name and email fields are both required");
+      return false;
+    }
+
+    if (!EmailValidator.validate(_emailController.text)) {
+      showErrorDialog(context, "Invalid email");
+      return false;
+    }
+
+    if (_passwordController.text.isNotEmpty &&
+        _passwordController.text.length < 8) {
+      showErrorDialog(context, "Password must be at least 8 characters");
+      return false;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      showErrorDialog(context, "Passwords do not match");
+      return false;
+    }
+
+    try {
+      await widget.profile.updateUser(
+          name: _nameController.text,
+          password: _passwordController.text.isEmpty
+              ? null
+              : _passwordController.text,
+          email: _emailController.text);
+      _passwordController.clear();
+      _confirmPasswordController.clear();
+      return true;
+    } on RegistrationConflictException {
+      showErrorDialog(context, "Email already in use");
+      return false;
+    } catch (_) {
+      showErrorDialog(context, "Cannot update profile");
+      return false;
+    }
+  }
+
+  @override
+  Future<void> discardChanges() async {
+    _nameController.text = widget.profile.user?.name;
+    _emailController.text = widget.profile.user?.email;
+    _passwordController.clear();
+    _confirmPasswordController.clear();
   }
 }

@@ -21,7 +21,10 @@ class TableCard extends Material {
 
 /// Name row
 class NameTableRow extends TableRow {
-  NameTableRow(bool isEdit, TextEditingController _nameController)
+  NameTableRow(bool isEdit, TextEditingController _nameController,
+      {String hintText,
+      TextInputAction textInputAction,
+      void Function(String) onFieldSubmitted})
       : super(
           children: [
             _paddedCell(
@@ -33,16 +36,19 @@ class NameTableRow extends TableRow {
                 readOnly: !isEdit,
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: const TextStyle(color: Colors.black38),
-                    suffixIcon: IconButton(
-                      icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
-                      onPressed: () {},
-                    ),
-                    border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    hintText: 'John Smith'),
+                  contentPadding: EdgeInsets.zero,
+                  hintStyle: const TextStyle(color: Colors.black38),
+                  suffixIcon: IconButton(
+                    icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
+                    onPressed: _nameController.clear,
+                  ),
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  hintText: hintText,
+                ),
                 controller: _nameController,
+                textInputAction: textInputAction,
+                onFieldSubmitted: onFieldSubmitted,
               ),
               padding: const EdgeInsets.only(left: 16),
             ),
@@ -52,7 +58,10 @@ class NameTableRow extends TableRow {
 
 /// Email row
 class EmailTableRow extends TableRow {
-  EmailTableRow(bool isEdit, TextEditingController _nameController)
+  EmailTableRow(bool isEdit, TextEditingController _emailController,
+      {String hintText,
+      TextInputAction textInputAction,
+      void Function(String) onFieldSubmitted})
       : super(
           children: [
             _paddedCell(
@@ -63,17 +72,20 @@ class EmailTableRow extends TableRow {
                 textAlignVertical: TextAlignVertical.center,
                 readOnly: !isEdit,
                 decoration: InputDecoration(
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: const TextStyle(color: Colors.black38),
-                    border: InputBorder.none,
-                    suffixIcon: IconButton(
-                      icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
-                      onPressed: () {},
-                    ),
-                    // A space
-                    focusedBorder: InputBorder.none,
-                    hintText: 'name@example.com'),
-                controller: _nameController,
+                  contentPadding: EdgeInsets.zero,
+                  hintStyle: const TextStyle(color: Colors.black38),
+                  border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
+                    onPressed: _emailController.clear,
+                  ),
+                  // A space
+                  focusedBorder: InputBorder.none,
+                  hintText: hintText,
+                ),
+                controller: _emailController,
+                textInputAction: textInputAction,
+                onFieldSubmitted: onFieldSubmitted,
               ),
               padding: const EdgeInsets.only(left: 16),
             ),
@@ -83,7 +95,10 @@ class EmailTableRow extends TableRow {
 
 /// Password row
 class PasswordTableRow extends TableRow {
-  PasswordTableRow(bool isEdit, TextEditingController _passwordController)
+  PasswordTableRow(bool isEdit, TextEditingController _passwordController,
+      {String hintText = 'Password',
+      TextInputAction textInputAction,
+      void Function(String) onFieldSubmitted})
       : super(
           children: [
             _paddedCell(
@@ -94,16 +109,19 @@ class PasswordTableRow extends TableRow {
                 obscureText: true,
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: const TextStyle(color: Colors.black38),
-                    border: InputBorder.none,
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {},
-                    ),
-                    focusedBorder: InputBorder.none,
-                    hintText: 'Password'),
+                  contentPadding: EdgeInsets.zero,
+                  hintStyle: const TextStyle(color: Colors.black38),
+                  border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: _passwordController.clear,
+                  ),
+                  focusedBorder: InputBorder.none,
+                  hintText: hintText,
+                ),
                 controller: _passwordController,
+                textInputAction: textInputAction,
+                onFieldSubmitted: onFieldSubmitted,
               ),
               padding: const EdgeInsets.only(left: 16),
             ),
@@ -114,7 +132,10 @@ class PasswordTableRow extends TableRow {
 /// Confirm password row
 class PasswordConfirmTableRow extends TableRow {
   PasswordConfirmTableRow(
-      bool isEdit, TextEditingController _passwordController)
+      bool isEdit, TextEditingController _passwordController,
+      {String hintText = 'Confirm password',
+      TextInputAction textInputAction,
+      void Function(String) onFieldSubmitted})
       : super(
           children: [
             _paddedCell(
@@ -126,17 +147,20 @@ class PasswordConfirmTableRow extends TableRow {
                 obscureText: true,
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: const TextStyle(color: Colors.black38),
-                    border: InputBorder.none,
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {},
-                    ),
-                    // A space
-                    focusedBorder: InputBorder.none,
-                    hintText: 'Confirm password'),
+                  contentPadding: EdgeInsets.zero,
+                  hintStyle: const TextStyle(color: Colors.black38),
+                  border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: _passwordController.clear,
+                  ),
+                  // A space
+                  focusedBorder: InputBorder.none,
+                  hintText: hintText,
+                ),
                 controller: _passwordController,
+                textInputAction: textInputAction,
+                onFieldSubmitted: onFieldSubmitted,
               ),
               padding: const EdgeInsets.only(left: 16),
             ),

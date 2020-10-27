@@ -12,6 +12,8 @@ void main() async {
   final PictureStash picStash = await PictureStash.create();
   final AuthStateModel authStateModel = AuthStateModel(keyValueStore);
   final UserRepository userRepo = UserRepository(picStash);
+  final UserProfileModel userProfileModel =
+      UserProfileModel(keyValueStore, authStateModel, userRepo, picStash);
   final QuizCollectionModel quizCollectionModel =
       QuizCollectionModel(authStateModel, picStash);
   final GroupRegistryModel groupRegistryModel =
@@ -21,6 +23,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => authStateModel),
+        ChangeNotifierProvider(create: (_) => userProfileModel),
         ChangeNotifierProvider(create: (context) => groupRegistryModel),
         ChangeNotifierProvider(create: (context) => quizCollectionModel)
       ],
