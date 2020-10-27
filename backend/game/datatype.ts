@@ -1,5 +1,5 @@
 export enum Res {
-    Success = "succss",
+    Success = "success",
     NoMoreQuestion = "No more question",
     ThereIsRunningQuestion = "There is player taking question",
 }
@@ -25,7 +25,7 @@ export enum QuizType {
 
 export class Player {
     public record: { [key: string]: any } = {};
-    public preRecord: { [key: string]: any } = {};
+    public previousRecord: { [key: string]: any } = {};
     constructor(
         readonly id: number,
         readonly name: string,
@@ -41,7 +41,7 @@ export class Player {
         this.record.points = 0;
         this.record.streak = 0;
         // deep copy
-        this.preRecord = JSON.parse(JSON.stringify(this.record));
+        this.previousRecord = JSON.parse(JSON.stringify(this.record));
     }
 
     /**

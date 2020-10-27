@@ -3,11 +3,11 @@ import { GameHandler, sendErr } from "./game";
 import { sessionTokenDecrypt } from "../controllers/session";
 import { Player, Role } from "./datatype";
 
-export let socketIO_: Server = null;
+export let _socketIO: Server = null;
 export const handler: GameHandler = new GameHandler();
 
 export default (socketIO: Server) => {
-    socketIO_ = socketIO;
+    _socketIO = socketIO;
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
         try {

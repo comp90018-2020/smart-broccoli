@@ -101,14 +101,22 @@ export class GameSession {
             player,
             Object.keys(this.playerMap).length
         );
-        this.playerMap[playerId].preRecord = this.playerMap[playerId].record;
+
+        this.playerMap[playerId].previousRecord = this.playerMap[
+            playerId
+        ].record;
+        const previousRecord = this.playerMap[playerId].previousRecord;
         this.playerMap[playerId].record = {
             questionNo: answer.questionNo,
-            oldPos: this.playerMap[playerId].preRecord.newPos,
+            oldPos:
+                previousRecord.questionNo === answer.questionNo
+                    ? this.playerMap[playerId].previousRecord.newPos
+                    : null,
             newPos: null,
             bonusPoints: points,
-            points: points + this.playerMap[playerId].preRecord.points,
-            streak: streak,
+            points: points + this.playerMap[playerId].previousRecord.points,
+            streak:
+                previousRecord.questionNo === answer.questionNo ? streak : 0,
         };
     }
 

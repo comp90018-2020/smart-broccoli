@@ -3,7 +3,7 @@ import { sessionTokenDecrypt as decrypt } from "../controllers/session";
 import { getUserSessionProfile } from "../controllers/user";
 import { GameSession } from "./session";
 import { formatQuestion, formatWelcome } from "./formatter";
-import { socketIO_ } from "./index";
+import { _socketIO } from "./index";
 import { Role, Res, GameStatus, Player, Answer, QuizType } from "./datatype";
 import { Quiz, Question } from "../models";
 import { endSession } from "../controllers/session";
@@ -82,12 +82,8 @@ export class GameHandler {
                 ],
             };
 
-            this.sessions[sessionId] = new GameSession(
-                quiz,
-                sessionId,
-                "live",
-                false
-            );
+            const q = new Quiz(quiz);
+            this.addSession(q, sessionId, quiz.type, quiz.isGroup);
         }
     }
 
@@ -209,7 +205,7 @@ export class GameHandler {
             ) {
                 // if not host, emit playerJoin
                 socket
-                    .to(player.sessionId.toString())
+                    .to(room(session, player.role))
                     .emit("playerJoin", player.profile());
             }
 
@@ -278,9 +274,9 @@ export class GameHandler {
         if (
             pastPlayer != null &&
             pastPlayer.socketId != player.socketId &&
-            socketIO_.sockets.connected.hasOwnProperty(pastPlayer.socketId)
+            _socketIO.sockets.connected.hasOwnProperty(pastPlayer.socketId)
         ) {
-            socketIO_.sockets.connected[pastPlayer.socketId].disconnect();
+            _socketIO.sockets.connected[pastPlayer.socketId].disconnect();
         }
     }
 
@@ -329,8 +325,8 @@ export class GameHandler {
     async start(socket: Socket, session: GameSession, player: Player) {
         try {
             if (
-                // if is host
-                player.role === Role.host &&
+                // if no host or player is host
+                (player === null || player.role === Role.host) &&
                 // and game is pending
                 session.status == GameStatus.Pending
             ) {
@@ -339,8 +335,8 @@ export class GameHandler {
                 // set the start time
                 session.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
                 // Broadcast that quiz will be started
-                socketIO_
-                    .to(player.sessionId.toString())
+                _socketIO
+                    .to(session.id.toString())
                     .emit(
                         "starting",
                         (session.quizStartsAt - Date.now()).toString()
@@ -368,7 +364,7 @@ export class GameHandler {
         try {
             if (player.role === Role.host) {
                 // Broadcast that quiz has been aborted
-                socketIO_
+                _socketIO
                     .to(player.sessionId.toString())
                     .emit("cancelled", null);
 
@@ -384,12 +380,12 @@ export class GameHandler {
 
     endSession(session: GameSession) {
         for (const socketId of Object.keys(
-            socketIO_.sockets.adapter.rooms[session.id.toString()].sockets
+            _socketIO.sockets.adapter.rooms[session.id.toString()].sockets
         )) {
             // loop over socket in the room
             // and disconnect them
-            if (socketIO_.sockets.connected.hasOwnProperty(socketId)) {
-                socketIO_.sockets.connected[socketId].disconnect();
+            if (_socketIO.sockets.connected.hasOwnProperty(socketId)) {
+                _socketIO.sockets.connected[socketId].disconnect();
             }
         }
     }
@@ -397,7 +393,8 @@ export class GameHandler {
     async next(socket: Socket, session: GameSession, player: Player) {
         try {
             if (
-                player.role === Role.host &&
+                // if no host or player is host
+                (player === null || player.role === Role.host) &&
                 session.status === GameStatus.Running
             ) {
                 // try to get the index of next question
@@ -410,7 +407,7 @@ export class GameHandler {
                     // }
                     // send question without answer to participants
                     socket
-                        .to(player.sessionId.toString())
+                        .to(session.id.toString())
                         .emit(
                             "nextQuestion",
                             formatQuestion(questionIndex, session, false)
@@ -502,7 +499,7 @@ export class GameHandler {
                         playerAhead: playerAheadRecord,
                     };
                     // emit questionOutcome to participants
-                    socketIO_
+                    _socketIO
                         .to(socketId)
                         .emit("questionOutcome", questionOutcome);
                 }
@@ -557,4 +554,8 @@ export const sendErr = (error: any, socket: Socket) => {
         socket.send(JSON.stringify(error, Object.getOwnPropertyNames(error)));
         socket.disconnect();
     }
+};
+
+export const room = (session: GameSession, role: string) => {
+    return session.id.toString() + (role === undefined ? "" : role);
 };
