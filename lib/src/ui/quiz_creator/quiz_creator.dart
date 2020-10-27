@@ -325,9 +325,13 @@ class _QuizCreateState extends State<QuizCreate> {
       ),
     );
 
-    setState(() {
-     model = result;
-    });
+    //Check whether transition was not caused by the back button
+    if(result!= null){
+      setState(() {
+        model = result;
+      });
+
+    }
 
   }
 
@@ -387,12 +391,21 @@ class _QuizCreateState extends State<QuizCreate> {
   Widget buildGroupList(List<Group> groups) {
 
     if(isDefaultGrpSelected == false) {
-      if(widget.passedQuiz == null){
+
+      if(widget.passedQuiz == null && widget.groupId == null){
+        model.groupId = groups[0].id;
+      }
+
+      else if(widget.passedQuiz == null && widget.groupId != null){
         model.groupId = widget.groupId;
 
-      }else{
-        model.groupId = widget.passedQuiz.groupId;
       }
+
+      else if(widget.passedQuiz != null){
+        model.groupId = widget.passedQuiz.groupId;
+
+      }
+
 
       for (var group in groups) {
         if (model.groupId == group.id) {

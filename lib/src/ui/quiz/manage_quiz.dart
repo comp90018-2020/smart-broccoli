@@ -67,7 +67,12 @@ class _ManageQuizState extends State<ManageQuiz> {
       secondaryBackgroundColour: true,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.of(context).pushNamed('/quiz');
+          if(_groupId == null){
+            Navigator.of(context).pushNamed('/quiz');
+          }else{
+            Navigator.of(context).pushNamed('/group/$_groupId/quiz');
+          }
+
         },
         label: Text('CREATE QUIZ'),
         icon: Icon(Icons.add),
