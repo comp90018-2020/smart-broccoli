@@ -39,7 +39,12 @@ class _ProfileJoinedState extends ProfileEditorState {
           padding: const EdgeInsets.all(24),
           child: TableCard(
             [
-              NameTableRow(widget.isEdit, _nameController),
+              NameTableRow(
+                widget.isEdit,
+                _nameController,
+                hintText:
+                    widget.profile.user.isAnonymous ? "(anonymous)" : null,
+              ),
             ],
           ),
         ),
