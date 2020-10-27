@@ -1,11 +1,7 @@
-import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/socket_data/correct_answer.dart';
-import 'package:smart_broccoli/src/socket_data/question_answered.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
-import '../socket_data/user.dart' as SocketUser;
-import '../socket_data/outcome.dart';
-import '../data/group.dart';
 import 'package:flutter/widgets.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import 'package:smart_broccoli/src/data.dart';
 
 enum SessionState {
   PENDING, // in lobby and waiting (unknown how long to start)
@@ -21,7 +17,7 @@ class GameSessionModel extends ChangeNotifier {
   // URL of server
   static const String SERVER_URL = 'https://fuzzybroccoli.com';
 
-  Map<int, SocketUser.User> players = {};
+  Map<int, SocketUser> players = {};
   int startCountDown;
   Question question;
   int time;
@@ -44,9 +40,7 @@ class GameSessionModel extends ChangeNotifier {
   }
 
   /// Connect to socket with headers
-  /// TODO: change to token
   void connect(String token) {
-    //change to token
     // Set query
     socket.opts['query'] = {};
     socket.opts['query']['token'] = token;
@@ -62,7 +56,7 @@ class GameSessionModel extends ChangeNotifier {
       print('welcome');
       print(message);
       List users = message['players'] as List;
-      players = Map.fromIterable(users.map((u) => SocketUser.User.fromJson(u)),
+      players = Map.fromIterable(users.map((u) => SocketUser.fromJson(u)),
           key: (u) => u.id);
       if ('participant' == message['role'])
         role = GroupRole.MEMBER;
@@ -87,7 +81,7 @@ class GameSessionModel extends ChangeNotifier {
 
     socket.on('playerJoin', (message) {
       print(message);
-      var user = SocketUser.User.fromJson(message);
+      var user = SocketUser.fromJson(message);
       players[user.id] = user;
       print("playerJoin");
       print(players);
@@ -96,7 +90,7 @@ class GameSessionModel extends ChangeNotifier {
     socket.on('playerLeave', (message) {
       print("playerLeave");
       print(message);
-      var user = SocketUser.User.fromJson(message);
+      var user = SocketUser.fromJson(message);
       players.remove(user.id);
       print(players);
     });

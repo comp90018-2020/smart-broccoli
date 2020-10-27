@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_broccoli/src/socket_data/outcome.dart';
-import 'package:smart_broccoli/src/socket_data/user_rank.dart';
+import 'package:smart_broccoli/src/data.dart';
 
 main() async {
   test('outcome test', () async {

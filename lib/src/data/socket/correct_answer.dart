@@ -1,4 +1,4 @@
-import 'package:smart_broccoli/src/socket_data/record.dart';
+import 'record.dart';
 
 class CorrectAnswer {
   final Answer answer;
