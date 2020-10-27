@@ -32,7 +32,6 @@ export class GameHandler {
     public async checkEnv() {
         if (process.env.SOCKET_MODE === "debug") {
             console.log("[-] Debug mode.");
-            console.log("[*] reset a game session for debug");
             const sessionId = 19;
             if (this.sessions.hasOwnProperty(sessionId)) {
                 delete this.sessions[sessionId];
@@ -43,7 +42,7 @@ export class GameHandler {
                 active: true,
                 description: "Test Quiz",
                 type: "self paced",
-                isGroup: true,
+                isGroup: false,
                 timeLimit: 20,
                 groupId: 2,
                 pictureId: null,
@@ -102,6 +101,8 @@ export class GameHandler {
         // const quizJSON: QuizAttributes = quiz.toJSON();
         const newSession = new GameSession(quiz, sessionId, quizType, isGroup);
         this.sessions[sessionId] = newSession;
+
+        console.log(`[*] reset a game session(${newSession.type}) for debug`);
         return true;
     }
 
@@ -253,38 +254,43 @@ export class GameHandler {
                     WAIT_TIME_BEFORE_START + 1,
                     session
                 );
-            } else if (session.status === GameStatus.Starting) {
-                // if game is starting,
-
-                emitToOne(
-                    socket.id,
-                    Event.starting,
-                    (session.quizStartsAt - Date.now()).toString()
-                );
-            } else if (session.status === GameStatus.Running) {
-                // if game is running, emit nextQuestion
-                emitToOne(
-                    player.socketId,
-                    Event.nextQuestion,
-                    formatQuestion(
-                        session.questionIndex,
-                        session,
-                        player.role === Role.host ? true : false
-                    )
-                );
-
-                if (
-                    session.isReadyForNextQuestion &&
-                    session.questionIndex >= 0 &&
-                    session.questionIndex < session.quiz.questions.length
-                ) {
-                    const correctAnswer = session.getAnsOfQuestion(
-                        session.questionIndex
-                    );
-                    this.emitCorrectAnswer(player, correctAnswer);
-                }
             } else {
-                // otherwise ignore
+                if (session.status === GameStatus.Pending) {
+                    if (session.type == GameType.SelfPaced_NotGroup) {
+                        this.start(session, player);
+                    }
+                } else if (session.status === GameStatus.Starting) {
+                    // if game is starting,
+                    emitToOne(
+                        socket.id,
+                        Event.starting,
+                        (session.quizStartsAt - Date.now()).toString()
+                    );
+                } else if (session.status === GameStatus.Running) {
+                    // if game is running, emit nextQuestion
+                    emitToOne(
+                        player.socketId,
+                        Event.nextQuestion,
+                        formatQuestion(
+                            session.questionIndex,
+                            session,
+                            player.role === Role.host ? true : false
+                        )
+                    );
+
+                    if (
+                        session.isReadyForNextQuestion &&
+                        session.questionIndex >= 0 &&
+                        session.questionIndex < session.quiz.questions.length
+                    ) {
+                        const correctAnswer = session.getAnsOfQuestion(
+                            session.questionIndex
+                        );
+                        this.emitCorrectAnswer(player, correctAnswer);
+                    }
+                } else {
+                    // otherwise ignore
+                }
             }
         } catch (error) {
             sendErr(error, player === undefined ? undefined : player.socketId);
@@ -390,7 +396,12 @@ export class GameHandler {
     }
 
     endSession(session: GameSession) {
-        if (_socketIO !== undefined) {
+        if (
+            _socketIO !== undefined &&
+            _socketIO.sockets.adapter.rooms.hasOwnProperty(
+                whichRoom(session, Role.all)
+            )
+        ) {
             for (const socketId of Object.keys(
                 _socketIO.sockets.adapter.rooms[whichRoom(session, Role.all)]
                     .sockets
@@ -414,6 +425,7 @@ export class GameHandler {
             }
 
             if (
+                session.isReadyForNextQuestion &&
                 // if no host or player is host
                 (session.type === GameType.SelfPaced_Group ||
                     player.role === Role.host) &&
@@ -435,23 +447,18 @@ export class GameHandler {
                             formatQuestion(questionIndex, session, true)
                         );
                     }
-                    setTimeout(
-                        () => {
-                            if (
-                                session.nextQuestionIndex ===
-                                session.questionIndex
-                            ) {
-                                session.setToNextQuestion();
-                                this.releaseCorrectAnswer(
-                                    session,
-                                    questionIndex
-                                );
+                    setTimeout(() => {
+                        if (
+                            session.nextQuestionIndex === session.questionIndex
+                        ) {
+                            session.setToNextQuestion();
+                            this.releaseCorrectAnswer(session, questionIndex);
+
+                            if (session.type === GameType.SelfPaced_NotGroup) {
+                                this.showBoard(session, player);
                             }
-                        },
-                        Object.keys(session.playerMap).length <= 0
-                            ? 0
-                            : session.quiz.timeLimit * 1000
-                    );
+                        }
+                    }, session.quiz.timeLimit * 1000);
                 } else {
                     // if failed to get next question index, print log
                     console.log(res);
