@@ -34,9 +34,12 @@ class _ProfileMainState extends State<ProfileMain> {
               icon: Icon(Icons.close),
               enableFeedback: false,
               splashRadius: 20,
-              onPressed: () => setState(() {
-                _isEdit = false;
-              }),
+              onPressed: () async {
+                if (!await _confirmDiscardDialogue()) return;
+                setState(() {
+                  _isEdit = false;
+                });
+              },
             )
           : null,
 
@@ -84,4 +87,21 @@ class _ProfileMainState extends State<ProfileMain> {
           ],
         ),
       );
+
+  Future<bool> _confirmDiscardDialogue() async => showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+            title: Text("Confirm"),
+            content: Text("No changes will be saved"),
+            actions: [
+              TextButton(
+                  child: Text("Cancel"),
+                  onPressed: () => Navigator.of(context).pop(false)),
+              TextButton(
+                child: Text("OK"),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          ),
+      barrierDismissible: false);
 }
