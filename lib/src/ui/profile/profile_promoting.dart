@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -77,6 +78,8 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
       _confirmPasswordController
     ].any((controller) => controller.text.isEmpty))
       return await showErrorDialog(context, "All fields are required");
+    if (!EmailValidator.validate(_emailController.text))
+      return await showErrorDialog(context, "Invalid email");
     if (_passwordController.text != _confirmPasswordController.text)
       return await showErrorDialog(context, "Passwords do not match");
     try {

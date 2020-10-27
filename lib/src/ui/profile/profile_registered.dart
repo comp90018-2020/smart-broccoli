@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -95,6 +96,11 @@ class _ProfileRegisteredState extends ProfileEditorState {
   Future<bool> commitChanges() async {
     if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
       showErrorDialog(context, "Name and email fields are both required");
+      return false;
+    }
+
+    if (!EmailValidator.validate(_emailController.text)) {
+      showErrorDialog(context, "Invalid email");
       return false;
     }
 
