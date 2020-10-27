@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -77,31 +80,35 @@ class _StartLobby extends State<QuizLobby> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Stack(children: [
-              // Quiz card
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-                margin: EdgeInsets.only(bottom: 12),
-                child: QuizCard(
-                  // placeholder
-                  Quiz.fromJson({'title': 'Quiz title', 'groupId': 1}),
-                  aspectRatio: 2.3,
-                ),
-              ),
-
-              // Start button on top of card
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: RaisedButton(
-                    shape: SmartBroccoliTheme.raisedButtonShape,
-                    child: Text("Start"),
-                    onPressed: () => _startQuiz(),
+            Consumer<GameSessionModel>(
+              builder: (context, model, child) => Stack(children: [
+                // Quiz card
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+                  margin: EdgeInsets.only(bottom: 12),
+                  child: Consumer<QuizCollectionModel>(
+                    builder: (context, collection, child) => QuizCard(
+                      collection.getQuiz(model.session.quizId),
+                      aspectRatio: 2.3,
+                    ),
                   ),
                 ),
-              ),
-            ]),
+
+                // Start button on top of card
+                if (model.role == GroupRole.OWNER)
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: RaisedButton(
+                        shape: SmartBroccoliTheme.raisedButtonShape,
+                        child: Text("Start"),
+                        onPressed: () => _startQuiz(),
+                      ),
+                    ),
+                  ),
+              ]),
+            ),
 
             // Chip for group subscriptions
             Chip(
