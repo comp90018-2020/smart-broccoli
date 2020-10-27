@@ -52,9 +52,10 @@ class AuthApi {
   /// `RegistrationConflictException` is thrown if the email is already in use.
   /// `ParticipantPromotionException` is thrown if the user cannot be registered
   /// due to a different reason.
-  Future<User> promote(String email, String password, String name) async {
+  Future<User> promote(
+      String token, String email, String password, String name) async {
     final http.Response response = await _http.post('$AUTH_URL/promote',
-        headers: ApiBase.headers(),
+        headers: ApiBase.headers(authToken: token),
         body: jsonEncode(<String, String>{
           'email': email,
           'password': password,

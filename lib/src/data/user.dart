@@ -10,6 +10,7 @@ class User {
   final String email;
   final String _name;
   String get name => _name != null ? _name : "(anonymous member)";
+  bool get isAnonymous => _name == null;
 
   final GroupRole groupRole;
 

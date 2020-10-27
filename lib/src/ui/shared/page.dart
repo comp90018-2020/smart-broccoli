@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/theme.dart';
 
 /// A page extending scaffold
 /// Supports tabs, drawer
@@ -107,31 +109,39 @@ class CustomPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           // User picture
-                          Container(
-                            decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(100)),
-                            width: 50,
-                            height: 50,
+                          Consumer<UserProfileModel>(
+                            builder: (context, profile, child) =>
+                                profile.user.picture == null
+                                    ? UserAvatar.placeholder(maxRadius: 30)
+                                    : UserAvatar(
+                                        profile.user.picture,
+                                        maxRadius: 30,
+                                      ),
                           ),
                           // Name/email
                           Expanded(
                             child: Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 18),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('name',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyText1),
-                                  Text('email',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyText2),
-                                ],
+                              child: Consumer<UserProfileModel>(
+                                builder: (context, profile, child) => Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(profile.user?.name ?? "",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText1),
+                                    Text(
+                                        profile.user?.type ==
+                                                UserType.UNREGISTERED
+                                            ? "Unregistered"
+                                            : profile.user?.email,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2),
+                                  ],
+                                ),
                               ),
                             ),
                           ),

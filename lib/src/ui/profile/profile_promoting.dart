@@ -1,5 +1,10 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models/user_profile.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'profile_picture.dart';
@@ -32,7 +37,7 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
   @override
   Widget build(BuildContext context) {
     return CustomPage(
-      title: "Promote user",
+      title: "Register account",
       hasDrawer: false,
       child: SingleChildScrollView(
         child: Column(
@@ -66,7 +71,31 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
   }
 
   // Code to promote profile to a joined profile
-  void initPromote() {
-    Navigator.of(context).pop();
+  void initPromote() async {
+    if ([
+      _nameController,
+      _emailController,
+      _passwordController,
+      _confirmPasswordController
+    ].any((controller) => controller.text.isEmpty))
+      return await showErrorDialog(context, "All fields are required");
+    if (!EmailValidator.validate(_emailController.text))
+      return await showErrorDialog(context, "Invalid email");
+    if (_passwordController.text.length < 8)
+      return await showErrorDialog(
+          context, "Password must be at least 8 characters");
+    if (_passwordController.text != _confirmPasswordController.text)
+      return await showErrorDialog(context, "Passwords do not match");
+    try {
+      await Provider.of<UserProfileModel>(context, listen: false).promoteUser(
+          _emailController.text,
+          _passwordController.text,
+          _nameController.text);
+      Navigator.of(context).pop();
+    } on RegistrationConflictException {
+      showErrorDialog(context, "Email already in use");
+    } catch (_) {
+      showErrorDialog(context, "Cannot register profile");
+    }
   }
 }
