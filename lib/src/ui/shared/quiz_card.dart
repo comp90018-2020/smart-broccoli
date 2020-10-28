@@ -25,14 +25,14 @@ class QuizCard extends StatelessWidget {
   QuizCard(this.quiz,
       {Key key,
       this.aspectRatio = 1.4,
-      this.optionsEnabled = false,
+      this.optionsEnabled = true,
       this.alwaysShowPicture = false});
 
   @override
   Widget build(BuildContext context) => Card(
         elevation: 2,
         child: InkWell(
-          onTap: quiz.role == GroupRole.OWNER
+          onTap: !optionsEnabled || quiz.role == GroupRole.OWNER
               ? null
               : () {
                   if (quiz.type == QuizType.LIVE) {
