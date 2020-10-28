@@ -2,8 +2,22 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/ui.dart';
 
+/// Actions
+enum RouteAction { PUSH, POPALL, REPLACE }
+
+/// Router arguemnts
+class RouteArgs {
+  /// Name of route
+  final String routeName;
+
+  /// Action to take
+  final RouteAction routeAction;
+
+  RouteArgs(this.routeName, {this.routeAction = RouteAction.PUSH});
+}
+
 /// Defines routes and transitions
-class Routes {
+class BroccoliRouter {
   static const String root = "/home";
   static const String auth = "/auth";
   static const String takeQuiz = "/take_quiz";
@@ -22,11 +36,16 @@ class Routes {
   static const String quizQuestion = "/quiz/question";
   static const String profile = "/profile";
 
-  /// Static router
-  static FluroRouter router;
+  /// Router
+  final FluroRouter router;
+
+  /// Constructor
+  BroccoliRouter() : this.router = FluroRouter() {
+    configureRoutes(router);
+  }
 
   /// Route configuration
-  static void configureRoutes(FluroRouter router) {
+  void configureRoutes(FluroRouter router) {
     // Root
     router.define(root, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {

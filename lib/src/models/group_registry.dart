@@ -4,12 +4,13 @@ import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/remote.dart';
+import 'model_change.dart';
 
 import 'auth_state.dart';
 import 'user_repository.dart';
 
 /// View model for group management
-class GroupRegistryModel extends ChangeNotifier {
+class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
 
@@ -100,6 +101,7 @@ class GroupRegistryModel extends ChangeNotifier {
   /// This callback does not populate the `members` field of each group if the
   /// optional [withMembers] parameter is `false`.
   Future<void> refreshJoinedGroups({bool withMembers = true}) async {
+    if (!_authStateModel.inSession) return;
     // fetch from API and save into map
     _joinedGroups = Map.fromIterable(
         (await _groupApi.getGroups(_authStateModel.token))
@@ -119,6 +121,7 @@ class GroupRegistryModel extends ChangeNotifier {
   /// This callback does not populate the `members` field of each group if the
   /// optional [withMembers] parameter is `false`.
   Future<void> refreshCreatedGroups({bool withMembers = true}) async {
+    if (!_authStateModel.inSession) return;
     // fetch from API and save into map
     _createdGroups = Map.fromIterable(
         (await _groupApi.getGroups(_authStateModel.token))
@@ -136,6 +139,7 @@ class GroupRegistryModel extends ChangeNotifier {
   /// Refreshes the specified group.
   Future<void> refreshGroup(int id,
       {bool withMembers = true, bool withQuizzes = true}) async {
+    if (!_authStateModel.inSession) return;
     // fetch group
     var group = await _groupApi.getGroup(_authStateModel.token, id);
     if (group.role == GroupRole.OWNER) {
@@ -164,5 +168,12 @@ class GroupRegistryModel extends ChangeNotifier {
   Future<void> joinGroup({String name, String code}) async {
     await _groupApi.joinGroup(_authStateModel.token, name: name, code: code);
     refreshJoinedGroups();
+  }
+
+  void authUpdated() {
+    if (!_authStateModel.inSession) {
+      _joinedGroups = {};
+      _createdGroups = {};
+    }
   }
 }
