@@ -109,12 +109,11 @@ export class GameSession {
     }
 
     playerLeave(player: Player) {
-        try {
+
+        if (process.env.SOCKET_MODE !== "debug") {
             leaveSession(player.sessionId, player.id);
-            this.setPlayerState(player, PlayerState.Left);
-        } catch (error) {
-            console.log(error);
         }
+        this.setPlayerState(player, PlayerState.Left);
 
     }
 
@@ -138,11 +137,10 @@ export class GameSession {
         if (status == GameStatus.Starting) {
             this.status = GameStatus.Starting;
             this.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
-            try {
+
+            if (process.env.SOCKET_MODE !== "debug") {
                 activateSession(this.id);
 
-            } catch (error) {
-                console.log(error);
             }
         } else if (status == GameStatus.Running) {
             this.status = GameStatus.Running;
@@ -159,15 +157,12 @@ export class GameSession {
                 state: state,
             });
         });
-        try {
-
+        if (process.env.SOCKET_MODE !== "debug") {
             endSessionInController(
                 this.id,
                 this.hasMoreQuestions() && this._isReadyForNextQuestion,
                 progress
             );
-        } catch (error) {
-            console.log(error);
         }
     }
     getStatus() {
