@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:path_provider/path_provider.dart';
 
 /// Local picture storage utility
@@ -26,7 +25,7 @@ class PictureStash {
   }
 
   /// Save a picture with specified [id] to local storage.
-  Future<String> storePic(int id, Uint8List bytes) async {
+  Future<void> storePic(int id, Uint8List bytes) async {
     // ensure picture directory exists
     final Directory picDir =
         await Directory('$_baseDir/picture').create(recursive: true);
@@ -35,10 +34,7 @@ class PictureStash {
     try {
       File f = File(assetDir);
       f.writeAsBytes(bytes);
-      return assetDir;
-    } catch (_) {
-      return null;
-    }
+    } catch (_) {}
   }
 
   /// Clear all pictures from local storage.

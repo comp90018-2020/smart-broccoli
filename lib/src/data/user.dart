@@ -13,10 +13,8 @@ class User {
 
   final GroupRole groupRole;
 
-  String picture;
-
   User._internal(this.type, this.id, this.pictureId, this.email, this._name,
-      this.groupRole, this.picture);
+      this.groupRole);
 
   factory User.fromJson(Map<String, dynamic> json, {String picture}) =>
       User._internal(
@@ -34,7 +32,6 @@ class User {
             : json['role'] == 'member'
                 ? GroupRole.MEMBER
                 : null,
-        picture,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{

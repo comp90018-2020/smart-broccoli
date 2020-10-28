@@ -38,23 +38,35 @@ class UserProfileModel extends ChangeNotifier {
     var userJson = _keyValueStore.getString('user');
     if (userJson != null) {
       _user = User.fromJson(json.decode(userJson));
-      if (_user?.pictureId != null) _picStash.getPic(_user.pictureId);
     }
   }
 
-  /// UI function to get user
+  /// Function to get user
   Future<User> getUser({bool forceRefresh = false}) async {
     // If in cache and we don't force refresh
     if (!forceRefresh && user != null) {
       return user;
     }
+    // If not, retrieve user
     return await _refreshUser();
   }
 
-  /// Asks _userRepo to retrieve user and image from API
+  Future<String> getUserPicture({bool forceRefresh = false}) async {
+    if (user?.pictureId == null) return null;
+    return await _picStash.getPic(user.id);
+  }
+
+  /// Retrieve user and image from API
   Future<User> _refreshUser() async {
-    _user = await _userRepo.getUser(_authStateModel.token);
+    _user = await _userApi.getUser(_authStateModel.token);
     _keyValueStore.setString('user', json.encode(_user.toJson()));
+    // If user has picture and picture is not stored in cache
+    if (_user.pictureId != null &&
+        await _picStash.getPic(_user.pictureId) == null) {
+      var picture = await _userApi.getProfilePic(_authStateModel.token);
+      await _picStash.storePic(user.pictureId, picture);
+    }
+    notifyListeners();
     return _user;
   }
 
@@ -68,12 +80,10 @@ class UserProfileModel extends ChangeNotifier {
   Future<void> updateProfilePic(Uint8List bytes) async {
     await _userApi.setProfilePic(_authStateModel.token, bytes);
     _refreshUser();
-    notifyListeners();
   }
 
   Future<void> promoteUser(String email, String password, String name) async {
     await _authStateModel.promote(email, password, name);
     _refreshUser();
-    notifyListeners();
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'game.dart';
 import 'group.dart';
 
@@ -15,7 +13,6 @@ class Quiz {
   final int id;
 
   final int pictureId;
-  Uint8List picture;
 
   /// User's role. This field is non-null for quizzes in the list returned by
   /// `getQuizzes`; however, it will be null for a quiz returned by `getQuiz`

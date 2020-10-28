@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 class SmartBroccoliColourScheme extends ColorScheme {
@@ -208,9 +207,9 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
 }
 
 class UserAvatar extends CircleAvatar {
-  UserAvatar(Uint8List image, {double maxRadius: 20})
+  UserAvatar(String filePath, {double maxRadius: 20})
       : super(
-          backgroundImage: MemoryImage(image),
+          backgroundImage: Image.file(File(filePath)).image,
           maxRadius: maxRadius,
         );
   UserAvatar.placeholder({double maxRadius: 20})

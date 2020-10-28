@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
@@ -23,17 +21,9 @@ class UserRepository {
     _groupApi = groupApi ?? GroupApi();
   }
 
-  Future<User> getUser(String token) async {
-    User user = await _userApi.getUser(token);
-    // no picture; return straight away
-    if (user.pictureId == null) return user;
-    // otherwise, check whether picture has already been cached
-    if ((user.picture = await _picStash.getPic(user.pictureId)) != null)
-      return user;
-    // if not, use the API then cache the picture (in background) for next time
-    var picture = await _userApi.getProfilePic(token);
-    user.picture = await _picStash.storePic(user.pictureId, picture);
-    return user;
+  Future<String> getUserPicture(int id) {
+    if (!_users.containsKey(id) || _users[id].pictureId == null) return null;
+    return _picStash.getPic(_users[id].pictureId);
   }
 
   Future<User> getUserBy(String token, int id, {bool fromCache = true}) async {
@@ -41,15 +31,12 @@ class UserRepository {
     if (fromCache && _users.containsKey(id)) return _users[id];
     // if not found (or caller specified not from cache), use the API
     _users[id] = await _userApi.getUserBy(token, id);
-    // no picture; return straight away
-    if (_users[id].pictureId == null) return _users[id];
-    // otherwise, check whether picture has already been cached
-    if ((_users[id].picture = await _picStash.getPic(_users[id].pictureId)) !=
-        null) return _users[id];
-    // if not, use the API then cache the picture (in background) for next time
-    var picture = await _userApi.getProfilePic(token);
-    _users[id].picture =
-        await _picStash.storePic(_users[id].pictureId, picture);
+    // If user has picture and picture is not stored in cache
+    if (_users[id].pictureId != null &&
+        await _picStash.getPic(_users[id].pictureId) == null) {
+      var picture = await _userApi.getProfilePicOf(token, id);
+      await _picStash.storePic(_users[id].pictureId, picture);
+    }
     return _users[id];
   }
 
@@ -63,15 +50,11 @@ class UserRepository {
     await Future.wait(members.map((member) async {
       // store member in the hashmap
       _users[member.id] = member;
-      // and look for profile pic locally before falling back to API
+      // If user has picture and picture is not stored in cache
       if (member.pictureId != null &&
-          (member.picture = await _picStash.getPic(member.pictureId)) == null) {
-        try {
-          var picture = await _userApi.getProfilePicOf(token, member.id);
-          member.picture = await _picStash.storePic(member.pictureId, picture);
-        } catch (_) {
-          // if unable to get the profie pic from the API, simply move on
-        }
+          await _picStash.getPic(member.pictureId) == null) {
+        var picture = await _userApi.getProfilePicOf(token, member.id);
+        await _picStash.storePic(member.pictureId, picture);
       }
     }));
     return members;

@@ -110,13 +110,19 @@ class CustomPage extends StatelessWidget {
                         children: [
                           // User picture
                           Consumer<UserProfileModel>(
-                            builder: (context, profile, child) =>
-                                profile.user?.picture == null
-                                    ? UserAvatar.placeholder(maxRadius: 30)
-                                    : UserAvatar(
-                                        profile.user.picture,
-                                        maxRadius: 30,
-                                      ),
+                            builder: (context, profile, child) => FutureBuilder(
+                              future: Provider.of<UserProfileModel>(context)
+                                  .getUserPicture(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<String> snapshot) {
+                                if (!snapshot.hasData || snapshot.data == null)
+                                  return UserAvatar.placeholder(maxRadius: 30);
+                                return UserAvatar(
+                                  snapshot.data,
+                                  maxRadius: 30,
+                                );
+                              },
+                            ),
                           ),
                           // Name/email
                           Expanded(
