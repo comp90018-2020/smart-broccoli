@@ -22,40 +22,38 @@ class _GroupCreateState extends State<GroupCreate> {
       title: "Create Group",
       hasDrawer: false,
       secondaryBackgroundColour: true,
-      child: Form(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Group name
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: TextFormField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'Group name',
-                  prefixIcon: Icon(Icons.people),
-                ),
-                onChanged: (value) =>
-                    setState(() => _isTextFormFieldEmpty = value.isEmpty),
-                onFieldSubmitted: (_) => _createGroup(),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Group name
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Group name',
+                prefixIcon: Icon(Icons.people),
+              ),
+              onChanged: (value) =>
+                  setState(() => _isTextFormFieldEmpty = value.isEmpty),
+              onSubmitted: (_) => _createGroup(),
+            ),
+          ),
+          // Button
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: SizedBox(
+              width: double.infinity,
+              child: RaisedButton(
+                disabledTextColor:
+                    SmartBroccoliColourScheme.disabledButtonTextColor,
+                onPressed: _isTextFormFieldEmpty ? null : _createGroup,
+                child: const Text("CREATE"),
               ),
             ),
-            // Button
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: SizedBox(
-                width: double.infinity,
-                child: RaisedButton(
-                  disabledTextColor:
-                      SmartBroccoliColourScheme.disabledButtonTextColor,
-                  onPressed: _isTextFormFieldEmpty ? null : _createGroup,
-                  child: const Text("CREATE"),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
