@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 
-import 'name_prompt.dart';
-
 // Login tab
 class Login extends StatefulWidget {
   Login({Key key}) : super(key: key);
