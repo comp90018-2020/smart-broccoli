@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 
-import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 
@@ -27,7 +26,6 @@ class AuthStateModel extends ChangeNotifier {
 
   /// Constructor for external use
   AuthStateModel(this._keyValueStore, {AuthApi authApi}) {
-    print("Auth: ${this.hashCode}");
     _token = _keyValueStore.getString('token');
     _authApi = authApi ?? AuthApi();
   }
