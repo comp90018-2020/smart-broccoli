@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 
@@ -31,7 +32,17 @@ class QuizCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
         elevation: 2,
         child: InkWell(
-          onTap: () {},
+          onTap: quiz.role == GroupRole.OWNER
+              ? null
+              : () {
+                  if (quiz.type == QuizType.LIVE) {
+                    Provider.of<GameSessionModel>(context, listen: false)
+                        .joinLiveSession(quiz);
+                    Navigator.of(context).pushNamed("/session/lobby");
+                  } else {
+                    Navigator.of(context).pushNamed("/session/start");
+                  }
+                },
           child: alwaysShowPicture
               // Always show picture
               ? _quizInner(context, true)
