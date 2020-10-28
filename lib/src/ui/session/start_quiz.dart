@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models/quiz_collection.dart';
+import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
@@ -81,7 +82,16 @@ class StartQuiz extends StatelessWidget {
                   SizedBox(width: 8),
                   Expanded(
                     child: RaisedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        try {
+                          await Provider.of<GameSessionModel>(context,
+                                  listen: false)
+                              .createSession(
+                                  quizId, GameSessionType.INDIVIDUAL);
+                        } catch (_) {
+                          showBasicDialog(context, "Cannot start session");
+                        }
+                      },
                       child: Column(
                         children: [
                           Icon(
