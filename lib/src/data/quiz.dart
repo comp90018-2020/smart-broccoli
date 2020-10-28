@@ -12,8 +12,11 @@ class Quiz {
   /// ID of the quiz (for quizzes fetched from server only)
   final int id;
 
+  /// Picture ID (from server)
   final int pictureId;
-  String picturePath;
+
+  /// The pending picture path
+  String pendingPicturePath;
 
   /// User's role. This field is non-null for quizzes in the list returned by
   /// `getQuizzes`; however, it will be null for a quiz returned by `getQuiz`
@@ -28,16 +31,16 @@ class Quiz {
   final List<GameSession> sessions;
 
   int timeLimit;
-  List<Question> questions = List<Question>();
+  List<Question> questions;
 
   final bool complete;
 
   /// Construtor for use when user creates a new quiz
   factory Quiz(String title, int groupId, QuizType type,
           {String description,
-          bool isActive,
+          bool isActive = false,
           int timeLimit,
-          List<Question> questions}) =>
+          List<Question> questions = const []}) =>
       Quiz._internal(null, null, GroupRole.OWNER, title, groupId, type,
           description, isActive, timeLimit, questions, null, false);
 
@@ -95,7 +98,6 @@ class Quiz {
       'active': isActive,
       'timeLimit': timeLimit,
       'complete': complete,
-      'pictureId': pictureId,
     };
     if (questions != null)
       json['questions'] =
@@ -115,7 +117,12 @@ abstract class Question {
   final int no;
 
   String text;
+
+  /// Picture ID (from server)
   int pictureId;
+
+  /// The pending picture path
+  String pendingPicturePath;
 
   Question({this.id, this.no, this.text, this.pictureId});
 
@@ -138,14 +145,12 @@ class TFQuestion extends Question {
   bool answer;
 
   /// Constructor for use when user creates a new true/false question
-
   TFQuestion(String text, this.answer, {int pictureId})
       : super(text: text, pictureId: pictureId);
 
   /// Constructor for internal use only
   TFQuestion._internal(int id, int no, String text, int pictureId, this.answer)
       : super(id: id, no: no, text: text, pictureId: pictureId);
-
 
   factory TFQuestion.fromJson(Map<String, dynamic> json) =>
       TFQuestion._internal(

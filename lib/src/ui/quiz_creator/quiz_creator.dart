@@ -145,9 +145,9 @@ class _QuizCreateState extends State<QuizCreate> {
                 ),
 
                 // Picture selection
-                PictureCard(model.picturePath, (path) {
+                PictureCard(model.pendingPicturePath, (path) {
                   setState(() {
-                    model.picturePath = path;
+                    model.pendingPicturePath = path;
                   });
                 }, quiz: model),
 

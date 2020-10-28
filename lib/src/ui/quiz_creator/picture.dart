@@ -70,7 +70,7 @@ class _PictureCardState extends State<PictureCard> {
   }
 
   assemblePicture(Quiz quiz, String picturePath) {
-    if (quiz.picturePath != null) {
+    if (quiz.pendingPicturePath != null) {
       return Image.file(File(widget.picturePath), fit: BoxFit.cover);
     } else if (quiz.pictureId != null) {
       return Icon(Icons.insert_photo_outlined, size: 100);

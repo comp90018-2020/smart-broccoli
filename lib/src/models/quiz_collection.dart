@@ -106,8 +106,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     var returnedQuiz = await _quizApi.createQuiz(_authStateModel.token, quiz);
 
     Uint8List imageDataUint;
-    if (quiz.picturePath != null) {
-      var rootBundleData = await rootBundle.load(quiz.picturePath);
+    if (quiz.pendingPicturePath != null) {
+      var rootBundleData = await rootBundle.load(quiz.pendingPicturePath);
 
       imageDataUint = rootBundleData.buffer.asUint8List();
       await _quizApi.setQuizPicture(
