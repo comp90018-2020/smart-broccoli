@@ -125,8 +125,7 @@ class _LoginState extends State<Login> {
               child: MaterialButton(
                 textColor: Theme.of(context).colorScheme.onBackground,
                 child: const Text('SKIP LOGIN'),
-                onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => NamePrompt())),
+                onPressed: () => Navigator.of(context).pushNamed("/join"),
               ),
             ),
           ],
