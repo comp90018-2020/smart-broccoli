@@ -122,13 +122,16 @@ class _ProfilePictureState extends State<ProfilePicture> {
 
   // Selector (from package)
   void _openPictureSelector(ImageSource source) async {
-    PickedFile pickedFile = await picker.getImage(source: source);
-    if (pickedFile == null) return;
     try {
+      PickedFile pickedFile = await picker.getImage(source: source);
+      if (pickedFile == null) return;
       await Provider.of<UserProfileModel>(context, listen: false)
           .updateProfilePic(await pickedFile.readAsBytes());
-    } catch (_) {
-      showErrorDialog(context, "Cannot update profile picture");
+    } catch (err) {
+      if (err.code == "photo_access_denied")
+        showErrorDialog(context, "Cannot access gallery");
+      else
+        showErrorDialog(context, "Cannot update profile picture");
     }
   }
 }
