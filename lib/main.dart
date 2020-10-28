@@ -78,7 +78,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    widget.pubSub.subscribe(PubSubTopic.ROUTE, navigate);
+    widget.pubSub
+        .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
   }
 
   /// Navigate to route
