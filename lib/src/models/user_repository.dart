@@ -22,7 +22,7 @@ class UserRepository {
   }
 
   Future<String> getUserPicture(int id) {
-    if (!_users.containsKey(id) || _users[id].pictureId == null) return null;
+    if (_users[id]?.pictureId == null) return null;
     return _picStash.getPic(_users[id].pictureId);
   }
 
