@@ -91,6 +91,7 @@ class _StartLobby extends State<QuizLobby> {
                     builder: (context, collection, child) => QuizCard(
                       collection.getQuiz(model.session.quizId),
                       aspectRatio: 2.3,
+                      optionsEnabled: false,
                     ),
                   ),
                 ),

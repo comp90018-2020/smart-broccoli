@@ -45,6 +45,7 @@ class _StartQuizState extends State<StartQuiz> {
                   Quiz.fromJson(
                       {'title': 'Quiz title', 'groupId': 1, 'complete': false}),
                   aspectRatio: 2.3,
+                  optionsEnabled: false,
                 ),
               ),
 
