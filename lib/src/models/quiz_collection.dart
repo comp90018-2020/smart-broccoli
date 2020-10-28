@@ -60,7 +60,7 @@ class QuizCollectionModel extends ChangeNotifier {
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
-    await _quizApi.getQuizPicture(_authStateModel.token, id);
+    _refreshQuizPicture(_selectedQuiz);
     notifyListeners();
   }
 
