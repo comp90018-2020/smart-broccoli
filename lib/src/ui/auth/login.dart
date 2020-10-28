@@ -138,6 +138,8 @@ class _LoginState extends State<Login> {
       try {
         await Provider.of<AuthStateModel>(context, listen: false)
             .login(_emailController.text, _passwordController.text);
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil("/take_quiz", (route) => false);
       } on LoginFailedException {
         _showLoginFailedDialogue(context);
       }

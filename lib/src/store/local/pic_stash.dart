@@ -39,6 +39,7 @@ class PictureStash {
 
   /// Clear all pictures from local storage.
   Future<void> clear() async {
-    await Directory('$_baseDir/picture').delete(recursive: true);
+    var directory = Directory('$_baseDir/picture');
+    if (await directory.exists()) await directory.delete(recursive: true);
   }
 }

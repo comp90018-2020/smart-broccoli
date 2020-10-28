@@ -1,12 +1,14 @@
 import 'dart:collection';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
+import 'model_change.dart';
 import 'auth_state.dart';
 
 /// View model for quiz management
-class QuizCollectionModel extends ChangeNotifier {
+class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
 
@@ -128,6 +130,8 @@ class QuizCollectionModel extends ChangeNotifier {
   }
 
   Future<void> refreshAvailableQuizzes() async {
+    print(_authStateModel.token);
+    if (!_authStateModel.inSession) return;
     _availableQuizzes = Map.fromIterable(
         (await _quizApi.getQuizzes(_authStateModel.token))
             .where((quiz) => quiz.role == GroupRole.MEMBER),
@@ -139,6 +143,7 @@ class QuizCollectionModel extends ChangeNotifier {
   }
 
   Future<void> refreshCreatedQuizzes() async {
+    if (!_authStateModel.inSession) return;
     _createdQuizzes = Map.fromIterable(
         (await _quizApi.getQuizzes(_authStateModel.token))
             .where((quiz) => quiz.role == GroupRole.OWNER),
@@ -151,6 +156,7 @@ class QuizCollectionModel extends ChangeNotifier {
 
   /// Refreshes specific group's quizzes.
   Future<void> refreshGroupQuizzes(int groupId) async {
+    if (!_authStateModel.inSession) return;
     List<Quiz> quizzes =
         await _quizApi.getGroupQuizzes(_authStateModel.token, groupId);
     await Future.wait(quizzes.map((quiz) async {
@@ -171,5 +177,14 @@ class QuizCollectionModel extends ChangeNotifier {
     // Get picture and cache
     var picture = await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
     _picStash.storePic(quiz.pictureId, picture);
+  }
+
+  /// When the auth state is updated
+  void authUpdated() {
+    if (!_authStateModel.inSession) {
+      _selectedQuiz = null;
+      _availableQuizzes = {};
+      _createdQuizzes = {};
+    }
   }
 }
