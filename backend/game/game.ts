@@ -173,7 +173,10 @@ export class GameHandler {
                     session.setToNextQuestion(session.getQuestionIndex());
 
                     if (session.isSelfPacedGroup()) {
-                        this.next(session, session.getQuestionIndex() + 1);
+                        await this.next(
+                            session,
+                            session.getQuestionIndex() + 1
+                        );
                     }
                 }
             }
@@ -227,16 +230,16 @@ export class GameHandler {
                     WAIT_TIME_BEFORE_START.toString()
                 );
 
-                session.setStatus(GameStatus.Starting);
+                await session.setStatus(GameStatus.Starting);
                 setTimeout(
-                    (session: GameSession) => {
+                    async (session: GameSession) => {
                         if (
                             session.is(GameStatus.Starting) &&
                             session.canReleaseTheFirstQuestion()
                         ) {
-                            session.setStatus(GameStatus.Running);
+                            await session.setStatus(GameStatus.Running);
                             session.setToNextQuestion(0);
-                            this.next(session, 0);
+                            await this.next(session, 0);
                         }
                     },
                     WAIT_TIME_BEFORE_START,
@@ -302,7 +305,7 @@ export class GameHandler {
                 Event.playerLeave,
                 player.profile()
             );
-            session.playerLeave(player);
+            await session.playerLeave(player);
             // disconnect
             socket.disconnect();
         } catch (error) {
@@ -317,7 +320,7 @@ export class GameHandler {
             }
             if (session.canStart(player)) {
                 // set game status to starting
-                session.setStatus(GameStatus.Starting);
+                await session.setStatus(GameStatus.Starting);
                 // Broadcast that quiz will be started
                 emitToRoom(
                     whichRoom(session, Role.all),
@@ -325,12 +328,12 @@ export class GameHandler {
                     (session.quizStartsAt - Date.now()).toString()
                 );
                 setTimeout(
-                    () => {
+                    async () => {
                         // after time out
-                        session.setStatus(GameStatus.Running);
+                        await session.setStatus(GameStatus.Running);
                         session.setToNextQuestion(0);
                         // release the firt question
-                        this.next(session, 0, player);
+                        await this.next(session, 0, player);
                     },
                     process.env.SOCKET_MODE === "debug"
                         ? 1
@@ -351,7 +354,7 @@ export class GameHandler {
                 // Broadcast that quiz has been aborted
                 emitToRoom(whichRoom(session, Role.all), Event.cancelled, null);
                 // end a session
-                this.endSession(session);
+                await this.endSession(session);
                 // reset a sample session if is debug mode
                 this.checkEnv();
             }
@@ -360,8 +363,8 @@ export class GameHandler {
         }
     }
 
-    endSession(session: GameSession) {
-        session.endSession();
+    async endSession(session: GameSession) {
+        await session.endSession();
         if (
             _socketIO !== undefined &&
             _socketIO.sockets.adapter.rooms.hasOwnProperty(
@@ -406,13 +409,17 @@ export class GameHandler {
                     );
                 }
                 setTimeout(
-                    (questionIndex: number) => {
+                    async (questionIndex: number) => {
                         if (session.canSetToNextQuestion(questionIndex)) {
-                            this.releaseCorrectAnswer(session, questionIndex);
+                            await this.releaseCorrectAnswer(
+                                session,
+                                questionIndex
+                            );
                         }
-                        // }, session.quiz.timeLimit * 1000);
                     },
-                    1000,
+                    process.env.SOCKET_MODE === "debug"
+                        ? 1000
+                        : session.quiz.timeLimit * 1000,
                     nextQuestionIndex
                 );
             }
@@ -428,7 +435,7 @@ export class GameHandler {
         });
     }
 
-    releaseCorrectAnswer(session: GameSession, questoinIndex: number) {
+    async releaseCorrectAnswer(session: GameSession, questoinIndex: number) {
         for (const player of Object.values(session.playerMap)) {
             this.emitCorrectAnswer(
                 player,
@@ -440,15 +447,15 @@ export class GameHandler {
             session.setToNextQuestion(questoinIndex + 1);
 
             if (session.isSelfPacedGroup()) {
-                this.showBoard(session, questoinIndex);
+                await this.showBoard(session, questoinIndex);
             } else if (session.isSelfPacedNotGroup()) {
-                setTimeout(() => {
-                    this.next(session, questoinIndex + 1);
+                setTimeout(async () => {
+                    await this.next(session, questoinIndex + 1);
                 }, BoardShowTime);
             }
         } else {
             emitToRoom(whichRoom(session, Role.all), Event.end, null);
-            this.abort(session);
+            await this.abort(session);
         }
     }
     async showBoard(
@@ -474,8 +481,8 @@ export class GameHandler {
                 }
                 if (session.isSelfPacedGroup()) {
                     if (session.hasMoreQuestions()) {
-                        setTimeout(() => {
-                            this.next(session, questionIndex + 1);
+                        setTimeout(async () => {
+                            await this.next(session, questionIndex + 1);
                         }, BoardShowTime);
                     } else {
                         emitToRoom(
@@ -483,8 +490,8 @@ export class GameHandler {
                             Event.end,
                             null
                         );
-                        setTimeout(() => {
-                            this.abort(session);
+                        setTimeout(async () => {
+                            await this.abort(session);
                         }, BoardShowTime);
                     }
                 } else {
