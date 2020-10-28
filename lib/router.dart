@@ -2,18 +2,18 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/ui.dart';
 
+/// Actions
+enum RouteAction { PUSH, POPALL, REPLACE }
+
 /// Router arguemnts
 class RouteArgs {
   /// Name of route
   final String routeName;
 
-  /// Whether to pop all routes
-  final bool popAll;
+  /// Action to take
+  final RouteAction routeAction;
 
-  /// Whether to replace current
-  final bool replace;
-
-  RouteArgs(this.routeName, {this.popAll = false, this.replace = false});
+  RouteArgs(this.routeName, {this.routeAction = RouteAction.PUSH});
 }
 
 /// Defines routes and transitions

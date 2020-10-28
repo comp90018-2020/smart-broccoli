@@ -78,15 +78,15 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    widget.pubSub.subscribe(PubSubTopics.route, navigate);
+    widget.pubSub.subscribe(PubSubTopic.ROUTE, navigate);
   }
 
   /// Navigate to route
   void navigate(RouteArgs routeArgs) {
-    if (routeArgs.popAll) {
+    if (routeArgs.routeAction == RouteAction.POPALL) {
       _mainNavigatorKey.currentState
           .pushNamedAndRemoveUntil(routeArgs.routeName, (route) => false);
-    } else if (routeArgs.replace) {
+    } else if (routeArgs.routeAction == RouteAction.REPLACE) {
       _mainNavigatorKey.currentState.pushReplacementNamed(routeArgs.routeName);
     } else {
       _mainNavigatorKey.currentState.pushNamed(routeArgs.routeName);
