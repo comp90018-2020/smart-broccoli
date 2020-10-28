@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models/quiz_collection.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
@@ -39,12 +41,12 @@ class StartQuiz extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 margin: EdgeInsets.only(bottom: 12),
-                child: QuizCard(
-                  // placeholder
-                  Quiz.fromJson(
-                      {'title': 'Quiz title', 'groupId': 1, 'complete': false}),
-                  aspectRatio: 2.3,
-                  optionsEnabled: false,
+                child: Consumer<QuizCollectionModel>(
+                  builder: (context, collection, child) => QuizCard(
+                    collection.getQuiz(quizId),
+                    aspectRatio: 2.3,
+                    optionsEnabled: false,
+                  ),
                 ),
               ),
 
