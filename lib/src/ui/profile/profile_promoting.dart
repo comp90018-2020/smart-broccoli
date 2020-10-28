@@ -78,14 +78,14 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
       _passwordController,
       _confirmPasswordController
     ].any((controller) => controller.text.isEmpty))
-      return await showErrorDialog(context, "All fields are required");
+      return await showBasicDialog(context, "All fields are required");
     if (!EmailValidator.validate(_emailController.text))
-      return await showErrorDialog(context, "Invalid email");
+      return await showBasicDialog(context, "Invalid email");
     if (_passwordController.text.length < 8)
-      return await showErrorDialog(
+      return await showBasicDialog(
           context, "Password must be at least 8 characters");
     if (_passwordController.text != _confirmPasswordController.text)
-      return await showErrorDialog(context, "Passwords do not match");
+      return await showBasicDialog(context, "Passwords do not match");
     try {
       await Provider.of<UserProfileModel>(context, listen: false).promoteUser(
           _emailController.text,
@@ -93,9 +93,9 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
           _nameController.text);
       Navigator.of(context).pop();
     } on RegistrationConflictException {
-      showErrorDialog(context, "Email already in use");
+      showBasicDialog(context, "Email already in use");
     } catch (_) {
-      showErrorDialog(context, "Cannot register profile");
+      showBasicDialog(context, "Cannot register profile");
     }
   }
 }

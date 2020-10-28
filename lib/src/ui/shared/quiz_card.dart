@@ -212,7 +212,7 @@ class _QuizCardState extends State<QuizCard> {
                                     .startQuizSession(widget.quiz,
                                         GameSessionType.INDIVIDUAL);
                               } catch (_) {
-                                showErrorDialog(
+                                showBasicDialog(
                                     context, "Cannot start live session");
                               }
                             },
@@ -244,7 +244,7 @@ class _QuizCardState extends State<QuizCard> {
                                             listen: false)
                                         .setQuizActivation(widget.quiz, value);
                                   } catch (_) {
-                                    showErrorDialog(
+                                    showBasicDialog(
                                         context, "Cannot update quiz status");
                                   }
                                 }),

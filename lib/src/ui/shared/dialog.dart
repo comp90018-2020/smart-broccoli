@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-Future<void> showErrorDialog(BuildContext context, String message) async {
+Future<void> showBasicDialog(BuildContext context, String message,
+    {String title = "Error"}) async {
   return showDialog(
     context: context,
     builder: (_) => AlertDialog(
-      title: Text("Error"),
+      title: Text(title),
       content: Text(message),
       actions: [
         TextButton(

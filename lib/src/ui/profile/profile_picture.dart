@@ -129,9 +129,9 @@ class _ProfilePictureState extends State<ProfilePicture> {
           .updateProfilePic(await pickedFile.readAsBytes());
     } catch (err) {
       if (err.code == "photo_access_denied")
-        showErrorDialog(context, "Cannot access gallery");
+        showBasicDialog(context, "Cannot access gallery");
       else
-        showErrorDialog(context, "Cannot update profile picture");
+        showBasicDialog(context, "Cannot update profile picture");
     }
   }
 }
