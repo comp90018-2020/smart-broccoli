@@ -108,13 +108,11 @@ export class GameSession {
         return this.questionIndex < this.quiz.questions.length - 1;
     }
 
-    playerLeave(player: Player) {
-
+    async playerLeave(player: Player) {
         if (process.env.SOCKET_MODE !== "debug") {
-            leaveSession(player.sessionId, player.id);
+            await leaveSession(player.sessionId, player.id);
         }
         this.setPlayerState(player, PlayerState.Left);
-
     }
 
     setPlayerState(player: Player, state: PlayerState) {
@@ -133,20 +131,19 @@ export class GameSession {
             player.role === Role.host
         );
     }
-    setStatus(status: GameStatus) {
+    async setStatus(status: GameStatus) {
         if (status == GameStatus.Starting) {
             this.status = GameStatus.Starting;
             this.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
 
             if (process.env.SOCKET_MODE !== "debug") {
-                activateSession(this.id);
-
+                await activateSession(this.id);
             }
         } else if (status == GameStatus.Running) {
             this.status = GameStatus.Running;
         }
     }
-    endSession() {
+    async endSession() {
         const progress: { userId: number; data: any; state?: string }[] = [];
         const rank = this.rankPlayers();
 
@@ -158,7 +155,7 @@ export class GameSession {
             });
         });
         if (process.env.SOCKET_MODE !== "debug") {
-            endSessionInController(
+            await endSessionInController(
                 this.id,
                 this.hasMoreQuestions() && this._isReadyForNextQuestion,
                 progress
