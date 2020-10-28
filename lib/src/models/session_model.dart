@@ -56,10 +56,10 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     notifyListeners();
   }
 
-  Future<void> createSession(Quiz quiz, GameSessionType type,
+  Future<void> createSession(int quizId, GameSessionType type,
       {bool autoSubscribe = false}) async {
     session = await _sessionApi.createSession(
-        _authStateModel.token, quiz.id, type,
+        _authStateModel.token, quizId, type,
         autoSubscribe: autoSubscribe);
     notifyListeners();
   }
