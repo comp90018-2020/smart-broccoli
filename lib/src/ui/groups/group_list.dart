@@ -78,7 +78,8 @@ class _GroupListState extends State<GroupList> {
               onTap: () =>
                   Navigator.of(context).pushNamed('/group/${groups[i].id}'),
               title: Text(
-                groups[i].name,
+                groups[i].name +
+                    (groups[i].defaultGroup ? ' (Default Group)' : ''),
                 style: TextStyle(fontSize: 16),
               ),
               subtitle: groups[i].members == null
