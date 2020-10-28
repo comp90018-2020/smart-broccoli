@@ -82,7 +82,8 @@ class _PictureCardState extends State<PictureCard> {
       return Image.file(File(widget.picturePath), fit: BoxFit.cover);
     }
     else if(quiz.pictureId != null){
-        return Image.memory(quiz.picture, fit: BoxFit.cover);
+      return Icon(Icons.insert_photo_outlined, size: 100);
+      //  return Image.memory(quiz.picture, fit: BoxFit.cover);
     }else{
       return Icon(Icons.insert_photo_outlined, size: 100);
     }

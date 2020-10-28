@@ -1,17 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'package:smart_broccoli/src/models/user_profile.dart';
-import 'package:smart_broccoli/src/ui/profile/profile_editor.dart';
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'profile_picture.dart';
 import 'profile_promoting.dart';
 import 'table_items.dart';
+import 'profile_editor.dart';
 
 class ProfileJoined extends ProfileEditor {
-  ProfileJoined(UserProfileModel profile, bool isEdit, {Key key})
-      : super(profile, isEdit, key: key);
+  ProfileJoined(User user, bool isEdit, {Key key})
+      : super(user, isEdit, key: key);
 
   @override
   State<StatefulWidget> createState() => new _ProfileJoinedState();
@@ -40,8 +42,7 @@ class _ProfileJoinedState extends ProfileEditorState {
               NameTableRow(
                 widget.isEdit,
                 _nameController,
-                hintText:
-                    widget.profile.user.isAnonymous ? "(anonymous)" : null,
+                hintText: widget.user.isAnonymous ? "(anonymous)" : null,
               ),
             ],
           ),
@@ -81,7 +82,8 @@ class _ProfileJoinedState extends ProfileEditorState {
       return false;
     }
     try {
-      await widget.profile.updateUser(name: _nameController.text);
+      await Provider.of<UserProfileModel>(context, listen: false)
+          .updateUser(name: _nameController.text);
       return true;
     } catch (_) {
       showErrorDialog(context, "Cannot update profile");
@@ -91,10 +93,7 @@ class _ProfileJoinedState extends ProfileEditorState {
 
   @override
   Future<void> discardChanges() async {
-    _nameController.text =
-        widget.profile.user == null || widget.profile.user.isAnonymous
-            ? ""
-            : widget.profile.user.name;
+    _nameController.text = widget.user.isAnonymous ? "" : widget.user.name;
   }
 
   // Code to promote a joined user to a registered user

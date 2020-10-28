@@ -1,5 +1,6 @@
-import { Picture, Question, Session } from "models";
 import Sequelize, { Optional } from "sequelize";
+import { Picture, Question, Session } from "models";
+import { QuestionAttributes } from "./question";
 
 const schema: Sequelize.ModelAttributes = {
     id: {
@@ -14,7 +15,7 @@ const schema: Sequelize.ModelAttributes = {
     active: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: true,
+        defaultValue: false,
     },
     description: {
         type: Sequelize.STRING,
@@ -31,16 +32,17 @@ const schema: Sequelize.ModelAttributes = {
     },
 };
 
-interface QuizAttributes {
+export interface QuizAttributes {
     id?: number;
     title?: string;
     description?: string;
     groupId: number;
     type: string;
+    isGroup?: boolean;
     active: boolean;
     pictureId?: number;
     timeLimit?: number;
-    questions?: Question[];
+    questions?: QuestionAttributes[];
 }
 interface QuizCreationAttributes
     extends Optional<QuizAttributes, "id" | "active"> {}
@@ -54,6 +56,7 @@ export default class Quiz
     public readonly id!: number;
     public groupId: number;
     public type: string;
+    public isGroup?: boolean;
     public active: boolean;
     public timeLimit?: number;
     public pictureId?: number;

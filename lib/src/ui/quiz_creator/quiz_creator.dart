@@ -51,9 +51,9 @@ class _QuizCreateState extends State<QuizCreate> {
       timerTextController = TextEditingController(text: model.timeLimit.toString() + " seconds");
 
       //Setting bytes for picture
-      if (widget.passedQuiz.pictureId != null){
-        model.picture = widget.passedQuiz.picture;
-      }
+      // if (widget.passedQuiz.pictureId != null){
+      //   model.picture = widget.passedQuiz.picture;
+      // }
 
 
     //Creation of a new quiz

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-
 import 'package:smart_broccoli/src/ui/shared/page.dart';
+
 import 'profile_editor.dart';
 import 'profile_registered.dart';
 import 'profile_joined.dart';
+import 'profile_picture.dart';
 
 /// Container for profile page elements
 class ProfileMain extends StatefulWidget {
@@ -21,6 +23,13 @@ class _ProfileMainState extends State<ProfileMain> {
 
   /// Whether edit mode is activated
   bool _isEdit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<UserProfileModel>(context, listen: false)
+        .getUser(forceRefresh: true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +74,19 @@ class _ProfileMainState extends State<ProfileMain> {
       ],
 
       // Render appropriate page
-      child: Consumer<UserProfileModel>(
-        builder: (context, profile, child) => SingleChildScrollView(
-          child: profile.user.type == UserType.UNREGISTERED
-              ? ProfileJoined(profile, _isEdit, key: key)
-              : ProfileRegistered(profile, _isEdit, key: key),
+      child: SingleChildScrollView(
+        child: Consumer<UserProfileModel>(
+          builder: (context, profile, child) {
+            if (profile.user == null)
+              // Placeholder profile picture
+              return Column(children: [
+                ProfilePicture(false),
+              ]);
+
+            return profile.user.type == UserType.UNREGISTERED
+                ? ProfileJoined(profile.user, _isEdit, key: key)
+                : ProfileRegistered(profile.user, _isEdit, key: key);
+          },
         ),
       ),
     );

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'group.dart';
 
 enum UserType { REGISTERED, UNREGISTERED }
@@ -14,13 +13,10 @@ class User {
 
   final GroupRole groupRole;
 
-  Uint8List picture;
-
   User._internal(this.type, this.id, this.pictureId, this.email, this._name,
-      this.groupRole, this.picture);
+      this.groupRole);
 
-  factory User.fromJson(Map<String, dynamic> json, {Uint8List picture}) =>
-      User._internal(
+  factory User.fromJson(Map<String, dynamic> json) => User._internal(
         json['role'] == 'user'
             ? UserType.REGISTERED
             : json['role'] == 'participant'
@@ -35,7 +31,6 @@ class User {
             : json['role'] == 'member'
                 ? GroupRole.MEMBER
                 : null,
-        picture,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
