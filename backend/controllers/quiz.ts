@@ -116,10 +116,8 @@ export const createQuiz = async (userId: number, info: any) => {
         type: info.type,
         title: info.title,
     });
-    if (info.active !== undefined) {
+    if (info.active !== undefined && quiz.type !== "live") {
         quiz.active = info.active;
-    } else {
-        quiz.active = false;
     }
     if (info.timeLimit) {
         quiz.timeLimit = info.timeLimit;
@@ -168,7 +166,19 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
         quiz.title = info.title;
     }
     if (info.active !== undefined) {
-        quiz.active = info.active;
+        // Change to self-paced quiz
+        if (info.type === "self-paced") {
+            quiz.active = info.active;
+        }
+        // Stay as self-paced quiz
+        if (info.type === undefined && quiz.type === "self-paced") {
+            quiz.active = info.active;
+        }
+
+        // Change to live quiz
+        if (quiz.type !== "live" && info.type === "live") {
+            quiz.active = false;
+        }
     }
     if (info.type) {
         quiz.type = info.type;

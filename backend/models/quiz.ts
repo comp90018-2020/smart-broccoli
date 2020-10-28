@@ -14,7 +14,7 @@ const schema: Sequelize.ModelAttributes = {
     active: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: true,
+        defaultValue: false,
     },
     description: {
         type: Sequelize.STRING,
