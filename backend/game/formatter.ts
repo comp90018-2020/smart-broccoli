@@ -26,10 +26,7 @@ export const formatQuestion = (
             }
         }
     }
-    const remainingTime =
-        session.quiz.timeLimit * 1000 +
-        session.preQuestionReleasedAt -
-        Date.now();
+    const remainingTime = session.QuestionReleaseAt[questionIndex] - Date.now();
     return {
         question: {
             no: questionIndex,
@@ -39,10 +36,7 @@ export const formatQuestion = (
             pictureId: questionCopy.pictureId,
             numCorrect: questionCopy.numCorrect,
         },
-        time:
-            remainingTime < 0 || session.isReadyForNextQuestion
-                ? 0
-                : remainingTime,
+        time: remainingTime,
         totalQuestions: questions.length,
     };
 };

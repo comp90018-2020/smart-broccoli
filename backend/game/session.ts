@@ -28,9 +28,9 @@ export class GameSession {
     public host: Player = null;
     // players info, user id to map
     public playerMap: { [playerId: number]: Player } = {};
-    public questionIndex = -1;
-    public quizStartsAt = 0;
-    public preQuestionReleasedAt = 0;
+    public questionIndex: number = -1;
+    public QuestionReleaseAt: { [questionIndex: number]: number } = {};
+    public preQuestionReleasedAt: number = 0;
     public _isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
     private activePlayersNum: number = 0;
@@ -69,6 +69,29 @@ export class GameSession {
     playerJoin(player: Player) {
         this.playerMap[player.id] = player;
         this.setPlayerState(player, PlayerState.Joined);
+    }
+
+    canSendQuesionAfterReconnection() {
+        return this.visibleQuestionIndex() !== -1;
+    }
+    visibleQuestionIndex() {
+        if (this._isReadyForNextQuestion) {
+            return this.questionIndex - 1;
+        } else {
+            return this.questionIndex;
+        }
+    }
+
+    freezeQuestion(questionIndex: number) {
+        if (questionIndex == this.questionIndex) {
+            this._isReadyForNextQuestion = false;
+        }
+    }
+
+    unfreezeQuestion(questionIndex: number) {
+        if (questionIndex == this.questionIndex) {
+            this._isReadyForNextQuestion = true;
+        }
     }
 
     getPlayer(playerId: number) {
@@ -114,7 +137,14 @@ export class GameSession {
         }
         this.setPlayerState(player, PlayerState.Left);
     }
-
+    getQuizTimeLimit() {
+        return this.quiz.timeLimit === undefined
+            ? 10 * 1000
+            : this.quiz.timeLimit * 1000;
+    }
+    setQuestionReleaseTime(questionIndex: number, afterTime: number) {
+        this.QuestionReleaseAt[questionIndex] = Date.now() + afterTime;
+    }
     setPlayerState(player: Player, state: PlayerState) {
         if (state == PlayerState.Joined) {
             this.activePlayersNum += 1;
@@ -132,15 +162,13 @@ export class GameSession {
         );
     }
     async setStatus(status: GameStatus) {
+        this.status = status;
         if (status == GameStatus.Starting) {
-            this.status = GameStatus.Starting;
-            this.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
+            this.QuestionReleaseAt[0] = Date.now() + WAIT_TIME_BEFORE_START;
 
             if (process.env.SOCKET_MODE !== "debug") {
                 await activateSession(this.id);
             }
-        } else if (status == GameStatus.Running) {
-            this.status = GameStatus.Running;
         }
     }
     async endSession() {
@@ -176,7 +204,10 @@ export class GameSession {
         );
     }
     canReleaseTheFirstQuestion() {
-        return Date.now() > this.quizStartsAt;
+        return (
+            this.QuestionReleaseAt.hasOwnProperty(0) &&
+            Date.now() > this.QuestionReleaseAt[0]
+        );
     }
     isAnswerNoCorrect(answer: Answer) {
         return answer.questionNo === this.questionIndex;
@@ -203,20 +234,23 @@ export class GameSession {
             this.type === GameType.SelfPaced_NotGroup
         );
     }
-    canAnswer(player: Player) {
+    canAnswer(player: Player, answer: Answer) {
         // is player
         return (
+            answer.questionNo === this.questionIndex &&
             player.role === Role.player &&
             // and there is a conducting question
-            !this._isReadyForNextQuestion &&
-            // and this player has not answered
-            !this.pointSys.answeredPlayers.has(player.id)
+            (!this._isReadyForNextQuestion || this.questionIndex === 0)
         );
     }
     canShowBoard(player: Player) {
         return (
             this._isReadyForNextQuestion &&
-            (this.type === GameType.SelfPaced_Group ||
+            ((this.type === GameType.SelfPaced_Group && player === undefined) ||
+                ((this.type === GameType.SelfPaced_NotGroup ||
+                    this.type === GameType.Live_NotGroup) &&
+                    player === undefined &&
+                    !this.hasMoreQuestions()) ||
                 player.role === Role.host)
         );
     }
@@ -224,7 +258,7 @@ export class GameSession {
     canEmitStarting() {
         return (
             this.isSelfPacedGroupAndHasNotStarted() &&
-            Date.now() > this.quizStartsAt
+            !this.QuestionReleaseAt.hasOwnProperty(0)
         );
     }
 
@@ -266,17 +300,23 @@ export class GameSession {
         const player = this.playerMap[playerId];
 
         let correct;
-        if (correctAnswer.MCSelection !== null) {
-            correct =
-                JSON.stringify(answer.MCSelection) ===
-                JSON.stringify(correctAnswer.MCSelection);
+        if (answer.questionNo !== correctAnswer.questionNo) {
+            correct = false;
         } else {
-            correct =
-                answer.TFSelection === correctAnswer.TFSelection ? true : false;
+            if (correctAnswer.MCSelection !== null) {
+                correct =
+                    JSON.stringify(answer.MCSelection) ===
+                    JSON.stringify(correctAnswer.MCSelection);
+            } else {
+                correct =
+                    answer.TFSelection === correctAnswer.TFSelection
+                        ? true
+                        : false;
+            }
         }
 
         // get points and streak
-        const { points, streak } = this.pointSys.getPointsAnsStreak(
+        const { points, streak } = this.pointSys.getPointsAndStreak(
             correct,
             player,
             Object.keys(this.playerMap).length

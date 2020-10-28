@@ -149,18 +149,13 @@ export class GameHandler {
                 content.TFSelection
             );
 
-            if (session.isAnswerNoCorrect(answer)) {
-                // ignore the emit with not matched quetion number
-                return;
-            }
-
-            if (session.canAnswer(player)) {
+            if (session.canAnswer(player, answer)) {
                 // assess answer
                 session.assessAns(player.id, answer);
 
                 // braodcast that question has been answered
                 emitToRoom(
-                    whichRoom(session, Role.player),
+                    whichRoom(session, Role.all),
                     Event.questionAnswered,
                     {
                         question: answer.questionNo,
@@ -254,25 +249,27 @@ export class GameHandler {
                     emitToOne(
                         socket.id,
                         Event.starting,
-                        (session.quizStartsAt - Date.now()).toString()
+                        (session.QuestionReleaseAt[0] - Date.now()).toString()
                     );
                 } else if (session.is(GameStatus.Running)) {
                     // if game is running, emit nextQuestion
-                    emitToOne(
-                        player.socketId,
-                        Event.nextQuestion,
-                        formatQuestion(
-                            session.questionIndex,
-                            session,
-                            player.role === Role.host ? true : false
-                        )
-                    );
-
-                    if (session.canEmitCorrectAnswer()) {
-                        const correctAnswer = session.getAnsOfQuestion(
-                            session.questionIndex
+                    if (session.canSendQuesionAfterReconnection()) {
+                        emitToOne(
+                            player.socketId,
+                            Event.nextQuestion,
+                            formatQuestion(
+                                session.visibleQuestionIndex(),
+                                session,
+                                player.role === Role.host ? true : false
+                            )
                         );
-                        this.emitCorrectAnswer(player, correctAnswer);
+
+                        if (session.canEmitCorrectAnswer()) {
+                            const correctAnswer = session.getAnsOfQuestion(
+                                session.visibleQuestionIndex()
+                            );
+                            this.emitCorrectAnswer(player, correctAnswer);
+                        }
                     }
                 } else {
                     // otherwise ignore
@@ -323,23 +320,19 @@ export class GameHandler {
                 // set game status to starting
                 await session.setStatus(GameStatus.Starting);
                 // Broadcast that quiz will be started
+                session.setQuestionReleaseTime(0, WAIT_TIME_BEFORE_START);
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.starting,
-                    (session.quizStartsAt - Date.now()).toString()
+                    (session.QuestionReleaseAt[0] - Date.now()).toString()
                 );
-                setTimeout(
-                    async () => {
-                        // after time out
-                        await session.setStatus(GameStatus.Running);
-                        session.setToNextQuestion(0);
-                        // release the firt question
-                        await this.next(session, 0, player);
-                    },
-                    process.env.SOCKET_MODE === "debug"
-                        ? 1
-                        : session.quizStartsAt - Date.now()
-                );
+                setTimeout(async () => {
+                    // after time out
+                    await session.setStatus(GameStatus.Running);
+                    session.setToNextQuestion(0);
+                    // release the firt question
+                    await this.next(session, 0, player);
+                }, WAIT_TIME_BEFORE_START);
             }
         } catch (error) {
             sendErr(error, player === undefined ? undefined : player.socketId);
@@ -385,43 +378,47 @@ export class GameHandler {
         }
     }
 
-    async next(
-        session: GameSession,
-        nextQuestionIndex: number,
-        player?: Player
-    ) {
+    async next(session: GameSession, questionIndex: number, player?: Player) {
         try {
             if (session.isEmitValid(player)) {
                 return;
             }
 
-            if (session.canReleaseNextQuestion(player, nextQuestionIndex)) {
+            if (session.canReleaseNextQuestion(player, questionIndex)) {
+                session.setQuestionReleaseTime(
+                    questionIndex,
+                    session.getQuizTimeLimit()
+                );
+                session.freezeQuestion(questionIndex);
                 emitToRoom(
                     whichRoom(session, Role.player),
                     Event.nextQuestion,
-                    formatQuestion(nextQuestionIndex, session, false)
+                    formatQuestion(questionIndex, session, false)
                 );
                 if (!session.isSelfPaced()) {
                     // send question with answer to the host
                     emitToRoom(
                         whichRoom(session, Role.host),
                         Event.nextQuestion,
-                        formatQuestion(nextQuestionIndex, session, true)
+                        formatQuestion(questionIndex, session, true)
                     );
                 }
                 setTimeout(
                     async (questionIndex: number) => {
+                        session.unfreezeQuestion(questionIndex);
                         if (session.canSetToNextQuestion(questionIndex)) {
                             await this.releaseCorrectAnswer(
                                 session,
-                                questionIndex
+                                questionIndex,
+                                player
                             );
+                            session.setToNextQuestion(questionIndex);
                         }
                     },
                     process.env.SOCKET_MODE === "debug"
-                        ? 1000
-                        : session.quiz.timeLimit * 1000,
-                    nextQuestionIndex
+                        ? 10000
+                        : session.getQuizTimeLimit(),
+                    questionIndex
                 );
             }
         } catch (error) {
@@ -436,7 +433,11 @@ export class GameHandler {
         });
     }
 
-    async releaseCorrectAnswer(session: GameSession, questoinIndex: number) {
+    async releaseCorrectAnswer(
+        session: GameSession,
+        questoinIndex: number,
+        player?: Player
+    ) {
         const correctAnswer = session.getAnsOfQuestion(questoinIndex);
         for (const player of Object.values(session.playerMap)) {
             this.emitCorrectAnswer(player, correctAnswer);
@@ -457,8 +458,9 @@ export class GameHandler {
                 }, BoardShowTime);
             }
         } else {
+            await this.showBoard(session, questoinIndex);
             emitToRoom(whichRoom(session, Role.all), Event.end, null);
-            await this.abort(session);
+            await this.abort(session, player);
         }
     }
     async showBoard(

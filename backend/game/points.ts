@@ -38,22 +38,29 @@ export class PointSystem {
         this.answeredPlayers.clear();
     }
 
-    public getPointsAnsStreak(
+    public getPointsAndStreak(
         correct: boolean,
         player: Player,
         totalPlayer: number
     ) {
-        this.answeredPlayers.add(player.id);
-        return {
-            points: Math.floor(
-                this.getFactor(
-                    correct,
-                    correct ? this.getRankForARightAns() : totalPlayer,
-                    player.record.streak,
-                    totalPlayer
-                ) * this.pointsEachQuestion
-            ),
-            streak: correct ? player.record.streak + 1 : 0,
-        };
+        if (this.answeredPlayers.has(player.id)) {
+            return {
+                points: correct ? this.pointsEachQuestion : 0,
+                streak: correct ? 0 : 1,
+            };
+        } else {
+            this.answeredPlayers.add(player.id);
+            return {
+                points: Math.floor(
+                    this.getFactor(
+                        correct,
+                        correct ? this.getRankForARightAns() : totalPlayer,
+                        player.record.streak,
+                        totalPlayer
+                    ) * this.pointsEachQuestion
+                ),
+                streak: correct ? player.record.streak + 1 : 0,
+            };
+        }
     }
 }
