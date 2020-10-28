@@ -116,10 +116,7 @@ class _MyAppState extends State<MyApp> {
       onGenerateInitialRoutes: (route) {
         return [router.generator(RouteSettings(name: route))];
       },
-      initialRoute:
-          Provider.of<AuthStateModel>(context, listen: false).inSession
-              ? '/group/home'
-              : '/auth',
+      initialRoute: state.inSession ? '/group/home' : '/auth',
     );
   }
 }
