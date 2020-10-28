@@ -52,7 +52,6 @@ class UserProfileModel extends ChangeNotifier {
   }
 
   Future<String> getUserPicture({bool forceRefresh = false}) async {
-    print(user.pictureId);
     if (user?.pictureId == null) return null;
     return await _picStash.getPic(user.pictureId);
   }
@@ -67,7 +66,6 @@ class UserProfileModel extends ChangeNotifier {
       var picture = await _userApi.getProfilePic(_authStateModel.token);
       await _picStash.storePic(user.pictureId, picture);
     }
-    print("update");
     notifyListeners();
     return _user;
   }

@@ -133,7 +133,7 @@ class QuizCollectionModel extends ChangeNotifier {
             .where((quiz) => quiz.role == GroupRole.MEMBER),
         key: (quiz) => quiz.id);
     await Future.wait(_availableQuizzes.values.map((Quiz quiz) async {
-      await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
+      await _refreshQuizPicture(quiz);
     }));
     notifyListeners();
   }
@@ -144,7 +144,7 @@ class QuizCollectionModel extends ChangeNotifier {
             .where((quiz) => quiz.role == GroupRole.OWNER),
         key: (quiz) => quiz.id);
     await Future.wait(_createdQuizzes.values.map((Quiz quiz) async {
-      await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
+      await _refreshQuizPicture(quiz);
     }));
     notifyListeners();
   }
@@ -164,12 +164,12 @@ class QuizCollectionModel extends ChangeNotifier {
 
   /// Load the picture of a quiz into the `picture` field of a [quiz].
   Future<void> _refreshQuizPicture(Quiz quiz) async {
+    // No picture
     if (quiz.pictureId == null) return;
-    // if stored locally, no need to use the API
-    if (await _picStash.getPic(quiz.pictureId) != null) {
-      var picture =
-          await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
-      _picStash.storePic(quiz.pictureId, picture);
-    }
+    // Picture cached
+    if (await _picStash.getPic(quiz.pictureId) != null) return;
+    // Get picture and cache
+    var picture = await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
+    _picStash.storePic(quiz.pictureId, picture);
   }
 }
