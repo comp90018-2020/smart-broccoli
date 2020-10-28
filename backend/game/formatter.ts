@@ -70,19 +70,46 @@ export const formatWelcome = (
 export const formatQuestionOutcome = (
     session: GameSession,
     player: Player,
-    rank: Player[]
+    rankAll: Player[],
+    rankFormated: any[]
 ) => {
-    const { id, record } = player;
+    const { id: playerId, record } = player;
     const playerAheadRecord =
         record.newPos === null || record.newPos === 0
             ? null
-            : rank[record.newPos - 1].formatRecord();
-    // form question outcome
+            : rankAll[record.newPos - 1].formatRecord();
+
     const questionOutcome = {
         question: session.questionIndex,
-        leaderboard: rank.slice(0, 5),
-        record: session.playerMap[Number(id)].formatRecord().record,
+        leaderboard: rankFormated,
+        record: session.playerMap[Number(playerId)].formatRecord().record,
         playerAhead: playerAheadRecord,
     };
     return questionOutcome;
+};
+
+export const rankSlice = (rank: Player[], count?: number) => {
+    if (count === undefined) {
+        count = rank.length;
+    }
+    const top5: any[] = [];
+    rank.slice(0, count).forEach((player) => {
+        const { id, name, pictureId, record } = player;
+        const { oldPos, newPos, bonusPoints, points, streak } = record;
+        top5.push({
+            player: {
+                id: id,
+                name: name,
+                pictureId: pictureId,
+            },
+            record: {
+                oldPos: oldPos,
+                newPos: newPos,
+                bonusPoints: bonusPoints,
+                points: points,
+                streak: streak,
+            },
+        });
+    });
+    return top5;
 };

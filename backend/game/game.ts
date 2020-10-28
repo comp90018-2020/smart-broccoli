@@ -5,6 +5,7 @@ import {
     formatQuestion,
     formatWelcome,
     formatQuestionOutcome,
+    rankSlice,
 } from "./formatter";
 import { Event, Role, GameStatus, Player, Answer, GameType } from "./datatype";
 import { QuizAttributes } from "models/quiz";
@@ -37,8 +38,8 @@ export class GameHandler {
                 title: "Fruits Master",
                 active: true,
                 description: "Test Quiz",
-                type: "self paced",
-                isGroup: true,
+                type: "live",
+                isGroup: false,
                 timeLimit: 20,
                 groupId: 2,
                 pictureId: null,
@@ -436,13 +437,15 @@ export class GameHandler {
     }
 
     async releaseCorrectAnswer(session: GameSession, questoinIndex: number) {
+        const correctAnswer = session.getAnsOfQuestion(questoinIndex);
         for (const player of Object.values(session.playerMap)) {
-            this.emitCorrectAnswer(
-                player,
-                session.getAnsOfQuestion(questoinIndex)
-            );
+            this.emitCorrectAnswer(player, correctAnswer);
         }
-
+        emitToRoom(
+            whichRoom(session, Role.host),
+            Event.correctAnswer,
+            correctAnswer
+        );
         if (session.hasMoreQuestions()) {
             session.setToNextQuestion(questoinIndex + 1);
 
@@ -471,12 +474,12 @@ export class GameHandler {
             if (session.canShowBoard(player)) {
                 //  get ranked records of players
                 const rank = session.rankPlayers();
-
+                const top5 = rankSlice(rank, 5);
                 for (const player of Object.values(session.playerMap)) {
                     emitToOne(
                         player.socketId,
                         Event.questionOutcome,
-                        formatQuestionOutcome(session, player, rank)
+                        formatQuestionOutcome(session, player, rank, top5)
                     );
                 }
                 if (session.isSelfPacedGroup()) {
@@ -501,7 +504,7 @@ export class GameHandler {
                         Event.questionOutcome,
                         {
                             question: session.questionIndex,
-                            leaderboard: rank,
+                            leaderboard: rankSlice(rank),
                         }
                     );
                 }

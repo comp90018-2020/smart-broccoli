@@ -199,7 +199,8 @@ export class GameSession {
 
     isSelfPaced() {
         return (
-            this.type == GameType.SelfPaced_Group || GameType.SelfPaced_NotGroup
+            this.type == GameType.SelfPaced_Group ||
+            this.type === GameType.SelfPaced_NotGroup
         );
     }
     canAnswer(player: Player) {
