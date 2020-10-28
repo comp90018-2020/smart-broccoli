@@ -1,9 +1,10 @@
 import 'package:flutter/widgets.dart';
-import 'package:smart_broccoli/src/models/auth_state.dart';
-import 'package:smart_broccoli/src/models/model_change.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models/auth_state.dart';
+import 'package:smart_broccoli/src/models/model_change.dart';
+import 'package:smart_broccoli/src/remote.dart';
 
 enum SessionState {
   PENDING, // in lobby and waiting (unknown how long to start)
@@ -22,6 +23,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
 
+  SessionApi _sessionApi;
+
   GameSession session;
   Map<int, SocketUser> players = {};
   int startCountDown;
@@ -38,23 +41,33 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
-  GameSessionModel(this._authStateModel) {
+  GameSessionModel(this._authStateModel, {SessionApi sessionApi}) {
+    _sessionApi = sessionApi ?? SessionApi();
     socket = IO.io(SERVER_URL, {
       'autoConnect': false,
       'transports': ['websocket']
     });
   }
 
-  Future<void> refreshSession() {
-    // TODO: implement
+  Future<void> refreshSession() async {
+    GameSession current = await _sessionApi.getSession(_authStateModel.token);
+    if (session == null && current == null) return;
+    session = current;
+    notifyListeners();
   }
 
-  Future<void> createSession(Quiz quiz) {
-    // TODO: implement
+  Future<void> createSession(Quiz quiz, GameSessionType type,
+      {bool autoSubscribe = false}) async {
+    session = await _sessionApi.createSession(
+        _authStateModel.token, quiz.id, type,
+        autoSubscribe: autoSubscribe);
+    notifyListeners();
   }
 
-  Future<void> joinSession(GameSession session) {
-    // TODO: implement
+  Future<void> joinSession(GameSession session) async {
+    session =
+        await _sessionApi.joinSession(_authStateModel.token, session.joinCode);
+    notifyListeners();
   }
 
   /// Connect to socket with headers
