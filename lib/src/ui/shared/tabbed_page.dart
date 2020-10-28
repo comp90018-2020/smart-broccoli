@@ -1,8 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:smart_broccoli/theme.dart';
-
 import 'page.dart';
 
 /// A tabbed page
