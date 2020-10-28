@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 import 'vertical_clip.dart';
 
 /// Widget for Lobby
-class StartQuiz extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => new _StartQuizState();
-}
+class StartQuiz extends StatelessWidget {
+  final int quizId;
 
-class _StartQuizState extends State<StartQuiz> {
-  // Entry function
+  StartQuiz(this.quizId);
+
   @override
   Widget build(BuildContext context) {
     return CustomPage(
@@ -63,7 +62,9 @@ class _StartQuizState extends State<StartQuiz> {
                 children: [
                   Expanded(
                     child: RaisedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        showErrorDialog(context, "Feature coming soon!");
+                      },
                       child: Column(
                         children: [
                           Icon(
