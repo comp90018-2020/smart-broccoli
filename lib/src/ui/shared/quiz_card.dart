@@ -34,9 +34,9 @@ class QuizCard extends StatelessWidget {
         child: InkWell(
           onTap: !optionsEnabled || quiz.role == GroupRole.OWNER
               ? null
-              : () {
+              : () async {
                   if (quiz.type == QuizType.LIVE) {
-                    Provider.of<GameSessionModel>(context, listen: false)
+                    await Provider.of<GameSessionModel>(context, listen: false)
                         .joinLiveSession(quiz);
                     Navigator.of(context).pushNamed("/session/lobby");
                   } else {
