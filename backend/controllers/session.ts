@@ -9,9 +9,10 @@ import sequelize, {
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
+import { handler } from "../game/index";
 
 // Represents a session token
-interface SessionToken {
+export interface TokenInfo {
     scope: string;
     userId: number;
     role: string;
@@ -48,11 +49,11 @@ const signSessionToken = async (info: {
  */
 export const sessionTokenDecrypt = async (token: string) => {
     if (!token) {
-        return false;
+        return null;
     }
 
     // Decrypt the session token
-    const sessionToken: SessionToken = await jwtVerify(
+    const sessionToken: TokenInfo = await jwtVerify(
         token,
         process.env.TOKEN_SECRET
     );
@@ -297,6 +298,10 @@ export const createSession = async (userId: number, opts: any) => {
             userId,
             role: sessionParticipant.role,
         });
+
+        // pass quiz and session to socket
+        handler.addSession(quiz, session.id, session.type, session.isGroup);
+
         return { session, token };
     });
 };

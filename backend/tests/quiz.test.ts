@@ -448,7 +448,8 @@ describe("Quiz", () => {
         await joinGroup(userMember.id, { code: group.code });
 
         // Get all quiz and picture
-        const resAll = await agent.get("/quiz")
+        const resAll = await agent
+            .get("/quiz")
             .set("Authorization", `Bearer ${userMember.token}`);
         expect(resAll.status).to.equal(200);
         expect(resAll.body).to.have.lengthOf(0);
@@ -488,7 +489,8 @@ describe("Quiz", () => {
         await joinGroup(userMember.id, { code: group.code });
 
         // Get all quiz and picture
-        const resAll = await agent.get("/quiz")
+        const resAll = await agent
+            .get("/quiz")
             .set("Authorization", `Bearer ${userMember.token}`);
         expect(resAll.status).to.equal(200);
         expect(resAll.body).to.have.lengthOf(1);
