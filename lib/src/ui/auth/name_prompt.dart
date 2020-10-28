@@ -68,7 +68,6 @@ class _NamePromptState extends State<NamePrompt> {
                             Provider.of<UserProfileModel>(context,
                                 listen: false);
                         await auth.join();
-                        await profile.refreshUser();
                         profile.updateUser(name: _nameController.text);
                       },
                     ),
@@ -91,7 +90,6 @@ class _NamePromptState extends State<NamePrompt> {
                                     Provider.of<UserProfileModel>(context,
                                         listen: false);
                                 await auth.join();
-                                await profile.refreshUser();
                                 profile.updateUser(name: _nameController.text);
                               },
                       ),
