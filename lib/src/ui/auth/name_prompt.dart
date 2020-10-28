@@ -31,72 +31,66 @@ class _NamePromptState extends State<NamePrompt> {
             backgroundColor: Theme.of(context).colorScheme.background,
           )
         ],
-        child: FractionallySizedBox(
-          widthFactor: 0.7,
-          child: Center(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: Form(
-                child: Wrap(
-                  runSpacing: 16,
-                  children: [
-                    Center(
-                      child: Text(
-                        'To get started, enter your name',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onBackground,
-                          fontSize: 16,
-                        ),
-                      ),
+        child: Center(
+          child: FractionallySizedBox(
+            widthFactor: 0.7,
+            child: Wrap(
+              runSpacing: 16,
+              children: [
+                Center(
+                  child: Text(
+                    'To get started, enter your name',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                      fontSize: 16,
                     ),
-
-                    // name field
-                    TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
-                        prefixIcon: Icon(Icons.person),
-                      ),
-                      keyboardType: TextInputType.name,
-                      onChanged: (value) =>
-                          setState(() => _nameEmpty = value.isEmpty),
-                      onSubmitted: (value) async {
-                        if (value.isEmpty) return;
-                        AuthStateModel auth =
-                            Provider.of<AuthStateModel>(context, listen: false);
-                        UserProfileModel profile =
-                            Provider.of<UserProfileModel>(context,
-                                listen: false);
-                        await auth.join();
-                        profile.updateUser(name: _nameController.text);
-                      },
-                    ),
-
-                    // join button
-                    SizedBox(
-                      width: double.infinity,
-                      child: RaisedButton(
-                        child: const Text("JOIN"),
-                        disabledColor: Theme.of(context).disabledColor,
-                        disabledTextColor:
-                            SmartBroccoliColourScheme.disabledButtonTextColor,
-                        onPressed: _nameEmpty
-                            ? null
-                            : () async {
-                                AuthStateModel auth =
-                                    Provider.of<AuthStateModel>(context,
-                                        listen: false);
-                                UserProfileModel profile =
-                                    Provider.of<UserProfileModel>(context,
-                                        listen: false);
-                                await auth.join();
-                                profile.updateUser(name: _nameController.text);
-                              },
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+
+                // name field
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    prefixIcon: Icon(Icons.person),
+                  ),
+                  keyboardType: TextInputType.name,
+                  onChanged: (value) =>
+                      setState(() => _nameEmpty = value.isEmpty),
+                  onSubmitted: (value) async {
+                    if (value.isEmpty) return;
+                    AuthStateModel auth =
+                        Provider.of<AuthStateModel>(context, listen: false);
+                    UserProfileModel profile =
+                        Provider.of<UserProfileModel>(context, listen: false);
+                    await auth.join();
+                    profile.updateUser(name: _nameController.text);
+                  },
+                ),
+
+                // join button
+                SizedBox(
+                  width: double.infinity,
+                  child: RaisedButton(
+                    child: const Text("JOIN"),
+                    disabledColor: Theme.of(context).disabledColor,
+                    disabledTextColor:
+                        SmartBroccoliColourScheme.disabledButtonTextColor,
+                    onPressed: _nameEmpty
+                        ? null
+                        : () async {
+                            AuthStateModel auth = Provider.of<AuthStateModel>(
+                                context,
+                                listen: false);
+                            UserProfileModel profile =
+                                Provider.of<UserProfileModel>(context,
+                                    listen: false);
+                            await auth.join();
+                            profile.updateUser(name: _nameController.text);
+                          },
+                  ),
+                ),
+              ],
             ),
           ),
         ),
