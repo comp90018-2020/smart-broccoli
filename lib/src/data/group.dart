@@ -9,7 +9,7 @@ enum GroupRole { OWNER, MEMBER }
 /// pass the `Group` object to `GroupModel.updateGroup` to synchronise the
 /// change with the server. Do not change other fields.
 class Group {
-  int id;
+  final int id;
   final String name;
   final bool defaultGroup;
   final String code;

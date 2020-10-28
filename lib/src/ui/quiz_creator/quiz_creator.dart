@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
@@ -9,16 +8,9 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:smart_broccoli/src/data/quiz.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
-import 'package:flutter/material.dart';
-
-import 'package:smart_broccoli/theme.dart';
-
 
 import '../../models.dart';
 import 'picture.dart';
-import 'package:smart_broccoli/src/ui/groups/group_create.dart';
 
 class QuizCreate extends StatefulWidget {
   final int groupId;
@@ -31,33 +23,31 @@ class QuizCreate extends StatefulWidget {
 }
 
 class _QuizCreateState extends State<QuizCreate> {
-
   Quiz model;
   final _formKey = GlobalKey<FormState>();
-  var  quizNameController;
+  var quizNameController;
   var timerTextController;
   String selectedGroupTitle;
   bool isDefaultGrpSelected = false;
 
   @override
   void initState() {
-
     //Editing existing quiz
-    if(widget.passedQuiz != null){
+    if (widget.passedQuiz != null) {
       //Cloning a quiz so that the original reference is not mutated if not saved
       Map<String, dynamic> quizJson = widget.passedQuiz.toJson();
       model = Quiz.fromJson(quizJson);
       quizNameController = TextEditingController(text: model.title);
-      timerTextController = TextEditingController(text: model.timeLimit.toString() + " seconds");
+      timerTextController =
+          TextEditingController(text: model.timeLimit.toString() + " seconds");
 
       //Setting bytes for picture
       // if (widget.passedQuiz.pictureId != null){
       //   model.picture = widget.passedQuiz.picture;
       // }
 
-
-    //Creation of a new quiz
-    }else{
+      //Creation of a new quiz
+    } else {
       // TODO: replace with cloned quiz
       model = Quiz("placeholder", 0, QuizType.LIVE);
       quizNameController = TextEditingController();
@@ -67,21 +57,15 @@ class _QuizCreateState extends State<QuizCreate> {
       model.questions = new List<Question>();
     }
 
-
-
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups(withMembers: true);
 
-    try{
-
-    }catch(e, stacktrace){
+    try {} catch (e, stacktrace) {
       print(e);
       print(stacktrace);
     }
@@ -104,12 +88,11 @@ class _QuizCreateState extends State<QuizCreate> {
           icon: Icon(Icons.delete),
           padding: EdgeInsets.zero,
           splashRadius: 20,
-          onPressed:  () async {
-
-            if( await _confirmDeleteQuiz(context) == true){
-              if (model.id != null){
+          onPressed: () async {
+            if (await _confirmDeleteQuiz(context) == true) {
+              if (model.id != null) {
                 _deleteQuiz();
-              }else{
+              } else {
                 Navigator.pop(context);
               }
             }
@@ -118,17 +101,15 @@ class _QuizCreateState extends State<QuizCreate> {
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
           onPressed: () {
-            if (model.id != null){
+            if (model.id != null) {
               _saveQuiz();
-            }
-            else{
+            } else {
               _createQuiz();
             }
           },
           child: Text(
             'Save',
             style: TextStyle(color: Colors.white, fontSize: 16),
-
           ),
         ),
       ],
@@ -164,7 +145,7 @@ class _QuizCreateState extends State<QuizCreate> {
                 ),
 
                 // Picture selection
-                PictureCard(model.picturePath,  (path) {
+                PictureCard(model.picturePath, (path) {
                   setState(() {
                     model.picturePath = path;
                   });
@@ -201,8 +182,7 @@ class _QuizCreateState extends State<QuizCreate> {
                           Consumer<GroupRegistryModel>(
                             builder: (context, registry, child) {
                               return buildGroupList(registry.createdGroups);
-                            }
-                                ,
+                            },
                           )
                         ],
                       ),
@@ -263,8 +243,8 @@ class _QuizCreateState extends State<QuizCreate> {
                   shrinkWrap: true,
                   itemCount: questionsInQuiz(),
                   itemBuilder: (BuildContext context, int index) {
-                    return _questionCard(index, model.questions.elementAt(index), context);
-
+                    return _questionCard(
+                        index, model.questions.elementAt(index), context);
                   },
                 ),
 
@@ -293,43 +273,39 @@ class _QuizCreateState extends State<QuizCreate> {
     );
   }
 
-  int questionsInQuiz(){
-
-    if(model.questions == null){
+  int questionsInQuiz() {
+    if (model.questions == null) {
       return 0;
-    }else if(model.questions.isEmpty){
+    } else if (model.questions.isEmpty) {
       return 0;
-    }else if (model.questions.isNotEmpty){
+    } else if (model.questions.isNotEmpty) {
       return model.questions.length;
     }
+    return 0;
   }
 
-
   createEditQuestion(BuildContext context, {int questionIndex}) async {
-
     fromControllersToModel();
 
     //Clone for quiz questions so that original copy does not get mutated in case changes are not saved
     Map<String, dynamic> quizJson = model.toJson();
     Quiz quizClone = Quiz.fromJson(quizJson);
 
-
     // Navigator returns a Future that completes after calling
     dynamic result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => QuestionCreate(passedQuiz: quizClone, passedQuestionIndex: questionIndex),
+        builder: (context) => QuestionCreate(
+            passedQuiz: quizClone, passedQuestionIndex: questionIndex),
       ),
     );
 
     //Null that is returned if transition is initiated by the back button
-    if(result!= null){
+    if (result != null) {
       setState(() {
         model = result;
       });
-
     }
-
   }
 
   //Transfer recent change to model
@@ -337,81 +313,62 @@ class _QuizCreateState extends State<QuizCreate> {
     model.title = quizNameController.text;
   }
 
-
   // Used to represent questions
   Widget _questionCard(int index, Question question, BuildContext context) {
-
-
-    var questionTextI = index +1;
+    var questionTextI = index + 1;
 
     return GestureDetector(
-      onTap: (){
-        createEditQuestion(context, questionIndex: index);
-
-      },
-      child: Card(
-        margin: EdgeInsets.symmetric(vertical: 4),
-
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.maxFinite,
-              child: AspectRatio(aspectRatio: 2, child:
+        onTap: () {
+          createEditQuestion(context, questionIndex: index);
+        },
+        child: Card(
+          margin: EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Container(
                 width: double.maxFinite,
-                child: question.pictureId == null
-                    ? Icon(Icons.insert_photo_outlined, size: 100)
-                    : Icon(Icons.insert_photo_outlined, size: 100),
+                child: AspectRatio(
+                  aspectRatio: 2,
+                  child: Container(
+                    width: double.maxFinite,
+                    child: question.pictureId == null
+                        ? Icon(Icons.insert_photo_outlined, size: 100)
+                        : Icon(Icons.insert_photo_outlined, size: 100),
+                  ),
+                ),
               ),
-
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Question $questionTextI',
-                      style: Theme.of(context).textTheme.headline6),
-                  Text(question.text)
-                ],
-              ),
-            )
-          ],
-        ),
-      )
-    );
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Question $questionTextI',
+                        style: Theme.of(context).textTheme.headline6),
+                    Text(question.text)
+                  ],
+                ),
+              )
+            ],
+          ),
+        ));
   }
 
-  setPictureForCard (Question question){
-
-    if (question.pictureId == null){
-
-    }
-
+  setPictureForCard(Question question) {
+    if (question.pictureId == null) {}
   }
-
 
   Widget buildGroupList(List<Group> groups) {
     //Seeting up initial value of the group
-    if(isDefaultGrpSelected == false) {
-
-      if(widget.passedQuiz == null && widget.groupId == null){
+    if (isDefaultGrpSelected == false) {
+      if (widget.passedQuiz == null && widget.groupId == null) {
         model.groupId = groups[0].id;
-      }
-
-      else if(widget.passedQuiz == null && widget.groupId != null){
+      } else if (widget.passedQuiz == null && widget.groupId != null) {
         model.groupId = widget.groupId;
-
-      }
-
-      else if(widget.passedQuiz != null){
+      } else if (widget.passedQuiz != null) {
         model.groupId = widget.passedQuiz.groupId;
-
       }
-
 
       for (var group in groups) {
         if (model.groupId == group.id) {
@@ -420,35 +377,32 @@ class _QuizCreateState extends State<QuizCreate> {
       }
 
       isDefaultGrpSelected = true;
-
     }
 
-    return
-      Expanded(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: DropdownButton(
-
-              isExpanded: true,
-              value: selectedGroupTitle,
-              items: groups.map((group) {
-                    return DropdownMenuItem<String>(
-                    value: group.name,
-                    child: Text(group.name),
-                    );
-                    }).toList(),
-              onChanged: (String groupName) {
-                setState(() {
-                  selectedGroupTitle = groupName;
-                  for (var i = 0; i < groups.length; i++) {
-                    if (groupName == groups[i].name){
-                      model.groupId = groups[i].id;
-                    }
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: DropdownButton(
+            isExpanded: true,
+            value: selectedGroupTitle,
+            items: groups.map((group) {
+              return DropdownMenuItem<String>(
+                value: group.name,
+                child: Text(group.name),
+              );
+            }).toList(),
+            onChanged: (String groupName) {
+              setState(() {
+                selectedGroupTitle = groupName;
+                for (var i = 0; i < groups.length; i++) {
+                  if (groupName == groups[i].name) {
+                    model.groupId = groups[i].id;
                   }
-                });
-              }),
-        ),
-      );
+                }
+              });
+            }),
+      ),
+    );
   }
 
   void _createQuiz() async {
@@ -457,7 +411,8 @@ class _QuizCreateState extends State<QuizCreate> {
     if (quizNameController.text == "")
       return _showUnsuccessful("Cannot create quiz", "Name required");
     try {
-      await Provider.of<QuizCollectionModel>(context, listen: false).createQuiz(model);
+      await Provider.of<QuizCollectionModel>(context, listen: false)
+          .createQuiz(model);
       Navigator.of(context).pop();
     } catch (e) {
       print(e);
@@ -465,19 +420,18 @@ class _QuizCreateState extends State<QuizCreate> {
     }
   }
 
-
-  void _saveQuiz() async{
+  void _saveQuiz() async {
     fromControllersToModel();
     if (quizNameController.text == "")
       return _showUnsuccessful("Cannot create quiz", "Name required");
     try {
-      await Provider.of<QuizCollectionModel>(context, listen: false).updateQuiz(model);
+      await Provider.of<QuizCollectionModel>(context, listen: false)
+          .updateQuiz(model);
       Navigator.of(context).pop();
     } catch (e) {
       print(e);
       _showUnsuccessful("Cannot save changes in the quiz", e);
     }
-
   }
 
   void _showUnsuccessful(String title, String body) {
@@ -515,7 +469,8 @@ class _QuizCreateState extends State<QuizCreate> {
 
   void _deleteQuiz() async {
     try {
-      await Provider.of<QuizCollectionModel>(context, listen: false).deleteQuiz(model);
+      await Provider.of<QuizCollectionModel>(context, listen: false)
+          .deleteQuiz(model);
       Navigator.of(context).pop();
     } catch (e) {
       print(e);
@@ -543,5 +498,4 @@ class _QuizCreateState extends State<QuizCreate> {
       barrierDismissible: false,
     );
   }
-
 }

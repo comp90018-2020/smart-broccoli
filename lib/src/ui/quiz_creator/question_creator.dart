@@ -6,7 +6,6 @@ import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:flutter/foundation.dart';
 
-
 import 'picture.dart';
 
 /// Arguments passed to question create page
@@ -15,30 +14,28 @@ class QuestionArgs {
   final Question question;
 
   QuestionArgs(this.questionNumber, this.question);
-
 }
 
 /// Question create page
 class QuestionCreate extends StatefulWidget {
-
   final Quiz passedQuiz;
   final int passedQuestionIndex;
 
-  QuestionCreate( {Key key, @required this.passedQuiz, this.passedQuestionIndex}) : super(key: key);
+  QuestionCreate({Key key, @required this.passedQuiz, this.passedQuestionIndex})
+      : super(key: key);
 
   @override
   _QuestionCreateState createState() => _QuestionCreateState();
 }
 
 class _QuestionCreateState extends State<QuestionCreate> {
-
   MCQuestion question;
   var questionTextController;
   List<TextEditingController> _optionTextControllers;
   int questionNumber;
   String tempImgId;
 
-  void printPassedQ(){
+  void printPassedQ() {
     print("Checking status of widget");
     print(widget.passedQuiz);
   }
@@ -49,30 +46,25 @@ class _QuestionCreateState extends State<QuestionCreate> {
     // TODO: implement initState
     super.initState();
     //Case of editing a question
-    if(widget.passedQuestionIndex != null){
+    if (widget.passedQuestionIndex != null) {
       questionNumber = widget.passedQuestionIndex + 1;
       question = widget.passedQuiz.questions[widget.passedQuestionIndex];
-      questionTextController  = TextEditingController(text: question.text);
+      questionTextController = TextEditingController(text: question.text);
       _optionTextControllers = <TextEditingController>[];
 
       for (var i = 0; i < question.options.length; i++) {
-
-         _optionTextControllers.add(TextEditingController(text: question.options[i].text));
+        _optionTextControllers
+            .add(TextEditingController(text: question.options[i].text));
       }
-
-
       //Case od creating a new question
-     }else{
+    } else {
       print("here");
       questionNumber = widget.passedQuiz.questions.length;
       question = MCQuestion('Text', [], pictureId: null);
-      questionTextController  = TextEditingController();
+      questionTextController = TextEditingController();
       _optionTextControllers = <TextEditingController>[];
     }
-
   }
-
-
 
   @override
   void dispose() {
@@ -101,14 +93,11 @@ class _QuestionCreateState extends State<QuestionCreate> {
           padding: EdgeInsets.zero,
           splashRadius: 20,
           onPressed: () {
-
-            if(widget.passedQuestionIndex == null){
-
-            }else{
-              widget.passedQuiz.questions.removeAt( widget.passedQuestionIndex);
+            if (widget.passedQuestionIndex == null) {
+            } else {
+              widget.passedQuiz.questions.removeAt(widget.passedQuestionIndex);
             }
             Navigator.pop(context, widget.passedQuiz);
-
           },
         ),
         CupertinoButton(
@@ -116,11 +105,13 @@ class _QuestionCreateState extends State<QuestionCreate> {
           onPressed: () {
             print(widget.passedQuiz);
 
-            if (questionTextController.text == ""){
-              return _showUnsuccessful("Cannot create question", "Question text required");
+            if (questionTextController.text == "") {
+              return _showUnsuccessful(
+                  "Cannot create question", "Question text required");
             }
-            if (question.options.length < 2){
-              return _showUnsuccessful("Cannot create question", "At least two possible answers are required");
+            if (question.options.length < 2) {
+              return _showUnsuccessful("Cannot create question",
+                  "At least two possible answers are required");
             }
 
             question.text = questionTextController.text;
@@ -129,10 +120,11 @@ class _QuestionCreateState extends State<QuestionCreate> {
               question.options[i].text = _optionTextControllers[i].text;
             }
 
-            if(widget.passedQuestionIndex == null){
+            if (widget.passedQuestionIndex == null) {
               widget.passedQuiz.questions.add(question);
-            }else{
-              widget.passedQuiz.questions[widget.passedQuestionIndex] = question;
+            } else {
+              widget.passedQuiz.questions[widget.passedQuestionIndex] =
+                  question;
             }
             Navigator.pop(context, widget.passedQuiz);
           },
@@ -176,7 +168,6 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
                 // Question image
                 PictureCard(null, (path) {
-
                   print(question.pictureId);
                   /*setState(() {
                     question.pictureId = path;

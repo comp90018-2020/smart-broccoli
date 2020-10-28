@@ -1,12 +1,8 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/theme.dart';
-
 import '../../data.dart';
-import '../../models.dart';
 
 /// Widget for pictures
 ///
@@ -20,8 +16,6 @@ class PictureCard extends StatefulWidget {
   /// Callback for upload
   final void Function(String) updatePicture;
 
-
-
   PictureCard(this.picturePath, this.updatePicture, {this.quiz});
 
   @override
@@ -34,7 +28,6 @@ class _PictureCardState extends State<PictureCard> {
 
   @override
   void initState() {
-
     super.initState();
   }
 
@@ -48,9 +41,8 @@ class _PictureCardState extends State<PictureCard> {
           children: <Widget>[
             // Picture
             Container(
-              width: double.maxFinite,
-              child: assemblePicture(widget.quiz, widget.picturePath)
-            ),
+                width: double.maxFinite,
+                child: assemblePicture(widget.quiz, widget.picturePath)),
 
             // Update picture (top right)
             Positioned(
@@ -77,14 +69,13 @@ class _PictureCardState extends State<PictureCard> {
     );
   }
 
-   assemblePicture(Quiz quiz, String picturePath ){
+  assemblePicture(Quiz quiz, String picturePath) {
     if (quiz.picturePath != null) {
       return Image.file(File(widget.picturePath), fit: BoxFit.cover);
-    }
-    else if(quiz.pictureId != null){
+    } else if (quiz.pictureId != null) {
       return Icon(Icons.insert_photo_outlined, size: 100);
       //  return Image.memory(quiz.picture, fit: BoxFit.cover);
-    }else{
+    } else {
       return Icon(Icons.insert_photo_outlined, size: 100);
     }
   }

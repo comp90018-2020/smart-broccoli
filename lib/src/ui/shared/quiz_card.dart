@@ -275,14 +275,14 @@ class _QuizCardState extends State<QuizCard> {
 
   editQuiz(BuildContext context, Quiz quiz) async {
     // Navigator returns a Future that completes after calling
-    dynamic result = await Navigator.push(
+    Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => QuizCreate(passedQuiz: quiz, groupId: widget.quiz.groupId),
+        builder: (context) =>
+            QuizCreate(passedQuiz: quiz, groupId: widget.quiz.groupId),
       ),
     );
   }
-
 
   Future<bool> _confirmActivateLiveQuiz() async {
     return showDialog(

@@ -6,7 +6,6 @@ import 'package:smart_broccoli/src/remote.dart';
 import 'model_change.dart';
 import 'auth_state.dart';
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -104,21 +103,17 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   Future<void> createQuiz(Quiz quiz) async {
-    var returnedQuiz =  await _quizApi.createQuiz(_authStateModel.token, quiz);
+    var returnedQuiz = await _quizApi.createQuiz(_authStateModel.token, quiz);
 
     Uint8List imageDataUint;
-    if(quiz.picturePath != null){
+    if (quiz.picturePath != null) {
       var rootBundleData = await rootBundle.load(quiz.picturePath);
 
       imageDataUint = rootBundleData.buffer.asUint8List();
-      await _quizApi.setQuizPicture(_authStateModel.token, returnedQuiz, imageDataUint);
+      await _quizApi.setQuizPicture(
+          _authStateModel.token, returnedQuiz, imageDataUint);
       // await getQuizPicture(returnedQuiz);
     }
-
-/*
-    _quizApi.setQuestionPicture(token, quizId, questionId, bytes)
-*/
-
     notifyListeners();
   }
 
@@ -214,11 +209,4 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       _createdQuizzes = {};
     }
   }
-
-
-
-
-
-
-
 }

@@ -6,8 +6,6 @@ import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/theme.dart';
 
-
-
 /// Manage quiz page
 class ManageQuiz extends StatefulWidget {
   @override
@@ -67,12 +65,11 @@ class _ManageQuizState extends State<ManageQuiz> {
       secondaryBackgroundColour: true,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          if(_groupId == null){
+          if (_groupId == null) {
             Navigator.of(context).pushNamed('/quiz');
-          }else{
+          } else {
             Navigator.of(context).pushNamed('/group/$_groupId/quiz');
           }
-
         },
         label: Text('CREATE QUIZ'),
         icon: Icon(Icons.add),
