@@ -15,11 +15,11 @@ void main() async {
   // Local storage
   final KeyValueStore keyValueStore = await SharedPrefsKeyValueStore.create();
   final PictureStash picStash = await PictureStash.create();
-  final UserRepository userRepo = UserRepository(picStash);
 
   final AuthStateModel authStateModel = AuthStateModel(keyValueStore, pubSub);
+  final UserRepository userRepo = UserRepository(picStash);
   final UserProfileModel userProfileModel =
-      UserProfileModel(keyValueStore, authStateModel, picStash);
+      UserProfileModel(keyValueStore, authStateModel, userRepo, picStash);
   final QuizCollectionModel quizCollectionModel =
       QuizCollectionModel(authStateModel, picStash);
   final GroupRegistryModel groupRegistryModel =
@@ -28,10 +28,22 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        Provider(create: (_) => authStateModel),
-        ChangeNotifierProvider(create: (_) => userProfileModel),
-        ChangeNotifierProvider(create: (_) => groupRegistryModel),
-        ChangeNotifierProvider(create: (_) => quizCollectionModel)
+        ChangeNotifierProvider(
+            create: (_) => AuthStateModel(keyValueStore, pubSub)),
+        ChangeNotifierProxyProvider<AuthStateModel, UserProfileModel>(
+          create: (_) => userProfileModel,
+          update: (_, authModel, userModel) => userModel..authUpdated(),
+        ),
+        ChangeNotifierProxyProvider<AuthStateModel, QuizCollectionModel>(
+          create: (_) => quizCollectionModel,
+          update: (_, authModel, quizCollectionModel) =>
+              quizCollectionModel..authUpdated(),
+        ),
+        ChangeNotifierProxyProvider<AuthStateModel, GroupRegistryModel>(
+          create: (_) => groupRegistryModel,
+          update: (_, authModel, groupRegistryModel) =>
+              groupRegistryModel..authUpdated(),
+        ),
       ],
       child: MyApp(pubSub),
     ),
