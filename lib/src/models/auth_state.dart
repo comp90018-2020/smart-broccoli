@@ -9,9 +9,6 @@ class AuthStateModel extends ChangeNotifier {
   /// Object implementing the KeyValueStore interface for local caching
   final KeyValueStore _keyValueStore;
 
-  /// Publish subscribe
-  final PubSubBase _pubSubBase;
-
   /// Token used for the authorization header where required
   String _token;
   String get token {
@@ -29,7 +26,7 @@ class AuthStateModel extends ChangeNotifier {
   bool get inSession => _token != null;
 
   /// Constructor for external use
-  AuthStateModel(this._keyValueStore, this._pubSubBase, {AuthApi authApi}) {
+  AuthStateModel(this._keyValueStore, {AuthApi authApi}) {
     print("Auth: ${this.hashCode}");
     _token = _keyValueStore.getString('token');
     _authApi = authApi ?? AuthApi();
@@ -68,7 +65,6 @@ class AuthStateModel extends ChangeNotifier {
     await _authApi.logout(_token);
     _token = null;
     await _keyValueStore.clear();
-    _pubSubBase.publish(PubSubTopics.reset);
     notifyListeners();
   }
 }

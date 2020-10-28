@@ -16,7 +16,7 @@ void main() async {
   final KeyValueStore keyValueStore = await SharedPrefsKeyValueStore.create();
   final PictureStash picStash = await PictureStash.create();
 
-  final AuthStateModel authStateModel = AuthStateModel(keyValueStore, pubSub);
+  final AuthStateModel authStateModel = AuthStateModel(keyValueStore);
   final UserRepository userRepo = UserRepository(picStash);
   final UserProfileModel userProfileModel =
       UserProfileModel(keyValueStore, authStateModel, userRepo, picStash);
@@ -62,17 +62,19 @@ class MyApp extends StatefulWidget {
 
 /// Main entrance class
 class _MyAppState extends State<MyApp> {
+  /// Initialise
+  _MyAppState() : router = BroccoliRouter().router;
+
   /// Router
   final FluroRouter router;
 
-  /// Initialise router
-  _MyAppState() : router = BroccoliRouter().router;
+  // Stores previous state about whether user's authenticated
+  bool inSession;
 
   @override
   void initState() {
     super.initState();
     widget.pubSub.subscribe(PubSubTopics.route, navigate);
-    widget.pubSub.subscribe(PubSubTopics.reset, reset);
   }
 
   // Key for navigator
@@ -91,14 +93,20 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  /// Navigation on reset
-  void reset() {
-    _mainNavigatorKey.currentState
-        .pushNamedAndRemoveUntil("/auth", (route) => false);
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Get AuthStateModel
+    AuthStateModel state = Provider.of<AuthStateModel>(context, listen: true);
+
+    // On change of inSession
+    if (inSession != state.inSession) {
+      // Push route if app is initialised
+      if (inSession != null)
+        _mainNavigatorKey.currentState.pushNamedAndRemoveUntil(
+            state.inSession ? '/group/home' : '/auth', (route) => false);
+      inSession = state.inSession;
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Smart Broccoli',

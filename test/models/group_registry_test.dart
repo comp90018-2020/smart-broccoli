@@ -5,7 +5,6 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/remote.dart';
-import 'package:smart_broccoli/src/base.dart';
 
 class MockGroupApi extends Mock implements GroupApi {}
 
@@ -13,15 +12,12 @@ class MockQuizApi extends Mock implements QuizApi {}
 
 class MockPicStash extends Mock implements PictureStash {}
 
-class MockPubSub extends Mock implements PubSubBase {}
-
 main() async {
   test('Refresh groups', () async {
     final GroupApi api = MockGroupApi();
     final PictureStash ps = MockPicStash();
-    final PubSubBase pb = MockPubSub();
     final KeyValueStore kv = MainMemKeyValueStore(init: {"token": "abc"});
-    final AuthStateModel am = AuthStateModel(kv, pb);
+    final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(ps, groupApi: api);
     final QuizCollectionModel qcm = QuizCollectionModel(am, ps);
     final GroupRegistryModel model =
@@ -72,8 +68,7 @@ main() async {
     final GroupApi api = MockGroupApi();
     final PictureStash ps = MockPicStash();
     final KeyValueStore kv = MainMemKeyValueStore(init: {"token": "abc"});
-    final PubSubBase pb = MockPubSub();
-    final AuthStateModel am = AuthStateModel(kv, pb);
+    final AuthStateModel am = AuthStateModel(kv);
     final UserRepository repo = UserRepository(ps, groupApi: api);
     final QuizCollectionModel qcm = QuizCollectionModel(am, ps);
     final GroupRegistryModel model =
