@@ -16,8 +16,7 @@ class User {
   User._internal(this.type, this.id, this.pictureId, this.email, this._name,
       this.groupRole);
 
-  factory User.fromJson(Map<String, dynamic> json, {String picture}) =>
-      User._internal(
+  factory User.fromJson(Map<String, dynamic> json) => User._internal(
         json['role'] == 'user'
             ? UserType.REGISTERED
             : json['role'] == 'participant'
