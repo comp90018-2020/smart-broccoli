@@ -28,8 +28,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-            create: (_) => AuthStateModel(keyValueStore, pubSub)),
+        ChangeNotifierProvider(create: (_) => authStateModel),
         ChangeNotifierProxyProvider<AuthStateModel, UserProfileModel>(
           create: (_) => userProfileModel,
           update: (_, authModel, userModel) => userModel..authUpdated(),

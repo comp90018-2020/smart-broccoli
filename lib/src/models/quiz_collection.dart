@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
@@ -130,7 +129,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   Future<void> refreshAvailableQuizzes() async {
-    print(_authStateModel.token);
     if (!_authStateModel.inSession) return;
     _availableQuizzes = Map.fromIterable(
         (await _quizApi.getQuizzes(_authStateModel.token))

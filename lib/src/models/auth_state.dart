@@ -30,6 +30,7 @@ class AuthStateModel extends ChangeNotifier {
 
   /// Constructor for external use
   AuthStateModel(this._keyValueStore, this._pubSubBase, {AuthApi authApi}) {
+    print("Auth: ${this.hashCode}");
     _token = _keyValueStore.getString('token');
     _authApi = authApi ?? AuthApi();
   }
