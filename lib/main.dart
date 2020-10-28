@@ -62,9 +62,6 @@ class MyApp extends StatefulWidget {
 
 /// Main entrance class
 class _MyAppState extends State<MyApp> {
-  /// Initialise
-  _MyAppState() : router = BroccoliRouter().router;
-
   /// Router
   final FluroRouter router;
 
@@ -75,6 +72,9 @@ class _MyAppState extends State<MyApp> {
   // Stores previous state about whether user's authenticated
   bool inSession;
 
+  /// Constructor
+  _MyAppState() : router = BroccoliRouter().router;
+
   @override
   void initState() {
     super.initState();
@@ -83,7 +83,7 @@ class _MyAppState extends State<MyApp> {
 
   /// Navigate to route
   void navigate(RouteArgs routeArgs) {
-    if (routeArgs.replace) {
+    if (routeArgs.popAll) {
       _mainNavigatorKey.currentState
           .pushNamedAndRemoveUntil(routeArgs.routeName, (route) => false);
     } else if (routeArgs.replace) {
