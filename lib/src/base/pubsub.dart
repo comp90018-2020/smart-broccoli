@@ -37,8 +37,6 @@ class PubSub extends PubSubBase {
     if (!_channels.containsKey(topic)) return;
 
     // Call functions
-    for (Function func in _channels[topic]) {
-      func(arg);
-    }
+    _channels[topic].forEach((Function func) => func(arg));
   }
 }
