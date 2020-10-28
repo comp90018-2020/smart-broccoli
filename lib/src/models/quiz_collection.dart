@@ -60,13 +60,19 @@ class QuizCollectionModel extends ChangeNotifier {
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
-    try {
-      _selectedQuiz.picture =
-          await _quizApi.getQuizPicture(_authStateModel.token, id);
-    } catch (_) {
-      // cannot obtain picture; move on
-    }
+    _refreshQuizPicture(_selectedQuiz);
     notifyListeners();
+  }
+
+  Quiz getQuiz(int id) {
+    return _createdQuizzes[id] ?? _availableQuizzes[id];
+  }
+
+  /// Gets the specified quiz's picture.
+  Future<String> getQuizPicture(int id) {
+    Quiz quiz = getQuiz(id);
+    if (quiz == null || quiz.pictureId == null) return null;
+    return _picStash.getPic(quiz.pictureId);
   }
 
   /// Activate a self-paced quiz
@@ -127,12 +133,7 @@ class QuizCollectionModel extends ChangeNotifier {
             .where((quiz) => quiz.role == GroupRole.MEMBER),
         key: (quiz) => quiz.id);
     await Future.wait(_availableQuizzes.values.map((Quiz quiz) async {
-      try {
-        quiz.picture =
-            await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
-      } catch (_) {
-        // cannot obtain picture; move on
-      }
+      await _refreshQuizPicture(quiz);
     }));
     notifyListeners();
   }
@@ -143,12 +144,7 @@ class QuizCollectionModel extends ChangeNotifier {
             .where((quiz) => quiz.role == GroupRole.OWNER),
         key: (quiz) => quiz.id);
     await Future.wait(_createdQuizzes.values.map((Quiz quiz) async {
-      try {
-        quiz.picture =
-            await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
-      } catch (_) {
-        // cannot obtain picture; move on
-      }
+      await _refreshQuizPicture(quiz);
     }));
     notifyListeners();
   }
@@ -162,19 +158,18 @@ class QuizCollectionModel extends ChangeNotifier {
         _createdQuizzes[quiz.id] = quiz;
       else
         _availableQuizzes[quiz.id] = quiz;
-      await getQuizPicture(quiz);
+      await _refreshQuizPicture(quiz);
     }));
   }
 
   /// Load the picture of a quiz into the `picture` field of a [quiz].
-  Future<void> getQuizPicture(Quiz quiz) async {
+  Future<void> _refreshQuizPicture(Quiz quiz) async {
+    // No picture
     if (quiz.pictureId == null) return;
-    // if stored locally, no need to use the API
-    if ((quiz.picture = await _picStash.getPic(quiz.pictureId)) != null) return;
-    // otherwise, fetch via the API
-    quiz.picture =
-        await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
-    // save it for next time
-    _picStash.storePic(quiz.pictureId, quiz.picture);
+    // Picture cached
+    if (await _picStash.getPic(quiz.pictureId) != null) return;
+    // Get picture and cache
+    var picture = await _quizApi.getQuizPicture(_authStateModel.token, quiz.id);
+    _picStash.storePic(quiz.pictureId, picture);
   }
 }

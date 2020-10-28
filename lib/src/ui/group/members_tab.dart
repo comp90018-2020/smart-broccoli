@@ -21,9 +21,16 @@ class MembersTab extends StatelessWidget {
               itemCount: group.members.length,
               itemBuilder: (BuildContext context, int index) => ListTile(
                 // Avatar
-                leading: group.members[index].picture == null
-                    ? UserAvatar.placeholder()
-                    : UserAvatar(group.members[index].picture),
+                leading: FutureBuilder(
+                    future:
+                        registry.getGroupMemberPicture(group.members[index].id),
+                    builder:
+                        (BuildContext context, AsyncSnapshot<String> snapshot) {
+                      if (!snapshot.hasData || snapshot.data == null) {
+                        return UserAvatar.placeholder();
+                      }
+                      return UserAvatar(snapshot.data);
+                    }),
                 // Name
                 title: Text(group.members[index].name),
                 // Remove

@@ -46,6 +46,11 @@ class GroupRegistryModel extends ChangeNotifier {
     return _joinedGroups[id] ?? _createdGroups[id];
   }
 
+  /// Gets a group member's picture.
+  Future<String> getGroupMemberPicture(int id) {
+    return _userRepo.getUserPicture(id);
+  }
+
   /// Refresh the code to join a group (ask server for new one).
   Future<void> refreshGroupCode(Group group) async {
     await _groupApi.refreshCode(_authStateModel.token, group.id);

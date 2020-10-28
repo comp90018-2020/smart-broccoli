@@ -1,4 +1,6 @@
 // Profile
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -43,26 +45,33 @@ class _ProfilePictureState extends State<ProfilePicture> {
                     _showPicker(context);
                   }
                 : null,
-            child: Consumer<UserProfileModel>(
-              builder: (context, profile, child) => CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.black12,
-                child: profile.user.picture != null
-                    ? ClipOval(
-                        child: Image.memory(
-                          profile.user.picture,
-                          fit: BoxFit.cover,
-                          width: 100.0,
-                          height: 100.0,
-                        ),
-                      )
-                    : Container(
+            child: CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.black12,
+              child: Consumer<UserProfileModel>(
+                builder: (context, profile, child) => FutureBuilder(
+                  future:
+                      Provider.of<UserProfileModel>(context).getUserPicture(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String> snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null)
+                      return Container(
                         child: Icon(
                           Icons.camera_alt,
                           size: 35,
                           color: Colors.black12,
                         ),
+                      );
+                    return ClipOval(
+                      child: Image.file(
+                        File(snapshot.data),
+                        fit: BoxFit.cover,
+                        width: 100.0,
+                        height: 100.0,
                       ),
+                    );
+                  },
+                ),
               ),
             ),
           ),
