@@ -37,9 +37,9 @@ class BroccoliRouter {
   static const String sessionLobby = "/session/lobby";
   static const String sessionQuestion = "/session/question";
   static const String sessionLeaderboard = "/session/leaderboard";
-  static const String sessionStart = "/session/start";
 
   // Group
+  static const String sessionStart = "/session/start/quiz/:id";
   static const String group = "/group/:id";
   static const String groupHome = "/group/home";
   static const String groupCreate = "/group/create";
@@ -161,7 +161,7 @@ class BroccoliRouter {
     // Session start
     router.define(sessionStart, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
-      return StartQuiz();
+      return StartQuiz(int.parse(params["id"][0]));
     }));
 
     // Profile

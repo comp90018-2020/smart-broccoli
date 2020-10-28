@@ -63,7 +63,7 @@ class StartQuiz extends StatelessWidget {
                   Expanded(
                     child: RaisedButton(
                       onPressed: () {
-                        showErrorDialog(context, "Feature coming soon!");
+                        showBasicDialog(context, "Feature coming soon!");
                       },
                       child: Column(
                         children: [

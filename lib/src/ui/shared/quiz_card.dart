@@ -40,7 +40,8 @@ class QuizCard extends StatelessWidget {
                         .joinLiveSession(quiz);
                     Navigator.of(context).pushNamed("/session/lobby");
                   } else {
-                    Navigator.of(context).pushNamed("/session/start");
+                    Navigator.of(context)
+                        .pushNamed("/session/start/quiz/${quiz.id}");
                   }
                 },
           child: alwaysShowPicture
