@@ -25,6 +25,13 @@ class _ProfileMainState extends State<ProfileMain> {
   bool _isEdit = false;
 
   @override
+  void initState() {
+    super.initState();
+    Provider.of<UserProfileModel>(context, listen: false)
+        .getUser(forceRefresh: true);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CustomPage(
       title: "Profile",
@@ -68,22 +75,20 @@ class _ProfileMainState extends State<ProfileMain> {
 
       // Render appropriate page
       child: SingleChildScrollView(
-          child: Consumer<UserProfileModel>(
-        builder: (context, profile, child) => FutureBuilder(
-            future: Provider.of<UserProfileModel>(context)
-                .getUser(forceRefresh: true),
-            builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-              if (!snapshot.hasData)
-                return Column(children: [
-                  // Placeholder profile picture
-                  ProfilePicture(false),
-                ]);
+        child: Consumer<UserProfileModel>(
+          builder: (context, profile, child) {
+            if (profile.user == null)
+              // Placeholder profile picture
+              return Column(children: [
+                ProfilePicture(false),
+              ]);
 
-              return snapshot.data.type == UserType.UNREGISTERED
-                  ? ProfileJoined(snapshot.data, _isEdit, key: key)
-                  : ProfileRegistered(snapshot.data, _isEdit, key: key);
-            }),
-      )),
+            return profile.user.type == UserType.UNREGISTERED
+                ? ProfileJoined(profile.user, _isEdit, key: key)
+                : ProfileRegistered(profile.user, _isEdit, key: key);
+          },
+        ),
+      ),
     );
   }
 
