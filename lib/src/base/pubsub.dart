@@ -5,7 +5,7 @@ enum PubSubTopic { ROUTE }
 abstract class PubSubBase {
   void subscribe(PubSubTopic topic, Function(dynamic) callback);
   void unsubscribe(PubSubTopic topic, Function(dynamic) callback);
-  void publish(PubSubTopic topic, dynamic arg);
+  void publish(PubSubTopic topic, {dynamic arg});
 }
 
 /// Publish/subscribe
@@ -32,7 +32,7 @@ class PubSub extends PubSubBase {
   }
 
   /// Publish topic
-  void publish(PubSubTopic topic, dynamic arg) {
+  void publish(PubSubTopic topic, {dynamic arg}) {
     // No subscribers
     if (!_channels.containsKey(topic)) return;
 
