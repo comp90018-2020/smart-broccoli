@@ -71,7 +71,7 @@ class BroccoliRouter {
     }));
 
     // Join (set name)
-    router.define(auth, handler: Handler(
+    router.define(join, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return NamePrompt();
     }));
