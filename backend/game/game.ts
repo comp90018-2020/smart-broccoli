@@ -6,15 +6,7 @@ import {
     formatWelcome,
     formatQuestionOutcome,
 } from "./formatter";
-import {
-    Event,
-    Role,
-    Res,
-    GameStatus,
-    Player,
-    Answer,
-    GameType,
-} from "./datatype";
+import { Event, Role, GameStatus, Player, Answer, GameType } from "./datatype";
 import { QuizAttributes } from "models/quiz";
 import { _socketIO } from "./index";
 
@@ -206,14 +198,14 @@ export class GameHandler {
             // add user to session
             if (player.role === Role.host) {
                 this.disconnectPast(session, session.host, player);
-                session.setHost(player);
+                session.hostJoin(player);
             } else {
                 this.disconnectPast(
                     session,
                     session.getPlayer(player.id),
                     player
                 );
-                session.setPlayer(player);
+                session.playerJoin(player);
             }
 
             // emit welcome event
@@ -310,6 +302,7 @@ export class GameHandler {
                 Event.playerLeave,
                 player.profile()
             );
+            session.playerLeave(player);
             // disconnect
             socket.disconnect();
         } catch (error) {
@@ -357,7 +350,7 @@ export class GameHandler {
             if (session.canAbort(player)) {
                 // Broadcast that quiz has been aborted
                 emitToRoom(whichRoom(session, Role.all), Event.cancelled, null);
-                // end this session
+                // end a session
                 this.endSession(session);
                 // reset a sample session if is debug mode
                 this.checkEnv();
@@ -368,6 +361,7 @@ export class GameHandler {
     }
 
     endSession(session: GameSession) {
+        session.endSession();
         if (
             _socketIO !== undefined &&
             _socketIO.sockets.adapter.rooms.hasOwnProperty(

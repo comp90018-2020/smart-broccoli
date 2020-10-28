@@ -1,9 +1,18 @@
 import { PointSystem } from "./points";
-import { Res, GameStatus, GameType, Player, Answer, Role } from "./datatype";
+import {
+    GameStatus,
+    GameType,
+    Player,
+    PlayerState,
+    Answer,
+    Role,
+} from "./datatype";
 import { QuizAttributes } from "../models/quiz";
-import { Session } from "models";
-import game from "game";
-import { stat } from "fs";
+import {
+    leaveSession,
+    activateSession,
+    endSession as endSessionInController,
+} from "../controllers/session";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 
@@ -24,6 +33,7 @@ export class GameSession {
     public preQuestionReleasedAt = 0;
     public _isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
+    private activePlayersNum: number = 0;
 
     constructor(
         $quiz: QuizAttributes,
@@ -52,11 +62,13 @@ export class GameSession {
     hasUser(player: Player) {
         return this.playerMap.hasOwnProperty(player.id);
     }
-    setHost(player: Player) {
+
+    hostJoin(player: Player) {
         this.host = player;
     }
-    setPlayer(player: Player) {
+    playerJoin(player: Player) {
         this.playerMap[player.id] = player;
+        this.setPlayerState(player, PlayerState.Joined);
     }
 
     getPlayer(playerId: number) {
@@ -96,6 +108,25 @@ export class GameSession {
         return this.questionIndex < this.quiz.questions.length - 1;
     }
 
+    playerLeave(player: Player) {
+        try {
+            leaveSession(player.sessionId, player.id);
+            this.setPlayerState(player, PlayerState.Left);
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
+
+    setPlayerState(player: Player, state: PlayerState) {
+        if (state == PlayerState.Joined) {
+            this.activePlayersNum += 1;
+        } else if (state == PlayerState.Left) {
+            this.activePlayersNum -= 1;
+        }
+        this.playerMap[player.id].state = state;
+    }
+
     canAbort(player: Player) {
         return (
             this.type === GameType.SelfPaced_Group ||
@@ -107,8 +138,36 @@ export class GameSession {
         if (status == GameStatus.Starting) {
             this.status = GameStatus.Starting;
             this.quizStartsAt = Date.now() + WAIT_TIME_BEFORE_START;
+            try {
+                activateSession(this.id);
+
+            } catch (error) {
+                console.log(error);
+            }
         } else if (status == GameStatus.Running) {
             this.status = GameStatus.Running;
+        }
+    }
+    endSession() {
+        const progress: { userId: number; data: any; state?: string }[] = [];
+        const rank = this.rankPlayers();
+
+        rank.forEach(function ({ id, record, state }) {
+            progress.push({
+                userId: id,
+                data: record,
+                state: state,
+            });
+        });
+        try {
+
+            endSessionInController(
+                this.id,
+                this.hasMoreQuestions() && this._isReadyForNextQuestion,
+                progress
+            );
+        } catch (error) {
+            console.log(error);
         }
     }
     getStatus() {
@@ -131,10 +190,7 @@ export class GameSession {
         return answer.questionNo === this.questionIndex;
     }
     hasAllPlayerAnswered() {
-        return (
-            this.pointSys.answeredPlayers.size >=
-            Object.keys(this.playerMap).length
-        );
+        return this.pointSys.answeredPlayers.size >= this.activePlayersNum;
     }
 
     canReleaseNextQuestion(player: Player, nextQuestionIndex: number) {
@@ -249,6 +305,10 @@ export class GameSession {
             streak:
                 previousRecord.questionNo === answer.questionNo ? streak : 0,
         };
+
+        if (!this.hasMoreQuestions()) {
+            this.playerMap[player.id].state = PlayerState.Complete;
+        }
     }
     getQuestionIndex() {
         return this.questionIndex;
@@ -264,28 +324,20 @@ export class GameSession {
 
     rankPlayers() {
         const playersArray: Player[] = [];
-        for (const [playerId, player] of Object.entries(this.playerMap)) {
+        for (const player of Object.values(this.playerMap)) {
             playersArray.push(player);
         }
         // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
         playersArray.sort((a, b) =>
             a.record.points < b.record.points ? 1 : -1
         );
-        for (const [rank, player] of Object.entries(playersArray)) {
-            this.playerMap[player.id].record.newPos = Number(rank);
-        }
-        let order = 0;
-        playersArray.forEach(({ id, record }) => {
+
+        playersArray.forEach(({ id, record }, ranking) => {
+            this.playerMap[id].record.newPos = ranking;
             this.playerMap[id].record.oldPos = record.newPos;
-            this.playerMap[id].record.newPos = order;
-            ++order;
+            playersArray[ranking].record.newPos = ranking;
+            playersArray[ranking].record.oldPos = record.newPos;
         });
-
-        const rank = [];
-        for (let i = 0; i < playersArray.length; ++i) {
-            rank.push(playersArray[i].formatRecord());
-        }
-
-        return rank;
+        return playersArray;
     }
 }

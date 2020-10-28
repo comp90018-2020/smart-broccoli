@@ -11,12 +11,6 @@ export enum Event {
     end = "end",
 }
 
-export enum Res {
-    Success = "success",
-    NoMoreQuestion = "No more question",
-    ThereIsRunningQuestion = "There is player taking question",
-}
-
 export enum Role {
     host = "host",
     player = "participant",
@@ -35,10 +29,15 @@ export enum GameType {
     Live_Group = "Live Group",
     Live_NotGroup = "Live Not Group",
 }
-
+export enum PlayerState {
+    Joined = "joined",
+    Complete = "complete",
+    Left = "complete",
+}
 export class Player {
     public record: { [key: string]: any } = {};
     public previousRecord: { [key: string]: any } = {};
+    public state: PlayerState;
     constructor(
         readonly id: number,
         readonly name: string,
