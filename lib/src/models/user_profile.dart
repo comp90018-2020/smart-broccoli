@@ -51,6 +51,7 @@ class UserProfileModel extends ChangeNotifier {
     return await _refreshUser();
   }
 
+  /// Retrieve user picture from cache
   Future<String> getUserPicture({bool forceRefresh = false}) async {
     if (user?.pictureId == null) return null;
     return await _picStash.getPic(user.pictureId);
