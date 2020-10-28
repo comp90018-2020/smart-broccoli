@@ -68,6 +68,10 @@ class _MyAppState extends State<MyApp> {
   /// Router
   final FluroRouter router;
 
+  // Key for navigator
+  final GlobalKey<NavigatorState> _mainNavigatorKey =
+      GlobalKey<NavigatorState>();
+
   // Stores previous state about whether user's authenticated
   bool inSession;
 
@@ -76,10 +80,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub.subscribe(PubSubTopics.route, navigate);
   }
-
-  // Key for navigator
-  final GlobalKey<NavigatorState> _mainNavigatorKey =
-      GlobalKey<NavigatorState>();
 
   /// Navigate to route
   void navigate(RouteArgs routeArgs) {
