@@ -70,6 +70,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     notifyListeners();
   }
 
+  Future<void> joinLiveSession(Quiz quiz) async {
+    joinSession(quiz.sessions
+        .firstWhere((session) => session.quizType == QuizType.LIVE));
+  }
+
   /// Connect to socket with headers
   void connect(String token) {
     // Set query
