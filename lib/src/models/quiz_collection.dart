@@ -102,7 +102,10 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
 
   Future<void> deleteQuiz(Quiz quiz) async {
     await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
-    _createdQuizzes.remove(quiz.id);
+    if (quiz.role == GroupRole.MEMBER)
+      _availableQuizzes.remove(quiz.id);
+    else
+      _createdQuizzes.remove(quiz.id);
     notifyListeners();
   }
 
