@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
 /// Group list page
@@ -138,27 +139,11 @@ class _GroupListState extends State<GroupList> {
       await Provider.of<GroupRegistryModel>(context, listen: false)
           .joinGroup(name: groupName);
     } on GroupNotFoundException {
-      _showUnsuccessful("Group does not exist: $groupName");
+      showBasicDialog(context, "Group does not exist: $groupName");
     } on AlreadyInGroupException {
-      _showUnsuccessful("Already a member of group: $groupName");
+      showBasicDialog(context, "Already a member of group: $groupName");
     } catch (err) {
-      _showUnsuccessful("Something went wrong");
+      showBasicDialog(context, "Something went wrong");
     }
-  }
-
-  void _showUnsuccessful(String text) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Cannot join"),
-        content: Text(text),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: Navigator.of(context).pop,
-          ),
-        ],
-      ),
-    );
   }
 }
