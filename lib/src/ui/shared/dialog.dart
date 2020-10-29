@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 Future<void> showBasicDialog(BuildContext context, String message,
     {String title = "Error"}) {
@@ -33,6 +34,41 @@ Future<bool> showConfirmDialog(BuildContext context, String message,
           child: Text("OK"),
           onPressed: () => Navigator.of(context).pop(true),
         ),
+      ],
+    ),
+  );
+}
+
+Future<ImageSource> showImgSrcPicker(BuildContext context) {
+  return showDialog<ImageSource>(
+    context: context,
+    builder: (BuildContext context) => SimpleDialog(
+      title: const Text("Select upload method"),
+      children: [
+        SimpleDialogOption(
+          child: Row(
+            children: [
+              Icon(Icons.picture_in_picture),
+              Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: const Text("From gallery"),
+              )
+            ],
+          ),
+          onPressed: () => Navigator.of(context).pop(ImageSource.gallery),
+        ),
+        SimpleDialogOption(
+          child: Row(
+            children: [
+              Icon(Icons.camera),
+              Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: const Text("Use camera"),
+              )
+            ],
+          ),
+          onPressed: () => Navigator.of(context).pop(ImageSource.camera),
+        )
       ],
     ),
   );
