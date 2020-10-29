@@ -7,7 +7,6 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
-import 'package:smart_broccoli/src/ui/quiz_creator/quiz_creator.dart';
 
 /// Represents a quiz card
 class QuizCard extends StatefulWidget {
@@ -258,7 +257,7 @@ class _QuizCardState extends State<QuizCard> {
             color: Theme.of(context).accentColor,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             onPressed: () {
-              editQuiz(context, widget.quiz);
+              Navigator.of(context).pushNamed("/quiz/${widget.quiz.id}");
             },
             elevation: 2.0,
             child: Icon(
@@ -269,17 +268,6 @@ class _QuizCardState extends State<QuizCard> {
             shape: CircleBorder(),
           ),
         ],
-      ),
-    );
-  }
-
-  editQuiz(BuildContext context, Quiz quiz) async {
-    // Navigator returns a Future that completes after calling
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            QuizCreate(passedQuiz: quiz, groupId: widget.quiz.groupId),
       ),
     );
   }
