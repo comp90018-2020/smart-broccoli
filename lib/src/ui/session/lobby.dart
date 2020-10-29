@@ -20,7 +20,7 @@ class _StartLobby extends State<QuizLobby> {
   // Timer for countdown
   Timer _timer;
   // You should have a getter method here to get data from server
-  int _start = 10;  // mia: get start time, needs game session model
+  int _start = 10; // mia: get start time, needs game session model
 
   void startTimer1() {
     // Decrement the timer
@@ -112,24 +112,23 @@ class _StartLobby extends State<QuizLobby> {
             ),
 
             // Chip for group subscriptions
-            
+
             Chip(
                 label: Text('Subscribed to group'),
                 avatar: Icon(Icons.check_sharp)),
 
             // Text describing status
             Consumer<GameSessionModel>(
-              builder: (context, socketModel, child) => 
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Text(
-                    socketModel.waitStatement(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        backgroundColor: Colors.transparent),
-                  ),
+              builder: (context, socketModel, child) => Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Text(
+                  socketModel.waitHint,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      backgroundColor: Colors.transparent),
                 ),
+              ),
             ),
 
             Expanded(
@@ -188,28 +187,27 @@ class _StartLobby extends State<QuizLobby> {
   // Quiz users list
   Widget _quizUsers() {
     return Consumer<GameSessionModel>(
-      builder: (context, socketModel, child) => 
-        ListView.separated(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          shrinkWrap: true,
-          itemCount: socketModel.players.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-                dense: true,
-                // Avatar
-                leading: Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(100))),
-                // Name
-                title: Text(socketModel.players.values.toList()[index].name, 
-                    style: SmartBroccoliTheme.listItemTextStyle));
-          },
-          separatorBuilder: (BuildContext context, int index) => const Divider(),
-        )
-    );
+        builder: (context, socketModel, child) => ListView.separated(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              shrinkWrap: true,
+              itemCount: socketModel.players.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                    dense: true,
+                    // Avatar
+                    leading: Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(100))),
+                    // Name
+                    title: Text(socketModel.players.values.toList()[index].name,
+                        style: SmartBroccoliTheme.listItemTextStyle));
+              },
+              separatorBuilder: (BuildContext context, int index) =>
+                  const Divider(),
+            ));
   }
 
   void _startQuiz() {

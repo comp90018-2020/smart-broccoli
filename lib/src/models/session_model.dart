@@ -38,6 +38,20 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   Answer answer;
   SessionState state;
 
+  String get waitHint {
+    if (session.quizType == QuizType.SELF_PACED)
+      return 'Waiting for quiz to start...';
+
+    if (state == SessionState.PENDING)
+      return role == GroupRole.MEMBER
+          ? 'Waiting for host to start...'
+          : 'Tap \'start\' to begin';
+
+    if (state == SessionState.STARTING) return 'Quiz starting!';
+
+    return null;
+  }
+
   /// The socket which we enclose
   IO.Socket socket;
 
@@ -237,24 +251,6 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   void answerQuestion() {
     socket.emit('answer', answer.toJson());
-  }
-
-  //get lobby statement according to quiz type
-  String waitStatement() {
-    String statement;
-    if (session.quizType == QuizType.LIVE && role == GroupRole.MEMBER && state == SessionState.PENDING){
-      statement = 'Waiting for host to start...';
-    }
-    else if (session.quizType == QuizType.LIVE && role == GroupRole.OWNER && state == SessionState.PENDING){
-      statement = 'press \'start\' button to start quiz';
-    }
-    else if (session.quizType == QuizType.LIVE && state == SessionState.STARTING){
-      statement = 'quiz will start very soon';
-    }
-    else if (session.quizType == QuizType.SELF_PACED){
-      statement = 'Waiting for quiz to start'; 
-    }
-    return statement;
   }
 
   @override
