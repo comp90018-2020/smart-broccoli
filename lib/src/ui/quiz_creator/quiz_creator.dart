@@ -154,7 +154,7 @@ class _QuizCreateState extends State<QuizCreate> {
                   setState(() {
                     model.pendingPicturePath = path;
                   });
-                }, quiz: model),
+                }),
 
                 // Seconds selection
                 Padding(
