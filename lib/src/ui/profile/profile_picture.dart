@@ -41,8 +41,10 @@ class _ProfilePictureState extends State<ProfilePicture> {
           bottom: 0,
           child: GestureDetector(
             onTap: widget.isEdit
-                ? () {
-                    _showPicker(context);
+                ? () async {
+                    ImageSource source = await showImgSrcPicker(context);
+                    if (source == null) return;
+                    _openPictureSelector(source);
                   }
                 : null,
             child: CircleAvatar(
@@ -77,46 +79,6 @@ class _ProfilePictureState extends State<ProfilePicture> {
           ),
         ),
       ],
-    );
-  }
-
-  // Image picker (from gallery/camera)
-  Future<void> _showPicker(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: const Text("Select upload method"),
-          children: [
-            SimpleDialogOption(
-              child: Row(children: [
-                Icon(Icons.picture_in_picture),
-                Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: const Text("From gallery"),
-                )
-              ]),
-              onPressed: () {
-                _openPictureSelector(ImageSource.gallery);
-                Navigator.of(context).pop();
-              },
-            ),
-            SimpleDialogOption(
-              child: Row(children: [
-                Icon(Icons.camera),
-                Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: const Text("Use camera"),
-                )
-              ]),
-              onPressed: () {
-                _openPictureSelector(ImageSource.camera);
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        );
-      },
     );
   }
 
