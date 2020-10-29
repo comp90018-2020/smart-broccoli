@@ -16,3 +16,24 @@ Future<void> showBasicDialog(BuildContext context, String message,
     ),
   );
 }
+
+Future<bool> showConfirmDialog(BuildContext context, String message,
+    {String title = "Confirm"}) {
+  return showDialog<bool>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          child: Text("Cancel"),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        TextButton(
+          child: Text("OK"),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    ),
+  );
+}
