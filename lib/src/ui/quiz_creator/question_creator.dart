@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
-import 'package:flutter/foundation.dart';
-
 import 'picture.dart';
 
 /// Question create page
