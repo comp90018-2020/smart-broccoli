@@ -88,6 +88,10 @@ class _GroupListState extends State<GroupList> {
                         Icon(Icons.person),
                         Text('${groups[i].members.length} member'
                             '${groups[i].members.length > 1 ? "s" : ""}'),
+                        if (groups[i].defaultGroup) ...[
+                          Spacer(),
+                          Text('Default Group')
+                        ]
                       ],
                     ),
             ),
