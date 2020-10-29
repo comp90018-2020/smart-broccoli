@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
@@ -55,9 +54,10 @@ class _ProfileMainState extends State<ProfileMain> {
 
       // Save/edit
       appbarActions: [
-        CupertinoButton(
-          child: Text(_isEdit ? "Save" : "Edit",
-              style: const TextStyle(color: Colors.white)),
+        IconButton(
+          icon: Icon(_isEdit ? Icons.check : Icons.edit),
+          padding: EdgeInsets.zero,
+          splashRadius: 20,
           onPressed: () async {
             if (_isEdit && await key.currentState.commitChanges()) {
               _showSuccessDialogue();

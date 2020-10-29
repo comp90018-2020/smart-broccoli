@@ -11,12 +11,14 @@ const socketPlayerMap: { [socketId: string]: Player } = {};
 export let _socketIO: Server;
 export default (socketIO: Server) => {
     _socketIO = socketIO;
-    //@ts-ignore
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
         try {
-            const [session, player] = await verify(socket);
-
+            const [success, session, player] = await verify(socket);
+            if (!success) {
+                socket.disconnect();
+                return;
+            }
             // join & welcome
             await handler.welcome(socket, session, player);
 
@@ -79,7 +81,9 @@ const decrypt = async (socket: SocketIO.Socket) => {
     }
 };
 
-const verify = async (socket: Socket): Promise<[GameSession, Player]> => {
+const verify = async (
+    socket: Socket
+): Promise<[boolean, GameSession, Player]> => {
     // @ts-ignore
     if (!_socketIO.sockets.connected.hasOwnProperty()) {
         _socketIO.sockets.connected[socket.id] = socket;
@@ -88,12 +92,14 @@ const verify = async (socket: Socket): Promise<[GameSession, Player]> => {
     let player: Player;
     if (!socketSessionMap.hasOwnProperty(socket.id)) {
         const { userId, sessionId, role } = await decrypt(socket);
+        if (!handler.sessions.hasOwnProperty(Number(sessionId))) {
+            return [false, null, null];
+        }
         session = handler.sessions[Number(sessionId)];
-
         player = await handler.createPlayer(socket, userId, sessionId, role);
     } else {
         session = socketSessionMap[socket.id];
         player = socketPlayerMap[socket.id];
     }
-    return [session, player];
+    return [true, session, player];
 };

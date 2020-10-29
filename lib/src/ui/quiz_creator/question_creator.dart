@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:smart_broccoli/src/data.dart';
@@ -100,8 +99,10 @@ class _QuestionCreateState extends State<QuestionCreate> {
             Navigator.pop(context, widget.passedQuiz);
           },
         ),
-        CupertinoButton(
-          padding: EdgeInsets.only(right: 14),
+        IconButton(
+          icon: Icon(Icons.check),
+          padding: EdgeInsets.zero,
+          splashRadius: 20,
           onPressed: () {
             print(widget.passedQuiz);
 
@@ -128,10 +129,6 @@ class _QuestionCreateState extends State<QuestionCreate> {
             }
             Navigator.pop(context, widget.passedQuiz);
           },
-          child: Text(
-            'Save',
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
         ),
       ],
 

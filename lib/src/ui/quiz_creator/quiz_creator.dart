@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
@@ -104,8 +103,10 @@ class _QuizCreateState extends State<QuizCreate> {
             }
           },
         ),
-        CupertinoButton(
-          padding: EdgeInsets.only(right: 14),
+        IconButton(
+          icon: Icon(Icons.check),
+          padding: EdgeInsets.zero,
+          splashRadius: 20,
           onPressed: () async {
             try {
               await Provider.of<QuizCollectionModel>(context, listen: false)
@@ -115,10 +116,6 @@ class _QuizCreateState extends State<QuizCreate> {
               _showUnsuccessful("Cannot save quiz", err);
             }
           },
-          child: Text(
-            'Save',
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
         ),
       ],
 

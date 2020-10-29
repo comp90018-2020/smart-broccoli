@@ -123,8 +123,7 @@ class _LoginState extends State<Login> {
               child: MaterialButton(
                 textColor: Theme.of(context).colorScheme.onBackground,
                 child: const Text('SKIP LOGIN'),
-                onPressed:
-                    Provider.of<AuthStateModel>(context, listen: false).join,
+                onPressed: () => Navigator.of(context).pushNamed("/join"),
               ),
             ),
           ],

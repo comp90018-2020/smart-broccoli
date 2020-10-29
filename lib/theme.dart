@@ -8,6 +8,7 @@ class SmartBroccoliColourScheme extends ColorScheme {
   static const Color logoContainerBackground = Colors.white;
   static const Color inputFieldColor = Colors.white;
   static const Color membersTabBackground = Colors.white;
+  static const Color disabledButtonTextColor = Color(0xFFC8E6C9);
 
   SmartBroccoliColourScheme()
       : super.light(
@@ -26,6 +27,7 @@ class SmartBroccoliTheme {
     primaryColor: Color(0xFF4CAF50),
     primaryColorDark: Color(0xFF419644),
     accentColor: Colors.green,
+    disabledColor: Colors.green[900],
     colorScheme: SmartBroccoliColourScheme(),
     buttonTheme: ButtonThemeData(
       shape: RoundedRectangleBorder(
