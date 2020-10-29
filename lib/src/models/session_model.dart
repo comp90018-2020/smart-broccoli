@@ -41,10 +41,6 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
-  int GetStartCD() {
-    return this.startCountDown;
-  }
-
   GameSessionModel(this._authStateModel, {SessionApi sessionApi}) {
     _sessionApi = sessionApi ?? SessionApi();
     socket = IO.io(SERVER_URL, {
