@@ -37,7 +37,6 @@ class _GroupCreateState extends State<GroupCreate> {
               ),
               onChanged: (value) =>
                   setState(() => _isTextFormFieldEmpty = value.isEmpty),
-              onSubmitted: (_) => _createGroup(),
             ),
           ),
           // Button
