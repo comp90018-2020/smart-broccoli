@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 
@@ -50,13 +49,11 @@ class _QuizCreateState extends State<QuizCreate> {
           splashRadius: 20,
           onPressed: () {},
         ),
-        CupertinoButton(
-          padding: EdgeInsets.only(right: 14),
+        IconButton(
+          icon: Icon(Icons.check),
+          padding: EdgeInsets.zero,
+          splashRadius: 20,
           onPressed: () {},
-          child: Text(
-            'Save',
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
         ),
       ],
 
