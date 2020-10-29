@@ -18,8 +18,14 @@ class QuizCard extends StatefulWidget {
   /// Whether options are enabled
   final bool optionsEnabled;
 
+  /// Whether to force no intrinsic height
+  final bool alwaysShowPicture;
+
   QuizCard(this.quiz,
-      {Key key, this.aspectRatio = 1.4, this.optionsEnabled = false});
+      {Key key,
+      this.aspectRatio = 1.4,
+      this.optionsEnabled = false,
+      this.alwaysShowPicture = false});
 
   @override
   State<StatefulWidget> createState() => new _QuizCardState();
@@ -31,105 +37,109 @@ class _QuizCardState extends State<QuizCard> {
         elevation: 2,
         child: InkWell(
           onTap: () {},
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // If the height of the picture is less than 0.4 of the viewport
-              // height, show it
-              bool showPicture = constraints.maxWidth / widget.aspectRatio <
-                  MediaQuery.of(context).size.height * 0.4;
+          child: widget.alwaysShowPicture
+              // Always show picture
+              ? _quizInner(true)
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    // If the height of the picture is less than 0.4 of the
+                    // viewporp height, show it
+                    bool showPicture =
+                        constraints.maxWidth / widget.aspectRatio <
+                            MediaQuery.of(context).size.height * 0.4;
+                    return _quizInner(showPicture);
+                  },
+                ),
+        ),
+      );
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  // Picture and title/group name
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Quiz picture
-                      showPicture
-                          ? AspectRatio(
-                              aspectRatio: widget.aspectRatio,
-                              child: FutureBuilder(
-                                future:
-                                    Provider.of<QuizCollectionModel>(context)
-                                        .getQuizPicture(widget.quiz.id),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<String> snapshot) {
-                                  if (!snapshot.hasData ||
-                                      snapshot.data == null)
-                                    return FractionallySizedBox(
-                                        widthFactor: 0.8,
-                                        heightFactor: 0.8,
-                                        child: Image(
-                                            image:
-                                                AssetImage('assets/icon.png')));
-                                  return Image.file(File(snapshot.data),
-                                      fit: BoxFit.cover);
-                                },
-                              ),
-                            )
-                          : SizedBox(),
+  Widget _quizInner(bool showPicture) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // Picture and title/group name
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Quiz picture
+              showPicture
+                  ? AspectRatio(
+                      aspectRatio: widget.aspectRatio,
+                      child: FutureBuilder(
+                        future: Provider.of<QuizCollectionModel>(context)
+                            .getQuizPicture(widget.quiz.id),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<String> snapshot) {
+                          if (!snapshot.hasData || snapshot.data == null)
+                            return FractionallySizedBox(
+                                widthFactor: 0.8,
+                                heightFactor: 0.8,
+                                child: Image(
+                                    image: AssetImage('assets/icon.png')));
+                          return Image.file(File(snapshot.data),
+                              fit: BoxFit.cover);
+                        },
+                      ),
+                    )
+                  : SizedBox(),
 
-                      // Quiz title & Group name
-                      Container(
-                        padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.quiz.title,
-                              style: TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              Provider.of<GroupRegistryModel>(context)
-                                      .getGroup(widget.quiz.groupId)
-                                      ?.name ??
-                                  "Group ID: ${widget.quiz.groupId}",
-                              style: TextStyle(fontSize: 15),
-                            ),
-                          ],
+              // Quiz title & Group name
+              Container(
+                padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.quiz.title,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      Provider.of<GroupRegistryModel>(context)
+                              .getGroup(widget.quiz.groupId)
+                              ?.name ??
+                          "Group ID: ${widget.quiz.groupId}",
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          // Space between
+
+          // Admin/quiz status
+          Column(
+            children: [
+              // Admin options
+              if (widget.quiz.role == GroupRole.OWNER) buildAdmin(),
+
+              // Quiz status
+              Container(
+                padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    widget.quiz.type == QuizType.LIVE
+                        ? liveIndicator()
+                        : selfPacedIndicator(),
+                    if (widget.quiz.complete)
+                      Text(
+                        'Complete',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-
-                  // Space between
-
-                  // Admin/quiz status
-                  Column(
-                    children: [
-                      // Admin options
-                      if (widget.quiz.role == GroupRole.OWNER) buildAdmin(),
-
-                      // Quiz status
-                      Container(
-                        padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            widget.quiz.type == QuizType.LIVE
-                                ? liveIndicator()
-                                : selfPacedIndicator(),
-                            if (widget.quiz.complete)
-                              Text(
-                                'Complete',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
+                  ],
+                ),
+              )
+            ],
+          )
+        ],
       );
 
   // Smart quiz indicator
