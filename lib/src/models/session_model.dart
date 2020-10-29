@@ -41,6 +41,10 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
+  int GetStartCD(){
+    return this.startCountDown;
+  }
+
   GameSessionModel(this._authStateModel, {SessionApi sessionApi}) {
     _sessionApi = sessionApi ?? SessionApi();
     socket = IO.io(SERVER_URL, {
@@ -67,6 +71,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   Future<void> joinSession(GameSession quizSession) async {
     session = await _sessionApi.joinSession(
         _authStateModel.token, quizSession.joinCode);
+    connect(session.token);
     notifyListeners();
   }
 
@@ -78,6 +83,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// Connect to socket with headers
   void connect(String token) {
     // Set query
+    print(socket);
     socket.opts['query'] = {};
     socket.opts['query']['token'] = token;
     print(socket.opts);
@@ -121,6 +127,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       players[user.id] = user;
       print("playerJoin");
       print(players);
+      notifyListeners();
     });
 
     socket.on('playerLeave', (message) {
@@ -129,6 +136,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       var user = SocketUser.fromJson(message);
       players.remove(user.id);
       print(players);
+      notifyListeners();
     });
 
     socket.on('starting', (message) {

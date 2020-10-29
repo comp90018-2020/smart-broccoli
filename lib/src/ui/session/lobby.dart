@@ -20,7 +20,7 @@ class _StartLobby extends State<QuizLobby> {
   // Timer for countdown
   Timer _timer;
   // You should have a getter method here to get data from server
-  int _start = 10;
+  int _start = 10;  // mia: get start time, needs game session model
 
   void startTimer1() {
     // Decrement the timer
@@ -180,7 +180,7 @@ class _StartLobby extends State<QuizLobby> {
     );
   }
 
-  final userList = ["A", "B", "C", "D", "E", "F", "G"];
+  final userList = ["A", "B", "C", "D", "E", "F", "G"]; // mia: get userList
   // Quiz users list
   Widget _quizUsers() {
     return ListView.separated(
