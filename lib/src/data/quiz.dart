@@ -106,13 +106,13 @@ class Quiz {
 
   int compareTo(Quiz other) {
     switch (this.type) {
-      case QuizType.SmartLive:
+      case QuizType.SMART_LIVE:
         if (this.updatedTimestamp < other.updatedTimestamp) {
           return 1;
         }
         return 0;
       case QuizType.LIVE:
-        if (other.type == QuizType.SmartLive) {
+        if (other.type == QuizType.SMART_LIVE) {
           return 1;
         }
         if (other.type == QuizType.LIVE &&
@@ -121,7 +121,7 @@ class Quiz {
         }
         return 0;
       case QuizType.SELF_PACED:
-        if (other.type == QuizType.SmartLive ||
+        if (other.type == QuizType.SMART_LIVE ||
             other.type == QuizType.LIVE ||
             this.updatedTimestamp < other.updatedTimestamp) {
           return 1;
