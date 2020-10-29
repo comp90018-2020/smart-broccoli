@@ -18,23 +18,34 @@ class RouteArgs {
 
 /// Defines routes and transitions
 class BroccoliRouter {
+  // About
+  static const String about = "/about";
+  static const String acknowledgements = "/about/acknowledgements";
+
+  // Auth/user
   static const String root = "/home";
   static const String auth = "/auth";
+  static const String profile = "/profile";
+
+  // Quiz pages
   static const String takeQuiz = "/take_quiz";
   static const String manageQuiz = "/manage_quiz";
+
+  // Session
   static const String sessionLobby = "/session/lobby";
   static const String sessionQuestion = "/session/question";
   static const String sessionLeaderboard = "/session/leaderboard";
   static const String sessionStart = "/session/start";
-  static const String about = "/about";
-  static const String acknowledgements = "/about/acknowledgements";
+
+  // Group
   static const String group = "/group/:id";
   static const String groupHome = "/group/home";
   static const String groupCreate = "/group/create";
+
+  // Quiz editor
   static const String quiz = "/quiz/:id";
-  static const String groupCreateQuiz = "/group/:id/quiz";
   static const String quizQuestion = "/quiz/question";
-  static const String profile = "/profile";
+  static const String groupCreateQuiz = "/group/:id/quiz";
 
   /// Router
   final FluroRouter router;
