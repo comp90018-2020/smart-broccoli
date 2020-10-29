@@ -1,7 +1,7 @@
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { SmartLive, LIVE, SELF_PACED }
+enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
 
 /// Object representing a quiz
 /// Instances of this class are returned when fetching quizzes from the server.
