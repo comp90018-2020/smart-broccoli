@@ -41,7 +41,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
-  int GetStartCD(){
+  int GetStartCD() {
     return this.startCountDown;
   }
 
@@ -83,7 +83,6 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// Connect to socket with headers
   void connect(String token) {
     // Set query
-    print(socket);
     socket.opts['query'] = {};
     socket.opts['query']['token'] = token;
     print(socket.opts);
@@ -246,17 +245,19 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   @override
   void authUpdated() {
-    players.clear();
-    startCountDown = null;
-    question = null;
-    time = null;
-    totalQuestion = null;
-    outcome = null;
-    questionAnswered = null;
-    correctAnswer = null;
-    role = null;
-    answer = null;
-    state = null;
-    socket = null;
+    if (!_authStateModel.inSession) {
+      players.clear();
+      startCountDown = null;
+      question = null;
+      time = null;
+      totalQuestion = null;
+      outcome = null;
+      questionAnswered = null;
+      correctAnswer = null;
+      role = null;
+      answer = null;
+      state = null;
+      socket.disconnect();
+    }
   }
 }
