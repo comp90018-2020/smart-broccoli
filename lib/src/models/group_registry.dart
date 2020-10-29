@@ -42,8 +42,20 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     _groupApi = groupApi ?? GroupApi();
   }
 
-  /// Get a group.
-  Group getGroup(int id) {
+  // Get a group.
+  Group getGroupFromCache(int id) {
+    return _joinedGroups[id] ?? _createdGroups[id];
+  }
+
+  /// Function to get group
+  Future<Group> getGroup(int id, {bool forceRefresh = false}) async {
+    // If in cache and we don't force refresh
+    if (!forceRefresh &&
+        (_joinedGroups[id] != null || _createdGroups[id] != null)) {
+      return _joinedGroups[id] ?? _createdGroups[id];
+    }
+    // If not, retrieve group
+    await refreshGroup(id);
     return _joinedGroups[id] ?? _createdGroups[id];
   }
 

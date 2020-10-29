@@ -61,7 +61,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
           // More actions
           actions: [
             Consumer<GroupRegistryModel>(builder: (context, registry, child) {
-              Group group = registry.getGroup(widget.groupId);
+              Group group = registry.getGroupFromCache(widget.groupId);
               return PopupMenuButton(
                 itemBuilder: (BuildContext context) =>
                     group.role == GroupRole.MEMBER
@@ -134,7 +134,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
           centerTitle: true,
           title: Consumer<GroupRegistryModel>(
             builder: (context, registry, child) {
-              Group group = registry.getGroup(widget.groupId);
+              Group group = registry.getGroupFromCache(widget.groupId);
               return group == null ? Text('Group Name') : Text(group.name);
             },
           ),
