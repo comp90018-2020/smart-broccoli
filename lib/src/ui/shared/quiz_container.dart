@@ -61,22 +61,20 @@ class _BuildQuiz extends State<QuizContainer> {
                 child: IntrinsicHeight(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: widget.items
-                        .asMap()
-                        .entries
-                        .map((item) => Container(
-                              constraints: BoxConstraints(maxWidth: 200),
-                              margin: item.key == 0 ||
-                                      item.key == widget.items.length - 1
-                                  ? EdgeInsets.only(
-                                      left: item.key == 0 ? 20 : 0,
-                                      right: item.key == 0 ? 0 : 20)
-                                  : EdgeInsets.zero,
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              child:
-                                  QuizCard(item.value, alwaysShowPicture: true),
-                            ))
-                        .toList(),
+                    children: mapIndexed(
+                      widget.items,
+                      ((index, item) => Container(
+                            constraints: BoxConstraints(maxWidth: 200),
+                            margin:
+                                index == 0 || index == widget.items.length - 1
+                                    ? EdgeInsets.only(
+                                        left: index == 0 ? 20 : 0,
+                                        right: index == 0 ? 0 : 20)
+                                    : EdgeInsets.zero,
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            child: QuizCard(item, alwaysShowPicture: true),
+                          )),
+                    ).toList(),
                   ),
                 ),
               ),
@@ -98,5 +96,17 @@ class _BuildQuiz extends State<QuizContainer> {
         ),
       ),
     );
+  }
+}
+
+/// .map() with index
+/// From: https://stackoverflow.com/a/57371764
+Iterable<E> mapIndexed<E, T>(
+    Iterable<T> items, E Function(int index, T item) f) sync* {
+  var index = 0;
+
+  for (final item in items) {
+    yield f(index, item);
+    index = index + 1;
   }
 }
