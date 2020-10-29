@@ -112,20 +112,24 @@ class _StartLobby extends State<QuizLobby> {
             ),
 
             // Chip for group subscriptions
+            
             Chip(
                 label: Text('Subscribed to group'),
                 avatar: Icon(Icons.check_sharp)),
 
             // Text describing status
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: Text(
-                'Waiting for host to start...',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    backgroundColor: Colors.transparent),
-              ),
+            Consumer<GameSessionModel>(
+              builder: (context, socketModel, child) => 
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Text(
+                    socketModel.waitStatement(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        backgroundColor: Colors.transparent),
+                  ),
+                ),
             ),
 
             Expanded(
@@ -180,28 +184,31 @@ class _StartLobby extends State<QuizLobby> {
     );
   }
 
-  final userList = ["A", "B", "C", "D", "E", "F", "G"]; // mia: get userList
+  // final userList = ["A", "B", "C", "D", "E", "F", "G"]; // mia: get userList
   // Quiz users list
   Widget _quizUsers() {
-    return ListView.separated(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      shrinkWrap: true,
-      itemCount: userList.length,
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-            dense: true,
-            // Avatar
-            leading: Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(100))),
-            // Name
-            title: Text(userList[index],
-                style: SmartBroccoliTheme.listItemTextStyle));
-      },
-      separatorBuilder: (BuildContext context, int index) => const Divider(),
+    return Consumer<GameSessionModel>(
+      builder: (context, socketModel, child) => 
+        ListView.separated(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          shrinkWrap: true,
+          itemCount: socketModel.players.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+                dense: true,
+                // Avatar
+                leading: Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(100))),
+                // Name
+                title: Text(socketModel.players.values.toList()[index].name, 
+                    style: SmartBroccoliTheme.listItemTextStyle));
+          },
+          separatorBuilder: (BuildContext context, int index) => const Divider(),
+        )
     );
   }
 
