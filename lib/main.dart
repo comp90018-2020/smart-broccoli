@@ -85,6 +85,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub
         .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
+    Provider.of<GameSessionModel>(context, listen: false).refreshSession();
   }
 
   /// Navigate to route
@@ -110,6 +111,7 @@ class _MyAppState extends State<MyApp> {
       if (inSession != null)
         _mainNavigatorKey.currentState.pushNamedAndRemoveUntil(
             state.inSession ? '/take_quiz' : '/auth', (route) => false);
+      Provider.of<GameSessionModel>(context, listen: false).refreshSession();
       inSession = state.inSession;
     }
 

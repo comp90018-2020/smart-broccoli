@@ -68,10 +68,12 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   }
 
   Future<void> refreshSession() async {
-    GameSession current = await _sessionApi.getSession(_authStateModel.token);
-    if (session == null && current == null) return;
-    session = current;
-    notifyListeners();
+    if (!_authStateModel.inSession) return;
+    if ((session = await _sessionApi.getSession(_authStateModel.token)) !=
+        null) {
+      socket.disconnect();
+      connect(session.token);
+    }
   }
 
   Future<void> createSession(int quizId, GameSessionType type,
