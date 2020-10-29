@@ -193,7 +193,51 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 if (questionType == QuestionType.MC) ..._mcFields(question),
 
                 // TF options
-                if (questionType == QuestionType.TF) Container(),
+                if (questionType == QuestionType.TF)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 32, 8, 8),
+                    child: Center(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColorDark,
+                            borderRadius: BorderRadius.circular(6)),
+                        child: ToggleButtons(
+                          borderRadius: BorderRadius.circular(6),
+                          borderColor: Colors.transparent,
+                          disabledBorderColor: Colors.transparent,
+                          selectedBorderColor: Colors.transparent,
+                          borderWidth: 00,
+                          fillColor: Colors.white,
+                          selectedColor: Colors.black,
+                          color: Colors.white60,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 0, horizontal: 33),
+                              child: Text('True'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 0, horizontal: 32),
+                              child: Text('False'),
+                            )
+                          ],
+                          onPressed: (int index) {
+                            setState(() {
+                              (question as TFQuestion).answer = index == 0;
+                            });
+                          },
+                          // Boolean array
+                          isSelected: [
+                            // True
+                            (question as TFQuestion).answer,
+                            // False
+                            !(question as TFQuestion).answer
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -219,10 +263,10 @@ class _QuestionCreateState extends State<QuestionCreate> {
   List<Widget> _mcFields(MCQuestion question) {
     return [
       // Answers heading
-      Container(
+      Padding(
         padding: EdgeInsets.only(top: 20, bottom: 4),
         child: Text(
-          'Answers',
+          "Answers",
           style: new TextStyle(
             fontSize: 17.0,
             fontWeight: FontWeight.normal,
@@ -230,7 +274,6 @@ class _QuestionCreateState extends State<QuestionCreate> {
           ),
         ),
       ),
-
       // Card container
       ListView.builder(
         scrollDirection: Axis.vertical,
