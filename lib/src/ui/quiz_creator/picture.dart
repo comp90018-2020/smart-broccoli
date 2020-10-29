@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Widget for pictures
@@ -52,7 +53,11 @@ class _PictureCardState extends State<PictureCard> {
                     Icons.add_a_photo,
                     size: 20,
                   ),
-                  onPressed: () => _showChoiceDialog(context),
+                  onPressed: () async {
+                    ImageSource source = await showImgSrcPicker(context);
+                    if (source == null) return;
+                    _openPictureSelector(context, source);
+                  },
                 ),
               ),
             ),
@@ -69,40 +74,5 @@ class _PictureCardState extends State<PictureCard> {
     PickedFile file = await picker.getImage(source: source);
     widget.updatePicture(file.path);
     Navigator.of(context).pop();
-  }
-
-  Future<void> _showChoiceDialog(BuildContext context) {
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return SimpleDialog(
-              title: const Text("Select upload method"),
-              children: [
-                SimpleDialogOption(
-                  child: Row(children: [
-                    Icon(Icons.picture_in_picture),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: Text("From gallery"),
-                    )
-                  ]),
-                  onPressed: () {
-                    _openPictureSelector(context, ImageSource.gallery);
-                  },
-                ),
-                SimpleDialogOption(
-                  child: Row(children: [
-                    Icon(Icons.camera),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: Text("Use camera"),
-                    )
-                  ]),
-                  onPressed: () {
-                    _openPictureSelector(context, ImageSource.camera);
-                  },
-                )
-              ]);
-        });
   }
 }
