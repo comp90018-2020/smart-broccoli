@@ -29,10 +29,10 @@ class BroccoliRouter {
   static const String about = "/about";
   static const String acknowledgements = "/about/acknowledgements";
   static const String group = "/group/:id";
-  static const String groupCreateQuiz = "/group/:id/quiz";
   static const String groupHome = "/group/home";
   static const String groupCreate = "/group/create";
-  static const String quiz = "/quiz";
+  static const String quiz = "/quiz/:id";
+  static const String groupCreateQuiz = "/group/:id/quiz";
   static const String quizQuestion = "/quiz/question";
   static const String profile = "/profile";
 
@@ -109,7 +109,8 @@ class BroccoliRouter {
     // Quiz
     router.define(quiz, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
-      return QuizCreate();
+      return QuizCreate(
+          quizId: params["id"].length > 0 ? int.parse(params["id"][0]) : null);
     }));
 
     // Question

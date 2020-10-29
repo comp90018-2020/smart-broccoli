@@ -13,10 +13,16 @@ import '../../models.dart';
 import 'picture.dart';
 
 class QuizCreate extends StatefulWidget {
+  /// Group id (used for quiz creation)
   final int groupId;
+
+  /// Quiz id (used for editing)
+  final int quizId;
+
   final Quiz passedQuiz;
 
-  QuizCreate({this.groupId, Key key, this.passedQuiz}) : super(key: key);
+  QuizCreate({this.groupId, Key key, this.passedQuiz, this.quizId})
+      : super(key: key);
 
   @override
   _QuizCreateState createState() => _QuizCreateState();
