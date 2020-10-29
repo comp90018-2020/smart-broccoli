@@ -293,24 +293,24 @@ class _QuizCreateState extends State<QuizCreate> {
     fromControllersToModel();
 
     //Clone for quiz questions so that original copy does not get mutated in case changes are not saved
-    Map<String, dynamic> quizJson = model.toJson();
-    Quiz quizClone = Quiz.fromJson(quizJson);
+    // Map<String, dynamic> quizJson = model.toJson();
+    // Quiz quizClone = Quiz.fromJson(quizJson);
 
     // Navigator returns a Future that completes after calling
-    dynamic result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => QuestionCreate(
-            passedQuiz: quizClone, passedQuestionIndex: questionIndex),
-      ),
-    );
+    // dynamic result = await Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) =>
+    //         QuestionCreate(quiz: quizClone, passedQuestionIndex: questionIndex),
+    //   ),
+    // );
 
-    //Null that is returned if transition is initiated by the back button
-    if (result != null) {
-      setState(() {
-        model = result;
-      });
-    }
+    // //Null that is returned if transition is initiated by the back button
+    // if (result != null) {
+    //   setState(() {
+    //     model = result;
+    //   });
+    // }
   }
 
   //Transfer recent change to model

@@ -7,20 +7,22 @@ import 'package:flutter/foundation.dart';
 
 import 'picture.dart';
 
-/// Arguments passed to question create page
-class QuestionArgs {
-  final int questionNumber;
-  final Question question;
-
-  QuestionArgs(this.questionNumber, this.question);
-}
-
 /// Question create page
 class QuestionCreate extends StatefulWidget {
-  final Quiz passedQuiz;
-  final int passedQuestionIndex;
+  /// Question being edited
+  final Question question;
 
-  QuestionCreate({Key key, @required this.passedQuiz, this.passedQuestionIndex})
+  /// Question index (used to indicate)
+  final int questionIndex;
+
+  /// Delete question
+  final Function(int) delete;
+
+  QuestionCreate(
+      {Key key,
+      @required this.question,
+      @required this.questionIndex,
+      @required this.delete})
       : super(key: key);
 
   @override
@@ -28,48 +30,25 @@ class QuestionCreate extends StatefulWidget {
 }
 
 class _QuestionCreateState extends State<QuestionCreate> {
-  MCQuestion question;
-  var questionTextController;
-  List<TextEditingController> _optionTextControllers;
-  int questionNumber;
-  String tempImgId;
+  // The cloned question
+  Question question;
 
-  void printPassedQ() {
-    print("Checking status of widget");
-    print(widget.passedQuiz);
-  }
+  // Type of question
+  QuestionType questionType;
 
-  @override
-  void initState() {
-    printPassedQ();
-    // TODO: implement initState
-    super.initState();
-    //Case of editing a question
-    if (widget.passedQuestionIndex != null) {
-      questionNumber = widget.passedQuestionIndex + 1;
-      question = widget.passedQuiz.questions[widget.passedQuestionIndex];
-      questionTextController = TextEditingController(text: question.text);
-      _optionTextControllers = <TextEditingController>[];
-
-      for (var i = 0; i < question.options.length; i++) {
-        _optionTextControllers
-            .add(TextEditingController(text: question.options[i].text));
-      }
-      //Case od creating a new question
+  _QuestionCreateState() {
+    // Clone
+    if (widget.question is MCQuestion) {
+      questionType = QuestionType.MC;
+      question = MCQuestion.fromJson((widget.question as MCQuestion).toJson());
     } else {
-      print("here");
-      questionNumber = widget.passedQuiz.questions.length;
-      question = MCQuestion('Text', [], pictureId: null);
-      questionTextController = TextEditingController();
-      _optionTextControllers = <TextEditingController>[];
+      questionType = QuestionType.TF;
+      question = TFQuestion.fromJson((widget.question as TFQuestion).toJson());
     }
   }
 
   @override
   void dispose() {
-    for (var controller in _optionTextControllers) {
-      controller.dispose();
-    }
     super.dispose();
   }
 
@@ -81,7 +60,9 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
       // Close icon
       appbarLeading: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          /// TODO: confirm discard
+        },
         child: Icon(Icons.close),
       ),
 
@@ -92,11 +73,8 @@ class _QuestionCreateState extends State<QuestionCreate> {
           padding: EdgeInsets.zero,
           splashRadius: 20,
           onPressed: () {
-            if (widget.passedQuestionIndex == null) {
-            } else {
-              widget.passedQuiz.questions.removeAt(widget.passedQuestionIndex);
-            }
-            Navigator.pop(context, widget.passedQuiz);
+            widget.delete(widget.questionIndex);
+            Navigator.pop(context);
           },
         ),
         IconButton(
@@ -104,30 +82,29 @@ class _QuestionCreateState extends State<QuestionCreate> {
           padding: EdgeInsets.zero,
           splashRadius: 20,
           onPressed: () {
-            print(widget.passedQuiz);
+            // print(widget.quiz);
 
-            if (questionTextController.text == "") {
-              return _showUnsuccessful(
-                  "Cannot create question", "Question text required");
-            }
-            if (question.options.length < 2) {
-              return _showUnsuccessful("Cannot create question",
-                  "At least two possible answers are required");
-            }
+            // if (questionTextController.text == "") {
+            //   return _showUnsuccessful(
+            //       "Cannot create question", "Question text required");
+            // }
+            // if (question.options.length < 2) {
+            //   return _showUnsuccessful("Cannot create question",
+            //       "At least two possible answers are required");
+            // }
 
-            question.text = questionTextController.text;
+            // question.text = questionTextController.text;
 
-            for (var i = 0; i < _optionTextControllers.length; i++) {
-              question.options[i].text = _optionTextControllers[i].text;
-            }
+            // for (var i = 0; i < _optionTextControllers.length; i++) {
+            //   question.options[i].text = _optionTextControllers[i].text;
+            // }
 
-            if (widget.passedQuestionIndex == null) {
-              widget.passedQuiz.questions.add(question);
-            } else {
-              widget.passedQuiz.questions[widget.passedQuestionIndex] =
-                  question;
-            }
-            Navigator.pop(context, widget.passedQuiz);
+            // if (widget.passedQuestionIndex == null) {
+            //   widget.quiz.questions.add(question);
+            // } else {
+            //   widget.quiz.questions[widget.passedQuestionIndex] = question;
+            // }
+            // Navigator.pop(context, widget.quiz);
           },
         ),
       ],
@@ -144,7 +121,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
-                    'Question',
+                    'Question ${widget.questionIndex}',
                     style: new TextStyle(
                       fontSize: 17.0,
                       fontWeight: FontWeight.normal,
@@ -155,73 +132,26 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 // Question
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: TextField(
-                    controller: questionTextController,
+                  child: TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Question text',
                     ),
+                    initialValue: question.text,
+                    onChanged: (value) {
+                      // Set question text
+                      setState(() {
+                        question.text = value;
+                      });
+                    },
                   ),
                 ),
 
                 // Question image
                 PictureCard(null, (path) {
-                  print(question.pictureId);
-                  /*setState(() {
-                    question.pictureId = path;
-                  });*/
+                  setState(() {
+                    question.pendingPicturePath = path;
+                  });
                 }),
-
-                // Answers heading
-                Container(
-                  padding: EdgeInsets.only(top: 20, bottom: 4),
-                  child: Text(
-                    'Answers',
-                    style: new TextStyle(
-                      fontSize: 17.0,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-
-                // Card container
-                ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: question.options.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6.0),
-                      child: _optionCard(index, question.options[index]),
-                    );
-                  },
-                ),
-
-                // Add Answer
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: RaisedButton(
-                      shape: SmartBroccoliTheme.raisedButtonShape,
-                      padding: EdgeInsets.all(14.0),
-                      child: Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 3,
-                          children: [Icon(Icons.add), Text('ADD ANSWER')]),
-                      onPressed: () {
-                        // Add text controller
-                        TextEditingController textController =
-                            TextEditingController();
-                        _optionTextControllers.add(textController);
-
-                        // Add choice
-                        setState(() =>
-                            {question.options.add(QuestionOption('', false))});
-                      },
-                    ),
-                  ),
-                )
               ],
             ),
           ),
@@ -230,20 +160,55 @@ class _QuestionCreateState extends State<QuestionCreate> {
     );
   }
 
-  void _showUnsuccessful(String title, String body) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: Navigator.of(context).pop,
+  /// Options editing for multiple choice
+  List<Widget> _mcOptions(MCQuestion question) {
+    return [
+      // Answers heading
+      Container(
+        padding: EdgeInsets.only(top: 20, bottom: 4),
+        child: Text(
+          'Answers',
+          style: new TextStyle(
+            fontSize: 17.0,
+            fontWeight: FontWeight.normal,
+            color: Colors.white,
           ),
-        ],
+        ),
       ),
-    );
+
+      // Card container
+      ListView.builder(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        itemCount: question.options.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6.0),
+            child: _optionCard(index, question.options[index]),
+          );
+        },
+      ),
+
+      // Add Answer
+      Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: RaisedButton(
+            shape: SmartBroccoliTheme.raisedButtonShape,
+            padding: EdgeInsets.all(14.0),
+            child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 3,
+                children: [Icon(Icons.add), Text('ADD ANSWER')]),
+            onPressed: () {
+              // Add choice
+              setState(() => {question.options.add(QuestionOption('', false))});
+            },
+          ),
+        ),
+      )
+    ];
   }
 
   // Creates a card for an option
@@ -258,7 +223,12 @@ class _QuestionCreateState extends State<QuestionCreate> {
           children: <Widget>[
             // Answer text
             TextFormField(
-                controller: _optionTextControllers[index],
+                initialValue: option.text,
+                onChanged: (value) {
+                  setState(() {
+                    option.text = value;
+                  });
+                },
                 decoration: InputDecoration(labelText: 'Answer')),
 
             // Bottom button action bar
@@ -278,7 +248,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                         value: option.correct,
                         onChanged: (value) {
                           setState(() {
-                            question.options[index].correct = value;
+                            option.correct = value;
                           });
                         },
                       ),
@@ -291,8 +261,9 @@ class _QuestionCreateState extends State<QuestionCreate> {
                     textColor: Colors.black54,
                     onPressed: () {
                       setState(() {
-                        question.options.removeAt(index);
-                        _optionTextControllers.removeAt(index);
+                        // Shouldn't happen
+                        if (questionType != QuestionType.MC) return;
+                        (question as MCQuestion).options.removeAt(index);
                       });
                     },
                     child: Icon(Icons.delete),

@@ -136,6 +136,9 @@ abstract class Question {
   }
 }
 
+// Question types
+enum QuestionType { TF, MC }
+
 /// Object representing a true/false question
 /// Instances of this class should be constructed when the user creates new
 /// true/false questions. To modify an existing true/false question, mutate
