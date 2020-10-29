@@ -42,7 +42,8 @@ class _StartQuizState extends State<StartQuiz> {
                 margin: EdgeInsets.only(bottom: 12),
                 child: QuizCard(
                   // placeholder
-                  Quiz.fromJson({'title': 'Quiz title', 'groupId': 1}),
+                  Quiz.fromJson(
+                      {'title': 'Quiz title', 'groupId': 1, 'complete': false}),
                   aspectRatio: 2.3,
                 ),
               ),
