@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'members_tab.dart';
 import 'quiz_tab.dart';
@@ -91,7 +92,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                           Navigator.of(context).pop();
                         }
                       } catch (_) {
-                        _showErrorDialogue("Cannot leave group");
+                        showBasicDialog(context, "Cannot leave group");
                       }
                       break;
                     case UserAction.RENAME_GROUP:
@@ -102,21 +103,25 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                                 listen: false)
                             .renameGroup(group, newName);
                       } on GroupCreateException {
-                        _showErrorDialogue("Name already in use: $newName");
+                        showBasicDialog(
+                            context, "Name already in use: $newName");
                       } catch (_) {
-                        _showErrorDialogue("Cannot rename group to: $newName");
+                        showBasicDialog(
+                            context, "Cannot rename group to: $newName");
                       }
                       break;
                     case UserAction.DELETE_GROUP:
                       try {
-                        if (await _confirmDeleteGroup()) {
+                        if (await showConfirmDialog(
+                            context, "This cannot be undone",
+                            title: "Confirm group deletion")) {
                           await Provider.of<GroupRegistryModel>(context,
                                   listen: false)
                               .deleteGroup(group);
                           Navigator.of(context).pop();
                         }
                       } catch (_) {
-                        _showErrorDialogue("Cannot delete group");
+                        showBasicDialog(context, "Cannot delete group");
                       }
                       break;
                     default:
@@ -192,43 +197,6 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
               Navigator.of(context).pop(controller.text);
             },
           )
-        ],
-      ),
-    );
-  }
-
-  Future<bool> _confirmDeleteGroup() {
-    return showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Confirm group deletion"),
-        content: Text("This cannot be undone"),
-        actions: [
-          TextButton(
-            child: Text("Cancel"),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text("OK"),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  void _showErrorDialogue(String text) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Error"),
-        content: Text(text),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: Navigator.of(context).pop,
-          ),
         ],
       ),
     );

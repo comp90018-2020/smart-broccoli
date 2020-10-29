@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 import 'profile_editor.dart';
@@ -43,7 +44,8 @@ class _ProfileMainState extends State<ProfileMain> {
               enableFeedback: false,
               splashRadius: 20,
               onPressed: () async {
-                if (!await _confirmDiscardDialogue()) return;
+                if (!await showConfirmDialog(
+                    context, "No changes will be saved")) return;
                 setState(() {
                   _isEdit = false;
                 });
@@ -60,7 +62,7 @@ class _ProfileMainState extends State<ProfileMain> {
           splashRadius: 20,
           onPressed: () async {
             if (_isEdit && await key.currentState.commitChanges()) {
-              _showSuccessDialogue();
+              showBasicDialog(context, "Profile updated", title: "Success");
               setState(() {
                 _isEdit = false;
               });
@@ -91,35 +93,4 @@ class _ProfileMainState extends State<ProfileMain> {
       ),
     );
   }
-
-  Future<void> _showSuccessDialogue() async => showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text("Success"),
-          content: Text("Profile updated"),
-          actions: [
-            TextButton(
-              child: Text("OK"),
-              onPressed: Navigator.of(context).pop,
-            ),
-          ],
-        ),
-      );
-
-  Future<bool> _confirmDiscardDialogue() async => showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-            title: Text("Confirm"),
-            content: Text("No changes will be saved"),
-            actions: [
-              TextButton(
-                  child: Text("Cancel"),
-                  onPressed: () => Navigator.of(context).pop(false)),
-              TextButton(
-                child: Text("OK"),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-          ),
-      barrierDismissible: false);
 }
