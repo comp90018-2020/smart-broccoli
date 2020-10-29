@@ -225,10 +225,6 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       print('end');
       state = SessionState.FINISHED;
     });
-
-    socket.on('disconnect', (message) {
-      socket.clearListeners();
-    });
   }
 
   /// host action
