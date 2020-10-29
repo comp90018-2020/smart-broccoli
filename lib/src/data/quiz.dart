@@ -1,7 +1,7 @@
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { LIVE, SELF_PACED }
+enum QuizType { SmartLive, LIVE, SELF_PACED }
 
 /// Object representing a quiz
 /// Instances of this class are returned when fetching quizzes from the server.
@@ -11,6 +11,7 @@ enum QuizType { LIVE, SELF_PACED }
 class Quiz {
   /// ID of the quiz (for quizzes fetched from server only)
   final int id;
+  final int updatedTimestamp;
 
   final int pictureId;
 
@@ -37,12 +38,13 @@ class Quiz {
           bool isActive,
           int timeLimit,
           List<Question> questions}) =>
-      Quiz._internal(null, null, GroupRole.OWNER, title, groupId, type,
+      Quiz._internal(null, null, null, GroupRole.OWNER, title, groupId, type,
           description, isActive, timeLimit, questions, null, false);
 
   /// Constructor for internal use only
   Quiz._internal(
     this.id,
+    this.updatedTimestamp,
     this.pictureId,
     this.role,
     this.title,
@@ -64,6 +66,7 @@ class Quiz {
     });
     Quiz quiz = Quiz._internal(
         json['id'],
+        DateTime.parse(json['updatedAt']).millisecondsSinceEpoch,
         json['pictureId'],
         json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
         json['title'],
@@ -99,6 +102,34 @@ class Quiz {
       json['questions'] =
           questions.map((question) => question.toJson()).toList();
     return json;
+  }
+
+  int compareTo(Quiz other) {
+    switch (this.type) {
+      case QuizType.SmartLive:
+        if (this.updatedTimestamp < other.updatedTimestamp) {
+          return 1;
+        }
+        return 0;
+      case QuizType.LIVE:
+        if (other.type == QuizType.SmartLive) {
+          return 1;
+        }
+        if (other.type == QuizType.LIVE &&
+            this.updatedTimestamp < other.updatedTimestamp) {
+          return 1;
+        }
+        return 0;
+      case QuizType.SELF_PACED:
+        if (other.type == QuizType.SmartLive ||
+            other.type == QuizType.LIVE ||
+            this.updatedTimestamp < other.updatedTimestamp) {
+          return 1;
+        }
+        return 0;
+      default:
+        return 0;
+    }
   }
 }
 
