@@ -19,10 +19,10 @@ class CenteredPage extends CustomPage {
                 child: Container(
                   alignment: Alignment.topCenter,
                   padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 325),
-                    child: FractionallySizedBox(widthFactor: 0.8, child: child),
-                  ),
+                  child: LayoutBuilder(
+                      builder: (context, constraints) => FractionallySizedBox(
+                          widthFactor: constraints.maxWidth < 800 ? 0.7 : 0.5,
+                          child: child)),
                 ),
               ),
             ),
