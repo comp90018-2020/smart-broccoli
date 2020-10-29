@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:smart_broccoli/src/data.dart';
@@ -63,13 +62,11 @@ class _QuestionCreateState extends State<QuestionCreate> {
           splashRadius: 20,
           onPressed: () {},
         ),
-        CupertinoButton(
-          padding: EdgeInsets.only(right: 14),
+        IconButton(
+          icon: Icon(Icons.check),
+          padding: EdgeInsets.zero,
+          splashRadius: 20,
           onPressed: () {},
-          child: Text(
-            'Save',
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
         ),
       ],
 
