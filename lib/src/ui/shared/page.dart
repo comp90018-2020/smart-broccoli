@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
@@ -135,11 +134,9 @@ class CustomPage extends StatelessWidget {
                                   future: profile.getUser(forceRefresh: false),
                                   builder: (BuildContext context,
                                       AsyncSnapshot<User> snapshot) {
-                                    return Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                    return Wrap(
+                                      direction: Axis.vertical,
+                                      spacing: 2,
                                       children: snapshot.hasData
                                           ? [
                                               Text(snapshot.data.name,
