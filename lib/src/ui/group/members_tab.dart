@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 
 class MembersTab extends StatelessWidget {
@@ -39,13 +40,16 @@ class MembersTab extends StatelessWidget {
                         icon: Icon(Icons.person_remove),
                         splashRadius: 20,
                         onPressed: () async {
-                          if (await _confirmKickMember(
-                              context, group.members[index].name))
+                          if (await showConfirmDialog(
+                              context,
+                              "${group.members[index].name ?? 'The member'}" +
+                                  "will no longer be a member of the group",
+                              title: "Confirm kick member"))
                             try {
                               await registry.kickMemberFromGroup(
                                   group, group.members[index].id);
                             } catch (_) {
-                              _showKickFailedDialogue(context);
+                              showBasicDialog(context, "Cannot kick member");
                             }
                         },
                       )
@@ -55,43 +59,4 @@ class MembersTab extends StatelessWidget {
           },
         ),
       );
-
-  Future<bool> _confirmKickMember(BuildContext context, String name) {
-    return showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Confirm kick member"),
-        content: Text(
-            "${name == null ? 'The member' : name} will no longer be a " +
-                "member of the group"),
-        actions: [
-          TextButton(
-            child: Text("Cancel"),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text("OK"),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  void _showKickFailedDialogue(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Error"),
-        content: Text("Cannot kick member"),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: Navigator.of(context).pop,
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -96,23 +96,23 @@ class _ProfileRegisteredState extends ProfileEditorState {
   @override
   Future<bool> commitChanges() async {
     if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
-      showErrorDialog(context, "Name and email fields are both required");
+      showBasicDialog(context, "Name and email fields are both required");
       return false;
     }
 
     if (!EmailValidator.validate(_emailController.text)) {
-      showErrorDialog(context, "Invalid email");
+      showBasicDialog(context, "Invalid email");
       return false;
     }
 
     if (_passwordController.text.isNotEmpty &&
         _passwordController.text.length < 8) {
-      showErrorDialog(context, "Password must be at least 8 characters");
+      showBasicDialog(context, "Password must be at least 8 characters");
       return false;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
-      showErrorDialog(context, "Passwords do not match");
+      showBasicDialog(context, "Passwords do not match");
       return false;
     }
 
@@ -127,10 +127,10 @@ class _ProfileRegisteredState extends ProfileEditorState {
       _confirmPasswordController.clear();
       return true;
     } on RegistrationConflictException {
-      showErrorDialog(context, "Email already in use");
+      showBasicDialog(context, "Email already in use");
       return false;
     } catch (_) {
-      showErrorDialog(context, "Cannot update profile");
+      showBasicDialog(context, "Cannot update profile");
       return false;
     }
   }

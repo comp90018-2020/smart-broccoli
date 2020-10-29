@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 // Login tab
 class Login extends StatefulWidget {
@@ -138,29 +139,13 @@ class _LoginState extends State<Login> {
         await Provider.of<AuthStateModel>(context, listen: false)
             .login(_emailController.text, _passwordController.text);
       } on LoginFailedException {
-        _showLoginFailedDialogue(context);
+        showBasicDialog(context, "Incorrect email or password",
+            title: "Login failed");
       }
     } else {
       setState(() {
         _formSubmitted = true;
       });
     }
-  }
-
-  void _showLoginFailedDialogue(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Login failed"),
-        content: Text("Incorrect email or password"),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: Navigator.of(context).pop,
-          ),
-        ],
-      ),
-      barrierDismissible: true,
-    );
   }
 }

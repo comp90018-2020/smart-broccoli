@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/centered_page.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Create group page
@@ -59,29 +60,15 @@ class _GroupCreateState extends State<GroupCreate> {
 
   void _createGroup() async {
     if (controller.text == "")
-      return _showUnsuccessful("Cannot create group", "Name required");
+      return showBasicDialog(context, "Name required",
+          title: "Cannot create group");
     try {
       await Provider.of<GroupRegistryModel>(context, listen: false)
           .createGroup(controller.text);
       Navigator.of(context).pop();
     } on GroupCreateException {
-      _showUnsuccessful("Cannot create group", "Name already in use");
+      showBasicDialog(context, "Name already in use",
+          title: "Cannot create group");
     }
-  }
-
-  void _showUnsuccessful(String title, String body) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: Navigator.of(context).pop,
-          ),
-        ],
-      ),
-    );
   }
 }

@@ -77,7 +77,7 @@ class _ProfileJoinedState extends ProfileEditorState {
   @override
   Future<bool> commitChanges() async {
     if (_nameController.text.isEmpty) {
-      showErrorDialog(context, "Name field is required");
+      showBasicDialog(context, "Name field is required");
       return false;
     }
     try {
@@ -85,7 +85,7 @@ class _ProfileJoinedState extends ProfileEditorState {
           .updateUser(name: _nameController.text);
       return true;
     } catch (_) {
-      showErrorDialog(context, "Cannot update profile");
+      showBasicDialog(context, "Cannot update profile");
       return false;
     }
   }

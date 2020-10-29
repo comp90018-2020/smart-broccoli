@@ -205,14 +205,18 @@ class _QuizCardState extends State<QuizCard> {
                           )
                         : RaisedButton(
                             onPressed: () async {
-                              if (!await _confirmActivateLiveQuiz()) return;
+                              if (!await showConfirmDialog(
+                                  context,
+                                  "You are about to start a live session " +
+                                      "for the quiz: ${widget.quiz.title}",
+                                  title: "Confirm start session")) return;
                               try {
                                 Provider.of<QuizCollectionModel>(context,
                                         listen: false)
                                     .startQuizSession(widget.quiz,
                                         GameSessionType.INDIVIDUAL);
                               } catch (_) {
-                                showErrorDialog(
+                                showBasicDialog(
                                     context, "Cannot start live session");
                               }
                             },
@@ -244,7 +248,7 @@ class _QuizCardState extends State<QuizCard> {
                                             listen: false)
                                         .setQuizActivation(widget.quiz, value);
                                   } catch (_) {
-                                    showErrorDialog(
+                                    showBasicDialog(
                                         context, "Cannot update quiz status");
                                   }
                                 }),
@@ -274,28 +278,6 @@ class _QuizCardState extends State<QuizCard> {
           ),
         ],
       ),
-    );
-  }
-
-  Future<bool> _confirmActivateLiveQuiz() async {
-    return showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Confirm start session"),
-        content: Text(
-            "You are about to start a live session for the quiz: ${widget.quiz.title}"),
-        actions: [
-          TextButton(
-            child: Text("Cancel"),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text("OK"),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
     );
   }
 }
