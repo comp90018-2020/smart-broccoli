@@ -38,7 +38,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
   // The cloned question
   Question question;
 
-  TextEditingController _questionTextController = TextEditingController();
+  TextEditingController _questionTextController;
 
   List<TextEditingController> _optionTextControllers =
       <TextEditingController>[];
@@ -61,11 +61,13 @@ class _QuestionCreateState extends State<QuestionCreate> {
       question = TFQuestion.fromJson((widget.question as TFQuestion).toJson());
     }
     // Set question controller
-    _questionTextController.text = widget.question.text;
-    _questionTextController.addListener(() {
-      question.text = _questionTextController.text;
-    });
+    _questionTextController = TextEditingController(text: question.text);
     // Set option controller
+    if (widget.question is MCQuestion) {
+      for (var option in (widget.question as MCQuestion).options) {
+        _optionTextControllers.add(TextEditingController(text: option.text));
+      }
+    }
   }
 
   @override
@@ -176,6 +178,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                     decoration: InputDecoration(
                       labelText: 'Question text',
                     ),
+                    onChanged: (value) => question.text = value,
                     controller: _questionTextController,
                   ),
                 ),
@@ -305,10 +308,12 @@ class _QuestionCreateState extends State<QuestionCreate> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   spacing: 3,
                   children: [Icon(Icons.add), Text('ADD ANSWER')]),
+              // Add choice
               onPressed: () {
-                // Add choice
-                setState(
-                    () => {question.options.add(QuestionOption('', false))});
+                _optionTextControllers.add(TextEditingController());
+                setState(() => {
+                      question.options.add(QuestionOption('', false)),
+                    });
               },
             ),
           ),
@@ -328,11 +333,9 @@ class _QuestionCreateState extends State<QuestionCreate> {
           children: <Widget>[
             // Answer text
             TextFormField(
-                initialValue: option.text,
+                controller: _optionTextControllers[index],
                 onChanged: (value) {
-                  setState(() {
-                    option.text = value;
-                  });
+                  option.text = value;
                 },
                 validator: (val) =>
                     val.isEmpty ? "Option cannot be empty" : null,
@@ -371,6 +374,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                         // Shouldn't happen
                         if (questionType != QuestionType.MC) return;
                         (question as MCQuestion).options.removeAt(index);
+                        _optionTextControllers.removeAt(index);
                       });
                     },
                     child: Icon(Icons.delete),
