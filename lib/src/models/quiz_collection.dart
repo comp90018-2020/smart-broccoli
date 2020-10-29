@@ -1,13 +1,11 @@
 import 'dart:collection';
+import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 import 'model_change.dart';
 import 'auth_state.dart';
-import 'dart:async';
-import 'dart:typed_data';
-import 'package:flutter/services.dart' show rootBundle;
 
 /// View model for quiz management
 class QuizCollectionModel extends ChangeNotifier implements AuthChange {
@@ -102,30 +100,49 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     }
   }
 
-  Future<void> createQuiz(Quiz quiz) async {
-    var returnedQuiz = await _quizApi.createQuiz(_authStateModel.token, quiz);
-
-    Uint8List imageDataUint;
-    if (quiz.pendingPicturePath != null) {
-      var rootBundleData = await rootBundle.load(quiz.pendingPicturePath);
-
-      imageDataUint = rootBundleData.buffer.asUint8List();
-      await _quizApi.setQuizPicture(
-          _authStateModel.token, returnedQuiz, imageDataUint);
-      // await getQuizPicture(returnedQuiz);
-    }
-    notifyListeners();
-  }
-
   Future<void> deleteQuiz(Quiz quiz) async {
     await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
     _createdQuizzes.remove(quiz.id);
     notifyListeners();
   }
 
-  Future<void> updateQuiz(Quiz quiz) async {
-    await _quizApi.updateQuiz(_authStateModel.token, quiz);
-    notifyListeners();
+  /// Save selected quiz
+  Future<void> saveQuiz() async {
+    if (_selectedQuiz == null) return;
+
+    // First save the quiz
+    Quiz updated;
+    if (_selectedQuiz.id == null) {
+      updated = await _quizApi.createQuiz(_authStateModel.token, _selectedQuiz);
+    } else {
+      updated = await _quizApi.updateQuiz(_authStateModel.token, _selectedQuiz);
+    }
+
+    // Has quiz picture to save
+    if (_selectedQuiz.pendingPicturePath != null) {
+      await _quizApi.setQuizPicture(_authStateModel.token, updated.id,
+          await File(_selectedQuiz.pendingPicturePath).readAsBytes());
+    }
+
+    // Has quiz question pictures to save
+    for (var question in _selectedQuiz.questions) {
+      // Has question picture
+      if (_selectedQuiz.pendingPicturePath != null) {
+        if (question.id != null) {
+          // Has ID
+          await _quizApi.setQuestionPicture(
+              _authStateModel.token,
+              updated.id,
+              question.id,
+              await File(question.pendingPicturePath).readAsBytes());
+        } else {
+          /// TODO: weird things can happen here
+        }
+      }
+    }
+
+    // Refresh quiz (since picture IDs may have changed by this point)
+    refreshQuiz(updated.id);
   }
 
   Future<void> refreshCurrentSession() async {

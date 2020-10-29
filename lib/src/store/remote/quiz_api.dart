@@ -147,9 +147,9 @@ class QuizApi {
   ///
   /// Usage:
   /// [quiz] should be a `Quiz` object obtained by `getQuiz` or `getQuizzes`.
-  Future<void> setQuizPicture(String token, Quiz quiz, Uint8List bytes) async {
+  Future<void> setQuizPicture(String token, int quizId, Uint8List bytes) async {
     final http.MultipartRequest request = http.MultipartRequest(
-        'PUT', Uri.parse('$QUIZ_URL/${quiz.id}/picture'))
+        'PUT', Uri.parse('$QUIZ_URL/$quizId/picture'))
       ..headers.addAll(
           ApiBase.headers(contentType: 'multipart/form-data', authToken: token))
       ..files.add(

@@ -100,11 +100,13 @@ class _QuizCreateState extends State<QuizCreate> {
         ),
         CupertinoButton(
           padding: EdgeInsets.only(right: 14),
-          onPressed: () {
-            if (model.id != null) {
-              _saveQuiz();
-            } else {
-              _createQuiz();
+          onPressed: () async {
+            try {
+              await Provider.of<QuizCollectionModel>(context, listen: false)
+                  .saveQuiz();
+              Navigator.of(context).pop();
+            } catch (err) {
+              _showUnsuccessful("Cannot save quiz", err);
             }
           },
           child: Text(
@@ -403,35 +405,6 @@ class _QuizCreateState extends State<QuizCreate> {
             }),
       ),
     );
-  }
-
-  void _createQuiz() async {
-    fromControllersToModel();
-
-    if (quizNameController.text == "")
-      return _showUnsuccessful("Cannot create quiz", "Name required");
-    try {
-      await Provider.of<QuizCollectionModel>(context, listen: false)
-          .createQuiz(model);
-      Navigator.of(context).pop();
-    } catch (e) {
-      print(e);
-      _showUnsuccessful("Cannot create quiz", e);
-    }
-  }
-
-  void _saveQuiz() async {
-    fromControllersToModel();
-    if (quizNameController.text == "")
-      return _showUnsuccessful("Cannot create quiz", "Name required");
-    try {
-      await Provider.of<QuizCollectionModel>(context, listen: false)
-          .updateQuiz(model);
-      Navigator.of(context).pop();
-    } catch (e) {
-      print(e);
-      _showUnsuccessful("Cannot save changes in the quiz", e);
-    }
   }
 
   void _showUnsuccessful(String title, String body) {
