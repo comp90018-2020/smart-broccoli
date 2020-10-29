@@ -46,26 +46,32 @@ Future<ImageSource> showImgSrcPicker(BuildContext context) {
       title: const Text("Select upload method"),
       children: [
         SimpleDialogOption(
-          child: Row(
-            children: [
-              Icon(Icons.picture_in_picture),
-              Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: const Text("From gallery"),
-              )
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Icon(Icons.picture_in_picture),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: const Text("From gallery"),
+                )
+              ],
+            ),
           ),
           onPressed: () => Navigator.of(context).pop(ImageSource.gallery),
         ),
         SimpleDialogOption(
-          child: Row(
-            children: [
-              Icon(Icons.camera),
-              Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: const Text("Use camera"),
-              )
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Icon(Icons.camera),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: const Text("Use camera"),
+                )
+              ],
+            ),
           ),
           onPressed: () => Navigator.of(context).pop(ImageSource.camera),
         )
