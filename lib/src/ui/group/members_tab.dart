@@ -42,8 +42,8 @@ class MembersTab extends StatelessWidget {
                         onPressed: () async {
                           if (await showConfirmDialog(
                               context,
-                              "${group.members[index].name ?? 'The member'} will no longer be a " +
-                                  "member of the group",
+                              "${group.members[index].name ?? 'The member'}" +
+                                  "will no longer be a member of the group",
                               title: "Confirm kick member"))
                             try {
                               await registry.kickMemberFromGroup(
