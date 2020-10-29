@@ -38,6 +38,11 @@ class _QuestionCreateState extends State<QuestionCreate> {
   // The cloned question
   Question question;
 
+  TextEditingController _questionTextController = TextEditingController();
+
+  List<TextEditingController> _optionTextControllers =
+      <TextEditingController>[];
+
   // Type of question
   QuestionType questionType;
 
@@ -55,6 +60,12 @@ class _QuestionCreateState extends State<QuestionCreate> {
       questionType = QuestionType.TF;
       question = TFQuestion.fromJson((widget.question as TFQuestion).toJson());
     }
+    // Set question controller
+    _questionTextController.text = widget.question.text;
+    _questionTextController.addListener(() {
+      question.text = _questionTextController.text;
+    });
+    // Set option controller
   }
 
   @override
@@ -165,13 +176,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                     decoration: InputDecoration(
                       labelText: 'Question text',
                     ),
-                    initialValue: question.text,
-                    onChanged: (value) {
-                      // Set question text
-                      setState(() {
-                        question.text = value;
-                      });
-                    },
+                    controller: _questionTextController,
                   ),
                 ),
 

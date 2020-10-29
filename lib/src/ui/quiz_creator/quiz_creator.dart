@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_broccoli/src/ui.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:smart_broccoli/src/data/quiz.dart';
@@ -18,63 +18,32 @@ class QuizCreate extends StatefulWidget {
   /// Quiz id (used for editing)
   final int quizId;
 
-  final Quiz passedQuiz;
-
-  QuizCreate({this.groupId, Key key, this.passedQuiz, this.quizId})
-      : super(key: key);
+  QuizCreate({Key key, this.groupId, this.quizId}) : super(key: key);
 
   @override
   _QuizCreateState createState() => _QuizCreateState();
 }
 
 class _QuizCreateState extends State<QuizCreate> {
-  Quiz model;
   final _formKey = GlobalKey<FormState>();
+
+  Quiz quiz;
+
   var quizNameController;
   var timerTextController;
   String selectedGroupTitle;
   bool isDefaultGrpSelected = false;
 
+  // Provider.of<GroupRegistryModel>(context, listen: false)
+  //     .refreshCreatedGroups(withMembers: true);
+
   @override
   void initState() {
-    //Editing existing quiz
-    if (widget.passedQuiz != null) {
-      //Cloning a quiz so that the original reference is not mutated if not saved
-      Map<String, dynamic> quizJson = widget.passedQuiz.toJson();
-      model = Quiz.fromJson(quizJson);
-      quizNameController = TextEditingController(text: model.title);
-      timerTextController =
-          TextEditingController(text: model.timeLimit.toString() + " seconds");
-
-      //Setting bytes for picture
-      // if (widget.passedQuiz.pictureId != null){
-      //   model.picture = widget.passedQuiz.picture;
-      // }
-
-      //Creation of a new quiz
-    } else {
-      // TODO: replace with cloned quiz
-      model = Quiz("placeholder", 0, QuizType.LIVE);
-      quizNameController = TextEditingController();
-      // Text controller for seconds per question
-      timerTextController = TextEditingController(text: "30 seconds");
-      model.type = QuizType.LIVE;
-      model.questions = new List<Question>();
-    }
-
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups(withMembers: true);
-
-    try {} catch (e, stacktrace) {
-      print(e);
-      print(stacktrace);
-    }
-
     return CustomPage(
       title: "Quiz",
       secondaryBackgroundColour: true,
@@ -93,15 +62,7 @@ class _QuizCreateState extends State<QuizCreate> {
           icon: Icon(Icons.delete),
           padding: EdgeInsets.zero,
           splashRadius: 20,
-          onPressed: () async {
-            if (await _confirmDeleteQuiz(context) == true) {
-              if (model.id != null) {
-                _deleteQuiz();
-              } else {
-                Navigator.pop(context);
-              }
-            }
-          },
+          onPressed: _deleteQuiz,
         ),
         IconButton(
           icon: Icon(Icons.check),
@@ -113,7 +74,7 @@ class _QuizCreateState extends State<QuizCreate> {
                   .saveQuiz();
               Navigator.of(context).pop();
             } catch (err) {
-              _showUnsuccessful("Cannot save quiz", err);
+              // _showUnsuccessful("Cannot save quiz", err);
             }
           },
         ),
@@ -150,9 +111,9 @@ class _QuizCreateState extends State<QuizCreate> {
                 ),
 
                 // Picture selection
-                PictureCard(model.pendingPicturePath, (path) {
+                PictureCard(quiz.pendingPicturePath, (path) {
                   setState(() {
-                    model.pendingPicturePath = path;
+                    quiz.pendingPicturePath = path;
                   });
                 }),
 
@@ -184,11 +145,11 @@ class _QuizCreateState extends State<QuizCreate> {
                             Icons.people,
                             color: Colors.grey,
                           ),
-                          Consumer<GroupRegistryModel>(
-                            builder: (context, registry, child) {
-                              return buildGroupList(registry.createdGroups);
-                            },
-                          )
+                          // Consumer<GroupRegistryModel>(
+                          //   builder: (context, registry, child) {
+                          //     return buildGroupList(registry.createdGroups);
+                          //   },
+                          // )
                         ],
                       ),
                     ),
@@ -206,10 +167,10 @@ class _QuizCreateState extends State<QuizCreate> {
                         dense: true,
                         title: const Text('LIVE'),
                         value: QuizType.LIVE,
-                        groupValue: model.type,
+                        groupValue: quiz.type,
                         onChanged: (QuizType value) {
                           setState(() {
-                            model.type = value;
+                            quiz.type = value;
                           });
                         },
                       ),
@@ -217,10 +178,10 @@ class _QuizCreateState extends State<QuizCreate> {
                         dense: true,
                         title: const Text('SELF-PACED'),
                         value: QuizType.SELF_PACED,
-                        groupValue: model.type,
+                        groupValue: quiz.type,
                         onChanged: (QuizType value) {
                           setState(() {
-                            model.type = value;
+                            quiz.type = value;
                           });
                         },
                       ),
@@ -246,10 +207,10 @@ class _QuizCreateState extends State<QuizCreate> {
                   scrollDirection: Axis.vertical,
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  itemCount: questionsInQuiz(),
+                  itemCount: quiz.questions.length,
                   itemBuilder: (BuildContext context, int index) {
                     return _questionCard(
-                        index, model.questions.elementAt(index), context);
+                        index, quiz.questions.elementAt(index), context);
                   },
                 ),
 
@@ -265,7 +226,7 @@ class _QuizCreateState extends State<QuizCreate> {
                           spacing: 3,
                           children: [Icon(Icons.add), Text('ADD QUESTION')]),
                       onPressed: () {
-                        createEditQuestion(context);
+                        // createEditQuestion(context);
                       },
                     ),
                   ),
@@ -278,54 +239,10 @@ class _QuizCreateState extends State<QuizCreate> {
     );
   }
 
-  int questionsInQuiz() {
-    if (model.questions == null) {
-      return 0;
-    } else if (model.questions.isEmpty) {
-      return 0;
-    } else if (model.questions.isNotEmpty) {
-      return model.questions.length;
-    }
-    return 0;
-  }
-
-  createEditQuestion(BuildContext context, {int questionIndex}) async {
-    fromControllersToModel();
-
-    //Clone for quiz questions so that original copy does not get mutated in case changes are not saved
-    // Map<String, dynamic> quizJson = model.toJson();
-    // Quiz quizClone = Quiz.fromJson(quizJson);
-
-    // Navigator returns a Future that completes after calling
-    // dynamic result = await Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) =>
-    //         QuestionCreate(quiz: quizClone, passedQuestionIndex: questionIndex),
-    //   ),
-    // );
-
-    // //Null that is returned if transition is initiated by the back button
-    // if (result != null) {
-    //   setState(() {
-    //     model = result;
-    //   });
-    // }
-  }
-
-  //Transfer recent change to model
-  void fromControllersToModel() {
-    model.title = quizNameController.text;
-  }
-
   // Used to represent questions
   Widget _questionCard(int index, Question question, BuildContext context) {
-    var questionTextI = index + 1;
-
     return GestureDetector(
-        onTap: () {
-          createEditQuestion(context, questionIndex: index);
-        },
+        onTap: () => _editQuestion(index),
         child: Card(
           margin: EdgeInsets.symmetric(vertical: 4),
           child: Column(
@@ -349,7 +266,7 @@ class _QuizCreateState extends State<QuizCreate> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Question $questionTextI',
+                    Text('Question ${index + 1}',
                         style: Theme.of(context).textTheme.headline6),
                     Text(question.text)
                   ],
@@ -360,71 +277,8 @@ class _QuizCreateState extends State<QuizCreate> {
         ));
   }
 
-  setPictureForCard(Question question) {
-    if (question.pictureId == null) {}
-  }
-
-  Widget buildGroupList(List<Group> groups) {
-    //Seeting up initial value of the group
-    if (isDefaultGrpSelected == false) {
-      if (widget.passedQuiz == null && widget.groupId == null) {
-        model.groupId = groups[0].id;
-      } else if (widget.passedQuiz == null && widget.groupId != null) {
-        model.groupId = widget.groupId;
-      } else if (widget.passedQuiz != null) {
-        model.groupId = widget.passedQuiz.groupId;
-      }
-
-      for (var group in groups) {
-        if (model.groupId == group.id) {
-          selectedGroupTitle = group.name;
-        }
-      }
-
-      isDefaultGrpSelected = true;
-    }
-
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8.0),
-        child: DropdownButton(
-            isExpanded: true,
-            value: selectedGroupTitle,
-            items: groups.map((group) {
-              return DropdownMenuItem<String>(
-                value: group.name,
-                child: Text(group.name),
-              );
-            }).toList(),
-            onChanged: (String groupName) {
-              setState(() {
-                selectedGroupTitle = groupName;
-                for (var i = 0; i < groups.length; i++) {
-                  if (groupName == groups[i].name) {
-                    model.groupId = groups[i].id;
-                  }
-                }
-              });
-            }),
-      ),
-    );
-  }
-
-  void _showUnsuccessful(String title, String body) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: Navigator.of(context).pop,
-          ),
-        ],
-      ),
-    );
-  }
+  /// Edit question
+  void _editQuestion(int index) {}
 
   // Time dialog
   Future _showTimeDialog() async {
@@ -436,42 +290,21 @@ class _QuizCreateState extends State<QuizCreate> {
         }).then((value) {
       if (value != null && value is int) {
         setState(() {
-          model.timeLimit = value;
+          quiz.timeLimit = value;
           timerTextController.text = value.toString() + " seconds";
         });
       }
     });
   }
 
+  /// Delete quiz
   void _deleteQuiz() async {
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
-          .deleteQuiz(model);
+          .deleteQuiz(quiz);
       Navigator.of(context).pop();
-    } catch (e) {
-      print(e);
-      _showUnsuccessful("Cannot save changes in the quiz", e);
+    } on Exception catch (e) {
+      showBasicDialog(context, e.toString());
     }
-  }
-
-  Future<bool> _confirmDeleteQuiz(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Confirm quiz deletion"),
-        content: Text("This cannot be undone"),
-        actions: [
-          TextButton(
-            child: Text("Cancel"),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text("OK"),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
   }
 }
