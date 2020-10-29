@@ -63,26 +63,23 @@ class _QuizCardState extends State<QuizCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Quiz picture
-              showPicture
-                  ? AspectRatio(
-                      aspectRatio: widget.aspectRatio,
-                      child: FutureBuilder(
-                        future: Provider.of<QuizCollectionModel>(context)
-                            .getQuizPicture(widget.quiz.id),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<String> snapshot) {
-                          if (!snapshot.hasData || snapshot.data == null)
-                            return FractionallySizedBox(
-                                widthFactor: 0.8,
-                                heightFactor: 0.8,
-                                child: Image(
-                                    image: AssetImage('assets/icon.png')));
-                          return Image.file(File(snapshot.data),
-                              fit: BoxFit.cover);
-                        },
-                      ),
-                    )
-                  : SizedBox(),
+              if (showPicture)
+                AspectRatio(
+                  aspectRatio: widget.aspectRatio,
+                  child: FutureBuilder(
+                    future: Provider.of<QuizCollectionModel>(context)
+                        .getQuizPicture(widget.quiz.id),
+                    builder:
+                        (BuildContext context, AsyncSnapshot<String> snapshot) {
+                      if (!snapshot.hasData || snapshot.data == null)
+                        return FractionallySizedBox(
+                            widthFactor: 0.8,
+                            heightFactor: 0.8,
+                            child: Image(image: AssetImage('assets/icon.png')));
+                      return Image.file(File(snapshot.data), fit: BoxFit.cover);
+                    },
+                  ),
+                ),
 
               // Quiz title & Group name
               Container(
