@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 // Register tab
 class Register extends StatefulWidget {
@@ -144,34 +145,16 @@ class _RegisterState extends State<Register> {
         Provider.of<AuthStateModel>(context, listen: false)
             .login(_emailController.text, _passwordController.text);
       } on RegistrationConflictException {
-        _showRegistrationFailedDialogue(
-            context, 'Registration failed', 'Email already in use');
+        showBasicDialog(context, 'Email already in use',
+            title: 'Registration failed');
       } catch (_) {
-        _showRegistrationFailedDialogue(
-            context, 'Registration failed', 'Something went wrong');
+        showBasicDialog(context, 'Something went wrong',
+            title: 'Registration failed');
       }
     } else {
       setState(() {
         _formSubmitted = true;
       });
     }
-  }
-
-  void _showRegistrationFailedDialogue(
-      BuildContext context, String title, String content) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: Navigator.of(context).pop,
-          ),
-        ],
-      ),
-      barrierDismissible: true,
-    );
   }
 }
