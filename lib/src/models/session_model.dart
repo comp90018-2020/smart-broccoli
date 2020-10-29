@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/base.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import 'package:smart_broccoli/src/data.dart';
@@ -22,6 +23,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
+
+  final PubSub _pubSub;
 
   SessionApi _sessionApi;
 
@@ -55,7 +58,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
-  GameSessionModel(this._authStateModel, {SessionApi sessionApi}) {
+  GameSessionModel(this._authStateModel, this._pubSub,
+      {SessionApi sessionApi}) {
     _sessionApi = sessionApi ?? SessionApi();
     socket = IO.io(SERVER_URL, {
       'autoConnect': false,
