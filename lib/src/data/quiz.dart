@@ -1,3 +1,6 @@
+import 'package:collection/collection.dart';
+import 'package:quiver/core.dart';
+
 import 'game.dart';
 import 'group.dart';
 
@@ -159,6 +162,16 @@ class TFQuestion extends Question {
       TFQuestion._internal(
           json['id'], json['no'], json['text'], json['pictureId'], json['tf']);
 
+  bool operator ==(obj) =>
+      obj is TFQuestion &&
+      obj.text == this.text &&
+      obj.answer == this.answer &&
+      obj.pictureId == this.pictureId &&
+      obj.pendingPicturePath == this.pendingPicturePath;
+
+  int get hashCode => hash4(text.hashCode, answer.hashCode, pictureId.hashCode,
+      pendingPicturePath.hashCode);
+
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
     map['type'] = 'truefalse';
@@ -174,24 +187,35 @@ class TFQuestion extends Question {
 /// synchronised with the server to finalise any changes.
 class MCQuestion extends Question {
   List<QuestionOption> options;
-  int numCorrect;
+
+  // Number of correct options
+  int get numCorrect => this.options.where((option) => option.correct).length;
 
   /// Constructor for use when user creates a new multiple choice question
-  MCQuestion(String text, this.options, {int pictureId, this.numCorrect})
+  MCQuestion(String text, this.options, {int pictureId})
       : super(text: text, pictureId: pictureId);
 
   /// Constructor for internal use only
   MCQuestion._internal(int id, int no, String text, int pictureId,
-      {this.options, this.numCorrect})
+      {this.options})
       : super(id: id, no: no, text: text, pictureId: pictureId);
 
   factory MCQuestion.fromJson(Map<String, dynamic> json) =>
       MCQuestion._internal(
           json['id'], json['no'], json['text'], json['pictureId'],
-          numCorrect: json['numCorrect'],
           options: (json['options'] as List)
               .map((option) => QuestionOption.fromJson(option))
               .toList());
+
+  bool operator ==(obj) =>
+      obj is MCQuestion &&
+      obj.text == this.text &&
+      ListEquality().equals(obj.options, this.options) &&
+      obj.pictureId == this.pictureId &&
+      obj.pendingPicturePath == this.pendingPicturePath;
+
+  int get hashCode => hash4(text.hashCode, pictureId.hashCode,
+      pendingPicturePath.hashCode, options.hashCode);
 
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
@@ -219,6 +243,13 @@ class QuestionOption {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{'text': text, 'correct': correct};
   }
+
+  bool operator ==(obj) =>
+      obj is QuestionOption &&
+      obj.text == this.text &&
+      obj.correct == this.correct;
+
+  int get hashCode => hash2(text.hashCode, correct.hashCode);
 }
 
 /// Exception thrown when a quiz cannot be found by the server
@@ -227,3 +258,12 @@ class QuizNotFoundException implements Exception {}
 /// Exception thrown when a question cannot be found by the server
 /// (thrown when setting a question picture)
 class QuestionNotFoundException implements Exception {}
+
+// Question equality
+bool questionEqual(Question q1, Question q2) {
+  if (q1 is MCQuestion && q2 is MCQuestion ||
+      q1 is TFQuestion && q2 is TFQuestion) {
+    return q1 == q2;
+  }
+  return false;
+}

@@ -73,6 +73,5 @@ class _PictureCardState extends State<PictureCard> {
   void _openPictureSelector(BuildContext context, ImageSource source) async {
     PickedFile file = await picker.getImage(source: source);
     widget.updatePicture(file.path);
-    Navigator.of(context).pop();
   }
 }

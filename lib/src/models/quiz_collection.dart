@@ -71,10 +71,15 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Gets the specified quiz's picture.
-  Future<String> getQuizPicture(int id) {
-    Quiz quiz = getQuiz(id);
+  Future<String> getQuizPicture(Quiz quiz) {
     if (quiz == null || quiz.pictureId == null) return null;
     return _picStash.getPic(quiz.pictureId);
+  }
+
+  /// Get question picture
+  Future<String> getQuestionPicture(Question question) {
+    if (question == null || question.pictureId == null) return null;
+    return _picStash.getPic(question.pictureId);
   }
 
   /// Activate a self-paced quiz

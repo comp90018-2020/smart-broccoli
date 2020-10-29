@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'picture.dart';
@@ -16,11 +19,15 @@ class QuestionCreate extends StatefulWidget {
   /// Delete question
   final Function(int) delete;
 
+  /// Save question
+  final Function(int, Question) save;
+
   QuestionCreate(
       {Key key,
       @required this.question,
       @required this.questionIndex,
-      @required this.delete})
+      @required this.delete,
+      @required this.save})
       : super(key: key);
 
   @override
@@ -34,7 +41,12 @@ class _QuestionCreateState extends State<QuestionCreate> {
   // Type of question
   QuestionType questionType;
 
-  _QuestionCreateState() {
+  // Key for form widget, allows for validation
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  initState() {
+    super.initState();
     // Clone
     if (widget.question is MCQuestion) {
       questionType = QuestionType.MC;
@@ -58,8 +70,13 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
       // Close icon
       appbarLeading: GestureDetector(
-        onTap: () {
-          /// TODO: confirm discard
+        onTap: () async {
+          if (questionEqual(widget.question, question) ||
+              await showConfirmDialog(context,
+                  "Are you sure you want to discard the question changes?",
+                  title: "Discard question changes")) {
+            Navigator.of(context).pop();
+          }
         },
         child: Icon(Icons.close),
       ),
@@ -70,9 +87,19 @@ class _QuestionCreateState extends State<QuestionCreate> {
           icon: Icon(Icons.delete),
           padding: EdgeInsets.zero,
           splashRadius: 20,
-          onPressed: () {
-            widget.delete(widget.questionIndex);
-            Navigator.pop(context);
+          onPressed: () async {
+            // Question equal
+            if (questionEqual(widget.question, question)) {
+              return Navigator.pop(context);
+            }
+
+            // Delete question (parent handles)
+            if (await showConfirmDialog(
+                context, "Are you sure you want to delete the question?",
+                title: "Delete question")) {
+              widget.delete(widget.questionIndex);
+              Navigator.pop(context);
+            }
           },
         ),
         IconButton(
@@ -80,35 +107,39 @@ class _QuestionCreateState extends State<QuestionCreate> {
           padding: EdgeInsets.zero,
           splashRadius: 20,
           onPressed: () {
-            // print(widget.quiz);
+            // No change
+            if (questionEqual(question, widget.question)) {
+              Navigator.of(context).pop();
+              return;
+            }
 
-            // if (questionTextController.text == "") {
-            //   return _showUnsuccessful(
-            //       "Cannot create question", "Question text required");
-            // }
-            // if (question.options.length < 2) {
-            //   return _showUnsuccessful("Cannot create question",
-            //       "At least two possible answers are required");
-            // }
+            // Check option fields
+            if (!_formKey.currentState.validate()) return;
 
-            // question.text = questionTextController.text;
+            // Text or picture
+            if (question.text.isEmpty &&
+                question.pictureId == null &&
+                question.pendingPicturePath == null) {
+              showBasicDialog(context, "Question must have body or picture");
+              return;
+            }
 
-            // for (var i = 0; i < _optionTextControllers.length; i++) {
-            //   question.options[i].text = _optionTextControllers[i].text;
-            // }
+            // Correct answers
+            if (question is MCQuestion &&
+                (question as MCQuestion).numCorrect < 1) {
+              showBasicDialog(context, "At least one option must be correct");
+              return;
+            }
 
-            // if (widget.passedQuestionIndex == null) {
-            //   widget.quiz.questions.add(question);
-            // } else {
-            //   widget.quiz.questions[widget.passedQuestionIndex] = question;
-            // }
-            // Navigator.pop(context, widget.quiz);
+            // Finally save
+            widget.save(widget.questionIndex, question);
           },
         ),
       ],
 
       child: SingleChildScrollView(
         child: Form(
+          key: _formKey,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
@@ -119,7 +150,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
-                    'Question ${widget.questionIndex}',
+                    'Question ${widget.questionIndex + 1}',
                     style: new TextStyle(
                       fontSize: 17.0,
                       fontWeight: FontWeight.normal,
@@ -145,11 +176,24 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 ),
 
                 // Question image
-                PictureCard(null, (path) {
-                  setState(() {
-                    question.pendingPicturePath = path;
-                  });
-                }),
+                FutureBuilder(
+                  future: getPicturePath(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String> snapshot) {
+                    return PictureCard(snapshot.hasData ? snapshot.data : null,
+                        (path) {
+                      setState(() {
+                        question.pendingPicturePath = path;
+                      });
+                    });
+                  },
+                ),
+
+                // MC options
+                if (questionType == QuestionType.MC) ..._mcFields(question),
+
+                // TF options
+                if (questionType == QuestionType.TF) Container(),
               ],
             ),
           ),
@@ -158,8 +202,21 @@ class _QuestionCreateState extends State<QuestionCreate> {
     );
   }
 
+  /// Picture card
+  Future<String> getPicturePath() async {
+    // No image
+    if (question.pendingPicturePath == null && question.pictureId == null) {
+      return null;
+    }
+    // Updated image
+    if (question.pendingPicturePath != null) return question.pendingPicturePath;
+    // Image id
+    return await Provider.of<QuizCollectionModel>(context, listen: false)
+        .getQuestionPicture(question);
+  }
+
   /// Options editing for multiple choice
-  List<Widget> _mcOptions(MCQuestion question) {
+  List<Widget> _mcFields(MCQuestion question) {
     return [
       // Answers heading
       Container(
@@ -189,23 +246,25 @@ class _QuestionCreateState extends State<QuestionCreate> {
       ),
 
       // Add Answer
-      Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: RaisedButton(
-            shape: SmartBroccoliTheme.raisedButtonShape,
-            padding: EdgeInsets.all(14.0),
-            child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 3,
-                children: [Icon(Icons.add), Text('ADD ANSWER')]),
-            onPressed: () {
-              // Add choice
-              setState(() => {question.options.add(QuestionOption('', false))});
-            },
+      if (question.options.length < 4)
+        Center(
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: RaisedButton(
+              shape: SmartBroccoliTheme.raisedButtonShape,
+              padding: EdgeInsets.all(14.0),
+              child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 3,
+                  children: [Icon(Icons.add), Text('ADD ANSWER')]),
+              onPressed: () {
+                // Add choice
+                setState(
+                    () => {question.options.add(QuestionOption('', false))});
+              },
+            ),
           ),
-        ),
-      )
+        )
     ];
   }
 
@@ -227,6 +286,8 @@ class _QuestionCreateState extends State<QuestionCreate> {
                     option.text = value;
                   });
                 },
+                validator: (val) =>
+                    val.isEmpty ? "Option cannot be empty" : null,
                 decoration: InputDecoration(labelText: 'Answer')),
 
             // Bottom button action bar
