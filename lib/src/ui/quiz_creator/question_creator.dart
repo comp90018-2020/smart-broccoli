@@ -330,7 +330,8 @@ class _QuestionCreateState extends State<QuestionCreate> {
                         // Shouldn't happen
                         if (_questionType != QuestionType.MC) return;
                         (_question as MCQuestion).options.removeAt(index);
-                        _optionTextControllers.removeAt(index);
+                        var controller = _optionTextControllers.removeAt(index);
+                        controller.dispose();
                       });
                     },
                     child: Icon(Icons.delete),
