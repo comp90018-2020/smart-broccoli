@@ -1,5 +1,3 @@
-import 'package:smart_broccoli/src/models/session_model.dart';
-
 import 'game.dart';
 import 'group.dart';
 
