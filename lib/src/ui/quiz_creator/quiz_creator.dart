@@ -129,11 +129,15 @@ class _QuizCreateState extends State<QuizCreate> {
                         builder: (BuildContext context,
                             AsyncSnapshot<String> snapshot) {
                           return PictureCard(
-                              snapshot.hasData ? snapshot.data : null, (path) {
-                            setState(() {
-                              _quiz.pendingPicturePath = path;
-                            });
-                          });
+                            snapshot.hasData ? snapshot.data : null,
+                            updatePicture: (path) {
+                              setState(
+                                () {
+                                  _quiz.pendingPicturePath = path;
+                                },
+                              );
+                            },
+                          );
                         },
                       ),
 
@@ -281,9 +285,14 @@ class _QuizCreateState extends State<QuizCreate> {
               height: 175,
               child: Container(
                 width: double.maxFinite,
-                child: question.pictureId == null
-                    ? Icon(Icons.insert_photo_outlined, size: 100)
-                    : Icon(Icons.insert_photo_outlined, size: 100),
+                child: FutureBuilder(
+                    future: Provider.of<QuizCollectionModel>(context)
+                        .getQuestionPicture(question),
+                    builder:
+                        (BuildContext context, AsyncSnapshot<String> snapshot) {
+                      return PictureCard(
+                          snapshot.hasData ? snapshot.data : null);
+                    }),
               ),
             ),
             Padding(

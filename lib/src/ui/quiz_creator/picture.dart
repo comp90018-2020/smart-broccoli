@@ -15,7 +15,7 @@ class PictureCard extends StatefulWidget {
   /// Callback for upload
   final void Function(String) updatePicture;
 
-  PictureCard(this.picturePath, this.updatePicture);
+  PictureCard(this.picturePath, {this.updatePicture});
 
   @override
   State createState() => _PictureCardState();
@@ -42,30 +42,31 @@ class _PictureCardState extends State<PictureCard> {
             ),
 
             // Update picture (top right)
-            Positioned(
-              top: 0,
-              right: 6,
-              child: ButtonTheme(
-                minWidth: 10,
-                child: RaisedButton(
-                  shape: SmartBroccoliTheme.raisedButtonShape,
-                  child: Icon(
-                    Icons.add_a_photo,
-                    size: 20,
+            if (widget.updatePicture != null)
+              Positioned(
+                top: 0,
+                right: 6,
+                child: ButtonTheme(
+                  minWidth: 10,
+                  child: RaisedButton(
+                    shape: SmartBroccoliTheme.raisedButtonShape,
+                    child: Icon(
+                      Icons.add_a_photo,
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      ImageSource source = await showImgSrcPicker(context);
+                      if (source == null) return;
+                      _openPictureSelector(context, source);
+                    },
                   ),
-                  onPressed: () async {
-                    ImageSource source = await showImgSrcPicker(context);
-                    if (source == null) return;
-                    _openPictureSelector(context, source);
-                  },
                 ),
               ),
-            ),
           ],
         ),
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        elevation: 5,
+        elevation: widget.updatePicture == null ? 0 : 5,
       ),
     );
   }

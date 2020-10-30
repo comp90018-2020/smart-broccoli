@@ -154,12 +154,14 @@ class _QuestionCreateState extends State<QuestionCreate> {
                   future: _getPicturePath(),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
-                    return PictureCard(snapshot.hasData ? snapshot.data : null,
-                        (path) {
-                      setState(() {
-                        _question.pendingPicturePath = path;
-                      });
-                    });
+                    return PictureCard(
+                      snapshot.hasData ? snapshot.data : null,
+                      updatePicture: (path) {
+                        setState(() {
+                          _question.pendingPicturePath = path;
+                        });
+                      },
+                    );
                   },
                 ),
 
