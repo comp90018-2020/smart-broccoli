@@ -12,6 +12,23 @@ import 'package:workmanager/workmanager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+
+  /// Initialise background services
+  Workmanager.initialize(
+    callbackDispatcher,
+    isInDebugMode: true,
+  );
+  /// Schedule the background task
+  /// Default is 15 minutes per refresh
+  Workmanager.registerPeriodicTask(
+    "1",
+    "backgroundReading",
+    initialDelay: Duration(seconds: 20),
+  );
+
+
+
   // Communication
   final PubSub pubSub = PubSub();
 
@@ -83,21 +100,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub
         .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
-
-    /// Initialise background services
-    Workmanager.initialize(
-      callbackDispatcher,
-      isInDebugMode: true,
-    );
-    // Purge the previous Background tasks
-    Workmanager.cancelAll();
-    /// Schedule the background task
-    /// Default is 15 minutes per refresh
-    Workmanager.registerPeriodicTask(
-      "1",
-      "backgroundReading",
-      initialDelay: Duration(seconds: 20),
-    );
   }
 
   /// Navigate to route

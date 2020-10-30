@@ -39,60 +39,17 @@ void callbackDispatcher() {
     try {
       switch (task) {
         case "backgroundReading":
+          print("Task running on background");
 
+          Position userLocation = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+          print("Done");
+          Notification notification = new Notification();
+          print("Sending Notification");
+          await notification.showNotificationWithoutSound(userLocation);
 
           break;
 
-
-
-
-          break;
-          // Geolocation Logic here
-
-          // Luminosity sensor
-          await startListeningLight();
-          // Light logic here
-          print(_luxString);
-
-          stopListeningLight();
-          // Connection Sorting
-          await initConnectivity();
-          print(_connectionStatus);
-          // Connectivity Logic here
-          _connectivitySubscription.cancel();
-          // Wifi Info sensor
-          await initPlatformState();
-
-          String ipAddress =
-              _wifiObject != null ? _wifiObject.ipAddress.toString() : "ip";
-          print(ipAddress);
-
-          /// Noise meters
-          _noiseMeter = new NoiseMeter();
-          await startRecording();
-
-          stopRecording();
-
-          /*
-          DeviceCalendarPlugin _deviceCalandar = new DeviceCalendarPlugin();
-
-          final calendarsResult  =  await _deviceCalandar.retrieveCalendars();
-
-          List<Calendar>_cal = calendarsResult?.data;
-
-          retrieveEventsParams
-
-          _cal[0].id
-
-          _deviceCalandar.retrieveEvents(calendarId, retrieveEventsParams)
-
-           */
-
-
-          // Logic here
-
-          print("FLUTTER AND OTHER SERVICES ARE RUNNING ON THE BACKGROUND");
-          break;
       }
       return Future.value(true);
     } on MissingPluginException catch (e) {
