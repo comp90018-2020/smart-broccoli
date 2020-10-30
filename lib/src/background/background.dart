@@ -1,16 +1,19 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:light/light.dart';
 import 'package:noise_meter/noise_meter.dart';
 import 'package:smart_broccoli/notification.dart';
 import 'package:wifi_info_plugin/wifi_info_plugin.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:device_calendar/device_calendar.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:xml/xml.dart';
 
+// TODO move these into their own functions
 // Make functions for these
 // Workload manager
 // Method channel if Kotlin is ever used
@@ -33,6 +36,50 @@ List<StreamSubscription<dynamic>> _streamSubscriptions =
 String recordingData;
 int LuxValue;
 
+/*
+* <osm-script>
+  <union into="_">
+    <query into="_" type="way">
+      <has-kv k="railway" modv="" regv="^(rail|subway|tram)$"/>
+      <bbox-query s="51.451" w="7.009" n="51.453" e="7.011"/>
+    </query>
+    <recurse from="_" into="_" type="down"/>
+  </union>
+  <print e="" from="_" geometry="skeleton" ids="yes" limit="" mode="body" n="" order="id" s="" w=""/>
+</osm-script>
+
+*
+* */
+
+http.Client _http;
+
+Future<HttpClientResponse> _sendOTP(
+    String lon, String lat, String lon1, String lat1) async {
+  final data = '''<?xml version="1.0" encoding="UTF-8"?>
+<osm-script>
+  <union into="_">
+    <query into="_" type="way">
+      <has-kv k="railway" modv="" regv="^(rail|subway|tram)"/>
+      <bbox-query s="$lon" w="$lat" n="$lon1" e="$lat1"/>
+    </query>
+    <recurse from="_" into="_" type="down"/>
+  </union>
+  <print e="" from="_" geometry="skeleton" ids="yes" limit="" mode="body" n="" order="id" s="" w=""/>
+</osm-script>''';
+
+  final document = XmlDocument.parse(data);
+  String _uriMsj = document.toString();
+  print("uri msj =" + _uriMsj);
+
+  String _uri = 'http://overpass-api.de/api/interpreter';
+
+  http.Response response = await http.post(_uri, body: _uriMsj, headers: {
+    'Content-type': 'text/xml',
+  });
+
+  print("Response code " + response.statusCode.toString());
+  print("Response body " + response.body.toString());
+}
 
 void callbackDispatcher() {
   Workmanager.executeTask((task, inputData) async {
@@ -41,15 +88,31 @@ void callbackDispatcher() {
         case "backgroundReading":
           print("Task running on background");
 
-          Position userLocation = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+          Position userLocation = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high);
 
-          print("Done");
+          print("Location reading complete Done");
+
+          List<Placemark> placemark = await placemarkFromCoordinates(
+              userLocation.latitude, userLocation.longitude);
+
+          double lon1 = userLocation.longitude + 0.001;
+          double lon2 = userLocation.longitude - 0.001;
+          double lat1 = userLocation.latitude + 0.001;
+          double lat2 = userLocation.latitude - 0.001;
+
+          await _sendOTP(lat2.toString(), lon2.toString(), lat1.toString(),
+              lon1.toString());
+
+          print("Placemark " + placemark.toString());
+          print("Placemark identification complete");
+
           Notification notification = new Notification();
           print("Sending Notification");
-          await notification.showNotificationWithoutSound(userLocation);
+          await notification.showNotificationWithoutSound(
+              userLocation, placemark.first);
 
           break;
-
       }
       return Future.value(true);
     } on MissingPluginException catch (e) {

@@ -1,11 +1,12 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class Notification {
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-  Future showNotificationWithoutSound(Position position) async {
+  Future showNotificationWithoutSound(Position position,Placemark placemark) async {
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
         '1', 'location-bg', 'fetch location in background',
         playSound: false, importance: Importance.max, priority: Priority.high);
@@ -16,7 +17,7 @@ class Notification {
     await flutterLocalNotificationsPlugin.show(
       0,
       'Location fetched',
-      position.toString(),
+      position.toString() + placemark.toString(),
       platformChannelSpecifics,
       payload: '',
     );
