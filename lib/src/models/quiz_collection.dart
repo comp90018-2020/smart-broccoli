@@ -70,9 +70,12 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   Future<void> selectQuiz(int id) async {
-    _selectedQuiz = null;
     _selectedQuiz = await _refreshQuiz(id, withQuestionPictures: true);
     notifyListeners();
+  }
+
+  void clearSelectedQuiz() {
+    _selectedQuiz = null;
   }
 
   /// Gets the specified quiz's picture.
@@ -257,6 +260,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     if (!_authStateModel.inSession) {
       _availableQuizzes = {};
       _createdQuizzes = {};
+      _selectedQuiz = null;
     }
   }
 }

@@ -46,7 +46,6 @@ class _QuizCreateState extends State<QuizCreate> {
 
     // From quiz id
     if (widget.quizId != null) {
-      _quiz = null;
       Provider.of<QuizCollectionModel>(context, listen: false)
           .selectQuiz(widget.quizId)
           .then((value) => null);
@@ -418,13 +417,17 @@ class _QuizCreateState extends State<QuizCreate> {
         return;
       }
     }
+    context.read<QuizCollectionModel>().clearSelectedQuiz();
     Navigator.of(context).pop();
   }
 
   /// Save quiz
   void _saveQuiz() async {
     // No change
-    if (_quiz.id != null && !quizModified()) return Navigator.of(context).pop();
+    if (_quiz.id != null && !quizModified()) {
+      context.read<QuizCollectionModel>().clearSelectedQuiz();
+      return Navigator.of(context).pop();
+    }
 
     if (_quiz.title.isEmpty) {
       showBasicDialog(context, "Quiz name cannot be empty");
@@ -440,9 +443,9 @@ class _QuizCreateState extends State<QuizCreate> {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .saveQuiz(_quiz);
       await showBasicDialog(context, "Quiz saved", title: "Success");
+      context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
     } catch (err) {
-      print(err);
       showBasicDialog(context, err.toString());
     }
   }
@@ -458,6 +461,7 @@ class _QuizCreateState extends State<QuizCreate> {
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .deleteQuiz(_quiz);
+      context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
     } on Exception catch (err) {
       showBasicDialog(context, err.toString());
