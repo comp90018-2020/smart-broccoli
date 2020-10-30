@@ -321,7 +321,7 @@ class _QuizCreateState extends State<QuizCreate> {
         items: [
           DropdownMenuItem(child: Text("Select a group"), value: null),
           ...groups.map((group) => DropdownMenuItem(
-                child: Text(group.name),
+                child: Text(group.nameWithDefaultGroup),
                 value: group.id,
               ))
         ],
