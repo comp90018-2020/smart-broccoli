@@ -34,28 +34,32 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     _sessionApi = sessionApi ?? SessionApi();
   }
 
+  /// get quizzes by rules
+  UnmodifiableListView<Quiz> filterQuizzesWhere(Iterable<Quiz> quizzes,
+          {int groupId, QuizType type}) =>
+      UnmodifiableListView(quizzes
+          .where((quiz) =>
+              (groupId == null || quiz.groupId == groupId) &&
+              (type == null || quiz.type == type))
+          .toList()
+            ..sort());
+
   /// Gets all quizzes
   UnmodifiableListView<Quiz> getQuizzesWhere({int groupId, QuizType type}) =>
-      UnmodifiableListView([
-        ..._availableQuizzes.values,
-        ..._createdQuizzes.values
-      ].where((quiz) =>
-          (groupId == null || quiz.groupId == groupId) &&
-          (type == null || quiz.type == type)));
+      filterQuizzesWhere(
+          [..._availableQuizzes.values, ..._createdQuizzes.values],
+          groupId: groupId, type: type);
 
   /// Gets available (user accessible) quizzes
   UnmodifiableListView<Quiz> getAvailableQuizzesWhere(
           {int groupId, QuizType type}) =>
-      UnmodifiableListView(_availableQuizzes.values.where((quiz) =>
-          (groupId == null || quiz.groupId == groupId) &&
-          (type == null || quiz.type == type)));
+      filterQuizzesWhere(_availableQuizzes.values,
+          groupId: groupId, type: type);
 
   /// Gets created (user managed) quizzes
   UnmodifiableListView<Quiz> getCreatedQuizzesWhere(
           {int groupId, QuizType type}) =>
-      UnmodifiableListView(_createdQuizzes.values.where((quiz) =>
-          (groupId == null || quiz.groupId == groupId) &&
-          (type == null || quiz.type == type)));
+      filterQuizzesWhere(_createdQuizzes.values, groupId: groupId, type: type);
 
   Quiz getQuiz(int id) {
     return _createdQuizzes[id] ?? _availableQuizzes[id];

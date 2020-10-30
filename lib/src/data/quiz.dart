@@ -4,16 +4,17 @@ import 'package:quiver/core.dart';
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { LIVE, SELF_PACED }
+enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
 
 /// Object representing a quiz
 /// Instances of this class are returned when fetching quizzes from the server.
 /// Additional instances of this class (i.e. not fetched from the server) are
 /// to be constructed when the user creates a new quiz. A new quiz can be
 /// synchronised with the server by passing it to `QuizModel.createQuiz`.
-class Quiz {
+class Quiz implements Comparable<Quiz> {
   /// ID of the quiz (for quizzes fetched from server only)
   final int id;
+  final int updatedTimestamp;
 
   /// Picture ID (from server)
   final int pictureId;
@@ -35,7 +36,7 @@ class Quiz {
   int groupId;
 
   /// Type of quiz
-  QuizType type;
+  QuizType _type;
 
   /// Quiz is active?
   bool isActive;
@@ -58,17 +59,18 @@ class Quiz {
           bool isActive = false,
           int timeLimit,
           List<Question> questions = const []}) =>
-      Quiz._internal(null, null, GroupRole.OWNER, title, groupId, type,
+      Quiz._internal(null, null, null, GroupRole.OWNER, title, groupId, type,
           description, isActive, timeLimit, questions, null, false);
 
   /// Constructor for internal use only
   Quiz._internal(
     this.id,
+    this.updatedTimestamp,
     this.pictureId,
     this.role,
     this.title,
     this.groupId,
-    this.type,
+    this._type,
     this.description,
     this.isActive,
     this.timeLimit,
@@ -85,6 +87,7 @@ class Quiz {
     });
     Quiz quiz = Quiz._internal(
         json['id'],
+        DateTime.parse(json['updatedAt']).millisecondsSinceEpoch,
         json['pictureId'],
         json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
         json['title'],
@@ -111,7 +114,7 @@ class Quiz {
       'title': title,
       'groupId': groupId,
       'pictureId': pictureId,
-      'type': type == QuizType.LIVE ? 'live' : 'self paced',
+      'type': _type == QuizType.LIVE ? 'live' : 'self paced',
       'description': description,
       'active': isActive,
       'timeLimit': timeLimit,
@@ -133,6 +136,36 @@ class Quiz {
       obj.isActive == this.isActive &&
       obj.timeLimit == this.timeLimit &&
       ListEquality().equals(obj.questions, this.questions);
+
+  @override
+  int compareTo(Quiz other) {
+    int thisType = this.type.index;
+    int thisTimestamp = this.updatedTimestamp;
+    int otherType = other.type.index;
+    int otherTimestamp = this.updatedTimestamp;
+
+    if (thisType == otherType)
+      return otherTimestamp - thisTimestamp;
+    else
+      return thisType - otherType;
+  }
+
+  /// Type of quiz
+  QuizType get type {
+    // Live quiz
+    if (this._type == QuizType.LIVE) return QuizType.LIVE;
+    // Determine if smart session exists (a self-paced quiz with session)
+    var smartSession = this.sessions?.firstWhere(
+        (session) =>
+            session.quizType == QuizType.SELF_PACED &&
+            session.state != GameSessionState.ENDED, orElse: () {
+      return null;
+    });
+    return smartSession == null ? QuizType.SELF_PACED : QuizType.SMART_LIVE;
+  }
+
+  /// Set type
+  set type(QuizType type) => this._type = type;
 }
 
 /// Object representing a question in a quiz
