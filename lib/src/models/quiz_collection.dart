@@ -36,48 +36,33 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     _sessionApi = sessionApi ?? SessionApi();
   }
 
-  /// Sort quizzes in order of Smart Live -> Live -> Self-paced chronologically
-  List<Quiz> sortQuizzes(List<Quiz> quizzes) {
-    if (quizzes.isNotEmpty) {
-      quizzes.sort((a, b) => a.compareTo(b));
-    }
-    return quizzes;
+  /// get quizzes by rules
+  List<Quiz> filterQuizzesWhere(Iterable<Quiz> quizzes,
+      {int groupId, QuizType type, bool rule}) {
+    List<Quiz> filteredQuizzes = quizzes
+        .where((quiz) => (rule == null
+            ? (groupId == null || quiz.groupId == groupId) &&
+                (type == null || quiz.type == type)
+            : rule))
+        .toList();
+    filteredQuizzes.sort();
+    return filteredQuizzes;
   }
 
   /// Gets all quizzes
-  UnmodifiableListView<Quiz> getQuizzesWhere({int groupId, QuizType type}) {
-    List<Quiz> quizzes = [
-      ..._availableQuizzes.values,
-      ..._createdQuizzes.values
-    ]
-        .where((quiz) =>
-            (groupId == null || quiz.groupId == groupId) &&
-            (type == null || quiz.type == type))
-        .toList();
-    return UnmodifiableListView(sortQuizzes(quizzes));
-  }
+  UnmodifiableListView<Quiz> getAllQuizzesWhere({int groupId, QuizType type}) =>
+      UnmodifiableListView(filterQuizzesWhere(
+          [..._availableQuizzes.values, ..._createdQuizzes.values]));
 
   /// Gets available (user accessible) quizzes
   UnmodifiableListView<Quiz> getAvailableQuizzesWhere(
-      {int groupId, QuizType type}) {
-    List<Quiz> quizzes = _availableQuizzes.values
-        .where((quiz) =>
-            (groupId == null || quiz.groupId == groupId) &&
-            (type == null || quiz.type == type))
-        .toList();
-    return UnmodifiableListView(sortQuizzes(quizzes));
-  }
+          {int groupId, QuizType type}) =>
+      UnmodifiableListView(filterQuizzesWhere(_availableQuizzes.values));
 
   /// Gets created (user managed) quizzes
   UnmodifiableListView<Quiz> getCreatedQuizzesWhere(
-      {int groupId, QuizType type}) {
-    List<Quiz> quizzes = _createdQuizzes.values
-        .where((quiz) =>
-            (groupId == null || quiz.groupId == groupId) &&
-            (type == null || quiz.type == type))
-        .toList();
-    return UnmodifiableListView(sortQuizzes(quizzes));
-  }
+          {int groupId, QuizType type}) =>
+      UnmodifiableListView(filterQuizzesWhere(_createdQuizzes.values));
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);

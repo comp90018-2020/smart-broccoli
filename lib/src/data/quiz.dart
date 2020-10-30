@@ -1,14 +1,14 @@
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
+enum QuizType { LIVE, SELF_PACED }
 
 /// Object representing a quiz
 /// Instances of this class are returned when fetching quizzes from the server.
 /// Additional instances of this class (i.e. not fetched from the server) are
 /// to be constructed when the user creates a new quiz. A new quiz can be
 /// synchronised with the server by passing it to `QuizModel.createQuiz`.
-class Quiz {
+class Quiz implements Comparable<Quiz> {
   /// ID of the quiz (for quizzes fetched from server only)
   final int id;
   final int updatedTimestamp;
@@ -104,25 +104,17 @@ class Quiz {
     return json;
   }
 
+  @override
   int compareTo(Quiz other) {
     switch (this.type) {
-      case QuizType.SMART_LIVE:
-        if (this.updatedTimestamp < other.updatedTimestamp) {
-          return 1;
-        }
-        return 0;
       case QuizType.LIVE:
-        if (other.type == QuizType.SMART_LIVE) {
-          return 1;
-        }
         if (other.type == QuizType.LIVE &&
             this.updatedTimestamp < other.updatedTimestamp) {
           return 1;
         }
         return 0;
       case QuizType.SELF_PACED:
-        if (other.type == QuizType.SMART_LIVE ||
-            other.type == QuizType.LIVE ||
+        if (other.type == QuizType.LIVE ||
             this.updatedTimestamp < other.updatedTimestamp) {
           return 1;
         }
