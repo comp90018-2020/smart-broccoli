@@ -162,7 +162,7 @@ class _QuizCreateState extends State<QuizCreate> {
                           ),
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
+                              padding: const EdgeInsets.only(left: 12),
                               child: Consumer<GroupRegistryModel>(
                                 builder: (context, registry, child) {
                                   return _buildGroupList(
@@ -298,6 +298,7 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Builds the group list dropdown
   Widget _buildGroupList(List<Group> groups) {
     return DropdownButton(
+        elevation: 0,
         isExpanded: true,
         value: _quiz.groupId,
         items: [
@@ -407,12 +408,23 @@ class _QuizCreateState extends State<QuizCreate> {
     if (widget.quiz != null && widget.quiz == _quiz)
       return Navigator.of(context).pop();
 
+    if (_quiz.title.isEmpty) {
+      showBasicDialog(context, "Quiz name cannot be empty");
+      return;
+    }
+
+    if (_quiz.groupId == null) {
+      showBasicDialog(context, "Quiz must belong to a group");
+      return;
+    }
+
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .saveQuiz(_quiz);
-      showBasicDialog(context, "Quiz saved", title: "Success");
+      await showBasicDialog(context, "Quiz saved", title: "Success");
       Navigator.of(context).pop();
     } catch (err) {
+      print(err);
       showBasicDialog(context, err.toString());
     }
   }

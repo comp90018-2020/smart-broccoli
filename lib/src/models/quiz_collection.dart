@@ -143,7 +143,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
 
     // Refresh quiz (since picture IDs may have changed by this point)
     refreshQuiz(updated.id, withQuestionPictures: true);
-    notifyListeners();
   }
 
   Future<void> refreshCurrentSession() async {
@@ -176,6 +175,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     } else {
       _availableQuizzes[quiz.id] = quiz;
     }
+    notifyListeners();
     return quiz;
   }
 
