@@ -293,7 +293,7 @@ class _QuizCreateState extends State<QuizCreate> {
                 children: [
                   Text('Question ${index + 1}',
                       style: Theme.of(context).textTheme.headline6),
-                  Text(question.text)
+                  if (question.text.isNotEmpty) Text(question.text)
                 ],
               ),
             )
