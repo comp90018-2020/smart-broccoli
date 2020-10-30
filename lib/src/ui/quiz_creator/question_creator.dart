@@ -83,6 +83,10 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
   @override
   void dispose() {
+    _questionTextController.dispose();
+    for (var controller in _optionTextControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
