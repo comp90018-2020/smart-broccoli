@@ -1,7 +1,7 @@
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { LIVE, SELF_PACED }
+enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
 
 /// Object representing a quiz
 /// Instances of this class are returned when fetching quizzes from the server.
@@ -23,7 +23,7 @@ class Quiz implements Comparable<Quiz> {
   String description;
 
   int groupId;
-  QuizType type;
+  QuizType _type;
   bool isActive;
   final List<GameSession> sessions;
 
@@ -49,7 +49,7 @@ class Quiz implements Comparable<Quiz> {
     this.role,
     this.title,
     this.groupId,
-    this.type,
+    this._type,
     this.description,
     this.isActive,
     this.timeLimit,
@@ -106,9 +106,9 @@ class Quiz implements Comparable<Quiz> {
 
   @override
   int compareTo(Quiz other) {
-    int thisType = this._getQuizType(this);
+    int thisType = this.type.index;
     int thisTimestamp = this.updatedTimestamp;
-    int otherType = this._getQuizType(other);
+    int otherType = other.type.index;
     int otherTimestamp = this.updatedTimestamp;
 
     if (thisType == otherType)
@@ -117,19 +117,22 @@ class Quiz implements Comparable<Quiz> {
       return thisType - otherType;
   }
 
-  int _getQuizType(Quiz quiz) {
-    if (quiz.type == QuizType.LIVE) {
-      if (quiz.sessions.isEmpty) return 0;
-      try {
-        quiz.sessions
-            .firstWhere((session) => session.quizType == QuizType.SELF_PACED);
-        return 0;
-      } catch (_) {
-        return 1;
-      }
-    }
-    return 2;
+  /// Type of quiz
+  QuizType get type {
+    // Live quiz
+    if (this._type == QuizType.LIVE) return QuizType.LIVE;
+    // Determine if start sessione xists
+    var smartSession = this.sessions.firstWhere(
+        (session) =>
+            session.quizType == QuizType.SELF_PACED &&
+            session.state != GameSessionState.ENDED, orElse: () {
+      return null;
+    });
+    return smartSession == null ? QuizType.SELF_PACED : QuizType.SMART_LIVE;
   }
+
+  /// Set type
+  set type(QuizType type) => this._type = type;
 }
 
 /// Object representing a question in a quiz
