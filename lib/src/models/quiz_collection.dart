@@ -27,6 +27,10 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   GameSession _currentSession;
   GameSession get currentSession => _currentSession;
 
+  /// Quiz that is selected in quiz page
+  Quiz _selectedQuiz;
+  Quiz get selectedQuiz => _selectedQuiz;
+
   /// Constructor for external use
   QuizCollectionModel(this._authStateModel, this._picStash,
       {QuizApi quizApi, SessionApi sessionApi}) {
@@ -65,6 +69,12 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     return _createdQuizzes[id] ?? _availableQuizzes[id];
   }
 
+  Future<void> selectQuiz(int id) async {
+    _selectedQuiz = null;
+    _selectedQuiz = await _refreshQuiz(id, withQuestionPictures: true);
+    notifyListeners();
+  }
+
   /// Gets the specified quiz's picture.
   Future<String> getQuizPicture(Quiz quiz) {
     if (quiz == null || quiz.pictureId == null) return null;
@@ -95,7 +105,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
         notifyListeners();
       }
     } catch (err) {
-      await refreshQuiz(quiz.id);
+      await _refreshQuiz(quiz.id);
       throw err;
     }
   }
@@ -142,7 +152,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     }
 
     // Refresh quiz (since picture IDs may have changed by this point)
-    refreshQuiz(updated.id, withQuestionPictures: true);
+    _refreshQuiz(updated.id, withQuestionPictures: true);
   }
 
   Future<void> refreshCurrentSession() async {
@@ -159,7 +169,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes the specified quiz
-  Future<Quiz> refreshQuiz(int quizId,
+  Future<Quiz> _refreshQuiz(int quizId,
       {bool withQuestionPictures = false}) async {
     // Refreshes the specified quiz
     var quiz = await _quizApi.getQuiz(_authStateModel.token, quizId);

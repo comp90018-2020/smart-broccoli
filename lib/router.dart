@@ -1,7 +1,5 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
-import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui.dart';
 
 /// Actions
@@ -144,11 +142,7 @@ class BroccoliRouter {
     router.define(quizId, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       int quizId = params["id"].length > 0 ? int.parse(params["id"][0]) : null;
-      if (quizId != null)
-        Provider.of<QuizCollectionModel>(context)
-            .refreshQuiz(quizId)
-            .then((quiz) => {QuizCreate(quiz: quiz)});
-      return QuizCreate();
+      return QuizCreate(quizId: quizId);
     }));
 
     // Session question

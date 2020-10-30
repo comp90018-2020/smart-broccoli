@@ -16,9 +16,9 @@ class QuizCreate extends StatefulWidget {
   final int groupId;
 
   /// Quiz id (used for editing)
-  final Quiz quiz;
+  final int quizId;
 
-  QuizCreate({Key key, this.groupId, this.quiz}) : super(key: key);
+  QuizCreate({Key key, this.groupId, this.quizId}) : super(key: key);
 
   @override
   _QuizCreateState createState() => _QuizCreateState();
@@ -31,37 +31,35 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Quiz that is held
   Quiz _quiz;
 
-  /// Controller for text
-  TextEditingController _quizTitleController;
-
   @override
   void initState() {
     super.initState();
-
-    print(widget.quiz);
-    print(widget.groupId);
 
     /// TODO: optimise group retrieval (this retrieves quiz/members of group) repeatedly
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups();
 
     // From group or new quiz
-    if (widget.groupId != null || widget.quiz == null)
+    if (widget.groupId != null || widget.quizId == null) {
       _quiz = new Quiz("", widget.groupId, QuizType.LIVE, timeLimit: 10);
-    // From quiz id
-    if (widget.quiz != null) {
-      _quiz = Quiz.fromJson(widget.quiz.toJson());
     }
 
-    // Quiz title
-    _quizTitleController = TextEditingController(text: _quiz.title);
-    _quizTitleController.addListener(() {
-      _quiz.title = _quizTitleController.text;
-    });
+    // From quiz id
+    if (widget.quizId != null) {
+      _quiz = null;
+      Provider.of<QuizCollectionModel>(context, listen: false)
+          .selectQuiz(widget.quizId)
+          .then((value) => null);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Set quiz after selectQuiz
+    var quiz =
+        Provider.of<QuizCollectionModel>(context, listen: true).selectedQuiz;
+    if (_quiz == null && quiz != null) _quiz = quiz;
+
     return CustomPage(
       title: "Quiz",
       secondaryBackgroundColour: true,
@@ -87,174 +85,184 @@ class _QuizCreateState extends State<QuizCreate> {
           onPressed: _saveQuiz,
         ),
       ],
+      child: _quiz == null
+          ? Container()
+          : SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Settings
+                      Text(
+                        'Attributes',
+                        style: new TextStyle(
+                          fontSize: 17.0,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
 
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Settings
-                Text(
-                  'Attributes',
-                  style: new TextStyle(
-                    fontSize: 17.0,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white,
-                  ),
-                ),
-
-                // Name box
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: TextField(
-                    controller: _quizTitleController,
-                    decoration: InputDecoration(
-                      labelText: 'Quiz name',
-                    ),
-                  ),
-                ),
-
-                // Picture selection
-                FutureBuilder(
-                  future: _getPicturePath(),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<String> snapshot) {
-                    return PictureCard(snapshot.hasData ? snapshot.data : null,
-                        (path) {
-                      setState(() {
-                        _quiz.pendingPicturePath = path;
-                      });
-                    });
-                  },
-                ),
-
-                // Seconds selection
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: TextFormField(
-                    autofocus: false,
-                    readOnly: true,
-                    onTap: _showTimeDialog,
-                    initialValue: "${_quiz.timeLimit} seconds",
-                    decoration: InputDecoration(
-                        labelText: 'Seconds per question',
-                        prefixIcon: Icon(Icons.timer)),
-                  ),
-                ),
-
-                // Group selection
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Card(
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 0, horizontal: 12),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.people,
-                            color: Colors.grey,
+                      // Name box
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: TextFormField(
+                          onChanged: (value) {
+                            setState(() {
+                              _quiz.title = value;
+                            });
+                          },
+                          initialValue: _quiz.title,
+                          decoration: InputDecoration(
+                            labelText: 'Quiz name',
                           ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 12),
-                              child: Consumer<GroupRegistryModel>(
-                                builder: (context, registry, child) {
-                                  return _buildGroupList(
-                                      registry.createdGroups);
-                                },
-                              ),
+                        ),
+                      ),
+
+                      // Picture selection
+                      FutureBuilder(
+                        future: _getPicturePath(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<String> snapshot) {
+                          return PictureCard(
+                              snapshot.hasData ? snapshot.data : null, (path) {
+                            setState(() {
+                              _quiz.pendingPicturePath = path;
+                            });
+                          });
+                        },
+                      ),
+
+                      // Seconds selection
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: TextFormField(
+                          autofocus: false,
+                          readOnly: true,
+                          onTap: _showTimeDialog,
+                          initialValue: "${_quiz.timeLimit} seconds",
+                          decoration: InputDecoration(
+                              labelText: 'Seconds per question',
+                              prefixIcon: Icon(Icons.timer)),
+                        ),
+                      ),
+
+                      // Group selection
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Card(
+                          margin: EdgeInsets.zero,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 0, horizontal: 12),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.people,
+                                  color: Colors.grey,
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 12),
+                                    child: Consumer<GroupRegistryModel>(
+                                      builder: (context, registry, child) {
+                                        return _buildGroupList(
+                                            registry.createdGroups);
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                ),
 
-                // Quiz type
-                Card(
-                  margin: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5)),
-                  child: Column(
-                    children: <Widget>[
-                      RadioListTile<QuizType>(
-                        dense: true,
-                        title: const Text('LIVE'),
-                        value: QuizType.LIVE,
-                        groupValue: _quiz.type,
-                        onChanged: (QuizType value) {
-                          setState(() {
-                            _quiz.type = value;
-                          });
+                      // Quiz type
+                      Card(
+                        margin: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5)),
+                        child: Column(
+                          children: <Widget>[
+                            RadioListTile<QuizType>(
+                              dense: true,
+                              title: const Text('LIVE'),
+                              value: QuizType.LIVE,
+                              groupValue: _quiz.type,
+                              onChanged: (QuizType value) {
+                                setState(() {
+                                  _quiz.type = value;
+                                });
+                              },
+                            ),
+                            RadioListTile<QuizType>(
+                              dense: true,
+                              title: const Text('SELF-PACED'),
+                              value: QuizType.SELF_PACED,
+                              groupValue: _quiz.type,
+                              onChanged: (QuizType value) {
+                                setState(() {
+                                  _quiz.type = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Questions title
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24, bottom: 8),
+                        child: Text(
+                          'Questions',
+                          style: new TextStyle(
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+
+                      // Question card
+                      ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: _quiz.questions.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return _questionCard(
+                              index, _quiz.questions.elementAt(index), context);
                         },
                       ),
-                      RadioListTile<QuizType>(
-                        dense: true,
-                        title: const Text('SELF-PACED'),
-                        value: QuizType.SELF_PACED,
-                        groupValue: _quiz.type,
-                        onChanged: (QuizType value) {
-                          setState(() {
-                            _quiz.type = value;
-                          });
-                        },
-                      ),
+
+                      // Add question
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: RaisedButton(
+                            shape: SmartBroccoliTheme.raisedButtonShape,
+                            padding: EdgeInsets.all(14.0),
+                            child: Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 3,
+                                children: [
+                                  Icon(Icons.add),
+                                  Text('ADD QUESTION')
+                                ]),
+                            onPressed: _insertQuestion,
+                          ),
+                        ),
+                      )
                     ],
                   ),
                 ),
-
-                // Questions title
-                Padding(
-                  padding: const EdgeInsets.only(top: 24, bottom: 8),
-                  child: Text(
-                    'Questions',
-                    style: new TextStyle(
-                      fontSize: 17.0,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-
-                // Question card
-                ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: _quiz.questions.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _questionCard(
-                        index, _quiz.questions.elementAt(index), context);
-                  },
-                ),
-
-                // Add question
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: RaisedButton(
-                      shape: SmartBroccoliTheme.raisedButtonShape,
-                      padding: EdgeInsets.all(14.0),
-                      child: Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 3,
-                          children: [Icon(Icons.add), Text('ADD QUESTION')]),
-                      onPressed: _insertQuestion,
-                    ),
-                  ),
-                )
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -382,17 +390,19 @@ class _QuizCreateState extends State<QuizCreate> {
               minValue: 5, maxValue: 90, initialIntegerValue: 30);
         }).then((value) {
       if (value != null && value is int) {
-        setState(() {
-          _quiz.timeLimit = value;
-        });
+        _quiz.timeLimit = value;
       }
     });
   }
 
+  /// Whether the quiz has been modified
+  bool quizModified() => !_quiz
+      .partialEqual(context.read<QuizCollectionModel>().getQuiz(_quiz.id));
+
   // Exit page
   void _close() async {
     // Unsaved changes
-    if (widget.quiz != _quiz) {
+    if (_quiz.id != null && quizModified()) {
       if (!await showConfirmDialog(
           context, "Are you sure you want to discard changes?",
           title: "Discard quiz changes")) {
@@ -405,8 +415,7 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Save quiz
   void _saveQuiz() async {
     // No change
-    if (widget.quiz != null && widget.quiz == _quiz)
-      return Navigator.of(context).pop();
+    if (_quiz.id != null && !quizModified()) return Navigator.of(context).pop();
 
     if (_quiz.title.isEmpty) {
       showBasicDialog(context, "Quiz name cannot be empty");
