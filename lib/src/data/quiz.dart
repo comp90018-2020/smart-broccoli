@@ -122,7 +122,7 @@ class Quiz implements Comparable<Quiz> {
     // Live quiz
     if (this._type == QuizType.LIVE) return QuizType.LIVE;
     // Determine if start sessione xists
-    var smartSession = this.sessions.firstWhere(
+    var smartSession = this.sessions?.firstWhere(
         (session) =>
             session.quizType == QuizType.SELF_PACED &&
             session.state != GameSessionState.ENDED, orElse: () {
