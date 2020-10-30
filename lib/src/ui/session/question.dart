@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/models/session_model.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -76,6 +79,17 @@ class _QuizQuestion extends State<QuizQuestion> {
 
     return CustomPage(
       title: 'Quiz',
+
+      appbarLeading: IconButton(
+        icon: Icon(Icons.close),
+        enableFeedback: false,
+        splashRadius: 20,
+        onPressed: () async {
+          if (!await showConfirmDialog(
+              context, "You are about to quit this session")) return;
+          Provider.of<GameSessionModel>(context, listen: false).quitQuiz();
+        },
+      ),
 
       // Points
       appbarActions: [

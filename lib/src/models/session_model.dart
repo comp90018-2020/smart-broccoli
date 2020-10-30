@@ -264,6 +264,9 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   void quitQuiz() {
     socket.emit('quit');
     socket.disconnect();
+    refreshSession();
+    _pubSub.publish(PubSubTopic.ROUTE,
+        arg: RouteArgs('/take_quiz', routeAction: RouteAction.POPALL));
   }
 
   void answerQuestion() {

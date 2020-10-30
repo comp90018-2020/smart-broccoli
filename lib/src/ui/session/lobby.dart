@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -61,6 +62,17 @@ class _StartLobby extends State<QuizLobby> {
   Widget build(BuildContext context) {
     return CustomPage(
       title: 'Take Quiz',
+
+      appbarLeading: IconButton(
+        icon: Icon(Icons.close),
+        enableFeedback: false,
+        splashRadius: 20,
+        onPressed: () async {
+          if (!await showConfirmDialog(
+              context, "You are about to quit this session")) return;
+          Provider.of<GameSessionModel>(context, listen: false).quitQuiz();
+        },
+      ),
 
       // Background decoration
       background: [
