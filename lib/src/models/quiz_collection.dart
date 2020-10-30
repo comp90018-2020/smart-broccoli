@@ -135,13 +135,16 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
         ? await _quizApi.createQuiz(_authStateModel.token, quiz)
         : await _quizApi.updateQuiz(_authStateModel.token, quiz);
 
-    // Has quiz picture to save
-    if (quiz.pendingPicturePath != null)
-      await _quizApi.setQuizPicture(_authStateModel.token, updated.id,
-          await File(quiz.pendingPicturePath).readAsBytes());
-
     // Exit if unexpected happens
     if (updated.questions.length != quiz.questions.length) return;
+
+    // Futures
+    var futures = <Future>[];
+
+    // Has quiz picture to save
+    if (quiz.pendingPicturePath != null)
+      futures.add(_quizApi.setQuizPicture(_authStateModel.token, updated.id,
+          await File(quiz.pendingPicturePath).readAsBytes()));
 
     // Has quiz question pictures to save
     for (var i = 0; i < quiz.questions.length; i++) {
@@ -150,12 +153,15 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
 
       // Has question picture
       if (question.pendingPicturePath != null) {
-        await _quizApi.setQuestionPicture(
+        futures.add(_quizApi.setQuestionPicture(
             _authStateModel.token,
             updated.id, // Updated quiz id
             questionUpdated.id, // Updated question id
-            await File(question.pendingPicturePath).readAsBytes());
+            await File(question.pendingPicturePath).readAsBytes()));
       }
+    }
+    if (futures.length > 0) {
+      await Future.wait(futures);
     }
 
     // Refresh quiz (since picture IDs may have changed by this point)
