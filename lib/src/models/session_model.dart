@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -72,7 +73,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     if ((session = await _sessionApi.getSession(_authStateModel.token)) !=
         null) {
       socket.disconnect();
-      connect(session.token);
+      _connect(session.token);
     }
   }
 
@@ -81,13 +82,13 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     session = await _sessionApi.createSession(
         _authStateModel.token, quizId, type,
         autoSubscribe: autoSubscribe);
-    notifyListeners();
+    _connect(session.token);
   }
 
   Future<void> joinSession(GameSession quizSession) async {
     session = await _sessionApi.joinSession(
         _authStateModel.token, quizSession.joinCode);
-    connect(session.token);
+    _connect(session.token);
     notifyListeners();
   }
 
@@ -96,8 +97,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         .firstWhere((session) => session.quizType == QuizType.LIVE));
   }
 
-  /// Connect to socket with headers
-  void connect(String token) {
+  /// Establish a websocket connection with the gameplay server.
+  ///
+  /// This method also routes the user to the appropriate initial screen via
+  /// pubsub event.
+  void _connect(String token) {
     // Set query
     socket.opts['query'] = {};
     socket.opts['query']['token'] = token;
@@ -120,19 +124,30 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       else
         role = GroupRole.OWNER;
 
-      //need to check
-      if ('pending' == message['status'])
-        state = SessionState.PENDING;
-      else if ('starting' == message['status'])
-        state = SessionState.STARTING;
-      else if ('running' == message['status'])
-        state = SessionState.QUESTION;
-      else
-        state = SessionState.ABORTED;
+      String route;
+      switch (message['status']) {
+        case 'pending':
+          state = SessionState.PENDING;
+          route = '/session/lobby';
+          break;
+        case 'starting':
+          state = SessionState.PENDING;
+          route = '/session/lobby';
+          break;
+        case 'running':
+          state = SessionState.QUESTION;
+          route = '/session/question';
+          break;
+        default:
+          state = SessionState.ABORTED;
+      }
 
       print(players);
       print(role);
       print(state);
+      if (route != null)
+        _pubSub.publish(PubSubTopic.ROUTE,
+            arg: RouteArgs(route, routeAction: RouteAction.POPALL));
       notifyListeners();
     });
 
