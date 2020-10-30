@@ -71,7 +71,15 @@ class _PictureCardState extends State<PictureCard> {
   }
 
   void _openPictureSelector(BuildContext context, ImageSource source) async {
-    PickedFile file = await picker.getImage(source: source);
-    widget.updatePicture(file.path);
+    try {
+      PickedFile pickedFile = await picker.getImage(source: source);
+      if (pickedFile == null) return;
+      widget.updatePicture(pickedFile.path);
+    } catch (err) {
+      if (err.code == "photo_access_denied")
+        showBasicDialog(context, "Cannot access gallery");
+      else
+        showBasicDialog(context, "Cannot update profile picture");
+    }
   }
 }
