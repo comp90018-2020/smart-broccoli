@@ -11,7 +11,7 @@ enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
 class Quiz implements Comparable<Quiz> {
   /// ID of the quiz (for quizzes fetched from server only)
   final int id;
-  final int updatedTimestamp;
+  final DateTime updatedTimestamp;
 
   final int pictureId;
 
@@ -66,7 +66,7 @@ class Quiz implements Comparable<Quiz> {
     });
     Quiz quiz = Quiz._internal(
         json['id'],
-        DateTime.parse(json['updatedAt']).millisecondsSinceEpoch,
+        DateTime.parse(json['updatedAt']),
         json['pictureId'],
         json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
         json['title'],
@@ -107,14 +107,12 @@ class Quiz implements Comparable<Quiz> {
   @override
   int compareTo(Quiz other) {
     int thisType = this.type.index;
-    int thisTimestamp = this.updatedTimestamp;
     int otherType = other.type.index;
-    int otherTimestamp = this.updatedTimestamp;
 
     if (thisType == otherType)
-      return otherTimestamp - thisTimestamp;
+      return other.updatedTimestamp.compareTo(this.updatedTimestamp);
     else
-      return thisType - otherType;
+      return otherType - thisType;
   }
 
   /// Type of quiz
