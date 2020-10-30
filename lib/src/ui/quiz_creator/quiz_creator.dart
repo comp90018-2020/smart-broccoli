@@ -125,7 +125,7 @@ class _QuizCreateState extends State<QuizCreate> {
                       // Picture selection
                       FutureBuilder(
                         future: Provider.of<QuizCollectionModel>(context)
-                            .getQuizPicture(quiz),
+                            .getQuizPicturePath(quiz),
                         builder: (BuildContext context,
                             AsyncSnapshot<String> snapshot) {
                           return PictureCard(
@@ -287,7 +287,7 @@ class _QuizCreateState extends State<QuizCreate> {
                 width: double.maxFinite,
                 child: FutureBuilder(
                     future: Provider.of<QuizCollectionModel>(context)
-                        .getQuestionPicture(question),
+                        .getQuestionPicturePath(question),
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
                       return PictureCard(

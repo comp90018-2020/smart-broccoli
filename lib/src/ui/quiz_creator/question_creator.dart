@@ -152,7 +152,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 // Question image
                 FutureBuilder(
                   future: Provider.of<QuizCollectionModel>(context)
-                      .getQuestionPicture(_question),
+                      .getQuestionPicturePath(_question),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
                     return PictureCard(

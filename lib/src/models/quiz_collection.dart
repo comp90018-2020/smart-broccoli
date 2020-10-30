@@ -79,7 +79,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Gets the specified quiz's picture.
-  Future<String> getQuizPicture(Quiz quiz) {
+  Future<String> getQuizPicturePath(Quiz quiz) {
     if (quiz == null || !quiz.hasPicture) return null;
     if (quiz.pendingPicturePath != null)
       return Future.value(quiz.pendingPicturePath);
@@ -87,7 +87,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Get question picture
-  Future<String> getQuestionPicture(Question question) {
+  Future<String> getQuestionPicturePath(Question question) {
     if (question == null || !question.hasPicture) return null;
     if (question.pendingPicturePath != null)
       return Future.value(question.pendingPicturePath);

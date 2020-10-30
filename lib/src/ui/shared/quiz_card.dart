@@ -68,7 +68,7 @@ class _QuizCardState extends State<QuizCard> {
                   aspectRatio: widget.aspectRatio,
                   child: FutureBuilder(
                     future: Provider.of<QuizCollectionModel>(context)
-                        .getQuizPicture(widget.quiz),
+                        .getQuizPicturePath(widget.quiz),
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
                       if (!snapshot.hasData || snapshot.data == null)
