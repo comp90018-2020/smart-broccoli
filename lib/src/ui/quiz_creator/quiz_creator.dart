@@ -401,7 +401,7 @@ class _QuizCreateState extends State<QuizCreate> {
   // Exit page
   void _close() async {
     // Unsaved changes
-    if (_quiz.id != null && quizModified()) {
+    if (_quiz.id == null || _quiz.id != null && quizModified()) {
       if (!await showConfirmDialog(
           context, "Are you sure you want to discard changes?",
           title: "Discard quiz changes")) {

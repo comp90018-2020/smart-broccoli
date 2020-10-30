@@ -66,7 +66,7 @@ class _ManageQuizState extends State<ManageQuiz> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           if (_groupId == null) {
-            Navigator.of(context).pushNamed('/quiz');
+            Navigator.of(context).pushNamed('/quiz/');
           } else {
             Navigator.of(context).pushNamed('/group/$_groupId/quiz');
           }

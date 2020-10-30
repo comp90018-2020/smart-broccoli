@@ -44,8 +44,7 @@ class BroccoliRouter {
   static const String groupCreate = "/group/create";
 
   // Quiz editor
-  static const String quiz = "/quiz";
-  static const String quizId = "/quiz/:id";
+  static const String quiz = "/quiz/:id";
   static const String quizQuestion = "/quiz/question";
   static const String groupCreateQuiz = "/group/:id/quiz";
 
@@ -125,12 +124,6 @@ class BroccoliRouter {
       return QuizCreate(groupId: int.parse(params["id"][0]));
     }));
 
-    // Quiz
-    router.define(quiz, handler: Handler(
-        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
-      return QuizCreate();
-    }));
-
     // Quiz question
     router.define(quizQuestion, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
@@ -139,9 +132,10 @@ class BroccoliRouter {
     }));
 
     // Quiz with ID
-    router.define(quizId, handler: Handler(
+    router.define(quiz, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
-      int quizId = params["id"].length > 0 ? int.parse(params["id"][0]) : null;
+      int quizId =
+          params["id"][0].length > 0 ? int.parse(params["id"][0]) : null;
       return QuizCreate(quizId: quizId);
     }));
 
