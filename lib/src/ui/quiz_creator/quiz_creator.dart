@@ -162,7 +162,7 @@ class _QuizCreateState extends State<QuizCreate> {
                           ),
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
+                              padding: const EdgeInsets.only(left: 12.0),
                               child: Consumer<GroupRegistryModel>(
                                 builder: (context, registry, child) {
                                   return _buildGroupList(
@@ -300,12 +300,13 @@ class _QuizCreateState extends State<QuizCreate> {
     return DropdownButton(
         isExpanded: true,
         value: _quiz.groupId,
-        items: groups
-            .map((group) => DropdownMenuItem(
-                  child: Text(group.name),
-                  value: group.id,
-                ))
-            .toList(),
+        items: [
+          DropdownMenuItem(child: Text("Select a group"), value: null),
+          ...groups.map((group) => DropdownMenuItem(
+                child: Text(group.name),
+                value: group.id,
+              ))
+        ],
         onChanged: (groupId) {
           setState(() {
             _quiz.groupId = groupId;
