@@ -50,19 +50,23 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Gets all quizzes
-  UnmodifiableListView<Quiz> getAllQuizzesWhere({int groupId, QuizType type}) =>
+  UnmodifiableListView<Quiz> getQuizzesWhere(
+          {int groupId, QuizType type, bool rule}) =>
       UnmodifiableListView(filterQuizzesWhere(
-          [..._availableQuizzes.values, ..._createdQuizzes.values]));
+          [..._availableQuizzes.values, ..._createdQuizzes.values],
+          groupId: groupId, type: type, rule: rule));
 
   /// Gets available (user accessible) quizzes
   UnmodifiableListView<Quiz> getAvailableQuizzesWhere(
-          {int groupId, QuizType type}) =>
-      UnmodifiableListView(filterQuizzesWhere(_availableQuizzes.values));
+          {int groupId, QuizType type, bool rule}) =>
+      UnmodifiableListView(filterQuizzesWhere(_availableQuizzes.values,
+          groupId: groupId, type: type, rule: rule));
 
   /// Gets created (user managed) quizzes
   UnmodifiableListView<Quiz> getCreatedQuizzesWhere(
-          {int groupId, QuizType type}) =>
-      UnmodifiableListView(filterQuizzesWhere(_createdQuizzes.values));
+          {int groupId, QuizType type, bool rule}) =>
+      UnmodifiableListView(filterQuizzesWhere(_createdQuizzes.values,
+          groupId: groupId, type: type, rule: rule));
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
