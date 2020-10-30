@@ -501,7 +501,7 @@ export const endSession = async (
     }
 };
 
-export const clearnSession = async () => {
+export const clearSessions = async () => {
     try {
         const state = {
             [Op.or]: ["active", "waiting"],

@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { GameHandler, sendErr } from "./game";
-import { sessionTokenDecrypt, clearnSession } from "../controllers/session";
+import { sessionTokenDecrypt, clearSessions } from "../controllers/session";
 import { Player, Role } from "./datatype";
 import { GameSession } from "./session";
 
@@ -10,7 +10,7 @@ const socketPlayerMap: { [socketId: string]: Player } = {};
 
 export let _socketIO: Server;
 export default (socketIO: Server) => {
-    clearnSession();
+    clearSessions();
     _socketIO = socketIO;
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
