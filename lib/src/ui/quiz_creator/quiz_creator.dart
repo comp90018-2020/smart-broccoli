@@ -61,9 +61,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
       // Close icon
       appbarLeading: GestureDetector(
-        onTap: () {
-          Navigator.pop(context);
-        },
+        onTap: _close,
         child: Icon(Icons.close),
       ),
 
@@ -361,6 +359,8 @@ class _QuizCreateState extends State<QuizCreate> {
       }
     });
   }
+
+  void _close() {}
 
   /// Save quiz
   void _saveQuiz() async {
