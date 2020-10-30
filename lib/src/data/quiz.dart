@@ -92,7 +92,7 @@ class Quiz implements Comparable<Quiz> {
       'id': id,
       'title': title,
       'groupId': groupId,
-      'type': type == QuizType.LIVE ? 'live' : 'self paced',
+      'type': _type == QuizType.LIVE ? 'live' : 'self paced',
       'description': description,
       'active': isActive,
       'timeLimit': timeLimit,
