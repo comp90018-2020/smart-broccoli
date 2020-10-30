@@ -6,21 +6,30 @@ import 'group.dart';
 
 enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
 
+/// Stores a pending picture
+abstract class PendingPicture {
+  /// The pending picture path
+  String pendingPicturePath;
+
+  /// Getter for pictureId
+  int get pictureId;
+
+  // Has picture
+  bool get hasPicture => pictureId != null || pendingPicturePath != null;
+}
+
 /// Object representing a quiz
 /// Instances of this class are returned when fetching quizzes from the server.
 /// Additional instances of this class (i.e. not fetched from the server) are
 /// to be constructed when the user creates a new quiz. A new quiz can be
 /// synchronised with the server by passing it to `QuizModel.createQuiz`.
-class Quiz implements Comparable<Quiz> {
+class Quiz with PendingPicture implements Comparable<Quiz> {
   /// ID of the quiz (for quizzes fetched from server only)
   final int id;
   final int updatedTimestamp;
 
   /// Picture ID (from server)
   final int pictureId;
-
-  /// The pending picture path
-  String pendingPicturePath;
 
   /// User's role. This field is non-null for quizzes in the list returned by
   /// `getQuizzes`; however, it will be null for a quiz returned by `getQuiz`
@@ -185,7 +194,7 @@ class Quiz implements Comparable<Quiz> {
 /// Object representing a question in a quiz
 /// `Quiz` instances hold a list of this class.
 /// Abstract class; not for instantiation.
-abstract class Question {
+abstract class Question with PendingPicture {
   /// Unique question id for questions from API only
   final int id;
 
@@ -196,9 +205,6 @@ abstract class Question {
 
   /// Picture ID (from server)
   int pictureId;
-
-  /// The pending picture path
-  String pendingPicturePath;
 
   Question({this.id, this.no, this.text, this.pictureId});
 

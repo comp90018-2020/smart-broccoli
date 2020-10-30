@@ -151,7 +151,8 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
                 // Question image
                 FutureBuilder(
-                  future: _getPicturePath(),
+                  future: Provider.of<QuizCollectionModel>(context)
+                      .getQuestionPicture(_question),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
                     return PictureCard(
@@ -341,20 +342,6 @@ class _QuestionCreateState extends State<QuestionCreate> {
         ),
       ),
     );
-  }
-
-  /// Picture card
-  Future<String> _getPicturePath() async {
-    // No image
-    if (_question.pendingPicturePath == null && _question.pictureId == null) {
-      return null;
-    }
-    // Updated image
-    if (_question.pendingPicturePath != null)
-      return _question.pendingPicturePath;
-    // Image id
-    return await Provider.of<QuizCollectionModel>(context, listen: false)
-        .getQuestionPicture(_question);
   }
 
   // Handle close icon tap

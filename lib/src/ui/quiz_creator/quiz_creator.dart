@@ -124,7 +124,8 @@ class _QuizCreateState extends State<QuizCreate> {
 
                       // Picture selection
                       FutureBuilder(
-                        future: _getPicturePath(),
+                        future: Provider.of<QuizCollectionModel>(context)
+                            .getQuizPicture(quiz),
                         builder: (BuildContext context,
                             AsyncSnapshot<String> snapshot) {
                           return PictureCard(
@@ -285,7 +286,8 @@ class _QuizCreateState extends State<QuizCreate> {
               child: Container(
                 width: double.maxFinite,
                 child: FutureBuilder(
-                    future: _getPicturePathQuestion(question),
+                    future: Provider.of<QuizCollectionModel>(context)
+                        .getQuestionPicture(question),
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
                       return PictureCard(
@@ -376,30 +378,6 @@ class _QuizCreateState extends State<QuizCreate> {
         _quiz.questions.add(returnArgs.question);
       });
     }
-  }
-
-  /// Picture card
-  Future<String> _getPicturePath() async {
-    // No image
-    if (_quiz.pendingPicturePath == null && _quiz.pictureId == null)
-      return null;
-    // Updated image
-    if (_quiz.pendingPicturePath != null) return _quiz.pendingPicturePath;
-    // Image id
-    return await Provider.of<QuizCollectionModel>(context, listen: false)
-        .getQuizPicture(_quiz);
-  }
-
-  /// Picture card for question
-  Future<String> _getPicturePathQuestion(Question question) async {
-    // No image
-    if (question.pendingPicturePath == null && question.pictureId == null)
-      return null;
-    // Updated image
-    if (question.pendingPicturePath != null) return question.pendingPicturePath;
-    // Image id
-    return await Provider.of<QuizCollectionModel>(context, listen: false)
-        .getQuestionPicture(question);
   }
 
   // Time dialog
