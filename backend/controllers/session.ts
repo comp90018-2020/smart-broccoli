@@ -500,3 +500,40 @@ export const endSession = async (
         throw err;
     }
 };
+
+export const clearnSession = async () => {
+    try {
+        const state = {
+            [Op.or]: ["active", "waiting"],
+        };
+        const sessions: Session[] = await Session.findAll({
+            where: {
+                state: {
+                    [Op.or]: ["active", "waiting"],
+                },
+            },
+        });
+
+        await Session.update(
+            { code: null, state: "lost" },
+            {
+                where: {
+                    state: {
+                        [Op.or]: ["active", "waiting"],
+                    },
+                },
+            }
+        );
+
+        await SessionParticipant.update(
+            { state: "lost" },
+            {
+                where: {
+                    state: "joined",
+                },
+            }
+        );
+    } catch (err) {
+        throw err;
+    }
+};
