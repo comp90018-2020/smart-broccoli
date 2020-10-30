@@ -93,13 +93,18 @@ class _QuizCardState extends State<QuizCard> {
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 4),
-                    Text(
-                      Provider.of<GroupRegistryModel>(context)
-                              .getGroup(widget.quiz.groupId)
-                              ?.name ??
-                          "Group ID: ${widget.quiz.groupId}",
-                      style: TextStyle(fontSize: 15),
-                    ),
+                    FutureBuilder(
+                        future: Provider.of<GroupRegistryModel>(context)
+                            .getGroup(widget.quiz.groupId),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<Group> snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(snapshot.data.name,
+                                style: TextStyle(fontSize: 15));
+                          }
+                          return Text('Loading',
+                              style: TextStyle(fontSize: 15));
+                        }),
                   ],
                 ),
               ),
