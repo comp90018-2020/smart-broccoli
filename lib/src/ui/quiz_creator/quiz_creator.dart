@@ -285,8 +285,7 @@ class _QuizCreateState extends State<QuizCreate> {
               child: Container(
                 width: double.maxFinite,
                 child: FutureBuilder(
-                    future: Provider.of<QuizCollectionModel>(context)
-                        .getQuestionPicture(question),
+                    future: _getPicturePathQuestion(question),
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
                       return PictureCard(
@@ -338,6 +337,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
     if (returnArgs is QuestionReturnArguments) {
       // No change
+      print(returnArgs.question == _quiz.questions[index]);
       if (returnArgs.question != null &&
           returnArgs.question == _quiz.questions[index]) return;
       // If saved
@@ -346,7 +346,9 @@ class _QuizCreateState extends State<QuizCreate> {
           _quiz.questions.removeAt(index);
         } else {
           _quiz.questions.removeAt(index);
+          print(returnArgs.question.pendingPicturePath);
           _quiz.questions.insert(index, returnArgs.question);
+          print(_quiz.questions[index].pendingPicturePath);
         }
       });
     }
@@ -379,14 +381,25 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Picture card
   Future<String> _getPicturePath() async {
     // No image
-    if (_quiz.pendingPicturePath == null && _quiz.pictureId == null) {
+    if (_quiz.pendingPicturePath == null && _quiz.pictureId == null)
       return null;
-    }
     // Updated image
     if (_quiz.pendingPicturePath != null) return _quiz.pendingPicturePath;
     // Image id
     return await Provider.of<QuizCollectionModel>(context, listen: false)
         .getQuizPicture(_quiz);
+  }
+
+  /// Picture card for question
+  Future<String> _getPicturePathQuestion(Question question) async {
+    // No image
+    if (question.pendingPicturePath == null && question.pictureId == null)
+      return null;
+    // Updated image
+    if (question.pendingPicturePath != null) return question.pendingPicturePath;
+    // Image id
+    return await Provider.of<QuizCollectionModel>(context, listen: false)
+        .getQuestionPicture(question);
   }
 
   // Time dialog
