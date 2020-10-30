@@ -353,7 +353,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
   // Handle close icon tap
   void _close() async {
-    if (questionEqual(widget.question, _question) ||
+    if (widget.question == _question ||
         await showConfirmDialog(
             context, "Are you sure you want to discard the question changes?",
             title: "Discard question changes")) {
@@ -364,22 +364,19 @@ class _QuestionCreateState extends State<QuestionCreate> {
   // Handles delete icon tap
   void _delete() async {
     // Question equal
-    if (questionEqual(widget.question, _question)) {
-      return Navigator.of(context).pop();
-    }
+    if (widget.question == _question) return Navigator.of(context).pop();
 
     // Delete question (parent handles)
     if (await showConfirmDialog(
         context, "Are you sure you want to delete the question?",
-        title: "Delete question")) {
+        title: "Delete question"))
       Navigator.of(context).pop(QuestionReturnArguments(null, delete: true));
-    }
   }
 
   // Handles save icon tap
   void _save() {
     // No change
-    if (questionEqual(widget.question, _question)) {
+    if (widget.question == _question) {
       Navigator.of(context).pop();
       return;
     }
@@ -396,7 +393,12 @@ class _QuestionCreateState extends State<QuestionCreate> {
     }
 
     // Correct answers
-    if (_question is MCQuestion && (_question as MCQuestion).numCorrect < 1) {
+    if (_question is MCQuestion &&
+        (_question as MCQuestion)
+                .options
+                .where((option) => option.correct)
+                .length <
+            1) {
       showBasicDialog(context, "At least one option must be correct");
       return;
     }

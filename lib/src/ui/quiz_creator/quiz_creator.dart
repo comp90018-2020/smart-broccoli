@@ -239,9 +239,7 @@ class _QuizCreateState extends State<QuizCreate> {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           spacing: 3,
                           children: [Icon(Icons.add), Text('ADD QUESTION')]),
-                      onPressed: () {
-                        // createEditQuestion(context);
-                      },
+                      onPressed: _insertQuestion,
                     ),
                   ),
                 )
@@ -329,7 +327,7 @@ class _QuizCreateState extends State<QuizCreate> {
   }
 
   // Create question
-  void _insertQuestion(int index) async {}
+  void _insertQuestion() async {}
 
   /// Picture card
   Future<String> _getPicturePath() async {

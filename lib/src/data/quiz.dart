@@ -257,12 +257,3 @@ class QuizNotFoundException implements Exception {}
 /// Exception thrown when a question cannot be found by the server
 /// (thrown when setting a question picture)
 class QuestionNotFoundException implements Exception {}
-
-// Question equality
-bool questionEqual(Question q1, Question q2) {
-  if (q1 is MCQuestion && q2 is MCQuestion ||
-      q1 is TFQuestion && q2 is TFQuestion) {
-    return q1 == q2;
-  }
-  return false;
-}
