@@ -38,13 +38,16 @@ class _QuizCreateState extends State<QuizCreate> {
   void initState() {
     super.initState();
 
+    print(widget.quiz);
+    print(widget.groupId);
+
     /// TODO: optimise group retrieval (this retrieves quiz/members of group) repeatedly
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups();
 
     // From group or new quiz
     if (widget.groupId != null || widget.quiz == null)
-      _quiz = new Quiz("", widget.groupId, QuizType.LIVE);
+      _quiz = new Quiz("", widget.groupId, QuizType.LIVE, timeLimit: 10);
     // From quiz id
     if (widget.quiz != null) {
       _quiz = Quiz.fromJson(widget.quiz.toJson());
@@ -297,6 +300,7 @@ class _QuizCreateState extends State<QuizCreate> {
   Widget _buildGroupList(List<Group> groups) {
     return DropdownButton(
         isExpanded: true,
+        value: _quiz.groupId,
         items: groups
             .map((group) => DropdownMenuItem(
                   child: Text(group.name),
