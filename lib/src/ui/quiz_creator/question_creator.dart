@@ -363,9 +363,6 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
   // Handles delete icon tap
   void _delete() async {
-    // Question equal
-    if (widget.question == _question) return Navigator.of(context).pop();
-
     // Delete question (parent handles)
     if (await showConfirmDialog(
         context, "Are you sure you want to delete the question?",
