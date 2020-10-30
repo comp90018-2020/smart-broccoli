@@ -25,17 +25,31 @@ class Quiz {
   /// `getQuizzes`; however, it will be null for a quiz returned by `getQuiz`
   final GroupRole role;
 
+  /// Title
   String title;
+
+  /// Description (currently unused)
   String description;
 
+  /// ID of owning group
   int groupId;
-  QuizType type;
-  bool isActive;
-  final List<GameSession> sessions;
 
+  /// Type of quiz
+  QuizType type;
+
+  /// Quiz is active?
+  bool isActive;
+
+  /// Time limit of quiz
   int timeLimit;
+
+  /// List of questions
   List<Question> questions;
 
+  /// Sessions
+  final List<GameSession> sessions;
+
+  /// Whether quiz is complete
   final bool complete;
 
   /// Construtor for use when user creates a new quiz
@@ -96,17 +110,29 @@ class Quiz {
       'id': id,
       'title': title,
       'groupId': groupId,
+      'pictureId': pictureId,
       'type': type == QuizType.LIVE ? 'live' : 'self paced',
       'description': description,
       'active': isActive,
       'timeLimit': timeLimit,
-      'complete': complete,
+      'questions': questions?.map((question) => question.toJson())?.toList()
     };
-    if (questions != null)
-      json['questions'] =
-          questions.map((question) => question.toJson()).toList();
     return json;
   }
+
+  /// Equality used by quiz page (cannot use all fields)
+  bool partialEqual(obj) =>
+      obj is Quiz &&
+      obj.id == this.id &&
+      obj.title == this.title &&
+      obj.groupId == this.groupId &&
+      obj.pictureId == this.pictureId &&
+      obj.pendingPicturePath == this.pendingPicturePath &&
+      obj.type == this.type &&
+      obj.description == this.description &&
+      obj.isActive == this.isActive &&
+      obj.timeLimit == this.timeLimit &&
+      ListEquality().equals(obj.questions, this.questions);
 }
 
 /// Object representing a question in a quiz

@@ -21,9 +21,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// Picture storage service
   final PictureStash _picStash;
 
-  Quiz _selectedQuiz;
-  Quiz get selectedQuiz => _selectedQuiz;
-
   Map<int, Quiz> _availableQuizzes = {};
   Map<int, Quiz> _createdQuizzes = {};
 
@@ -59,12 +56,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       UnmodifiableListView(_createdQuizzes.values.where((quiz) =>
           (groupId == null || quiz.groupId == groupId) &&
           (type == null || quiz.type == type)));
-
-  Future<void> selectQuiz(int id) async {
-    _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
-    _refreshQuizPicture(_selectedQuiz);
-    notifyListeners();
-  }
 
   Quiz getQuiz(int id) {
     return _createdQuizzes[id] ?? _availableQuizzes[id];
@@ -106,6 +97,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   Future<void> deleteQuiz(Quiz quiz) async {
+    if (quiz.id == null) return;
     await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
     if (quiz.role == GroupRole.MEMBER)
       _availableQuizzes.remove(quiz.id);
@@ -115,42 +107,38 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Save selected quiz
-  Future<void> saveQuiz() async {
-    if (_selectedQuiz == null) return;
-
+  Future<void> saveQuiz(Quiz quiz) async {
     // First save the quiz
-    Quiz updated;
-    if (_selectedQuiz.id == null) {
-      updated = await _quizApi.createQuiz(_authStateModel.token, _selectedQuiz);
-    } else {
-      updated = await _quizApi.updateQuiz(_authStateModel.token, _selectedQuiz);
-    }
+    Quiz updated = quiz.id == null
+        ? await _quizApi.createQuiz(_authStateModel.token, quiz)
+        : await _quizApi.updateQuiz(_authStateModel.token, quiz);
 
     // Has quiz picture to save
-    if (_selectedQuiz.pendingPicturePath != null) {
+    if (quiz.pendingPicturePath != null)
       await _quizApi.setQuizPicture(_authStateModel.token, updated.id,
-          await File(_selectedQuiz.pendingPicturePath).readAsBytes());
-    }
+          await File(quiz.pendingPicturePath).readAsBytes());
+
+    // Exit if unexpected happens
+    if (updated.questions.length != quiz.questions.length) return;
 
     // Has quiz question pictures to save
-    for (var question in _selectedQuiz.questions) {
+    for (var i = 0; i < quiz.questions.length; i++) {
+      var question = quiz.questions[i];
+      var questionUpdated = updated.questions[i];
+
       // Has question picture
-      if (_selectedQuiz.pendingPicturePath != null) {
-        if (question.id != null) {
-          // Has ID
-          await _quizApi.setQuestionPicture(
-              _authStateModel.token,
-              updated.id,
-              question.id,
-              await File(question.pendingPicturePath).readAsBytes());
-        } else {
-          /// TODO: weird things can happen here
-        }
+      if (question.pendingPicturePath != null) {
+        await _quizApi.setQuestionPicture(
+            _authStateModel.token,
+            updated.id, // Updated quiz id
+            questionUpdated.id, // Updated question id
+            await File(question.pendingPicturePath).readAsBytes());
       }
     }
 
     // Refresh quiz (since picture IDs may have changed by this point)
-    refreshQuiz(updated.id);
+    refreshQuiz(updated.id, withQuestionPictures: true);
+    notifyListeners();
   }
 
   Future<void> refreshCurrentSession() async {
@@ -167,16 +155,26 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes the specified quiz
-  Future<void> refreshQuiz(int quizId) async {
+  Future<Quiz> refreshQuiz(int quizId,
+      {bool withQuestionPictures = false}) async {
+    // Refreshes the specified quiz
     var quiz = await _quizApi.getQuiz(_authStateModel.token, quizId);
+    await _refreshQuizPicture(quiz);
+    // Refresh pictures if necessary
+    if (withQuestionPictures)
+      await Future.wait(quiz.questions.map((Question question) async {
+        await _refreshQuestionPicture(quiz.id, question);
+      }));
+    // Set
     if (quiz.role == GroupRole.OWNER) {
       _createdQuizzes[quiz.id] = quiz;
     } else {
       _availableQuizzes[quiz.id] = quiz;
     }
-    notifyListeners();
+    return quiz;
   }
 
+  /// Refreshes list of available quizzes
   Future<void> refreshAvailableQuizzes() async {
     if (!_authStateModel.inSession) return;
     _availableQuizzes = Map.fromIterable(
@@ -189,6 +187,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     notifyListeners();
   }
 
+  /// Refreshes list of created quizzes
   Future<void> refreshCreatedQuizzes() async {
     if (!_authStateModel.inSession) return;
     _createdQuizzes = Map.fromIterable(
@@ -215,7 +214,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     }));
   }
 
-  /// Load the picture of a quiz into the `picture` field of a [quiz].
+  /// Loads the picture of a quiz into cache
   Future<void> _refreshQuizPicture(Quiz quiz) async {
     // No picture
     if (quiz.pictureId == null) return;
@@ -226,10 +225,21 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     _picStash.storePic(quiz.pictureId, picture);
   }
 
+  // Loads the picture of a question into cache
+  Future<void> _refreshQuestionPicture(int quizId, Question question) async {
+    // No picture
+    if (question.pictureId == null) return;
+    // Picture cached
+    if (await _picStash.getPic(question.pictureId) != null) return;
+    // Get picture and cache
+    var picture = await _quizApi.getQuestionPicture(
+        _authStateModel.token, quizId, question.id);
+    _picStash.storePic(question.pictureId, picture);
+  }
+
   /// When the auth state is updated
   void authUpdated() {
     if (!_authStateModel.inSession) {
-      _selectedQuiz = null;
       _availableQuizzes = {};
       _createdQuizzes = {};
     }

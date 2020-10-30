@@ -16,9 +16,9 @@ class QuizCreate extends StatefulWidget {
   final int groupId;
 
   /// Quiz id (used for editing)
-  final int quizId;
+  final Quiz quiz;
 
-  QuizCreate({Key key, this.groupId, this.quizId}) : super(key: key);
+  QuizCreate({Key key, this.groupId, this.quiz}) : super(key: key);
 
   @override
   _QuizCreateState createState() => _QuizCreateState();
@@ -28,28 +28,32 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Key for form
   final _formKey = GlobalKey<FormState>();
 
-  Quiz quiz;
+  /// Quiz that is held
+  Quiz _quiz;
 
-  // Provider.of<GroupRegistryModel>(context, listen: false)
-  //     .refreshCreatedGroups(withMembers: true);
-
+  /// Controller for text
   TextEditingController _quizTitleController;
 
   @override
   void initState() {
     super.initState();
 
+    /// TODO: optimise group retrieval (this retrieves quiz/members of group) repeatedly
+    Provider.of<GroupRegistryModel>(context, listen: false)
+        .refreshCreatedGroups();
+
     // From group or new quiz
-    if (widget.groupId != null || widget.quizId == null) {
-      quiz = new Quiz("", widget.groupId, QuizType.LIVE);
-    }
+    if (widget.groupId != null || widget.quiz == null)
+      _quiz = new Quiz("", widget.groupId, QuizType.LIVE);
     // From quiz id
-    // TODO:
+    if (widget.quiz != null) {
+      _quiz = Quiz.fromJson(widget.quiz.toJson());
+    }
 
     // Quiz title
-    _quizTitleController = TextEditingController(text: quiz.title);
+    _quizTitleController = TextEditingController(text: _quiz.title);
     _quizTitleController.addListener(() {
-      quiz.title = _quizTitleController.text;
+      _quiz.title = _quizTitleController.text;
     });
   }
 
@@ -119,7 +123,7 @@ class _QuizCreateState extends State<QuizCreate> {
                     return PictureCard(snapshot.hasData ? snapshot.data : null,
                         (path) {
                       setState(() {
-                        quiz.pendingPicturePath = path;
+                        _quiz.pendingPicturePath = path;
                       });
                     });
                   },
@@ -132,7 +136,7 @@ class _QuizCreateState extends State<QuizCreate> {
                     autofocus: false,
                     readOnly: true,
                     onTap: _showTimeDialog,
-                    initialValue: "${quiz.timeLimit} seconds",
+                    initialValue: "${_quiz.timeLimit} seconds",
                     decoration: InputDecoration(
                         labelText: 'Seconds per question',
                         prefixIcon: Icon(Icons.timer)),
@@ -181,10 +185,10 @@ class _QuizCreateState extends State<QuizCreate> {
                         dense: true,
                         title: const Text('LIVE'),
                         value: QuizType.LIVE,
-                        groupValue: quiz.type,
+                        groupValue: _quiz.type,
                         onChanged: (QuizType value) {
                           setState(() {
-                            quiz.type = value;
+                            _quiz.type = value;
                           });
                         },
                       ),
@@ -192,10 +196,10 @@ class _QuizCreateState extends State<QuizCreate> {
                         dense: true,
                         title: const Text('SELF-PACED'),
                         value: QuizType.SELF_PACED,
-                        groupValue: quiz.type,
+                        groupValue: _quiz.type,
                         onChanged: (QuizType value) {
                           setState(() {
-                            quiz.type = value;
+                            _quiz.type = value;
                           });
                         },
                       ),
@@ -221,10 +225,10 @@ class _QuizCreateState extends State<QuizCreate> {
                   scrollDirection: Axis.vertical,
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  itemCount: quiz.questions.length,
+                  itemCount: _quiz.questions.length,
                   itemBuilder: (BuildContext context, int index) {
                     return _questionCard(
-                        index, quiz.questions.elementAt(index), context);
+                        index, _quiz.questions.elementAt(index), context);
                   },
                 ),
 
@@ -301,7 +305,7 @@ class _QuizCreateState extends State<QuizCreate> {
             .toList(),
         onChanged: (groupId) {
           setState(() {
-            quiz.groupId = groupId;
+            _quiz.groupId = groupId;
           });
         });
   }
@@ -310,7 +314,7 @@ class _QuizCreateState extends State<QuizCreate> {
   void _editQuestion(int index) async {
     QuestionReturnArguments returnArgs = await Navigator.of(context).pushNamed(
         "/quiz/question",
-        arguments: QuestionArguments(quiz.questions[index], index));
+        arguments: QuestionArguments(_quiz.questions[index], index));
 
     // Nothing returned
     if (returnArgs == null) return;
@@ -318,28 +322,50 @@ class _QuizCreateState extends State<QuizCreate> {
     // Delete
     setState(() {
       if (returnArgs.delete) {
-        quiz.questions.removeAt(index);
+        _quiz.questions.removeAt(index);
       } else {
-        quiz.questions.removeAt(index);
-        quiz.questions.insert(index, returnArgs.question);
+        _quiz.questions.removeAt(index);
+        _quiz.questions.insert(index, returnArgs.question);
       }
     });
   }
 
   // Create question
-  void _insertQuestion() async {}
+  void _insertQuestion() async {
+    // Show the picker
+    var type = await showQuestionTypePicker(context);
+    if (type == null) return;
+
+    // Init an empty question
+    Question question;
+    if (type == QuestionType.MC) {
+      question = MCQuestion("", []);
+    } else {
+      question = TFQuestion("", false);
+    }
+
+    // If saved
+    QuestionReturnArguments returnArgs = await Navigator.of(context).pushNamed(
+        "/quiz/question",
+        arguments: QuestionArguments(question, _quiz.questions.length));
+    if (returnArgs.question != null) {
+      setState(() {
+        _quiz.questions.add(returnArgs.question);
+      });
+    }
+  }
 
   /// Picture card
   Future<String> _getPicturePath() async {
     // No image
-    if (quiz.pendingPicturePath == null && quiz.pictureId == null) {
+    if (_quiz.pendingPicturePath == null && _quiz.pictureId == null) {
       return null;
     }
     // Updated image
-    if (quiz.pendingPicturePath != null) return quiz.pendingPicturePath;
+    if (_quiz.pendingPicturePath != null) return _quiz.pendingPicturePath;
     // Image id
     return await Provider.of<QuizCollectionModel>(context, listen: false)
-        .getQuizPicture(quiz);
+        .getQuizPicture(_quiz);
   }
 
   // Time dialog
@@ -352,18 +378,35 @@ class _QuizCreateState extends State<QuizCreate> {
         }).then((value) {
       if (value != null && value is int) {
         setState(() {
-          quiz.timeLimit = value;
+          _quiz.timeLimit = value;
         });
       }
     });
   }
 
-  void _close() {}
+  // Exit page
+  void _close() async {
+    // Unsaved changes
+    if (widget.quiz != _quiz) {
+      if (!await showConfirmDialog(
+          context, "Are you sure you want to discard changes?",
+          title: "Discard quiz changes")) {
+        return;
+      }
+    }
+    Navigator.of(context).pop();
+  }
 
   /// Save quiz
   void _saveQuiz() async {
+    // No change
+    if (widget.quiz != null && widget.quiz == _quiz)
+      return Navigator.of(context).pop();
+
     try {
-      await Provider.of<QuizCollectionModel>(context, listen: false).saveQuiz();
+      await Provider.of<QuizCollectionModel>(context, listen: false)
+          .saveQuiz(_quiz);
+      showBasicDialog(context, "Quiz saved", title: "Success");
       Navigator.of(context).pop();
     } catch (err) {
       showBasicDialog(context, err.toString());
@@ -372,9 +415,15 @@ class _QuizCreateState extends State<QuizCreate> {
 
   /// Delete quiz
   void _deleteQuiz() async {
+    if (!await showConfirmDialog(
+        context, "Are you sure you want to delete the question?",
+        title: "Delete question")) {
+      return;
+    }
+
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
-          .deleteQuiz(quiz);
+          .deleteQuiz(_quiz);
       Navigator.of(context).pop();
     } on Exception catch (err) {
       showBasicDialog(context, err.toString());

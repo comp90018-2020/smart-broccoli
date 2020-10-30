@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:smart_broccoli/src/data/quiz.dart';
 
 Future<void> showBasicDialog(BuildContext context, String message,
     {String title = "Error"}) {
@@ -74,6 +75,47 @@ Future<ImageSource> showImgSrcPicker(BuildContext context) {
             ),
           ),
           onPressed: () => Navigator.of(context).pop(ImageSource.camera),
+        )
+      ],
+    ),
+  );
+}
+
+Future<QuestionType> showQuestionTypePicker(BuildContext context) {
+  return showDialog<QuestionType>(
+    context: context,
+    builder: (BuildContext context) => SimpleDialog(
+      title: const Text("Select question type"),
+      children: [
+        SimpleDialogOption(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Icon(Icons.done),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: const Text("True/false"),
+                )
+              ],
+            ),
+          ),
+          onPressed: () => Navigator.of(context).pop(QuestionType.TF),
+        ),
+        SimpleDialogOption(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Icon(Icons.list),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: const Text("Multiple Choice"),
+                )
+              ],
+            ),
+          ),
+          onPressed: () => Navigator.of(context).pop(QuestionType.MC),
         )
       ],
     ),
