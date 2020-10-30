@@ -1,11 +1,14 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/router.dart';
+import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
+import 'package:workmanager/workmanager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,6 +83,21 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub
         .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
+
+    /// Initialise background services
+    Workmanager.initialize(
+      callbackDispatcher,
+      isInDebugMode: true,
+    );
+    // Purge the previous Background tasks
+    Workmanager.cancelAll();
+    /// Schedule the background task
+    /// Default is 15 minutes per refresh
+    Workmanager.registerPeriodicTask(
+      "1",
+      "backgroundReading",
+      initialDelay: Duration(seconds: 20),
+    );
   }
 
   /// Navigate to route
@@ -96,6 +114,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    _checkPermissions();
     // Get AuthStateModel
     AuthStateModel state = Provider.of<AuthStateModel>(context, listen: true);
 
@@ -119,5 +138,15 @@ class _MyAppState extends State<MyApp> {
       },
       initialRoute: state.inSession ? '/take_quiz' : '/auth',
     );
+  }
+}
+
+/// A temporary permission checker
+/// It works as intended so far
+_checkPermissions() async {
+  LocationPermission permission = await Geolocator.checkPermission();
+
+  if (permission != LocationPermission.always) {
+    await Geolocator.openAppSettings();
   }
 }
