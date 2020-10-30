@@ -96,6 +96,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     }
   }
 
+  /// Deletes a quiz
   Future<void> deleteQuiz(Quiz quiz) async {
     if (quiz.id == null) return;
     await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
