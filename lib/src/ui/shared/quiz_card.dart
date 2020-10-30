@@ -238,31 +238,26 @@ class _QuizCardState extends State<QuizCard> {
               : Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 6),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Row(
-                          children: [
-                            Switch(
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                value: widget.quiz.isActive,
-                                onChanged: (bool value) async {
-                                  try {
-                                    await Provider.of<QuizCollectionModel>(
-                                            context,
-                                            listen: false)
-                                        .setQuizActivation(widget.quiz, value);
-                                  } catch (_) {
-                                    showBasicDialog(
-                                        context, "Cannot update quiz status");
-                                  }
-                                }),
-                            Container(
-                                child: Text('Visible'),
-                                transform: Matrix4.translationValues(-3, 0, 0))
-                          ],
-                        );
-                      },
+                    child: Row(
+                      children: [
+                        Switch(
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            value: widget.quiz.isActive,
+                            onChanged: (bool value) async {
+                              try {
+                                await Provider.of<QuizCollectionModel>(context,
+                                        listen: false)
+                                    .setQuizActivation(widget.quiz, value);
+                              } catch (_) {
+                                showBasicDialog(
+                                    context, "Cannot update quiz status");
+                              }
+                            }),
+                        Container(
+                            child: Text('Visible'),
+                            transform: Matrix4.translationValues(-3, 0, 0))
+                      ],
                     ),
                   ),
                 ),
