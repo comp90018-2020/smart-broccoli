@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 
-import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
-import 'package:smart_broccoli/src/data/quiz.dart';
 
-import '../../models.dart';
+import 'question_creator.dart';
 import 'picture.dart';
 
 class QuizCreate extends StatefulWidget {
@@ -25,21 +25,32 @@ class QuizCreate extends StatefulWidget {
 }
 
 class _QuizCreateState extends State<QuizCreate> {
+  /// Key for form
   final _formKey = GlobalKey<FormState>();
 
   Quiz quiz;
 
-  var quizNameController;
-  var timerTextController;
-  String selectedGroupTitle;
-  bool isDefaultGrpSelected = false;
-
   // Provider.of<GroupRegistryModel>(context, listen: false)
   //     .refreshCreatedGroups(withMembers: true);
+
+  TextEditingController _quizTitleController;
 
   @override
   void initState() {
     super.initState();
+
+    // From group or new quiz
+    if (widget.groupId != null || widget.quizId == null) {
+      quiz = new Quiz("", widget.groupId, QuizType.LIVE);
+    }
+    // From quiz id
+    // TODO:
+
+    // Quiz title
+    _quizTitleController = TextEditingController(text: quiz.title);
+    _quizTitleController.addListener(() {
+      quiz.title = _quizTitleController.text;
+    });
   }
 
   @override
@@ -68,15 +79,7 @@ class _QuizCreateState extends State<QuizCreate> {
           icon: Icon(Icons.check),
           padding: EdgeInsets.zero,
           splashRadius: 20,
-          onPressed: () async {
-            try {
-              await Provider.of<QuizCollectionModel>(context, listen: false)
-                  .saveQuiz();
-              Navigator.of(context).pop();
-            } catch (err) {
-              // _showUnsuccessful("Cannot save quiz", err);
-            }
-          },
+          onPressed: _saveQuiz,
         ),
       ],
 
@@ -103,7 +106,7 @@ class _QuizCreateState extends State<QuizCreate> {
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
                   child: TextField(
-                    controller: quizNameController,
+                    controller: _quizTitleController,
                     decoration: InputDecoration(
                       labelText: 'Quiz name',
                     ),
@@ -111,20 +114,27 @@ class _QuizCreateState extends State<QuizCreate> {
                 ),
 
                 // Picture selection
-                PictureCard(quiz.pendingPicturePath, (path) {
-                  setState(() {
-                    quiz.pendingPicturePath = path;
-                  });
-                }),
+                FutureBuilder(
+                  future: _getPicturePath(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String> snapshot) {
+                    return PictureCard(snapshot.hasData ? snapshot.data : null,
+                        (path) {
+                      setState(() {
+                        quiz.pendingPicturePath = path;
+                      });
+                    });
+                  },
+                ),
 
                 // Seconds selection
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
-                  child: TextField(
+                  child: TextFormField(
                     autofocus: false,
-                    controller: timerTextController,
                     readOnly: true,
                     onTap: _showTimeDialog,
+                    initialValue: "${quiz.timeLimit} seconds",
                     decoration: InputDecoration(
                         labelText: 'Seconds per question',
                         prefixIcon: Icon(Icons.timer)),
@@ -145,11 +155,17 @@ class _QuizCreateState extends State<QuizCreate> {
                             Icons.people,
                             color: Colors.grey,
                           ),
-                          // Consumer<GroupRegistryModel>(
-                          //   builder: (context, registry, child) {
-                          //     return buildGroupList(registry.createdGroups);
-                          //   },
-                          // )
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Consumer<GroupRegistryModel>(
+                                builder: (context, registry, child) {
+                                  return _buildGroupList(
+                                      registry.createdGroups);
+                                },
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -277,8 +293,58 @@ class _QuizCreateState extends State<QuizCreate> {
         ));
   }
 
+  /// Builds the group list dropdown
+  Widget _buildGroupList(List<Group> groups) {
+    return DropdownButton(
+        isExpanded: true,
+        items: groups
+            .map((group) => DropdownMenuItem(
+                  child: Text(group.name),
+                  value: group.id,
+                ))
+            .toList(),
+        onChanged: (groupId) {
+          setState(() {
+            quiz.groupId = groupId;
+          });
+        });
+  }
+
   /// Edit question
-  void _editQuestion(int index) {}
+  void _editQuestion(int index) async {
+    QuestionReturnArguments returnArgs = await Navigator.of(context).pushNamed(
+        "/quiz/question",
+        arguments: QuestionArguments(quiz.questions[index], index));
+
+    // Nothing returned
+    if (returnArgs == null) return;
+
+    // Delete
+    setState(() {
+      if (returnArgs.delete) {
+        quiz.questions.removeAt(index);
+      } else {
+        quiz.questions.removeAt(index);
+        quiz.questions.insert(index, returnArgs.question);
+      }
+    });
+  }
+
+  // Create question
+  void _insertQuestion(int index) async {}
+
+  /// Picture card
+  Future<String> _getPicturePath() async {
+    // No image
+    if (quiz.pendingPicturePath == null && quiz.pictureId == null) {
+      return null;
+    }
+    // Updated image
+    if (quiz.pendingPicturePath != null) return quiz.pendingPicturePath;
+    // Image id
+    return await Provider.of<QuizCollectionModel>(context, listen: false)
+        .getQuizPicture(quiz);
+  }
 
   // Time dialog
   Future _showTimeDialog() async {
@@ -291,10 +357,19 @@ class _QuizCreateState extends State<QuizCreate> {
       if (value != null && value is int) {
         setState(() {
           quiz.timeLimit = value;
-          timerTextController.text = value.toString() + " seconds";
         });
       }
     });
+  }
+
+  /// Save quiz
+  void _saveQuiz() async {
+    try {
+      await Provider.of<QuizCollectionModel>(context, listen: false).saveQuiz();
+      Navigator.of(context).pop();
+    } catch (err) {
+      showBasicDialog(context, err.toString());
+    }
   }
 
   /// Delete quiz
@@ -303,8 +378,8 @@ class _QuizCreateState extends State<QuizCreate> {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .deleteQuiz(quiz);
       Navigator.of(context).pop();
-    } on Exception catch (e) {
-      showBasicDialog(context, e.toString());
+    } on Exception catch (err) {
+      showBasicDialog(context, err.toString());
     }
   }
 }

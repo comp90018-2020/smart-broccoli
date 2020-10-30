@@ -8,6 +8,28 @@ import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'picture.dart';
 
+/// Arguments for creating this widget
+class QuestionArguments {
+  /// Question being edited
+  final Question question;
+
+  /// Question index (used to indicate)
+  final int questionIndex;
+
+  QuestionArguments(this.question, this.questionIndex);
+}
+
+/// Return arguments used on pop
+class QuestionReturnArguments {
+  /// The question
+  final Question question;
+
+  /// Whether question should be deleted
+  final bool delete;
+
+  QuestionReturnArguments(this.question, {this.delete = false});
+}
+
 /// Question create page
 class QuestionCreate extends StatefulWidget {
   /// Question being edited
@@ -16,19 +38,7 @@ class QuestionCreate extends StatefulWidget {
   /// Question index (used to indicate)
   final int questionIndex;
 
-  /// Delete question
-  final Function(int) delete;
-
-  /// Save question
-  final Function(int, Question) save;
-
-  QuestionCreate(
-      {Key key,
-      @required this.question,
-      @required this.questionIndex,
-      @required this.delete,
-      @required this.save})
-      : super(key: key);
+  QuestionCreate(this.question, this.questionIndex);
 
   @override
   _QuestionCreateState createState() => _QuestionCreateState();
@@ -36,7 +46,7 @@ class QuestionCreate extends StatefulWidget {
 
 class _QuestionCreateState extends State<QuestionCreate> {
   // The cloned question
-  Question question;
+  Question _question;
 
   TextEditingController _questionTextController;
 
@@ -44,7 +54,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
       <TextEditingController>[];
 
   // Type of question
-  QuestionType questionType;
+  QuestionType _questionType;
 
   // Key for form widget, allows for validation
   final _formKey = GlobalKey<FormState>();
@@ -52,16 +62,17 @@ class _QuestionCreateState extends State<QuestionCreate> {
   @override
   initState() {
     super.initState();
+
     // Clone
     if (widget.question is MCQuestion) {
-      questionType = QuestionType.MC;
-      question = MCQuestion.fromJson((widget.question as MCQuestion).toJson());
+      _questionType = QuestionType.MC;
+      _question = MCQuestion.fromJson((widget.question as MCQuestion).toJson());
     } else {
-      questionType = QuestionType.TF;
-      question = TFQuestion.fromJson((widget.question as TFQuestion).toJson());
+      _questionType = QuestionType.TF;
+      _question = TFQuestion.fromJson((widget.question as TFQuestion).toJson());
     }
     // Set question controller
-    _questionTextController = TextEditingController(text: question.text);
+    _questionTextController = TextEditingController(text: _question.text);
     // Set option controller
     if (widget.question is MCQuestion) {
       for (var option in (widget.question as MCQuestion).options) {
@@ -83,71 +94,22 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
       // Close icon
       appbarLeading: GestureDetector(
-        onTap: () async {
-          if (questionEqual(widget.question, question) ||
-              await showConfirmDialog(context,
-                  "Are you sure you want to discard the question changes?",
-                  title: "Discard question changes")) {
-            Navigator.of(context).pop();
-          }
-        },
+        onTap: _close,
         child: Icon(Icons.close),
       ),
 
       // Delete and Save on AppBar
       appbarActions: <Widget>[
         IconButton(
-          icon: Icon(Icons.delete),
-          padding: EdgeInsets.zero,
-          splashRadius: 20,
-          onPressed: () async {
-            // Question equal
-            if (questionEqual(widget.question, question)) {
-              return Navigator.pop(context);
-            }
-
-            // Delete question (parent handles)
-            if (await showConfirmDialog(
-                context, "Are you sure you want to delete the question?",
-                title: "Delete question")) {
-              widget.delete(widget.questionIndex);
-              Navigator.pop(context);
-            }
-          },
-        ),
+            icon: Icon(Icons.delete),
+            padding: EdgeInsets.zero,
+            splashRadius: 20,
+            onPressed: _delete),
         IconButton(
-          icon: Icon(Icons.check),
-          padding: EdgeInsets.zero,
-          splashRadius: 20,
-          onPressed: () {
-            // No change
-            if (questionEqual(question, widget.question)) {
-              Navigator.of(context).pop();
-              return;
-            }
-
-            // Check option fields
-            if (!_formKey.currentState.validate()) return;
-
-            // Text or picture
-            if (question.text.isEmpty &&
-                question.pictureId == null &&
-                question.pendingPicturePath == null) {
-              showBasicDialog(context, "Question must have body or picture");
-              return;
-            }
-
-            // Correct answers
-            if (question is MCQuestion &&
-                (question as MCQuestion).numCorrect < 1) {
-              showBasicDialog(context, "At least one option must be correct");
-              return;
-            }
-
-            // Finally save
-            widget.save(widget.questionIndex, question);
-          },
-        ),
+            icon: Icon(Icons.check),
+            padding: EdgeInsets.zero,
+            splashRadius: 20,
+            onPressed: _save)
       ],
 
       child: SingleChildScrollView(
@@ -178,30 +140,30 @@ class _QuestionCreateState extends State<QuestionCreate> {
                     decoration: InputDecoration(
                       labelText: 'Question text',
                     ),
-                    onChanged: (value) => question.text = value,
+                    onChanged: (value) => _question.text = value,
                     controller: _questionTextController,
                   ),
                 ),
 
                 // Question image
                 FutureBuilder(
-                  future: getPicturePath(),
+                  future: _getPicturePath(),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
                     return PictureCard(snapshot.hasData ? snapshot.data : null,
                         (path) {
                       setState(() {
-                        question.pendingPicturePath = path;
+                        _question.pendingPicturePath = path;
                       });
                     });
                   },
                 ),
 
                 // MC options
-                if (questionType == QuestionType.MC) ..._mcFields(question),
+                if (_questionType == QuestionType.MC) ..._mcFields(_question),
 
                 // TF options
-                if (questionType == QuestionType.TF)
+                if (_questionType == QuestionType.TF)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8, 32, 8, 8),
                     child: Center(
@@ -232,15 +194,15 @@ class _QuestionCreateState extends State<QuestionCreate> {
                           ],
                           onPressed: (int index) {
                             setState(() {
-                              (question as TFQuestion).answer = index == 0;
+                              (_question as TFQuestion).answer = index == 0;
                             });
                           },
                           // Boolean array
                           isSelected: [
                             // True
-                            (question as TFQuestion).answer,
+                            (_question as TFQuestion).answer,
                             // False
-                            !(question as TFQuestion).answer
+                            !(_question as TFQuestion).answer
                           ],
                         ),
                       ),
@@ -252,19 +214,6 @@ class _QuestionCreateState extends State<QuestionCreate> {
         ),
       ),
     );
-  }
-
-  /// Picture card
-  Future<String> getPicturePath() async {
-    // No image
-    if (question.pendingPicturePath == null && question.pictureId == null) {
-      return null;
-    }
-    // Updated image
-    if (question.pendingPicturePath != null) return question.pendingPicturePath;
-    // Image id
-    return await Provider.of<QuizCollectionModel>(context, listen: false)
-        .getQuestionPicture(question);
   }
 
   /// Options editing for multiple choice
@@ -372,8 +321,8 @@ class _QuestionCreateState extends State<QuestionCreate> {
                     onPressed: () {
                       setState(() {
                         // Shouldn't happen
-                        if (questionType != QuestionType.MC) return;
-                        (question as MCQuestion).options.removeAt(index);
+                        if (_questionType != QuestionType.MC) return;
+                        (_question as MCQuestion).options.removeAt(index);
                         _optionTextControllers.removeAt(index);
                       });
                     },
@@ -386,5 +335,73 @@ class _QuestionCreateState extends State<QuestionCreate> {
         ),
       ),
     );
+  }
+
+  /// Picture card
+  Future<String> _getPicturePath() async {
+    // No image
+    if (_question.pendingPicturePath == null && _question.pictureId == null) {
+      return null;
+    }
+    // Updated image
+    if (_question.pendingPicturePath != null)
+      return _question.pendingPicturePath;
+    // Image id
+    return await Provider.of<QuizCollectionModel>(context, listen: false)
+        .getQuestionPicture(_question);
+  }
+
+  // Handle close icon tap
+  void _close() async {
+    if (questionEqual(widget.question, _question) ||
+        await showConfirmDialog(
+            context, "Are you sure you want to discard the question changes?",
+            title: "Discard question changes")) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  // Handles delete icon tap
+  void _delete() async {
+    // Question equal
+    if (questionEqual(widget.question, _question)) {
+      return Navigator.of(context).pop();
+    }
+
+    // Delete question (parent handles)
+    if (await showConfirmDialog(
+        context, "Are you sure you want to delete the question?",
+        title: "Delete question")) {
+      Navigator.of(context).pop(QuestionReturnArguments(null, delete: true));
+    }
+  }
+
+  // Handles save icon tap
+  void _save() {
+    // No change
+    if (questionEqual(widget.question, _question)) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    // Check option fields
+    if (!_formKey.currentState.validate()) return;
+
+    // Text or picture
+    if (_question.text.isEmpty &&
+        _question.pictureId == null &&
+        _question.pendingPicturePath == null) {
+      showBasicDialog(context, "Question must have body or picture");
+      return;
+    }
+
+    // Correct answers
+    if (_question is MCQuestion && (_question as MCQuestion).numCorrect < 1) {
+      showBasicDialog(context, "At least one option must be correct");
+      return;
+    }
+
+    // Finally save
+    return Navigator.of(context).pop(QuestionReturnArguments(_question));
   }
 }
