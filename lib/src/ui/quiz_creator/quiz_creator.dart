@@ -263,7 +263,7 @@ class _QuizCreateState extends State<QuizCreate> {
     return GestureDetector(
         onTap: () => _editQuestion(index),
         child: Card(
-          margin: EdgeInsets.symmetric(vertical: 4),
+          margin: EdgeInsets.symmetric(vertical: 6),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

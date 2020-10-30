@@ -397,6 +397,13 @@ class _QuestionCreateState extends State<QuestionCreate> {
       return;
     }
 
+    // Options
+    if (_question is MCQuestion &&
+        (_question as MCQuestion).options.length <= 1) {
+      showBasicDialog(context, "Must have two or more options");
+      return;
+    }
+
     // Finally save
     return Navigator.of(context).pop(QuestionReturnArguments(_question));
   }
