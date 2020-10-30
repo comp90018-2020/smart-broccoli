@@ -12,26 +12,30 @@ enum GameSessionState { WAITING, ACTIVE, ENDED }
 /// `QuizModel.createSession`.
 class GameSession {
   final int id, quizId, groupId;
+  final QuizType quizType;
   final GameSessionType type;
   final GameSessionState state;
   final String joinCode, token;
   final bool groupAutoJoin;
 
+  // DO NOT USE THIS
   // Constructor to be used by when the user wants to start a new game session
+  @deprecated
   factory GameSession(Quiz quiz, GameSessionType sessionType,
           {bool groupAutoJoin = true}) =>
-      GameSession._internal(
-          null, quiz.id, null, sessionType, null, null, null, groupAutoJoin);
+      GameSession._internal(null, quiz.id, null, quiz.type, sessionType, null,
+          null, null, groupAutoJoin);
 
   // Constructor for internal use only
-  GameSession._internal(this.id, this.quizId, this.groupId, this.type,
-      this.state, this.joinCode, this.token, this.groupAutoJoin);
+  GameSession._internal(this.id, this.quizId, this.groupId, this.quizType,
+      this.type, this.state, this.joinCode, this.token, this.groupAutoJoin);
 
   factory GameSession.fromJson(Map<String, dynamic> json, {String token}) =>
       GameSession._internal(
           json['id'],
           json['quizId'],
           json['groupId'],
+          json['type'] == 'live' ? QuizType.LIVE : QuizType.SELF_PACED,
           json['isGroup'] ? GameSessionType.GROUP : GameSessionType.INDIVIDUAL,
           json['state'] == 'waiting'
               ? GameSessionState.WAITING
