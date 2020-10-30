@@ -111,7 +111,7 @@ main() async {
     expect(quizzes[2].description, "quiz for your own time");
     expect(quizzes[0].type, QuizType.LIVE);
     expect(quizzes[1].type, QuizType.LIVE);
-    expect(quizzes[2].type, QuizType.SELF_PACED);
+    expect(quizzes[2].type, QuizType.SMART_LIVE);
     expect(quizzes[0].timeLimit, 10);
     expect(quizzes[1].timeLimit, 15);
     expect(quizzes[2].timeLimit, 20);
