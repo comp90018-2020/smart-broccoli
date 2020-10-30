@@ -55,10 +55,10 @@ class _QuizCreateState extends State<QuizCreate> {
 
   @override
   Widget build(BuildContext context) {
-    // Set quiz after selectQuiz
+    // Clone and set quiz after selectQuiz
     var quiz =
         Provider.of<QuizCollectionModel>(context, listen: true).selectedQuiz;
-    if (_quiz == null && quiz != null) _quiz = quiz;
+    if (_quiz == null && quiz != null) _quiz = Quiz.fromJson(quiz.toJson());
 
     return CustomPage(
       title: "Quiz",
