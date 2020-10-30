@@ -119,7 +119,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
 
   /// Deletes a quiz
   Future<void> deleteQuiz(Quiz quiz) async {
-    if (quiz.id == null) return;
+    if (quiz == null || quiz.id == null) return;
     await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
     if (quiz.role == GroupRole.MEMBER)
       _availableQuizzes.remove(quiz.id);
@@ -130,6 +130,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
 
   /// Save selected quiz
   Future<void> saveQuiz(Quiz quiz) async {
+    if (quiz == null) return;
     // First save the quiz
     Quiz updated = quiz.id == null
         ? await _quizApi.createQuiz(_authStateModel.token, quiz)

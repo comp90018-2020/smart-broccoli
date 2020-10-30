@@ -400,6 +400,9 @@ class _QuizCreateState extends State<QuizCreate> {
 
   // Exit page
   void _close() async {
+    // Quiz not loaded
+    if (_quiz == null) return Navigator.of(context).pop();
+
     // Unsaved changes
     if (_quiz.id == null || _quiz.id != null && quizModified()) {
       if (!await showConfirmDialog(
@@ -414,8 +417,8 @@ class _QuizCreateState extends State<QuizCreate> {
 
   /// Save quiz
   void _saveQuiz() async {
-    // No change
-    if (_quiz.id != null && !quizModified()) {
+    // Quiz not loaded or no change
+    if (_quiz == null || _quiz.id != null && !quizModified()) {
       context.read<QuizCollectionModel>().clearSelectedQuiz();
       return Navigator.of(context).pop();
     }
@@ -443,6 +446,8 @@ class _QuizCreateState extends State<QuizCreate> {
 
   /// Delete quiz
   void _deleteQuiz() async {
+    // Quiz not loaded
+    if (_quiz == null) return Navigator.of(context).pop();
     if (!await showConfirmDialog(
         context, "Are you sure you want to delete the question?",
         title: "Delete question")) {
