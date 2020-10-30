@@ -270,14 +270,12 @@ class _QuizCreateState extends State<QuizCreate> {
             children: [
               Container(
                 width: double.maxFinite,
-                child: AspectRatio(
-                  aspectRatio: 2,
-                  child: Container(
-                    width: double.maxFinite,
-                    child: question.pictureId == null
-                        ? Icon(Icons.insert_photo_outlined, size: 100)
-                        : Icon(Icons.insert_photo_outlined, size: 100),
-                  ),
+                height: 175,
+                child: Container(
+                  width: double.maxFinite,
+                  child: question.pictureId == null
+                      ? Icon(Icons.insert_photo_outlined, size: 100)
+                      : Icon(Icons.insert_photo_outlined, size: 100),
                 ),
               ),
               Padding(
@@ -316,22 +314,23 @@ class _QuizCreateState extends State<QuizCreate> {
 
   /// Edit question
   void _editQuestion(int index) async {
-    QuestionReturnArguments returnArgs = await Navigator.of(context).pushNamed(
-        "/quiz/question",
+    var returnArgs = await Navigator.of(context).pushNamed("/quiz/question",
         arguments: QuestionArguments(_quiz.questions[index], index));
 
-    // Nothing returned
-    if (returnArgs == null) return;
-
-    // Delete
-    setState(() {
-      if (returnArgs.delete) {
-        _quiz.questions.removeAt(index);
-      } else {
-        _quiz.questions.removeAt(index);
-        _quiz.questions.insert(index, returnArgs.question);
-      }
-    });
+    if (returnArgs is QuestionReturnArguments) {
+      // No change
+      if (returnArgs.question != null &&
+          returnArgs.question == _quiz.questions[index]) return;
+      // If saved
+      setState(() {
+        if (returnArgs.delete) {
+          _quiz.questions.removeAt(index);
+        } else {
+          _quiz.questions.removeAt(index);
+          _quiz.questions.insert(index, returnArgs.question);
+        }
+      });
+    }
   }
 
   // Create question
@@ -348,11 +347,10 @@ class _QuizCreateState extends State<QuizCreate> {
       question = TFQuestion("", false);
     }
 
-    // If saved
-    QuestionReturnArguments returnArgs = await Navigator.of(context).pushNamed(
-        "/quiz/question",
+    var returnArgs = await Navigator.of(context).pushNamed("/quiz/question",
         arguments: QuestionArguments(question, _quiz.questions.length));
-    if (returnArgs.question != null) {
+    // If saved
+    if (returnArgs is QuestionReturnArguments && returnArgs.question != null) {
       setState(() {
         _quiz.questions.add(returnArgs.question);
       });

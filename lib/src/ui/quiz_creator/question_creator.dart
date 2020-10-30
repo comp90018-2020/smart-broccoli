@@ -375,12 +375,6 @@ class _QuestionCreateState extends State<QuestionCreate> {
 
   // Handles save icon tap
   void _save() {
-    // No change
-    if (widget.question == _question) {
-      Navigator.of(context).pop();
-      return;
-    }
-
     // Check option fields
     if (!_formKey.currentState.validate()) return;
 

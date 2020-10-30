@@ -133,6 +133,13 @@ class BroccoliRouter {
       return QuizCreate();
     }));
 
+    // Quiz question
+    router.define(quizQuestion, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      final args = context.settings.arguments as QuestionArguments;
+      return QuestionCreate(args.question, args.questionIndex);
+    }));
+
     // Quiz with ID
     router.define(quizId, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
@@ -142,13 +149,6 @@ class BroccoliRouter {
             .refreshQuiz(quizId)
             .then((quiz) => {QuizCreate(quiz: quiz)});
       return QuizCreate();
-    }));
-
-    // Quiz question
-    router.define(quizQuestion, handler: Handler(
-        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
-      final args = context.settings.arguments as QuestionArguments;
-      return QuestionCreate(args.question, args.questionIndex);
     }));
 
     // Session question

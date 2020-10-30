@@ -58,9 +58,21 @@ class Quiz implements Comparable<Quiz> {
           {String description,
           bool isActive = false,
           int timeLimit,
-          List<Question> questions = const []}) =>
-      Quiz._internal(null, null, null, GroupRole.OWNER, title, groupId, type,
-          description, isActive, timeLimit, questions, null, false);
+          List<Question> questions}) =>
+      Quiz._internal(
+          null,
+          null,
+          null,
+          GroupRole.OWNER,
+          title,
+          groupId,
+          type,
+          description,
+          isActive,
+          timeLimit,
+          questions == null ? [] : questions,
+          null,
+          false);
 
   /// Constructor for internal use only
   Quiz._internal(
