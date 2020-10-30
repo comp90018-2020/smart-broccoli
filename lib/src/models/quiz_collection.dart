@@ -37,36 +37,31 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// get quizzes by rules
-  List<Quiz> filterQuizzesWhere(Iterable<Quiz> quizzes,
-      {int groupId, QuizType type, bool rule}) {
-    List<Quiz> filteredQuizzes = quizzes
-        .where((quiz) => (rule == null
-            ? (groupId == null || quiz.groupId == groupId) &&
-                (type == null || quiz.type == type)
-            : rule))
-        .toList();
-    filteredQuizzes.sort();
-    return filteredQuizzes;
-  }
+  UnmodifiableListView<Quiz> filterQuizzesWhere(Iterable<Quiz> quizzes,
+          {int groupId, QuizType type}) =>
+      UnmodifiableListView(quizzes
+          .where((quiz) =>
+              (groupId == null || quiz.groupId == groupId) &&
+              (type == null || quiz.type == type))
+          .toList()
+            ..sort());
 
   /// Gets all quizzes
-  UnmodifiableListView<Quiz> getQuizzesWhere(
-          {int groupId, QuizType type, bool rule}) =>
-      UnmodifiableListView(filterQuizzesWhere(
+  UnmodifiableListView<Quiz> getQuizzesWhere({int groupId, QuizType type}) =>
+      filterQuizzesWhere(
           [..._availableQuizzes.values, ..._createdQuizzes.values],
-          groupId: groupId, type: type, rule: rule));
+          groupId: groupId, type: type);
 
   /// Gets available (user accessible) quizzes
   UnmodifiableListView<Quiz> getAvailableQuizzesWhere(
-          {int groupId, QuizType type, bool rule}) =>
-      UnmodifiableListView(filterQuizzesWhere(_availableQuizzes.values,
-          groupId: groupId, type: type, rule: rule));
+          {int groupId, QuizType type}) =>
+      filterQuizzesWhere(_availableQuizzes.values,
+          groupId: groupId, type: type);
 
   /// Gets created (user managed) quizzes
   UnmodifiableListView<Quiz> getCreatedQuizzesWhere(
-          {int groupId, QuizType type, bool rule}) =>
-      UnmodifiableListView(filterQuizzesWhere(_createdQuizzes.values,
-          groupId: groupId, type: type, rule: rule));
+          {int groupId, QuizType type}) =>
+      filterQuizzesWhere(_createdQuizzes.values, groupId: groupId, type: type);
 
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _quizApi.getQuiz(_authStateModel.token, id);
