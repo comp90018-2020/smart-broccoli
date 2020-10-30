@@ -1,3 +1,5 @@
+import 'package:smart_broccoli/src/models/session_model.dart';
+
 import 'game.dart';
 import 'group.dart';
 
@@ -106,22 +108,29 @@ class Quiz implements Comparable<Quiz> {
 
   @override
   int compareTo(Quiz other) {
-    switch (this.type) {
-      case QuizType.LIVE:
-        if (other.type == QuizType.LIVE &&
-            this.updatedTimestamp < other.updatedTimestamp) {
-          return 1;
-        }
+    int thisType = this._getQuizType(this);
+    int thisTimestamp = this.updatedTimestamp;
+    int otherType = this._getQuizType(other);
+    int otherTimestamp = this.updatedTimestamp;
+
+    if (thisType == otherType)
+      return otherTimestamp - thisTimestamp;
+    else
+      return thisType - otherType;
+  }
+
+  int _getQuizType(Quiz quiz) {
+    if (quiz.type == QuizType.LIVE) {
+      if (quiz.sessions.isEmpty) return 0;
+      try {
+        quiz.sessions
+            .firstWhere((session) => session.quizType == QuizType.SELF_PACED);
         return 0;
-      case QuizType.SELF_PACED:
-        if (other.type == QuizType.LIVE ||
-            this.updatedTimestamp < other.updatedTimestamp) {
-          return 1;
-        }
-        return 0;
-      default:
-        return 0;
+      } catch (_) {
+        return 1;
+      }
     }
+    return 2;
   }
 }
 
