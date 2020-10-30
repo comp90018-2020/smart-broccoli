@@ -260,38 +260,39 @@ class _QuizCreateState extends State<QuizCreate> {
 
   // Used to represent questions
   Widget _questionCard(int index, Question question, BuildContext context) {
-    return GestureDetector(
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 6),
+      child: InkWell(
         onTap: () => _editQuestion(index),
-        child: Card(
-          margin: EdgeInsets.symmetric(vertical: 6),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.maxFinite,
+              height: 175,
+              child: Container(
                 width: double.maxFinite,
-                height: 175,
-                child: Container(
-                  width: double.maxFinite,
-                  child: question.pictureId == null
-                      ? Icon(Icons.insert_photo_outlined, size: 100)
-                      : Icon(Icons.insert_photo_outlined, size: 100),
-                ),
+                child: question.pictureId == null
+                    ? Icon(Icons.insert_photo_outlined, size: 100)
+                    : Icon(Icons.insert_photo_outlined, size: 100),
               ),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Question ${index + 1}',
-                        style: Theme.of(context).textTheme.headline6),
-                    Text(question.text)
-                  ],
-                ),
-              )
-            ],
-          ),
-        ));
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Question ${index + 1}',
+                      style: Theme.of(context).textTheme.headline6),
+                  Text(question.text)
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   /// Builds the group list dropdown
