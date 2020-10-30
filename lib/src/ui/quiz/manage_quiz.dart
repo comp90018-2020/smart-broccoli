@@ -111,8 +111,10 @@ class _ManageQuizState extends State<ManageQuiz> {
                       // All groups
                       makeItem(null, "All Groups"),
                       // Each created group
-                      ...collection.createdGroups
-                          .map((group) => makeItem(group.id, group.name))
+                      ...collection.createdGroups.map((group) => makeItem(
+                          group.id,
+                          group.name +
+                              '${group.defaultGroup ? " (Default Group)" : ""}'))
                     ],
                   );
                 })),
