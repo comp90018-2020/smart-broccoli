@@ -21,7 +21,7 @@ class TableCard extends Material {
 /// Name row
 class NameTableRow extends TableRow {
   NameTableRow(bool isEdit, TextEditingController _nameController,
-      {String hintText,
+      {String hintText = 'Name',
       TextInputAction textInputAction,
       void Function(String) onFieldSubmitted})
       : super(
@@ -58,13 +58,14 @@ class NameTableRow extends TableRow {
 /// Email row
 class EmailTableRow extends TableRow {
   EmailTableRow(bool isEdit, TextEditingController _emailController,
-      {String hintText,
+      {String hintText = 'Email',
       TextInputAction textInputAction,
       void Function(String) onFieldSubmitted})
       : super(
           children: [
             _paddedCell(
-                const Text('EMAIL', style: TextStyle(color: Colors.black38)),
+                const Text('EMAIL',
+                    style: const TextStyle(color: Colors.black38)),
                 padding: const EdgeInsets.only(left: 16)),
             _paddedCell(
               TextFormField(
