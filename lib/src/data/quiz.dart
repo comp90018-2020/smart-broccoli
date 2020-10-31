@@ -66,7 +66,9 @@ class Quiz implements Comparable<Quiz> {
     });
     Quiz quiz = Quiz._internal(
         json['id'],
-        DateTime.parse(json['updatedAt']),
+        DateTime.parse(json['updatedAt']) == null
+            ? DateTime.parse(json['createdAt'])
+            : DateTime.parse(json['updatedAt']),
         json['pictureId'],
         json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
         json['title'],
