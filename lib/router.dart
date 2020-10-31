@@ -27,6 +27,7 @@ class BroccoliRouter {
   static const String auth = "/auth";
   static const String join = "/join";
   static const String profile = "/profile";
+  static const String profilePromoting = "/profile/promoting";
 
   // Quiz pages
   static const String takeQuiz = "/take_quiz";
@@ -165,5 +166,11 @@ class BroccoliRouter {
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return ProfileMain();
     }), transitionType: TransitionType.inFromLeft);
+
+    // Register account (in profile)
+    router.define(profilePromoting, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return ProfilePromoting();
+    }));
   }
 }
