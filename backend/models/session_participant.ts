@@ -15,7 +15,7 @@ const schema: Sequelize.ModelAttributes = {
         allowNull: false,
     },
     state: {
-        type: Sequelize.ENUM("joined", "complete", "left"),
+        type: Sequelize.ENUM("joined", "complete", "left", "lost"),
         allowNull: false,
         defaultValue: "joined",
     },

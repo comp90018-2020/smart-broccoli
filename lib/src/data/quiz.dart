@@ -26,7 +26,7 @@ abstract class PendingPicture {
 class Quiz with PendingPicture implements Comparable<Quiz> {
   /// ID of the quiz (for quizzes fetched from server only)
   final int id;
-  final int updatedTimestamp;
+  final DateTime updatedTimestamp;
 
   /// Picture ID (from server)
   final int pictureId;
@@ -108,9 +108,7 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
     });
     Quiz quiz = Quiz._internal(
         json['id'],
-        json['updatedAt'] == null
-            ? null
-            : DateTime.parse(json['updatedAt']).millisecondsSinceEpoch,
+        DateTime.parse(json['updatedAt'] ?? '2020-01-01 00:00:00.000'),
         json['pictureId'],
         json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
         json['title'],
@@ -163,14 +161,12 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
   @override
   int compareTo(Quiz other) {
     int thisType = this.type.index;
-    int thisTimestamp = this.updatedTimestamp;
     int otherType = other.type.index;
-    int otherTimestamp = this.updatedTimestamp;
 
     if (thisType == otherType)
-      return otherTimestamp - thisTimestamp;
+      return other.updatedTimestamp.compareTo(this.updatedTimestamp);
     else
-      return thisType - otherType;
+      return otherType - thisType;
   }
 
   /// Type of quiz
