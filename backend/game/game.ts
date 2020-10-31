@@ -38,7 +38,7 @@ export class GameHandler {
                 title: "Fruits Master",
                 active: true,
                 description: "Test Quiz",
-                type: "live",
+                type: "self paced",
                 isGroup: false,
                 timeLimit: 20,
                 groupId: 2,
@@ -204,7 +204,6 @@ export class GameHandler {
                 );
                 session.playerJoin(player);
             }
-
             // emit welcome event
             emitToOne(
                 socket.id,
@@ -240,8 +239,8 @@ export class GameHandler {
                     session
                 );
             } else {
-                if (session.isSelfPacedNotGroupAndPending()) {
-                    this.start(session, player);
+                if (session.isSelfPacedNotGroupAndNotStart()) {
+                    this.next(session, 0);
                 } else if (session.is(GameStatus.Starting)) {
                     // if game is starting,
                     emitToOne(

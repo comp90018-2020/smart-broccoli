@@ -43,6 +43,7 @@ export class GameSession {
     ) {
         this.id = $sessionId;
         this.quiz = $quiz;
+
         if (isGroup) {
             // "live", "self paced"
             if (sessionType === "live") {
@@ -55,6 +56,8 @@ export class GameSession {
                 this.type = GameType.Live_NotGroup;
             } else {
                 this.type = GameType.SelfPaced_NotGroup;
+                this.status = GameStatus.Running;
+                this.setToNextQuestion(0);
             }
         }
     }
@@ -105,9 +108,9 @@ export class GameSession {
                 this.status === GameStatus.Starting)
         );
     }
-    isSelfPacedNotGroupAndPending() {
+    isSelfPacedNotGroupAndNotStart() {
         return (
-            this.status === GameStatus.Pending &&
+            this.status === GameStatus.Running &&
             this.type == GameType.SelfPaced_NotGroup
         );
     }
@@ -190,6 +193,7 @@ export class GameSession {
             );
         }
     }
+
     getStatus() {
         return this.status;
     }
