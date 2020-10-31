@@ -1,5 +1,6 @@
 import { FindOptions } from "sequelize";
 import ErrorStatus from "../helpers/error";
+import { Op } from "sequelize";
 import sequelize, {
     Quiz,
     Question,
@@ -65,7 +66,7 @@ export const getQuizAndRole = async (
     // Find user's quiz sessions
     // This query is not ideal
     const sessions = await Session.findAll({
-        where: { quizId },
+        where: { quizId, state: { [Op.not]: "lost" } },
         attributes: ["id", "state"],
         include: [
             {
@@ -247,6 +248,7 @@ export const getAllQuiz = async (
                         // @ts-ignore
                         model: Session,
                         required: false,
+                        where: { state: { [Op.not]: "lost" } },
                         include: [
                             {
                                 // @ts-ignore
@@ -321,6 +323,7 @@ export const getQuiz = async (userId: number, quizId: number) => {
                 // @ts-ignore
                 model: Session,
                 required: false,
+                where: { state: { [Op.not]: "lost" } },
                 include: [
                     {
                         // @ts-ignore
