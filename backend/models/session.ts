@@ -22,7 +22,7 @@ const schema: Sequelize.ModelAttributes = {
         allowNull: true,
     },
     state: {
-        type: Sequelize.ENUM("waiting", "active", "ended"),
+        type: Sequelize.ENUM("waiting", "active", "ended", "lost"),
         allowNull: false,
         defaultValue: "waiting",
     },
