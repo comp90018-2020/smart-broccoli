@@ -98,8 +98,6 @@ export class GameHandler {
         // const quizJSON: QuizAttributes = quiz.toJSON();
         const newSession = new GameSession(quiz, sessionId, quizType, isGroup);
         this.sessions[sessionId] = newSession;
-
-        console.log(`[*] reset a game session(${newSession.type}) for debug`);
         return true;
     }
 
@@ -292,8 +290,10 @@ export class GameHandler {
 
     async quit(socket: Socket, session: GameSession, player: Player) {
         try {
-            // remove this participants from session in memory
-            delete session.playerMap[player.id];
+            // Host should not use this
+            if (player.role == Role.host) {
+                return;
+            }
             // leave from socket room
             socket.leave(whichRoom(session, player.role));
             socket.leave(whichRoom(session, Role.all));
