@@ -86,13 +86,13 @@ export class GameSession {
     }
 
     freezeQuestion(questionIndex: number) {
-        if (questionIndex == this.questionIndex) {
+        if (questionIndex === this.questionIndex) {
             this._isReadyForNextQuestion = false;
         }
     }
 
     unfreezeQuestion(questionIndex: number) {
-        if (questionIndex == this.questionIndex) {
+        if (questionIndex === this.questionIndex) {
             this._isReadyForNextQuestion = true;
         }
     }
@@ -108,10 +108,11 @@ export class GameSession {
                 this.status === GameStatus.Starting)
         );
     }
-    isSelfPacedNotGroupAndNotStart() {
+    isSelfPacedNotGroupAndHasNotStart() {
         return (
-            this.status === GameStatus.Running &&
-            this.type == GameType.SelfPaced_NotGroup
+            this.questionIndex === 0 &&
+            this._isReadyForNextQuestion &&
+            this.type === GameType.SelfPaced_NotGroup
         );
     }
     isEmitValid(player: Player) {
@@ -128,7 +129,7 @@ export class GameSession {
     }
 
     is(status: GameStatus) {
-        return this.status == status;
+        return this.status === status;
     }
     hasMoreQuestions() {
         return this.questionIndex < this.quiz.questions.length - 1;
@@ -149,9 +150,9 @@ export class GameSession {
         this.QuestionReleaseAt[questionIndex] = Date.now() + afterTime;
     }
     setPlayerState(player: Player, state: PlayerState) {
-        if (state == PlayerState.Joined) {
+        if (state === PlayerState.Joined) {
             this.activePlayersNum += 1;
-        } else if (state == PlayerState.Left) {
+        } else if (state === PlayerState.Left) {
             this.activePlayersNum -= 1;
         }
         this.playerMap[player.id].state = state;
@@ -166,7 +167,7 @@ export class GameSession {
     }
     async setStatus(status: GameStatus) {
         this.status = status;
-        if (status == GameStatus.Starting) {
+        if (status === GameStatus.Starting) {
             this.QuestionReleaseAt[0] = Date.now() + WAIT_TIME_BEFORE_START;
 
             if (process.env.SOCKET_MODE !== "debug") {
@@ -185,8 +186,9 @@ export class GameSession {
                 state: state,
             });
         });
+
         if (process.env.SOCKET_MODE !== "debug") {
-            await endSessionInController(
+            endSessionInController(
                 this.id,
                 this.hasMoreQuestions() && this._isReadyForNextQuestion,
                 progress
@@ -200,7 +202,7 @@ export class GameSession {
     canStart(player: Player) {
         // and game is pending
         return (
-            this.status == GameStatus.Pending &&
+            this.status === GameStatus.Pending &&
             // if no host or player is host
             (this.type === GameType.SelfPaced_Group ||
                 this.type === GameType.SelfPaced_NotGroup ||
@@ -234,7 +236,7 @@ export class GameSession {
 
     isSelfPaced() {
         return (
-            this.type == GameType.SelfPaced_Group ||
+            this.type === GameType.SelfPaced_Group ||
             this.type === GameType.SelfPaced_NotGroup
         );
     }

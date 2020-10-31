@@ -23,36 +23,36 @@ export default async (socketIO: Server) => {
                 return;
             }
             // join & welcome
-            await handler.welcome(socket, session, player);
+            handler.welcome(socket, session, player);
 
             // answer
-            socket.on("answer", async (content: any) => {
-                await handler.answer(content, session, player);
+            socket.on("answer", (content: any) => {
+                handler.answer(content, session, player);
             });
 
             // quit
-            socket.on("quit", async () => {
-                await handler.quit(socket, session, player);
+            socket.on("quit", () => {
+                handler.quit(socket, session, player);
             });
 
             // start
-            socket.on("start", async () => {
-                await handler.start(session, player);
+            socket.on("start", () => {
+                handler.start(session, player);
             });
 
             // abort
-            socket.on("abort", async () => {
-                await handler.abort(session, player);
+            socket.on("abort", () => {
+                handler.abort(session, player);
             });
 
             // next question
-            socket.on("next", async () => {
-                await handler.next(session, session.getQuestionIndex(), player);
+            socket.on("next", () => {
+                handler.next(session, session.getQuestionIndex(), player);
             });
 
             // showBoard
-            socket.on("showBoard", async () => {
-                await handler.showBoard(session, session.questionIndex, player);
+            socket.on("showBoard", () => {
+                handler.showBoard(session, session.questionIndex, player);
             });
 
             if (process.env.SOCKET_MODE === "debug") {
@@ -62,7 +62,6 @@ export default async (socketIO: Server) => {
                 });
             }
         } catch (err) {
-            delete _socketIO.sockets.connected[socket.id];
             sendErr(err, socket.id);
         }
 
