@@ -214,7 +214,8 @@ class _QuizCardState extends State<QuizCard> {
                                   context,
                                   "You are about to start a live session " +
                                       "for the quiz: ${widget.quiz.title}",
-                                  title: "Confirm start session")) return;
+                                  title: "Confirm start session",
+                                  barrierDismissable: true)) return;
                               try {
                                 Provider.of<QuizCollectionModel>(context,
                                         listen: false)

@@ -350,7 +350,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
     if (widget.question == _question ||
         await showConfirmDialog(
             context, "Are you sure you want to discard changes?",
-            title: "Discard question changes")) {
+            title: "Discard question changes", barrierDismissable: true)) {
       Navigator.of(context).pop();
     }
   }

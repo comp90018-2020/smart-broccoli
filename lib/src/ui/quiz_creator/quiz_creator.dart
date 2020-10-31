@@ -406,7 +406,7 @@ class _QuizCreateState extends State<QuizCreate> {
     if (_quiz.id == null || _quiz.id != null && quizModified()) {
       if (!await showConfirmDialog(
           context, "Are you sure you want to discard changes?",
-          title: "Discard quiz changes")) {
+          title: "Discard quiz changes", barrierDismissable: true)) {
         return;
       }
     }
