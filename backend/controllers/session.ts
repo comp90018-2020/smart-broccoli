@@ -507,27 +507,23 @@ export const endSession = async (
  * also make joined participants' state lost
  */
 export const clearSessions = async () => {
-    try {
-        await Session.update(
-            { code: null, state: "lost" },
-            {
-                where: {
-                    state: {
-                        [Op.or]: ["active", "waiting"],
-                    },
+    await Session.update(
+        { code: null, state: "lost" },
+        {
+            where: {
+                state: {
+                    [Op.or]: ["active", "waiting"],
                 },
-            }
-        );
+            },
+        }
+    );
 
-        await SessionParticipant.update(
-            { state: "lost" },
-            {
-                where: {
-                    state: "joined",
-                },
-            }
-        );
-    } catch (err) {
-        throw err;
-    }
+    await SessionParticipant.update(
+        { state: "lost" },
+        {
+            where: {
+                state: "joined",
+            },
+        }
+    );
 };
