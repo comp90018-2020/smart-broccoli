@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:quiver/iterables.dart';
 
 class SmartBroccoliColourScheme extends ColorScheme {
   static const Color tabHolderBackground = Color(0xFF82C785);
@@ -211,12 +212,17 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
 class UserAvatar extends CircleAvatar {
   UserAvatar(String filePath, {double maxRadius: 20})
       : super(
-          backgroundImage: Image.file(File(filePath)).image,
+          backgroundImage:
+              filePath == null ? null : Image.file(File(filePath)).image,
+          backgroundColor: Colors.white,
+          child: filePath == null
+              ? Icon(Icons.account_circle, size: maxRadius * 2)
+              : null,
           maxRadius: maxRadius,
         );
-  UserAvatar.placeholder({double maxRadius: 20})
-      : super(
-          backgroundColor: Colors.black12,
-          maxRadius: maxRadius,
-        );
+  // UserAvatar.placeholder({double maxRadius: 20})
+  //     : super(
+  //         backgroundColor: Colors.black12,
+  //         maxRadius: maxRadius,
+  //       );
 }
