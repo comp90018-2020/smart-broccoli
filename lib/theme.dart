@@ -209,8 +209,6 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
         );
 }
 
-// ClipOval(child: )
-
 class UserAvatar extends ClipOval {
   UserAvatar(String filePath, {double maxRadius: 20})
       : super(
