@@ -47,8 +47,7 @@ class _QuizCreateState extends State<QuizCreate> {
     // From quiz id
     if (widget.quizId != null) {
       Provider.of<QuizCollectionModel>(context, listen: false)
-          .selectQuiz(widget.quizId)
-          .then((value) => null);
+          .selectQuiz(widget.quizId);
     }
   }
 
