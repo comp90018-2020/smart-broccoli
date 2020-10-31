@@ -9,8 +9,8 @@ class TableCard extends Material {
           child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             columnWidths: const {
-              0: FlexColumnWidth(0.3),
-              1: FlexColumnWidth(0.7)
+              0: IntrinsicColumnWidth(),
+              1: FlexColumnWidth(1)
             },
             border: TableBorder.all(width: 0.8, color: Colors.black12),
             children: children,
@@ -26,10 +26,8 @@ class NameTableRow extends TableRow {
       void Function(String) onFieldSubmitted})
       : super(
           children: [
-            _paddedCell(
-                const Text('NAME',
-                    style: const TextStyle(color: Colors.black38)),
-                padding: const EdgeInsets.only(left: 16)),
+            _paddedCell(Icon(Icons.person),
+                padding: EdgeInsets.symmetric(horizontal: 16)),
             _paddedCell(
               TextFormField(
                 readOnly: !isEdit,
@@ -63,10 +61,8 @@ class EmailTableRow extends TableRow {
       void Function(String) onFieldSubmitted})
       : super(
           children: [
-            _paddedCell(
-                const Text('EMAIL',
-                    style: const TextStyle(color: Colors.black38)),
-                padding: const EdgeInsets.only(left: 16)),
+            _paddedCell(Icon(Icons.email),
+                padding: EdgeInsets.symmetric(horizontal: 16)),
             _paddedCell(
               TextFormField(
                 textAlignVertical: TextAlignVertical.center,
@@ -101,9 +97,8 @@ class PasswordTableRow extends TableRow {
       void Function(String) onFieldSubmitted})
       : super(
           children: [
-            _paddedCell(
-                Text('Password', style: const TextStyle(color: Colors.black38)),
-                padding: const EdgeInsets.only(left: 16)),
+            _paddedCell(Icon(Icons.lock),
+                padding: EdgeInsets.symmetric(horizontal: 16)),
             _paddedCell(
               TextFormField(
                 obscureText: true,
@@ -138,10 +133,8 @@ class PasswordConfirmTableRow extends TableRow {
       void Function(String) onFieldSubmitted})
       : super(
           children: [
-            _paddedCell(
-                Text('Confirm Password',
-                    style: const TextStyle(color: Colors.black38)),
-                padding: const EdgeInsets.only(left: 16)),
+            _paddedCell(Icon(Icons.lock),
+                padding: EdgeInsets.symmetric(horizontal: 16)),
             _paddedCell(
               TextFormField(
                 obscureText: true,
