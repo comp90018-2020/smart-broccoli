@@ -97,8 +97,6 @@ class _ProfileJoinedState extends ProfileEditorState {
 
   // Code to promote a joined user to a registered user
   void initRegister() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => ProfilePromoting()),
-    );
+    Navigator.of(context).pushNamed("/profile/promoting");
   }
 }
