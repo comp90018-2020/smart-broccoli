@@ -305,7 +305,7 @@ export class GameHandler {
             );
             await session.playerLeave(player);
             // disconnect
-            socket.disconnect();
+            socket.disconnect(true);
         } catch (error) {
             sendErr(error, player === undefined ? undefined : player.socketId);
         }
