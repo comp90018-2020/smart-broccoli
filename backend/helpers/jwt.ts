@@ -26,12 +26,16 @@ const jwtSign = (
  */
 const jwtVerify = (token: string, secret: string): Promise<any> => {
     return new Promise((resolve, reject) => {
+        try {
         jwt.verify(token, secret, function (err, decoded) {
             if (err) {
                 return reject(err);
             }
             return resolve(decoded);
         });
+        } catch (err) {
+            return reject(err);
+        }
     });
 };
 
