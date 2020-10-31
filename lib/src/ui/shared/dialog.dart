@@ -41,7 +41,7 @@ Future<bool> showConfirmDialog(BuildContext context, String message,
       ],
     ),
   );
-  return value != null ? value : false;
+  return value ?? false;
 }
 
 /// Shows an image source picker
