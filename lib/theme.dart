@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:quiver/iterables.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SmartBroccoliColourScheme extends ColorScheme {
   static const Color tabHolderBackground = Color(0xFF82C785);
@@ -209,20 +209,19 @@ class LobbyTimerBoxDecoration extends BoxDecoration {
         );
 }
 
-class UserAvatar extends CircleAvatar {
+// ClipOval(child: )
+
+class UserAvatar extends ClipOval {
   UserAvatar(String filePath, {double maxRadius: 20})
       : super(
-          backgroundImage:
-              filePath == null ? null : Image.file(File(filePath)).image,
-          backgroundColor: Colors.white,
           child: filePath == null
-              ? Icon(Icons.account_circle, size: maxRadius * 2)
-              : null,
-          maxRadius: maxRadius,
+              ? SvgPicture.asset("assets/account_circle-black-24dp.svg",
+                  width: maxRadius * 2,
+                  height: maxRadius * 2,
+                  color: Color(0xFF4CAF50))
+              : Container(
+                  child: CircleAvatar(
+                      backgroundImage: Image.file(File(filePath)).image),
+                ),
         );
-  // UserAvatar.placeholder({double maxRadius: 20})
-  //     : super(
-  //         backgroundColor: Colors.black12,
-  //         maxRadius: maxRadius,
-  //       );
 }
