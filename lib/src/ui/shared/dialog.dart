@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:smart_broccoli/src/data/quiz.dart';
 
+/// Shows a basic dialog (title with OK)
 Future<void> showBasicDialog(BuildContext context, String message,
     {String title = "Error"}) {
   return showDialog(
@@ -19,10 +20,12 @@ Future<void> showBasicDialog(BuildContext context, String message,
   );
 }
 
+/// Confirmation dialog
 Future<bool> showConfirmDialog(BuildContext context, String message,
-    {String title = "Confirm"}) async {
+    {String title = "Confirm", bool barrierDismissable = false}) async {
   bool value = await showDialog<bool>(
     context: context,
+    barrierDismissible: barrierDismissable,
     builder: (_) => AlertDialog(
       title: Text(title),
       content: Text(message),
@@ -38,9 +41,10 @@ Future<bool> showConfirmDialog(BuildContext context, String message,
       ],
     ),
   );
-  return value == null ? false : value;
+  return value == null ?? value;
 }
 
+/// Shows an image source picker
 Future<ImageSource> showImgSrcPicker(BuildContext context) {
   return showDialog<ImageSource>(
     context: context,
@@ -82,6 +86,7 @@ Future<ImageSource> showImgSrcPicker(BuildContext context) {
   );
 }
 
+/// Shows a question type picker
 Future<QuestionType> showQuestionTypePicker(BuildContext context) {
   return showDialog<QuestionType>(
     context: context,
