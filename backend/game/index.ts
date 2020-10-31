@@ -77,9 +77,15 @@ const decrypt = async (socket: SocketIO.Socket) => {
         const role = userId === 1 ? Role.host : Role.player;
         return { userId, sessionId, role };
     } else {
-        const { userId, sessionId, role } = await sessionTokenDecrypt(
+        const decrypted = await sessionTokenDecrypt(
             socket.handshake.query.token
         );
+        if (!decrypted)
+            return { userId: undefined, sessionId: undefined, role: undefined };
+        const { userId, sessionId, role } = decrypted;
+        console.log(userId);
+        console.log(sessionId);
+        console.log(role);
         return { userId, sessionId, role };
     }
 };
