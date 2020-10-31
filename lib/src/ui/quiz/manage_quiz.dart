@@ -64,7 +64,13 @@ class _ManageQuizState extends State<ManageQuiz> {
       hasDrawer: true,
       secondaryBackgroundColour: true,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () {
+          if (_groupId == null) {
+            Navigator.of(context).pushNamed('/quiz/');
+          } else {
+            Navigator.of(context).pushNamed('/group/$_groupId/quiz');
+          }
+        },
         label: Text('CREATE QUIZ'),
         icon: Icon(Icons.add),
       ),
@@ -105,10 +111,8 @@ class _ManageQuizState extends State<ManageQuiz> {
                       // All groups
                       makeItem(null, "All Groups"),
                       // Each created group
-                      ...collection.createdGroups.map((group) => makeItem(
-                          group.id,
-                          group.name +
-                              '${group.defaultGroup ? " (Default Group)" : ""}'))
+                      ...collection.createdGroups.map((group) =>
+                          makeItem(group.id, group.nameWithDefaultGroup))
                     ],
                   );
                 })),

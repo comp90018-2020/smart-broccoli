@@ -68,7 +68,7 @@ class _QuizCardState extends State<QuizCard> {
                   aspectRatio: widget.aspectRatio,
                   child: FutureBuilder(
                     future: Provider.of<QuizCollectionModel>(context)
-                        .getQuizPicture(widget.quiz.id),
+                        .getQuizPicturePath(widget.quiz),
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
                       if (!snapshot.hasData || snapshot.data == null)
@@ -214,7 +214,8 @@ class _QuizCardState extends State<QuizCard> {
                                   context,
                                   "You are about to start a live session " +
                                       "for the quiz: ${widget.quiz.title}",
-                                  title: "Confirm start session")) return;
+                                  title: "Confirm start session",
+                                  barrierDismissable: true)) return;
                               try {
                                 Provider.of<QuizCollectionModel>(context,
                                         listen: false)
@@ -267,7 +268,9 @@ class _QuizCardState extends State<QuizCard> {
             height: 36,
             color: Theme.of(context).accentColor,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed("/quiz/${widget.quiz.id}");
+            },
             elevation: 2.0,
             child: Icon(
               Icons.settings,
