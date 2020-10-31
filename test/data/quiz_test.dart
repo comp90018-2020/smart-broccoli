@@ -6,6 +6,7 @@ void main() {
     final Question questionTF1 = TFQuestion("a", true);
     final Question questionTF2 = TFQuestion("a", false);
     final Question questionTF3 = TFQuestion("a", true);
+    final Question questionTF4 = TFQuestion("b", true);
     final Question questionMC1 = MCQuestion("a", []);
     final Question questionMC2 = MCQuestion("a", [QuestionOption("a", true)]);
     final Question questionMC3 = MCQuestion("a", [QuestionOption("a", true)]);
@@ -14,6 +15,8 @@ void main() {
     expect(questionTF1 == questionTF2, false);
     // True equal
     expect(questionTF1 == questionTF3, true);
+    // Check super text
+    expect(questionTF3 == questionTF4, false);
 
     // TF not MC
     expect(questionTF1 == questionMC1, false);

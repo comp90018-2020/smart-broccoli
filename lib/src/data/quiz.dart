@@ -204,6 +204,17 @@ abstract class Question with PendingPicture {
 
   Question({this.id, this.no, this.text, this.pictureId});
 
+  bool operator ==(obj) =>
+      obj is Question &&
+      obj.id == this.id &&
+      obj.no == this.no &&
+      obj.text == this.text &&
+      obj.pictureId == this.pictureId &&
+      obj.pendingPicturePath == this.pendingPicturePath;
+
+  int get hashCode =>
+      hash4(text.hashCode, text.hashCode, id.hashCode, no.hashCode);
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,
@@ -238,14 +249,9 @@ class TFQuestion extends Question {
           json['id'], json['no'], json['text'], json['pictureId'], json['tf']);
 
   bool operator ==(obj) =>
-      obj is TFQuestion &&
-      obj.text == this.text &&
-      obj.answer == this.answer &&
-      obj.pictureId == this.pictureId &&
-      obj.pendingPicturePath == this.pendingPicturePath;
+      obj is TFQuestion && super == obj && obj.answer == this.answer;
 
-  int get hashCode => hash4(text.hashCode, answer.hashCode, pictureId.hashCode,
-      pendingPicturePath.hashCode);
+  int get hashCode => hash2(super.hashCode, answer.hashCode);
 
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
@@ -283,13 +289,10 @@ class MCQuestion extends Question {
 
   bool operator ==(obj) =>
       obj is MCQuestion &&
-      obj.text == this.text &&
-      ListEquality().equals(obj.options, this.options) &&
-      obj.pictureId == this.pictureId &&
-      obj.pendingPicturePath == this.pendingPicturePath;
+      super == obj &&
+      ListEquality().equals(obj.options, this.options);
 
-  int get hashCode => hash4(text.hashCode, pictureId.hashCode,
-      pendingPicturePath.hashCode, options.hashCode);
+  int get hashCode => hash2(super.hashCode, options.hashCode);
 
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
