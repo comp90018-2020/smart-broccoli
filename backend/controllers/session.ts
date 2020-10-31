@@ -501,19 +501,13 @@ export const endSession = async (
     }
 };
 
+/**
+ * Clear sessions in database
+ * make active or waiting sessions' state lost
+ * also make joined participants' state lost
+ */
 export const clearSessions = async () => {
     try {
-        const state = {
-            [Op.or]: ["active", "waiting"],
-        };
-        const sessions: Session[] = await Session.findAll({
-            where: {
-                state: {
-                    [Op.or]: ["active", "waiting"],
-                },
-            },
-        });
-
         await Session.update(
             { code: null, state: "lost" },
             {

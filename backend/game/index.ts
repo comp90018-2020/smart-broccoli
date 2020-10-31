@@ -9,8 +9,8 @@ const socketSessionMap: { [socketId: string]: GameSession } = {};
 const socketPlayerMap: { [socketId: string]: Player } = {};
 
 export let _socketIO: Server;
-export default (socketIO: Server) => {
-    clearSessions();
+export default async (socketIO: Server) => {
+    await clearSessions();
     _socketIO = socketIO;
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
