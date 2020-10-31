@@ -507,6 +507,7 @@ export const endSession = async (
  * also make joined participants' state lost
  */
 export const clearSessions = async () => {
+    // Update sessions to lost
     await Session.update(
         { code: null, state: "lost" },
         {
@@ -518,6 +519,7 @@ export const clearSessions = async () => {
         }
     );
 
+    // Update session participants to lost
     await SessionParticipant.update(
         { state: "lost" },
         {
@@ -526,4 +528,7 @@ export const clearSessions = async () => {
             },
         }
     );
+
+    // Deactivate live sessions
+    await Quiz.update({ active: false }, { where: { type: "live" } });
 };
