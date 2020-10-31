@@ -53,11 +53,15 @@ export const sessionTokenDecrypt = async (token: string) => {
     }
 
     // Decrypt the session token
-    const sessionToken: TokenInfo = await jwtVerify(
-        token,
-        process.env.TOKEN_SECRET
-    );
-    return sessionToken.scope === "game" ? sessionToken : null;
+    try {
+        const sessionToken: TokenInfo = await jwtVerify(
+            token,
+            process.env.TOKEN_SECRET
+        );
+        return sessionToken.scope === "game" ? sessionToken : null;
+    } catch (err) {
+        return null;
+    }
 };
 
 /**
