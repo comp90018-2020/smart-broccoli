@@ -21,7 +21,7 @@ Future<void> showBasicDialog(BuildContext context, String message,
 
 Future<bool> showConfirmDialog(BuildContext context, String message,
     {String title = "Confirm"}) async {
-  var value = await showDialog<bool>(
+  bool value = await showDialog<bool>(
     context: context,
     builder: (_) => AlertDialog(
       title: Text(title),
@@ -38,8 +38,7 @@ Future<bool> showConfirmDialog(BuildContext context, String message,
       ],
     ),
   );
-  if (value == null) return false;
-  return value;
+  return value == null ? false : value;
 }
 
 Future<ImageSource> showImgSrcPicker(BuildContext context) {
