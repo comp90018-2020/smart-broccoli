@@ -73,6 +73,11 @@ describe("Notification", () => {
     });
 
     it("Update/get user notification settings", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
 
+        await agent.put("/user/notification", async () => {
+
+        });
     });
 });

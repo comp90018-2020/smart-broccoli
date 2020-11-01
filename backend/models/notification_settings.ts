@@ -78,19 +78,19 @@ const schema: Sequelize.ModelAttributes = {
     },
 };
 
-interface SmartQuizOptionsAttributes {
+interface NotificationSettingsAttributes {
     id?: number;
     userId?: number;
 }
-interface SmartQuizOptionsCreationAttributes
-    extends Optional<SmartQuizOptionsAttributes, "id"> {}
+interface NotificationSettingsCreationAttributes
+    extends Optional<NotificationSettingsAttributes, "id"> {}
 
-export default class SmartQuizOptions
+export default class NotificationSettings
     extends Sequelize.Model<
-        SmartQuizOptionsAttributes,
-        SmartQuizOptionsCreationAttributes
+        NotificationSettingsAttributes,
+        NotificationSettingsCreationAttributes
     >
-    implements SmartQuizOptionsAttributes {
+    implements NotificationSettingsAttributes {
     public readonly id!: number;
     public readonly userId!: number;
 
