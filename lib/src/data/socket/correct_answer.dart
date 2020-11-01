@@ -15,15 +15,16 @@ class CorrectAnswer {
 
 class Answer {
   int question;
-  List<dynamic> mcSelection;
+  final List<dynamic> mcSelection;
   bool tfSelection;
 
-  Answer._internal(this.question, this.mcSelection, this.tfSelection);
+  Answer(this.question, {List<dynamic> mcSelection, this.tfSelection})
+      : this.mcSelection = mcSelection ?? [];
 
-  factory Answer.fromJson(Map<String, dynamic> json) => Answer._internal(
+  factory Answer.fromJson(Map<String, dynamic> json) => Answer(
         json['question'],
-        json['MCSelection'],
-        json['TFSelection'],
+        mcSelection: json['MCSelection'],
+        tfSelection: json['TFSelection'],
       );
 
   Map<String, dynamic> toJson() {
