@@ -33,26 +33,18 @@ class _QuizQuestion extends State<QuizQuestion> {
   // State of question
   QuestionState _questionState = QuestionState.Standard;
 
-  // Timing functionalities
-  // TODO after form change transition to the next activity or leaderboard
   Timer _timer;
-  int _start = 10;
+  int _secondsRemaining;
+
   void startTimer() {
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
-      oneSec,
-      (Timer timer) => setState(
-        () {
-          if (_start < 1) {
-            setState(() {
-              _questionState = QuestionState.ShowCorrect;
-            });
-            timer.cancel();
-          } else {
-            _start = _start - 1;
-          }
-        },
-      ),
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (Timer timer) => setState(() {
+        if (_secondsRemaining < 1)
+          timer.cancel();
+        else
+          --_secondsRemaining;
+      }),
     );
   }
 
@@ -62,10 +54,12 @@ class _QuizQuestion extends State<QuizQuestion> {
     super.dispose();
   }
 
-  // We start the timer as soon as we begin this state
   @override
   void initState() {
     super.initState();
+    // initial time for question
+    _secondsRemaining =
+        Provider.of<GameSessionModel>(context, listen: false).time ~/ 1000;
     startTimer();
     // empty answer object for this question
     Provider.of<GameSessionModel>(context, listen: false).answer = Answer(
@@ -142,7 +136,7 @@ class _QuizQuestion extends State<QuizQuestion> {
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
                     child: Text(
-                      '${_start}s',
+                      '${_secondsRemaining}s',
                       style: TextStyle(fontSize: 18),
                     ),
                   ),
