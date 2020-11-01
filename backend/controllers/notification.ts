@@ -208,6 +208,8 @@ export const handleSessionCreation = async (initiatorId: number, session: Sessio
 
     // Get group ID
     const groupId = session.groupId;
+
+    // Query for group users
     // @ts-ignore
     const group = await Group.findByPk(groupId, {
         include: [
@@ -231,4 +233,6 @@ export const handleSessionCreation = async (initiatorId: number, session: Sessio
             },
         ],
     });
+
+
 };
