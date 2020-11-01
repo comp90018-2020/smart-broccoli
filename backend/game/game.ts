@@ -189,7 +189,7 @@ export class GameHandler {
             // add user to session
             if (player.role === Role.host) {
                 if (session.type === GameType.SelfPaced_NotGroup) {
-                    this.disconnectOtherPlayerAndCopyRecord(session, player);
+                    this.disconnectOtherPlayersAndCopyRecords(session, player);
                     session.playerJoin(player);
                 } else {
                     this.disconnectPast(session, session.host, player);
@@ -202,7 +202,7 @@ export class GameHandler {
                     player
                 );
                 if (session.type === GameType.SelfPaced_NotGroup)
-                    this.disconnectOtherPlayerAndCopyRecord(session, player);
+                    this.disconnectOtherPlayersAndCopyRecords(session, player);
                 session.playerJoin(player);
             }
 
@@ -294,17 +294,17 @@ export class GameHandler {
         }
     }
 
-    disconnectOtherPlayerAndCopyRecord(session: GameSession, player: Player) {
+    disconnectOtherPlayersAndCopyRecords(session: GameSession, player: Player) {
         player.role = Role.player;
         const players = Object.values(session.playerMap);
         if (players.length > 0) {
-            const theOtherplayer = players[0];
-            player.record = theOtherplayer.record;
-            player.previousRecord = theOtherplayer.previousRecord;
+            const theFirstExistedPlayer = players[0];
+            player.record = theFirstExistedPlayer.record;
+            player.previousRecord = theFirstExistedPlayer.previousRecord;
         }
 
         for (const existedPlayer of Object.values(session.playerMap)) {
-            this.disconnectPast(session, session.host, player);
+            this.disconnectPast(session, existedPlayer, player);
         }
         session.playerMap = {};
     }
