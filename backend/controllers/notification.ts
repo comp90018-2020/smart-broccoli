@@ -161,10 +161,8 @@ export const updateNotificationSettings = async (userId: number, opts: any) => {
     if (opts.location === undefined) {
         opts.location = null;
     } else {
-        opts.location = {
-            type: "Point",
-            coordinates: [opts.location.lat, opts.location.lon],
-        };
+        const { lat, lon } = opts.locatoin;
+        opts.location = { lat, lon };
     }
 
     // Update

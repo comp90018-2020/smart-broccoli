@@ -54,7 +54,7 @@ const schema: Sequelize.ModelAttributes = {
     },
     // Location
     location: {
-        type: Sequelize.GEOMETRY("POINT"),
+        type: Sequelize.JSONB,
         allowNull: true,
     },
     // Radius in km
