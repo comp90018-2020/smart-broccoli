@@ -186,13 +186,15 @@ export class GameHandler {
                 );
             }
 
-            // add user to socket room
-            socket.join(whichRoom(session, player.role));
-            socket.join(whichRoom(session, Role.all));
             // add user to session
             if (player.role === Role.host) {
-                this.disconnectPast(session, session.host, player);
-                session.hostJoin(player);
+                if (session.type === GameType.SelfPaced_NotGroup) {
+                    this.disconnectOtherPlayerAndCopyRecord(session, player);
+                    session.playerJoin(player);
+                } else {
+                    this.disconnectPast(session, session.host, player);
+                    session.hostJoin(player);
+                }
             } else {
                 this.disconnectPast(
                     session,
@@ -200,9 +202,14 @@ export class GameHandler {
                     player
                 );
                 if (session.type === GameType.SelfPaced_NotGroup)
-                    this.disconnectOtherPlayersAndCopyRecords(session, player);
+                    this.disconnectOtherPlayerAndCopyRecord(session, player);
                 session.playerJoin(player);
             }
+
+            // add user to socket room
+            socket.join(whichRoom(session, player.role));
+            socket.join(whichRoom(session, Role.all));
+
             // emit welcome event
             emitToOne(
                 socket.id,
@@ -287,15 +294,17 @@ export class GameHandler {
         }
     }
 
-    disconnectOtherPlayersAndCopyRecords(session: GameSession, player: Player) {
-        if (Object.keys(session.playerMap).length > 0) {
-            const theFirstExistedPlayer = Object.values(session.playerMap)[0];
-            player.record = theFirstExistedPlayer.record;
-            player.previousRecord = theFirstExistedPlayer.previousRecord;
+    disconnectOtherPlayerAndCopyRecord(session: GameSession, player: Player) {
+        player.role = Role.player;
+        const players = Object.values(session.playerMap);
+        if (players.length > 0) {
+            const theOtherplayer = players[0];
+            player.record = theOtherplayer.record;
+            player.previousRecord = theOtherplayer.previousRecord;
         }
 
         for (const existedPlayer of Object.values(session.playerMap)) {
-            this.disconnectPast(session, existedPlayer, player);
+            this.disconnectPast(session, session.host, player);
         }
         session.playerMap = {};
     }
