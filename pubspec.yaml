@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  sqflite: ^1.3.0
   http: ^0.12.2
   path_provider: ^1.6.18
   provider: ^4.3.2
@@ -32,6 +33,8 @@ dependencies:
   device_calendar: ^3.1.0
   geocoding: ^1.0.5
   xml: ^4.5.1
+  pedometer: ^2.0.2
+
 
 
 dev_dependencies:

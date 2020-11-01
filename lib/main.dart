@@ -9,6 +9,9 @@ import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
