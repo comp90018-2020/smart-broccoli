@@ -57,18 +57,19 @@ class ProfilePicture extends StatelessWidget {
                             child: Image.file(
                               File(snapshot.data),
                               fit: BoxFit.cover,
-                              width: 100.0,
-                              height: 100.0,
                             ),
                           ),
                         if (!snapshot.hasData || isEdit)
-                          Container(
-                            width: 60,
-                            height: 60,
-                            child: Icon(
-                              Icons.camera_alt,
-                              size: 40,
-                              color: Colors.black45,
+                          ClipOval(
+                            child: Container(
+                              width: 120,
+                              height: double.maxFinite,
+                              decoration: BoxDecoration(color: Colors.black26),
+                              child: Icon(
+                                Icons.camera_alt,
+                                size: 40,
+                                color: Colors.black87,
+                              ),
                             ),
                           ),
                       ],
@@ -99,20 +100,3 @@ class ProfilePicture extends StatelessWidget {
     }
   }
 }
-
-var stack = new Stack(
-  alignment: const Alignment(0.0, 0.0),
-  children: [
-    new CircleAvatar(
-      backgroundImage: new AssetImage('assets/account_circle-black-24dp.svg'),
-      radius: 20.0,
-    ),
-    new Container(
-      child: Icon(
-        Icons.camera_alt,
-        size: 40,
-        color: Colors.black12,
-      ),
-    )
-  ],
-);
