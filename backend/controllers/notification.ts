@@ -1,4 +1,4 @@
-import { NotificationSettings, Token, User, UserState } from "../models";
+import { Group, NotificationSettings, Session, Token, UserState } from "../models";
 import sendFirebaseMessage, { firebaseTokenValid } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 
@@ -185,4 +185,16 @@ export const updateNotificationSettings = async (userId: number, opts: any) => {
  */
 export const getNotificationSettings = async (userId: number) => {
     return await NotificationSettings.findOne({ where: { userId } });
+};
+
+/**
+ * This function gets called on session creation for the purpose of notifying
+ * users.
+ * @param session The session
+ */
+export const handleSessionCreation = async(session: Session) => {
+    const groupId = session.groupId;
+    const group = await Group.findByPk(groupId, {
+
+     });
 };
