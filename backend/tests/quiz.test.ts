@@ -134,6 +134,25 @@ describe("Quiz", () => {
         expect(res.body.questions[1].options).to.have.lengthOf(3);
     });
 
+    it("Update self-paced quiz to active", async () => {
+        const agent = supertest(app);
+        const user = await registerAndLogin(USER);
+        const group = await createGroup(user.id, "foo");
+        const quiz = await createQuiz(user.id, group.id, {
+            ...QUIZ,
+            type: "self paced",
+        });
+
+        const res = await agent
+            .patch(`/quiz/${quiz.id}`)
+            .set("Authorization", `Bearer ${user.token}`)
+            .send({
+                active: true,
+            });
+        expect(res.status).to.equal(200);
+        expect(res.body.active).to.equal(true);
+    });
+
     it("Get quiz", async () => {
         const agent = supertest(app);
         const userAdmin = await registerAndLogin(USER);
