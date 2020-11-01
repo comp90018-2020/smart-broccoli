@@ -20,26 +20,16 @@ const schema: Sequelize.ModelAttributes = {
     onTheMove: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: true,
+        defaultValue: false,
     },
-    onPublicTransport: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-    },
-    publicTransportDevices: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 10,
-    },
-    inVehicle: {
+    onCommute: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
     },
 
     // Whether calendar should be checked
-    checkCalendar: {
+    calendar: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true,

@@ -141,19 +141,14 @@ export const updateNotificationState = async (
     userId: number,
     opts: { free: boolean }
 ) => {
-    // const user = await User.findByPk(userId, { attributes: ["id"]});
-    try {
-        const [record] = await UserState.upsert(
-            {
-                userId,
-                free: opts.free,
-            },
-            { returning: true }
-        );
-        return record;
-    } catch (err) {
-        // console.log(err);
-    }
+    const [record] = await UserState.upsert(
+        {
+            userId,
+            free: opts.free,
+        },
+        { returning: true }
+    );
+    return record;
 };
 
 /**
@@ -162,7 +157,7 @@ export const updateNotificationState = async (
  * @param opts
  */
 export const updateNotificationSettigns = async (userId: number, opts: any) => {
-    return await NotificationSettings.upsert({
+    const [record] = await NotificationSettings.upsert({
         userId,
         ...opts,
     });
