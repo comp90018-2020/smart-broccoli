@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
@@ -75,10 +76,11 @@ class _QuizQuestion extends State<QuizQuestion> {
   // Entry function
   @override
   Widget build(BuildContext context) {
-    // TODO: provider listen and store state
+    final GameSessionModel sessionModel =
+        Provider.of<GameSessionModel>(context, listen: false);
 
     return CustomPage(
-      title: 'Quiz',
+      title: 'Question ${sessionModel.question.no + 1}',
 
       appbarLeading: IconButton(
         icon: Icon(Icons.close),
@@ -99,7 +101,7 @@ class _QuizQuestion extends State<QuizQuestion> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                "1000",
+                '${(sessionModel.outcome as OutcomeUser)?.record?.newPos ?? 0}',
                 style: TextStyle(
                     color: Color(0xFFECC030),
                     fontSize: 18,
@@ -121,8 +123,7 @@ class _QuizQuestion extends State<QuizQuestion> {
               child: Column(
                 children: [
                   // Question
-                  Text(
-                      "1. The content of question one. This is an example with image. Bla bla?",
+                  Text("${sessionModel.question.text}",
                       style: Theme.of(context).textTheme.headline6),
                   // Question picture
                   Expanded(
