@@ -2,14 +2,20 @@ import 'dart:async';
 
 import 'package:sensors/sensors.dart';
 
-class gyro {
+class Gyro {
   List<double> _accelerometerValues;
   List<double> _userAccelerometerValues;
   List<double> _gyroscopeValues;
   List<StreamSubscription<dynamic>> _streamSubscriptions =
       <StreamSubscription<dynamic>>[];
 
-  gyroCancel(){
+  get accelerometerValues => _accelerometerValues;
+
+  get userAccelerometerValues => _userAccelerometerValues;
+
+  get gyroscopeValues => _gyroscopeValues;
+
+  gyroCancel() {
     for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
       subscription.cancel();
     }

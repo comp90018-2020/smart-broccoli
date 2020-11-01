@@ -7,7 +7,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:xml/xml.dart';
 
-class WifiGeoFence {
+class BackgroundLocation {
   String pth;
   Database db;
 
@@ -42,7 +42,7 @@ class WifiGeoFence {
     // TODO define a geofence radius for now assume 1 km
     for (var i = 0; i < gf.length; i++) {
       distance = Geolocator.distanceBetween(
-          gf[i].lat, gf[i].lon, userLocation.latitude, userLocation.latitude);
+          gf[i].lat, gf[i].lon, userLocation.latitude, userLocation.longitude);
 
       if (distance < 1000) {
         return true;
@@ -93,7 +93,7 @@ class WifiGeoFence {
 
   /// SQL database stuff
 
-  WifiGeoFence() {
+  BackgroundLocation() {
     init();
   }
 
