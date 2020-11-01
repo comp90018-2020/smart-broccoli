@@ -1,4 +1,12 @@
-import { Group, NotificationSettings, Session, Token, UserState } from "../models";
+import {
+    Group,
+    NotificationSettings,
+    Session,
+    Token,
+    User,
+    UserState,
+} from "../models";
+import { Op } from "sequelize";
 import sendFirebaseMessage, { firebaseTokenValid } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 
@@ -192,9 +200,35 @@ export const getNotificationSettings = async (userId: number) => {
  * users.
  * @param session The session
  */
-export const handleSessionCreation = async(session: Session) => {
-    const groupId = session.groupId;
-    const group = await Group.findByPk(groupId, {
+export const handleSessionCreation = async (initiatorId: number, session: Session) => {
+    // Self paced alone, nothing to do
+    if (session.type === "self paced" && !session.isGroup) {
+        return;
+    }
 
-     });
+    // Get group ID
+    const groupId = session.groupId;
+    // @ts-ignore
+    const group = await Group.findByPk(groupId, {
+        include: [
+            {
+                model: User,
+                attributes: ["id"],
+                // Is member
+                through: { where: { role: "member" } },
+                // Cannot be initiator
+                where: { "id": { [Op.not]: initiatorId } },
+                include: [
+                    {
+                        model: UserState,
+                        required: false
+                    },
+                    {
+                        model: NotificationSettings,
+                        required: false
+                    }
+                ],
+            },
+        ],
+    });
 };
