@@ -76,8 +76,6 @@ describe("Notification", () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
 
-        await agent.put("/user/notification", async () => {
-
-        });
+        await agent.put("/user/notification", async () => {});
     });
 });

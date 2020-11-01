@@ -343,7 +343,6 @@ router.put(
     }
 );
 
-
 /**
  * @swagger
  * components:
@@ -458,12 +457,16 @@ router.patch(
  *             schema:
  *               $ref: '#/components/schemas/NotificationSettings'
  */
-router.get("/notification", auth(), async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        return res.json(await getNotificationSettings(req.user.id));
-    } catch (err) {
-        return next(err);
+router.get(
+    "/notification",
+    auth(),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            return res.json(await getNotificationSettings(req.user.id));
+        } catch (err) {
+            return next(err);
+        }
     }
-});
+);
 
 export default router;
