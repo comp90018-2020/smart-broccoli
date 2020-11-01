@@ -191,19 +191,16 @@ export class GameHandler {
             socket.join(whichRoom(session, Role.all));
             // add user to session
             if (player.role === Role.host) {
-                await this.disconnectPast(session, session.host, player);
+                this.disconnectPast(session, session.host, player);
                 session.hostJoin(player);
             } else {
-                await this.disconnectPast(
+                this.disconnectPast(
                     session,
                     session.getPlayer(player.id),
                     player
                 );
                 if (session.type === GameType.SelfPaced_NotGroup)
-                    await this.disconnectOtherPlayersAndCopyRecords(
-                        session,
-                        player
-                    );
+                    this.disconnectOtherPlayersAndCopyRecords(session, player);
                 session.playerJoin(player);
             }
             // emit welcome event
@@ -280,11 +277,7 @@ export class GameHandler {
         }
     }
 
-    async disconnectPast(
-        session: GameSession,
-        pastPlayer: Player,
-        player: Player
-    ) {
+    disconnectPast(session: GameSession, pastPlayer: Player, player: Player) {
         if (
             pastPlayer != null &&
             pastPlayer.socketId != player.socketId &&
@@ -294,10 +287,7 @@ export class GameHandler {
         }
     }
 
-    async disconnectOtherPlayersAndCopyRecords(
-        session: GameSession,
-        player: Player
-    ) {
+    disconnectOtherPlayersAndCopyRecords(session: GameSession, player: Player) {
         if (Object.keys(session.playerMap).length > 0) {
             const theFirstExistedPlayer = Object.values(session.playerMap)[0];
             player.record = theFirstExistedPlayer.record;
@@ -305,7 +295,7 @@ export class GameHandler {
         }
 
         for (const existedPlayer of Object.values(session.playerMap)) {
-            await this.disconnectPast(session, existedPlayer, player);
+            this.disconnectPast(session, existedPlayer, player);
         }
         session.playerMap = {};
     }
