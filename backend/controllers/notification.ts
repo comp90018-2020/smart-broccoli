@@ -158,10 +158,14 @@ export const updateNotificationState = async (
  */
 export const updateNotificationSettings = async (userId: number, opts: any) => {
     // Location
-    if (opts.location === undefined) {
+    if (
+        opts.location === undefined ||
+        opts.location.lat === undefined ||
+        opts.location.lon === undefined
+    ) {
         opts.location = null;
     } else {
-        const { lat, lon } = opts.locatoin;
+        const { lat, lon } = opts.location;
         opts.location = { lat, lon };
     }
 

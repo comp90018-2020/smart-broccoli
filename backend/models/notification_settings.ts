@@ -42,7 +42,7 @@ const schema: Sequelize.ModelAttributes = {
         defaultValue: [false, true, true, true, true, true, false],
     },
     // Timezone by IANA name
-    timeZone: {
+    timezone: {
         type: Sequelize.STRING,
         allowNull: false,
     },

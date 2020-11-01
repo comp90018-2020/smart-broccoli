@@ -76,6 +76,53 @@ describe("Notification", () => {
         const agent = supertest(app);
         const user = await registerAndLogin(USER);
 
-        await agent.put("/user/notification", async () => {});
+        const values = {
+            onTheMove: false,
+            onCommute: false,
+            calendar: false,
+            days: [true, true, false, false, true, false, true],
+            timezone: "Australia/Melbourne",
+            ssid: "ABC",
+            location: "heh",
+            radius: 5,
+            notificationWindow: 10,
+            maxNotificationsPerDay: 100,
+        };
+
+        const res = await agent
+            .put("/user/notification")
+            .set("Authorization", `Bearer ${user.token}`)
+            .send(values);
+        expect(res.status).to.equal(200);
+
+        expect(res.body).to.have.property("onTheMove");
+        expect(res.body).to.have.property("onCommute");
+        expect(res.body).to.have.property("calendar");
+        expect(res.body).to.have.property("days");
+        expect(res.body).to.have.property("timezone");
+        expect(res.body).to.have.property("ssid");
+        expect(res.body).to.have.property("location");
+        expect(res.body).to.have.property("radius");
+        expect(res.body).to.have.property("notificationWindow");
+        expect(res.body).to.have.property("maxNotificationsPerDay");
+
+        expect(res.body.onTheMove).to.equal(false);
+        expect(res.body.onCommute).to.equal(false);
+        expect(res.body.calendar).to.equal(false);
+        expect(res.body.days).to.deep.equal([
+            true,
+            true,
+            false,
+            false,
+            true,
+            false,
+            true,
+        ]);
+        expect(res.body.timezone).to.equal("Australia/Melbourne");
+        expect(res.body.ssid).to.equal("ABC");
+        expect(res.body.location).to.equal(null);
+        expect(res.body.radius).to.equal(5);
+        expect(res.body.notificationWindow).to.equal(10);
+        expect(res.body.maxNotificationsPerDay).to.equal(100);
     });
 });

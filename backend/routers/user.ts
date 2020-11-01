@@ -398,7 +398,7 @@ router.put(
 /**
  * @swagger
  * /user/notification:
- *   patch:
+ *   put:
  *     summary: Update user notification settings
  *     tags:
  *       - User
@@ -412,14 +412,14 @@ router.put(
  *       '200':
  *         description: OK
  */
-router.patch(
+router.put(
     "/notification",
     [
         body("onTheMove").isBoolean(),
         body("onCommute").isBoolean(),
         body("calendar").isBoolean(),
         body("days").isArray({ min: 7, max: 7 }),
-        body("timeZone").isString(),
+        body("timezone").optional().isString(),
         body("ssid").optional().isString(),
         body("location.lat").optional().isString(),
         body("location.lon").optional().isString(),
