@@ -49,21 +49,29 @@ class ProfilePicture extends StatelessWidget {
                       Provider.of<UserProfileModel>(context).getUserPicture(),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
-                    if (!snapshot.hasData || snapshot.data == null)
-                      return Container(
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 40,
-                          color: Colors.black12,
-                        ),
-                      );
-                    return ClipOval(
-                      child: Image.file(
-                        File(snapshot.data),
-                        fit: BoxFit.cover,
-                        width: 100.0,
-                        height: 100.0,
-                      ),
+                    return Stack(
+                      alignment: AlignmentDirectional.center,
+                      children: [
+                        if (snapshot.hasData)
+                          ClipOval(
+                            child: Image.file(
+                              File(snapshot.data),
+                              fit: BoxFit.cover,
+                              width: 100.0,
+                              height: 100.0,
+                            ),
+                          ),
+                        if (!snapshot.hasData || isEdit)
+                          Container(
+                            width: 60,
+                            height: 60,
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: 40,
+                              color: Colors.black45,
+                            ),
+                          ),
+                      ],
                     );
                   },
                 ),
@@ -91,3 +99,20 @@ class ProfilePicture extends StatelessWidget {
     }
   }
 }
+
+var stack = new Stack(
+  alignment: const Alignment(0.0, 0.0),
+  children: [
+    new CircleAvatar(
+      backgroundImage: new AssetImage('assets/account_circle-black-24dp.svg'),
+      radius: 20.0,
+    ),
+    new Container(
+      child: Icon(
+        Icons.camera_alt,
+        size: 40,
+        color: Colors.black12,
+      ),
+    )
+  ],
+);
