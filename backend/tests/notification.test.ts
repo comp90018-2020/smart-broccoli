@@ -37,7 +37,7 @@ describe("Notification", () => {
             .send({ token: "aaabbb" });
         expect(first.status).to.equal(200);
 
-        const second= await agent
+        const second = await agent
             .post("/auth/firebase")
             .set("Authorization", `Bearer ${user.token}`)
             .send({ token: "aaabbb" });

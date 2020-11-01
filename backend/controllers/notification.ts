@@ -1,4 +1,4 @@
-import { NotificationSettings, Token, UserState } from "../models";
+import { NotificationSettings, Token, User, UserState } from "../models";
 import sendFirebaseMessage, { firebaseTokenValid } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 
@@ -141,16 +141,19 @@ export const updateNotificationState = async (
     userId: number,
     opts: { free: boolean }
 ) => {
+    // const user = await User.findByPk(userId, { attributes: ["id"]});
     try {
-        const [record] = await UserState.upsert({
-            userId,
-            free: opts.free
-        }, { returning: true });
+        const [record] = await UserState.upsert(
+            {
+                userId,
+                free: opts.free,
+            },
+            { returning: true }
+        );
         return record;
     } catch (err) {
         // console.log(err);
     }
-
 };
 
 /**

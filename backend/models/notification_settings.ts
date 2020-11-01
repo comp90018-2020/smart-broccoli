@@ -8,6 +8,14 @@ const schema: Sequelize.ModelAttributes = {
         autoIncrement: true,
     },
 
+    // Foreign key constraint
+    // https://stackoverflow.com/questions/29551941
+    userId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        unique: "unique_settings_user",
+    },
+
     // On the move settings
     onTheMove: {
         type: Sequelize.BOOLEAN,
@@ -42,17 +50,6 @@ const schema: Sequelize.ModelAttributes = {
         type: Sequelize.ARRAY(Sequelize.BOOLEAN),
         allowNull: false,
         defaultValue: [false, true, true, true, true, true, false],
-    },
-    // Start and end time that user can be notified
-    startTime: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: "1000",
-    },
-    endTime: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: "2100",
     },
     timeZone: {
         type: Sequelize.STRING,

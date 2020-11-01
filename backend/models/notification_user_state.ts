@@ -14,6 +14,14 @@ const schema: Sequelize.ModelAttributes = {
         defaultValue: true,
         allowNull: false,
     },
+
+    // Foreign key constraint
+    // https://stackoverflow.com/questions/29551941
+    userId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        unique: "unique_state_user",
+    },
 };
 
 interface UserStateAttributes {
