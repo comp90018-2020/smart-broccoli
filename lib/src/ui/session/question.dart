@@ -25,16 +25,10 @@ class QuizQuestion extends StatefulWidget {
 class _QuizQuestion extends State<QuizQuestion> {
   GameSessionModel _sessionModel;
 
-  int _tappedIndex = -1;
+  List<int> _selections = [];
 
   // Correct answer getter
   int actual = 2;
-  List<String> data = [
-    "very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very veryvery very very very very very very very very very very very very very very very very long",
-    "hello",
-    "very very very very very very very very very very very very long",
-    "yes"
-  ];
 
   // State of question
   QuestionState _questionState = QuestionState.Standard;
@@ -73,6 +67,9 @@ class _QuizQuestion extends State<QuizQuestion> {
   void initState() {
     super.initState();
     startTimer();
+    // empty answer object for this question
+    Provider.of<GameSessionModel>(context, listen: false).answer = Answer(
+        Provider.of<GameSessionModel>(context, listen: false).question.no);
   }
 
   @override
@@ -169,18 +166,23 @@ class _QuizQuestion extends State<QuizQuestion> {
   // More flexiable than the previous offerings.
   Widget _quizAnswers() {
     return Column(
-      children: [
-        Expanded(child: _answerTab(0)),
-        Expanded(
-          child: Row(
-            children: [
-              Expanded(child: _answerTab(1)),
-              Expanded(child: _answerTab(2))
+      children: _sessionModel.question is TFQuestion
+          ? [Expanded(child: _answerTab(1)), Expanded(child: _answerTab(0))]
+          : [
+              Expanded(child: _answerTab(0)),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(child: _answerTab(1)),
+                    if ((_sessionModel.question as MCQuestion).options.length >
+                        2)
+                      Expanded(child: _answerTab(2))
+                  ],
+                ),
+              ),
+              if ((_sessionModel.question as MCQuestion).options.length > 3)
+                Expanded(child: _answerTab(3)),
             ],
-          ),
-        ),
-        Expanded(child: _answerTab(3)),
-      ],
     );
   }
 
@@ -189,17 +191,24 @@ class _QuizQuestion extends State<QuizQuestion> {
     return Card(
       color: findColour(index),
       child: InkWell(
-        onTap: () => _questionState == QuestionState.Standard
-            ? updateAnswer(index)
-            : next(),
+        onTap: _questionState == QuestionState.Standard
+            ? () => updateAnswer(index)
+            : null,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Container(
             height: double.maxFinite,
             width: double.maxFinite,
-            child: Text(
-              'Item $index: ${data[index]}',
-              style: TextStyle(fontSize: 16),
+            child: Center(
+              child: _sessionModel.question is TFQuestion
+                  ? Text('${index == 0 ? 'False' : 'True'}',
+                      style: TextStyle(fontSize: 36))
+                  : Text(
+                      (_sessionModel.question as MCQuestion)
+                          .options[index]
+                          .text,
+                      style: TextStyle(fontSize: 16),
+                    ),
             ),
           ),
         ),
@@ -208,30 +217,47 @@ class _QuizQuestion extends State<QuizQuestion> {
   }
 
   // User updated their answer, hence update accordingly
-  void updateAnswer(ans) async {
-    setState(() {
-      _tappedIndex = ans;
-    });
-    // TODO: call model to send answer
+  void updateAnswer(int index) async {
+    // TF question: only one answer can be selected
+    if (_sessionModel.question is TFQuestion) {
+      _sessionModel.answer.tfSelection = index == 0 ? false : true;
+      _sessionModel.answerQuestion();
+      setState(() {
+        _selections = [index];
+      });
+    }
+
+    // MC question: multiple answers may be possible
+    else {
+      // deselection
+      if (_sessionModel.answer.mcSelection.contains(index))
+        _sessionModel.answer.mcSelection.remove(index);
+
+      // selection as long as no. selections does not exceed no. correct
+      else if (_sessionModel.answer.mcSelection.length <
+          (_sessionModel.question as MCQuestion).numCorrect) {
+        _sessionModel.answer.mcSelection.add(index);
+        // send answer if no. selections == no. correct
+        if (_sessionModel.answer.mcSelection.length ==
+            (_sessionModel.question as MCQuestion).numCorrect)
+          _sessionModel.answerQuestion();
+      }
+      setState(() {
+        _selections = List.from(_sessionModel.answer.mcSelection);
+      });
+    }
   }
 
   // Determines the correct colour to display
   Color findColour(index) {
     if (_questionState == QuestionState.ShowCorrect) {
-      if (index == actual) {
-        return AnswerColours.correct;
-      } else if (index == _tappedIndex) {
-        return AnswerColours.selected;
-      } else {
-        return AnswerColours.normal;
-      }
-    } else {
-      if (index == _tappedIndex) {
-        return AnswerColours.selected;
-      } else {
-        return AnswerColours.normal;
-      }
+      if (index == actual) return AnswerColours.correct;
+      if (_selections.contains(index)) return AnswerColours.selected;
+      return AnswerColours.normal;
     }
+
+    if (_selections.contains(index)) return AnswerColours.selected;
+    return AnswerColours.normal;
   }
 
   // This method in the real app should check if there is another question
