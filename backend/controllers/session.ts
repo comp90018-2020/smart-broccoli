@@ -465,7 +465,7 @@ export const endSession = async (
     try {
         const session = await Session.findByPk(sessionId, {
             // @ts-ignore
-            include: { model: "Quiz", attributes: ["id", "type"] },
+            include: { model: Quiz, attributes: ["id", "type"] },
             attributes: ["id"],
         });
 
