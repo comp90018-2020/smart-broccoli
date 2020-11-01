@@ -34,6 +34,7 @@ export class GameSession {
     public _isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
     private activePlayersNum: number = 0;
+    private invalidTokens: Set<String> = new Set([]);
 
     constructor(
         $quiz: QuizAttributes,
@@ -60,6 +61,14 @@ export class GameSession {
                 this.setToNextQuestion(0);
             }
         }
+    }
+
+    deactivateToken(token: string) {
+        this.invalidTokens.add(token);
+    }
+
+    isTokenDeactivated(token: string) {
+        return this.invalidTokens.has(token);
     }
 
     hasUser(player: Player) {

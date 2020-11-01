@@ -30,9 +30,6 @@ export class GameHandler {
         if (process.env.SOCKET_MODE === "debug") {
             console.log("[-] Debug mode.");
             const sessionId = 19;
-            if (this.sessions.hasOwnProperty(sessionId)) {
-                delete this.sessions[sessionId];
-            }
             const quiz: QuizAttributes = {
                 id: 19,
                 title: "Fruits Master",
@@ -122,7 +119,8 @@ export class GameHandler {
                 null,
                 socket.id,
                 19,
-                Number(userId) === 1 ? Role.host : Role.player
+                Number(userId) === 1 ? Role.host : Role.player,
+                null
             );
             socketPlayerMapCache[socket.id] = player;
             return player;
@@ -131,7 +129,8 @@ export class GameHandler {
                 userId,
                 socket.id,
                 sessionId,
-                role
+                role,
+                socket.handshake.query.token
             );
             socketPlayerMapCache[socket.id] = player;
             return player;
@@ -324,6 +323,7 @@ export class GameHandler {
                 player.profile()
             );
             await session.playerLeave(player);
+            session.deactivateToken(player.token);
             // disconnect
             socket.disconnect(true);
         } catch (error) {
@@ -536,17 +536,19 @@ export class GameHandler {
         userId: number,
         socketId?: string,
         sessionId?: number,
-        role?: string
+        role?: string,
+        token?: string
     ): Promise<Player> {
         if (playerCache.hasOwnProperty(userId)) {
-            const { name, pictureId, socketId, role } = playerCache[userId];
+            const { name, pictureId } = playerCache[userId];
             return new Player(
                 userId,
                 name,
                 pictureId,
                 socketId,
                 sessionId,
-                role
+                role,
+                token
             );
         } else {
             const { name, pictureId } = await getUserSessionProfile(userId);
@@ -556,7 +558,8 @@ export class GameHandler {
                 pictureId,
                 socketId,
                 sessionId,
-                role
+                role,
+                token
             );
             playerCache[userId] = player;
             return player;

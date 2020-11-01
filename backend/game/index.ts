@@ -3,6 +3,7 @@ import { GameHandler, sendErr } from "./game";
 import { sessionTokenDecrypt, clearSessions } from "../controllers/session";
 import { Player, Role } from "./datatype";
 import { GameSession } from "./session";
+import { Token } from "models";
 
 export const handler: GameHandler = new GameHandler();
 const socketSessionMap: { [socketId: string]: GameSession } = {};
@@ -12,7 +13,6 @@ export let _socketIO: Server;
 export default async (socketIO: Server) => {
     // clear sessions that are not ended on startup
     await clearSessions();
-
     _socketIO = socketIO;
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
@@ -88,8 +88,9 @@ const decrypt = async (socket: SocketIO.Socket) => {
 const verify = async (
     socket: Socket
 ): Promise<[boolean, GameSession, Player]> => {
+    const token = socket.handshake.query.token;
     // @ts-ignore
-    if (!_socketIO.sockets.connected.hasOwnProperty()) {
+    if (!_socketIO.sockets.connected.hasOwnProperty(socket.id)) {
         _socketIO.sockets.connected[socket.id] = socket;
     }
     let session: GameSession;
@@ -105,5 +106,7 @@ const verify = async (
         session = socketSessionMap[socket.id];
         player = socketPlayerMap[socket.id];
     }
+    if (token && session.isTokenDeactivated(token)) return [false, null, null];
+
     return [true, session, player];
 };
