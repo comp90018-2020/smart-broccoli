@@ -156,9 +156,31 @@ export const updateNotificationState = async (
  * @param userId
  * @param opts
  */
-export const updateNotificationSettigns = async (userId: number, opts: any) => {
-    const [record] = await NotificationSettings.upsert({
-        userId,
-        ...opts,
-    });
+export const updateNotificationSettings = async (userId: number, opts: any) => {
+    // Location
+    if (opts.location === undefined) {
+        opts.location = null;
+    } else {
+        opts.location = {
+            type: "Point",
+            coordinates: [opts.location.lat, opts.location.lon],
+        };
+    }
+
+    // Update
+    const [record] = await NotificationSettings.upsert(
+        {
+            userId,
+            ...opts,
+        },
+        { returning: true }
+    );
+    return record;
+};
+
+/**
+ * Gets the user's notification settings.
+ */
+export const getNotificationSettings = async (userId: number) => {
+    return await NotificationSettings.findOne({ where: { userId }});
 };

@@ -41,19 +41,22 @@ const schema: Sequelize.ModelAttributes = {
         allowNull: false,
         defaultValue: [false, true, true, true, true, true, false],
     },
+    // Timezone by IANA name
     timeZone: {
         type: Sequelize.STRING,
         allowNull: false,
     },
 
-    // Do not notify while app is open
-    apps: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
+    // Work
+    ssid: {
+        type: Sequelize.STRING,
         allowNull: true,
     },
-
-    // Location (todo)
-
+    // Location
+    location: {
+        type: Sequelize.GEOMETRY("POINT"),
+        allowNull: true,
+    },
     // Radius in km
     radius: {
         type: Sequelize.INTEGER,
@@ -65,18 +68,19 @@ const schema: Sequelize.ModelAttributes = {
     notificationWindow: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        defaultValue: 30,
+        defaultValue: 0,
     },
     // Max. number of notifications per day
-    maxNotificationPerDay: {
+    maxNotificationsPerDay: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        defaultValue: 5,
+        defaultValue: 0,
     },
 };
 
 interface SmartQuizOptionsAttributes {
     id?: number;
+    userId?: number;
 }
 interface SmartQuizOptionsCreationAttributes
     extends Optional<SmartQuizOptionsAttributes, "id"> {}
@@ -88,6 +92,7 @@ export default class SmartQuizOptions
     >
     implements SmartQuizOptionsAttributes {
     public readonly id!: number;
+    public readonly userId!: number;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {

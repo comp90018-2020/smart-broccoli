@@ -265,7 +265,6 @@ router.post(
  * /auth/firebase:
  *   post:
  *     summary: Attach firebase token to user
- *     security: []
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -307,19 +306,8 @@ router.post(
  * /auth/firebase:
  *   delete:
  *     summary: Delete user's firebase token
- *     security: []
  *     tags:
  *       - Authentication
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             properties:
- *               token:
- *                 type: string
- *             required:
- *               - token
  *     responses:
  *       '200':
  *         description: OK

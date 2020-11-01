@@ -68,8 +68,11 @@ describe("Notification", () => {
         expect(res.status).to.equal(200);
 
         const states = await UserState.findAll();
-        // console.log(states);
         expect(states.length).to.equal(1);
         expect(states[0].free).to.equal(false);
+    });
+
+    it("Update/get user notification settings", async () => {
+
     });
 });

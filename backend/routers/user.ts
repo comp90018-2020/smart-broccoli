@@ -16,7 +16,8 @@ import {
 } from "../controllers/user";
 import { auth } from "./middleware/auth";
 import {
-    updateNotificationSettigns,
+    getNotificationSettings,
+    updateNotificationSettings,
     updateNotificationState,
 } from "../controllers/notification";
 
@@ -315,12 +316,14 @@ router.get(
  *     summary: Update user availability/state
  *     tags:
  *       - User
- *     parameters:
- *       - in: body
- *         name: free
- *         schema:
- *           type: boolean
- *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             properties:
+ *               free:
+ *                 type: boolean
  *     responses:
  *       '200':
  *         description: OK
@@ -340,23 +343,96 @@ router.put(
     }
 );
 
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Location:
+ *       type: object
+ *       required:
+ *         - lat
+ *         - lon
+ *       properties:
+ *         lat:
+ *           type: number
+ *         lon:
+ *           type: number
+ *     NotificationSettings:
+ *       type: object
+ *       required:
+ *         - onTheMove
+ *         - onCommute
+ *         - calendar
+ *         - days
+ *         - timeZone
+ *         - notificationWindow
+ *         - maxNotificationsPerDay
+ *       properties:
+ *         onTheMove:
+ *           type: boolean
+ *         onCommute:
+ *           type: boolean
+ *         calendar:
+ *           type: boolean
+ *         days:
+ *           type: array
+ *           minItems: 7
+ *           maxItems: 7
+ *           items:
+ *             type: boolean
+ *         timezone:
+ *           type: string
+ *         ssid:
+ *           type: string
+ *         location:
+ *           type: object
+ *           $ref: '#/components/schemas/Location'
+ *         radius:
+ *           type: integer
+ *         notificationWindow:
+ *           type: integer
+ *         maxNotificationsPerDay:
+ *           type: integer
+ */
+
 /**
  * @swagger
  * /user/notification:
- *   put:
+ *   patch:
  *     summary: Update user notification settings
  *     tags:
  *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/NotificationSettings'
  *     responses:
  *       '200':
  *         description: OK
  */
-router.put(
+router.patch(
     "/notification",
+    [
+        body("onTheMove").isBoolean(),
+        body("onCommute").isBoolean(),
+        body("calendar").isBoolean(),
+        body("days").isArray({ min: 7, max: 7 }),
+        body("timeZone").isString(),
+        body("ssid").optional().isString(),
+        body("location.lat").optional().isString(),
+        body("location.lon").optional().isString(),
+        body("radius").optional().isInt({ min: 0 }),
+        body("notificationWindow").isInt({ min: 0 }),
+        body("maxNotificationsPerDay").isInt({ min: 0 }),
+    ],
+    validate,
     auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const saved = await updateNotificationSettigns(
+            const saved = await updateNotificationSettings(
                 req.user.id,
                 req.body
             );
@@ -366,5 +442,28 @@ router.put(
         }
     }
 );
+
+/**
+ * @swagger
+ * /user/notification:
+ *   get:
+ *     summary: Get user notification settings
+ *     tags:
+ *       - User
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/NotificationSettings'
+ */
+router.get("/notification", auth(), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        return res.json(await getNotificationSettings(req.user.id));
+    } catch (err) {
+        return next(err);
+    }
+});
 
 export default router;
