@@ -23,6 +23,8 @@ class QuizQuestion extends StatefulWidget {
 }
 
 class _QuizQuestion extends State<QuizQuestion> {
+  GameSessionModel _sessionModel;
+
   int _tappedIndex = -1;
 
   // Correct answer getter
@@ -73,14 +75,17 @@ class _QuizQuestion extends State<QuizQuestion> {
     startTimer();
   }
 
+  @override
+  void didChangeDependencies() {
+    _sessionModel = Provider.of<GameSessionModel>(context, listen: false);
+    super.didChangeDependencies();
+  }
+
   // Entry function
   @override
   Widget build(BuildContext context) {
-    final GameSessionModel sessionModel =
-        Provider.of<GameSessionModel>(context, listen: false);
-
     return CustomPage(
-      title: 'Question ${sessionModel.question.no + 1}',
+      title: 'Question ${_sessionModel.question.no + 1}',
 
       appbarLeading: IconButton(
         icon: Icon(Icons.close),
@@ -101,7 +106,7 @@ class _QuizQuestion extends State<QuizQuestion> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                '${(sessionModel.outcome as OutcomeUser)?.record?.newPos ?? 0}',
+                '${(_sessionModel.outcome as OutcomeUser)?.record?.newPos ?? 0}',
                 style: TextStyle(
                     color: Color(0xFFECC030),
                     fontSize: 18,
@@ -123,7 +128,7 @@ class _QuizQuestion extends State<QuizQuestion> {
               child: Column(
                 children: [
                   // Question
-                  Text("${sessionModel.question.text}",
+                  Text("${_sessionModel.question.text}",
                       style: Theme.of(context).textTheme.headline6),
                   // Question picture
                   Expanded(
