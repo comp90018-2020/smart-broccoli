@@ -146,7 +146,7 @@ describe("Quiz", () => {
         const quiz = await createQuiz(userAdmin.id, group.id, {
             ...QUIZ,
             type: "self paced",
-            active: true
+            active: true,
         });
 
         // Admin

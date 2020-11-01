@@ -16,7 +16,7 @@ class MembersTab extends StatelessWidget {
         color: SmartBroccoliColourScheme.membersTabBackground,
         child: Consumer<GroupRegistryModel>(
           builder: (context, registry, child) {
-            Group group = registry.getGroup(groupId);
+            Group group = registry.getGroupFromCache(groupId);
             return ListView.builder(
               padding: EdgeInsets.symmetric(vertical: 8),
               itemCount: group.members.length,

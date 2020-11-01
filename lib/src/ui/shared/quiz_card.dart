@@ -68,7 +68,7 @@ class _QuizCardState extends State<QuizCard> {
                   aspectRatio: widget.aspectRatio,
                   child: FutureBuilder(
                     future: Provider.of<QuizCollectionModel>(context)
-                        .getQuizPicture(widget.quiz.id),
+                        .getQuizPicturePath(widget.quiz),
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
                       if (!snapshot.hasData || snapshot.data == null)
@@ -93,13 +93,18 @@ class _QuizCardState extends State<QuizCard> {
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 4),
-                    Text(
-                      Provider.of<GroupRegistryModel>(context)
-                              .getGroup(widget.quiz.groupId)
-                              ?.name ??
-                          "Group ID: ${widget.quiz.groupId}",
-                      style: TextStyle(fontSize: 15),
-                    ),
+                    FutureBuilder(
+                        future: Provider.of<GroupRegistryModel>(context)
+                            .getGroup(widget.quiz.groupId),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<Group> snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(snapshot.data.name,
+                                style: TextStyle(fontSize: 15));
+                          }
+                          return Text('Loading',
+                              style: TextStyle(fontSize: 15));
+                        }),
                   ],
                 ),
               ),
@@ -209,7 +214,8 @@ class _QuizCardState extends State<QuizCard> {
                                   context,
                                   "You are about to start a live session " +
                                       "for the quiz: ${widget.quiz.title}",
-                                  title: "Confirm start session")) return;
+                                  title: "Confirm start session",
+                                  barrierDismissable: true)) return;
                               try {
                                 Provider.of<QuizCollectionModel>(context,
                                         listen: false)
@@ -233,31 +239,26 @@ class _QuizCardState extends State<QuizCard> {
               : Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 6),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Row(
-                          children: [
-                            Switch(
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                value: widget.quiz.isActive,
-                                onChanged: (bool value) async {
-                                  try {
-                                    await Provider.of<QuizCollectionModel>(
-                                            context,
-                                            listen: false)
-                                        .setQuizActivation(widget.quiz, value);
-                                  } catch (_) {
-                                    showBasicDialog(
-                                        context, "Cannot update quiz status");
-                                  }
-                                }),
-                            Container(
-                                child: Text('Visible'),
-                                transform: Matrix4.translationValues(-3, 0, 0))
-                          ],
-                        );
-                      },
+                    child: Row(
+                      children: [
+                        Switch(
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            value: widget.quiz.isActive,
+                            onChanged: (bool value) async {
+                              try {
+                                await Provider.of<QuizCollectionModel>(context,
+                                        listen: false)
+                                    .setQuizActivation(widget.quiz, value);
+                              } catch (_) {
+                                showBasicDialog(
+                                    context, "Cannot update quiz status");
+                              }
+                            }),
+                        Container(
+                            child: Text('Visible'),
+                            transform: Matrix4.translationValues(-3, 0, 0))
+                      ],
                     ),
                   ),
                 ),
@@ -267,7 +268,9 @@ class _QuizCardState extends State<QuizCard> {
             height: 36,
             color: Theme.of(context).accentColor,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed("/quiz/${widget.quiz.id}");
+            },
             elevation: 2.0,
             child: Icon(
               Icons.settings,

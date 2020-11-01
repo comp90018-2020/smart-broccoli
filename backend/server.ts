@@ -34,7 +34,7 @@ export default (async () => {
     }
 
     // socket.io server
-    io(socket(server));
+    await io(socket(server));
 
     // Listen on provided port, on all network interfaces
     server.listen(port);

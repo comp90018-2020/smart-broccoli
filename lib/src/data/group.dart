@@ -22,6 +22,10 @@ class Group {
   Group._internal(this.id, this.name, this.defaultGroup, this.code, this.role,
       this.members);
 
+  /// Name with default group annotation
+  String get nameWithDefaultGroup =>
+      defaultGroup ? "$name (Default group)" : name;
+
   factory Group.fromJson(Map<String, dynamic> json) => Group._internal(
         json['id'],
         json['name'],

@@ -483,6 +483,7 @@ export const getGroupQuizzes = async (userId: number, groupId: number) => {
                 // @ts-ignore
                 model: Session,
                 required: false,
+                where: { state: { [Op.not]: "lost" } },
                 include: [
                     {
                         // @ts-ignore

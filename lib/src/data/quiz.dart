@@ -1,53 +1,97 @@
+import 'package:collection/collection.dart';
+import 'package:quiver/core.dart';
+
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { LIVE, SELF_PACED }
+enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
+
+/// Stores a pending picture
+abstract class PendingPicture {
+  /// The pending picture path
+  String pendingPicturePath;
+
+  /// Getter for pictureId
+  int get pictureId;
+
+  // Has picture
+  bool get hasPicture => pictureId != null || pendingPicturePath != null;
+}
 
 /// Object representing a quiz
 /// Instances of this class are returned when fetching quizzes from the server.
 /// Additional instances of this class (i.e. not fetched from the server) are
 /// to be constructed when the user creates a new quiz. A new quiz can be
 /// synchronised with the server by passing it to `QuizModel.createQuiz`.
-class Quiz {
+class Quiz with PendingPicture implements Comparable<Quiz> {
   /// ID of the quiz (for quizzes fetched from server only)
   final int id;
+  final DateTime updatedTimestamp;
 
+  /// Picture ID (from server)
   final int pictureId;
 
   /// User's role. This field is non-null for quizzes in the list returned by
   /// `getQuizzes`; however, it will be null for a quiz returned by `getQuiz`
   final GroupRole role;
 
+  /// Title
   String title;
+
+  /// Description (currently unused)
   String description;
 
+  /// ID of owning group
   int groupId;
-  QuizType type;
-  bool isActive;
-  final List<GameSession> sessions;
 
+  /// Type of quiz
+  QuizType _type;
+
+  /// Quiz is active?
+  bool isActive;
+
+  /// Time limit of quiz
   int timeLimit;
+
+  /// List of questions
   List<Question> questions;
 
+  /// Sessions
+  final List<GameSession> sessions;
+
+  /// Whether quiz is complete
   final bool complete;
 
   /// Construtor for use when user creates a new quiz
   factory Quiz(String title, int groupId, QuizType type,
           {String description,
-          bool isActive,
+          bool isActive = false,
           int timeLimit,
           List<Question> questions}) =>
-      Quiz._internal(null, null, GroupRole.OWNER, title, groupId, type,
-          description, isActive, timeLimit, questions, null, false);
+      Quiz._internal(
+          null,
+          null,
+          null,
+          GroupRole.OWNER,
+          title,
+          groupId,
+          type,
+          description,
+          isActive,
+          timeLimit,
+          questions == null ? [] : questions,
+          null,
+          false);
 
   /// Constructor for internal use only
   Quiz._internal(
     this.id,
+    this.updatedTimestamp,
     this.pictureId,
     this.role,
     this.title,
     this.groupId,
-    this.type,
+    this._type,
     this.description,
     this.isActive,
     this.timeLimit,
@@ -64,6 +108,7 @@ class Quiz {
     });
     Quiz quiz = Quiz._internal(
         json['id'],
+        DateTime.parse(json['updatedAt'] ?? '2020-01-01 00:00:00.000'),
         json['pictureId'],
         json['role'] == 'owner' ? GroupRole.OWNER : GroupRole.MEMBER,
         json['title'],
@@ -89,23 +134,63 @@ class Quiz {
       'id': id,
       'title': title,
       'groupId': groupId,
-      'type': type == QuizType.LIVE ? 'live' : 'self paced',
+      'pictureId': pictureId,
+      'type': _type == QuizType.LIVE ? 'live' : 'self paced',
       'description': description,
       'active': isActive,
       'timeLimit': timeLimit,
-      'complete': complete
+      'questions': questions?.map((question) => question.toJson())?.toList()
     };
-    if (questions != null)
-      json['questions'] =
-          questions.map((question) => question.toJson()).toList();
     return json;
   }
+
+  /// Equality used by quiz page (cannot use all fields)
+  bool partialEqual(obj) =>
+      obj is Quiz &&
+      obj.id == this.id &&
+      obj.title == this.title &&
+      obj.groupId == this.groupId &&
+      obj.pictureId == this.pictureId &&
+      obj.pendingPicturePath == this.pendingPicturePath &&
+      obj.type == this.type &&
+      obj.description == this.description &&
+      obj.isActive == this.isActive &&
+      obj.timeLimit == this.timeLimit &&
+      ListEquality().equals(obj.questions, this.questions);
+
+  @override
+  int compareTo(Quiz other) {
+    int thisType = this.type.index;
+    int otherType = other.type.index;
+
+    if (thisType == otherType)
+      return other.updatedTimestamp.compareTo(this.updatedTimestamp);
+    else
+      return otherType - thisType;
+  }
+
+  /// Type of quiz
+  QuizType get type {
+    // Live quiz
+    if (this._type == QuizType.LIVE) return QuizType.LIVE;
+    // Determine if smart session exists (a self-paced quiz with session)
+    var smartSession = this.sessions?.firstWhere(
+        (session) =>
+            session.quizType == QuizType.SELF_PACED &&
+            session.state != GameSessionState.ENDED, orElse: () {
+      return null;
+    });
+    return smartSession == null ? QuizType.SELF_PACED : QuizType.SMART_LIVE;
+  }
+
+  /// Set type
+  set type(QuizType type) => this._type = type;
 }
 
 /// Object representing a question in a quiz
 /// `Quiz` instances hold a list of this class.
 /// Abstract class; not for instantiation.
-abstract class Question {
+abstract class Question with PendingPicture {
   /// Unique question id for questions from API only
   final int id;
 
@@ -113,9 +198,22 @@ abstract class Question {
   final int no;
 
   String text;
+
+  /// Picture ID (from server)
   int pictureId;
 
   Question({this.id, this.no, this.text, this.pictureId});
+
+  bool operator ==(obj) =>
+      obj is Question &&
+      obj.id == this.id &&
+      obj.no == this.no &&
+      obj.text == this.text &&
+      obj.pictureId == this.pictureId &&
+      obj.pendingPicturePath == this.pendingPicturePath;
+
+  int get hashCode =>
+      hash4(text.hashCode, text.hashCode, id.hashCode, no.hashCode);
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -126,6 +224,9 @@ abstract class Question {
     };
   }
 }
+
+// Question types
+enum QuestionType { TF, MC }
 
 /// Object representing a true/false question
 /// Instances of this class should be constructed when the user creates new
@@ -147,6 +248,11 @@ class TFQuestion extends Question {
       TFQuestion._internal(
           json['id'], json['no'], json['text'], json['pictureId'], json['tf']);
 
+  bool operator ==(obj) =>
+      obj is TFQuestion && super == obj && obj.answer == this.answer;
+
+  int get hashCode => hash2(super.hashCode, answer.hashCode);
+
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
     map['type'] = 'truefalse';
@@ -165,7 +271,7 @@ class MCQuestion extends Question {
   int numCorrect;
 
   /// Constructor for use when user creates a new multiple choice question
-  MCQuestion(String text, this.options, {int pictureId, this.numCorrect})
+  MCQuestion(String text, this.options, {int pictureId})
       : super(text: text, pictureId: pictureId);
 
   /// Constructor for internal use only
@@ -180,6 +286,13 @@ class MCQuestion extends Question {
           options: (json['options'] as List)
               .map((option) => QuestionOption.fromJson(option))
               .toList());
+
+  bool operator ==(obj) =>
+      obj is MCQuestion &&
+      super == obj &&
+      ListEquality().equals(obj.options, this.options);
+
+  int get hashCode => hash2(super.hashCode, options.hashCode);
 
   Map<String, dynamic> toJson() {
     Map map = super.toJson();
@@ -207,6 +320,13 @@ class QuestionOption {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{'text': text, 'correct': correct};
   }
+
+  bool operator ==(obj) =>
+      obj is QuestionOption &&
+      obj.text == this.text &&
+      obj.correct == this.correct;
+
+  int get hashCode => hash2(text.hashCode, correct.hashCode);
 }
 
 /// Exception thrown when a quiz cannot be found by the server

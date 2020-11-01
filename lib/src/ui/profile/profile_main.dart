@@ -45,7 +45,8 @@ class _ProfileMainState extends State<ProfileMain> {
               splashRadius: 20,
               onPressed: () async {
                 if (!await showConfirmDialog(
-                    context, "No changes will be saved")) return;
+                    context, "No changes will be saved",
+                    barrierDismissable: true)) return;
                 setState(() {
                   _isEdit = false;
                 });

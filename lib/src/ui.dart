@@ -15,3 +15,4 @@ export 'ui/quiz/manage_quiz.dart';
 export 'ui/quiz_creator/question_creator.dart';
 export 'ui/quiz_creator/quiz_creator.dart';
 export 'ui/profile/profile_main.dart';
+export 'ui/profile/profile_promoting.dart';

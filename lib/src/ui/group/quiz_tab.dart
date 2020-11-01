@@ -18,7 +18,7 @@ class QuizTab extends StatelessWidget {
       body: Container(
         child: Consumer2<GroupRegistryModel, QuizCollectionModel>(
             builder: (context, registry, collection, child) {
-          final Group group = registry.getGroup(groupId);
+          final Group group = registry.getGroupFromCache(groupId);
 
           return group == null
               ? Container()

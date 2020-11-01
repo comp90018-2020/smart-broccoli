@@ -53,11 +53,15 @@ export const sessionTokenDecrypt = async (token: string) => {
     }
 
     // Decrypt the session token
-    const sessionToken: TokenInfo = await jwtVerify(
-        token,
-        process.env.TOKEN_SECRET
-    );
-    return sessionToken.scope === "game" ? sessionToken : null;
+    try {
+        const sessionToken: TokenInfo = await jwtVerify(
+            token,
+            process.env.TOKEN_SECRET
+        );
+        return sessionToken.scope === "game" ? sessionToken : null;
+    } catch (err) {
+        return null;
+    }
 };
 
 /**
@@ -461,7 +465,7 @@ export const endSession = async (
     try {
         const session = await Session.findByPk(sessionId, {
             // @ts-ignore
-            include: { model: "Quiz", attributes: ["id", "type"] },
+            include: { model: Quiz, attributes: ["id", "type"] },
             attributes: ["id"],
         });
 
@@ -499,4 +503,36 @@ export const endSession = async (
     } catch (err) {
         throw err;
     }
+};
+
+/**
+ * Clear sessions in database
+ * make active or waiting sessions' state lost
+ * also make joined participants' state lost
+ */
+export const clearSessions = async () => {
+    // Update sessions to lost
+    await Session.update(
+        { code: null, state: "lost" },
+        {
+            where: {
+                state: {
+                    [Op.or]: ["active", "waiting"],
+                },
+            },
+        }
+    );
+
+    // Update session participants to lost
+    await SessionParticipant.update(
+        { state: "lost" },
+        {
+            where: {
+                state: "joined",
+            },
+        }
+    );
+
+    // Deactivate live sessions
+    await Quiz.update({ active: false }, { where: { type: "live" } });
 };

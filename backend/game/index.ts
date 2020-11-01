@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { GameHandler, sendErr } from "./game";
-import { sessionTokenDecrypt } from "../controllers/session";
+import { sessionTokenDecrypt, clearSessions } from "../controllers/session";
 import { Player, Role } from "./datatype";
 import { GameSession } from "./session";
 
@@ -9,7 +9,10 @@ const socketSessionMap: { [socketId: string]: GameSession } = {};
 const socketPlayerMap: { [socketId: string]: Player } = {};
 
 export let _socketIO: Server;
-export default (socketIO: Server) => {
+export default async (socketIO: Server) => {
+    // clear sessions that are not ended on startup
+    await clearSessions();
+
     _socketIO = socketIO;
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
@@ -20,36 +23,36 @@ export default (socketIO: Server) => {
                 return;
             }
             // join & welcome
-            await handler.welcome(socket, session, player);
+            handler.welcome(socket, session, player);
 
             // answer
-            socket.on("answer", async (content: any) => {
-                await handler.answer(content, session, player);
+            socket.on("answer", (content: any) => {
+                handler.answer(content, session, player);
             });
 
             // quit
-            socket.on("quit", async () => {
-                await handler.quit(socket, session, player);
+            socket.on("quit", () => {
+                handler.quit(socket, session, player);
             });
 
             // start
-            socket.on("start", async () => {
-                await handler.start(session, player);
+            socket.on("start", () => {
+                handler.start(session, player);
             });
 
             // abort
-            socket.on("abort", async () => {
-                await handler.abort(session, player);
+            socket.on("abort", () => {
+                handler.abort(session, player);
             });
 
             // next question
-            socket.on("next", async () => {
-                await handler.next(session, session.getQuestionIndex(), player);
+            socket.on("next", () => {
+                handler.next(session, session.getQuestionIndex(), player);
             });
 
             // showBoard
-            socket.on("showBoard", async () => {
-                await handler.showBoard(session, session.questionIndex, player);
+            socket.on("showBoard", () => {
+                handler.showBoard(session, session.questionIndex, player);
             });
 
             if (process.env.SOCKET_MODE === "debug") {
@@ -59,7 +62,6 @@ export default (socketIO: Server) => {
                 });
             }
         } catch (err) {
-            delete _socketIO.sockets.connected[socket.id];
             sendErr(err, socket.id);
         }
 
@@ -74,10 +76,12 @@ const decrypt = async (socket: SocketIO.Socket) => {
         const role = userId === 1 ? Role.host : Role.player;
         return { userId, sessionId, role };
     } else {
-        const { userId, sessionId, role } = await sessionTokenDecrypt(
+        const decrypted = await sessionTokenDecrypt(
             socket.handshake.query.token
         );
-        return { userId, sessionId, role };
+        if (!decrypted)
+            return { userId: undefined, sessionId: undefined, role: undefined };
+        return { ...decrypted };
     }
 };
 

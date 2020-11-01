@@ -22,6 +22,7 @@ dependencies:
   numberpicker: ^1.2.1
   fluro: ^1.7.3
   socket_io_client: ^0.9.11
+<<<<<<< HEAD
   workmanager: ^0.2.0
   flutter_local_notifications: ^3.0.1
   noise_meter: ^1.2.0+1
@@ -35,8 +36,8 @@ dependencies:
   xml: ^4.5.1
   pedometer: ^2.0.2
   sensors: ^0.4.2+6
-
-
+  quiver: ^2.1.4
+  collection: ^1.14.13
 
 dev_dependencies:
   flutter_test:
