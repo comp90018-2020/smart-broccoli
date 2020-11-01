@@ -5,12 +5,16 @@ import 'package:pedometer/pedometer.dart';
 
 
 class PedoMeter{
-  Stream<PedestrianStatus> _pedestrianStatusStream;
+  StreamController<PedestrianStatus> _pedestrianStatusStream;
   String status;
 
   void onPedestrianStatusChanged(PedestrianStatus event) {
     /// Handle status changed
     status = event.status;
+  }
+
+  void closePedo(){
+    _pedestrianStatusStream.close();
   }
 
   void onPedestrianStatusError(error) {
@@ -19,9 +23,9 @@ class PedoMeter{
 
   Future<void> initPedoState() async {
     /// Init streams
-    _pedestrianStatusStream = Pedometer.pedestrianStatusStream;
+    _pedestrianStatusStream.addStream(Pedometer.pedestrianStatusStream);
 
-    _pedestrianStatusStream
+    _pedestrianStatusStream.stream
         .listen(onPedestrianStatusChanged)
         .onError(onPedestrianStatusError);
   }
