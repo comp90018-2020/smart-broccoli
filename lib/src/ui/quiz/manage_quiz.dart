@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/group_dropdown.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -94,43 +95,28 @@ class _ManageQuizState extends State<ManageQuiz> {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: DropdownButtonHideUnderline(child:
-                    Consumer<GroupRegistryModel>(
-                        builder: (context, collection, child) {
-                  return DropdownButton(
-                    value: _groupId,
-                    underline: Container(),
-                    // Update current selected group
-                    onChanged: (i) {
-                      setState(() {
-                        _groupId = i;
-                      });
+                child: DropdownButtonHideUnderline(
+                  child: Consumer<GroupRegistryModel>(
+                    builder: (context, collection, child) {
+                      return GroupDropdown(
+                        collection.createdGroups,
+                        _groupId,
+                        centered: true,
+                        defaultText: "All Groups",
+                        onChanged: (i) {
+                          setState(() {
+                            _groupId = i;
+                          });
+                        },
+                      );
                     },
-                    isExpanded: true,
-                    items: [
-                      // All groups
-                      makeItem(null, "All Groups"),
-                      // Each created group
-                      ...collection.createdGroups.map((group) =>
-                          makeItem(group.id, group.nameWithDefaultGroup))
-                    ],
-                  );
-                })),
+                  ),
+                ),
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  /// Creates a DropdownMenuItem representing a group
-  DropdownMenuItem makeItem(int id, String name) {
-    return DropdownMenuItem(
-      child: Center(
-        child: Text(name),
-      ),
-      value: id,
     );
   }
 }

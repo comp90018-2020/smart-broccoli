@@ -3,6 +3,7 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/group_dropdown.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
@@ -173,8 +174,14 @@ class _QuizCreateState extends State<QuizCreate> {
                                     padding: const EdgeInsets.only(left: 12),
                                     child: Consumer<GroupRegistryModel>(
                                       builder: (context, registry, child) {
-                                        return _buildGroupList(
-                                            registry.createdGroups);
+                                        return GroupDropdown(
+                                            registry.createdGroups,
+                                            _quiz.groupId,
+                                            onChanged: (groupId) {
+                                          setState(() {
+                                            _quiz.groupId = groupId;
+                                          });
+                                        });
                                       },
                                     ),
                                   ),
@@ -309,26 +316,6 @@ class _QuizCreateState extends State<QuizCreate> {
         ),
       ),
     );
-  }
-
-  /// Builds the group list dropdown
-  Widget _buildGroupList(List<Group> groups) {
-    return DropdownButton(
-        elevation: 0,
-        isExpanded: true,
-        value: _quiz.groupId,
-        items: [
-          DropdownMenuItem(child: Text("Select a group"), value: null),
-          ...groups.map((group) => DropdownMenuItem(
-                child: Text(group.nameWithDefaultGroup),
-                value: group.id,
-              ))
-        ],
-        onChanged: (groupId) {
-          setState(() {
-            _quiz.groupId = groupId;
-          });
-        });
   }
 
   /// Edit question
