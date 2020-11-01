@@ -22,7 +22,7 @@ if (process.env.NODE_ENV === "production") {
  */
 export const firebaseTokenValid = async (token: string) => {
     try {
-        if (process.env.NODE_ENV === "development") {
+        if (process.env.NODE_ENV !== "production") {
             return true;
         }
         await admin.auth().verifyIdToken(token, true);
