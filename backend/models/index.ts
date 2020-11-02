@@ -40,7 +40,7 @@ NotificationSettings.initialise(sequelize);
 UserState.initialise(sequelize);
 
 // User has many tokens
-User.hasMany(Token, { as: "tokens", foreignKey: "userId" });
+User.hasMany(Token, { foreignKey: "userId" });
 Token.belongsTo(User, { foreignKey: "userId" });
 // User has profile picture
 User.belongsTo(Picture, {

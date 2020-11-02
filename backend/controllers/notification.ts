@@ -161,7 +161,8 @@ const WEEKDAYS = [
  */
 export const sendSessionCreationNotification = async (
     initiatorId: number,
-    session: Session
+    session: Session,
+    quiz: Quiz
 ) => {
     // Self paced alone, nothing to do
     if (session.type === "self paced" && !session.isGroup) {
@@ -174,10 +175,12 @@ export const sendSessionCreationNotification = async (
     // Query for group users
     // @ts-ignore
     const group = await Group.findByPk(groupId, {
+        attributes: ["id"],
         include: [
             {
                 model: User,
                 attributes: ["id"],
+                required: false,
                 // Is member
                 through: { where: { role: "member" } },
                 // Cannot be initiator
@@ -193,21 +196,14 @@ export const sendSessionCreationNotification = async (
                     // User's notification settings
                     {
                         model: NotificationSettings,
-                        required: true,
+                        required: false,
                     },
                     // User tokens
                     {
                         model: Token,
-                        require: true,
+                        require: false,
                         where: { scope: "firebase" },
                         attributes: ["token"],
-                    },
-                    // The quiz
-                    {
-                        model: Quiz,
-                        require: true,
-                        where: { id: session.quizId },
-                        attributes: ["id", "title"],
                     },
                 ],
             },
@@ -227,7 +223,7 @@ export const sendSessionCreationNotification = async (
             quizId: session.quizId,
         },
         `New ${type} quiz session started`,
-        `A new session for the quiz "${group.Quizzes[0].title}" has been started, click to join`,
+        `A new session for the quiz "${quiz.title}" has been started, click to join`,
         tokens
     );
     await sendMessage(message);

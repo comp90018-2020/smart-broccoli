@@ -308,7 +308,7 @@ export const createSession = async (userId: number, opts: any) => {
         handler.addSession(quiz, session.id, session.type, session.isGroup);
 
         // push notifications
-        sendSessionCreationNotification(userId, session);
+        await sendSessionCreationNotification(userId, session, quiz);
 
         return { session, token };
     });
