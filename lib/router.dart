@@ -3,7 +3,13 @@ import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/ui.dart';
 
 /// Actions
-enum RouteAction { PUSH, POPALL, POPALL_SESSION, REPLACE }
+enum RouteAction {
+  PUSH,
+  POPALL,
+  POPALL_SESSION,
+  DIALOG_POPALL_SESSION,
+  REPLACE
+}
 
 /// Router arguemnts
 class RouteArgs {

@@ -6,6 +6,7 @@ import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 
 void main() async {
@@ -89,7 +90,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   /// Navigate to route
-  void navigate(RouteArgs routeArgs) {
+  Future<void> navigate(RouteArgs routeArgs) async {
     switch (routeArgs.routeAction) {
       case RouteAction.PUSH:
         _mainNavigatorKey.currentState.pushNamed(routeArgs.routeName);
@@ -98,6 +99,11 @@ class _MyAppState extends State<MyApp> {
         _mainNavigatorKey.currentState
             .pushNamedAndRemoveUntil(routeArgs.routeName, (route) => false);
         break;
+      case RouteAction.DIALOG_POPALL_SESSION:
+        await showBasicDialog(context, 'The host aborted the session',
+            title: 'Oof');
+        continue popall_session;
+      popall_session:
       case RouteAction.POPALL_SESSION:
         _mainNavigatorKey.currentState
             .popUntil((route) => !route.settings.name.startsWith('/session'));
