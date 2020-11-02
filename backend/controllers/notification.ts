@@ -6,7 +6,7 @@ import {
     User,
     UserState,
 } from "../models";
-import { Op } from "sequelize";
+import { DATE, Op } from "sequelize";
 import sendFirebaseMessage, { firebaseTokenValid } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 
@@ -147,12 +147,13 @@ export const updateToken = async (token: Token, newValue: string) => {
  */
 export const updateNotificationState = async (
     userId: number,
-    opts: { free: boolean }
+    opts: { free: boolean; calendarFree: boolean }
 ) => {
     const [record] = await UserState.upsert(
         {
             userId,
             free: opts.free,
+            calendarFree: opts.calendarFree,
         },
         { returning: true }
     );
@@ -192,15 +193,21 @@ export const updateNotificationSettings = async (userId: number, opts: any) => {
  * Gets the user's notification settings.
  */
 export const getNotificationSettings = async (userId: number) => {
-    return await NotificationSettings.findOne({ where: { userId } });
+    return await NotificationSettings.findOrCreate({ where: { userId } });
 };
+
+// Day names
+const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Monday"];
 
 /**
  * This function gets called on session creation for the purpose of notifying
  * users.
  * @param session The session
  */
-export const handleSessionCreation = async (initiatorId: number, session: Session) => {
+export const handleSessionCreation = async (
+    initiatorId: number,
+    session: Session
+) => {
     // Self paced alone, nothing to do
     if (session.type === "self paced" && !session.isGroup) {
         return;
@@ -219,20 +226,85 @@ export const handleSessionCreation = async (initiatorId: number, session: Sessio
                 // Is member
                 through: { where: { role: "member" } },
                 // Cannot be initiator
-                where: { "id": { [Op.not]: initiatorId } },
+                where: {
+                    id: { [Op.not]: initiatorId },
+                },
                 include: [
                     {
                         model: UserState,
-                        required: false
+                        required: false,
                     },
                     {
                         model: NotificationSettings,
-                        required: false
-                    }
+                        required: true,
+                    },
+                    {
+                        model: Token,
+                        require: true,
+                        where: { scope: "firebase" },
+                    },
                 ],
             },
         ],
     });
 
+    // Get list of users
+    const users = await filterUsers(group.Users, session);
 
+
+};
+
+// Filter available users
+const filterUsers = async (users: User[], session: Session) => {
+    // Notification settings does not exist
+    for (const user of users) {
+        if (!user.NotificationSettings) {
+            user.NotificationSettings = await NotificationSettings.create({
+                userId: user.id,
+            });
+        }
+    }
+
+    return users.filter(async (user) => {
+        // No token
+        if (user.Tokens.length === 0) return false;
+
+        // Current date
+        const date = new Date();
+        // Get day of week
+        const dateLocal = date.toLocaleDateString("en-US", {
+            timeZone:
+                user.NotificationSettings.timezone ?? "Australia/Melbourne",
+                weekday: "long",
+        });
+        if (!user.NotificationSettings.days[WEEKDAYS.indexOf(dateLocal)]) {
+            return false;
+        }
+
+        // todo: notification count check
+
+        // Now check user state
+        if (user.UserState) {
+            if (session.type === "live") {
+                // Live
+                return user.NotificationSettings.calendarLive;
+            } else {
+                // Self paced
+                if (user.UserState.calendarFree) {
+                    return user.UserState.free;
+                } else {
+                    if (user.NotificationSettings.calendarSelfPaced) {
+                        // User indicated that they're ok with notifications
+                        // when they have item on calendar
+                        return user.UserState.free;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // User has no state, true
+        return true;
+    });
 };

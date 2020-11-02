@@ -330,7 +330,7 @@ router.get(
  */
 router.put(
     "/state",
-    [body("free").isBoolean()],
+    [body("free").isBoolean(), body("calendarFree").isBoolean()],
     validate,
     auth(),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -417,7 +417,8 @@ router.put(
     [
         body("onTheMove").isBoolean(),
         body("onCommute").isBoolean(),
-        body("calendar").isBoolean(),
+        body("calendarLive").isBoolean(),
+        body("calendarSelfPaced").isBoolean(),
         body("days").isArray({ min: 7, max: 7 }),
         body("timezone").optional().isString(),
         body("ssid").optional().isString(),

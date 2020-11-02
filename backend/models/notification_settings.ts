@@ -28,11 +28,16 @@ const schema: Sequelize.ModelAttributes = {
         defaultValue: false,
     },
 
-    // Whether calendar should be checked
-    calendar: {
+    // Whether to notify when there are events on the calendar
+    calendarLive: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true,
+    },
+    calendarSelfPaced: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
     },
 
     // Days of week
@@ -78,12 +83,43 @@ const schema: Sequelize.ModelAttributes = {
     },
 };
 
+// Lat/lon location
+interface Location {
+    lat: number;
+    lon: number;
+}
+
 interface NotificationSettingsAttributes {
-    id?: number;
-    userId?: number;
+    id: number;
+    userId: number;
+    onTheMove: boolean;
+    onCommute: boolean;
+    calendarLive: boolean;
+    calendarSelfPaced: boolean;
+    days: boolean[];
+    timezone: string;
+    ssid: string;
+    location: Location;
+    radius: number;
+    notificationWindow: number;
+    maxNotificationsPerDay: number;
 }
 interface NotificationSettingsCreationAttributes
-    extends Optional<NotificationSettingsAttributes, "id"> {}
+    extends Optional<
+        NotificationSettingsAttributes,
+        | "id"
+        | "onTheMove"
+        | "onCommute"
+        | "calendarLive"
+        | "calendarSelfPaced"
+        | "days"
+        | "timezone"
+        | "ssid"
+        | "location"
+        | "radius"
+        | "notificationWindow"
+        | "maxNotificationsPerDay"
+    > {}
 
 export default class NotificationSettings
     extends Sequelize.Model<
@@ -93,6 +129,18 @@ export default class NotificationSettings
     implements NotificationSettingsAttributes {
     public readonly id!: number;
     public readonly userId!: number;
+
+    public onTheMove: boolean;
+    public onCommute: boolean;
+    public calendarLive: boolean;
+    public calendarSelfPaced: boolean;
+    public days: boolean[];
+    public timezone: string;
+    public ssid: string;
+    public location: Location;
+    public radius: number;
+    public notificationWindow: number;
+    public maxNotificationsPerDay: number;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {

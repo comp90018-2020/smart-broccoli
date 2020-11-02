@@ -15,6 +15,13 @@ const schema: Sequelize.ModelAttributes = {
         allowNull: false,
     },
 
+    // Whether calendar is free
+    calendarFree: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+        allowNull: false,
+    },
+
     // Foreign key constraint
     // https://stackoverflow.com/questions/29551941
     userId: {
@@ -27,6 +34,7 @@ const schema: Sequelize.ModelAttributes = {
 interface UserStateAttributes {
     id: number;
     free: boolean;
+    calendarFree: boolean;
     userId: number;
 }
 interface UserStateCreationAttributes
@@ -38,6 +46,7 @@ export default class UserState
     public readonly id!: number;
     public readonly userId!: number;
     public free: boolean;
+    public calendarFree: boolean;
 
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {

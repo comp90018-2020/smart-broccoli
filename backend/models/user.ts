@@ -9,6 +9,7 @@ import {
     Group,
     NotificationSettings,
     SessionParticipant,
+    Token,
     UserGroup,
     UserState,
 } from "models";
@@ -70,6 +71,10 @@ class User
     public UserGroup?: UserGroup;
     public SessionParticipant?: SessionParticipant;
     public Picture?: Picture;
+
+    public Tokens?: Token[];
+    public UserState?: UserState;
+    public NotificationSettings?: NotificationSettings;
 
     public getGroups!: BelongsToManyGetAssociationsMixin<Group>;
     public getPicture!: HasOneGetAssociationMixin<Picture>;
