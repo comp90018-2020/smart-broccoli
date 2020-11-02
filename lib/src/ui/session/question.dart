@@ -1,20 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
-
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
-
-import 'leaderboard.dart';
-
-/// State of question
-enum QuestionState {
-  Standard,
-  ShowCorrect,
-}
 
 /// Represents the quiz question page
 class QuizQuestion extends StatefulWidget {
@@ -213,11 +205,6 @@ class _QuizQuestion extends State<QuizQuestion> {
       model.correctAnswer?.record?.points ??
       (model.outcome as OutcomeUser)?.record?.points;
 
-  // // User updated their answer, hence update accordingly
-  // void updateAnswer(GameSessionModel model, int index) async {
-
-  // }
-
   // Determines the correct colour to display
   Color findColour(GameSessionModel model, int index) {
     if (model.question is TFQuestion) {
@@ -247,15 +234,5 @@ class _QuizQuestion extends State<QuizQuestion> {
     }
     // incorrect unselected answer
     return AnswerColours.normal;
-  }
-
-  // This method in the real app should check if there is another question
-  // If not, move to the leaderboard
-  // Otherwise move to next question
-  void next() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => QuizLeaderboard()),
-    );
   }
 }
