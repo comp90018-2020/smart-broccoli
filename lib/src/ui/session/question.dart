@@ -1,56 +1,15 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
+import 'package:smart_broccoli/src/ui/session/timer.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Represents the quiz question page
-class QuizQuestion extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => new _QuizQuestion();
-}
-
-class _QuizQuestion extends State<QuizQuestion> {
-  Timer _timer;
-  int _secondsRemaining;
-
-  void startTimer() {
-    _timer = Timer.periodic(
-      const Duration(seconds: 1),
-      (Timer timer) => setState(() {
-        if (_secondsRemaining < 1)
-          timer.cancel();
-        else
-          --_secondsRemaining;
-      }),
-    );
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // initial time for question
-    _secondsRemaining =
-        Provider.of<GameSessionModel>(context, listen: false).time ~/ 1000;
-    startTimer();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  // Entry function
+class QuizQuestion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<GameSessionModel>(
@@ -127,10 +86,7 @@ class _QuizQuestion extends State<QuizQuestion> {
 
                     Padding(
                       padding: const EdgeInsets.only(top: 16.0),
-                      child: Text(
-                        '${_secondsRemaining}s',
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      child: TimerWidget(style: TextStyle(fontSize: 18)),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0, bottom: 16.0),

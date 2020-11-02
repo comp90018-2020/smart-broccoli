@@ -191,6 +191,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       print(totalQuestion);
       answer = Answer(question.no);
       _transitionTo(SessionState.QUESTION);
+      pubSub.publish(PubSubTopic.TIMER, arg: time);
     });
 
     socket.on('questionAnswered', (message) {
