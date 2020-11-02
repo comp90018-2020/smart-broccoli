@@ -124,31 +124,23 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       else
         role = GroupRole.OWNER;
 
-      String route;
       switch (message['status']) {
         case 'pending':
-          state = SessionState.PENDING;
-          route = '/session/lobby';
+          _transitionTo(SessionState.PENDING);
           break;
         case 'starting':
-          state = SessionState.PENDING;
-          route = '/session/lobby';
+          _transitionTo(SessionState.STARTING);
           break;
         case 'running':
-          state = SessionState.QUESTION;
-          route = '/session/question';
+          _transitionTo(SessionState.QUESTION);
           break;
         default:
-          state = SessionState.ABORTED;
+          _transitionTo(SessionState.ABORTED);
       }
 
       print(players);
       print(role);
       print(state);
-      if (route != null)
-        _pubSub.publish(PubSubTopic.ROUTE,
-            arg: RouteArgs(name: route, action: RouteAction.PUSH));
-      notifyListeners();
     });
 
     socket.on('playerJoin', (message) {
@@ -174,15 +166,13 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       print(message);
       startCountDown = int.parse(message);
       print(startCountDown);
-      state = SessionState.STARTING;
-      notifyListeners();
+      _transitionTo(SessionState.STARTING);
     });
 
     socket.on('cancelled', (message) {
       print("cancelled");
       socket.disconnect();
-      state = SessionState.ABORTED;
-      notifyListeners();
+      _transitionTo(SessionState.ABORTED);
     });
 
     socket.on('nextQuestion', (message) {
@@ -198,21 +188,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       print(question);
       print(time);
       print(totalQuestion);
-
-      state = SessionState.QUESTION;
-      _pubSub.publish(PubSubTopic.ROUTE,
-          arg: RouteArgs(
-              name: '/session/question', action: RouteAction.REPLACE));
-      notifyListeners();
+      _transitionTo(SessionState.QUESTION);
     });
 
     socket.on('questionAnswered', (message) {
-      print("questionAnswered");
-      print(message);
-      questionAnswered = QuestionAnswered.fromJson(message);
-      print(questionAnswered);
-      state = SessionState.QUESTION;
-      notifyListeners();
+      // TODO: future enhancement
     });
 
     socket.on('correctAnswer', (message) {
@@ -220,8 +200,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       print(message);
       correctAnswer = CorrectAnswer.fromJson(message);
       print(correctAnswer);
-      state = SessionState.ANSWER;
-      notifyListeners();
+      _transitionTo(SessionState.ANSWER);
     });
 
     socket.on('questionOutcome', (message) {
@@ -235,13 +214,12 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         outcome = OutcomeUser.fromJson(message);
         print(outcome);
       }
-      state = SessionState.OUTCOME;
-      notifyListeners();
+      _transitionTo(SessionState.OUTCOME);
     });
 
     socket.on('end', (_) {
       print('end');
-      state = SessionState.FINISHED;
+      _transitionTo(SessionState.FINISHED);
     });
 
     socket.on('disconnect', (_) {
@@ -255,56 +233,58 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   /// State transition upon receiving event.
   void _transitionTo(SessionState updated) {
-    if (updated == SessionState.ABORTED)
-      _pubSub.publish(PubSubTopic.ROUTE,
-          arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
-
-    switch (state) {
+    switch (updated) {
       case SessionState.PENDING:
-        // if starting, notify UI that countdown is known (no push)
-        if (updated == SessionState.STARTING)
-          notifyListeners();
-        // if question has been received (should not occur), push page
-        else if (updated == SessionState.QUESTION)
-          _pubSub.publish(PubSubTopic.ROUTE,
-              arg: RouteArgs(
-                  name: '/session/question', action: RouteAction.REPLACE));
+        state = SessionState.PENDING;
+        _pubSub.publish(PubSubTopic.ROUTE,
+            arg: RouteArgs(name: '/session/lobby', action: RouteAction.PUSH));
         break;
       case SessionState.STARTING:
-        if (updated == SessionState.QUESTION)
+        if (state == SessionState.PENDING)
+          notifyListeners();
+        else
+          _pubSub.publish(PubSubTopic.ROUTE,
+              arg: RouteArgs(name: '/session/lobby', action: RouteAction.PUSH));
+        break;
+      case SessionState.QUESTION:
+        if (state == SessionState.PENDING || state == SessionState.STARTING)
           _pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.REPLACE));
-        break;
-      case SessionState.QUESTION:
-        // from prev. question directly to answer or next answer: no need to push
-        if (updated == SessionState.QUESTION || updated == SessionState.ANSWER)
+        else if (state == SessionState.QUESTION)
           notifyListeners();
-        break;
-      case SessionState.ANSWER:
-        if (updated == SessionState.OUTCOME)
+        else if (state == SessionState.OUTCOME)
           _pubSub.publish(PubSubTopic.ROUTE,
-              arg: RouteArgs(
-                  name: '/session/leaderboard', action: RouteAction.PUSH));
-        else if (updated == SessionState.QUESTION)
-          notifyListeners();
-        else if (updated == SessionState.FINISHED)
-          _pubSub.publish(PubSubTopic.ROUTE,
-              arg:
-                  RouteArgs(name: '/session/finish', action: RouteAction.PUSH));
-        break;
-      case SessionState.OUTCOME:
-        if (updated == SessionState.QUESTION)
+              arg: RouteArgs(action: RouteAction.POP));
+        else
           _pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.PUSH));
-        else if (updated == SessionState.FINISHED) notifyListeners();
+        break;
+      case SessionState.ANSWER:
+        if (state == SessionState.QUESTION)
+          notifyListeners();
+        else
+          _pubSub.publish(PubSubTopic.ROUTE,
+              arg: RouteArgs(
+                  name: '/session/question', action: RouteAction.PUSH));
+        break;
+      case SessionState.OUTCOME:
+        _pubSub.publish(PubSubTopic.ROUTE,
+            arg: RouteArgs(
+                name: '/session/leaderboard', action: RouteAction.PUSH));
         break;
       case SessionState.FINISHED:
-        // state transition should not be called in this state
+        if (state == SessionState.ANSWER)
+          _pubSub.publish(PubSubTopic.ROUTE,
+              arg:
+                  RouteArgs(name: '/session/finish', action: RouteAction.PUSH));
+        else
+          notifyListeners();
         break;
       case SessionState.ABORTED:
-        // state transition should not be called in this state
+        _pubSub.publish(PubSubTopic.ROUTE,
+            arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
         break;
     }
   }
