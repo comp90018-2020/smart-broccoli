@@ -40,6 +40,7 @@ class BroccoliRouter {
   // Quiz pages
   static const String takeQuiz = "/take_quiz";
   static const String manageQuiz = "/manage_quiz";
+  static const String smartQuiz = "/smart_quiz";
 
   // Session
   static const String sessionStart = "/session/start/quiz/:id";
@@ -189,6 +190,12 @@ class BroccoliRouter {
     router.define(profilePromoting, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return ProfilePromoting();
+    }));
+
+    // Smart live quiz page
+    router.define(smartQuiz, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return SmartQuiz();
     }));
   }
 }
