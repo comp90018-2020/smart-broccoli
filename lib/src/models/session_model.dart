@@ -253,6 +253,62 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     });
   }
 
+  /// State transition upon receiving event.
+  void _transitionTo(SessionState updated) {
+    if (updated == SessionState.ABORTED)
+      _pubSub.publish(PubSubTopic.ROUTE,
+          arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
+
+    switch (state) {
+      case SessionState.PENDING:
+        // if starting, notify UI that countdown is known (no push)
+        if (updated == SessionState.STARTING)
+          notifyListeners();
+        // if question has been received (should not occur), push page
+        else if (updated == SessionState.QUESTION)
+          _pubSub.publish(PubSubTopic.ROUTE,
+              arg: RouteArgs(
+                  name: '/session/question', action: RouteAction.REPLACE));
+        break;
+      case SessionState.STARTING:
+        if (updated == SessionState.QUESTION)
+          _pubSub.publish(PubSubTopic.ROUTE,
+              arg: RouteArgs(
+                  name: '/session/question', action: RouteAction.REPLACE));
+        break;
+      case SessionState.QUESTION:
+        // from prev. question directly to answer or next answer: no need to push
+        if (updated == SessionState.QUESTION || updated == SessionState.ANSWER)
+          notifyListeners();
+        break;
+      case SessionState.ANSWER:
+        if (updated == SessionState.OUTCOME)
+          _pubSub.publish(PubSubTopic.ROUTE,
+              arg: RouteArgs(
+                  name: '/session/leaderboard', action: RouteAction.PUSH));
+        else if (updated == SessionState.QUESTION)
+          notifyListeners();
+        else if (updated == SessionState.FINISHED)
+          _pubSub.publish(PubSubTopic.ROUTE,
+              arg:
+                  RouteArgs(name: '/session/finish', action: RouteAction.PUSH));
+        break;
+      case SessionState.OUTCOME:
+        if (updated == SessionState.QUESTION)
+          _pubSub.publish(PubSubTopic.ROUTE,
+              arg: RouteArgs(
+                  name: '/session/question', action: RouteAction.PUSH));
+        else if (updated == SessionState.FINISHED) notifyListeners();
+        break;
+      case SessionState.FINISHED:
+        // state transition should not be called in this state
+        break;
+      case SessionState.ABORTED:
+        // state transition should not be called in this state
+        break;
+    }
+  }
+
   /// host action
   void startQuiz() {
     socket.emit('start');
