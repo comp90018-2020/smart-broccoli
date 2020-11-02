@@ -71,7 +71,7 @@ class _QuizQuestion extends State<QuizQuestion> {
 
         // Points
         appbarActions: [
-          model.state == SessionState.ANSWER &&
+          [SessionState.ANSWER, SessionState.FINISHED].contains(model.state) &&
                   (model.role == GroupRole.OWNER ||
                       model.session.quizType == QuizType.SELF_PACED &&
                           model.session.type == GameSessionType.INDIVIDUAL)
@@ -79,7 +79,9 @@ class _QuizQuestion extends State<QuizQuestion> {
                   onPressed: () => model.role == GroupRole.OWNER
                       ? model.showLeaderBoard()
                       : model.nextQuestion(),
-                  icon: Icon(Icons.arrow_forward),
+                  icon: model.state == SessionState.FINISHED
+                      ? Icon(Icons.flag)
+                      : Icon(Icons.arrow_forward),
                 )
               : Padding(
                   padding: const EdgeInsets.all(8.0),
