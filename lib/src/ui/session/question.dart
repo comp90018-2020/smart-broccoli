@@ -89,7 +89,7 @@ class _QuizQuestion extends State<QuizQuestion> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  '${(model.outcome as OutcomeUser)?.record?.newPos ?? 0}',
+                  '${_getPoints(model) ?? 0}',
                   style: TextStyle(
                       color: Color(0xFFECC030),
                       fontSize: 18,
@@ -202,6 +202,10 @@ class _QuizQuestion extends State<QuizQuestion> {
       ),
     );
   }
+
+  int _getPoints(GameSessionModel model) =>
+      model.correctAnswer?.record?.points ??
+      (model.outcome as OutcomeUser)?.record?.points;
 
   // User updated their answer, hence update accordingly
   void updateAnswer(GameSessionModel model, int index) async {
