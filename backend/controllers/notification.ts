@@ -259,7 +259,7 @@ const filterUsers = async (users: User[], session: Session) => {
                     // User was participant and completed
                     through: {
                         where: { role: "participant", state: "complete" },
-                        attributes: ["id", "role", "state"]
+                        attributes: ["id", "role", "state"],
                     },
                 },
             ],

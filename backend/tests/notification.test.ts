@@ -60,16 +60,17 @@ describe("Notification", () => {
         await agent
             .put("/user/state")
             .set("Authorization", `Bearer ${user.token}`)
-            .send({ free: true });
+            .send({ free: true, calendarFree: true });
         const res = await agent
             .put("/user/state")
             .set("Authorization", `Bearer ${user.token}`)
-            .send({ free: false });
+            .send({ free: false, calendarFree: false });
         expect(res.status).to.equal(200);
 
         const states = await UserState.findAll();
         expect(states.length).to.equal(1);
         expect(states[0].free).to.equal(false);
+        expect(states[0].calendarFree).to.equal(false);
     });
 
     it("Update/get user notification settings", async () => {
@@ -79,7 +80,8 @@ describe("Notification", () => {
         const values = {
             onTheMove: false,
             onCommute: false,
-            calendar: false,
+            calendarLive: false,
+            calendarSelfPaced: false,
             days: [true, true, false, false, true, false, true],
             timezone: "Australia/Melbourne",
             ssid: "ABC",
@@ -97,7 +99,8 @@ describe("Notification", () => {
 
         expect(res.body).to.have.property("onTheMove");
         expect(res.body).to.have.property("onCommute");
-        expect(res.body).to.have.property("calendar");
+        expect(res.body).to.have.property("calendarLive");
+        expect(res.body).to.have.property("calendarSelfPaced");
         expect(res.body).to.have.property("days");
         expect(res.body).to.have.property("timezone");
         expect(res.body).to.have.property("ssid");
@@ -108,7 +111,8 @@ describe("Notification", () => {
 
         expect(res.body.onTheMove).to.equal(false);
         expect(res.body.onCommute).to.equal(false);
-        expect(res.body.calendar).to.equal(false);
+        expect(res.body.calendarLive).to.equal(false);
+        expect(res.body.calendarSelfPaced).to.equal(false);
         expect(res.body.days).to.deep.equal([
             true,
             true,

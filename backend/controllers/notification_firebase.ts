@@ -1,5 +1,4 @@
 // File for building notification message
-import { Token } from "models";
 import * as admin from "firebase-admin";
 
 /**
