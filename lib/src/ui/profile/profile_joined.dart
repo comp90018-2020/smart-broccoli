@@ -31,7 +31,10 @@ class _ProfileJoinedState extends ProfileEditorState {
     return Column(
       children: [
         // Profile picture
-        ProfilePicture(widget.isEdit),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10.0),
+          child: ProfilePicture(widget.isEdit),
+        ),
         // Table
         Container(
           padding: const EdgeInsets.all(24),

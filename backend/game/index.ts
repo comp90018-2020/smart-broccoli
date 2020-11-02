@@ -5,14 +5,11 @@ import { Player, Role } from "./datatype";
 import { GameSession } from "./session";
 
 export const handler: GameHandler = new GameHandler();
-const socketSessionMap: { [socketId: string]: GameSession } = {};
-const socketPlayerMap: { [socketId: string]: Player } = {};
 
 export let _socketIO: Server;
 export default async (socketIO: Server) => {
     // clear sessions that are not ended on startup
     await clearSessions();
-
     _socketIO = socketIO;
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
@@ -88,22 +85,22 @@ const decrypt = async (socket: SocketIO.Socket) => {
 const verify = async (
     socket: Socket
 ): Promise<[boolean, GameSession, Player]> => {
+    const token = socket.handshake.query.token;
     // @ts-ignore
-    if (!_socketIO.sockets.connected.hasOwnProperty()) {
+    if (!_socketIO.sockets.connected.hasOwnProperty(socket.id)) {
         _socketIO.sockets.connected[socket.id] = socket;
     }
-    let session: GameSession;
-    let player: Player;
-    if (!socketSessionMap.hasOwnProperty(socket.id)) {
-        const { userId, sessionId, role } = await decrypt(socket);
-        if (!handler.sessions.hasOwnProperty(Number(sessionId))) {
-            return [false, null, null];
-        }
-        session = handler.sessions[Number(sessionId)];
-        player = await handler.createPlayer(socket, userId, sessionId, role);
-    } else {
-        session = socketSessionMap[socket.id];
-        player = socketPlayerMap[socket.id];
+    const { userId, sessionId, role } = await decrypt(socket);
+    if (
+        sessionId === undefined ||
+        !handler.sessions.hasOwnProperty(Number(sessionId))
+    ) {
+        return [false, null, null];
     }
+    const session = handler.sessions[Number(sessionId)];
+    const player = await handler.createPlayer(socket, userId, sessionId, role);
+
+    if (token && session.isTokenDeactivated(token)) return [false, null, null];
+
     return [true, session, player];
 };

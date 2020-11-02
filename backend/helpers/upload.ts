@@ -96,7 +96,7 @@ const profileImageProcessor = async (filePath: string) => {
     // Resize to 128x128
     await sharp(buf)
         .resize(128, 128, {
-            fit: "contain",
+            fit: "cover",
             withoutEnlargement: true,
         })
         .png({ quality: 100 })

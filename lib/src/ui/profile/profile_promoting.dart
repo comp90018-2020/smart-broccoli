@@ -43,7 +43,10 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
         child: Column(
           children: [
             // Profile picture
-            ProfilePicture(true),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: ProfilePicture(true),
+            ),
             // Form
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),

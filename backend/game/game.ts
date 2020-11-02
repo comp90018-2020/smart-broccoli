@@ -12,9 +12,9 @@ import { QuizAttributes } from "models/quiz";
 import { _socketIO } from "./index";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
-const BoardShowTime = 5 * 1000;
+const CORRECT_ANSWER_SHOW_TIME = 3 * 1000;
+const BOARD_SHOW_TIME = 5 * 1000;
 const playerCache: { [userId: number]: Player } = {};
-const socketPlayerMapCache: { [socketId: string]: Player } = {};
 
 export class GameHandler {
     sessions: {
@@ -30,16 +30,13 @@ export class GameHandler {
         if (process.env.SOCKET_MODE === "debug") {
             console.log("[-] Debug mode.");
             const sessionId = 19;
-            if (this.sessions.hasOwnProperty(sessionId)) {
-                delete this.sessions[sessionId];
-            }
             const quiz: QuizAttributes = {
                 id: 19,
                 title: "Fruits Master",
                 active: true,
                 description: "Test Quiz",
                 type: "self paced",
-                isGroup: false,
+                isGroup: true,
                 timeLimit: 20,
                 groupId: 2,
                 pictureId: null,
@@ -111,8 +108,20 @@ export class GameHandler {
         sessionId: number,
         role: string
     ): Promise<Player> {
-        if (socketPlayerMapCache.hasOwnProperty(socket.id)) {
-            return socketPlayerMapCache[socket.id];
+        if (playerCache.hasOwnProperty(userId)) {
+            const player = playerCache[userId];
+            if (player.sessionId !== sessionId)
+                return new Player(
+                    userId,
+                    player.name,
+                    player.pictureId,
+                    socket.id,
+                    sessionId,
+                    role,
+                    socket.handshake.query.token
+                );
+            player.socketId = socket.id;
+            return player;
         }
         if (process.env.SOCKET_MODE === "debug") {
             const userId = Number(socket.handshake.query.userId);
@@ -122,18 +131,20 @@ export class GameHandler {
                 null,
                 socket.id,
                 19,
-                Number(userId) === 1 ? Role.host : Role.player
+                Number(userId) === 1 ? Role.host : Role.player,
+                null
             );
-            socketPlayerMapCache[socket.id] = player;
+            playerCache[userId] = player;
             return player;
         } else {
             const player = await this.getUserInfo(
                 userId,
                 socket.id,
                 sessionId,
-                role
+                role,
+                socket.handshake.query.token
             );
-            socketPlayerMapCache[socket.id] = player;
+            playerCache[userId] = player;
             return player;
         }
     }
@@ -186,13 +197,15 @@ export class GameHandler {
                 );
             }
 
-            // add user to socket room
-            socket.join(whichRoom(session, player.role));
-            socket.join(whichRoom(session, Role.all));
             // add user to session
             if (player.role === Role.host) {
-                this.disconnectPast(session, session.host, player);
-                session.hostJoin(player);
+                if (session.type === GameType.SelfPaced_NotGroup) {
+                    this.disconnectOtherPlayersAndCopyRecords(session, player);
+                    session.playerJoin(player);
+                } else {
+                    this.disconnectPast(session, session.host, player);
+                    session.hostJoin(player);
+                }
             } else {
                 this.disconnectPast(
                     session,
@@ -203,6 +216,11 @@ export class GameHandler {
                     this.disconnectOtherPlayersAndCopyRecords(session, player);
                 session.playerJoin(player);
             }
+
+            // add user to socket room
+            socket.join(whichRoom(session, player.role));
+            socket.join(whichRoom(session, Role.all));
+
             // emit welcome event
             emitToOne(
                 socket.id,
@@ -263,7 +281,6 @@ export class GameHandler {
                             player.role === Role.host ? true : false
                         )
                     );
-
                     if (session.canEmitCorrectAnswer()) {
                         const correctAnswer = session.getAnsOfQuestion(
                             session.visibleQuestionIndex()
@@ -288,8 +305,10 @@ export class GameHandler {
     }
 
     disconnectOtherPlayersAndCopyRecords(session: GameSession, player: Player) {
-        if (Object.keys(session.playerMap).length > 0) {
-            const theFirstExistedPlayer = Object.values(session.playerMap)[0];
+        player.role = Role.player;
+        const players = Object.values(session.playerMap);
+        if (players.length > 0) {
+            const theFirstExistedPlayer = players[0];
             player.record = theFirstExistedPlayer.record;
             player.previousRecord = theFirstExistedPlayer.previousRecord;
         }
@@ -315,6 +334,7 @@ export class GameHandler {
                 player.profile()
             );
             await session.playerLeave(player);
+            session.deactivateToken(player.token);
             // disconnect
             socket.disconnect(true);
         } catch (error) {
@@ -324,9 +344,8 @@ export class GameHandler {
 
     async start(session: GameSession, player: Player) {
         try {
-            if (session.isEmitValid(player)) {
-                return;
-            }
+            if (session.isEmitValid(player)) return;
+
             if (session.canStart(player)) {
                 // set game status to starting
                 await session.setStatus(GameStatus.Starting);
@@ -352,9 +371,8 @@ export class GameHandler {
 
     abort(session: GameSession, player?: Player) {
         try {
-            if (session.isEmitValid(player)) {
-                return;
-            }
+            if (session.isEmitValid(player)) return;
+
             if (session.canAbort(player)) {
                 // Broadcast that quiz has been aborted
                 emitToRoom(whichRoom(session, Role.all), Event.cancelled, null);
@@ -369,6 +387,7 @@ export class GameHandler {
     }
 
     endSession(session: GameSession) {
+        delete this.sessions[session.id];
         session.endSession();
         if (
             _socketIO !== undefined &&
@@ -391,9 +410,7 @@ export class GameHandler {
 
     next(session: GameSession, questionIndex: number, player?: Player) {
         try {
-            if (session.isEmitValid(player)) {
-                return;
-            }
+            if (session.isEmitValid(player)) return;
 
             if (session.canReleaseNextQuestion(player, questionIndex)) {
                 session.setQuestionReleaseTime(
@@ -462,11 +479,9 @@ export class GameHandler {
             session.setToNextQuestion(questoinIndex + 1);
 
             if (session.isSelfPacedGroup()) {
-                this.showBoard(session, questoinIndex);
-            } else if (session.isSelfPacedNotGroup()) {
                 setTimeout(() => {
-                    this.next(session, questoinIndex + 1);
-                }, BoardShowTime);
+                    this.showBoard(session, questoinIndex);
+                }, CORRECT_ANSWER_SHOW_TIME);
             }
         } else {
             this.showBoard(session, questoinIndex);
@@ -476,9 +491,7 @@ export class GameHandler {
     }
     showBoard(session: GameSession, questionIndex: number, player?: Player) {
         try {
-            if (session.isEmitValid(player)) {
-                return;
-            }
+            if (session.isEmitValid(player)) return;
 
             if (session.canShowBoard(player)) {
                 //  get ranked records of players
@@ -495,7 +508,7 @@ export class GameHandler {
                     if (session.hasMoreQuestions()) {
                         setTimeout(() => {
                             this.next(session, questionIndex + 1);
-                        }, BoardShowTime);
+                        }, BOARD_SHOW_TIME);
                     } else {
                         emitToRoom(
                             whichRoom(session, Role.all),
@@ -504,7 +517,7 @@ export class GameHandler {
                         );
                         setTimeout(() => {
                             this.abort(session);
-                        }, BoardShowTime);
+                        }, BOARD_SHOW_TIME);
                     }
                 } else {
                     //  emit questionOutcome to the host
@@ -527,17 +540,19 @@ export class GameHandler {
         userId: number,
         socketId?: string,
         sessionId?: number,
-        role?: string
+        role?: string,
+        token?: string
     ): Promise<Player> {
         if (playerCache.hasOwnProperty(userId)) {
-            const { name, pictureId, socketId, role } = playerCache[userId];
+            const { name, pictureId } = playerCache[userId];
             return new Player(
                 userId,
                 name,
                 pictureId,
                 socketId,
                 sessionId,
-                role
+                role,
+                token
             );
         } else {
             const { name, pictureId } = await getUserSessionProfile(userId);
@@ -547,7 +562,8 @@ export class GameHandler {
                 pictureId,
                 socketId,
                 sessionId,
-                role
+                role,
+                token
             );
             playerCache[userId] = player;
             return player;

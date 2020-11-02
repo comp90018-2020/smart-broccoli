@@ -7,18 +7,11 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
-class ProfilePicture extends StatefulWidget {
+class ProfilePicture extends StatelessWidget {
   /// Whether picture is editable
   final bool isEdit;
 
   ProfilePicture(this.isEdit);
-
-  @override
-  State<StatefulWidget> createState() => new _ProfilePictureState();
-}
-
-class _ProfilePictureState extends State<ProfilePicture> {
-  final picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +22,9 @@ class _ProfilePictureState extends State<ProfilePicture> {
             // Green clip
             Container(
                 color: Theme.of(context).backgroundColor,
-                height: MediaQuery.of(context).size.height * 0.18),
+                height: MediaQuery.of(context).size.height * 0.15),
             // White container which is half the width of the profile picture
-            Container(color: Colors.white, height: 50),
+            Container(color: Colors.white, height: 60),
           ],
         ),
         // Profile picture
@@ -40,15 +33,15 @@ class _ProfilePictureState extends State<ProfilePicture> {
           right: 0,
           bottom: 0,
           child: GestureDetector(
-            onTap: widget.isEdit
+            onTap: isEdit
                 ? () async {
                     ImageSource source = await showImgSrcPicker(context);
                     if (source == null) return;
-                    _openPictureSelector(source);
+                    _openPictureSelector(context, source);
                   }
                 : null,
             child: CircleAvatar(
-              radius: 50,
+              radius: 60,
               backgroundColor: Colors.black12,
               child: Consumer<UserProfileModel>(
                 builder: (context, profile, child) => FutureBuilder(
@@ -56,21 +49,30 @@ class _ProfilePictureState extends State<ProfilePicture> {
                       Provider.of<UserProfileModel>(context).getUserPicture(),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
-                    if (!snapshot.hasData || snapshot.data == null)
-                      return Container(
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 35,
-                          color: Colors.black12,
-                        ),
-                      );
-                    return ClipOval(
-                      child: Image.file(
-                        File(snapshot.data),
-                        fit: BoxFit.cover,
-                        width: 100.0,
-                        height: 100.0,
-                      ),
+                    return Stack(
+                      alignment: AlignmentDirectional.center,
+                      children: [
+                        if (snapshot.hasData)
+                          ClipOval(
+                            child: Image.file(
+                              File(snapshot.data),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        if (!snapshot.hasData || isEdit)
+                          ClipOval(
+                            child: Container(
+                              width: 120,
+                              height: double.maxFinite,
+                              decoration: BoxDecoration(color: Colors.black26),
+                              child: Icon(
+                                Icons.camera_alt,
+                                size: 40,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                      ],
                     );
                   },
                 ),
@@ -83,7 +85,8 @@ class _ProfilePictureState extends State<ProfilePicture> {
   }
 
   // Selector (from package)
-  void _openPictureSelector(ImageSource source) async {
+  void _openPictureSelector(BuildContext context, ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
     try {
       PickedFile pickedFile = await picker.getImage(source: source);
       if (pickedFile == null) return;

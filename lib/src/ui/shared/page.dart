@@ -114,8 +114,6 @@ class CustomPage extends StatelessWidget {
                                   .getUserPicture(),
                               builder: (BuildContext context,
                                   AsyncSnapshot<String> snapshot) {
-                                if (!snapshot.hasData || snapshot.data == null)
-                                  return UserAvatar.placeholder(maxRadius: 30);
                                 return UserAvatar(
                                   snapshot.data,
                                   maxRadius: 30,

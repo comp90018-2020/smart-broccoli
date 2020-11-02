@@ -36,7 +36,10 @@ class _ProfileRegisteredState extends ProfileEditorState {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ProfilePicture(widget.isEdit),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10.0),
+          child: ProfilePicture(widget.isEdit),
+        ),
 
         // Name/email
         Container(

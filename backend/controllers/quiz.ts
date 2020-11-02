@@ -167,17 +167,14 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
         quiz.title = info.title;
     }
     if (info.active !== undefined) {
-        // Change to self-paced quiz
-        if (info.type === "self-paced") {
+        if (info.type === "self paced") {
+            // Changes to self-paced quiz
             quiz.active = info.active;
-        }
-        // Stay as self-paced quiz
-        if (info.type === undefined && quiz.type === "self-paced") {
+        } else if (info.type === undefined && quiz.type === "self paced") {
+            // Changes to self-paced quiz
             quiz.active = info.active;
-        }
-
-        // Change to live quiz
-        if (quiz.type !== "live" && info.type === "live") {
+        } else if (quiz.type !== "live" && info.type === "live") {
+            // Change to live quiz
             quiz.active = false;
         }
     }

@@ -36,7 +36,7 @@ export const formatQuestion = (
             pictureId: questionCopy.pictureId,
             numCorrect: questionCopy.numCorrect,
         },
-        time: remainingTime,
+        time: remainingTime < 0 ? 0 : remainingTime,
         totalQuestions: questions.length,
     };
 };

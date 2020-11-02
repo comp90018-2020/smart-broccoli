@@ -27,9 +27,6 @@ class MembersTab extends StatelessWidget {
                         registry.getGroupMemberPicture(group.members[index].id),
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
-                      if (!snapshot.hasData || snapshot.data == null) {
-                        return UserAvatar.placeholder();
-                      }
                       return UserAvatar(snapshot.data);
                     }),
                 // Name
