@@ -25,7 +25,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
 
-  final PubSub _pubSub;
+  final PubSub pubSub;
 
   SessionApi _sessionApi;
 
@@ -59,8 +59,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
-  GameSessionModel(this._authStateModel, this._pubSub,
-      {SessionApi sessionApi}) {
+  GameSessionModel(this._authStateModel, this.pubSub, {SessionApi sessionApi}) {
     _sessionApi = sessionApi ?? SessionApi();
     socket = IO.io(SERVER_URL, {
       'autoConnect': false,
@@ -226,7 +225,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       // must stop listening immediately to avoid timing conflicts
       socket.clearListeners();
       _clearFields();
-      _pubSub.publish(PubSubTopic.ROUTE,
+      pubSub.publish(PubSubTopic.ROUTE,
           arg: RouteArgs(name: '/take_quiz', action: RouteAction.POPALL));
     });
   }
@@ -236,29 +235,29 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     switch (updated) {
       case SessionState.PENDING:
         state = SessionState.PENDING;
-        _pubSub.publish(PubSubTopic.ROUTE,
+        pubSub.publish(PubSubTopic.ROUTE,
             arg: RouteArgs(name: '/session/lobby', action: RouteAction.PUSH));
         break;
       case SessionState.STARTING:
         if (state == SessionState.PENDING)
           notifyListeners();
         else
-          _pubSub.publish(PubSubTopic.ROUTE,
+          pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(name: '/session/lobby', action: RouteAction.PUSH));
         state = SessionState.STARTING;
         break;
       case SessionState.QUESTION:
         if (state == SessionState.PENDING || state == SessionState.STARTING)
-          _pubSub.publish(PubSubTopic.ROUTE,
+          pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.REPLACE));
         else if (state == SessionState.QUESTION || state == SessionState.ANSWER)
           notifyListeners();
         else if (state == SessionState.OUTCOME)
-          _pubSub.publish(PubSubTopic.ROUTE,
+          pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(action: RouteAction.POP));
         else
-          _pubSub.publish(PubSubTopic.ROUTE,
+          pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.PUSH));
         state = SessionState.QUESTION;
@@ -268,20 +267,20 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
           print('QUESTION TO ANSWER TRANSITION');
           notifyListeners();
         } else
-          _pubSub.publish(PubSubTopic.ROUTE,
+          pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.PUSH));
         state = SessionState.ANSWER;
         break;
       case SessionState.OUTCOME:
-        _pubSub.publish(PubSubTopic.ROUTE,
+        pubSub.publish(PubSubTopic.ROUTE,
             arg: RouteArgs(
                 name: '/session/leaderboard', action: RouteAction.PUSH));
         state = SessionState.OUTCOME;
         break;
       case SessionState.FINISHED:
         if (state == SessionState.ANSWER)
-          _pubSub.publish(PubSubTopic.ROUTE,
+          pubSub.publish(PubSubTopic.ROUTE,
               arg:
                   RouteArgs(name: '/session/finish', action: RouteAction.PUSH));
         else
@@ -289,7 +288,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         state = SessionState.FINISHED;
         break;
       case SessionState.ABORTED:
-        _pubSub.publish(PubSubTopic.ROUTE,
+        pubSub.publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
         state = SessionState.ABORTED;
         break;
