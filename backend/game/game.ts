@@ -12,7 +12,8 @@ import { QuizAttributes } from "models/quiz";
 import { _socketIO } from "./index";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
-const BoardShowTime = 5 * 1000;
+const CORRECT_ANSWER_SHOW_TIME = 3 * 1000;
+const BOARD_SHOW_TIME = 5 * 1000;
 const playerCache: { [userId: number]: Player } = {};
 const socketPlayerMapCache: { [socketId: string]: Player } = {};
 
@@ -36,7 +37,7 @@ export class GameHandler {
                 active: true,
                 description: "Test Quiz",
                 type: "self paced",
-                isGroup: false,
+                isGroup: true,
                 timeLimit: 20,
                 groupId: 2,
                 pictureId: null,
@@ -471,11 +472,9 @@ export class GameHandler {
             session.setToNextQuestion(questoinIndex + 1);
 
             if (session.isSelfPacedGroup()) {
-                this.showBoard(session, questoinIndex);
-            } else if (session.isSelfPacedNotGroup()) {
                 setTimeout(() => {
-                    this.next(session, questoinIndex + 1);
-                }, BoardShowTime);
+                    this.showBoard(session, questoinIndex);
+                }, CORRECT_ANSWER_SHOW_TIME);
             }
         } else {
             this.showBoard(session, questoinIndex);
@@ -504,7 +503,7 @@ export class GameHandler {
                     if (session.hasMoreQuestions()) {
                         setTimeout(() => {
                             this.next(session, questionIndex + 1);
-                        }, BoardShowTime);
+                        }, BOARD_SHOW_TIME);
                     } else {
                         emitToRoom(
                             whichRoom(session, Role.all),
@@ -513,7 +512,7 @@ export class GameHandler {
                         );
                         setTimeout(() => {
                             this.abort(session);
-                        }, BoardShowTime);
+                        }, BOARD_SHOW_TIME);
                     }
                 } else {
                     //  emit questionOutcome to the host
