@@ -62,8 +62,9 @@ class _QuizQuestion extends State<QuizQuestion> {
           enableFeedback: false,
           splashRadius: 20,
           onPressed: () async {
-            if (!await showConfirmDialog(
-                context, "You are about to quit this session")) return;
+            if (model.state != SessionState.FINISHED &&
+                !await showConfirmDialog(
+                    context, "You are about to quit this session")) return;
             Provider.of<GameSessionModel>(context, listen: false).quitQuiz();
           },
         ),
