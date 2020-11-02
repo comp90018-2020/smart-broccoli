@@ -53,9 +53,7 @@ class _GroupCreateState extends State<GroupCreate> {
                 onPressed: _isTextFormFieldEmpty || _createClicked
                     ? null
                     : _createGroup,
-                child: _createClicked
-                    ? const Text("CREATING")
-                    : const Text("CREATE"),
+                child: const Text("CREATE"),
               ),
             ),
           ),
@@ -65,9 +63,7 @@ class _GroupCreateState extends State<GroupCreate> {
   }
 
   void _createGroup() async {
-    setState(() {
-      _createClicked = true;
-    });
+    setState(() => _createClicked = true);
     if (controller.text == "")
       return showBasicDialog(context, "Name required",
           title: "Cannot create group");
@@ -79,8 +75,6 @@ class _GroupCreateState extends State<GroupCreate> {
       showBasicDialog(context, "Name already in use",
           title: "Cannot create group");
     }
-    setState(() {
-      _createClicked = false;
-    });
+    setState(() => _createClicked = false);
   }
 }

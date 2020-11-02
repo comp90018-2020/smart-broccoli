@@ -173,8 +173,6 @@ class _RegisterState extends State<Register> {
       setState(() => _formSubmitted = true);
     }
 
-    setState(() {
-      _isRegisterButtonDisabled = false;
-    });
+    setState(() => _isRegisterButtonDisabled = false);
   }
 }

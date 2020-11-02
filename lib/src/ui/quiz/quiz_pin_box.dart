@@ -44,22 +44,19 @@ class _QuizPinBoxState extends State<QuizPinBox> {
       Padding(
         padding: const EdgeInsets.all(12.0),
         child: RaisedButton(
+          disabledColor: SmartBroccoliColourScheme.disabledButtonTextColor,
           onPressed: _isJoinButtonDisabled
               ? null
               : () {
-                  setState(() {
-                    _isJoinButtonDisabled = true;
-                  });
+                  setState(() => _isJoinButtonDisabled = true);
                   _verifyPin(context);
-                  setState(() {
-                    _isJoinButtonDisabled = false;
-                  });
+                  setState(() => _isJoinButtonDisabled = false);
                 },
           shape: SmartBroccoliTheme.raisedButtonShape,
           child: Padding(
             padding: SmartBroccoliTheme.raisedButtonTextPadding,
             child: Text(
-              _isJoinButtonDisabled ? "JOINING" : "JOIN BY PIN",
+              "JOIN BY PIN",
               style: TextStyle(fontSize: 13),
             ),
           ),

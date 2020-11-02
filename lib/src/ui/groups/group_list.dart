@@ -34,9 +34,7 @@ class _GroupListState extends State<GroupList> {
 
         // Handle tab tap
         tabTap: (value) {
-          setState(() {
-            tab = value;
-          });
+          setState(() => tab = value);
         },
 
         // Tabs

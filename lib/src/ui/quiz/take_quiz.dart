@@ -36,9 +36,7 @@ class _TakeQuizState extends State<TakeQuiz> {
       RenderBox renderBox = _buildQuizKey.currentContext.findRenderObject();
       double pinBoxHeight = renderBox.size.height;
       if (pinBoxHeight != _height) {
-        setState(() {
-          _height = pinBoxHeight;
-        });
+        setState(() => _height = pinBoxHeight);
       }
     });
   }

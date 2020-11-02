@@ -104,9 +104,7 @@ class _ManageQuizState extends State<ManageQuiz> {
                         centered: true,
                         defaultText: "All Groups",
                         onChanged: (i) {
-                          setState(() {
-                            _groupId = i;
-                          });
+                          setState(() => _groupId = i);
                         },
                       );
                     },

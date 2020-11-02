@@ -85,12 +85,14 @@ class _QuizCreateState extends State<QuizCreate> {
       // Delete and Save on AppBar
       appbarActions: <Widget>[
         IconButton(
+          disabledColor: Color(0x65ffffff),
           icon: Icon(Icons.delete),
           padding: EdgeInsets.zero,
           splashRadius: 20,
           onPressed: _isCommited ? null : _deleteQuiz,
         ),
         IconButton(
+          disabledColor: Color(0x65ffffff),
           icon: Icon(Icons.check),
           padding: EdgeInsets.zero,
           splashRadius: 20,
@@ -124,9 +126,7 @@ class _QuizCreateState extends State<QuizCreate> {
                         padding: EdgeInsets.symmetric(vertical: 8),
                         child: TextFormField(
                           onChanged: (value) {
-                            setState(() {
-                              _quiz.title = value;
-                            });
+                            setState(() => _quiz.title = value);
                           },
                           initialValue: _quiz.title,
                           decoration: InputDecoration(
@@ -145,9 +145,7 @@ class _QuizCreateState extends State<QuizCreate> {
                             snapshot.hasData ? snapshot.data : null,
                             updatePicture: (path) {
                               setState(
-                                () {
-                                  _quiz.pendingPicturePath = path;
-                                },
+                                () => _quiz.pendingPicturePath = path,
                               );
                             },
                           );
@@ -191,9 +189,8 @@ class _QuizCreateState extends State<QuizCreate> {
                                             registry.createdGroups,
                                             _quiz.groupId,
                                             onChanged: (groupId) {
-                                          setState(() {
-                                            _quiz.groupId = groupId;
-                                          });
+                                          setState(
+                                              () => _quiz.groupId = groupId);
                                         });
                                       },
                                     ),
@@ -218,9 +215,7 @@ class _QuizCreateState extends State<QuizCreate> {
                               value: QuizType.LIVE,
                               groupValue: _quiz.type,
                               onChanged: (QuizType value) {
-                                setState(() {
-                                  _quiz.type = value;
-                                });
+                                setState(() => _quiz.type = value);
                               },
                             ),
                             RadioListTile<QuizType>(
@@ -229,9 +224,7 @@ class _QuizCreateState extends State<QuizCreate> {
                               value: QuizType.SELF_PACED,
                               groupValue: _quiz.type,
                               onChanged: (QuizType value) {
-                                setState(() {
-                                  _quiz.type = value;
-                                });
+                                setState(() => _quiz.type = value);
                               },
                             ),
                           ],
@@ -369,11 +362,8 @@ class _QuizCreateState extends State<QuizCreate> {
     var returnArgs = await Navigator.of(context).pushNamed("/quiz/question",
         arguments: QuestionArguments(question, _quiz.questions.length));
     // If saved
-    if (returnArgs is QuestionReturnArguments && returnArgs.question != null) {
-      setState(() {
-        _quiz.questions.add(returnArgs.question);
-      });
-    }
+    if (returnArgs is QuestionReturnArguments && returnArgs.question != null)
+      setState(() => _quiz.questions.add(returnArgs.question));
   }
 
   // Time dialog
@@ -421,31 +411,23 @@ class _QuizCreateState extends State<QuizCreate> {
 
   /// Save quiz
   void _saveQuiz() async {
-    setState(() {
-      _isCommited = true;
-    });
+    setState(() => _isCommited = true);
     // Quiz not loaded or no change
     if (_quiz == null || _quiz.id != null && !quizModified()) {
       context.read<QuizCollectionModel>().clearSelectedQuiz();
-      setState(() {
-        _isCommited = false;
-      });
+      setState(() => _isCommited = false);
       return Navigator.of(context).pop();
     }
 
     if (_quiz.title.isEmpty) {
       showBasicDialog(context, "Quiz name cannot be empty");
-      setState(() {
-        _isCommited = false;
-      });
+      setState(() => _isCommited = false);
       return;
     }
 
     if (_quiz.groupId == null) {
       showBasicDialog(context, "Quiz must belong to a group");
-      setState(() {
-        _isCommited = false;
-      });
+      setState(() => _isCommited = false);
       return;
     }
 
@@ -458,31 +440,23 @@ class _QuizCreateState extends State<QuizCreate> {
     } catch (err) {
       showBasicDialog(context, err.toString());
     }
-    setState(() {
-      _isCommited = false;
-    });
+    setState(() => _isCommited = false);
   }
 
   /// Delete quiz
   void _deleteQuiz() async {
-    setState(() {
-      _isCommited = true;
-    });
+    setState(() => _isCommited = true);
 
     // Quiz not loaded
     if (_quiz == null) {
-      setState(() {
-        _isCommited = false;
-      });
+      setState(() => _isCommited = false);
       return Navigator.of(context).pop();
     }
 
     if (!await showConfirmDialog(
         context, "Are you sure you want to delete the question?",
         title: "Delete question")) {
-      setState(() {
-        _isCommited = false;
-      });
+      setState(() => _isCommited = false);
       return;
     }
 
@@ -495,8 +469,6 @@ class _QuizCreateState extends State<QuizCreate> {
       showBasicDialog(context, err.toString());
     }
 
-    setState(() {
-      _isCommited = false;
-    });
+    setState(() => _isCommited = false);
   }
 }

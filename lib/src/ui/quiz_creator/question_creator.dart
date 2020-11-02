@@ -158,9 +158,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                     return PictureCard(
                       snapshot.hasData ? snapshot.data : null,
                       updatePicture: (path) {
-                        setState(() {
-                          _question.pendingPicturePath = path;
-                        });
+                        setState(() => _question.pendingPicturePath = path);
                       },
                     );
                   },
@@ -200,9 +198,8 @@ class _QuestionCreateState extends State<QuestionCreate> {
                             )
                           ],
                           onPressed: (int index) {
-                            setState(() {
-                              (_question as TFQuestion).answer = index == 0;
-                            });
+                            setState(() =>
+                                (_question as TFQuestion).answer = index == 0);
                           },
                           // Boolean array
                           isSelected: [
@@ -267,9 +264,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
               // Add choice
               onPressed: () {
                 _optionTextControllers.add(TextEditingController());
-                setState(() => {
-                      question.options.add(QuestionOption('', false)),
-                    });
+                setState(() => question.options.add(QuestionOption('', false)));
               },
             ),
           ),
@@ -313,9 +308,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
                       Switch(
                         value: option.correct,
                         onChanged: (value) {
-                          setState(() {
-                            option.correct = value;
-                          });
+                          setState(() => option.correct = value);
                         },
                       ),
                     ],
