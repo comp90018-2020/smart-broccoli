@@ -243,6 +243,14 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       print('end');
       state = SessionState.FINISHED;
     });
+
+    socket.on('disconnect', (_) {
+      // must stop listening immediately to avoid timing conflicts
+      socket.clearListeners();
+      refreshSession();
+      _pubSub.publish(PubSubTopic.ROUTE,
+          arg: RouteArgs('/take_quiz', routeAction: RouteAction.POPALL));
+    });
   }
 
   /// host action
@@ -266,10 +274,6 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// participant action
   void quitQuiz() {
     socket.emit('quit');
-    socket.disconnect();
-    refreshSession();
-    _pubSub.publish(PubSubTopic.ROUTE,
-        arg: RouteArgs('/take_quiz', routeAction: RouteAction.POPALL));
   }
 
   void answerQuestion() {
