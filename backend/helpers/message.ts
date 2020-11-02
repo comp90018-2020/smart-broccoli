@@ -1,7 +1,7 @@
 // Firebase messaging
 // Adapted from:
 // https://github.com/COMP30022-Russia/COMP30022_Server/blob/master/helpers/notifications.ts
-import { removeToken } from "controllers/notification";
+import { removeToken } from "../controllers/notification";
 import * as admin from "firebase-admin";
 
 // Initalise firebase in production environments
