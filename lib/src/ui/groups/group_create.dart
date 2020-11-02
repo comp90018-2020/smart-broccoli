@@ -17,6 +17,8 @@ class _GroupCreateState extends State<GroupCreate> {
   final TextEditingController controller = TextEditingController();
   bool _isTextFormFieldEmpty = true;
 
+  /// has create button been clicked
+  bool _createClicked = false;
   @override
   Widget build(BuildContext context) {
     return CenteredPage(
@@ -48,8 +50,12 @@ class _GroupCreateState extends State<GroupCreate> {
               child: RaisedButton(
                 disabledTextColor:
                     SmartBroccoliColourScheme.disabledButtonTextColor,
-                onPressed: _isTextFormFieldEmpty ? null : _createGroup,
-                child: const Text("CREATE"),
+                onPressed: _isTextFormFieldEmpty || _createClicked
+                    ? null
+                    : _createGroup,
+                child: _createClicked
+                    ? const Text("CREATING")
+                    : const Text("CREATE"),
               ),
             ),
           ),
@@ -59,6 +65,9 @@ class _GroupCreateState extends State<GroupCreate> {
   }
 
   void _createGroup() async {
+    setState(() {
+      _createClicked = true;
+    });
     if (controller.text == "")
       return showBasicDialog(context, "Name required",
           title: "Cannot create group");
@@ -70,5 +79,8 @@ class _GroupCreateState extends State<GroupCreate> {
       showBasicDialog(context, "Name already in use",
           title: "Cannot create group");
     }
+    setState(() {
+      _createClicked = false;
+    });
   }
 }

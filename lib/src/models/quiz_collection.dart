@@ -188,13 +188,19 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// Refreshes list of available quizzes
   Future<void> refreshAvailableQuizzes() async {
     if (!_authStateModel.inSession) return;
-    _availableQuizzes = Map.fromIterable(
-        (await _quizApi.getQuizzes(_authStateModel.token))
-            .where((quiz) => quiz.role == GroupRole.MEMBER),
-        key: (quiz) => quiz.id);
-    await Future.wait(_availableQuizzes.values.map((Quiz quiz) async {
-      await _refreshQuizPicture(quiz);
-    }));
+    try {
+      _availableQuizzes = Map.fromIterable(
+          (await _quizApi.getQuizzes(_authStateModel.token))
+              .where((quiz) => quiz.role == GroupRole.MEMBER),
+          key: (quiz) => quiz.id);
+      await Future.wait(_availableQuizzes.values.map((Quiz quiz) async {
+        await _refreshQuizPicture(quiz);
+      }));
+    } catch (e) {
+      await _authStateModel.checkSession();
+      await _authStateModel.logout();
+    }
+
     notifyListeners();
   }
 

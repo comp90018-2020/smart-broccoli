@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
@@ -34,6 +35,9 @@ class _QuizCreateState extends State<QuizCreate> {
 
   /// The time controller
   TextEditingController _timeController = TextEditingController();
+
+  /// Whether change is commited
+  bool _isCommited = false;
 
   /// Sets the quiz that this widget holds
   void _setQuiz(Quiz quiz) {
@@ -84,13 +88,13 @@ class _QuizCreateState extends State<QuizCreate> {
           icon: Icon(Icons.delete),
           padding: EdgeInsets.zero,
           splashRadius: 20,
-          onPressed: _deleteQuiz,
+          onPressed: _isCommited ? null : _deleteQuiz,
         ),
         IconButton(
           icon: Icon(Icons.check),
           padding: EdgeInsets.zero,
           splashRadius: 20,
-          onPressed: _saveQuiz,
+          onPressed: _isCommited ? null : _saveQuiz,
         ),
       ],
       child: _quiz == null
@@ -417,19 +421,31 @@ class _QuizCreateState extends State<QuizCreate> {
 
   /// Save quiz
   void _saveQuiz() async {
+    setState(() {
+      _isCommited = true;
+    });
     // Quiz not loaded or no change
     if (_quiz == null || _quiz.id != null && !quizModified()) {
       context.read<QuizCollectionModel>().clearSelectedQuiz();
+      setState(() {
+        _isCommited = false;
+      });
       return Navigator.of(context).pop();
     }
 
     if (_quiz.title.isEmpty) {
       showBasicDialog(context, "Quiz name cannot be empty");
+      setState(() {
+        _isCommited = false;
+      });
       return;
     }
 
     if (_quiz.groupId == null) {
       showBasicDialog(context, "Quiz must belong to a group");
+      setState(() {
+        _isCommited = false;
+      });
       return;
     }
 
@@ -442,15 +458,31 @@ class _QuizCreateState extends State<QuizCreate> {
     } catch (err) {
       showBasicDialog(context, err.toString());
     }
+    setState(() {
+      _isCommited = false;
+    });
   }
 
   /// Delete quiz
   void _deleteQuiz() async {
+    setState(() {
+      _isCommited = true;
+    });
+
     // Quiz not loaded
-    if (_quiz == null) return Navigator.of(context).pop();
+    if (_quiz == null) {
+      setState(() {
+        _isCommited = false;
+      });
+      return Navigator.of(context).pop();
+    }
+
     if (!await showConfirmDialog(
         context, "Are you sure you want to delete the question?",
         title: "Delete question")) {
+      setState(() {
+        _isCommited = false;
+      });
       return;
     }
 
@@ -462,5 +494,9 @@ class _QuizCreateState extends State<QuizCreate> {
     } on Exception catch (err) {
       showBasicDialog(context, err.toString());
     }
+
+    setState(() {
+      _isCommited = false;
+    });
   }
 }

@@ -19,6 +19,8 @@ class _QuizPinBoxState extends State<QuizPinBox> {
   /// listens for input by the pin listener
   final TextEditingController _pinFilter = new TextEditingController();
 
+  // Whether login button is disabled
+  bool _isJoinButtonDisabled = false;
   Widget build(BuildContext context) {
     return Column(children: [
       // Join by pin box
@@ -42,12 +44,22 @@ class _QuizPinBoxState extends State<QuizPinBox> {
       Padding(
         padding: const EdgeInsets.all(12.0),
         child: RaisedButton(
-          onPressed: () => _verifyPin(context),
+          onPressed: _isJoinButtonDisabled
+              ? null
+              : () {
+                  setState(() {
+                    _isJoinButtonDisabled = true;
+                  });
+                  _verifyPin(context);
+                  setState(() {
+                    _isJoinButtonDisabled = false;
+                  });
+                },
           shape: SmartBroccoliTheme.raisedButtonShape,
           child: Padding(
             padding: SmartBroccoliTheme.raisedButtonTextPadding,
             child: Text(
-              "JOIN BY PIN",
+              _isJoinButtonDisabled ? "JOINING" : "JOIN BY PIN",
               style: TextStyle(fontSize: 13),
             ),
           ),

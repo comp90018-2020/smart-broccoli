@@ -293,3 +293,53 @@ class QuizCard extends StatelessWidget {
     );
   }
 }
+
+class QuizCardButton extends StatefulWidget {
+  final Quiz quiz;
+
+  QuizCardButton(this.quiz);
+
+  @override
+  State<StatefulWidget> createState() => new _QuizButtonState();
+}
+
+class _QuizButtonState extends State<QuizCardButton> {
+  /// Whether the activate button is diable or not
+  bool _isActivateButtonDisable = false;
+
+  @override
+  Widget build(BuildContext context) => RaisedButton(
+      onPressed: _isActivateButtonDisable
+          ? null
+          : () async {
+              setState(() {
+                _isActivateButtonDisable = true;
+              });
+              if (!await showConfirmDialog(
+                  context,
+                  "You are about to start a live session " +
+                      "for the quiz: ${widget.quiz.title}",
+                  title: "Confirm start session",
+                  barrierDismissable: true)) {
+                setState(() {
+                  _isActivateButtonDisable = false;
+                });
+                return;
+              }
+
+              try {
+                Provider.of<GameSessionModel>(context, listen: false)
+                    .createSession(widget.quiz.id, GameSessionType.INDIVIDUAL);
+              } catch (_) {
+                showBasicDialog(context, "Cannot start live session");
+              }
+              setState(() {
+                _isActivateButtonDisable = false;
+              });
+            },
+      color: Theme.of(context).accentColor,
+      textColor: Theme.of(context).colorScheme.onBackground,
+      child: _isActivateButtonDisable ? Text('Activating') : Text('Activate'),
+      padding: EdgeInsets.zero,
+      shape: SmartBroccoliTheme.raisedButtonShape);
+}
