@@ -2,7 +2,7 @@ import supertest from "supertest";
 import { expect } from "chai";
 import app from "./index";
 import rebuild from "./rebuild";
-import { registerAndLogin } from "./helpers";
+import { createGroup, createQuiz, registerAndLogin } from "./helpers";
 import { Token, UserState } from "../models";
 
 describe("Notification", () => {
@@ -128,5 +128,50 @@ describe("Notification", () => {
         expect(res.body.radius).to.equal(5);
         expect(res.body.notificationWindow).to.equal(10);
         expect(res.body.maxNotificationsPerDay).to.equal(100);
+    });
+
+    // Quiz/question
+    const QUESTION_TF = {
+        text: "a question",
+        type: "truefalse",
+        tf: false,
+    };
+    const QUESTION_CHOICE = {
+        text: "a question",
+        type: "choice",
+        options: [
+            {
+                text: "abc",
+                correct: false,
+            },
+            {
+                text: "def",
+                correct: true,
+            },
+        ],
+    };
+    const QUIZ = {
+        title: "Quiz title",
+        description: "Quiz description",
+        questions: [QUESTION_TF, QUESTION_CHOICE],
+        type: "self paced",
+    };
+
+    it("'Trigger' notification", async () => {
+        const agent = supertest(app);
+        const owner = await registerAndLogin({ ...USER, email: "b@b.com" } );
+        const user = await registerAndLogin(USER);
+
+        // Set token
+        const token = await agent
+            .post("/auth/firebase")
+            .set("Authorization", `Bearer ${user.token}`)
+            .send({ token: "aaabbb" });
+        expect(token.status).to.equal(200);
+
+
+        // Create group/quiz
+        const group = await createGroup(user.id, "foo");
+        const quiz = await createQuiz(user.id, group.id, QUIZ);
     });
 });
