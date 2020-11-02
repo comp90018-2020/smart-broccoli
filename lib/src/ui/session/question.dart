@@ -223,9 +223,8 @@ class _QuizQuestion extends State<QuizQuestion> {
     if (model.question is TFQuestion) {
       // correct answer
       if (model.state == SessionState.ANSWER &&
-              model.correctAnswer.answer.tfSelection &&
-              index == 1 ||
-          !model.correctAnswer.answer.tfSelection && index == 0)
+          (model.correctAnswer.answer.tfSelection && index == 1 ||
+              !model.correctAnswer.answer.tfSelection && index == 0))
         return AnswerColours.correct;
       // incorrect selected answer
       else if (model.answer.tfSelection != null &&
