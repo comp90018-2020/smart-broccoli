@@ -86,7 +86,8 @@ class QuizQuestion extends StatelessWidget {
 
                     Padding(
                       padding: const EdgeInsets.only(top: 16.0),
-                      child: TimerWidget(style: TextStyle(fontSize: 18)),
+                      child: TimerWidget(
+                          initTime: model.time, style: TextStyle(fontSize: 18)),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0, bottom: 16.0),
