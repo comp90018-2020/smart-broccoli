@@ -203,6 +203,16 @@ class CustomPage extends StatelessWidget {
                       _navigateToNamed(context, '/group/home');
                     },
                   ),
+                  ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.notifications),
+                    title: Text('NOTIFICATION SETTING',
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColorDark)),
+                    onTap: () {
+                      _navigateToNamed(context, '/smart_quiz');
+                    },
+                  ),
                   Divider(),
                   ListTile(
                     dense: true,
