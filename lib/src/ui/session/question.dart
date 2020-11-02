@@ -25,12 +25,6 @@ class QuizQuestion extends StatefulWidget {
 class _QuizQuestion extends State<QuizQuestion> {
   List<int> _selections = [];
 
-  // Correct answer getter
-  int actual = 2;
-
-  // State of question
-  QuestionState _questionState = QuestionState.Standard;
-
   Timer _timer;
   int _secondsRemaining;
 
@@ -184,9 +178,9 @@ class _QuizQuestion extends State<QuizQuestion> {
   // Answer selection tabs
   Widget _answerTab(GameSessionModel model, int index) {
     return Card(
-      color: findColour(index),
+      color: findColour(model, index),
       child: InkWell(
-        onTap: _questionState == QuestionState.Standard
+        onTap: model.state == SessionState.QUESTION
             ? () => updateAnswer(model, index)
             : null,
         child: Padding(
@@ -241,14 +235,26 @@ class _QuizQuestion extends State<QuizQuestion> {
   }
 
   // Determines the correct colour to display
-  Color findColour(index) {
-    if (_questionState == QuestionState.ShowCorrect) {
-      if (index == actual) return AnswerColours.correct;
+  Color findColour(GameSessionModel model, int index) {
+    if (model.state == SessionState.ANSWER) {
+      // true/false question correct answer
+      if (model.correctAnswer.answer.tfSelection != null &&
+          (model.correctAnswer.answer.tfSelection && index == 1 ||
+              !model.correctAnswer.answer.tfSelection && index == 0))
+        return AnswerColours.correct;
+      // MC question correct answer
+      if (model.correctAnswer.answer.mcSelection != null &&
+          model.correctAnswer.answer.mcSelection.contains(index))
+        return AnswerColours.correct;
+      // incorrect selected answer
       if (_selections.contains(index)) return AnswerColours.selected;
+      // incorrect undelected answer
       return AnswerColours.normal;
     }
 
+    // selected answer before correct answer is known
     if (_selections.contains(index)) return AnswerColours.selected;
+    // unselected answer before correct answer is known
     return AnswerColours.normal;
   }
 
