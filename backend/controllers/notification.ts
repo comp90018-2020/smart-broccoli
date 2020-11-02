@@ -1,69 +1,16 @@
 import {
     Group,
     NotificationSettings,
+    Quiz,
     Session,
     Token,
     User,
     UserState,
 } from "../models";
-import { DATE, Op } from "sequelize";
-import sendFirebaseMessage, { firebaseTokenValid } from "../helpers/message";
+import { Op } from "sequelize";
+import { firebaseTokenValid, sendMessage } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
-
-/**
- * Sends a message to the specified recipient.
-// Adapted from:
-// https://github.com/COMP30022-Russia/COMP30022_Server
- * @param message The message to be sent.
- * @param userID The ID(s) of the recipient.
- */
-export const sendMessage = async (message: any, tokens: Token[]) => {
-    // Only send in production environment
-    if (process.env.NODE_ENV !== "production") {
-        // Output message to console if in development environment
-        if (process.env.NODE_ENV === "development") {
-            console.info(message);
-        }
-        return;
-    }
-
-    // Stop if there are no tokens
-    if (tokens.length === 0) {
-        return;
-    }
-
-    try {
-        // Send the message with given tokens
-        const response = await sendFirebaseMessage(
-            message,
-            tokens.map((t) => t.token)
-        );
-
-        for (const [index, result] of response.results.entries()) {
-            // Replace token, if applicable
-            if (result.canonicalRegistrationToken !== tokens[index].token) {
-                await updateToken(
-                    tokens[index],
-                    result.canonicalRegistrationToken
-                );
-            }
-
-            // Remove token, if applicable
-            if (result.error) {
-                if (
-                    result.error.code ===
-                    "messaging/registration-token-not-registered"
-                ) {
-                    await removeToken(tokens[index]);
-                } else {
-                    console.error(result.error);
-                }
-            }
-        }
-    } catch (err) {
-        console.error(err);
-    }
-};
+import { buildSessionMessage } from "./notification_firebase";
 
 /**
  * Adds a firebase token to a user.
@@ -127,8 +74,8 @@ export const deleteTokenOfUser = async (userId: number, token: string) => {
  * Removes a token.
  * @param tokenId
  */
-export const removeToken = async (token: Token) => {
-    await token.destroy();
+export const removeToken = async (token: string) => {
+    await Token.destroy({ where: { scope: "firebase", token } });
 };
 
 /**
@@ -197,14 +144,22 @@ export const getNotificationSettings = async (userId: number) => {
 };
 
 // Day names
-const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Monday"];
+const WEEKDAYS = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Monday",
+];
 
 /**
  * This function gets called on session creation for the purpose of notifying
  * users.
  * @param session The session
  */
-export const handleSessionCreation = async (
+export const sendSessionCreationNotification = async (
     initiatorId: number,
     session: Session
 ) => {
@@ -230,18 +185,29 @@ export const handleSessionCreation = async (
                     id: { [Op.not]: initiatorId },
                 },
                 include: [
+                    // Current user state
                     {
                         model: UserState,
                         required: false,
                     },
+                    // User's notification settings
                     {
                         model: NotificationSettings,
                         required: true,
                     },
+                    // User tokens
                     {
                         model: Token,
                         require: true,
                         where: { scope: "firebase" },
+                        attributes: ["token"],
+                    },
+                    // The quiz
+                    {
+                        model: Quiz,
+                        require: true,
+                        where: { id: session.quizId },
+                        attributes: ["id", "title"],
                     },
                 ],
             },
@@ -250,8 +216,21 @@ export const handleSessionCreation = async (
 
     // Get list of users
     const users = await filterUsers(group.Users, session);
+    const tokens = users
+        .map((user) => user.Tokens.map((token) => token.token))
+        .flat();
 
-
+    const type = session.type === "live" ? "live" : "smart";
+    const message = buildSessionMessage(
+        "SESSION_START",
+        {
+            quizId: session.quizId,
+        },
+        `New ${type} quiz session started`,
+        `A new session for the quiz "${group.Quizzes[0].title}" has been started, click to join`,
+        tokens
+    );
+    await sendMessage(message);
 };
 
 // Filter available users
@@ -265,7 +244,35 @@ const filterUsers = async (users: User[], session: Session) => {
         }
     }
 
-    return users.filter(async (user) => {
+    // Get all users who have completed session
+    let excluded: number[] = [];
+    if (session.type === "self paced") {
+        const sessions = await Session.findAll({
+            attributes: ["id"],
+            where: { quizId: session.quizId, type: "self paced" },
+            include: [
+                {
+                    // @ts-ignore
+                    model: User,
+                    required: false,
+                    attributes: ["id"],
+                    // User was participant and completed
+                    through: {
+                        where: { role: "participant", state: "complete" },
+                        attributes: ["id", "role", "state"]
+                    },
+                },
+            ],
+        });
+        excluded = sessions
+            .map((session) => session.Users.map((user) => user.id))
+            .flat();
+    }
+
+    return users.filter((user) => {
+        // Excluded since they have completed session
+        if (excluded.includes(user.id)) return false;
+
         // No token
         if (user.Tokens.length === 0) return false;
 
@@ -275,7 +282,7 @@ const filterUsers = async (users: User[], session: Session) => {
         const dateLocal = date.toLocaleDateString("en-US", {
             timeZone:
                 user.NotificationSettings.timezone ?? "Australia/Melbourne",
-                weekday: "long",
+            weekday: "long",
         });
         if (!user.NotificationSettings.days[WEEKDAYS.indexOf(dateLocal)]) {
             return false;

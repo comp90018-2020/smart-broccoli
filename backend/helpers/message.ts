@@ -1,6 +1,7 @@
 // Firebase messaging
 // Adapted from:
 // https://github.com/COMP30022-Russia/COMP30022_Server/blob/master/helpers/notifications.ts
+import { removeToken } from "controllers/notification";
 import * as admin from "firebase-admin";
 
 // Initalise firebase in production environments
@@ -33,33 +34,6 @@ export const firebaseTokenValid = async (token: string) => {
 };
 
 /**
- * Sends a message to the socket service and FCM.
- * @param message The payload to be sent.
- * @param tokens List of device tokens.
- * @return Promise object representing the response.
- */
-export default async function (
-    tokens: string[],
-    message: any,
-    timeToLive?: number
-): Promise<admin.messaging.MessagingDevicesResponse> {
-    // Send the message and return the response
-    return new Promise<admin.messaging.MessagingDevicesResponse>(
-        (resolve, reject) => {
-            admin
-                .messaging()
-                .sendToDevice(tokens, message, { timeToLive })
-                .then((response: admin.messaging.MessagingDevicesResponse) => {
-                    resolve(response);
-                })
-                .catch((err: Error) => {
-                    reject(err);
-                });
-        }
-    );
-}
-
-/**
  * Builds an Firebase android notification message.
  * @param title Title of message.
  * @param body Body of message.
@@ -77,15 +51,40 @@ export const buildAndroidNotificationMessage = (
 };
 
 /**
- * Builds a Firebase data message.
- * @param type The type of the message.
- * @param content Content of message.
+ * Sends a message to the specified recipient.
+ * Adapted from:
+ * https://github.com/COMP30022-Russia/COMP30022_Server
+ * @param message The message to be sent.
+ * @param userID The ID(s) of the recipient.
  */
-export const buildDataMessage = (type: string, content: any) => {
-    return {
-        data: {
-            type,
-            data: JSON.stringify(content),
-        },
-    };
+export const sendMessage = async (
+    message: admin.messaging.MulticastMessage
+) => {
+    if (message.tokens.length === 0) return;
+
+    try {
+        // Send the message with given tokens
+        const messaging = admin.messaging();
+        const response = await messaging.sendMulticast(
+            message,
+            // dryrun
+            process.env.NODE_ENV !== "production"
+        );
+
+        for (const [index, result] of response.responses.entries()) {
+            // Remove token, if applicable
+            if (result.error) {
+                if (
+                    result.error.code ===
+                    "messaging/registration-token-not-registered"
+                ) {
+                    await removeToken(message.tokens[index]);
+                } else {
+                    console.error(result.error);
+                }
+            }
+        }
+    } catch (err) {
+        console.error(err);
+    }
 };
