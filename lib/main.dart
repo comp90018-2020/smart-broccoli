@@ -90,13 +90,22 @@ class _MyAppState extends State<MyApp> {
 
   /// Navigate to route
   void navigate(RouteArgs routeArgs) {
-    if (routeArgs.routeAction == RouteAction.POPALL) {
-      _mainNavigatorKey.currentState
-          .pushNamedAndRemoveUntil(routeArgs.routeName, (route) => false);
-    } else if (routeArgs.routeAction == RouteAction.REPLACE) {
-      _mainNavigatorKey.currentState.pushReplacementNamed(routeArgs.routeName);
-    } else {
-      _mainNavigatorKey.currentState.pushNamed(routeArgs.routeName);
+    switch (routeArgs.routeAction) {
+      case RouteAction.PUSH:
+        _mainNavigatorKey.currentState.pushNamed(routeArgs.routeName);
+        break;
+      case RouteAction.POPALL:
+        _mainNavigatorKey.currentState
+            .pushNamedAndRemoveUntil(routeArgs.routeName, (route) => false);
+        break;
+      case RouteAction.POPALL_SESSION:
+        _mainNavigatorKey.currentState
+            .popUntil((route) => !route.settings.name.startsWith('/session'));
+        break;
+      case RouteAction.REPLACE:
+        _mainNavigatorKey.currentState
+            .pushReplacementNamed(routeArgs.routeName);
+        break;
     }
   }
 
