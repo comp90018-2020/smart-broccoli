@@ -262,8 +262,7 @@ export class GameSession {
         return (
             this._isReadyForNextQuestion &&
             ((this.type === GameType.SelfPaced_Group && player === undefined) ||
-                ((this.type === GameType.SelfPaced_NotGroup ||
-                    this.type === GameType.Live_NotGroup) &&
+                (this.type === GameType.Live_NotGroup &&
                     player === undefined &&
                     !this.hasMoreQuestions()) ||
                 player.role === Role.host)
