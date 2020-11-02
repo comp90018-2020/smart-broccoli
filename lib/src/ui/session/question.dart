@@ -222,7 +222,8 @@ class _QuizQuestion extends State<QuizQuestion> {
   Color findColour(GameSessionModel model, int index) {
     if (model.question is TFQuestion) {
       // correct answer
-      if (model.state == SessionState.ANSWER &&
+      if ([SessionState.ANSWER, SessionState.OUTCOME, SessionState.FINISHED]
+              .contains(model.state) &&
           (model.correctAnswer.answer.tfSelection && index == 1 ||
               !model.correctAnswer.answer.tfSelection && index == 0))
         return AnswerColours.correct;
@@ -235,7 +236,8 @@ class _QuizQuestion extends State<QuizQuestion> {
     // MC question
     else {
       // correct answer
-      if (model.state == SessionState.ANSWER &&
+      if ([SessionState.ANSWER, SessionState.OUTCOME, SessionState.FINISHED]
+              .contains(model.state) &&
           model.correctAnswer.answer.mcSelection.contains(index))
         return AnswerColours.correct;
       // incorrect selected answer
