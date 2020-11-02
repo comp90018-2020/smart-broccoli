@@ -244,22 +244,28 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         else
           pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(name: '/session/lobby', action: RouteAction.PUSH));
+        pubSub.publish(PubSubTopic.TIMER, arg: startCountDown);
         state = SessionState.STARTING;
         break;
       case SessionState.QUESTION:
-        if (state == SessionState.PENDING || state == SessionState.STARTING)
+        if (state == SessionState.PENDING || state == SessionState.STARTING) {
           pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.REPLACE));
-        else if (state == SessionState.QUESTION || state == SessionState.ANSWER)
+          pubSub.publish(PubSubTopic.TIMER, arg: time);
+        } else if (state == SessionState.QUESTION ||
+            state == SessionState.ANSWER)
           notifyListeners();
-        else if (state == SessionState.OUTCOME)
+        else if (state == SessionState.OUTCOME) {
           pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(action: RouteAction.POP));
-        else
+          pubSub.publish(PubSubTopic.TIMER, arg: time);
+        } else {
           pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.PUSH));
+          pubSub.publish(PubSubTopic.TIMER, arg: time);
+        }
         state = SessionState.QUESTION;
         break;
       case SessionState.ANSWER:
