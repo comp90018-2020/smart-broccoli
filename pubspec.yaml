@@ -24,6 +24,7 @@ dependencies:
   quiver: ^2.1.4
   collection: ^1.14.13
   flutter_svg: ^0.19.1
+  weekday_selector: ^0.4.0
 
 dev_dependencies:
   flutter_test:
