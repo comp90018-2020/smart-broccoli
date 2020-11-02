@@ -23,8 +23,6 @@ class QuizQuestion extends StatefulWidget {
 }
 
 class _QuizQuestion extends State<QuizQuestion> {
-  GameSessionModel _sessionModel;
-
   List<int> _selections = [];
 
   // Correct answer getter
@@ -68,89 +66,90 @@ class _QuizQuestion extends State<QuizQuestion> {
 
   @override
   void didChangeDependencies() {
-    _sessionModel = Provider.of<GameSessionModel>(context, listen: false);
     super.didChangeDependencies();
   }
 
   // Entry function
   @override
   Widget build(BuildContext context) {
-    return CustomPage(
-      title: 'Question ${_sessionModel.question.no + 1}',
+    return Consumer<GameSessionModel>(
+      builder: (context, model, child) => CustomPage(
+        title: 'Question ${model.question.no + 1}',
 
-      appbarLeading: IconButton(
-        icon: Icon(Icons.close),
-        enableFeedback: false,
-        splashRadius: 20,
-        onPressed: () async {
-          if (!await showConfirmDialog(
-              context, "You are about to quit this session")) return;
-          Provider.of<GameSessionModel>(context, listen: false).quitQuiz();
-        },
-      ),
+        appbarLeading: IconButton(
+          icon: Icon(Icons.close),
+          enableFeedback: false,
+          splashRadius: 20,
+          onPressed: () async {
+            if (!await showConfirmDialog(
+                context, "You are about to quit this session")) return;
+            Provider.of<GameSessionModel>(context, listen: false).quitQuiz();
+          },
+        ),
 
-      // Points
-      appbarActions: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
+        // Points
+        appbarActions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  '${(model.outcome as OutcomeUser)?.record?.newPos ?? 0}',
+                  style: TextStyle(
+                      color: Color(0xFFECC030),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                Text("Points"),
+              ],
+            ),
+          )
+        ],
+
+        // Container
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                '${(_sessionModel.outcome as OutcomeUser)?.record?.newPos ?? 0}',
-                style: TextStyle(
-                    color: Color(0xFFECC030),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
-              ),
-              Text("Points"),
-            ],
-          ),
-        )
-      ],
-
-      // Container
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              flex: 5,
-              child: Column(
-                children: [
-                  // Question
-                  Text("${_sessionModel.question.text}",
-                      style: Theme.of(context).textTheme.headline6),
-                  // Question picture
-                  Expanded(
-                    child: FractionallySizedBox(
-                      widthFactor: 0.8,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        // Replace with Container when there's no picture
-                        child: Placeholder(),
+              Expanded(
+                flex: 5,
+                child: Column(
+                  children: [
+                    // Question
+                    Text("${model.question.text}",
+                        style: Theme.of(context).textTheme.headline6),
+                    // Question picture
+                    Expanded(
+                      child: FractionallySizedBox(
+                        widthFactor: 0.8,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 16.0),
+                          // Replace with Container when there's no picture
+                          child: Placeholder(),
+                        ),
                       ),
                     ),
-                  ),
 
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      '${_secondsRemaining}s',
-                      style: TextStyle(fontSize: 18),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Text(
+                        '${_secondsRemaining}s',
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0, bottom: 16.0),
-                    child: Text('Flip the phone to select options',
-                        style: Theme.of(context).textTheme.subtitle1),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0, bottom: 16.0),
+                      child: Text('Flip the phone to select options',
+                          style: Theme.of(context).textTheme.subtitle1),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            // Answer selection boxes
-            Expanded(flex: 5, child: _quizAnswers())
-          ],
+              // Answer selection boxes
+              Expanded(flex: 5, child: _quizAnswers(model))
+            ],
+          ),
         ),
       ),
     );
@@ -158,35 +157,37 @@ class _QuizQuestion extends State<QuizQuestion> {
 
   // The answers grid, this is changed from Wireframe designs as this is much
   // More flexiable than the previous offerings.
-  Widget _quizAnswers() {
+  Widget _quizAnswers(GameSessionModel model) {
     return Column(
-      children: _sessionModel.question is TFQuestion
-          ? [Expanded(child: _answerTab(1)), Expanded(child: _answerTab(0))]
+      children: model.question is TFQuestion
+          ? [
+              Expanded(child: _answerTab(model, 1)),
+              Expanded(child: _answerTab(model, 0))
+            ]
           : [
-              Expanded(child: _answerTab(0)),
+              Expanded(child: _answerTab(model, 0)),
               Expanded(
                 child: Row(
                   children: [
-                    Expanded(child: _answerTab(1)),
-                    if ((_sessionModel.question as MCQuestion).options.length >
-                        2)
-                      Expanded(child: _answerTab(2))
+                    Expanded(child: _answerTab(model, 1)),
+                    if ((model.question as MCQuestion).options.length > 2)
+                      Expanded(child: _answerTab(model, 2))
                   ],
                 ),
               ),
-              if ((_sessionModel.question as MCQuestion).options.length > 3)
-                Expanded(child: _answerTab(3)),
+              if ((model.question as MCQuestion).options.length > 3)
+                Expanded(child: _answerTab(model, 3)),
             ],
     );
   }
 
   // Answer selection tabs
-  Widget _answerTab(int index) {
+  Widget _answerTab(GameSessionModel model, int index) {
     return Card(
       color: findColour(index),
       child: InkWell(
         onTap: _questionState == QuestionState.Standard
-            ? () => updateAnswer(index)
+            ? () => updateAnswer(model, index)
             : null,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -194,13 +195,11 @@ class _QuizQuestion extends State<QuizQuestion> {
             height: double.maxFinite,
             width: double.maxFinite,
             child: Center(
-              child: _sessionModel.question is TFQuestion
+              child: model.question is TFQuestion
                   ? Text('${index == 0 ? 'False' : 'True'}',
                       style: TextStyle(fontSize: 36))
                   : Text(
-                      (_sessionModel.question as MCQuestion)
-                          .options[index]
-                          .text,
+                      (model.question as MCQuestion).options[index].text,
                       style: TextStyle(fontSize: 16),
                     ),
             ),
@@ -211,11 +210,11 @@ class _QuizQuestion extends State<QuizQuestion> {
   }
 
   // User updated their answer, hence update accordingly
-  void updateAnswer(int index) async {
+  void updateAnswer(GameSessionModel model, int index) async {
     // TF question: only one answer can be selected
-    if (_sessionModel.question is TFQuestion) {
-      _sessionModel.answer.tfSelection = index == 0 ? false : true;
-      _sessionModel.answerQuestion();
+    if (model.question is TFQuestion) {
+      model.answer.tfSelection = index == 0 ? false : true;
+      model.answerQuestion();
       setState(() {
         _selections = [index];
       });
@@ -224,20 +223,19 @@ class _QuizQuestion extends State<QuizQuestion> {
     // MC question: multiple answers may be possible
     else {
       // deselection
-      if (_sessionModel.answer.mcSelection.contains(index))
-        _sessionModel.answer.mcSelection.remove(index);
+      if (model.answer.mcSelection.contains(index))
+        model.answer.mcSelection.remove(index);
 
       // selection as long as no. selections does not exceed no. correct
-      else if (_sessionModel.answer.mcSelection.length <
-          (_sessionModel.question as MCQuestion).numCorrect) {
-        _sessionModel.answer.mcSelection.add(index);
+      else if (model.answer.mcSelection.length <
+          (model.question as MCQuestion).numCorrect) {
+        model.answer.mcSelection.add(index);
         // send answer if no. selections == no. correct
-        if (_sessionModel.answer.mcSelection.length ==
-            (_sessionModel.question as MCQuestion).numCorrect)
-          _sessionModel.answerQuestion();
+        if (model.answer.mcSelection.length ==
+            (model.question as MCQuestion).numCorrect) model.answerQuestion();
       }
       setState(() {
-        _selections = List.from(_sessionModel.answer.mcSelection);
+        _selections = List.from(model.answer.mcSelection);
       });
     }
   }
