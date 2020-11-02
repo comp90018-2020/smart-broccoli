@@ -95,6 +95,9 @@ class _MyAppState extends State<MyApp> {
       case RouteAction.PUSH:
         _mainNavigatorKey.currentState.pushNamed(routeArgs.name);
         break;
+      case RouteAction.POP:
+        _mainNavigatorKey.currentState.pop();
+        break;
       case RouteAction.POPALL:
         _mainNavigatorKey.currentState
             .pushNamedAndRemoveUntil(routeArgs.name, (route) => false);

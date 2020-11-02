@@ -5,6 +5,7 @@ import 'package:smart_broccoli/src/ui.dart';
 /// Actions
 enum RouteAction {
   PUSH,
+  POP,
   POPALL,
   POPALL_SESSION,
   DIALOG_POPALL_SESSION,
