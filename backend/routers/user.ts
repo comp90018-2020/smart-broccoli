@@ -372,7 +372,9 @@ router.put(
  *           type: boolean
  *         onCommute:
  *           type: boolean
- *         calendar:
+ *         calendarLive:
+ *           type: boolean
+ *         calendarSelfPaced:
  *           type: boolean
  *         days:
  *           type: array
