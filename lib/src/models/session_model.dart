@@ -187,6 +187,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       print(question);
       print(time);
       print(totalQuestion);
+      answer = Answer(question.no);
       _transitionTo(SessionState.QUESTION);
     });
 
@@ -309,6 +310,34 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   void abortQuiz() {
     socket.emit('abort');
     socket.disconnect();
+  }
+
+  void toggleAnswer(int index) {
+    // TF question: only one answer can be selected
+    if (question is TFQuestion) {
+      answer.tfSelection = index == 0 ? false : true;
+      answerQuestion();
+      notifyListeners();
+    }
+
+    // MC question: multiple answers may be possible
+    else {
+      // deselection
+      if (answer.mcSelection.contains(index)) {
+        answer.mcSelection.remove(index);
+        notifyListeners();
+      }
+
+      // selection as long as no. selections does not exceed no. correct
+      else if (answer.mcSelection.length <
+          (question as MCQuestion).numCorrect) {
+        answer.mcSelection.add(index);
+        notifyListeners();
+        // send answer if no. selections == no. correct
+        if (answer.mcSelection.length == (question as MCQuestion).numCorrect)
+          answerQuestion();
+      }
+    }
   }
 
   void nextQuestion() {

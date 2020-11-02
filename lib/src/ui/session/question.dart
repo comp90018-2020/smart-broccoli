@@ -23,8 +23,6 @@ class QuizQuestion extends StatefulWidget {
 }
 
 class _QuizQuestion extends State<QuizQuestion> {
-  List<int> _selections = [];
-
   Timer _timer;
   int _secondsRemaining;
 
@@ -53,9 +51,6 @@ class _QuizQuestion extends State<QuizQuestion> {
     _secondsRemaining =
         Provider.of<GameSessionModel>(context, listen: false).time ~/ 1000;
     startTimer();
-    // empty answer object for this question
-    Provider.of<GameSessionModel>(context, listen: false).answer = Answer(
-        Provider.of<GameSessionModel>(context, listen: false).question.no);
   }
 
   @override
@@ -181,7 +176,7 @@ class _QuizQuestion extends State<QuizQuestion> {
       color: findColour(model, index),
       child: InkWell(
         onTap: model.state == SessionState.QUESTION
-            ? () => updateAnswer(model, index)
+            ? () => model.toggleAnswer(index)
             : null,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -207,58 +202,38 @@ class _QuizQuestion extends State<QuizQuestion> {
       model.correctAnswer?.record?.points ??
       (model.outcome as OutcomeUser)?.record?.points;
 
-  // User updated their answer, hence update accordingly
-  void updateAnswer(GameSessionModel model, int index) async {
-    // TF question: only one answer can be selected
-    if (model.question is TFQuestion) {
-      model.answer.tfSelection = index == 0 ? false : true;
-      model.answerQuestion();
-      setState(() {
-        _selections = [index];
-      });
-    }
+  // // User updated their answer, hence update accordingly
+  // void updateAnswer(GameSessionModel model, int index) async {
 
-    // MC question: multiple answers may be possible
-    else {
-      // deselection
-      if (model.answer.mcSelection.contains(index))
-        model.answer.mcSelection.remove(index);
-
-      // selection as long as no. selections does not exceed no. correct
-      else if (model.answer.mcSelection.length <
-          (model.question as MCQuestion).numCorrect) {
-        model.answer.mcSelection.add(index);
-        // send answer if no. selections == no. correct
-        if (model.answer.mcSelection.length ==
-            (model.question as MCQuestion).numCorrect) model.answerQuestion();
-      }
-      setState(() {
-        _selections = List.from(model.answer.mcSelection);
-      });
-    }
-  }
+  // }
 
   // Determines the correct colour to display
   Color findColour(GameSessionModel model, int index) {
-    if (model.state == SessionState.ANSWER) {
-      // true/false question correct answer
-      if (model.correctAnswer.answer.tfSelection != null &&
-          (model.correctAnswer.answer.tfSelection && index == 1 ||
-              !model.correctAnswer.answer.tfSelection && index == 0))
+    if (model.question is TFQuestion) {
+      // correct answer
+      if (model.state == SessionState.ANSWER &&
+              model.correctAnswer.answer.tfSelection &&
+              index == 1 ||
+          !model.correctAnswer.answer.tfSelection && index == 0)
         return AnswerColours.correct;
-      // MC question correct answer
-      if (model.correctAnswer.answer.mcSelection != null &&
+      // incorrect selected answer
+      else if (model.answer.tfSelection != null &&
+          (model.answer.tfSelection && index == 1 ||
+              !model.answer.tfSelection && index == 0))
+        return AnswerColours.selected;
+    }
+    // MC question
+    else {
+      // correct answer
+      if (model.state == SessionState.ANSWER &&
           model.correctAnswer.answer.mcSelection.contains(index))
         return AnswerColours.correct;
       // incorrect selected answer
-      if (_selections.contains(index)) return AnswerColours.selected;
-      // incorrect undelected answer
-      return AnswerColours.normal;
+      if (model.answer.mcSelection != null &&
+          model.answer.mcSelection.contains(index))
+        return AnswerColours.selected;
     }
-
-    // selected answer before correct answer is known
-    if (_selections.contains(index)) return AnswerColours.selected;
-    // unselected answer before correct answer is known
+    // incorrect unselected answer
     return AnswerColours.normal;
   }
 
