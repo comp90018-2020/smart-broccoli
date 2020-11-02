@@ -3,10 +3,9 @@ import { GameHandler, sendErr } from "./game";
 import { sessionTokenDecrypt, clearSessions } from "../controllers/session";
 import { Player, Role } from "./datatype";
 import { GameSession } from "./session";
-import { Token } from "models";
 
 export const handler: GameHandler = new GameHandler();
-const socketSessionMap: { [socketId: string]: GameSession } = {};
+export const socketSessionMap: { [socketId: string]: GameSession } = {};
 const socketPlayerMap: { [socketId: string]: Player } = {};
 
 export let _socketIO: Server;

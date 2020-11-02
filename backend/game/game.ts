@@ -9,7 +9,7 @@ import {
 } from "./formatter";
 import { Event, Role, GameStatus, Player, Answer, GameType } from "./datatype";
 import { QuizAttributes } from "models/quiz";
-import { _socketIO } from "./index";
+import { _socketIO, socketSessionMap } from "./index";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const CORRECT_ANSWER_SHOW_TIME = 3 * 1000;
@@ -390,6 +390,7 @@ export class GameHandler {
                 _socketIO.sockets.adapter.rooms[whichRoom(session, Role.all)]
                     .sockets
             )) {
+                delete socketPlayerMapCache[socketId];
                 // loop over socket in the room
                 // and disconnect them
                 if (_socketIO.sockets.connected.hasOwnProperty(socketId)) {
