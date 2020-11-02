@@ -16,6 +16,7 @@ enum SessionState {
   OUTCOME,
   FINISHED,
   ABORTED,
+  ABANDONED,
 }
 
 class GameSessionModel extends ChangeNotifier implements AuthChange {
@@ -171,7 +172,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     socket.on('cancelled', (message) {
       print("cancelled");
       socket.disconnect();
-      _transitionTo(SessionState.ABORTED);
+      // TODO: reinstate after backend is patched
+      // _transitionTo(SessionState.ABORTED);
     });
 
     socket.on('nextQuestion', (message) {
@@ -225,9 +227,15 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     socket.on('disconnect', (_) {
       // must stop listening immediately to avoid timing conflicts
       socket.clearListeners();
-      _clearFields();
-      pubSub.publish(PubSubTopic.ROUTE,
-          arg: RouteArgs(name: '/take_quiz', action: RouteAction.POPALL));
+      if (state == SessionState.ABORTED) {
+        pubSub.publish(PubSubTopic.ROUTE,
+            arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
+        _clearFields();
+      } else if (state == SessionState.ABANDONED) {
+        pubSub.publish(PubSubTopic.ROUTE,
+            arg: RouteArgs(action: RouteAction.POPALL_SESSION));
+        _clearFields();
+      }
     });
   }
 
@@ -299,6 +307,9 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
             arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
         state = SessionState.ABORTED;
         break;
+      case SessionState.ABANDONED:
+        state = SessionState.ABANDONED;
+        break;
     }
   }
 
@@ -350,6 +361,13 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   /// participant action
   void quitQuiz() {
+    // must handle finished state separately as connection is closed
+    if (state == SessionState.FINISHED) {
+      pubSub.publish(PubSubTopic.ROUTE,
+          arg: RouteArgs(action: RouteAction.POPALL_SESSION));
+      _clearFields();
+    }
+    _transitionTo(SessionState.ABANDONED);
     socket.emit('quit');
   }
 
