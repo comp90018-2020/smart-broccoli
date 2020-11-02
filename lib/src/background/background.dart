@@ -147,25 +147,25 @@ void callbackDispatcher() {
             print("User is not walking");
             // Access Light sensor
             LightSensor lightSensor = new LightSensor();
-            await lightSensor.startListeningLight();
+            await lightSensor.startListening();
             print("Accssed Light sensor");
 
 
 
 
             //TODO check if lum != null light sensor stream is closed
-            int lum =  lightSensor.lumval;
+            int lum =  lightSensor.luxString;
             print("Lum " + lum.toString());
 
 
-            lightSensor.stopListeningLight();
+            lightSensor.stopListening();
 
             DateTime dateTime = DateTime.now();
             print("Datetime read");
             // Todo you may want to change 20 to a config value
             if (lum > 10) {
               print("Reason: notif sent because lum value is greater than 10");
-              lightSensor.stopListeningLight();
+              lightSensor.stopListening();
               break;
               /// return 1
 

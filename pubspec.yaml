@@ -37,6 +37,8 @@ dependencies:
   sensors: ^0.4.2+6
   quiver: ^2.1.4
   collection: ^1.14.13
+  permission_handler: ^5.0.1+1
+
 
 dev_dependencies:
   flutter_test:

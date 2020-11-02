@@ -13,6 +13,7 @@ import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 // Device Calendar Plugin
 DeviceCalendarPlugin deviceCalendarPlugin;
@@ -171,7 +172,9 @@ _checkPermissions() async {
   if (permission != LocationPermission.always || !res.data) {
     await deviceCalendarPlugin.requestPermissions();
     await Geolocator.requestPermission();
-    await Geolocator.openAppSettings();
+    await Permission.microphone.request();
+    await Permission.storage.request();
+    await Permission.activityRecognition.request();
   }
 }
 
