@@ -78,22 +78,32 @@ class _QuizQuestion extends State<QuizQuestion> {
 
         // Points
         appbarActions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  '${_getPoints(model) ?? 0}',
-                  style: TextStyle(
-                      color: Color(0xFFECC030),
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
-                ),
-                Text("Points"),
-              ],
-            ),
-          )
+          model.state == SessionState.ANSWER &&
+                  (model.role == GroupRole.OWNER ||
+                      model.session.quizType == QuizType.SELF_PACED &&
+                          model.session.type == GameSessionType.INDIVIDUAL)
+              ? IconButton(
+                  onPressed: () => model.role == GroupRole.OWNER
+                      ? model.showLeaderBoard()
+                      : model.nextQuestion(),
+                  icon: Icon(Icons.arrow_forward),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        '${_getPoints(model) ?? 0}',
+                        style: TextStyle(
+                            color: Color(0xFFECC030),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text("Points"),
+                    ],
+                  ),
+                )
         ],
 
         // Container
@@ -174,6 +184,7 @@ class _QuizQuestion extends State<QuizQuestion> {
   Widget _answerTab(GameSessionModel model, int index) {
     return Card(
       color: findColour(model, index),
+      elevation: 4.0,
       child: InkWell(
         onTap: model.state == SessionState.QUESTION
             ? () => model.toggleAnswer(index)
