@@ -295,12 +295,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         state = SessionState.OUTCOME;
         break;
       case SessionState.FINISHED:
-        if (state == SessionState.ANSWER)
-          pubSub.publish(PubSubTopic.ROUTE,
-              arg:
-                  RouteArgs(name: '/session/finish', action: RouteAction.PUSH));
-        else
-          notifyListeners();
+        notifyListeners();
         state = SessionState.FINISHED;
         break;
       case SessionState.ABORTED:
@@ -353,7 +348,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   }
 
   void nextQuestion() {
-    socket.emit('next');
+    if (state == SessionState.FINISHED)
+      pubSub.publish(PubSubTopic.ROUTE,
+          arg: RouteArgs(name: '/session/finish', action: RouteAction.REPLACE));
+    else
+      socket.emit('next');
   }
 
   void showLeaderBoard() {
