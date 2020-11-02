@@ -5,6 +5,10 @@ import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
 
 class TimerWidget extends StatefulWidget {
+  final TextStyle style;
+
+  TimerWidget({this.style});
+
   @override
   _TimerWidgetState createState() => _TimerWidgetState();
 }
@@ -46,6 +50,6 @@ class _TimerWidgetState extends State<TimerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Text('$_secondsRemaining');
+    return Text('$_secondsRemaining', style: widget.style);
   }
 }
