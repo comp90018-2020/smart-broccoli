@@ -91,13 +91,13 @@ class _MyAppState extends State<MyApp> {
 
   /// Navigate to route
   Future<void> navigate(RouteArgs routeArgs) async {
-    switch (routeArgs.routeAction) {
+    switch (routeArgs.action) {
       case RouteAction.PUSH:
-        _mainNavigatorKey.currentState.pushNamed(routeArgs.routeName);
+        _mainNavigatorKey.currentState.pushNamed(routeArgs.name);
         break;
       case RouteAction.POPALL:
         _mainNavigatorKey.currentState
-            .pushNamedAndRemoveUntil(routeArgs.routeName, (route) => false);
+            .pushNamedAndRemoveUntil(routeArgs.name, (route) => false);
         break;
       case RouteAction.DIALOG_POPALL_SESSION:
         await showBasicDialog(context, 'The host aborted the session',
@@ -109,8 +109,7 @@ class _MyAppState extends State<MyApp> {
             .popUntil((route) => !route.settings.name.startsWith('/session'));
         break;
       case RouteAction.REPLACE:
-        _mainNavigatorKey.currentState
-            .pushReplacementNamed(routeArgs.routeName);
+        _mainNavigatorKey.currentState.pushReplacementNamed(routeArgs.name);
         break;
     }
   }

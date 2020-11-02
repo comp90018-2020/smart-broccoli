@@ -14,12 +14,12 @@ enum RouteAction {
 /// Router arguemnts
 class RouteArgs {
   /// Name of route
-  final String routeName;
+  final String name;
 
   /// Action to take
-  final RouteAction routeAction;
+  final RouteAction action;
 
-  RouteArgs(this.routeName, {this.routeAction = RouteAction.PUSH});
+  RouteArgs({this.name, this.action = RouteAction.PUSH});
 }
 
 /// Defines routes and transitions

@@ -147,7 +147,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       print(state);
       if (route != null)
         _pubSub.publish(PubSubTopic.ROUTE,
-            arg: RouteArgs(route, routeAction: RouteAction.PUSH));
+            arg: RouteArgs(name: route, action: RouteAction.PUSH));
       notifyListeners();
     });
 
@@ -201,8 +201,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
       state = SessionState.QUESTION;
       _pubSub.publish(PubSubTopic.ROUTE,
-          arg:
-              RouteArgs('/session/question', routeAction: RouteAction.REPLACE));
+          arg: RouteArgs(
+              name: '/session/question', action: RouteAction.REPLACE));
       notifyListeners();
     });
 
@@ -249,7 +249,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       socket.clearListeners();
       _clearFields();
       _pubSub.publish(PubSubTopic.ROUTE,
-          arg: RouteArgs('/take_quiz', routeAction: RouteAction.POPALL));
+          arg: RouteArgs(name: '/take_quiz', action: RouteAction.POPALL));
     });
   }
 
