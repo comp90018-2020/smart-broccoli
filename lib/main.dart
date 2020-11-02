@@ -1,36 +1,52 @@
+import 'dart:collection';
+
+import 'package:device_calendar/device_calendar.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/background/background.dart';
+import 'package:smart_broccoli/src/background_database.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 
+// Device Calendar Plugin
+DeviceCalendarPlugin deviceCalendarPlugin;
+
+List<Event> events = [];
+
+final Map<String, Object> inputMap = {};
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await _checkPermissions();
+
+  await _saveCalendarData();
 
   /// Initialise background services
   Workmanager.initialize(
     callbackDispatcher,
     isInDebugMode: true,
   );
+  // Cancel all ongoing background tasks upon running the app
+  await Workmanager.cancelAll();
+
+  inputMap['cal'] = deviceCalendarPlugin;
+
   /// Schedule the background task
   /// Default is 15 minutes per refresh
-  Workmanager.registerPeriodicTask(
-    "1",
-    "backgroundReading",
-    initialDelay: Duration(seconds: 20),
-  );
-
-
+  Workmanager.registerPeriodicTask("1", "backgroundReading",
+      initialDelay: Duration(seconds: 30),
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+        requiresBatteryNotLow: true,
+        requiresDeviceIdle: false,
+      ));
 
   // Communication
   final PubSub pubSub = PubSub();
@@ -119,7 +135,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    _checkPermissions();
     // Get AuthStateModel
     AuthStateModel state = Provider.of<AuthStateModel>(context, listen: true);
 
@@ -149,9 +164,60 @@ class _MyAppState extends State<MyApp> {
 /// A temporary permission checker
 /// It works as intended so far
 _checkPermissions() async {
+  deviceCalendarPlugin = new DeviceCalendarPlugin();
   LocationPermission permission = await Geolocator.checkPermission();
+  Result<bool> res = await deviceCalendarPlugin.hasPermissions();
 
-  if (permission != LocationPermission.always) {
+  if (permission != LocationPermission.always || !res.data) {
+    await deviceCalendarPlugin.requestPermissions();
+    await Geolocator.requestPermission();
     await Geolocator.openAppSettings();
   }
+}
+
+/// This should only be run on release mode see
+/// https://github.com/builttoroam/device_calendar/issues/217
+_saveCalendarData() async {
+  await BackgroundDatabase.init();
+  await BackgroundDatabase.cleanEvent();
+
+  List<Result<UnmodifiableListView<Event>>> e = [];
+  List<Event> ev = [];
+  deviceCalendarPlugin = new DeviceCalendarPlugin();
+  var cal = await deviceCalendarPlugin.retrieveCalendars();
+  List<Calendar> calendar = cal.data;
+  print("Calendar" + calendar.toString() + "Length:" + calendar.length.toString());
+
+
+  // Define the time frame
+  var now = new DateTime.now();
+  RetrieveEventsParams retrieveEventsParams = new RetrieveEventsParams(
+      startDate: now, endDate: now.add(new Duration(days: 7)));
+  // Find all events within 7 days
+  for (var i = 0; i < calendar.length; i++) {
+    print("ID i = " + i.toString() );
+    print("Cal ID" + calendar[i].id.toString());
+    e.add(await deviceCalendarPlugin.retrieveEvents(
+        calendar[i].id, retrieveEventsParams));
+  }
+
+  for (var j = 0; j < e.length; j++) {
+    if (e[j].isSuccess) {
+      ev = ev + e[j].data.toList();
+    } else {
+      print(e[j].errorMessages);
+    }
+  }
+
+  print("Events:" + ev.toString());
+
+  for (var j = 0; j < ev.length; j++) {
+    CalEvent calEvent = new CalEvent(
+        id: j,
+        start: ev[j].start.millisecondsSinceEpoch,
+        end: ev[j].end.millisecondsSinceEpoch);
+
+    await BackgroundDatabase.insertEvent(calEvent);
+  }
+  BackgroundDatabase.closeDB();
 }

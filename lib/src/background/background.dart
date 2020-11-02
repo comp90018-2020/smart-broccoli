@@ -1,124 +1,217 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:smart_broccoli/src/background/background_calendar.dart';
-import 'package:smart_broccoli/src/background/gyro.dart';
 import 'package:smart_broccoli/src/background/light_sensor.dart';
-import 'package:smart_broccoli/src/background/location.dart';
+import 'package:smart_broccoli/src/background/network.dart';
+import 'package:smart_broccoli/src/background_database.dart';
+import 'package:wifi_info_plugin/wifi_info_plugin.dart';
 import 'package:workmanager/workmanager.dart';
 
-/*
-* <osm-script>
-  <union into="_">
-    <query into="_" type="way">
-      <has-kv k="railway" modv="" regv="^(rail|subway|tram)$"/>
-      <bbox-query s="51.451" w="7.009" n="51.453" e="7.011"/>
-    </query>
-    <recurse from="_" into="_" type="down"/>
-  </union>
-  <print e="" from="_" geometry="skeleton" ids="yes" limit="" mode="body" n="" order="id" s="" w=""/>
-</osm-script>
-
-*
-* */
+import 'gyro.dart';
+import 'location.dart';
 
 void callbackDispatcher() {
   Workmanager.executeTask((task, inputData) async {
     try {
+      print("Starting background tasks");
       switch (task) {
         case "backgroundReading":
-          BackgroundCalendar backgroundCalendar = new BackgroundCalendar();
+          await BackgroundDatabase.init();
+          print("Get Events");
+          List<CalEvent> calEvent = await BackgroundDatabase.getEvents();
+          print("FINISHED getting events");
+          DateTime tiem = DateTime.now();
+          // TODO test calendar events
+          for (var i = 0; i < calEvent.length; i++) {
+            print(calEvent.toString());
 
-          // Retrieve the calandar events in the backgorund
-          await backgroundCalendar.getBackground();
-          // Getter
-          if (!backgroundCalendar.isEmpty()) {
-            // Todo add failure condition
-            break;
+            /// 3 600 000 is exactly an hour in miliseconds
+            if (calEvent[i].start < tiem.millisecondsSinceEpoch &&
+                calEvent[i].end > tiem.millisecondsSinceEpoch + 3600000) {
+              // Return 0
+              print("Reason: Person is busy");
+              break;
+            }
           }
 
+          /// Check wifi for work wifi stuff
+          Network network = new Network();
 
+          await network.initConnectivity();
 
+          String status = await network.connectionStatus;
 
+          if (status == ConnectivityResult.wifi.toString()) {
+            await network.initWifiInfro();
+            WifiInfoWrapper wifiObj = network.wifiObject;
+            print(wifiObj.ssid);
 
+            if (wifiObj.ssid.contains("staff") ||
+                wifiObj.ssid.contains("work")) {
+              // Return 0
+              print("Reason: Wifi contains string staff or work");
 
+              break;
+            }
+          }
+          print(status);
 
-          // Check if user is moving
-          // Todo add pedometer
+          /// Start location stuff
           BackgroundLocation backgroundLocation = new BackgroundLocation();
 
-
-
+          /// Get current long lat
           Position position1 = await backgroundLocation.getPosition();
 
-          if((await backgroundLocation.inGeoFence(position1))){
-            // TODO send a notif
+          print("Location get");
+
+          /*
+          print("Position 1 " +
+              position1.longitude.toString() +
+              " " +
+              position1.latitude.toString());
+
+          BackgroundDatabase.insertFence(GeoFence(id: 0, lon: 1, lat: 1));
+          BackgroundDatabase.insertFence(
+              GeoFence(id: 1, lon: -122.078827, lat: 37.419857));
+            */
+
+          /// If in Geofence
+          if ((await backgroundLocation.inGeoFence(position1))) {
+            /// Return 1
+            print("Reason: Notif sent because user is in a geofence");
             break;
           }
 
+          /// Check location info
+          Placemark placemark =
+              await backgroundLocation.getPlacemark(position1);
 
+          print("Place name " +
+              placemark.street +
+              " " +
+              placemark.postalCode +
+              " " +
+              placemark.country);
+
+          String data = await backgroundLocation.placeMarkType(placemark);
+
+          /// Not at a residential address or university
+          if (data.contains("office") || data.contains("commercial")) {
+            // Return 0
+            print("Reason: At a office or commercial area");
+            // break;
+          }
+
+          /// Idle for 30 seconds
           Duration duration = new Duration(seconds: 30);
 
-          // Idle background process for a while
+          /// Idle background process for a while
           sleep(duration);
 
+          /// Get second location
           Position position2 = await backgroundLocation.getPosition();
 
-          double distance = Geolocator.distanceBetween(position1.latitude, position1.longitude,
-              position1.longitude, position2.longitude);
+          /// Check distance between the two
+          double distance = Geolocator.distanceBetween(position1.latitude,
+              position1.longitude, position1.latitude, position2.longitude);
 
-          // Main branch 1
-          if(distance > 1000){
+          print("Position 1" + distance.toString());
+
+          /// Determine if the user has moved about 100 m in 30 + a few seconds
+          /// Todo add perf logic
+          if (distance > 100) {
+            print(
+                "The user is  moving, however I need perferences to continue");
             // Check if on train
-            if(!(await backgroundLocation.onTrain(position2))){
-              // Todo don't send notif
+            if ((await backgroundLocation.onTrain(position2))) {
+              print("The user is on a train");
+
+              /// If allow prompts on move or not logic here
               break;
             }
-            // Todo check if allows prompt on commute
 
+            /// Not on train and moving
+            /// Check if allow prompts on the move
+            else {
+              print("Not on train but you need prompts");
+              break;
+            }
           }
-          else{
+
+          /// If not moving
+          else {
+            print("User is not walking");
+            // Access Light sensor
             LightSensor lightSensor = new LightSensor();
-            lightSensor.startListeningLight();
-            int lum = lightSensor.Lumval;
-            lightSensor.stopListeningLight();
+            await lightSensor.startListeningLight();
+            print("Accssed Light sensor");
+
+
+
 
             //TODO check if lum != null light sensor stream is closed
+            int lum =  lightSensor.lumval;
+            print("Lum " + lum.toString());
+
+
+            lightSensor.stopListeningLight();
 
             DateTime dateTime = DateTime.now();
+            print("Datetime read");
             // Todo you may want to change 20 to a config value
-            if(lum > 10 ){
-              // Todo send a quiz
+            if (lum > 10) {
+              print("Reason: notif sent because lum value is greater than 10");
+              lightSensor.stopListeningLight();
               break;
-            }
-            else{
-              if(dateTime.hour > 18 && dateTime.hour < 23){
-                //Todo send quiz
+              /// return 1
 
-              }
-              else{
+            } else {
+              print("LUM fail");
+              if (dateTime.hour > 18 && dateTime.hour < 23) {
+                print("Reason: notif sent because time is at night");
+
+                /// return 1
+                break;
+              } else {
+                print("Gyro test");
                 Gyro gyro = new Gyro();
-                // TODO determine gyro values, either up down left n right
-                gyro.gyroscopeValues[0];
+                // Determine phone movement, i.e is teh user currently using
+                // The phone
+                double x = gyro.gyroscopeValues[0];
+                double y = gyro.gyroscopeValues[1];
+                double z = gyro.gyroscopeValues[2];
+                print(x.toString() + " " + y.toString() + " " + z.toString());
+                duration = new Duration(seconds: 1);
+                sleep(duration);
+                double x1 = gyro.gyroscopeValues[0] - x;
+                double y1 = gyro.gyroscopeValues[1] - y;
+                double z1 = gyro.gyroscopeValues[2] - z;
 
+                print(
+                    x1.toString() + " " + y1.toString() + " " + z1.toString());
 
-
-
-
+                /// If not moving
+                /// TODO gyro is best tested on a real phone
+                if ((x1.abs() < 0.01) &&
+                    (y1.abs() < 0.01) &&
+                    (z1.abs() < 0.01)) {
+                  print(
+                      "Reason: notif sent because phone is likely stationary");
+                  // Return 1
+                  break;
+                }
               }
             }
-
-
-
-
-
-
-
           }
+          // Return 0
+          print("Reason: Either perferences failed or Gyro failed");
           break;
       }
+      BackgroundDatabase.closeDB();
       return Future.value(true);
     } on MissingPluginException catch (e) {
       print("You should probably implement some plugins :D");

@@ -3,10 +3,14 @@ import 'dart:async';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:xml/xml.dart';
 
+import '../background_database.dart';
+
+// check when app is open
+
+// Abstract database API
 class BackgroundLocation {
   String pth;
   Database db;
@@ -36,8 +40,30 @@ class BackgroundLocation {
     return placemark.first;
   }
 
+  Future<String> placeMarkType(Placemark placeMark) async {
+    String name = (placeMark.street +
+            " " +
+            placeMark.postalCode +
+            " " +
+            placeMark.country)
+        .replaceAll(" ", "+");
+    print("Name: " + name);
+
+    String query =
+        "https://nominatim.openstreetmap.org/search?q=$name&format=json&polygon_geojson=1&addressdetails=1";
+
+    http.Response response = await http.post(query);
+
+    print("Response code JSON" + response.statusCode.toString());
+    print("Response body JSON" + response.body.toString());
+    // We don't need to use Json stuff actually, we just need to identify keywords
+    // Todo parse JSON in future iterations
+    // json.decode(response.body);
+    return response.body.toString();
+  }
+
   Future<bool> inGeoFence(Position userLocation) async {
-    List<GeoFence> gf = await getGeoFence();
+    List<GeoFence> gf = await BackgroundDatabase.getGeoFence();
     double distance;
     // TODO define a geofence radius for now assume 1 km
     for (var i = 0; i < gf.length; i++) {
@@ -91,154 +117,5 @@ class BackgroundLocation {
     return false;
   }
 
-  /// SQL database stuff
-
-  BackgroundLocation() {
-    init();
-  }
-
-  void closeDB() {
-    db.close();
-  }
-
-  init() async {
-    db = await openDatabase(
-      join(await getDatabasesPath(), 'backend_database.db'),
-      onCreate: (db, version) {
-        db.execute(
-          "CREATE TABLE last(id INTEGER PRIMARY KEY, lon DOUBLE, lat DOUBLE)",
-        );
-        // Run the CREATE TABLE statement on the database.
-        return db.execute(
-          "CREATE TABLE geo(id INTEGER PRIMARY KEY, lon DOUBLE, lat DOUBLE)",
-        );
-      },
-    );
-  }
-
-// Define a function that inserts dogs into the database
-  Future<void> insertFence(GeoFence fence) async {
-    // Insert the Dog into the correct table. You might also specify the
-    // `conflictAlgorithm` to use in case the same dog is inserted twice.
-    //
-    // In this case, replace any previous data.
-    await db.insert(
-      'geo',
-      fence.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-// Define a function that inserts dogs into the database
-  Future<void> insertLast(LastLocation lastLocation) async {
-    // Insert the Dog into the correct table. You might also specify the
-    // `conflictAlgorithm` to use in case the same dog is inserted twice.
-    //
-    // In this case, replace any previous data.
-    await db.insert(
-      'last',
-      lastLocation.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  // A method that retrieves all the dogs from the dogs table.
-  Future<List<GeoFence>> getGeoFence() async {
-    // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db.query('geo');
-
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
-    return List.generate(maps.length, (i) {
-      return GeoFence(
-        id: maps[i]['id'],
-        lon: maps[i]['lon'],
-        lat: maps[i]['lat'],
-      );
-    });
-  }
-
-  // A method that retrieves all the dogs from the dogs table.
-  Future<List<LastLocation>> getLast() async {
-    // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db.query('last');
-
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
-    return List.generate(maps.length, (i) {
-      return LastLocation(
-        id: maps[i]['id'],
-        lon: maps[i]['lon'],
-        lat: maps[i]['lat'],
-      );
-    });
-  }
-
-  Future<void> updateLast(LastLocation last) async {
-    // Update the given Dog.
-    await db.update(
-      'last',
-      last.toMap(),
-      // Ensure that the Dog has a matching id.
-      where: "id = ?",
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
-      whereArgs: [last.id],
-    );
-  }
-
-  /*
-  * e.g
-  // Update Fido's age.
-  await updateDog(Dog(
-    id: 0,
-    name: 'Fido',
-    age: 42,
-  ));
-
-  * */
-
-  Future<void> deleteGeoFence(int id) async {
-    // Remove the Dog from the Database.
-    await db.delete(
-      'geo',
-      // Use a `where` clause to delete a specific dog.
-      where: "id = ?",
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
-      whereArgs: [id],
-    );
-  }
-}
-
-/// Data structures
-
-class LastLocation {
-  final int id;
-  final double lon;
-  final double lat;
-
-  LastLocation({this.id, this.lon, this.lat});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'lon': lon,
-      'lat': lat,
-    };
-  }
-}
-
-/// These two are seperate since we may need to add additional data to either of
-/// these in the future
-class GeoFence {
-  final int id;
-  final double lon;
-  final double lat;
-
-  GeoFence({this.id, this.lon, this.lat});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'lon': lon,
-      'lat': lat,
-    };
-  }
+  BackgroundLocation() {}
 }

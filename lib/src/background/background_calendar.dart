@@ -1,20 +1,25 @@
 import 'dart:collection';
 
 import 'package:device_calendar/device_calendar.dart';
+import 'package:flutter/services.dart';
 
 class BackgroundCalendar {
   List<Calendar> calendar;
   List<Event> events = [];
-  DeviceCalendarPlugin deviceCalendarPlugin = new DeviceCalendarPlugin();
+  DeviceCalendarPlugin deviceCalendarPlugin;
 
-  Future<void> getBackground() async {
-    Result<bool> hasPermissions = await deviceCalendarPlugin.hasPermissions();
-    // Check permissions
-    if (hasPermissions.isSuccess) {
-      // Get all the Calendars
+  BackgroundCalendar(DeviceCalendarPlugin dcp) {
+    deviceCalendarPlugin = dcp;
+  }
+
+  void getBackground() async {
+
+      print("GET all Calendars");
       Result<UnmodifiableListView<Calendar>> cal =
           await deviceCalendarPlugin.retrieveCalendars();
       calendar = cal.data;
+
+      print("Calendar :" + calendar.toString());
 
       var now = new DateTime.now();
 
@@ -28,10 +33,7 @@ class BackgroundCalendar {
             .retrieveEvents(calendar[i].id, retrieveEventsParams);
         events = events + e.data.toList();
       }
-    } else {
-      // Request permission or ignore
-      deviceCalendarPlugin.requestPermissions();
-    }
+      print("Events" + events.toString());
   }
 
   bool isEmpty() {

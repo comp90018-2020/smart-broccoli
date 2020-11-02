@@ -5,10 +5,11 @@ import 'package:light/light.dart';
 class LightSensor {
   Light _light;
   StreamSubscription _lightStream;
-  int Lumval;
+  int lumval = -1;
 
   void onLightData(int luxValue) async {
-    Lumval = luxValue;
+    print(luxValue);
+    lumval = luxValue;
   }
 
   void stopListeningLight() {
@@ -21,6 +22,7 @@ class LightSensor {
       _lightStream = _light.lightSensorStream.listen(onLightData);
     } on LightException catch (exception) {
       print(exception);
+      _lightStream.cancel();
     }
   }
 }

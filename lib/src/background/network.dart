@@ -9,6 +9,9 @@ class Network {
   WifiInfoWrapper _wifiObject;
   String _connectionStatus;
 
+  get connectionStatus => _connectionStatus;
+  get wifiObject => _wifiObject;
+
   /// Connectivity, determines if WIFI or Mobile connection
 // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initConnectivity() async {
