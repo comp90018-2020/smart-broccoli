@@ -15,20 +15,19 @@ class TimerWidget extends StatefulWidget {
 
 class _TimerWidgetState extends State<TimerWidget> {
   Timer _timer;
-  int _secondsRemaining;
+  int _millisecondsRemaining;
 
-  void reset(dynamic seconds) {
-    _secondsRemaining = seconds;
-    if (_timer == null)
-      _timer = Timer.periodic(
-        const Duration(seconds: 1),
-        (Timer timer) => setState(() {
-          if (_secondsRemaining < 1)
-            timer.cancel();
-          else
-            --_secondsRemaining;
-        }),
-      );
+  void reset(dynamic milliseconds) {
+    _millisecondsRemaining = milliseconds;
+    _timer = Timer.periodic(
+      const Duration(milliseconds: 100),
+      (Timer timer) => setState(() {
+        if (_millisecondsRemaining < 1)
+          timer.cancel();
+        else
+          _millisecondsRemaining -= 100;
+      }),
+    );
   }
 
   @override
@@ -50,6 +49,8 @@ class _TimerWidgetState extends State<TimerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Text('$_secondsRemaining', style: widget.style);
+    return Text(
+        '${_millisecondsRemaining == null ? '***' : _millisecondsRemaining ~/ 1000}',
+        style: widget.style);
   }
 }
