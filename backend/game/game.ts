@@ -110,6 +110,16 @@ export class GameHandler {
     ): Promise<Player> {
         if (playerCache.hasOwnProperty(userId)) {
             const player = playerCache[userId];
+            if (player.sessionId !== sessionId)
+                return new Player(
+                    userId,
+                    player.name,
+                    player.pictureId,
+                    socket.id,
+                    sessionId,
+                    role,
+                    socket.handshake.query.token
+                );
             player.socketId = socket.id;
             return player;
         }
