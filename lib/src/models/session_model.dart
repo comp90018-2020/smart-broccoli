@@ -245,13 +245,14 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         else
           _pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(name: '/session/lobby', action: RouteAction.PUSH));
+        state = SessionState.STARTING;
         break;
       case SessionState.QUESTION:
         if (state == SessionState.PENDING || state == SessionState.STARTING)
           _pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.REPLACE));
-        else if (state == SessionState.QUESTION)
+        else if (state == SessionState.QUESTION || state == SessionState.ANSWER)
           notifyListeners();
         else if (state == SessionState.OUTCOME)
           _pubSub.publish(PubSubTopic.ROUTE,
@@ -260,19 +261,23 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
           _pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.PUSH));
+        state = SessionState.QUESTION;
         break;
       case SessionState.ANSWER:
-        if (state == SessionState.QUESTION)
+        if (state == SessionState.QUESTION) {
+          print('QUESTION TO ANSWER TRANSITION');
           notifyListeners();
-        else
+        } else
           _pubSub.publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.PUSH));
+        state = SessionState.ANSWER;
         break;
       case SessionState.OUTCOME:
         _pubSub.publish(PubSubTopic.ROUTE,
             arg: RouteArgs(
                 name: '/session/leaderboard', action: RouteAction.PUSH));
+        state = SessionState.OUTCOME;
         break;
       case SessionState.FINISHED:
         if (state == SessionState.ANSWER)
@@ -281,10 +286,12 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
                   RouteArgs(name: '/session/finish', action: RouteAction.PUSH));
         else
           notifyListeners();
+        state = SessionState.FINISHED;
         break;
       case SessionState.ABORTED:
         _pubSub.publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
+        state = SessionState.ABORTED;
         break;
     }
   }
