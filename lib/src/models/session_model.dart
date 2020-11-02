@@ -247,7 +247,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     socket.on('disconnect', (_) {
       // must stop listening immediately to avoid timing conflicts
       socket.clearListeners();
-      refreshSession();
+      _clearFields();
       _pubSub.publish(PubSubTopic.ROUTE,
           arg: RouteArgs('/take_quiz', routeAction: RouteAction.POPALL));
     });
@@ -280,21 +280,23 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     socket.emit('answer', answer.toJson());
   }
 
+  void _clearFields() {
+    players.clear();
+    startCountDown = null;
+    question = null;
+    time = null;
+    totalQuestion = null;
+    outcome = null;
+    questionAnswered = null;
+    correctAnswer = null;
+    role = null;
+    answer = null;
+    state = null;
+    socket.disconnect();
+  }
+
   @override
   void authUpdated() {
-    if (!_authStateModel.inSession) {
-      players.clear();
-      startCountDown = null;
-      question = null;
-      time = null;
-      totalQuestion = null;
-      outcome = null;
-      questionAnswered = null;
-      correctAnswer = null;
-      role = null;
-      answer = null;
-      state = null;
-      socket.disconnect();
-    }
+    if (!_authStateModel.inSession) _clearFields();
   }
 }
