@@ -30,9 +30,6 @@ export class GameHandler {
         if (process.env.SOCKET_MODE === "debug") {
             console.log("[-] Debug mode.");
             const sessionId = 19;
-            if (this.sessions.hasOwnProperty(sessionId)) {
-                delete this.sessions[sessionId];
-            }
             const quiz: QuizAttributes = {
                 id: 19,
                 title: "Fruits Master",
@@ -122,7 +119,8 @@ export class GameHandler {
                 null,
                 socket.id,
                 19,
-                Number(userId) === 1 ? Role.host : Role.player
+                Number(userId) === 1 ? Role.host : Role.player,
+                null
             );
             socketPlayerMapCache[socket.id] = player;
             return player;
@@ -131,7 +129,8 @@ export class GameHandler {
                 userId,
                 socket.id,
                 sessionId,
-                role
+                role,
+                socket.handshake.query.token
             );
             socketPlayerMapCache[socket.id] = player;
             return player;
@@ -186,13 +185,15 @@ export class GameHandler {
                 );
             }
 
-            // add user to socket room
-            socket.join(whichRoom(session, player.role));
-            socket.join(whichRoom(session, Role.all));
             // add user to session
             if (player.role === Role.host) {
-                this.disconnectPast(session, session.host, player);
-                session.hostJoin(player);
+                if (session.type === GameType.SelfPaced_NotGroup) {
+                    this.disconnectOtherPlayersAndCopyRecords(session, player);
+                    session.playerJoin(player);
+                } else {
+                    this.disconnectPast(session, session.host, player);
+                    session.hostJoin(player);
+                }
             } else {
                 this.disconnectPast(
                     session,
@@ -203,6 +204,11 @@ export class GameHandler {
                     this.disconnectOtherPlayersAndCopyRecords(session, player);
                 session.playerJoin(player);
             }
+
+            // add user to socket room
+            socket.join(whichRoom(session, player.role));
+            socket.join(whichRoom(session, Role.all));
+
             // emit welcome event
             emitToOne(
                 socket.id,
@@ -288,8 +294,10 @@ export class GameHandler {
     }
 
     disconnectOtherPlayersAndCopyRecords(session: GameSession, player: Player) {
-        if (Object.keys(session.playerMap).length > 0) {
-            const theFirstExistedPlayer = Object.values(session.playerMap)[0];
+        player.role = Role.player;
+        const players = Object.values(session.playerMap);
+        if (players.length > 0) {
+            const theFirstExistedPlayer = players[0];
             player.record = theFirstExistedPlayer.record;
             player.previousRecord = theFirstExistedPlayer.previousRecord;
         }
@@ -315,6 +323,7 @@ export class GameHandler {
                 player.profile()
             );
             await session.playerLeave(player);
+            session.deactivateToken(player.token);
             // disconnect
             socket.disconnect(true);
         } catch (error) {
@@ -527,17 +536,19 @@ export class GameHandler {
         userId: number,
         socketId?: string,
         sessionId?: number,
-        role?: string
+        role?: string,
+        token?: string
     ): Promise<Player> {
         if (playerCache.hasOwnProperty(userId)) {
-            const { name, pictureId, socketId, role } = playerCache[userId];
+            const { name, pictureId } = playerCache[userId];
             return new Player(
                 userId,
                 name,
                 pictureId,
                 socketId,
                 sessionId,
-                role
+                role,
+                token
             );
         } else {
             const { name, pictureId } = await getUserSessionProfile(userId);
@@ -547,7 +558,8 @@ export class GameHandler {
                 pictureId,
                 socketId,
                 sessionId,
-                role
+                role,
+                token
             );
             playerCache[userId] = player;
             return player;

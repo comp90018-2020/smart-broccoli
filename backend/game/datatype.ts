@@ -44,7 +44,8 @@ export class Player {
         readonly pictureId: number,
         public socketId: string,
         public sessionId: number,
-        public role: string
+        public role: string,
+        public token: string
     ) {
         this.record.questionNo = 0;
         this.record.oldPos = null;
