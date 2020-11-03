@@ -66,9 +66,11 @@ export class GameSession {
             }
         }
     }
+
     hasFinalBoardReleased() {
         return this.boardReleased.has(this.totalQuestions - 1);
     }
+
     deactivateToken(token: string) {
         this.invalidTokens.add(token);
     }
@@ -78,12 +80,19 @@ export class GameSession {
     }
 
     hasUser(player: Player) {
-        return this.playerMap.hasOwnProperty(player.id);
+        if (player.role == Role.player)
+            return (
+                this.playerMap.hasOwnProperty(player.id) &&
+                this.playerMap[player.id].state !== PlayerState.Left
+            );
+        return true;
     }
 
     hostJoin(player: Player) {
         this.host = player;
+        this.setPlayerState(player, PlayerState.Joined);
     }
+
     playerJoin(player: Player) {
         this.playerMap[player.id] = player;
         this.setPlayerState(player, PlayerState.Joined);
@@ -92,6 +101,7 @@ export class GameSession {
     canSendQuesionAfterReconnection() {
         return this.visibleQuestionIndex() !== -1;
     }
+
     visibleQuestionIndex() {
         if (this._isReadyForNextQuestion) {
             return this.questionIndex - 1;
@@ -117,6 +127,7 @@ export class GameSession {
                 this.status === GameStatus.Starting)
         );
     }
+
     isSelfPacedNotGroupAndHasNotStart() {
         return (
             this.questionIndex === 0 &&
@@ -124,6 +135,7 @@ export class GameSession {
             this.type === GameType.SelfPaced_NotGroup
         );
     }
+
     isEmitValid(player: Player) {
         return (
             (player !== undefined &&
@@ -132,12 +144,15 @@ export class GameSession {
             player == undefined
         );
     }
+
     isSelfPacedGroup() {
         return this.type === GameType.SelfPaced_Group;
     }
+
     isSelfPacedNotGroup() {
         return this.type === GameType.SelfPaced_NotGroup;
     }
+
     isReadyForNextQuestion() {
         return this._isReadyForNextQuestion;
     }
@@ -145,6 +160,7 @@ export class GameSession {
     is(status: GameStatus) {
         return this.status === status;
     }
+
     hasMoreQuestions() {
         return this.questionIndex < this.totalQuestions - 1;
     }
@@ -155,21 +171,28 @@ export class GameSession {
         }
         this.setPlayerState(player, PlayerState.Left);
     }
+
     getQuizTimeLimit() {
         return this.quiz.timeLimit === undefined
             ? 10 * 1000
             : this.quiz.timeLimit * 1000;
     }
+
     setQuestionReleaseTime(questionIndex: number, afterTime: number) {
         this.QuestionReleaseAt[questionIndex] = Date.now() + afterTime;
     }
+
     setPlayerState(player: Player, state: PlayerState) {
-        if (state === PlayerState.Joined) {
-            this.activePlayersNum += 1;
-        } else if (state === PlayerState.Left) {
-            this.activePlayersNum -= 1;
+        if (player.role === Role.player) {
+            if (state === PlayerState.Joined) {
+                this.activePlayersNum += 1;
+            } else if (state === PlayerState.Left) {
+                this.activePlayersNum -= 1;
+            }
+            this.playerMap[player.id].state = state;
+        } else if (player.role === Role.host) {
+            this.host.state = state;
         }
-        this.playerMap[player.id].state = state;
     }
 
     canAbort(player: Player) {
@@ -180,6 +203,7 @@ export class GameSession {
             player.role === Role.host
         );
     }
+
     async setStatus(status: GameStatus) {
         this.status = status;
         if (status === GameStatus.Starting) {
@@ -190,6 +214,7 @@ export class GameSession {
             }
         }
     }
+
     async endSession() {
         const progress: { userId: number; data: any; state?: string }[] = [];
         const rank = this.rankPlayers();
@@ -214,6 +239,7 @@ export class GameSession {
     getStatus() {
         return this.status;
     }
+
     canStart(player: Player) {
         // and game is pending
         return (
@@ -224,15 +250,18 @@ export class GameSession {
                 player.role === Role.host)
         );
     }
+
     canReleaseTheFirstQuestion() {
         return (
             this.QuestionReleaseAt.hasOwnProperty(0) &&
             Date.now() > this.QuestionReleaseAt[0]
         );
     }
+
     isAnswerNoCorrect(answer: Answer) {
         return answer.questionNo === this.questionIndex;
     }
+
     hasAllPlayerAnswered() {
         return this.pointSys.answeredPlayers.size >= this.activePlayersNum;
     }
@@ -257,6 +286,7 @@ export class GameSession {
             this.type === GameType.SelfPaced_NotGroup
         );
     }
+
     canAnswer(player: Player, answer: Answer) {
         // is player
         return (
@@ -362,6 +392,7 @@ export class GameSession {
             this.playerMap[player.id].state = PlayerState.Complete;
         }
     }
+
     getQuestionIndex() {
         return this._isReadyForNextQuestion
             ? this.questionIndex
