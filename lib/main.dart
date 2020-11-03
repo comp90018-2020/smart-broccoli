@@ -9,9 +9,6 @@ import 'package:smart_broccoli/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Communication
-  final PubSub pubSub = PubSub();
-
   // Local storage
   final KeyValueStore keyValueStore = await SharedPrefsKeyValueStore.create();
   final PictureStash picStash = await PictureStash.create();
@@ -44,7 +41,7 @@ void main() async {
               groupRegistryModel..authUpdated(),
         ),
       ],
-      child: MyApp(pubSub),
+      child: MyApp(),
     ),
   );
 }
@@ -54,7 +51,7 @@ class MyApp extends StatefulWidget {
   final PubSub pubSub;
 
   /// Takes a publish/subscribe
-  MyApp(this.pubSub);
+  MyApp() : this.pubSub = PubSub();
 
   @override
   State createState() => _MyAppState();
