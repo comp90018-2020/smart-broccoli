@@ -1,4 +1,3 @@
-import { timeStamp } from "console";
 import Sequelize, { Optional } from "sequelize";
 
 const schema: Sequelize.ModelAttributes = {
