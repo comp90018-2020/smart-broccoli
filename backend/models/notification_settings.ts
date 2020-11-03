@@ -44,7 +44,7 @@ const schema: Sequelize.ModelAttributes = {
     days: {
         type: Sequelize.ARRAY(Sequelize.BOOLEAN),
         allowNull: false,
-        defaultValue: [false, true, true, true, true, true, false],
+        defaultValue: [true, true, true, true, true, false, false],
     },
     // Timezone by IANA name
     timezone: {
