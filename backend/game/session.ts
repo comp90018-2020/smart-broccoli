@@ -38,6 +38,7 @@ export class GameSession {
     public boardReleased: Set<number> = new Set([]);
     public questionReleased: Set<number> = new Set([]);
     public totalQuestions: number = 0;
+    public updatedAt: number = Date.now();
 
     constructor(
         $quiz: QuizAttributes,
@@ -65,6 +66,10 @@ export class GameSession {
                 this.setToNextQuestion(0);
             }
         }
+    }
+
+    updatingTime() {
+        this.updatedAt = Date.now();
     }
 
     hasFinalBoardReleased() {

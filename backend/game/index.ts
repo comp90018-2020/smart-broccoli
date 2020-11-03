@@ -5,11 +5,12 @@ import { Player, Role } from "./datatype";
 import { GameSession } from "./session";
 
 export const handler: GameHandler = new GameHandler();
-
+const SESSIONS_PURNING_INTERVAL = 300000;
 export let _socketIO: Server;
 export default async (socketIO: Server) => {
     // clear sessions that are not ended on startup
     await clearSessions();
+    pruneSessions();
     _socketIO = socketIO;
     socketIO.use(async (socket, next) => {
         // check socket.handshake contents (authentication)
@@ -107,4 +108,20 @@ const verify = async (
     if (token && session.isTokenDeactivated(token)) return [false, null, null];
 
     return [true, session, player];
+};
+
+const pruneSessions = async () => {
+    for (const sessionId of Object.keys(handler.sessions)) {
+        const nowTime = Date.now();
+        if (
+            nowTime - handler.sessions[Number(sessionId)].updatedAt >
+            SESSIONS_PURNING_INTERVAL
+        ) {
+            handler.sessions[Number(sessionId)].endSession();
+            delete handler.sessions[Number(sessionId)];
+        }
+    }
+    setTimeout(() => {
+        pruneSessions();
+    }, SESSIONS_PURNING_INTERVAL);
 };
