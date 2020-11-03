@@ -230,7 +230,7 @@ export class GameSession {
         if (process.env.SOCKET_MODE !== "debug") {
             endSessionInController(
                 this.id,
-                this.hasMoreQuestions() && this._isReadyForNextQuestion,
+                this.questionReleased.size === this.totalQuestions,
                 progress
             );
         }
