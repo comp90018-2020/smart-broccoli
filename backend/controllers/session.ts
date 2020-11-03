@@ -10,6 +10,7 @@ import sequelize, {
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
 import { handler } from "../game/index";
+import { sendSessionCreationNotification } from "./notification";
 
 // Represents a session token
 export interface TokenInfo {
@@ -305,6 +306,13 @@ export const createSession = async (userId: number, opts: any) => {
 
         // pass quiz and session to socket
         handler.addSession(quiz, session.id, session.type, session.isGroup);
+
+        // push notifications
+        if (process.env.NODE_ENV === "production") {
+            sendSessionCreationNotification(userId, session, quiz);
+        } else {
+            await sendSessionCreationNotification(userId, session, quiz);
+        }
 
         return { session, token };
     });

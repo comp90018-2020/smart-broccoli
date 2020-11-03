@@ -73,11 +73,15 @@ export const login = async (email: string, password: string) => {
 
     // Generate and add token
     const token = await jwtSign({ id: user.id }, process.env.TOKEN_SECRET);
-    return await Token.create({
-        scope: "auth",
-        token,
-        userId: user.id,
-    });
+    const [record, _] = await Token.upsert(
+        {
+            scope: "auth",
+            token,
+            userId: user.id,
+        },
+        { returning: true }
+    );
+    return record;
 };
 
 /**

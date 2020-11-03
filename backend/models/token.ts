@@ -13,6 +13,7 @@ const schema: Sequelize.ModelAttributes = {
     token: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
     },
     scope: {
         type: Sequelize.STRING,
@@ -53,6 +54,15 @@ export default class Token
     static initialise(sequelize: Sequelize.Sequelize) {
         return super.init.call(this, schema, {
             sequelize,
+            indexes: [
+                // Ensure that tokens are unique
+                {
+                    name: "unique_token",
+                    unique: true,
+                    // @ts-ignore
+                    fields: [sequelize.fn("lower", sequelize.col("token"))],
+                },
+            ],
         });
     }
 }

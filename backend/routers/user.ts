@@ -15,6 +15,11 @@ import {
     getUserProfile,
 } from "../controllers/user";
 import { auth } from "./middleware/auth";
+import {
+    getNotificationSettings,
+    updateNotificationSettings,
+    updateNotificationState,
+} from "../controllers/notification";
 
 /**
  * @swagger
@@ -298,6 +303,173 @@ router.get(
             // Read and serve
             const file = fs.readFileSync(`${picture.destination}.thumb`);
             res.end(file, "binary");
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /user/state:
+ *   put:
+ *     summary: Update user availability/state
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             properties:
+ *               free:
+ *                 type: boolean
+ *     responses:
+ *       '200':
+ *         description: OK
+ */
+router.put(
+    "/state",
+    [body("free").isBoolean(), body("calendarFree").isBoolean()],
+    validate,
+    auth(),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await updateNotificationState(req.user.id, req.body);
+            return res.sendStatus(200);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Location:
+ *       type: object
+ *       required:
+ *         - lat
+ *         - lon
+ *       properties:
+ *         lat:
+ *           type: number
+ *         lon:
+ *           type: number
+ *     NotificationSettings:
+ *       type: object
+ *       required:
+ *         - onTheMove
+ *         - onCommute
+ *         - calendar
+ *         - days
+ *         - timeZone
+ *         - notificationWindow
+ *         - maxNotificationsPerDay
+ *       properties:
+ *         onTheMove:
+ *           type: boolean
+ *         onCommute:
+ *           type: boolean
+ *         calendarLive:
+ *           type: boolean
+ *         calendarSelfPaced:
+ *           type: boolean
+ *         days:
+ *           type: array
+ *           minItems: 7
+ *           maxItems: 7
+ *           items:
+ *             type: boolean
+ *         timezone:
+ *           type: string
+ *         workSSID:
+ *           type: string
+ *         workLocation:
+ *           type: object
+ *           $ref: '#/components/schemas/Location'
+ *         workRadius:
+ *           type: integer
+ *         workSmart:
+ *           type: boolean
+ *         notificationWindow:
+ *           type: integer
+ *         maxNotificationsPerDay:
+ *           type: integer
+ */
+
+/**
+ * @swagger
+ * /user/notification:
+ *   put:
+ *     summary: Update user notification settings
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/NotificationSettings'
+ *     responses:
+ *       '200':
+ *         description: OK
+ */
+router.put(
+    "/notification",
+    [
+        body("onTheMove").isBoolean(),
+        body("onCommute").isBoolean(),
+        body("calendarLive").isBoolean(),
+        body("calendarSelfPaced").isBoolean(),
+        body("days").isArray({ min: 7, max: 7 }),
+        body("days.*").isBoolean(),
+        body("timezone").optional().isString(),
+        body("workSSID").optional({ nullable: true }).isString(),
+        body("workLocation.lat").optional().isString(),
+        body("workLocation.lon").optional().isString(),
+        body("workRadius").optional({ nullable: true }).isInt({ min: 0 }),
+        body("workSmart").optional({ nullable: true }).isBoolean(),
+        body("notificationWindow").isInt({ min: 0 }),
+        body("maxNotificationsPerDay").isInt({ min: 0 }),
+    ],
+    validate,
+    auth(),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const saved = await updateNotificationSettings(
+                req.user.id,
+                req.body
+            );
+            return res.json(saved);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /user/notification:
+ *   get:
+ *     summary: Get user notification settings
+ *     tags:
+ *       - User
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/NotificationSettings'
+ */
+router.get(
+    "/notification",
+    auth(),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            return res.json(await getNotificationSettings(req.user.id));
         } catch (err) {
             return next(err);
         }

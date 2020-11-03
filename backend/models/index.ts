@@ -11,6 +11,9 @@ import Group from "./group";
 import UserGroup from "./user_group";
 import Session from "./session";
 import SessionParticipant from "./session_participant";
+import NotificationSettings from "./notification_settings";
+import UserState from "./notification_user_state";
+import NotificationEntry from "./notification_entry";
 
 // Initiate sequelize instance
 const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
@@ -34,15 +37,24 @@ Group.initialise(sequelize);
 UserGroup.initialise(sequelize);
 Session.initialise(sequelize);
 SessionParticipant.initialise(sequelize);
+NotificationSettings.initialise(sequelize);
+UserState.initialise(sequelize);
+NotificationEntry.initialise(sequelize);
 
 // User has many tokens
-User.hasMany(Token, { as: "tokens", foreignKey: "userId" });
+User.hasMany(Token, { foreignKey: "userId" });
 Token.belongsTo(User, { foreignKey: "userId" });
 // User has profile picture
 User.belongsTo(Picture, {
     foreignKey: "pictureId",
     onDelete: "set null",
 });
+// User has notification settings
+User.hasOne(NotificationSettings, { foreignKey: "userId" });
+// User has state
+User.hasOne(UserState, { foreignKey: "userId" });
+// User has many notification entries
+User.hasMany(NotificationEntry, { foreignKey: "userId" });
 
 // Quiz has picture
 Quiz.belongsTo(Picture, {
@@ -106,4 +118,7 @@ export {
     Picture,
     Session,
     SessionParticipant,
+    NotificationSettings,
+    UserState,
+    NotificationEntry,
 };
