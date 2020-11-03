@@ -217,7 +217,6 @@ export const sendSessionCreationNotification = async (
     // IDs of users who should not be messaged
     const noMessageUserIds = await noMessageUsers(session);
 
-
     // List of all users who should be messaged
     const messageUsers = allUsers.filter(
         (user) => !noMessageUserIds.includes(user.id)

@@ -384,13 +384,15 @@ router.put(
  *             type: boolean
  *         timezone:
  *           type: string
- *         ssid:
+ *         workSSID:
  *           type: string
- *         location:
+ *         workLocation:
  *           type: object
  *           $ref: '#/components/schemas/Location'
- *         radius:
+ *         workRadius:
  *           type: integer
+ *         workSmart:
+ *           type: boolean
  *         notificationWindow:
  *           type: integer
  *         maxNotificationsPerDay:
@@ -423,10 +425,11 @@ router.put(
         body("calendarSelfPaced").isBoolean(),
         body("days").isArray({ min: 7, max: 7 }),
         body("timezone").optional().isString(),
-        body("ssid").optional().isString(),
-        body("location.lat").optional().isString(),
-        body("location.lon").optional().isString(),
-        body("radius").optional().isInt({ min: 0 }),
+        body("workSSID").optional({ nullable: true }).isString(),
+        body("workLocation.lat").optional().isString(),
+        body("workLocation.lon").optional().isString(),
+        body("workRadius").optional({ nullable: true }).isInt({ min: 0 }),
+        body("workSmart").optional({ nullable: true }).isBoolean(),
         body("notificationWindow").isInt({ min: 0 }),
         body("maxNotificationsPerDay").isInt({ min: 0 }),
     ],

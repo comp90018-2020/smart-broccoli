@@ -90,9 +90,10 @@ describe("Notification", () => {
             calendarSelfPaced: false,
             days: [true, true, false, false, true, false, true],
             timezone: "Australia/Melbourne",
-            ssid: "ABC",
-            location: "heh",
-            radius: 5,
+            workSSID: "ABC",
+            workLocation: "heh",
+            workRadius: 5,
+            workSmart: false,
             notificationWindow: 10,
             maxNotificationsPerDay: 100,
         };
@@ -109,31 +110,27 @@ describe("Notification", () => {
         expect(res.body).to.have.property("calendarSelfPaced");
         expect(res.body).to.have.property("days");
         expect(res.body).to.have.property("timezone");
-        expect(res.body).to.have.property("ssid");
-        expect(res.body).to.have.property("location");
-        expect(res.body).to.have.property("radius");
+        expect(res.body).to.have.property("workSSID");
+        expect(res.body).to.have.property("workLocation");
+        expect(res.body).to.have.property("workRadius");
+        expect(res.body).to.have.property("workSmart");
         expect(res.body).to.have.property("notificationWindow");
         expect(res.body).to.have.property("maxNotificationsPerDay");
 
-        expect(res.body.onTheMove).to.equal(false);
-        expect(res.body.onCommute).to.equal(false);
-        expect(res.body.calendarLive).to.equal(false);
-        expect(res.body.calendarSelfPaced).to.equal(false);
-        expect(res.body.days).to.deep.equal([
-            true,
-            true,
-            false,
-            false,
-            true,
-            false,
-            true,
-        ]);
-        expect(res.body.timezone).to.equal("Australia/Melbourne");
-        expect(res.body.ssid).to.equal("ABC");
-        expect(res.body.location).to.equal(null);
-        expect(res.body.radius).to.equal(5);
-        expect(res.body.notificationWindow).to.equal(10);
-        expect(res.body.maxNotificationsPerDay).to.equal(100);
+        expect(res.body.onTheMove).to.equal(values.onTheMove);
+        expect(res.body.onCommute).to.equal(values.onCommute);
+        expect(res.body.calendarLive).to.equal(values.calendarLive);
+        expect(res.body.calendarSelfPaced).to.equal(values.calendarSelfPaced);
+        expect(res.body.days).to.deep.equal(values.days);
+        expect(res.body.timezone).to.equal(values.timezone);
+        expect(res.body.workSSID).to.equal(values.workSSID);
+        expect(res.body.workLocation).to.equal(values.workLocation);
+        expect(res.body.workRadius).to.equal(values.workRadius);
+        expect(res.body.workSmart).to.equal(values.workSmart);
+        expect(res.body.notificationWindow).to.equal(values.notificationWindow);
+        expect(res.body.maxNotificationsPerDay).to.equal(
+            values.maxNotificationsPerDay
+        );
     });
 
     // Quiz/question
@@ -195,7 +192,9 @@ describe("Notification", () => {
             .send(values);
         expect(res.status).to.equal(200);
         expect(res.body.notificationWindow).to.equal(values.notificationWindow);
-        expect(res.body.maxNotificationsPerDay).to.equal(values.maxNotificationsPerDay);
+        expect(res.body.maxNotificationsPerDay).to.equal(
+            values.maxNotificationsPerDay
+        );
 
         // Create group/quiz
         const group = await createGroup(owner1.id, "foo");

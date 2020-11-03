@@ -53,20 +53,24 @@ const schema: Sequelize.ModelAttributes = {
     },
 
     // Work
-    ssid: {
+    workSSID: {
         type: Sequelize.STRING,
         allowNull: true,
     },
     // Location
-    location: {
+    workLocation: {
         type: Sequelize.JSONB,
         allowNull: true,
     },
     // Radius in km
-    radius: {
+    workRadius: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 5,
+        allowNull: true,
+    },
+    // Smart detection
+    workSmart: {
+        type: Sequelize.BOOLEAN,
+        allowNull: true,
     },
 
     // Minimum time between notifications
@@ -98,9 +102,10 @@ interface NotificationSettingsAttributes {
     calendarSelfPaced: boolean;
     days: boolean[];
     timezone: string;
-    ssid: string;
-    location: Location;
-    radius: number;
+    workSSID: string;
+    workLocation: Location;
+    workRadius: number;
+    workSmart: boolean;
     notificationWindow: number;
     maxNotificationsPerDay: number;
 }
@@ -114,9 +119,10 @@ interface NotificationSettingsCreationAttributes
         | "calendarSelfPaced"
         | "days"
         | "timezone"
-        | "ssid"
-        | "location"
-        | "radius"
+        | "workSSID"
+        | "workLocation"
+        | "workRadius"
+        | "workSmart"
         | "notificationWindow"
         | "maxNotificationsPerDay"
     > {}
@@ -136,9 +142,10 @@ export default class NotificationSettings
     public calendarSelfPaced: boolean;
     public days: boolean[];
     public timezone: string;
-    public ssid: string;
-    public location: Location;
-    public radius: number;
+    public workSSID: string;
+    public workLocation: Location;
+    public workRadius: number;
+    public workSmart: boolean;
     public notificationWindow: number;
     public maxNotificationsPerDay: number;
 
