@@ -5,6 +5,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:sensors/sensors.dart';
 import 'package:smart_broccoli/src/background/light_sensor.dart';
 import 'package:smart_broccoli/src/background/network.dart';
 import 'package:smart_broccoli/src/background_database.dart';
@@ -147,26 +148,21 @@ void callbackDispatcher() {
             print("User is not walking");
             // Access Light sensor
             LightSensor lightSensor = new LightSensor();
-            await lightSensor.startListening();
+            print("Light sensor created");
+            int lum = await lightSensor.whenLight();
             print("Accssed Light sensor");
 
-
-
-
-            //TODO check if lum != null light sensor stream is closed
-            int lum =  lightSensor.luxString;
             print("Lum " + lum.toString());
 
-
-            lightSensor.stopListening();
+            lightSensor.close();
 
             DateTime dateTime = DateTime.now();
             print("Datetime read");
             // Todo you may want to change 20 to a config value
             if (lum > 10) {
               print("Reason: notif sent because lum value is greater than 10");
-              lightSensor.stopListening();
               break;
+
               /// return 1
 
             } else {
@@ -181,15 +177,14 @@ void callbackDispatcher() {
                 Gyro gyro = new Gyro();
                 // Determine phone movement, i.e is teh user currently using
                 // The phone
-                double x = gyro.gyroscopeValues[0];
-                double y = gyro.gyroscopeValues[1];
-                double z = gyro.gyroscopeValues[2];
-                print(x.toString() + " " + y.toString() + " " + z.toString());
-                duration = new Duration(seconds: 1);
+                duration = new Duration(seconds: 5);
                 sleep(duration);
-                double x1 = gyro.gyroscopeValues[0] - x;
-                double y1 = gyro.gyroscopeValues[1] - y;
-                double z1 = gyro.gyroscopeValues[2] - z;
+                GyroscopeEvent gyroscopeEvent = await gyro.whenGyro();
+                double x1 = gyroscopeEvent.x;
+                double y1 = gyroscopeEvent.y;
+                double z1 = gyroscopeEvent.z;
+
+                gyro.gyroCancel();
 
                 print(
                     x1.toString() + " " + y1.toString() + " " + z1.toString());

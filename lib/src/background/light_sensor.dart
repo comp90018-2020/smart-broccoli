@@ -3,28 +3,22 @@ import 'dart:async';
 import 'package:light/light.dart';
 
 class LightSensor {
-  int _luxString = -1;
   Light _light;
-  StreamSubscription _subscription;
+  StreamController<int> controller = StreamController<int>();
 
-  int get luxString => _luxString;
-
-  void onData(int luxValue) async {
-    print("Lux value: $luxValue");
-      _luxString = luxValue;
-  }
-
-  void stopListening() {
-    _subscription.cancel();
-  }
-
-  Future<void> startListening() {
+  LightSensor() {
     _light = new Light();
-    try {
-      _subscription = _light.lightSensorStream.listen(onData);
+    controller.addStream(_light.lightSensorStream);
+  }
+
+  close() {
+    controller.close();
+  }
+
+  Future<int> whenLight() async {
+    await for (int value in controller.stream) {
+      return value;
     }
-    on LightException catch (exception) {
-      print(exception);
-    }
+    return null;
   }
 }
