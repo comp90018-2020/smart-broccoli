@@ -271,6 +271,7 @@ export class GameSession {
         return (
             this.questionIndex !== -1 &&
             this._isReadyForNextQuestion &&
+            !this.boardReleased.has(this.questionIndex - 1) &&
             !this.hasFinalBoardReleased() &&
             (player === undefined || player.role === Role.host)
         );
