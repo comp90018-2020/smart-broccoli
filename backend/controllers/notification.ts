@@ -12,7 +12,7 @@ import { Op } from "sequelize";
 import { firebaseTokenValid, sendMessage } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 import { buildSessionMessage } from "./notification_firebase";
-import { DateTime } from "luxon";
+import { DateTime, Info } from "luxon";
 
 /**
  * Adds a firebase token to a user.
@@ -144,17 +144,6 @@ export const updateNotificationSettings = async (userId: number, opts: any) => {
 export const getNotificationSettings = async (userId: number) => {
     return await NotificationSettings.findOrCreate({ where: { userId } });
 };
-
-// Day names
-const WEEKDAYS = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Monday",
-];
 
 /**
  * This function gets called on session creation for the purpose of notifying
@@ -311,7 +300,7 @@ const notificationUsers = async (users: User[], session: Session) => {
         );
         // Get day of week
         const dayOfWeek = date.weekdayLong;
-        if (!user.NotificationSetting.days[WEEKDAYS.indexOf(dayOfWeek)]) {
+        if (!user.NotificationSetting.days[Info.weekdays("long").indexOf(dayOfWeek)]) {
             return false;
         }
 
