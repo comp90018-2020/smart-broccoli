@@ -4,6 +4,7 @@ import sequelize, { Picture } from "../models";
 import Question, { OptionAttributes } from "../models/question";
 import { deletePicture, insertPicture } from "./picture";
 import { getQuizAndRole } from "./quiz";
+import { sessionTokenDecrypt } from "./session";
 
 // Parses question info
 interface QuestionInfo {
@@ -233,17 +234,27 @@ export const updateQuestionPicture = async (
  */
 export const getQuestionPicture = async (
     userId: number,
+    token: string,
     quizId: number,
     questionId: number
 ) => {
-    const { role, state } = await getQuizAndRole(userId, quizId, {
-        attributes: [],
-    });
-    if (
-        (role === "member" || role === "participant") &&
-        state === "inaccessible"
-    ) {
-        throw new ErrorStatus("Cannot access resource (yet)", 403);
+    const decryptedToken = await sessionTokenDecrypt(token);
+    if (decryptedToken) {
+        // Check session token
+        if (decryptedToken.quizId !== quizId)
+            throw new ErrorStatus("Session token mismatch", 403);
+        // Fall through when token is valid
+    } else {
+        // Check user permission
+        const { role, state } = await getQuizAndRole(userId, quizId, {
+            attributes: [],
+        });
+        if (
+            (role === "member" || role === "participant") &&
+            state === "inaccessible"
+        ) {
+            throw new ErrorStatus("Cannot access resource (yet)", 403);
+        }
     }
 
     const question = await Question.findOne({

@@ -24,7 +24,7 @@ router.use("/auth", authRouter);
 // User
 router.use("/user", userRouter);
 // Quiz
-router.use("/quiz", auth(), quizRouter);
+router.use("/quiz", quizRouter);
 // Group
 router.use("/group", auth(), groupRouter);
 // Quiz session
