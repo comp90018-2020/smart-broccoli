@@ -1,63 +1,17 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
+import 'package:smart_broccoli/src/ui/session/timer.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 import 'package:smart_broccoli/theme.dart';
-import 'question.dart';
 import 'vertical_clip.dart';
 
 /// Widget for Lobby
-class QuizLobby extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => new _StartLobby();
-}
-
-class _StartLobby extends State<QuizLobby> {
-  // Timer for countdown
-  Timer _timer;
-  // You should have a getter method here to get data from server
-  int _start = 10; // mia: get start time, needs game session model
-
-  void startTimer1() {
-    // Decrement the timer
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
-      oneSec,
-      (Timer timer) => setState(
-        () {
-          if (_start < 1) {
-            //TODO after reaching this point, either:
-            // 1. Call the next question activity
-            // 2. Call a function in the build class
-            // which creates a button for the user to move to the next class
-            timer.cancel();
-          } else {
-            _start = _start - 1;
-          }
-        },
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  // Initiate timers on start up
-  @override
-  void initState() {
-    super.initState();
-    startTimer1();
-  }
-
-  // Entry function
+class QuizLobby extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPage(
@@ -116,7 +70,10 @@ class _StartLobby extends State<QuizLobby> {
                       child: RaisedButton(
                         shape: SmartBroccoliTheme.raisedButtonShape,
                         child: Text("Start"),
-                        onPressed: () => _startQuiz(),
+                        onPressed: () {
+                          Provider.of<GameSessionModel>(context, listen: false)
+                              .startQuiz();
+                        },
                       ),
                     ),
                   ),
@@ -144,36 +101,39 @@ class _StartLobby extends State<QuizLobby> {
             ),
 
             Expanded(
-              child: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 25),
-                        child: Text(
-                          'Participants',
-                          textAlign: TextAlign.left,
+              child: Consumer<GameSessionModel>(
+                builder: (context, model, child) => Stack(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 25),
+                          child: Text(
+                            'Participants',
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                        LobbyDivider(),
+                      ],
+                    ),
+
+                    // The list of Quiz players
+                    Padding(
+                      padding: EdgeInsets.only(top: 26),
+                      child: _quizUsers(),
+                    ),
+
+                    // Quiz countdown
+                    if (model.state == SessionState.STARTING)
+                      Positioned.fill(
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: _quizTimer(model),
                         ),
                       ),
-                      LobbyDivider(),
-                    ],
-                  ),
-
-                  // The list of Quiz players
-                  Padding(
-                    padding: EdgeInsets.only(top: 26),
-                    child: _quizUsers(),
-                  ),
-
-                  // Quiz countdown
-                  Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: _quizTimer(),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -183,14 +143,16 @@ class _StartLobby extends State<QuizLobby> {
   }
 
   // Timer display functionality
-  Widget _quizTimer() {
+  Widget _quizTimer(GameSessionModel model) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 30, 0),
       child: Container(
         height: 50,
         width: 50,
         decoration: LobbyTimerBoxDecoration(),
-        child: Center(child: Text("$_start")),
+        child: Center(
+          child: TimerWidget(initTime: model.startCountDown),
+        ),
       ),
     );
   }
@@ -220,11 +182,5 @@ class _StartLobby extends State<QuizLobby> {
               separatorBuilder: (BuildContext context, int index) =>
                   const Divider(),
             ));
-  }
-
-  void _startQuiz() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => QuizQuestion()),
-    );
   }
 }
