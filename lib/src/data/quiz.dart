@@ -184,7 +184,7 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
         session.quizType == QuizType.SELF_PACED &&
         session.state != GameSessionState.ENDED);
     // if there is no sessions, this is a self-paced quiz
-    if (smartSessions.length == 0) return QuizType.SELF_PACED;
+    if (smartSessions != null && smartSessions.length == 0) return QuizType.SELF_PACED;
     // there is group session it is a smart live quiz
     // otherwise it is a self-paced alone quiz
     return smartSessions.firstWhere(
