@@ -12,7 +12,7 @@ export const buildSessionMessage = (
     title: string,
     body: string,
     tokens: string[],
-    notify: boolean = true,
+    notification: boolean = true,
     ttlSeconds: number = 5 * 60
 ): admin.messaging.MulticastMessage => {
     const message: admin.messaging.MulticastMessage = {
@@ -33,7 +33,7 @@ export const buildSessionMessage = (
         },
         tokens,
     };
-    if (notify) {
+    if (notification) {
         message["notification"] = {
             title: title,
             body: body,
