@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models/session_model.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -10,12 +13,16 @@ class QuizLeaderboard extends StatelessWidget {
         title: "Leaderboard",
         background: [
           // The clip for the current user's rank
-          Container(
-            child: ClipPath(
-              clipper: _BackgroundRectClipper(),
-              child: Container(
-                color: Color(0xFFFEC12D),
-              ),
+          Consumer<GameSessionModel>(
+            builder: (context, model, child) => Container(
+              child: model.role == GroupRole.MEMBER
+                  ? ClipPath(
+                      clipper: _BackgroundRectClipper(),
+                      child: Container(
+                        color: Color(0xFFFEC12D),
+                      ),
+                    )
+                  : Container(),
             ),
           ),
           // Overall wavy clip
@@ -34,41 +41,54 @@ class QuizLeaderboard extends StatelessWidget {
             Container(
                 padding: EdgeInsets.all(16),
                 constraints: BoxConstraints(maxHeight: 165),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  runAlignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 25,
-                  children: <Widget>[
-                    _topThreeUsers(
-                      context,
-                      "Winner 2",
-                      50,
-                      Text('2', style: SmartBroccoliTheme.leaderboardRankStyle),
-                    ),
-                    _topThreeUsers(
-                      context,
-                      "Winner 1",
-                      75,
-                      Text('1', style: SmartBroccoliTheme.leaderboardRankStyle),
-                      bolded: true,
-                    ),
-                    _topThreeUsers(
-                      context,
-                      "Winner 3",
-                      50,
-                      Text('3', style: SmartBroccoliTheme.leaderboardRankStyle),
-                    ),
-                  ],
+                child: Consumer<GameSessionModel>(
+                  builder: (context, model, child) => Wrap(
+                    alignment: WrapAlignment.center,
+                    runAlignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 25,
+                    children: <Widget>[
+                      if (model.outcome.leaderboard.length > 2)
+                        _topThreeUsers(
+                          context,
+                          model.outcome.leaderboard[1].player.name,
+                          50,
+                          Text('2',
+                              style: SmartBroccoliTheme.leaderboardRankStyle),
+                        ),
+                      if (model.outcome.leaderboard.length > 0)
+                        _topThreeUsers(
+                          context,
+                          model.outcome.leaderboard[0].player.name,
+                          75,
+                          Text('1',
+                              style: SmartBroccoliTheme.leaderboardRankStyle),
+                          bold: true,
+                        ),
+                      if (model.outcome.leaderboard.length > 2)
+                        _topThreeUsers(
+                          context,
+                          model.outcome.leaderboard[2].player.name,
+                          50,
+                          Text('3',
+                              style: SmartBroccoliTheme.leaderboardRankStyle),
+                        ),
+                    ],
+                  ),
                 )),
 
             // Current user & ranking
-            Container(
-                margin: EdgeInsets.symmetric(vertical: 8),
-                // Lowest point of green area to end of yellow (150 -> 205)
-                // See below for more details
-                height: 65,
-                child: _leaderboardList(["A"], scrollable: false)),
+            Consumer<GameSessionModel>(
+              builder: (context, model, child) => model.role == GroupRole.MEMBER
+                  ? Container(
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      // Lowest point of green area to end of yellow (150 -> 205)
+                      // See below for more details
+                      height: 65,
+                      child: _leaderboardList(["A"], scrollable: false),
+                    )
+                  : Container(height: 16),
+            ),
 
             // List of users
             Expanded(child: _leaderboardList(["A", "B", "C"])),
@@ -80,7 +100,7 @@ class QuizLeaderboard extends StatelessWidget {
 // Creates user image and name
 Widget _topThreeUsers(
     BuildContext context, String text, double dimensions, Widget inner,
-    {bool bolded = false}) {
+    {bool bold = false}) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: <Widget>[
@@ -97,7 +117,7 @@ Widget _topThreeUsers(
           text,
           style: TextStyle(
               color: Theme.of(context).colorScheme.onBackground,
-              fontWeight: bolded ? FontWeight.bold : FontWeight.normal),
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal),
         ),
       ),
     ],
