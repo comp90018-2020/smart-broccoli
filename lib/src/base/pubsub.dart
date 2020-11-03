@@ -22,7 +22,6 @@ class PubSub extends PubSubBase {
 
   /// PubSub instance
   factory PubSub() {
-    print("Here");
     return _singleton;
   }
 
