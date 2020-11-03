@@ -160,11 +160,8 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
 
   @override
   int compareTo(Quiz other) {
-    final int nQuizType = QuizType.values.length;
-    int thisType =
-        this.complete ? this.type.index - nQuizType : this.type.index;
-    int otherType =
-        other.complete ? other.type.index - nQuizType : other.type.index;
+    int thisType = this.type.index;
+    int otherType = other.type.index;
 
     if (thisType == otherType) {
       if (this.complete && other.complete)
@@ -184,7 +181,8 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
         session.quizType == QuizType.SELF_PACED &&
         session.state != GameSessionState.ENDED);
     // if there is no sessions, this is a self-paced quiz
-    if (smartSessions != null && smartSessions.length == 0) return QuizType.SELF_PACED;
+    if (smartSessions != null && smartSessions.length == 0)
+      return QuizType.SELF_PACED;
     // there is group session it is a smart live quiz
     // otherwise it is a self-paced alone quiz
     return smartSessions.firstWhere(
