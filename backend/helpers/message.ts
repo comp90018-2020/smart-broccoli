@@ -39,23 +39,6 @@ export const firebaseTokenValid = async (token: string) => {
 };
 
 /**
- * Builds an Firebase android notification message.
- * @param title Title of message.
- * @param body Body of message.
- */
-export const buildAndroidNotificationMessage = (
-    title: string,
-    body: string
-) => {
-    return {
-        notification: {
-            title,
-            body,
-        },
-    };
-};
-
-/**
  * Sends a message to the specified recipient.
  * Adapted from:
  * https://github.com/COMP30022-Russia/COMP30022_Server

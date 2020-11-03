@@ -211,26 +211,56 @@ export const sendSessionCreationNotification = async (
     });
 
     // Get list of users
-    const users = await filterUsers(group.Users, session);
-    const tokens = users
+    const allUsers = group.Users.filter((user) => user.Tokens.length > 0);
+    // IDs of users who should not be messaged
+    const noMessageUserIds = await noMessageUsers(session);
+
+    // List of all users who should be messaged
+    const messageUsers = allUsers.filter(
+        (user) => !noMessageUserIds.includes(user.id)
+    );
+    // IDs of users who should receive a notification
+    const notificationUsersIds = await notificationUsers(messageUsers, session);
+
+    // Get tokens
+    const dataTokens = messageUsers
+        .filter((user) => !notificationUsersIds.includes(user.id))
+        .map((user) => user.Tokens.map((token) => token.token))
+        .flat();
+    const notifyTokens = messageUsers
+        .filter((user) => notificationUsersIds.includes(user.id))
         .map((user) => user.Tokens.map((token) => token.token))
         .flat();
 
+    // Generate messages
     const type = session.type === "live" ? "live" : "smart";
-    const message = buildSessionMessage(
+    const dataMessage = buildSessionMessage(
         "SESSION_START",
         {
             quizId: session.quizId,
         },
         `New ${type} quiz session started`,
         `A new session for the quiz "${quiz.title}" has started, click to join`,
-        tokens
+        dataTokens,
+        false
     );
-    await sendMessage(message);
+    const notificationMessage = buildSessionMessage(
+        "SESSION_START",
+        {
+            quizId: session.quizId,
+        },
+        `New ${type} quiz session started`,
+        `A new session for the quiz "${quiz.title}" has started, click to join`,
+        notifyTokens,
+        true
+    );
+    // And send
+    await sendMessage(dataMessage);
+    await sendMessage(notificationMessage);
 };
 
-// Filter available users
-const filterUsers = async (users: User[], session: Session) => {
+// Fill notification settings
+const fillNotificationSettings = async (users: User[]) => {
     // Notification settings does not exist
     for (const user of users) {
         if (!user.NotificationSettings) {
@@ -239,9 +269,11 @@ const filterUsers = async (users: User[], session: Session) => {
             });
         }
     }
+};
 
+// Filter to users who SHOULDN't have data message sent
+const noMessageUsers = async (session: Session) => {
     // Get all users who have completed session
-    let excluded: number[] = [];
     if (session.type === "self paced") {
         const sessions = await Session.findAll({
             attributes: ["id"],
@@ -260,17 +292,21 @@ const filterUsers = async (users: User[], session: Session) => {
                 },
             ],
         });
-        excluded = sessions
+        return sessions
             .map((session) => session.Users.map((user) => user.id))
             .flat();
     }
+    return [];
+};
 
-    return users.filter((user) => {
-        // Excluded since they have completed session
-        if (excluded.includes(user.id)) return false;
-
-        // No token
-        if (user.Tokens.length === 0) return false;
+// Filter to users who SHOULD receive a notification
+const notificationUsers = async (users: User[], session: Session) => {
+    // Filter by state
+    const stateFilteredUsers: User[] = users.filter((user) => {
+        // Temporary replacement
+        if (!user.NotificationSettings) {
+            user.NotificationSettings = new NotificationSettings();
+        }
 
         // Current date
         const date = new Date();
@@ -283,8 +319,6 @@ const filterUsers = async (users: User[], session: Session) => {
         if (!user.NotificationSettings.days[WEEKDAYS.indexOf(dateLocal)]) {
             return false;
         }
-
-        // todo: notification count check
 
         // Now check user state
         if (user.UserState) {
@@ -310,4 +344,17 @@ const filterUsers = async (users: User[], session: Session) => {
         // User has no state, true
         return true;
     });
+
+    // Filter/map to list of user ids who can be notified (or null)
+    const notify: number[] = await Promise.all(
+        stateFilteredUsers.map((user) => canAndSetNotify(user))
+    );
+    // Now filter to users who can be notified and return their user IDs
+    return stateFilteredUsers
+        .filter((user) => notify.includes(user.id))
+        .map((user) => user.id);
+};
+
+const canAndSetNotify = async (user: User) => {
+    return user.id;
 };

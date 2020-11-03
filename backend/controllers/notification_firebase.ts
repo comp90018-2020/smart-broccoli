@@ -12,23 +12,17 @@ export const buildSessionMessage = (
     title: string,
     body: string,
     tokens: string[],
+    notify: boolean = true,
     ttlSeconds: number = 5 * 60
 ): admin.messaging.MulticastMessage => {
-    return {
+    const message: admin.messaging.MulticastMessage = {
         data: {
             type,
             data: JSON.stringify(content),
         },
-        notification: {
-            title: title,
-            body: body,
-        },
         android: {
             ttl: ttlSeconds * 1000,
             priority: "normal",
-            notification: {
-                clickAction: type,
-            },
         },
         apns: {
             payload: {
@@ -39,4 +33,12 @@ export const buildSessionMessage = (
         },
         tokens,
     };
+    if (notify) {
+        message["notification"] = {
+            title: title,
+            body: body,
+        };
+        message["android"]["notification"] = { clickAction: type };
+    }
+    return message;
 };
