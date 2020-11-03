@@ -63,7 +63,8 @@ class QuizLobby extends StatelessWidget {
                 ),
 
                 // Start button on top of card
-                if (model.role == GroupRole.OWNER)
+                if (model.role == GroupRole.OWNER &&
+                    model.state == SessionState.PENDING)
                   Positioned.fill(
                     child: Align(
                       alignment: Alignment.bottomCenter,
