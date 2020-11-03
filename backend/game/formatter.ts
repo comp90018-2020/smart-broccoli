@@ -29,7 +29,7 @@ export const formatQuestion = (
     const remainingTime = session.QuestionReleaseAt[questionIndex] - Date.now();
     return {
         question: {
-            id:questionCopy.id,
+            id: questionCopy.id,
             no: questionIndex,
             text: questionCopy.text,
             tf: questionCopy.tf,

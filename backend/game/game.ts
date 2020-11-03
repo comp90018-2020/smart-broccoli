@@ -436,13 +436,13 @@ export class GameHandler {
                 }
                 setTimeout(
                     (questionIndex: number) => {
-                        if (session.canSetToNextQuestion(questionIndex)) {
-                            this.releaseCorrectAnswer(
-                                session,
-                                questionIndex,
-                                player
-                            );
-                        }
+                        // if (session.canSetToNextQuestion(questionIndex)) {
+                        this.releaseCorrectAnswer(
+                            session,
+                            questionIndex,
+                            player
+                        );
+                        // }
                     },
                     process.env.SOCKET_MODE === "debug"
                         ? 10000
