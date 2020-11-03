@@ -32,6 +32,15 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Quiz that is held
   Quiz _quiz;
 
+  /// The time controller
+  TextEditingController _timeController = TextEditingController();
+
+  /// Sets the quiz that this widget holds
+  void _setQuiz(Quiz quiz) {
+    _quiz = quiz;
+    _timeController.text = _getTimeString(_quiz.timeLimit);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +51,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
     // From group or new quiz
     if (widget.groupId != null || widget.quizId == null) {
-      _quiz = new Quiz("", widget.groupId, QuizType.LIVE, timeLimit: 10);
+      _setQuiz(new Quiz("", widget.groupId, QuizType.LIVE, timeLimit: 10));
     }
 
     // From quiz id
@@ -57,7 +66,7 @@ class _QuizCreateState extends State<QuizCreate> {
     // Clone and set quiz after selectQuiz
     var quiz =
         Provider.of<QuizCollectionModel>(context, listen: true).selectedQuiz;
-    if (_quiz == null && quiz != null) _quiz = Quiz.fromJson(quiz.toJson());
+    if (_quiz == null && quiz != null) _setQuiz(Quiz.fromJson(quiz.toJson()));
 
     return CustomPage(
       title: "Quiz",
@@ -148,7 +157,7 @@ class _QuizCreateState extends State<QuizCreate> {
                           autofocus: false,
                           readOnly: true,
                           onTap: _showTimeDialog,
-                          initialValue: "${_quiz.timeLimit} seconds",
+                          controller: _timeController,
                           decoration: InputDecoration(
                               labelText: 'Seconds per question',
                               prefixIcon: Icon(Icons.timer)),
@@ -372,12 +381,20 @@ class _QuizCreateState extends State<QuizCreate> {
         context: context,
         builder: (BuildContext context) {
           return new NumberPickerDialog.integer(
-              minValue: 5, maxValue: 90, initialIntegerValue: 30);
+              minValue: 5,
+              maxValue: 90,
+              initialIntegerValue: _quiz.timeLimit ?? 10);
         }).then((value) {
       if (value != null && value is int) {
         _quiz.timeLimit = value;
+        _timeController.text = _getTimeString(value);
       }
     });
+  }
+
+  /// Formats a time as a string
+  String _getTimeString(int time) {
+    return "$time seconds";
   }
 
   /// Whether the quiz has been modified
