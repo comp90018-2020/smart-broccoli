@@ -500,7 +500,7 @@ export const endSession = async (
                 }
             );
 
-            // Update user entries
+            // Update user entries according to progress held by game
             for (const entry of progress) {
                 await SessionParticipant.update(
                     {
@@ -513,6 +513,13 @@ export const endSession = async (
                     }
                 );
             }
+
+            // Those who are still in the joined state should be removed
+            // Or they will be in limbo
+            await SessionParticipant.update(
+                { state: "lost" },
+                { where: { state: "joined" }, transaction }
+            );
         });
     } catch (err) {
         throw err;
