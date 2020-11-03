@@ -3,27 +3,11 @@ import 'dart:async';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:sqflite/sqflite.dart';
 import 'package:xml/xml.dart';
 
 import '../background_database.dart';
 
-// check when app is open
-
-// Abstract database API
 class BackgroundLocation {
-  String pth;
-  Database db;
-
-  Future<bool> onTrain(Position userLocation) async {
-    double lon1 = userLocation.longitude + 0.001;
-    double lon2 = userLocation.longitude - 0.001;
-    double lat1 = userLocation.latitude + 0.001;
-    double lat2 = userLocation.latitude - 0.001;
-    return await _onTrain(
-        lat2.toString(), lon2.toString(), lat1.toString(), lon1.toString());
-  }
-
   // get GPS lon lat reading
   Future<Position> getPosition() async {
     Position userLocation = await Geolocator.getCurrentPosition(
@@ -40,6 +24,10 @@ class BackgroundLocation {
     return placemark.first;
   }
 
+  /// The API to get details of a specific placemark
+  /// i.e 601 Little Lonsdale Street
+  /// Nominatim also returns the type of building, where it be residential or
+  /// Commercial
   Future<String> placeMarkType(Placemark placeMark) async {
     String name = (placeMark.street +
             " " +
@@ -54,14 +42,32 @@ class BackgroundLocation {
 
     http.Response response = await http.post(query);
 
-    print("Response code JSON" + response.statusCode.toString());
-    print("Response body JSON" + response.body.toString());
-    // We don't need to use Json stuff actually, we just need to identify keywords
-    // Todo parse JSON in future iterations
-    // json.decode(response.body);
-    return response.body.toString();
+    try {
+      if (response.statusCode == 200) {
+        print("Response code JSON" + response.statusCode.toString());
+        print("Response body JSON" + response.body.toString());
+        String httpResult = response.body.toString();
+        // We don't need to use Json stuff actually, we just need to check
+        // if certain keywords is within the JSON file
+        return httpResult;
+      }
+
+      if (response.statusCode == 401) {
+        print("Overpass Turbo API Unauthorised");
+      }
+      if (response.statusCode == 403) {
+        print("Overpass Turbo API Forbidden Request");
+      } else {
+        throw Exception('Unable to get groups: unknown error occurred');
+      }
+    } catch (e) {
+      print(e);
+    }
+    return null;
   }
 
+  /// Check if a long lat is within 1km of a Geofence point
+  /// 1 Km as that assumes for GPS errors and other inaccuracies
   Future<bool> inGeoFence(Position userLocation) async {
     List<GeoFence> gf = await BackgroundDatabase.getGeoFence();
     double distance;
@@ -77,10 +83,19 @@ class BackgroundLocation {
     return false;
   }
 
-  /// XML http request stuff
+  /// Intermediate function to control the area which we scan for trains.
+  Future<bool> onTrain(Position userLocation) async {
+    double lon1 = userLocation.longitude + 0.001;
+    double lon2 = userLocation.longitude - 0.001;
+    double lat1 = userLocation.latitude + 0.001;
+    double lat2 = userLocation.latitude - 0.001;
+    return await _onTrain(
+        lat2.toString(), lon2.toString(), lat1.toString(), lon1.toString());
+  }
 
-  http.Client _http;
-
+  /// Makes an HTTP request to the overpass API and checks if the user is on the
+  /// I made the decision not to convert the XML and just check for specific
+  /// Elements as ideally you want to reduce background processing
   Future<bool> _onTrain(
       String lon, String lat, String lon1, String lat1) async {
     final data = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -108,14 +123,26 @@ class BackgroundLocation {
     print("Response code " + response.statusCode.toString());
     print("Response body " + response.body.toString());
 
-    final result = XmlDocument.parse(response.body);
-
-    // The user is very likely on a train
-    if (result.findAllElements('tag').length != 0) {
-      return true;
+    if (response.statusCode == 200) {
+      try {
+        final result = XmlDocument.parse(response.body);
+        // The user is very likely on a train
+        if (result.findAllElements('tag').length != 0) {
+          return true;
+        }
+      } catch (e) {
+        print(e);
+      }
+      return false;
     }
-    return false;
-  }
 
-  BackgroundLocation() {}
+    if (response.statusCode == 401) {
+      print("Overpass Turbo API Unauthorised");
+    }
+    if (response.statusCode == 403) {
+      print("Overpass Turbo API Forbidden Request");
+    } else {
+      throw Exception('Unable to get groups: unknown error occurred');
+    }
+  }
 }

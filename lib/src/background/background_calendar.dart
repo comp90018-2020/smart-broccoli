@@ -1,42 +1,62 @@
 import 'dart:collection';
 
 import 'package:device_calendar/device_calendar.dart';
-import 'package:flutter/services.dart';
+
+import '../background_database.dart';
 
 class BackgroundCalendar {
-  List<Calendar> calendar;
-  List<Event> events = [];
-  DeviceCalendarPlugin deviceCalendarPlugin;
+  /// This should only be run on release mode and on a foreground thread
+  /// https://github.com/builttoroam/device_calendar/issues/217
+  static saveCalendarData(DeviceCalendarPlugin deviceCalendarPlugin) async {
+    await BackgroundDatabase.init();
+    await BackgroundDatabase.cleanEvent();
 
-  BackgroundCalendar(DeviceCalendarPlugin dcp) {
-    deviceCalendarPlugin = dcp;
-  }
+    List<Result<UnmodifiableListView<Event>>> e = [];
+    List<Event> ev = [];
+    deviceCalendarPlugin = new DeviceCalendarPlugin();
+    var cal = await deviceCalendarPlugin.retrieveCalendars();
+    List<Calendar> calendar = cal.data;
+    print("Calendar" +
+        calendar.toString() +
+        "Length:" +
+        calendar.length.toString());
 
-  void getBackground() async {
+    // Define the time frame
+    var now = new DateTime.now();
+    // Define that we want events from now to 7 days later
+    RetrieveEventsParams retrieveEventsParams = new RetrieveEventsParams(
+        startDate: now, endDate: now.add(new Duration(days: 7)));
+    // Find all events within 7 days
+    for (var i = 0; i < calendar.length; i++) {
+      print("ID i = " + i.toString());
+      print("Cal ID" + calendar[i].id.toString());
+      e.add(await deviceCalendarPlugin.retrieveEvents(
+          calendar[i].id, retrieveEventsParams));
+    }
 
-      print("GET all Calendars");
-      Result<UnmodifiableListView<Calendar>> cal =
-          await deviceCalendarPlugin.retrieveCalendars();
-      calendar = cal.data;
-
-      print("Calendar :" + calendar.toString());
-
-      var now = new DateTime.now();
-
-      // Define the time frame
-      RetrieveEventsParams retrieveEventsParams = new RetrieveEventsParams(
-          startDate: now, endDate: now.add(new Duration(hours: 1)));
-
-      // Find all events within an hour of now
-      for (var i = 0; i < calendar.length; i++) {
-        Result<UnmodifiableListView<Event>> e = await deviceCalendarPlugin
-            .retrieveEvents(calendar[i].id, retrieveEventsParams);
-        events = events + e.data.toList();
+    /// Intermediate step to check if every event is extracted
+    for (var j = 0; j < e.length; j++) {
+      if (e[j].isSuccess) {
+        ev = ev + e[j].data.toList();
+      } else {
+        print(e[j].errorMessages);
       }
-      print("Events" + events.toString());
-  }
+    }
 
-  bool isEmpty() {
-    return events.isEmpty;
+    /// Debug print all events
+    print("Events:" + ev.toString());
+
+    /// Write the data into the datatebase
+    /// Which only stores the start time since Epoch
+    /// And end time since Epoch
+    for (var j = 0; j < ev.length; j++) {
+      CalEvent calEvent = new CalEvent(
+          id: j,
+          start: ev[j].start.millisecondsSinceEpoch,
+          end: ev[j].end.millisecondsSinceEpoch);
+
+      await BackgroundDatabase.insertEvent(calEvent);
+    }
+    BackgroundDatabase.closeDB();
   }
 }

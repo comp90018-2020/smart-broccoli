@@ -22,9 +22,7 @@ void callbackDispatcher() {
       switch (task) {
         case "backgroundReading":
           await BackgroundDatabase.init();
-          print("Get Events");
           List<CalEvent> calEvent = await BackgroundDatabase.getEvents();
-          print("FINISHED getting events");
           DateTime tiem = DateTime.now();
           // TODO test calendar events
           for (var i = 0; i < calEvent.length; i++) {
@@ -67,9 +65,9 @@ void callbackDispatcher() {
           /// Get current long lat
           Position position1 = await backgroundLocation.getPosition();
 
-          print("Location get");
-
           /*
+
+          Debug Test code
           print("Position 1 " +
               position1.longitude.toString() +
               " " +
@@ -91,6 +89,7 @@ void callbackDispatcher() {
           Placemark placemark =
               await backgroundLocation.getPlacemark(position1);
 
+          // print Address Details
           print("Place name " +
               placemark.street +
               " " +
@@ -104,7 +103,7 @@ void callbackDispatcher() {
           if (data.contains("office") || data.contains("commercial")) {
             // Return 0
             print("Reason: At a office or commercial area");
-            // break;
+            // break; //todo uncomment break in final
           }
 
           /// Idle for 30 seconds
@@ -124,12 +123,12 @@ void callbackDispatcher() {
 
           /// Determine if the user has moved about 100 m in 30 + a few seconds
           /// Todo add perf logic
+          /// If the user is moving
           if (distance > 100) {
-            print(
-                "The user is  moving, however I need perferences to continue");
+            print("The user is  moving, however I need configs to continue");
             // Check if on train
             if ((await backgroundLocation.onTrain(position2))) {
-              print("The user is on a train");
+              print("The user is on a train, but I need the configs");
 
               /// If allow prompts on move or not logic here
               break;
@@ -138,26 +137,21 @@ void callbackDispatcher() {
             /// Not on train and moving
             /// Check if allow prompts on the move
             else {
-              print("Not on train but you need prompts");
+              print("Not on train but I need configs to continue");
               break;
             }
           }
 
-          /// If not moving
+          /// If the user is not moving
           else {
-            print("User is not walking");
             // Access Light sensor
             LightSensor lightSensor = new LightSensor();
-            print("Light sensor created");
             int lum = await lightSensor.whenLight();
-            print("Accssed Light sensor");
 
             print("Lum " + lum.toString());
 
             lightSensor.close();
 
-            DateTime dateTime = DateTime.now();
-            print("Datetime read");
             // Todo you may want to change 20 to a config value
             if (lum > 10) {
               print("Reason: notif sent because lum value is greater than 10");
@@ -166,17 +160,18 @@ void callbackDispatcher() {
               /// return 1
 
             } else {
-              print("LUM fail");
+              /// If the time is at night //todo add config
+              DateTime dateTime = DateTime.now();
               if (dateTime.hour > 18 && dateTime.hour < 23) {
                 print("Reason: notif sent because time is at night");
 
                 /// return 1
                 break;
               } else {
-                print("Gyro test");
+                // Check if the phone is stationary and not being used
                 Gyro gyro = new Gyro();
                 // Determine phone movement, i.e is teh user currently using
-                // The phone
+                // The phone also determine if we need to sleep below
                 duration = new Duration(seconds: 5);
                 sleep(duration);
                 GyroscopeEvent gyroscopeEvent = await gyro.whenGyro();
@@ -203,7 +198,8 @@ void callbackDispatcher() {
             }
           }
           // Return 0
-          print("Reason: Either perferences failed or Gyro failed");
+          print(
+              "Reason: Phone is not stationary or asked not to be prompted or calendar is busy");
           break;
       }
       BackgroundDatabase.closeDB();

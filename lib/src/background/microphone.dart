@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:noise_meter/noise_meter.dart';
 
 
-
+// Note this class isn't currently used
 class Microphone {
 
   bool _isRecording = false;

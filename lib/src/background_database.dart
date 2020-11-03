@@ -1,6 +1,9 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// A Sql lite database which holds all the calendar events within 7 days
+/// And all Geo Fences
+
 class BackgroundDatabase {
   static String pth;
   static Database db;
@@ -9,6 +12,7 @@ class BackgroundDatabase {
     db.close();
   }
 
+  // Initialise the database
   static init() async {
     db = await openDatabase(
       join(await getDatabasesPath(), 'backend_database.db'),
@@ -17,9 +21,6 @@ class BackgroundDatabase {
           "CREATE TABLE events(id INTEGER PRIMARY KEY, time INTEGER)",
         );
 
-        db.execute(
-          "CREATE TABLE last(id INTEGER PRIMARY KEY, lon DOUBLE, lat DOUBLE)",
-        );
         // Run the CREATE TABLE statement on the database.
         return db.execute(
           "CREATE TABLE geo(id INTEGER PRIMARY KEY, lon DOUBLE, lat DOUBLE)",
@@ -29,13 +30,20 @@ class BackgroundDatabase {
     );
   }
 
-  static Future<void> cleanEvent() async {
+  /// Clears out the GeoFence Database for later use
+  static Future<void> cleanGeo() async {
     //here we execute a query to drop the table if exists which is called "tableName"
     //and could be given as method's input parameter too
-    await db.execute("DROP TABLE IF EXISTS events");
+    await db.execute("DROP TABLE IF geo events");
 
     //and finally here we recreate our beloved "tableName" again which needs
     //some columns initialization
+    await db.execute(
+        "CREATE TABLE geo (id INTEGER PRIMARY KEY, lon DOUBLE, lat DOUBLE)");
+  }
+
+  static Future<void> cleanEvent() async {
+    await db.execute("DROP TABLE IF EXISTS events");
     await db.execute("CREATE TABLE events (id INTEGER, time INTEGER)");
   }
 
@@ -48,10 +56,10 @@ class BackgroundDatabase {
     );
   }
 
-// Define a function that inserts dogs into the database
+// Define a function that inserts fence into the database
   static Future<void> insertFence(GeoFence fence) async {
-    // Insert the Dog into the correct table. You might also specify the
-    // `conflictAlgorithm` to use in case the same dog is inserted twice.
+    // Insert the Fence into the correct table. You might also specify the
+    // `conflictAlgorithm` to use in case the same fence is inserted twice.
     //
     // In this case, replace any previous data.
     await db.insert(
@@ -61,25 +69,12 @@ class BackgroundDatabase {
     );
   }
 
-// Define a function that inserts dogs into the database
-  static Future<void> insertLast(LastLocation lastLocation) async {
-    // Insert the Dog into the correct table. You might also specify the
-    // `conflictAlgorithm` to use in case the same dog is inserted twice.
-    //
-    // In this case, replace any previous data.
-    await db.insert(
-      'last',
-      lastLocation.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  // A method that retrieves all the dogs from the dogs table.
+  // A method that retrieves all the  Calendar events from the events table.
   static Future<List<CalEvent>> getEvents() async {
     // Query the table for all The Dogs.
     final List<Map<String, dynamic>> maps = await db.query('events');
 
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
+    // Convert the List<Map<String, dynamic> into a List<CalEvents>.
     return List.generate(maps.length, (i) {
       return CalEvent(
         id: maps[i]['id'],
@@ -103,78 +98,24 @@ class BackgroundDatabase {
           lat: maps[i]['lat'],
         );
       });
-    } catch(e){
+    } catch (e) {
       print(e);
     }
   }
 
-  // A method that retrieves all the dogs from the dogs table.
-  static Future<List<LastLocation>> getLast() async {
-    // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db.query('last');
-
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
-    return List.generate(maps.length, (i) {
-      return LastLocation(
-        id: maps[i]['id'],
-        lon: maps[i]['lon'],
-        lat: maps[i]['lat'],
-      );
-    });
-  }
-
-  static Future<void> updateLast(LastLocation last) async {
-    // Update the given Dog.
-    await db.update(
-      'last',
-      last.toMap(),
-      // Ensure that the Dog has a matching id.
-      where: "id = ?",
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
-      whereArgs: [last.id],
-    );
-  }
-
-  /*
-  * e.g
-  // Update Fido's age.
-  await updateDog(Dog(
-    id: 0,
-    name: 'Fido',
-    age: 42,
-  ));
-
-  * */
-
   static Future<void> deleteGeoFence(int id) async {
-    // Remove the Dog from the Database.
+    // Remove the Geofence from the Database.
     await db.delete(
       'geo',
-      // Use a `where` clause to delete a specific dog.
+      // Use a `where` clause to delete a specific Fence
       where: "id = ?",
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      // Pass the Fence's id as a whereArg to prevent SQL injection.
       whereArgs: [id],
     );
   }
 }
 
 /// Data structure
-
-class LastLocation {
-  final int id;
-  final double lon;
-  final double lat;
-
-  LastLocation({this.id, this.lon, this.lat});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'lon': lon,
-      'lat': lat,
-    };
-  }
-}
 
 /// These two are seperate since we may need to add additional data to either of
 /// these in the future
