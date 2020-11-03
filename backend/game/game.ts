@@ -172,15 +172,6 @@ export class GameHandler {
                         total: Object.keys(session.playerMap).length,
                     }
                 );
-
-                if (session.hasAllPlayerAnswered()) {
-                    // set session state
-                    session.setToNextQuestion(session.getQuestionIndex());
-
-                    if (session.isSelfPacedGroup()) {
-                        this.next(session, session.getQuestionIndex() + 1);
-                    }
-                }
             }
         } catch (error) {
             sendErr(error, player === undefined ? undefined : player.socketId);
@@ -249,7 +240,7 @@ export class GameHandler {
                         ) {
                             await session.setStatus(GameStatus.Running);
                             session.setToNextQuestion(0);
-                            this.next(session, 0);
+                            this.releaseQuestion(session, 0);
                         }
                     },
                     WAIT_TIME_BEFORE_START,
@@ -257,7 +248,7 @@ export class GameHandler {
                 );
                 return;
             } else if (session.isSelfPacedNotGroupAndHasNotStart()) {
-                this.next(session, 0);
+                this.releaseQuestion(session, 0);
                 return;
             }
             if (session.is(GameStatus.Starting)) {
@@ -344,7 +335,7 @@ export class GameHandler {
 
     async start(session: GameSession, player: Player) {
         try {
-            if (session.isEmitValid(player)) return;
+            if (!session.isEmitValid(player)) return;
 
             if (session.canStart(player)) {
                 // set game status to starting
@@ -361,7 +352,7 @@ export class GameHandler {
                     await session.setStatus(GameStatus.Running);
                     session.setToNextQuestion(0);
                     // release the firt question
-                    this.next(session, 0, player);
+                    this.releaseQuestion(session, 0, player);
                 }, WAIT_TIME_BEFORE_START);
             }
         } catch (error) {
@@ -371,11 +362,18 @@ export class GameHandler {
 
     abort(session: GameSession, player?: Player) {
         try {
-            if (session.isEmitValid(player)) return;
+            if (!session.isEmitValid(player)) return;
 
             if (session.canAbort(player)) {
-                // Broadcast that quiz has been aborted
-                emitToRoom(whichRoom(session, Role.all), Event.cancelled, null);
+                if (session.hasMoreQuestions())
+                    // Broadcast that quiz has been cancelled
+                    emitToRoom(
+                        whichRoom(session, Role.all),
+                        Event.cancelled,
+                        null
+                    );
+                else emitToRoom(whichRoom(session, Role.all), Event.end, null);
+
                 // end a session
                 this.endSession(session);
                 // reset a sample session if is debug mode
@@ -408,9 +406,13 @@ export class GameHandler {
         }
     }
 
-    next(session: GameSession, questionIndex: number, player?: Player) {
+    releaseQuestion(
+        session: GameSession,
+        questionIndex: number,
+        player?: Player
+    ) {
         try {
-            if (session.isEmitValid(player)) return;
+            if (!session.isEmitValid(player)) return;
 
             if (session.canReleaseNextQuestion(player, questionIndex)) {
                 session.setQuestionReleaseTime(
@@ -423,6 +425,7 @@ export class GameHandler {
                     Event.nextQuestion,
                     formatQuestion(questionIndex, session, false)
                 );
+                session.questionReleased.add(questionIndex);
                 if (!session.isSelfPaced()) {
                     // send question with answer to the host
                     emitToRoom(
@@ -433,15 +436,11 @@ export class GameHandler {
                 }
                 setTimeout(
                     (questionIndex: number) => {
-                        session.unfreezeQuestion(questionIndex);
-                        if (session.canSetToNextQuestion(questionIndex)) {
-                            this.releaseCorrectAnswer(
-                                session,
-                                questionIndex,
-                                player
-                            );
-                            session.setToNextQuestion(questionIndex);
-                        }
+                        this.releaseCorrectAnswer(
+                            session,
+                            questionIndex,
+                            player
+                        );
                     },
                     process.env.SOCKET_MODE === "debug"
                         ? 10000
@@ -463,10 +462,10 @@ export class GameHandler {
 
     releaseCorrectAnswer(
         session: GameSession,
-        questoinIndex: number,
+        questionIndex: number,
         player?: Player
     ) {
-        const correctAnswer = session.getAnsOfQuestion(questoinIndex);
+        const correctAnswer = session.getAnsOfQuestion(questionIndex);
         for (const player of Object.values(session.playerMap)) {
             this.emitCorrectAnswer(player, correctAnswer);
         }
@@ -475,24 +474,27 @@ export class GameHandler {
             Event.correctAnswer,
             correctAnswer
         );
-        if (session.hasMoreQuestions()) {
-            session.setToNextQuestion(questoinIndex + 1);
 
-            if (session.isSelfPacedGroup()) {
+        session.setToNextQuestion(questionIndex + 1);
+        if (session.isSelfPacedGroup()) {
+            if (!session.hasFinalBoardReleased())
                 setTimeout(() => {
-                    this.showBoard(session, questoinIndex);
+                    this.showBoard(session);
                 }, CORRECT_ANSWER_SHOW_TIME);
-            }
-        } else {
-            this.showBoard(session, questoinIndex);
-            emitToRoom(whichRoom(session, Role.all), Event.end, null);
+            return;
+        }
+        if (
+            session.isSelfPacedNotGroup() &&
+            session.questionIndex == session.totalQuestions
+        ) {
             this.abort(session, player);
+            return;
         }
     }
-    showBoard(session: GameSession, questionIndex: number, player?: Player) {
-        try {
-            if (session.isEmitValid(player)) return;
 
+    showBoard(session: GameSession, player?: Player) {
+        try {
+            if (!session.isEmitValid(player)) return;
             if (session.canShowBoard(player)) {
                 //  get ranked records of players
                 const rank = session.rankPlayers();
@@ -504,31 +506,31 @@ export class GameHandler {
                         formatQuestionOutcome(session, player, rank, top5)
                     );
                 }
-                if (session.isSelfPacedGroup()) {
-                    if (session.hasMoreQuestions()) {
-                        setTimeout(() => {
-                            this.next(session, questionIndex + 1);
-                        }, BOARD_SHOW_TIME);
-                    } else {
-                        emitToRoom(
-                            whichRoom(session, Role.all),
-                            Event.end,
-                            null
-                        );
-                        setTimeout(() => {
-                            this.abort(session);
-                        }, BOARD_SHOW_TIME);
+                //  emit questionOutcome to the host
+                emitToRoom(
+                    whichRoom(session, Role.host),
+                    Event.questionOutcome,
+                    {
+                        question: session.questionIndex - 1,
+                        // leaderboard: rankSlice(rank, 5),
+                        leaderboard: top5,
                     }
-                } else {
-                    //  emit questionOutcome to the host
-                    emitToRoom(
-                        whichRoom(session, Role.host),
-                        Event.questionOutcome,
-                        {
-                            question: session.questionIndex,
-                            leaderboard: rankSlice(rank),
-                        }
-                    );
+                );
+                session.boardReleased.add(session.questionIndex - 1);
+                if (session.isSelfPacedGroup()) {
+                    if (!session.hasFinalBoardReleased()) {
+                        setTimeout(() => {
+                            this.releaseQuestion(
+                                session,
+                                session.questionIndex
+                            );
+                        }, BOARD_SHOW_TIME);
+                    } else this.abort(session);
+                } else if (
+                    !session.isSelfPacedNotGroup() &&
+                    session.hasFinalBoardReleased()
+                ) {
+                    this.abort(session);
                 }
             }
         } catch (error) {

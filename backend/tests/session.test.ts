@@ -12,6 +12,7 @@ import {
 } from "./helpers";
 import { jwtVerify } from "../helpers/jwt";
 import { activateSession, leaveSession } from "../controllers/session";
+import { readFileSync } from "fs";
 
 describe("Session", () => {
     beforeEach(async () => {
@@ -489,5 +490,52 @@ describe("Session", () => {
             .get(`/user/${userOwner.id}/profile`)
             .set("Authorization", `Bearer ${sessionUser.token}`);
         expect(res.status).to.equal(200);
+    });
+
+    it("Get picture in session", async () => {
+        const agent = supertest(app);
+        const userOwner = await registerAndLogin(USER);
+        const userMember = await registerAndLogin({
+            ...USER,
+            email: "b@b.com",
+        });
+        const group = await createGroup(userOwner.id, "foo");
+        const quiz = await createQuiz(userOwner.id, group.id, QUIZ);
+        const session = await createSession(userOwner.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
+
+        const setQuizPictureRes = await agent
+            .put(`/quiz/${quiz.id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${userOwner.token}`);
+        expect(setQuizPictureRes.status).to.equal(200);
+        const setQuestionPictureRes = await agent
+            .put(`/quiz/${quiz.id}/question/${quiz.questions[0].id}/picture`)
+            .attach("picture", readFileSync(`${__dirname}/assets/yc.png`), {
+                filename: "yc.png",
+            })
+            .set("Authorization", `Bearer ${userOwner.token}`);
+        expect(setQuestionPictureRes.status).to.equal(200);
+
+        const res = await agent
+            .post("/session/join")
+            .set("Authorization", `Bearer ${userMember.token}`)
+            .send({ code: session.session.code });
+        expect(res.status).to.equal(200);
+        expect(res.body).to.have.property("token");
+
+        const getQuizPictureRes = await agent
+            .get(`/quiz/${quiz.id}/picture`)
+            .set("Authorization", `Bearer ${res.body.token}`);
+        expect(getQuizPictureRes.status).to.equal(200);
+
+        const getQuestionPictureRes = await agent
+            .get(`/quiz/${quiz.id}/question/${quiz.questions[0].id}/picture`)
+            .set("Authorization", `Bearer ${res.body.token}`);
+        expect(getQuestionPictureRes.status).to.equal(200);
     });
 });

@@ -13,6 +13,7 @@ import sequelize, {
 import { processQuestions } from "./question";
 import { deletePicture, insertPicture } from "./picture";
 import { assertGroupOwnership } from "./group";
+import { sessionTokenDecrypt } from "./session";
 
 /**
  * Get quiz and permissions.
@@ -442,7 +443,32 @@ export const updateQuizPicture = async (
  * Get quiz picture.
  * @param quiz Quiz object
  */
-export const getQuizPicture = async (userId: number, quizId: number) => {
+export const getQuizPicture = async (
+    userId: number,
+    token: string,
+    quizId: number
+) => {
+    // Check session token
+    const decryptedToken = await sessionTokenDecrypt(token);
+    if (decryptedToken) {
+        // Bad token
+        if (decryptedToken.quizId !== quizId)
+            throw new ErrorStatus("Session token mismatch", 403);
+
+        // Get picture
+        const quiz = await Quiz.findByPk(quizId, {
+            attributes: ["pictureId"],
+            include: [
+                {
+                    // @ts-ignore
+                    model: Picture,
+                    attributes: ["id", "destination"],
+                },
+            ],
+        });
+        return quiz.Picture;
+    }
+
     // Ensure that user can access quiz
     const { quiz } = await getQuizAndRole(userId, quizId, {
         attributes: ["pictureId"],

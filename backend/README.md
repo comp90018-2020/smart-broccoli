@@ -18,3 +18,7 @@ Note: portions of code have been adapted from [COMP30022-Russia/COMP30022\_Serve
 |POSTGRES\_DB|comp90018|Postgres database|
 |POSTGRES\_HOST|postgresql|Postgres host (reflects `docker-compose.yml` service)|
 |TOKEN\_SECRET|foo|Secret used to sign JWT tokens (authentication)
+|FIREBASE_PRIVATE_KEY|-|Private key of Firebase Admin SDK|
+|FIREBASE_PROJECT_ID|-|Firebase project ID|
+|FIREBASE_CLIENT_EMAIL|-|Firebase client email|
+|FIREBASE_DATABASE_URL|-|Firebase database URL|

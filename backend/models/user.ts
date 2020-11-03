@@ -1,10 +1,18 @@
 import Sequelize, {
     BelongsToManyGetAssociationsMixin,
     HasOneGetAssociationMixin,
+    HasOneSetAssociationMixin,
     Optional,
 } from "sequelize";
 import crypto from "crypto";
-import { Group, SessionParticipant, UserGroup } from "models";
+import {
+    Group,
+    NotificationSettings,
+    SessionParticipant,
+    Token,
+    UserGroup,
+    UserState,
+} from "models";
 import Picture from "./picture";
 
 // Represents users
@@ -63,6 +71,10 @@ class User
     public UserGroup?: UserGroup;
     public SessionParticipant?: SessionParticipant;
     public Picture?: Picture;
+
+    public Tokens?: Token[];
+    public UserState?: UserState;
+    public NotificationSetting?: NotificationSettings;
 
     public getGroups!: BelongsToManyGetAssociationsMixin<Group>;
     public getPicture!: HasOneGetAssociationMixin<Picture>;

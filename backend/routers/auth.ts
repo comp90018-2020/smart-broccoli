@@ -9,6 +9,7 @@ import {
     promoteParticipant,
     register,
 } from "../controllers/auth";
+import { addToken, deleteTokenOfUser } from "../controllers/notification";
 
 const router = Router();
 
@@ -253,6 +254,77 @@ router.post(
         try {
             await logout(req.token);
             return res.sendStatus(200);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /auth/firebase:
+ *   post:
+ *     summary: Attach firebase token to user
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             properties:
+ *               token:
+ *                 type: string
+ *               oldToken:
+ *                 type: string
+ *             required:
+ *               - token
+ *     responses:
+ *       '200':
+ *         description: OK
+ */
+router.post(
+    "/firebase",
+    [
+        body("token").isString().trim(),
+        body("oldToken").optional().isString().trim(),
+    ],
+    validate,
+    auth(),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const token = await addToken(
+                req.user.id,
+                req.body.token,
+                req.body.oldToken
+            );
+            return res.send(token);
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
+/**
+ * @swagger
+ * /auth/firebase:
+ *   delete:
+ *     summary: Delete user's firebase token
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       '200':
+ *         description: OK
+ */
+router.delete(
+    "/firebase",
+    [body("token").isString().trim()],
+    validate,
+    auth(),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await deleteTokenOfUser(req.user.id, req.body.token);
+            return res.sendStatus(204);
         } catch (err) {
             return next(err);
         }

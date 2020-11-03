@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:device_calendar/device_calendar.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +11,6 @@ import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:workmanager/workmanager.dart';
-
-
 
 List<Event> events = [];
 
@@ -36,7 +32,6 @@ void main() async {
 
   // Cancel all ongoing background tasks upon running the app
   await Workmanager.cancelAll();
-
 
   /// Schedule the background task
   /// Default is 15 minutes per refresh
@@ -83,7 +78,7 @@ void main() async {
               groupRegistryModel..authUpdated(),
         ),
       ],
-      child: MyApp(pubSub),
+      child: MyApp(),
     ),
   );
 }
@@ -93,7 +88,7 @@ class MyApp extends StatefulWidget {
   final PubSub pubSub;
 
   /// Takes a publish/subscribe
-  MyApp(this.pubSub);
+  MyApp() : this.pubSub = PubSub();
 
   @override
   State createState() => _MyAppState();
@@ -163,8 +158,6 @@ class _MyAppState extends State<MyApp> {
 
 /// A permission checker
 _checkPermissions(DeviceCalendarPlugin deviceCalendarPlugin) async {
-
-
   var statusCal = await Permission.calendar.status;
   if (statusCal.isUndetermined) {
     // You can request multiple permissions this way just in case there is a
@@ -172,25 +165,25 @@ _checkPermissions(DeviceCalendarPlugin deviceCalendarPlugin) async {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.calendar,
     ].request();
-    print(statuses[Permission.storage]); // it should print PermissionStatus.granted
+    print(statuses[
+        Permission.storage]); // it should print PermissionStatus.granted
   }
-
 
   var statusGPS = await Permission.location.status;
   if (statusGPS.isUndetermined) {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.location,
     ].request();
-    print(statuses[Permission.storage]); // it should print PermissionStatus.granted
+    print(statuses[
+        Permission.storage]); // it should print PermissionStatus.granted
   }
-
 
   var statusStorage = await Permission.storage.status;
   if (statusStorage.isUndetermined) {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.storage,
     ].request();
-    print(statuses[Permission.storage]); // it should print PermissionStatus.granted
+    print(statuses[
+        Permission.storage]); // it should print PermissionStatus.granted
   }
 }
-

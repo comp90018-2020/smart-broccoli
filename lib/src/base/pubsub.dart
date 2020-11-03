@@ -14,7 +14,16 @@ class PubSub extends PubSubBase {
   /// called with a topic is emitted.
   Map<PubSubTopic, List<Function(dynamic)>> _channels = {};
 
-  PubSub();
+  /// Instance held locally
+  static final PubSub _singleton = PubSub._internal();
+
+  /// Internal constructor
+  PubSub._internal();
+
+  /// PubSub instance
+  factory PubSub() {
+    return _singleton;
+  }
 
   /// Subscribe to topic
   void subscribe(PubSubTopic topic, Function(dynamic) callback) {

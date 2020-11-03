@@ -35,6 +35,9 @@ export class GameSession {
     public pointSys: PointSystem = new PointSystem();
     private activePlayersNum: number = 0;
     private invalidTokens: Set<String> = new Set([]);
+    public boardReleased: Set<number> = new Set([]);
+    public questionReleased: Set<number> = new Set([]);
+    public totalQuestions: number = 0;
 
     constructor(
         $quiz: QuizAttributes,
@@ -44,6 +47,7 @@ export class GameSession {
     ) {
         this.id = $sessionId;
         this.quiz = $quiz;
+        this.totalQuestions = this.quiz.questions.length;
 
         if (isGroup) {
             // "live", "self paced"
@@ -62,7 +66,9 @@ export class GameSession {
             }
         }
     }
-
+    hasFinalBoardReleased() {
+        return this.boardReleased.has(this.totalQuestions - 1);
+    }
     deactivateToken(token: string) {
         this.invalidTokens.add(token);
     }
@@ -100,12 +106,6 @@ export class GameSession {
         }
     }
 
-    unfreezeQuestion(questionIndex: number) {
-        if (questionIndex === this.questionIndex) {
-            this._isReadyForNextQuestion = true;
-        }
-    }
-
     getPlayer(playerId: number) {
         return this.playerMap[playerId];
     }
@@ -125,7 +125,12 @@ export class GameSession {
         );
     }
     isEmitValid(player: Player) {
-        return this.type === GameType.SelfPaced_Group && player !== undefined;
+        return (
+            (player !== undefined &&
+                (player.role === Role.host ||
+                    this.type == GameType.SelfPaced_NotGroup)) ||
+            player == undefined
+        );
     }
     isSelfPacedGroup() {
         return this.type === GameType.SelfPaced_Group;
@@ -141,7 +146,7 @@ export class GameSession {
         return this.status === status;
     }
     hasMoreQuestions() {
-        return this.questionIndex < this.quiz.questions.length - 1;
+        return this.questionIndex < this.totalQuestions - 1;
     }
 
     async playerLeave(player: Player) {
@@ -171,6 +176,7 @@ export class GameSession {
         return (
             this.type === GameType.SelfPaced_Group ||
             this.type === GameType.SelfPaced_NotGroup ||
+            (player === undefined && !this.hasMoreQuestions()) ||
             player.role === Role.host
         );
     }
@@ -233,13 +239,15 @@ export class GameSession {
 
     canReleaseNextQuestion(player: Player, nextQuestionIndex: number) {
         return (
+            nextQuestionIndex <= this.totalQuestions &&
+            !this.questionReleased.has(nextQuestionIndex) &&
             this.questionIndex === nextQuestionIndex &&
             this._isReadyForNextQuestion &&
             this.status === GameStatus.Running &&
             // if no host or player is host
             (this.type === GameType.SelfPaced_Group ||
                 this.type === GameType.SelfPaced_NotGroup ||
-                player.role === Role.host)
+                (player !== undefined && player.role === Role.host))
         );
     }
 
@@ -258,14 +266,14 @@ export class GameSession {
             (!this._isReadyForNextQuestion || this.questionIndex === 0)
         );
     }
+
     canShowBoard(player: Player) {
         return (
+            this.questionIndex !== -1 &&
             this._isReadyForNextQuestion &&
-            ((this.type === GameType.SelfPaced_Group && player === undefined) ||
-                (this.type === GameType.Live_NotGroup &&
-                    player === undefined &&
-                    !this.hasMoreQuestions()) ||
-                player.role === Role.host)
+            !this.boardReleased.has(this.questionIndex - 1) &&
+            !this.hasFinalBoardReleased() &&
+            (player === undefined || player.role === Role.host)
         );
     }
 
@@ -280,15 +288,12 @@ export class GameSession {
         return (
             this._isReadyForNextQuestion &&
             this.questionIndex >= 0 &&
-            this.questionIndex < this.quiz.questions.length
+            this.questionIndex < this.totalQuestions
         );
     }
 
-    canSetToNextQuestion(nextQuestionIndex: number) {
-        return (
-            this._isReadyForNextQuestion &&
-            nextQuestionIndex === this.questionIndex
-        );
+    canSetToNextQuestion(questionIndex: number) {
+        return questionIndex === this.questionIndex;
     }
 
     getAnsOfQuestion(questionIndex: number): Answer {
@@ -358,12 +363,17 @@ export class GameSession {
         }
     }
     getQuestionIndex() {
-        return this.questionIndex;
+        return this._isReadyForNextQuestion
+            ? this.questionIndex
+            : this.questionIndex - 1;
     }
 
     setToNextQuestion(nextQuestionIndex: number) {
-        if (this.questionIndex === nextQuestionIndex - 1) {
-            this.questionIndex += 1;
+        if (
+            this.questionIndex === nextQuestionIndex - 1 &&
+            nextQuestionIndex <= this.totalQuestions
+        ) {
+            this.questionIndex = nextQuestionIndex;
             this._isReadyForNextQuestion = true;
             this.pointSys.setForNewQuestion();
         }

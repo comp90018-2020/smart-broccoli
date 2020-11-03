@@ -26,5 +26,6 @@ import "./user.test";
 import "./group.test";
 import "./quiz.test";
 import "./session.test";
+import "./notification.test";
 
 export default app;
