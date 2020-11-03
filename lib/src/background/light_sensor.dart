@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:light/light.dart';
 
+/// The Luminosity sensor
+/// Gets light data
 class LightSensor {
   Light _light;
   StreamController<int> controller = StreamController<int>();

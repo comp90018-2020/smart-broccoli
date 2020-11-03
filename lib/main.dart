@@ -3,13 +3,11 @@ import 'dart:collection';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/background/background_calendar.dart';
-import 'package:smart_broccoli/src/background/microphone.dart';
-import 'package:smart_broccoli/src/background_database.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
@@ -35,6 +33,7 @@ void main() async {
     callbackDispatcher,
     isInDebugMode: true,
   );
+
   // Cancel all ongoing background tasks upon running the app
   await Workmanager.cancelAll();
 
@@ -162,23 +161,36 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-/// A temporary permission checker
-/// It works as intended so far
+/// A permission checker
 _checkPermissions(DeviceCalendarPlugin deviceCalendarPlugin) async {
-  LocationPermission permission = await Geolocator.checkPermission();
-  Result<bool> res = await deviceCalendarPlugin.hasPermissions();
 
-  await deviceCalendarPlugin.requestPermissions();
-  await Geolocator.requestPermission();
-  await Geolocator.openAppSettings();
 
-  /*
-  if (permission != LocationPermission.always || !res.data) {
-    await deviceCalendarPlugin.requestPermissions();
-    await Geolocator.requestPermission();
-    await Permission.microphone.request();
-    await Permission.storage.request();
-    await Permission.activityRecognition.request();
-  } */
+  var statusCal = await Permission.calendar.status;
+  if (statusCal.isUndetermined) {
+    // You can request multiple permissions this way just in case there is a
+    // need to combine things
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.calendar,
+    ].request();
+    print(statuses[Permission.storage]); // it should print PermissionStatus.granted
+  }
+
+
+  var statusGPS = await Permission.location.status;
+  if (statusGPS.isUndetermined) {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+    ].request();
+    print(statuses[Permission.storage]); // it should print PermissionStatus.granted
+  }
+
+
+  var statusStorage = await Permission.storage.status;
+  if (statusStorage.isUndetermined) {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+    ].request();
+    print(statuses[Permission.storage]); // it should print PermissionStatus.granted
+  }
 }
 

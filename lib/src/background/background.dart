@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:connectivity/connectivity.dart';
@@ -23,19 +24,24 @@ void callbackDispatcher() {
         case "backgroundReading":
           await BackgroundDatabase.init();
           List<CalEvent> calEvent = await BackgroundDatabase.getEvents();
-          DateTime tiem = DateTime.now();
+          DateTime time = DateTime.now();
           // TODO test calendar events
-          print("Time " + tiem.millisecondsSinceEpoch.toString());
+          // print("Time " + tiem.millisecondsSinceEpoch.toString());
           for (var i = 0; i < calEvent.length; i++) {
+            /*
             print("CAL EVENTS" +
-                calEvent[i].start.toString() +" "+
+                calEvent[i].start.toString() +
+                " " +
                 calEvent[i].end.toString());
 
+             */
+
             /// 3 600 000 is exactly an hour in miliseconds
-            if (calEvent[i].start < tiem.millisecondsSinceEpoch &&
-                calEvent[i].end > tiem.millisecondsSinceEpoch + 3600000) {
+            if (calEvent[i].start < time.millisecondsSinceEpoch &&
+                calEvent[i].end > time.millisecondsSinceEpoch + 3600000) {
               // Return 0
-              print("Reason: Person is busy");
+              log("The user is busy today accoridng to cal return 0",
+                  name: "Backend");
               break;
             }
           }
@@ -55,7 +61,8 @@ void callbackDispatcher() {
             if (wifiObj.ssid.contains("staff") ||
                 wifiObj.ssid.contains("work")) {
               // Return 0
-              print("Reason: Wifi contains string staff or work");
+              log("The user's wifi appears to be work wifi return 0",
+                  name: "Backend");
 
               break;
             }
@@ -84,7 +91,7 @@ void callbackDispatcher() {
           /// If in Geofence
           if ((await backgroundLocation.inGeoFence(position1))) {
             /// Return 1
-            print("Reason: Notif sent because user is in a geofence");
+            log("The user is in a geofence return 1", name: "Backend");
             break;
           }
 
@@ -92,21 +99,13 @@ void callbackDispatcher() {
           Placemark placemark =
               await backgroundLocation.getPlacemark(position1);
 
-          // print Address Details
-          print("Place name " +
-              placemark.street +
-              " " +
-              placemark.postalCode +
-              " " +
-              placemark.country);
-
           String data = await backgroundLocation.placeMarkType(placemark);
 
           /// Not at a residential address or university
           if (data.contains("office") || data.contains("commercial")) {
             // Return 0
-            print("Reason: At a office or commercial area");
-            // break; //todo uncomment break in final
+            log("The defult location is GOOGLE HQ", name: "Backend-NOTE");
+            break;
           }
 
           /// Idle for 30 seconds
@@ -122,16 +121,16 @@ void callbackDispatcher() {
           double distance = Geolocator.distanceBetween(position1.latitude,
               position1.longitude, position1.latitude, position2.longitude);
 
-          print("Position 1" + distance.toString());
+          log("Position 1" + distance.toString(), name: "Backend");
 
           /// Determine if the user has moved about 100 m in 30 + a few seconds
           /// Todo add perf logic
           /// If the user is moving
           if (distance > 100) {
-            print("The user is  moving, however I need configs to continue");
+            log("The user is on a train", name: "Backend TODO");
             // Check if on train
             if ((await backgroundLocation.onTrain(position2))) {
-              print("The user is on a train, but I need the configs");
+              log("The user is on a train", name: "Backend TODO");
 
               /// If allow prompts on move or not logic here
               break;
@@ -140,7 +139,7 @@ void callbackDispatcher() {
             /// Not on train and moving
             /// Check if allow prompts on the move
             else {
-              print("Not on train but I need configs to continue");
+              log("Not on a train and moving", name: "Backend TODO");
               break;
             }
           }
@@ -151,7 +150,7 @@ void callbackDispatcher() {
             LightSensor lightSensor = new LightSensor();
             int lum = await lightSensor.whenLight();
 
-            print("Lum " + lum.toString());
+            log("Lum" + lum.toString(), name: "Backend");
 
             lightSensor.close();
 
@@ -166,19 +165,15 @@ void callbackDispatcher() {
 
             // Todo you may want to change 20 to a config value
             if (lum > 10 /*&& reading < 70 */) {
-              print(
-                  "Reason: notif sent because lum value is greater than 10 and decibel reading less than 70");
+              log("Reason: high light, return 1", name: "Backend");
+
               break;
-
-              /// return 1
-
             } else {
               /// If the time is at night //todo add config
               DateTime dateTime = DateTime.now();
               if (dateTime.hour > 18 && dateTime.hour < 23) {
-                print("Reason: notif sent because time is at night");
-
-                /// return 1
+                log("Reason: notif sent because time is at night, return 1",
+                    name: "Backend");
                 break;
               } else {
                 // Check if the phone is stationary and not being used
@@ -193,32 +188,37 @@ void callbackDispatcher() {
                 double z1 = gyroscopeEvent.z;
 
                 gyro.gyroCancel();
-
-                print(
-                    x1.toString() + " " + y1.toString() + " " + z1.toString());
+                log(
+                    "Gyro Data: " +
+                        x1.toString() +
+                        " " +
+                        y1.toString() +
+                        " " +
+                        z1.toString(),
+                    name: "Backend");
 
                 /// If phone is stationary
                 /// TODO gyro is best tested on a real phone
                 if ((x1.abs() < 0.01) &&
                     (y1.abs() < 0.01) &&
                     (z1.abs() < 0.01)) {
-                  print(
-                      "Reason: notif sent because phone is likely stationary");
-                  // Return 1
+                  log("Reason: notif sent because phone is likely stationary, return 1",
+                      name: "Backend");
                   break;
                 }
               }
             }
           }
           // Return 0
-          print(
-              "Reason: Phone is not stationary or asked not to be prompted or calendar is busy");
+          log("Reason: Phone is not stationary or asked not to be prompted or calendar is busy return 0",
+              name: "Backend");
+
           break;
       }
       BackgroundDatabase.closeDB();
       return Future.value(true);
     } on MissingPluginException catch (e) {
-      print("You should probably implement some plugins :D");
+      print("You should probably implement some plugins" + e.toString());
       return Future.value(true);
     }
   });

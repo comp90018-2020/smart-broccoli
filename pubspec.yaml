@@ -23,7 +23,6 @@ dependencies:
   fluro: ^1.7.3
   socket_io_client: ^0.9.11
   workmanager: ^0.2.0
-  flutter_local_notifications: ^3.0.1
   noise_meter: ^1.2.0+1
   geolocator: ^6.1.0
   connectivity: ^2.0.0
@@ -32,11 +31,11 @@ dependencies:
   device_calendar: ^3.1.0
   geocoding: ^1.0.5
   xml: ^4.5.1
-  pedometer: ^2.0.2
   sensors: ^0.4.2+6
   quiver: ^2.1.4
   collection: ^1.14.13
   flutter_svg: ^0.19.1
+  permission_handler: ^5.0.1+1
 
 
 dev_dependencies:

@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:device_calendar/device_calendar.dart';
 
@@ -16,10 +17,13 @@ class BackgroundCalendar {
     deviceCalendarPlugin = new DeviceCalendarPlugin();
     var cal = await deviceCalendarPlugin.retrieveCalendars();
     List<Calendar> calendar = cal.data;
-    print("Calendar" +
-        calendar.toString() +
-        "Length:" +
-        calendar.length.toString());
+
+    log(
+        "Calendar" +
+            calendar.toString() +
+            "Length:" +
+            calendar.length.toString(),
+        name: "Backend-Calendar");
 
     // Define the time frame
     var now = new DateTime.now();
@@ -28,8 +32,6 @@ class BackgroundCalendar {
         startDate: now, endDate: now.add(new Duration(days: 7)));
     // Find all events within 7 days
     for (var i = 0; i < calendar.length; i++) {
-      print("ID i = " + i.toString());
-      print("Cal ID" + calendar[i].id.toString());
       e.add(await deviceCalendarPlugin.retrieveEvents(
           calendar[i].id, retrieveEventsParams));
     }
@@ -43,8 +45,7 @@ class BackgroundCalendar {
       }
     }
 
-    /// Debug print all events
-    print("Events:" + ev.toString());
+    log("Events:" + ev.toString(), name: "Backend-Calendar");
 
     /// Write the data into the datatebase
     /// Which only stores the start time since Epoch

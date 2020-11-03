@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -35,28 +36,31 @@ class BackgroundLocation {
             " " +
             placeMark.country)
         .replaceAll(" ", "+");
-    print("Name: " + name);
 
     String query =
         "https://nominatim.openstreetmap.org/search?q=$name&format=json&polygon_geojson=1&addressdetails=1";
 
+    log("Location Name " + name + " Query " + query, name: "Backend-Location");
     http.Response response = await http.post(query);
 
     try {
       if (response.statusCode == 200) {
-        print("Response code JSON" + response.statusCode.toString());
-        print("Response body JSON" + response.body.toString());
         String httpResult = response.body.toString();
+        log(
+            "Response Status " +
+                response.statusCode.toString() +
+                " Response " +
+                httpResult,
+            name: "Backend-Location");
         // We don't need to use Json stuff actually, we just need to check
         // if certain keywords is within the JSON file
         return httpResult;
       }
-
       if (response.statusCode == 401) {
-        print("Overpass Turbo API Unauthorised");
+        throw Exception('Unauthroised');
       }
       if (response.statusCode == 403) {
-        print("Overpass Turbo API Forbidden Request");
+        throw Exception('Forbidden');
       } else {
         throw Exception('Unable to get groups: unknown error occurred');
       }
@@ -112,7 +116,6 @@ class BackgroundLocation {
 
     final document = XmlDocument.parse(data);
     String _uriMsj = document.toString();
-    print("uri msj =" + _uriMsj);
 
     String _uri = 'http://overpass-api.de/api/interpreter';
 
@@ -120,11 +123,16 @@ class BackgroundLocation {
       'Content-type': 'text/xml',
     });
 
-    print("Response code " + response.statusCode.toString());
-    print("Response body " + response.body.toString());
+    log("Input" + _uriMsj, name: "Backend-Location");
 
     if (response.statusCode == 200) {
       try {
+        log(
+            "Response code " +
+                response.statusCode.toString() +
+                "Response body " +
+                response.body.toString(),
+            name: "Backend-Location");
         final result = XmlDocument.parse(response.body);
         // The user is very likely on a train
         if (result.findAllElements('tag').length != 0) {
@@ -137,12 +145,13 @@ class BackgroundLocation {
     }
 
     if (response.statusCode == 401) {
-      print("Overpass Turbo API Unauthorised");
+      throw Exception('Unauthroised');
     }
     if (response.statusCode == 403) {
-      print("Overpass Turbo API Forbidden Request");
+      throw Exception('Forbidden');
     } else {
       throw Exception('Unable to get groups: unknown error occurred');
     }
+    return false;
   }
 }
