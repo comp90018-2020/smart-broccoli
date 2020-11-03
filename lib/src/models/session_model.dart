@@ -325,6 +325,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   void abortQuiz() {
     socket.emit('abort');
+    // for host, transition to ABANDONED to avoid getting dialogue box
+    _transitionTo(SessionState.ABANDONED);
     socket.disconnect();
   }
 
@@ -370,14 +372,18 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   /// participant action
   void quitQuiz() {
-    // must handle finished state separately as connection is closed
-    if (state == SessionState.FINISHED) {
-      pubSub.publish(PubSubTopic.ROUTE,
-          arg: RouteArgs(action: RouteAction.POPALL_SESSION));
-      _clearFields();
-    }
-    _transitionTo(SessionState.ABANDONED);
-    socket.emit('quit');
+    if (role == GroupRole.MEMBER) {
+      // must handle finished state separately as connection is closed
+      if (state == SessionState.FINISHED) {
+        pubSub.publish(PubSubTopic.ROUTE,
+            arg: RouteArgs(action: RouteAction.POPALL_SESSION));
+        _clearFields();
+      }
+      _transitionTo(SessionState.ABANDONED);
+      socket.emit('quit');
+    } else
+      // quiz owner
+      abortQuiz();
   }
 
   void answerQuestion() {
