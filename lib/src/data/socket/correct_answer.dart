@@ -6,11 +6,15 @@ class CorrectAnswer {
 
   CorrectAnswer._internal(this.answer, this.record);
 
-  factory CorrectAnswer.fromJson(Map<String, dynamic> json) =>
-      CorrectAnswer._internal(
-        Answer.fromJson(json['answer']),
-        Record.fromJson(json['record']),
-      );
+  factory CorrectAnswer.fromJson(Map<String, dynamic> json) {
+    if (!json.containsKey('answer'))
+      return CorrectAnswer._internal(Answer.fromJson(json), null);
+
+    return CorrectAnswer._internal(
+      Answer.fromJson(json['answer']),
+      Record.fromJson(json['record']),
+    );
+  }
 }
 
 class Answer {
