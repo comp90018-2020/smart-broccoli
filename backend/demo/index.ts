@@ -263,9 +263,7 @@ export const generateDemoData = async () => {
             if (userIndex !== groupIndex)
                 for (const group of groups) {
                     // Member
-                    users[userIndex].groupsCreated.push(
-                        await groupController.createGroup(user.id, group)
-                    );
+                    await groupController.joinGroup(user.id, { name: group });
                 }
         }
     }
