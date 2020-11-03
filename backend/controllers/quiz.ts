@@ -14,7 +14,6 @@ import { processQuestions } from "./question";
 import { deletePicture, insertPicture } from "./picture";
 import { assertGroupOwnership } from "./group";
 import { sessionTokenDecrypt } from "./session";
-import { exception } from "console";
 
 /**
  * Get quiz and permissions.
