@@ -29,7 +29,6 @@ export const formatQuestion = (
     const remainingTime = session.QuestionReleaseAt[questionIndex] - Date.now();
     return {
         question: {
-            id: questionCopy.id,
             no: questionIndex,
             text: questionCopy.text,
             tf: questionCopy.tf,
@@ -75,7 +74,7 @@ export const formatQuestionOutcome = (
             : rankAll[record.newPos - 1].formatRecord();
 
     const questionOutcome = {
-        question: session.questionIndex,
+        question: session.questionIndex - 1,
         leaderboard: rankFormated,
         record: session.playerMap[Number(playerId)].formatRecord().record,
         playerAhead: playerAheadRecord,
