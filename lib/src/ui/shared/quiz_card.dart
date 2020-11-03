@@ -123,7 +123,8 @@ class QuizCard extends StatelessWidget {
           Column(
             children: [
               // Admin options
-              if (quiz.role == GroupRole.OWNER) buildAdmin(context),
+              if (quiz.role == GroupRole.OWNER && optionsEnabled)
+                buildAdmin(context),
 
               // Quiz status
               Container(
