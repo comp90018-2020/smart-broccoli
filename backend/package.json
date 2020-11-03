@@ -46,15 +46,15 @@
     "@types/validator": "^13.1.0",
     "chai": "^4.2.0",
     "dotenv": "^8.2.0",
-    "mocha": "^8.2.0",
+    "mocha": "^8.2.1",
     "openapi-types": "^7.0.1",
     "supertest": "^6.0.0",
     "typescript": "^4.0.5"
   },
   "optionalDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.6.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^4.6.0",
-    "@typescript-eslint/parser": "^4.6.0",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/eslint-plugin-tslint": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
     "eslint": "^7.12.0",
     "prettier": "^2.1.2",
     "tslint": "^6.1.3"
