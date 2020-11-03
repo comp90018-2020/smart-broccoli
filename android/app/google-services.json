@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1021947399760",
+    "firebase_url": "https://comp90018-2020.firebaseio.com",
+    "project_id": "comp90018-2020",
+    "storage_bucket": "comp90018-2020.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021947399760:android:9f1af718be1dc519644b55",
+        "android_client_info": {
+          "package_name": "comp90018.smart_broccoli"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1021947399760-k9mpjv6p8arvc2a587snpi1flv1749ak.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6_sGjCEuOhvPB_7nU3A5Cg0VVraJkdos"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1021947399760-k9mpjv6p8arvc2a587snpi1flv1749ak.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
