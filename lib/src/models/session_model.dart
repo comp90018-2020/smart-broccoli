@@ -1,10 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/base.dart';
+import 'package:smart_broccoli/src/models/quiz_collection.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/models/auth_state.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/models/model_change.dart';
 import 'package:smart_broccoli/src/remote.dart';
 
@@ -25,6 +26,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
+
+  final QuizCollectionModel _quizCollectionModel;
 
   final PubSub pubSub;
 
@@ -60,7 +63,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
-  GameSessionModel(this._authStateModel, this.pubSub, {SessionApi sessionApi}) {
+  GameSessionModel(this._authStateModel, this._quizCollectionModel, this.pubSub,
+      {SessionApi sessionApi}) {
     _sessionApi = sessionApi ?? SessionApi();
     socket = IO.io(SERVER_URL, {
       'autoConnect': false,
@@ -176,7 +180,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       // _transitionTo(SessionState.ABORTED);
     });
 
-    socket.on('nextQuestion', (message) {
+    socket.on('nextQuestion', (message) async {
       print("nextQuestion");
       print(message);
       if (message['question']['options'] == null)
@@ -190,6 +194,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       print(time);
       print(totalQuestion);
       answer = Answer(question.no);
+      try {
+        await _quizCollectionModel.refreshQuestionPicture(
+            session.quizId, question,
+            token: session.token);
+      } catch (_) {}
       _transitionTo(SessionState.QUESTION);
       pubSub.publish(PubSubTopic.TIMER, arg: time);
     });

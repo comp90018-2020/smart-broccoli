@@ -24,7 +24,7 @@ void main() async {
   final GroupRegistryModel groupRegistryModel =
       GroupRegistryModel(authStateModel, userRepo, quizCollectionModel);
   final GameSessionModel gameSessionModel =
-      GameSessionModel(authStateModel, pubSub);
+      GameSessionModel(authStateModel, quizCollectionModel, pubSub);
 
   runApp(
     MultiProvider(

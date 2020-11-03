@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models/quiz_collection.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/src/ui/session/timer.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
@@ -69,20 +72,42 @@ class QuizQuestion extends StatelessWidget {
                 flex: 5,
                 child: Column(
                   children: [
-                    // Question
+                    // spacer if question has no pic
+                    if (!model.question.hasPicture) Spacer(),
+                    // question text
                     Text("${model.question.text}",
                         style: Theme.of(context).textTheme.headline6),
-                    // Question picture
-                    Expanded(
-                      child: FractionallySizedBox(
-                        widthFactor: 0.8,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 16.0),
-                          // Replace with Container when there's no picture
-                          child: Placeholder(),
-                        ),
-                      ),
-                    ),
+                    // question picture or spacer if question has no pic
+                    model.question.hasPicture
+                        ? Expanded(
+                            child: FractionallySizedBox(
+                              widthFactor: 0.8,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                // Replace with Container when there's no picture
+                                child: FutureBuilder(
+                                  future: Provider.of<QuizCollectionModel>(
+                                          context,
+                                          listen: false)
+                                      .getQuestionPicturePath(model.question),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<String> snapshot) {
+                                    if (!snapshot.hasData ||
+                                        snapshot.data == null)
+                                      return FractionallySizedBox(
+                                          widthFactor: 0.8,
+                                          heightFactor: 0.8,
+                                          child: Image(
+                                              image: AssetImage(
+                                                  'assets/icon.png')));
+                                    return Image.file(File(snapshot.data),
+                                        fit: BoxFit.cover);
+                                  },
+                                ),
+                              ),
+                            ),
+                          )
+                        : Spacer(),
 
                     Padding(
                       padding: const EdgeInsets.only(top: 16.0),

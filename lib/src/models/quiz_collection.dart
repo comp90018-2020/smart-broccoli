@@ -191,7 +191,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     // Refresh pictures if necessary
     if (withQuestionPictures)
       await Future.wait(quiz.questions.map((Question question) async {
-        await _refreshQuestionPicture(quiz.id, question);
+        await refreshQuestionPicture(quiz.id, question);
       }));
     // Set
     if (quiz.role == GroupRole.OWNER) {
@@ -255,14 +255,15 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   // Loads the picture of a question into cache
-  Future<void> _refreshQuestionPicture(int quizId, Question question) async {
+  Future<void> refreshQuestionPicture(int quizId, Question question,
+      {String token}) async {
     // No picture
     if (question.pictureId == null) return;
     // Picture cached
     if (await _picStash.getPic(question.pictureId) != null) return;
     // Get picture and cache
     var picture = await _quizApi.getQuestionPicture(
-        _authStateModel.token, quizId, question.id);
+        token ?? _authStateModel.token, quizId, question.id);
     _picStash.storePic(question.pictureId, picture);
   }
 
