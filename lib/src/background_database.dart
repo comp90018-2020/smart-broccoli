@@ -44,7 +44,9 @@ class BackgroundDatabase {
 
   static Future<void> cleanEvent() async {
     await db.execute("DROP TABLE IF EXISTS events");
-    await db.execute("CREATE TABLE events(id INTEGER PRIMARY KEY,start INTEGER, end INTEGER)",);
+    await db.execute(
+      "CREATE TABLE events(id INTEGER PRIMARY KEY,start INTEGER, end INTEGER)",
+    );
   }
 
   // Define a function that inserts dogs into the database
@@ -101,6 +103,7 @@ class BackgroundDatabase {
     } catch (e) {
       print(e);
     }
+    return null;
   }
 
   static Future<void> deleteGeoFence(int id) async {
