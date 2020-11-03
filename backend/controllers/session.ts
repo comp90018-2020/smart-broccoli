@@ -18,6 +18,7 @@ export interface TokenInfo {
     userId: number;
     role: string;
     sessionId: number;
+    quizId: number;
 }
 
 /**
@@ -31,6 +32,7 @@ const signSessionToken = async (info: {
     sessionId: number;
     role: string;
     userId: number;
+    quizId: number;
 }) => {
     return await jwtSign(
         {
@@ -38,6 +40,7 @@ const signSessionToken = async (info: {
             userId: info.userId,
             role: info.role,
             sessionId: info.sessionId,
+            quizId: info.quizId,
         },
         process.env.TOKEN_SECRET,
         { expiresIn: "1h" }
@@ -167,6 +170,7 @@ export const getUserSession = async (userId: number) => {
         sessionId: session.id,
         role: session.Users[0].SessionParticipant.role,
         userId,
+        quizId: session.quizId,
     });
     return {
         session: {
@@ -302,6 +306,7 @@ export const createSession = async (userId: number, opts: any) => {
             sessionId: session.id,
             userId,
             role: sessionParticipant.role,
+            quizId: quiz.id,
         });
 
         // pass quiz and session to socket
@@ -414,6 +419,7 @@ export const joinSession = async (userId: number, code: string) => {
         sessionId: session.id,
         role: "participant",
         userId,
+        quizId: session.quizId,
     });
     return {
         session: {

@@ -20,6 +20,7 @@ import {
     getQuestionPicture,
     deleteQuestionPicture,
 } from "../controllers/question";
+import { auth } from "./middleware/auth";
 
 /**
  * @swagger
@@ -151,6 +152,7 @@ router.post(
         body("questions.*.text").optional({ nullable: true }).isString(),
     ],
     validate,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const quiz = await createQuiz(req.user.id, req.body);
@@ -194,6 +196,7 @@ router.get(
     "/",
     [query("role").optional().isIn(["all", "owner", "member"])],
     validate,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             return res.json(await getAllQuiz(req.user.id, req.query));
@@ -230,6 +233,7 @@ router.get(
     "/:quizId",
     [param("quizId").isInt()],
     validate,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             return res.json(
@@ -290,6 +294,7 @@ router.patch(
         body("questions.*.text").optional({ nullable: true }).isString(),
     ],
     validate,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const quiz = await updateQuiz(
@@ -327,6 +332,7 @@ router.delete(
     "/:quizId",
     [param("quizId").isInt()],
     validate,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             await deleteQuiz(req.user.id, Number(req.params.quizId));
@@ -402,6 +408,7 @@ router.put(
     "/:quizId/picture",
     [param("quizId").isInt()],
     validate,
+    auth(),
     quizPictureUploadMiddleware,
     async (req: Request, res: Response, next: NextFunction) => {
         // Save picture information to DB
@@ -448,10 +455,12 @@ router.get(
     "/:quizId/picture",
     [param("quizId").isInt()],
     validate,
+    auth({ sessionAuth: true }),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const picture = await getQuizPicture(
-                req.user.id,
+                req.user?.id,
+                req.token,
                 Number(req.params.quizId)
             );
             if (!picture) {
@@ -492,6 +501,7 @@ router.delete(
     "/:quizId/picture",
     [param("quizId").isInt()],
     validate,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             await deleteQuizPicture(req.user.id, Number(req.params.quizId));
@@ -540,6 +550,7 @@ router.put(
     "/:quizId/question/:questionId/picture",
     [param("questionId").isInt(), param("quizId").isInt()],
     validate,
+    auth(),
     (req: Request, res: Response, next: NextFunction) => {
         const pictureUpload = upload.single("picture");
 
@@ -607,10 +618,12 @@ router.get(
     "/:quizId/question/:questionId/picture",
     [param("questionId").isInt(), param("quizId").isInt()],
     validate,
+    auth({ sessionAuth: true }),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const picture = await getQuestionPicture(
-                req.user.id,
+                req.user?.id,
+                req.token,
                 Number(req.params.quizId),
                 Number(req.params.questionId)
             );
@@ -658,6 +671,7 @@ router.delete(
     "/:quizId/question/:questionId/picture",
     [param("quizId").isInt(), param("questionId").isInt()],
     validate,
+    auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             await deleteQuestionPicture(
