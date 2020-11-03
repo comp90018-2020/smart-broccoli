@@ -152,6 +152,5 @@ class BackgroundLocation {
     } else {
       throw Exception('Unable to get groups: unknown error occurred');
     }
-    return false;
   }
 }
