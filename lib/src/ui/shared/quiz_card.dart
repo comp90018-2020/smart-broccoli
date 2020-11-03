@@ -223,10 +223,10 @@ class QuizCard extends StatelessWidget {
                                   title: "Confirm start session",
                                   barrierDismissable: true)) return;
                               try {
-                                Provider.of<QuizCollectionModel>(context,
+                                Provider.of<GameSessionModel>(context,
                                         listen: false)
-                                    .startQuizSession(
-                                        quiz, GameSessionType.INDIVIDUAL);
+                                    .createSession(
+                                        quiz.id, GameSessionType.INDIVIDUAL);
                               } catch (_) {
                                 showBasicDialog(
                                     context, "Cannot start live session");

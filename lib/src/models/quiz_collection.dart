@@ -15,9 +15,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// API provider for the quiz service
   QuizApi _quizApi;
 
-  /// API provider for the session service
-  SessionApi _sessionApi;
-
   /// Picture storage service
   final PictureStash _picStash;
 
@@ -32,10 +29,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   Quiz get selectedQuiz => _selectedQuiz;
 
   /// Constructor for external use
-  QuizCollectionModel(this._authStateModel, this._picStash,
-      {QuizApi quizApi, SessionApi sessionApi}) {
+  QuizCollectionModel(this._authStateModel, this._picStash, {QuizApi quizApi}) {
     _quizApi = quizApi ?? QuizApi();
-    _sessionApi = sessionApi ?? SessionApi();
   }
 
   /// get quizzes by rules
@@ -167,19 +162,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
 
     // Refresh quiz (since picture IDs may have changed by this point)
     _refreshQuiz(updated.id, withQuestionPictures: true);
-  }
-
-  Future<void> refreshCurrentSession() async {
-    _currentSession = await _sessionApi.getSession(_authStateModel.token);
-    notifyListeners();
-  }
-
-  Future<void> startQuizSession(Quiz quiz, GameSessionType type) async {
-    await _sessionApi.joinSession(
-        _authStateModel.token,
-        (await _sessionApi.createSession(_authStateModel.token, quiz.id, type))
-            .joinCode);
-    refreshCurrentSession();
   }
 
   /// Refreshes the specified quiz
