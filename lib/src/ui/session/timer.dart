@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/base.dart';
-import 'package:smart_broccoli/src/models/session_model.dart';
 
 class TimerWidget extends StatefulWidget {
   final int initTime;
@@ -39,13 +37,12 @@ class _TimerWidgetState extends State<TimerWidget> {
   void initState() {
     super.initState();
     reset(widget.initTime);
-    Provider.of<GameSessionModel>(context, listen: false)
-        .pubSub
-        .subscribe(PubSubTopic.TIMER, reset);
+    PubSub().subscribe(PubSubTopic.TIMER, reset);
   }
 
   @override
   void dispose() {
+    PubSub().unsubscribe(PubSubTopic.TIMER, reset);
     _timer?.cancel();
     super.dispose();
   }

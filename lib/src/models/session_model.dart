@@ -29,8 +29,6 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   final QuizCollectionModel _quizCollectionModel;
 
-  final PubSub pubSub;
-
   SessionApi _sessionApi;
 
   GameSession session;
@@ -63,7 +61,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
-  GameSessionModel(this._authStateModel, this._quizCollectionModel, this.pubSub,
+  GameSessionModel(this._authStateModel, this._quizCollectionModel,
       {SessionApi sessionApi}) {
     _sessionApi = sessionApi ?? SessionApi();
     socket = IO.io(SERVER_URL, {
@@ -105,7 +103,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// Establish a websocket connection with the gameplay server.
   ///
   /// This method also routes the user to the appropriate initial screen via
-  /// pubsub event.
+  /// PubSub() event.
   void _connect(String token) {
     // Set query
     socket.opts['query'] = {};
@@ -200,7 +198,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
             token: session.token);
       } catch (_) {}
       _transitionTo(SessionState.QUESTION);
-      pubSub.publish(PubSubTopic.TIMER, arg: time);
+      PubSub().publish(PubSubTopic.TIMER, arg: time);
     });
 
     socket.on('questionAnswered', (message) {
@@ -238,11 +236,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       // must stop listening immediately to avoid timing conflicts
       socket.clearListeners();
       if (state == SessionState.ABORTED) {
-        pubSub.publish(PubSubTopic.ROUTE,
+        PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
         _clearFields();
       } else if (state == SessionState.ABANDONED) {
-        pubSub.publish(PubSubTopic.ROUTE,
+        PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.POPALL_SESSION));
         _clearFields();
       }
@@ -254,36 +252,36 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     switch (updated) {
       case SessionState.PENDING:
         state = SessionState.PENDING;
-        pubSub.publish(PubSubTopic.ROUTE,
+        PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(name: '/session/lobby', action: RouteAction.PUSH));
         break;
       case SessionState.STARTING:
         if (state == SessionState.PENDING)
           notifyListeners();
         else
-          pubSub.publish(PubSubTopic.ROUTE,
+          PubSub().publish(PubSubTopic.ROUTE,
               arg: RouteArgs(name: '/session/lobby', action: RouteAction.PUSH));
-        pubSub.publish(PubSubTopic.TIMER, arg: startCountDown);
+        PubSub().publish(PubSubTopic.TIMER, arg: startCountDown);
         state = SessionState.STARTING;
         break;
       case SessionState.QUESTION:
         if (state == SessionState.PENDING || state == SessionState.STARTING) {
-          pubSub.publish(PubSubTopic.ROUTE,
+          PubSub().publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.REPLACE));
-          pubSub.publish(PubSubTopic.TIMER, arg: time);
+          PubSub().publish(PubSubTopic.TIMER, arg: time);
         } else if (state == SessionState.QUESTION ||
             state == SessionState.ANSWER)
           notifyListeners();
         else if (state == SessionState.OUTCOME) {
-          pubSub.publish(PubSubTopic.ROUTE,
+          PubSub().publish(PubSubTopic.ROUTE,
               arg: RouteArgs(action: RouteAction.POP));
-          pubSub.publish(PubSubTopic.TIMER, arg: time);
+          PubSub().publish(PubSubTopic.TIMER, arg: time);
         } else {
-          pubSub.publish(PubSubTopic.ROUTE,
+          PubSub().publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.PUSH));
-          pubSub.publish(PubSubTopic.TIMER, arg: time);
+          PubSub().publish(PubSubTopic.TIMER, arg: time);
         }
         state = SessionState.QUESTION;
         break;
@@ -292,13 +290,13 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
           print('QUESTION TO ANSWER TRANSITION');
           notifyListeners();
         } else
-          pubSub.publish(PubSubTopic.ROUTE,
+          PubSub().publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.PUSH));
         state = SessionState.ANSWER;
         break;
       case SessionState.OUTCOME:
-        pubSub.publish(PubSubTopic.ROUTE,
+        PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(
                 name: '/session/leaderboard', action: RouteAction.PUSH));
         state = SessionState.OUTCOME;
@@ -308,7 +306,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         state = SessionState.FINISHED;
         break;
       case SessionState.ABORTED:
-        pubSub.publish(PubSubTopic.ROUTE,
+        PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
         state = SessionState.ABORTED;
         break;
@@ -360,7 +358,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   void nextQuestion() {
     if (state == SessionState.FINISHED)
-      pubSub.publish(PubSubTopic.ROUTE,
+      PubSub().publish(PubSubTopic.ROUTE,
           arg: RouteArgs(name: '/session/finish', action: RouteAction.REPLACE));
     else
       socket.emit('next');
@@ -375,7 +373,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     if (role == GroupRole.MEMBER) {
       // must handle finished state separately as connection is closed
       if (state == SessionState.FINISHED) {
-        pubSub.publish(PubSubTopic.ROUTE,
+        PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.POPALL_SESSION));
         _clearFields();
       }
