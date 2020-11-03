@@ -6,7 +6,12 @@ import * as admin from "firebase-admin";
 
 // Initalise firebase in production environments
 // From https://firebase.google.com/docs/admin/setup#initialize_the_sdk
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production" && !process.env.FIREBASE_PROJECT_ID) {
+    console.error("Firebase configurations not set");
+    process.exit(1);
+}
+// If project ID is set, initialise firebase
+if (process.env.FIREBASE_PROJECT_ID) {
     admin.initializeApp({
         credential: admin.credential.cert({
             projectId: process.env.FIREBASE_PROJECT_ID,
@@ -61,6 +66,10 @@ export const sendMessage = async (
     message: admin.messaging.MulticastMessage
 ) => {
     if (message.tokens.length === 0) return;
+    if (!process.env.FIREBASE_PROJECT_ID) {
+        console.log(message);
+        return;
+    }
 
     try {
         // Send the message with given tokens

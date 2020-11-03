@@ -2,7 +2,13 @@ import supertest from "supertest";
 import { expect } from "chai";
 import app from "./index";
 import rebuild from "./rebuild";
-import { createGroup, createQuiz, registerAndLogin } from "./helpers";
+import {
+    createGroup,
+    createQuiz,
+    registerAndLogin,
+    createSession,
+    joinGroup,
+} from "./helpers";
 import { Token, UserState } from "../models";
 
 describe("Notification", () => {
@@ -154,12 +160,12 @@ describe("Notification", () => {
         title: "Quiz title",
         description: "Quiz description",
         questions: [QUESTION_TF, QUESTION_CHOICE],
-        type: "self paced",
+        type: "live",
     };
 
     it("'Trigger' notification", async () => {
         const agent = supertest(app);
-        const owner = await registerAndLogin({ ...USER, email: "b@b.com" } );
+        const owner = await registerAndLogin({ ...USER, email: "b@b.com" });
         const user = await registerAndLogin(USER);
 
         // Set token
@@ -169,9 +175,17 @@ describe("Notification", () => {
             .send({ token: "aaabbb" });
         expect(token.status).to.equal(200);
 
-
         // Create group/quiz
-        const group = await createGroup(user.id, "foo");
-        const quiz = await createQuiz(user.id, group.id, QUIZ);
+        const group = await createGroup(owner.id, "foo");
+        const quiz = await createQuiz(owner.id, group.id, QUIZ);
+
+        // Join group
+        await joinGroup(user.id, { code: group.code });
+
+        // Start live quiz
+        await createSession(owner.id, {
+            quizId: quiz.id,
+            isGroup: false,
+        });
     });
 });

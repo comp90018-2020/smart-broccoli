@@ -223,7 +223,7 @@ export const sendSessionCreationNotification = async (
             quizId: session.quizId,
         },
         `New ${type} quiz session started`,
-        `A new session for the quiz "${quiz.title}" has been started, click to join`,
+        `A new session for the quiz "${quiz.title}" has started, click to join`,
         tokens
     );
     await sendMessage(message);

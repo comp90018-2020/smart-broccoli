@@ -49,7 +49,7 @@ const schema: Sequelize.ModelAttributes = {
     // Timezone by IANA name
     timezone: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
     },
 
     // Work

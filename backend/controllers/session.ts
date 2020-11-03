@@ -308,7 +308,11 @@ export const createSession = async (userId: number, opts: any) => {
         handler.addSession(quiz, session.id, session.type, session.isGroup);
 
         // push notifications
-        await sendSessionCreationNotification(userId, session, quiz);
+        if (process.env.NODE_ENV === "production") {
+            sendSessionCreationNotification(userId, session, quiz);
+        } else {
+            await sendSessionCreationNotification(userId, session, quiz);
+        }
 
         return { session, token };
     });
