@@ -97,8 +97,9 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   }
 
   Future<void> joinLiveSession(Quiz quiz) async {
-    await joinSession(quiz.sessions
-        .firstWhere((session) => session.quizType == QuizType.LIVE));
+    await joinSession(quiz.sessions.firstWhere((session) =>
+        session.quizType == QuizType.LIVE &&
+        session.state != GameSessionState.ENDED));
   }
 
   /// Establish a websocket connection with the gameplay server.
