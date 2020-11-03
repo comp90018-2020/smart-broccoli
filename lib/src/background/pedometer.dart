@@ -3,7 +3,8 @@ import 'dart:async';
 
 import 'package:pedometer/pedometer.dart';
 
-// Note this class isn't currently used
+/// Note this class isn't currently used but is here just in case we need it
+/// Will be removed in merge if not
 class PedoMeter{
   StreamController<PedestrianStatus> _pedestrianStatusStream;
   String status;

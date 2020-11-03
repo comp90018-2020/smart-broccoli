@@ -1,45 +1,55 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:noise_meter/noise_meter.dart';
 
-
-// Note this class isn't currently used
+/// Note this class isn't currently used but is here just in case we need it
+/// Will be removed in merge
 class Microphone {
-
   bool _isRecording = false;
   StreamSubscription<NoiseReading> _noiseSubscription;
   NoiseMeter _noiseMeter;
-  String recordingData;
+  NoiseReading noiseReading;
 
-
-  /// decibel data (Nearby noise)
-  void onDataRecording(NoiseReading noiseReading) {
-    if (!_isRecording) {
-      _isRecording = true;
-    }
-    recordingData = noiseReading.toString();
+  Microphone(){
+    _noiseMeter = new NoiseMeter();
   }
 
-  void startRecording() async {
+  Future<double> getReading() async {
+    log("Attempting to get reading");
+    while (!_isRecording) {}
+    log("No reading");
+    return noiseReading.meanDecibel;
+  }
+
+  void onData(NoiseReading noiseReading) {
+    log("isRecording" + _isRecording.toString());
+    if (!this._isRecording) {
+      _isRecording = true;
+    }
+    noiseReading = noiseReading;
+    log(noiseReading.toString());
+
+  }
+
+  Future<void> start() async {
     try {
-      _noiseSubscription = _noiseMeter.noiseStream.listen(onDataRecording);
+      _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
     } catch (err) {
       print(err);
     }
+    log("blaghhhhh");
   }
 
-  void stopRecording() async {
+  void stop() async {
     try {
       if (_noiseSubscription != null) {
         _noiseSubscription.cancel();
         _noiseSubscription = null;
       }
-      _isRecording = false;
+      this._isRecording = false;
     } catch (err) {
       print('stopRecorder error: $err');
     }
   }
-
-
-
 }

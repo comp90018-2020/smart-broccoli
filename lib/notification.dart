@@ -1,7 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-
+/// Local notification testing class
 class Notification {
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;

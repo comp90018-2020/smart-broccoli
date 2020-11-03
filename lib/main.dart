@@ -8,13 +8,13 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/background/background_calendar.dart';
+import 'package:smart_broccoli/src/background/microphone.dart';
 import 'package:smart_broccoli/src/background_database.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 
 
@@ -168,12 +168,17 @@ _checkPermissions(DeviceCalendarPlugin deviceCalendarPlugin) async {
   LocationPermission permission = await Geolocator.checkPermission();
   Result<bool> res = await deviceCalendarPlugin.hasPermissions();
 
+  await deviceCalendarPlugin.requestPermissions();
+  await Geolocator.requestPermission();
+  await Geolocator.openAppSettings();
+
+  /*
   if (permission != LocationPermission.always || !res.data) {
     await deviceCalendarPlugin.requestPermissions();
     await Geolocator.requestPermission();
     await Permission.microphone.request();
     await Permission.storage.request();
     await Permission.activityRecognition.request();
-  }
+  } */
 }
 

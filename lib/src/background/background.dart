@@ -25,8 +25,11 @@ void callbackDispatcher() {
           List<CalEvent> calEvent = await BackgroundDatabase.getEvents();
           DateTime tiem = DateTime.now();
           // TODO test calendar events
+          print("Time " + tiem.millisecondsSinceEpoch.toString());
           for (var i = 0; i < calEvent.length; i++) {
-            print(calEvent.toString());
+            print("CAL EVENTS" +
+                calEvent[i].start.toString() +" "+
+                calEvent[i].end.toString());
 
             /// 3 600 000 is exactly an hour in miliseconds
             if (calEvent[i].start < tiem.millisecondsSinceEpoch &&
@@ -152,9 +155,19 @@ void callbackDispatcher() {
 
             lightSensor.close();
 
+/*
+            // Access the microphone sensor
+            Microphone microphone = new Microphone();
+            await microphone.start();
+            print("Microphone started");
+            double reading = await microphone.getReading();
+            print("Stopping Microphone");
+            microphone.stop(); */
+
             // Todo you may want to change 20 to a config value
-            if (lum > 10) {
-              print("Reason: notif sent because lum value is greater than 10");
+            if (lum > 10 /*&& reading < 70 */) {
+              print(
+                  "Reason: notif sent because lum value is greater than 10 and decibel reading less than 70");
               break;
 
               /// return 1
@@ -184,7 +197,7 @@ void callbackDispatcher() {
                 print(
                     x1.toString() + " " + y1.toString() + " " + z1.toString());
 
-                /// If not moving
+                /// If phone is stationary
                 /// TODO gyro is best tested on a real phone
                 if ((x1.abs() < 0.01) &&
                     (y1.abs() < 0.01) &&
