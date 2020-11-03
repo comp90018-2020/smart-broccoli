@@ -127,3 +127,19 @@ Future<QuestionType> showQuestionTypePicker(BuildContext context) {
     ),
   );
 }
+
+// show loading overlay
+void showLoadingOverlay(BuildContext context) {
+  showDialog(
+      context: context, barrierDismissible: false, child: FullScreenLoader());
+}
+
+// loading overlay
+class FullScreenLoader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        decoration: BoxDecoration(color: Color.fromRGBO(0, 0, 0, 0.5)),
+        child: Center(child: CircularProgressIndicator()));
+  }
+}

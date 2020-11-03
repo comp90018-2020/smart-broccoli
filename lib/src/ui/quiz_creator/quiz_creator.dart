@@ -8,6 +8,7 @@ import 'package:smart_broccoli/src/ui/shared/group_dropdown.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/snack_bar.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'question_creator.dart';
@@ -420,25 +421,23 @@ class _QuizCreateState extends State<QuizCreate> {
     }
 
     if (_quiz.title.isEmpty) {
-      showBasicDialog(context, "Quiz name cannot be empty");
-      setState(() => _isCommited = false);
+      showSnackBar(context, 'Quiz name cannot be empty');
       return;
     }
 
     if (_quiz.groupId == null) {
-      showBasicDialog(context, "Quiz must belong to a group");
-      setState(() => _isCommited = false);
+      showSnackBar(context, 'Quiz must belong to a group');
       return;
     }
 
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .saveQuiz(_quiz);
-      await showBasicDialog(context, "Quiz saved", title: "Success");
+      showSnackBar(context, 'Quiz saved');
       context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
     } catch (err) {
-      showBasicDialog(context, err.toString());
+      showSnackBar(context, err.toString());
     }
     setState(() => _isCommited = false);
   }
@@ -455,10 +454,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
     if (!await showConfirmDialog(
         context, "Are you sure you want to delete the question?",
-        title: "Delete question")) {
-      setState(() => _isCommited = false);
-      return;
-    }
+        title: "Delete question")) {}
 
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
@@ -466,9 +462,8 @@ class _QuizCreateState extends State<QuizCreate> {
       context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
     } on Exception catch (err) {
-      showBasicDialog(context, err.toString());
+      showSnackBar(context, err.toString());
     }
-
     setState(() => _isCommited = false);
   }
 }

@@ -28,6 +28,9 @@ class _ProfileMainState extends State<ProfileMain> {
   /// Whether the update has been submitted
   bool _committed = false;
 
+  /// Global key
+  GlobalKey globalKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +44,7 @@ class _ProfileMainState extends State<ProfileMain> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtain a different BuildContext by using builder
     return CustomPage(
       title: "Profile",
       hasDrawer: !_isEdit,
