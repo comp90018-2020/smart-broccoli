@@ -43,9 +43,6 @@ void main() async {
         requiresDeviceIdle: false,
       ));
 
-  // Communication
-  final PubSub pubSub = PubSub();
-
   // Local storage
   final KeyValueStore keyValueStore = await SharedPrefsKeyValueStore.create();
   final PictureStash picStash = await PictureStash.create();
