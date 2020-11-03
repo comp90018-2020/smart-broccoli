@@ -6,11 +6,13 @@ import {
     Token,
     User,
     UserState,
+    NotificationEntry,
 } from "../models";
 import { Op } from "sequelize";
 import { firebaseTokenValid, sendMessage } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 import { buildSessionMessage } from "./notification_firebase";
+import { DateTime } from "luxon";
 
 /**
  * Adds a firebase token to a user.
@@ -309,14 +311,12 @@ const notificationUsers = async (users: User[], session: Session) => {
         }
 
         // Current date
-        const date = new Date();
+        const date = DateTime.local().setZone(
+            user.NotificationSettings.timezone ?? "Australia/Melbourne"
+        );
         // Get day of week
-        const dateLocal = date.toLocaleDateString("en-US", {
-            timeZone:
-                user.NotificationSettings.timezone ?? "Australia/Melbourne",
-            weekday: "long",
-        });
-        if (!user.NotificationSettings.days[WEEKDAYS.indexOf(dateLocal)]) {
+        const dayOfWeek = date.weekdayLong;
+        if (!user.NotificationSettings.days[WEEKDAYS.indexOf(dayOfWeek)]) {
             return false;
         }
 
@@ -347,7 +347,7 @@ const notificationUsers = async (users: User[], session: Session) => {
 
     // Filter/map to list of user ids who can be notified (or null)
     const notify: number[] = await Promise.all(
-        stateFilteredUsers.map((user) => canAndSetNotify(user))
+        stateFilteredUsers.map((user) => canNotifyAndSet(user))
     );
     // Now filter to users who can be notified and return their user IDs
     return stateFilteredUsers
@@ -355,6 +355,48 @@ const notificationUsers = async (users: User[], session: Session) => {
         .map((user) => user.id);
 };
 
-const canAndSetNotify = async (user: User) => {
+// Can notify user within bounds of user's notification limits?
+// If so, add an entry
+const canNotifyAndSet = async (user: User) => {
+    // Start of day for user
+    const startForUser = DateTime.local()
+        .setZone(user.NotificationSettings.timezone ?? "Australia/Melbourne")
+        .startOf("day");
+
+    // Get notification entries with createdAt within 24 hours
+    // https://stackoverflow.com/questions/52453374
+    const notifications = await NotificationEntry.findAll({
+        where: {
+            userId: user.id,
+            createdAt: { [Op.gt]: startForUser.toJSDate() },
+        },
+        order: [["time", "DESC"]],
+    });
+
+    // Max notification count per day
+    if (
+        user.NotificationSettings.maxNotificationsPerDay !== 0 &&
+        notifications.length >= user.NotificationSettings.maxNotificationsPerDay
+    ) {
+        return null;
+    }
+
+    // Look at last notification
+    if (
+        user.NotificationSettings.notificationWindow !== 0 &&
+        notifications.length > 0
+    ) {
+        const last: Date = notifications[0].time;
+        // If (current - last).minutes < user setting, do not notify
+        if (
+            DateTime.local().diff(DateTime.fromJSDate(last)).minutes <
+            user.NotificationSettings.notificationWindow
+        ) {
+            return null;
+        }
+    }
+
+    // Add notification entry
+    await NotificationEntry.create({ userId: user.id, time: new Date() });
     return user.id;
 };

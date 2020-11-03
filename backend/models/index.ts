@@ -13,6 +13,7 @@ import Session from "./session";
 import SessionParticipant from "./session_participant";
 import NotificationSettings from "./notification_settings";
 import UserState from "./notification_user_state";
+import NotificationEntry from "./notification_entry";
 
 // Initiate sequelize instance
 const sequelize: Sequelize.Sequelize = new Sequelize.Sequelize(
@@ -38,6 +39,7 @@ Session.initialise(sequelize);
 SessionParticipant.initialise(sequelize);
 NotificationSettings.initialise(sequelize);
 UserState.initialise(sequelize);
+NotificationEntry.initialise(sequelize);
 
 // User has many tokens
 User.hasMany(Token, { foreignKey: "userId" });
@@ -51,6 +53,8 @@ User.belongsTo(Picture, {
 User.hasOne(NotificationSettings, { foreignKey: "userId" });
 // User has state
 User.hasOne(UserState, { foreignKey: "userId" });
+// User has many notification entries
+User.hasMany(NotificationEntry, { foreignKey: "userId" });
 
 // Quiz has picture
 Quiz.belongsTo(Picture, {
@@ -116,4 +120,5 @@ export {
     SessionParticipant,
     NotificationSettings,
     UserState,
+    NotificationEntry,
 };
