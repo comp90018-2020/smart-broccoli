@@ -33,7 +33,7 @@ export class GameSession {
     public preQuestionReleasedAt: number = 0;
     public _isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
-    private activePlayersNum: number = 0;
+    public activePlayersNum: number = 0;
     private invalidTokens: Set<String> = new Set([]);
     public boardReleased: Set<number> = new Set([]);
     public questionReleased: Set<number> = new Set([]);
@@ -196,12 +196,7 @@ export class GameSession {
     }
 
     canAbort(player: Player) {
-        return (
-            this.type === GameType.SelfPaced_Group ||
-            this.type === GameType.SelfPaced_NotGroup ||
-            (player === undefined && !this.hasMoreQuestions()) ||
-            player.role === Role.host
-        );
+        return player === undefined || player.role === Role.host;
     }
 
     async setStatus(status: GameStatus) {

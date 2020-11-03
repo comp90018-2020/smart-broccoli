@@ -325,6 +325,9 @@ export class GameHandler {
                 player.profile()
             );
             await session.playerLeave(player);
+            if (session.host === null && session.activePlayersNum === 0)
+                this.abort(session);
+
             session.deactivateToken(player.token);
             // disconnect
             socket.disconnect(true);
