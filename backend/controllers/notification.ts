@@ -217,10 +217,13 @@ export const sendSessionCreationNotification = async (
     // IDs of users who should not be messaged
     const noMessageUserIds = await noMessageUsers(session);
 
+
     // List of all users who should be messaged
     const messageUsers = allUsers.filter(
         (user) => !noMessageUserIds.includes(user.id)
     );
+    // Fill in notification settings
+    await fillNotificationSettings(messageUsers);
     // IDs of users who should receive a notification
     const notificationUsersIds = await notificationUsers(messageUsers, session);
 
@@ -242,7 +245,7 @@ export const sendSessionCreationNotification = async (
             quizId: session.quizId,
         },
         `New ${type} quiz session started`,
-        `A new session for the quiz "${quiz.title}" has started, click to join`,
+        `A new session for the quiz "${quiz.title}" has started, tap to join`,
         dataTokens,
         false
     );
@@ -252,7 +255,7 @@ export const sendSessionCreationNotification = async (
             quizId: session.quizId,
         },
         `New ${type} quiz session started`,
-        `A new session for the quiz "${quiz.title}" has started, click to join`,
+        `A new session for the quiz "${quiz.title}" has started, tap to join`,
         notifyTokens,
         true
     );
@@ -265,10 +268,8 @@ export const sendSessionCreationNotification = async (
 const fillNotificationSettings = async (users: User[]) => {
     // Notification settings does not exist
     for (const user of users) {
-        if (!user.NotificationSettings) {
-            user.NotificationSettings = await NotificationSettings.create({
-                userId: user.id,
-            });
+        if (!user.NotificationSetting) {
+            user.NotificationSetting = new NotificationSettings();
         }
     }
 };
@@ -305,18 +306,13 @@ const noMessageUsers = async (session: Session) => {
 const notificationUsers = async (users: User[], session: Session) => {
     // Filter by state
     const stateFilteredUsers: User[] = users.filter((user) => {
-        // Temporary replacement
-        if (!user.NotificationSettings) {
-            user.NotificationSettings = new NotificationSettings();
-        }
-
         // Current date
         const date = DateTime.local().setZone(
-            user.NotificationSettings.timezone ?? "Australia/Melbourne"
+            user.NotificationSetting.timezone ?? "Australia/Melbourne"
         );
         // Get day of week
         const dayOfWeek = date.weekdayLong;
-        if (!user.NotificationSettings.days[WEEKDAYS.indexOf(dayOfWeek)]) {
+        if (!user.NotificationSetting.days[WEEKDAYS.indexOf(dayOfWeek)]) {
             return false;
         }
 
@@ -324,13 +320,13 @@ const notificationUsers = async (users: User[], session: Session) => {
         if (user.UserState) {
             if (session.type === "live") {
                 // Live
-                return user.NotificationSettings.calendarLive;
+                return user.NotificationSetting.calendarLive;
             } else {
                 // Self paced
                 if (user.UserState.calendarFree) {
                     return user.UserState.free;
                 } else {
-                    if (user.NotificationSettings.calendarSelfPaced) {
+                    if (user.NotificationSetting.calendarSelfPaced) {
                         // User indicated that they're ok with notifications
                         // when they have item on calendar
                         return user.UserState.free;
@@ -360,7 +356,7 @@ const notificationUsers = async (users: User[], session: Session) => {
 const canNotifyAndSet = async (user: User) => {
     // Start of day for user
     const startForUser = DateTime.local()
-        .setZone(user.NotificationSettings.timezone ?? "Australia/Melbourne")
+        .setZone(user.NotificationSetting.timezone ?? "Australia/Melbourne")
         .startOf("day");
 
     // Get notification entries with createdAt within 24 hours
@@ -375,22 +371,22 @@ const canNotifyAndSet = async (user: User) => {
 
     // Max notification count per day
     if (
-        user.NotificationSettings.maxNotificationsPerDay !== 0 &&
-        notifications.length >= user.NotificationSettings.maxNotificationsPerDay
+        user.NotificationSetting.maxNotificationsPerDay > 0 &&
+        notifications.length >= user.NotificationSetting.maxNotificationsPerDay
     ) {
         return null;
     }
 
     // Look at last notification
     if (
-        user.NotificationSettings.notificationWindow !== 0 &&
+        user.NotificationSetting.notificationWindow > 0 &&
         notifications.length > 0
     ) {
         const last: Date = notifications[0].time;
         // If (current - last).minutes < user setting, do not notify
         if (
             DateTime.local().diff(DateTime.fromJSDate(last)).minutes <
-            user.NotificationSettings.notificationWindow
+            user.NotificationSetting.notificationWindow
         ) {
             return null;
         }

@@ -74,7 +74,7 @@ class User
 
     public Tokens?: Token[];
     public UserState?: UserState;
-    public NotificationSettings?: NotificationSettings;
+    public NotificationSetting?: NotificationSettings;
 
     public getGroups!: BelongsToManyGetAssociationsMixin<Group>;
     public getPicture!: HasOneGetAssociationMixin<Picture>;

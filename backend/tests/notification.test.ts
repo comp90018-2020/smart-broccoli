@@ -165,7 +165,8 @@ describe("Notification", () => {
 
     it("'Trigger' notification", async () => {
         const agent = supertest(app);
-        const owner = await registerAndLogin({ ...USER, email: "b@b.com" });
+        const owner1 = await registerAndLogin({ ...USER, email: "b@b.com" });
+        const owner2 = await registerAndLogin({ ...USER, email: "c@c.com" });
         const user = await registerAndLogin(USER);
 
         // Set token
@@ -175,16 +176,45 @@ describe("Notification", () => {
             .send({ token: "aaabbb" });
         expect(token.status).to.equal(200);
 
+        const values = {
+            onTheMove: false,
+            onCommute: false,
+            calendarLive: false,
+            calendarSelfPaced: false,
+            days: [true, true, false, false, true, false, true],
+            timezone: "Australia/Melbourne",
+            ssid: "ABC",
+            location: "heh",
+            radius: 5,
+            notificationWindow: 5,
+            maxNotificationsPerDay: 100,
+        };
+        const res = await agent
+            .put("/user/notification")
+            .set("Authorization", `Bearer ${user.token}`)
+            .send(values);
+        expect(res.status).to.equal(200);
+        expect(res.body.notificationWindow).to.equal(values.notificationWindow);
+        expect(res.body.maxNotificationsPerDay).to.equal(values.maxNotificationsPerDay);
+
         // Create group/quiz
-        const group = await createGroup(owner.id, "foo");
-        const quiz = await createQuiz(owner.id, group.id, QUIZ);
+        const group = await createGroup(owner1.id, "foo");
+        const group2 = await createGroup(owner2.id, "bar");
+        const quiz = await createQuiz(owner1.id, group.id, QUIZ);
+        const quiz2 = await createQuiz(owner2.id, group2.id, QUIZ);
 
         // Join group
         await joinGroup(user.id, { code: group.code });
+        await joinGroup(user.id, { code: group2.code });
 
-        // Start live quiz
-        await createSession(owner.id, {
+        // Start live quiz, user 'gets' notification
+        await createSession(owner1.id, {
             quizId: quiz.id,
+            isGroup: false,
+        });
+        // Start second live quiz, user should got 'get' notification
+        await createSession(owner2.id, {
+            quizId: quiz2.id,
             isGroup: false,
         });
     });
