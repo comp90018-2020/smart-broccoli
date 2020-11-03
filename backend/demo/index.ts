@@ -117,7 +117,7 @@ const profilePictures = [
 const password = "12345678";
 const email = "@gmail.com";
 
-export const accountDataGen = async () =>{
+export const generateDemoData = async () =>{
 
     await rebuild();
     const users: any =  [];
@@ -242,7 +242,7 @@ async function questionDataGen(questionsNotobject: any[]) {
     }
     return questionsObjectArray;
 }
-    
+
 async function quizDataGen(user: any, groupId: number[][], questions: TempQuestion[], quizInfo: any, quizType: string ) {
             const quiz = await quizCntr.createQuiz(user.id, {
                 groupId: groupId,
