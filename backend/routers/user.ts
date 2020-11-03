@@ -424,6 +424,7 @@ router.put(
         body("calendarLive").isBoolean(),
         body("calendarSelfPaced").isBoolean(),
         body("days").isArray({ min: 7, max: 7 }),
+        body("days.*").isBoolean(),
         body("timezone").optional().isString(),
         body("workSSID").optional({ nullable: true }).isString(),
         body("workLocation.lat").optional().isString(),
