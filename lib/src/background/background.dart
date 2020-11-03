@@ -49,7 +49,7 @@ void callbackDispatcher() {
           }
           // For code above
           if (flag) {
-            break;
+            // break;
           }
 
           /// Check wifi for work wifi stuff
@@ -101,19 +101,6 @@ void callbackDispatcher() {
             break;
           }
 
-          /// Check location info
-          Placemark placemark =
-              await backgroundLocation.getPlacemark(position1);
-
-          String data = await backgroundLocation.placeMarkType(placemark);
-
-          /// Not at a residential address or university
-          if (data.contains("office") || data.contains("commercial")) {
-            // Return 0
-            log("The defult location is GOOGLE HQ", name: "Backend-NOTE");
-            break;
-          }
-
           /// Idle for 30 seconds
           Duration duration = new Duration(seconds: 30);
 
@@ -152,6 +139,23 @@ void callbackDispatcher() {
 
           /// If the user is not moving
           else {
+            /// If the user is not moving check the location info
+            Placemark placemark =
+                await backgroundLocation.getPlacemark(position1);
+
+            String data = await backgroundLocation.placeMarkType(placemark);
+
+            /// Not at a residential address or university
+            if (data.contains("office") ||
+                data.contains("commercial") ||
+                data.contains("gym") ||
+                data.contains("park")) {
+              // Return 0
+              log("The defult location is GOOGLE HQ", name: "Backend-NOTE");
+              log("We are at a Do not send notif area", name: "Backend");
+              break;
+            }
+
             // Access Light sensor
             LightSensor lightSensor = new LightSensor();
             int lum = await lightSensor.whenLight();
