@@ -32,11 +32,12 @@ export const addToken = async (
     try {
         if (!oldToken) {
             // New token
-            await Token.upsert({
+            const [created] = await Token.upsert({
                 token: token,
                 userId,
                 scope: "firebase",
             });
+            return created;
         } else {
             // Old token exists
             const res = await Token.update(
@@ -49,11 +50,13 @@ export const addToken = async (
                         token: oldToken,
                         scope: "firebase",
                     },
+                    returning: true,
                 }
             );
             if (res[0] != 1) {
                 throw new ErrorStatus("Old token does not exist", 400);
             }
+            return res[1][0];
         }
     } catch (err) {
         if (err.parent.code === "23505") {
@@ -300,7 +303,11 @@ const notificationUsers = async (users: User[], session: Session) => {
         );
         // Get day of week
         const dayOfWeek = date.weekdayLong;
-        if (!user.NotificationSetting.days[Info.weekdays("long").indexOf(dayOfWeek)]) {
+        if (
+            !user.NotificationSetting.days[
+                Info.weekdays("long").indexOf(dayOfWeek)
+            ]
+        ) {
             return false;
         }
 

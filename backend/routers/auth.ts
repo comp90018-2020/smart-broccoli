@@ -293,8 +293,12 @@ router.post(
     auth(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await addToken(req.user.id, req.body.token, req.body.oldToken);
-            return res.sendStatus(200);
+            const token = await addToken(
+                req.user.id,
+                req.body.token,
+                req.body.oldToken
+            );
+            return res.send(token);
         } catch (err) {
             return next(err);
         }
@@ -320,6 +324,7 @@ router.delete(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             await deleteTokenOfUser(req.user.id, req.body.token);
+            return res.sendStatus(204);
         } catch (err) {
             return next(err);
         }
