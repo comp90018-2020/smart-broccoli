@@ -177,8 +177,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     socket.on('cancelled', (message) {
       print("cancelled");
       socket.disconnect();
-      // TODO: reinstate after backend is patched
-      // _transitionTo(SessionState.ABORTED);
+      _transitionTo(SessionState.ABORTED);
     });
 
     socket.on('nextQuestion', (message) async {
