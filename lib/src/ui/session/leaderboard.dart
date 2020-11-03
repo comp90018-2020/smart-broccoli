@@ -4,159 +4,155 @@ import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Leaderboard page
-class QuizLeaderboard extends StatefulWidget {
+class QuizLeaderboard extends StatelessWidget {
   @override
-  State<StatefulWidget> createState() => new _LeaderBoardLobby();
-}
-
-class _LeaderBoardLobby extends State<QuizLeaderboard> {
-  // Entry function
-  @override
-  Widget build(BuildContext context) {
-    return new CustomPage(
-      title: "Leaderboard",
-      background: [
-        // The clip for the current user's rank
-        Container(
-          child: ClipPath(
-            clipper: _BackgroundRectClipper(),
-            child: Container(
-              color: Color(0xFFFEC12D),
-            ),
-          ),
-        ),
-        // Overall wavy clip
-        Container(
-          child: ClipPath(
-            clipper: _BackgroundClipper(),
-            child: Container(
-              color: Theme.of(context).colorScheme.background,
-            ),
-          ),
-        ),
-      ],
-      child: Column(
-        children: <Widget>[
-          // Top 3
+  Widget build(BuildContext context) => CustomPage(
+        title: "Leaderboard",
+        background: [
+          // The clip for the current user's rank
           Container(
-              padding: EdgeInsets.all(16),
-              constraints: BoxConstraints(maxHeight: 165),
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                runAlignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 25,
-                children: <Widget>[
-                  _topThreeUsers(
-                    "Winner 2",
-                    50,
-                    Text(
-                      '2',
-                      style: SmartBroccoliTheme.leaderboardRankStyle,
+            child: ClipPath(
+              clipper: _BackgroundRectClipper(),
+              child: Container(
+                color: Color(0xFFFEC12D),
+              ),
+            ),
+          ),
+          // Overall wavy clip
+          Container(
+            child: ClipPath(
+              clipper: _BackgroundClipper(),
+              child: Container(
+                color: Theme.of(context).colorScheme.background,
+              ),
+            ),
+          ),
+        ],
+        child: Column(
+          children: <Widget>[
+            // Top 3
+            Container(
+                padding: EdgeInsets.all(16),
+                constraints: BoxConstraints(maxHeight: 165),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  runAlignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 25,
+                  children: <Widget>[
+                    _topThreeUsers(
+                      context,
+                      "Winner 2",
+                      50,
+                      Text('2', style: SmartBroccoliTheme.leaderboardRankStyle),
                     ),
-                  ),
-                  _topThreeUsers("Winner 1", 75,
+                    _topThreeUsers(
+                      context,
+                      "Winner 1",
+                      75,
                       Text('1', style: SmartBroccoliTheme.leaderboardRankStyle),
-                      bolded: true),
-                  _topThreeUsers(
+                      bolded: true,
+                    ),
+                    _topThreeUsers(
+                      context,
                       "Winner 3",
                       50,
-                      Text('3',
-                          style: SmartBroccoliTheme.leaderboardRankStyle)),
-                ],
-              )),
+                      Text('3', style: SmartBroccoliTheme.leaderboardRankStyle),
+                    ),
+                  ],
+                )),
 
-          // Current user & ranking
-          Container(
-              margin: EdgeInsets.symmetric(vertical: 8),
-              // Lowest point of green area to end of yellow (150 -> 205)
-              // See below for more details
-              height: 65,
-              child: _leaderboardList(["A"], scrollable: false)),
+            // Current user & ranking
+            Container(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                // Lowest point of green area to end of yellow (150 -> 205)
+                // See below for more details
+                height: 65,
+                child: _leaderboardList(["A"], scrollable: false)),
 
-          // List of users
-          Expanded(child: _leaderboardList(["A", "B", "C"])),
-        ],
-      ),
-    );
-  }
-
-  // Creates user image and name
-  Widget _topThreeUsers(text, double dimensions, Widget inner,
-      {bool bolded = false}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        // Bubble
-        Container(
-            height: dimensions,
-            width: dimensions,
-            decoration: WinnerBubble(),
-            child: Align(alignment: Alignment.center, child: inner)),
-        // Name
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            text,
-            style: TextStyle(
-                color: Theme.of(context).colorScheme.onBackground,
-                fontWeight: bolded ? FontWeight.bold : FontWeight.normal),
-          ),
+            // List of users
+            Expanded(child: _leaderboardList(["A", "B", "C"])),
+          ],
         ),
-      ],
-    );
-  }
+      );
+}
 
-  Widget _leaderboardList(List<String> list, {bool scrollable = true}) {
-    return ListView.separated(
-      shrinkWrap: true,
-      itemCount: list.length,
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      physics: scrollable ? null : NeverScrollableScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-          leading: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Rank
-              Text(
-                '1',
-                style: SmartBroccoliTheme.listItemTextStyle,
-              ),
-              // Name/image
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(children: [
-                  // Profile image
-                  Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(100))),
-                  // Name
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Text('name',
-                        style: SmartBroccoliTheme.listItemTextStyle),
-                  )
-                ]),
-              )
-            ],
-          ),
-          // Score
-          trailing: Wrap(
-              spacing: 5,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text('3,500', style: SmartBroccoliTheme.listItemTextStyle),
-                Icon(Icons.star, color: Color(0xFF656565))
+// Creates user image and name
+Widget _topThreeUsers(
+    BuildContext context, String text, double dimensions, Widget inner,
+    {bool bolded = false}) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: <Widget>[
+      // Bubble
+      Container(
+          height: dimensions,
+          width: dimensions,
+          decoration: WinnerBubble(),
+          child: Align(alignment: Alignment.center, child: inner)),
+      // Name
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          text,
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onBackground,
+              fontWeight: bolded ? FontWeight.bold : FontWeight.normal),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _leaderboardList(List<String> list, {bool scrollable = true}) {
+  return ListView.separated(
+    shrinkWrap: true,
+    itemCount: list.length,
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+    physics: scrollable ? null : NeverScrollableScrollPhysics(),
+    itemBuilder: (BuildContext context, int index) {
+      return ListTile(
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Rank
+            Text(
+              '1',
+              style: SmartBroccoliTheme.listItemTextStyle,
+            ),
+            // Name/image
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(children: [
+                // Profile image
+                Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(100))),
+                // Name
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child:
+                      Text('name', style: SmartBroccoliTheme.listItemTextStyle),
+                )
               ]),
-        );
-      },
-      separatorBuilder: (BuildContext context, int index) => const Divider(),
-    );
-  }
+            )
+          ],
+        ),
+        // Score
+        trailing: Wrap(
+            spacing: 5,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text('3,500', style: SmartBroccoliTheme.listItemTextStyle),
+              Icon(Icons.star, color: Color(0xFF656565))
+            ]),
+      );
+    },
+    separatorBuilder: (BuildContext context, int index) => const Divider(),
+  );
 }
 
 // Curved clipper
