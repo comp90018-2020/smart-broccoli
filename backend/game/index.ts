@@ -44,12 +44,16 @@ export default async (socketIO: Server) => {
 
             // next question
             socket.on("next", () => {
-                handler.next(session, session.getQuestionIndex(), player);
+                handler.releaseQuestion(
+                    session,
+                    session.getQuestionIndex(),
+                    player
+                );
             });
 
             // showBoard
             socket.on("showBoard", () => {
-                handler.showBoard(session, session.questionIndex, player);
+                handler.showBoard(session, player);
             });
 
             if (process.env.SOCKET_MODE === "debug") {

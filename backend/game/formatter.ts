@@ -75,7 +75,7 @@ export const formatQuestionOutcome = (
             : rankAll[record.newPos - 1].formatRecord();
 
     const questionOutcome = {
-        question: session.questionIndex,
+        question: session.questionIndex - 1,
         leaderboard: rankFormated,
         record: session.playerMap[Number(playerId)].formatRecord().record,
         playerAhead: playerAheadRecord,
