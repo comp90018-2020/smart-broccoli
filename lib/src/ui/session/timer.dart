@@ -20,15 +20,19 @@ class _TimerWidgetState extends State<TimerWidget> {
 
   void reset(dynamic milliseconds) {
     _millisecondsRemaining = milliseconds;
-    _timer = Timer.periodic(
-      const Duration(milliseconds: 100),
-      (Timer timer) => setState(() {
-        if (_millisecondsRemaining < 1)
-          timer.cancel();
-        else
-          _millisecondsRemaining -= 100;
-      }),
-    );
+    if (_timer == null)
+      _timer = Timer.periodic(
+        const Duration(milliseconds: 100),
+        (Timer timer) {
+          if (mounted)
+            setState(() {
+              if (_millisecondsRemaining < 1)
+                timer.cancel();
+              else
+                _millisecondsRemaining -= 100;
+            });
+        },
+      );
   }
 
   @override
@@ -42,11 +46,8 @@ class _TimerWidgetState extends State<TimerWidget> {
 
   @override
   void dispose() {
-    super.dispose();
-    Provider.of<GameSessionModel>(context, listen: false)
-        .pubSub
-        .unsubscribe(PubSubTopic.TIMER, reset);
     _timer?.cancel();
+    super.dispose();
   }
 
   @override
