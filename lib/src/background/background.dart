@@ -209,12 +209,13 @@ void callbackDispatcher() {
               }
             }
           }
-          // Return 0
+          /// Return 0
           log("Reason: Phone is not stationary or asked not to be prompted or calendar is busy return 0",
               name: "Backend");
 
           break;
       }
+      /// Close the SQL database
       BackgroundDatabase.closeDB();
       return Future.value(true);
     } on MissingPluginException catch (e) {
