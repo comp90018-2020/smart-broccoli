@@ -4,7 +4,7 @@ import 'package:quiver/core.dart';
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
+enum QuizType { LIVE, SELF_PACED_ALONE, SMART_LIVE, SELF_PACED }
 
 /// Stores a pending picture
 abstract class PendingPicture {
@@ -160,8 +160,11 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
 
   @override
   int compareTo(Quiz other) {
-    int thisType = this.type.index;
-    int otherType = other.type.index;
+    final int nQuizType = QuizType.values.length;
+    int thisType =
+        this.complete ? this.type.index - nQuizType : this.type.index;
+    int otherType =
+        other.complete ? other.type.index - nQuizType : other.type.index;
 
     if (thisType == otherType)
       return other.updatedTimestamp.compareTo(this.updatedTimestamp);
@@ -174,13 +177,19 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
     // Live quiz
     if (this._type == QuizType.LIVE) return QuizType.LIVE;
     // Determine if smart session exists (a self-paced quiz with session)
-    var smartSession = this.sessions?.firstWhere(
-        (session) =>
-            session.quizType == QuizType.SELF_PACED &&
-            session.state != GameSessionState.ENDED, orElse: () {
-      return null;
-    });
-    return smartSession == null ? QuizType.SELF_PACED : QuizType.SMART_LIVE;
+    var smartSessions = this.sessions?.where((session) =>
+        session.quizType == QuizType.SELF_PACED &&
+        session.state != GameSessionState.ENDED);
+    // if there is no sessions, this is a self-paced quiz
+    if (smartSessions.length == 0) return QuizType.SELF_PACED;
+    // there is group session it is a smart live quiz
+    // otherwise it is a self-paced alone quiz
+    return smartSessions.firstWhere(
+                (session) => session.type == GameSessionType.GROUP,
+                orElse: () => null) ==
+            null
+        ? QuizType.SELF_PACED_ALONE
+        : QuizType.SMART_LIVE;
   }
 
   /// Set type
