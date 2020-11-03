@@ -103,7 +103,8 @@ class _MyAppState extends State<MyApp> {
             .pushNamedAndRemoveUntil(routeArgs.name, (route) => false);
         break;
       case RouteAction.DIALOG_POPALL_SESSION:
-        await showBasicDialog(context, 'The host aborted the session',
+        await showBasicDialog(_mainNavigatorKey.currentState.overlay.context,
+            'The host aborted the session',
             title: 'Oof');
         continue popall_session;
       popall_session:
