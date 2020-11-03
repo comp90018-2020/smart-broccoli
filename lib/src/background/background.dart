@@ -22,6 +22,7 @@ void callbackDispatcher() {
       print("Starting background tasks");
       switch (task) {
         case "backgroundReading":
+          bool flag = false;
           await BackgroundDatabase.init();
           List<CalEvent> calEvent = await BackgroundDatabase.getEvents();
           DateTime time = DateTime.now();
@@ -42,8 +43,13 @@ void callbackDispatcher() {
               // Return 0
               log("The user is busy today accoridng to cal return 0",
                   name: "Backend");
+              flag = true;
               break;
             }
+          }
+          // For code above
+          if (flag) {
+            break;
           }
 
           /// Check wifi for work wifi stuff
@@ -209,12 +215,14 @@ void callbackDispatcher() {
               }
             }
           }
+
           /// Return 0
           log("Reason: Phone is not stationary or asked not to be prompted or calendar is busy return 0",
               name: "Backend");
 
           break;
       }
+
       /// Close the SQL database
       BackgroundDatabase.closeDB();
       return Future.value(true);
