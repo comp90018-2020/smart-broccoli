@@ -66,6 +66,9 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         : '${(question as MCQuestion).numCorrect} correct answers';
   }
 
+  int get points =>
+      correctAnswer?.record?.points ?? (outcome as OutcomeUser)?.record?.points;
+
   /// The socket which we enclose
   IO.Socket socket;
 

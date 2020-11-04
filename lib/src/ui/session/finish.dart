@@ -53,14 +53,14 @@ class SessionFinish extends StatelessWidget {
                   ),
                 ),
               ),
-              if (_finalPoints(model) != null)
+              if (model.points != null)
                 Column(
                   children: [
                     Center(
                         child: Text('Final Score',
                             style: SmartBroccoliTheme.finalScoreCaptionStyle)),
                     Center(
-                        child: Text('${_finalPoints(model)}',
+                        child: Text('${model.points}',
                             style: SmartBroccoliTheme.finishScreenPointsStyle)),
                   ],
                 )
@@ -70,8 +70,4 @@ class SessionFinish extends StatelessWidget {
       ),
     );
   }
-
-  int _finalPoints(GameSessionModel model) =>
-      model?.correctAnswer?.record?.points ??
-      (model?.outcome as OutcomeUser)?.record?.points;
 }

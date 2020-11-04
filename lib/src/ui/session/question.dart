@@ -205,7 +205,7 @@ class QuizQuestion extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  '${_getPoints(model) ?? 0}',
+                  '${model.points ?? 0}',
                   style: TextStyle(
                       color: Color(0xFFECC030),
                       fontSize: 18,
@@ -216,10 +216,6 @@ class QuizQuestion extends StatelessWidget {
             ),
           )
       ];
-
-  int _getPoints(GameSessionModel model) =>
-      model.correctAnswer?.record?.points ??
-      (model.outcome as OutcomeUser)?.record?.points;
 
   // Determines the correct colour to display
   Color findColour(GameSessionModel model, int index) {
