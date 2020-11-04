@@ -492,9 +492,9 @@ export class GameHandler {
         }
         if (
             session.isSelfPacedNotGroup() &&
-            session.questionIndex == session.totalQuestions
+            session.questionIndex === session.totalQuestions
         ) {
-            this.abort(session, player);
+            this.abort(session);
             return;
         }
     }
