@@ -30,15 +30,6 @@ void main() async {
   // Cancel all ongoing background tasks upon running the app
   await Workmanager.cancelAll();
 
-  /// Schedule the background task
-  /// Default is 15 minutes per refresh
-  Workmanager.registerPeriodicTask("1", "backgroundReading",
-      initialDelay: Duration(seconds: 30),
-      constraints: Constraints(
-        networkType: NetworkType.connected,
-        requiresBatteryNotLow: true,
-        requiresDeviceIdle: false,
-      ));
 
   // Local storage
   final KeyValueStore keyValueStore = await SharedPrefsKeyValueStore.create();
@@ -134,6 +125,18 @@ class _MyAppState extends State<MyApp> {
         _mainNavigatorKey.currentState.pushNamedAndRemoveUntil(
             state.inSession ? '/take_quiz' : '/auth', (route) => false);
       inSession = state.inSession;
+    }
+
+    if(state.inSession) {
+      /// Schedule the background task
+      /// Default is 15 minutes per refresh
+      Workmanager.registerPeriodicTask("1", "backgroundReading",
+          initialDelay: Duration(seconds: 30),
+          constraints: Constraints(
+            networkType: NetworkType.connected,
+            requiresBatteryNotLow: true,
+            requiresDeviceIdle: false,
+          ));
     }
 
     return MaterialApp(

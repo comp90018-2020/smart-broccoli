@@ -9,20 +9,18 @@ class LightSensor {
   Light _light;
   StreamController<int> controller = StreamController<int>();
 
-  LightSensor() {
+  close() {
+    controller.close();
+  }
+
+  Future<int> whenLight() async {
     try {
       _light = new Light();
       controller.addStream(_light.lightSensorStream);
     } catch (e) {
       log(e, name: "Light");
     }
-  }
 
-  close() {
-    controller.close();
-  }
-
-  Future<int> whenLight() async {
     await for (int value in controller.stream) {
       return value;
     }
