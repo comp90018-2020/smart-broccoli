@@ -130,10 +130,11 @@ class _MyAppState extends State<MyApp> {
     // On change of inSession
     if (inSession != state.inSession) {
       // Push route if app is initialised
-      if (inSession != null)
+      if (inSession != null) {
         _mainNavigatorKey.currentState.pushNamedAndRemoveUntil(
             state.inSession ? '/take_quiz' : '/auth', (route) => false);
-      Provider.of<GameSessionModel>(context, listen: false).refreshSession();
+        Provider.of<GameSessionModel>(context, listen: false).refreshSession();
+      }
       inSession = state.inSession;
     }
 
