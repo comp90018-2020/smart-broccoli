@@ -98,6 +98,10 @@ class _MyAppState extends State<MyApp> {
       case RouteAction.POP:
         _mainNavigatorKey.currentState.pop();
         break;
+      case RouteAction.POP_LEADERBOARD:
+        _mainNavigatorKey.currentState
+            .popUntil((route) => route.settings.name != '/session/leaderboard');
+        break;
       case RouteAction.DIALOG_POPALL_SESSION:
         await showBasicDialog(_mainNavigatorKey.currentState.overlay.context,
             'The host aborted the session',

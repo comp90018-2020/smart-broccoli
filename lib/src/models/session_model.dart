@@ -298,7 +298,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
           notifyListeners();
         else if (state == SessionState.OUTCOME) {
           PubSub().publish(PubSubTopic.ROUTE,
-              arg: RouteArgs(action: RouteAction.POP));
+              arg: RouteArgs(action: RouteAction.POP_LEADERBOARD));
           PubSub().publish(PubSubTopic.TIMER, arg: time);
           notifyListeners();
         } else {
