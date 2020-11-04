@@ -3,17 +3,25 @@ import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/ui.dart';
 
 /// Actions
-enum RouteAction { PUSH, POPALL, REPLACE }
+enum RouteAction {
+  PUSH,
+  POP,
+  POP_LEADERBOARD,
+  POPALL_SESSION,
+  DIALOG_POPALL_SESSION,
+  REPLACE,
+  REPLACE_ALL
+}
 
 /// Router arguemnts
 class RouteArgs {
   /// Name of route
-  final String routeName;
+  final String name;
 
   /// Action to take
-  final RouteAction routeAction;
+  final RouteAction action;
 
-  RouteArgs(this.routeName, {this.routeAction = RouteAction.PUSH});
+  RouteArgs({this.name, this.action = RouteAction.PUSH});
 }
 
 /// Defines routes and transitions
@@ -34,10 +42,11 @@ class BroccoliRouter {
   static const String manageQuiz = "/manage_quiz";
 
   // Session
+  static const String sessionStart = "/session/start/quiz/:id";
   static const String sessionLobby = "/session/lobby";
   static const String sessionQuestion = "/session/question";
   static const String sessionLeaderboard = "/session/leaderboard";
-  static const String sessionStart = "/session/start";
+  static const String sessionFinish = "/session/finish";
 
   // Group
   static const String group = "/group/:id";
@@ -161,7 +170,13 @@ class BroccoliRouter {
     // Session start
     router.define(sessionStart, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
-      return StartQuiz();
+      return StartQuiz(int.parse(params["id"][0]));
+    }));
+
+    // Session finish for self-paced solo quizzes
+    router.define(sessionFinish, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return SessionFinish();
     }));
 
     // Profile

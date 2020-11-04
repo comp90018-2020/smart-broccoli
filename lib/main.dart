@@ -1,10 +1,12 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 
 void main() async {
@@ -21,6 +23,8 @@ void main() async {
       QuizCollectionModel(authStateModel, picStash);
   final GroupRegistryModel groupRegistryModel =
       GroupRegistryModel(authStateModel, userRepo, quizCollectionModel);
+  final GameSessionModel gameSessionModel =
+      GameSessionModel(authStateModel, quizCollectionModel, userRepo);
 
   runApp(
     MultiProvider(
@@ -39,6 +43,11 @@ void main() async {
           create: (_) => groupRegistryModel,
           update: (_, authModel, groupRegistryModel) =>
               groupRegistryModel..authUpdated(),
+        ),
+        ChangeNotifierProxyProvider<AuthStateModel, GameSessionModel>(
+          create: (_) => gameSessionModel,
+          update: (_, authModel, gameSessionModel) =>
+              gameSessionModel..authUpdated(),
         ),
       ],
       child: MyApp(),
@@ -77,17 +86,39 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub
         .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
+    Provider.of<GameSessionModel>(context, listen: false).refreshSession();
   }
 
   /// Navigate to route
-  void navigate(RouteArgs routeArgs) {
-    if (routeArgs.routeAction == RouteAction.POPALL) {
-      _mainNavigatorKey.currentState
-          .pushNamedAndRemoveUntil(routeArgs.routeName, (route) => false);
-    } else if (routeArgs.routeAction == RouteAction.REPLACE) {
-      _mainNavigatorKey.currentState.pushReplacementNamed(routeArgs.routeName);
-    } else {
-      _mainNavigatorKey.currentState.pushNamed(routeArgs.routeName);
+  Future<void> navigate(RouteArgs routeArgs) async {
+    switch (routeArgs.action) {
+      case RouteAction.PUSH:
+        _mainNavigatorKey.currentState.pushNamed(routeArgs.name);
+        break;
+      case RouteAction.POP:
+        _mainNavigatorKey.currentState.pop();
+        break;
+      case RouteAction.POP_LEADERBOARD:
+        _mainNavigatorKey.currentState
+            .popUntil((route) => route.settings.name != '/session/leaderboard');
+        break;
+      case RouteAction.DIALOG_POPALL_SESSION:
+        await showBasicDialog(_mainNavigatorKey.currentState.overlay.context,
+            'The host aborted the session',
+            title: 'Oof');
+        continue popall_session;
+      popall_session:
+      case RouteAction.POPALL_SESSION:
+        _mainNavigatorKey.currentState
+            .popUntil((route) => !route.settings.name.startsWith('/session'));
+        break;
+      case RouteAction.REPLACE:
+        _mainNavigatorKey.currentState.pushReplacementNamed(routeArgs.name);
+        break;
+      case RouteAction.REPLACE_ALL:
+        _mainNavigatorKey.currentState
+            .pushNamedAndRemoveUntil(routeArgs.name, (route) => false);
+        break;
     }
   }
 
@@ -99,9 +130,11 @@ class _MyAppState extends State<MyApp> {
     // On change of inSession
     if (inSession != state.inSession) {
       // Push route if app is initialised
-      if (inSession != null)
+      if (inSession != null) {
         _mainNavigatorKey.currentState.pushNamedAndRemoveUntil(
             state.inSession ? '/take_quiz' : '/auth', (route) => false);
+        Provider.of<GameSessionModel>(context, listen: false).refreshSession();
+      }
       inSession = state.inSession;
     }
 

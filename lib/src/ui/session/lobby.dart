@@ -1,63 +1,33 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 import 'package:smart_broccoli/theme.dart';
-import 'question.dart';
+
+import 'timer.dart';
 import 'vertical_clip.dart';
 
 /// Widget for Lobby
-class QuizLobby extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => new _StartLobby();
-}
-
-class _StartLobby extends State<QuizLobby> {
-  // Timer for countdown
-  Timer _timer;
-  // You should have a getter method here to get data from server
-  int _start = 10;
-
-  void startTimer1() {
-    // Decrement the timer
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
-      oneSec,
-      (Timer timer) => setState(
-        () {
-          if (_start < 1) {
-            //TODO after reaching this point, either:
-            // 1. Call the next question activity
-            // 2. Call a function in the build class
-            // which creates a button for the user to move to the next class
-            timer.cancel();
-          } else {
-            _start = _start - 1;
-          }
-        },
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  // Initiate timers on start up
-  @override
-  void initState() {
-    super.initState();
-    startTimer1();
-  }
-
-  // Entry function
+class QuizLobby extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPage(
       title: 'Take Quiz',
+
+      appbarLeading: IconButton(
+        icon: Icon(Icons.close),
+        enableFeedback: false,
+        splashRadius: 20,
+        onPressed: () async {
+          if (!await showConfirmDialog(
+              context, "You are about to quit this session")) return;
+          Provider.of<GameSessionModel>(context, listen: false).quitQuiz();
+        },
+      ),
 
       // Background decoration
       background: [
@@ -77,80 +47,108 @@ class _StartLobby extends State<QuizLobby> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Stack(children: [
-              // Quiz card
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-                margin: EdgeInsets.only(bottom: 12),
-                child: QuizCard(
-                  // placeholder
-                  Quiz.fromJson({'title': 'Quiz title', 'groupId': 1}),
-                  aspectRatio: 2.3,
-                ),
-              ),
-
-              // Start button on top of card
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: RaisedButton(
-                    shape: SmartBroccoliTheme.raisedButtonShape,
-                    child: Text("Start"),
-                    onPressed: () => _startQuiz(),
+            Consumer<GameSessionModel>(
+              builder: (context, model, child) => Stack(children: [
+                // Quiz card
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+                  margin: EdgeInsets.only(bottom: 12),
+                  child: Consumer<QuizCollectionModel>(
+                    builder: (context, collection, child) => QuizCard(
+                      collection.getQuiz(model.session.quizId),
+                      aspectRatio: 2.3,
+                      optionsEnabled: false,
+                    ),
                   ),
                 ),
-              ),
-            ]),
+
+                // Start button on top of card
+                if (model.role == GroupRole.OWNER &&
+                    model.state == SessionState.PENDING)
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: RaisedButton(
+                        shape: SmartBroccoliTheme.raisedButtonShape,
+                        child: Text("Start"),
+                        onPressed: () {
+                          Provider.of<GameSessionModel>(context, listen: false)
+                              .startQuiz();
+                        },
+                      ),
+                    ),
+                  ),
+              ]),
+            ),
 
             // Chip for group subscriptions
-            Chip(
-                label: Text('Subscribed to group'),
-                avatar: Icon(Icons.check_sharp)),
+            Consumer<GameSessionModel>(
+              builder: (context, model, child) => model.role == GroupRole.MEMBER
+                  ? FutureBuilder(
+                      future: Provider.of<GroupRegistryModel>(context,
+                              listen: false)
+                          .getGroup(model.session.groupId),
+                      builder: (BuildContext context,
+                              AsyncSnapshot<Group> snapshot) =>
+                          snapshot.hasData && snapshot.data != null
+                              ? Chip(
+                                  label: Text('Subscribed to group'),
+                                  avatar: Icon(Icons.check_sharp),
+                                )
+                              : SizedBox(height: 8),
+                    )
+                  : SizedBox(height: 8),
+            ),
 
             // Text describing status
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: Text(
-                'Waiting for host to start...',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    backgroundColor: Colors.transparent),
+            Consumer<GameSessionModel>(
+              builder: (context, socketModel, child) => Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Text(
+                  socketModel.waitHint,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      backgroundColor: Colors.transparent),
+                ),
               ),
             ),
 
             Expanded(
-              child: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 25),
-                        child: Text(
-                          'Participants',
-                          textAlign: TextAlign.left,
+              child: Consumer<GameSessionModel>(
+                builder: (context, model, child) => Stack(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 25),
+                          child: Text(
+                            'Participants',
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                        LobbyDivider(),
+                      ],
+                    ),
+
+                    // The list of Quiz players
+                    Padding(
+                      padding: EdgeInsets.only(top: 26),
+                      child: _quizUsers(),
+                    ),
+
+                    // Quiz countdown
+                    if (model.state == SessionState.STARTING)
+                      Positioned.fill(
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: _quizTimer(model),
                         ),
                       ),
-                      LobbyDivider(),
-                    ],
-                  ),
-
-                  // The list of Quiz players
-                  Padding(
-                    padding: EdgeInsets.only(top: 26),
-                    child: _quizUsers(),
-                  ),
-
-                  // Quiz countdown
-                  Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: _quizTimer(),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -160,46 +158,44 @@ class _StartLobby extends State<QuizLobby> {
   }
 
   // Timer display functionality
-  Widget _quizTimer() {
+  Widget _quizTimer(GameSessionModel model) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 30, 0),
       child: Container(
         height: 50,
         width: 50,
         decoration: LobbyTimerBoxDecoration(),
-        child: Center(child: Text("$_start")),
+        child: Center(
+          child: TimerWidget(initTime: model.startCountDown),
+        ),
       ),
     );
   }
 
-  final userList = ["A", "B", "C", "D", "E", "F", "G"];
   // Quiz users list
   Widget _quizUsers() {
-    return ListView.separated(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      shrinkWrap: true,
-      itemCount: userList.length,
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-            dense: true,
-            // Avatar
-            leading: Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(100))),
-            // Name
-            title: Text(userList[index],
-                style: SmartBroccoliTheme.listItemTextStyle));
-      },
-      separatorBuilder: (BuildContext context, int index) => const Divider(),
-    );
-  }
-
-  void _startQuiz() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => QuizQuestion()),
-    );
+    return Consumer<GameSessionModel>(
+        builder: (context, model, child) => ListView.separated(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              shrinkWrap: true,
+              itemCount: model.players.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                    dense: true,
+                    // Avatar
+                    leading: FutureBuilder(
+                      future: model.getPeerProfilePicturePath(
+                          model.players.values.toList()[index].id),
+                      builder: (BuildContext context,
+                              AsyncSnapshot<String> snapshot) =>
+                          UserAvatar(snapshot.data, maxRadius: 20),
+                    ),
+                    // Name
+                    title: Text(model.players.values.toList()[index].name,
+                        style: SmartBroccoliTheme.listItemTextStyle));
+              },
+              separatorBuilder: (BuildContext context, int index) =>
+                  const Divider(),
+            ));
   }
 }

@@ -1,9 +1,11 @@
 class SocketUser {
   final int id;
-  final String name;
+  final String _name;
   final int pictureId;
 
-  SocketUser._internal(this.id, this.name, this.pictureId);
+  String get name => _name != null ? _name : "(anonymous member)";
+
+  SocketUser._internal(this.id, this._name, this.pictureId);
 
   factory SocketUser.fromJson(Map<String, dynamic> json) =>
       SocketUser._internal(

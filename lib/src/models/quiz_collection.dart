@@ -15,9 +15,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// API provider for the quiz service
   QuizApi _quizApi;
 
-  /// API provider for the session service
-  SessionApi _sessionApi;
-
   /// Picture storage service
   final PictureStash _picStash;
 
@@ -32,10 +29,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   Quiz get selectedQuiz => _selectedQuiz;
 
   /// Constructor for external use
-  QuizCollectionModel(this._authStateModel, this._picStash,
-      {QuizApi quizApi, SessionApi sessionApi}) {
+  QuizCollectionModel(this._authStateModel, this._picStash, {QuizApi quizApi}) {
     _quizApi = quizApi ?? QuizApi();
-    _sessionApi = sessionApi ?? SessionApi();
   }
 
   /// get quizzes by rules
@@ -169,19 +164,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     _refreshQuiz(updated.id, withQuestionPictures: true);
   }
 
-  Future<void> refreshCurrentSession() async {
-    _currentSession = await _sessionApi.getSession(_authStateModel.token);
-    notifyListeners();
-  }
-
-  Future<void> startQuizSession(Quiz quiz, GameSessionType type) async {
-    await _sessionApi.joinSession(
-        _authStateModel.token,
-        (await _sessionApi.createSession(_authStateModel.token, quiz.id, type))
-            .joinCode);
-    refreshCurrentSession();
-  }
-
   /// Refreshes the specified quiz
   Future<Quiz> _refreshQuiz(int quizId,
       {bool withQuestionPictures = false}) async {
@@ -191,7 +173,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     // Refresh pictures if necessary
     if (withQuestionPictures)
       await Future.wait(quiz.questions.map((Question question) async {
-        await _refreshQuestionPicture(quiz.id, question);
+        await refreshQuestionPicture(quiz.id, question);
       }));
     // Set
     if (quiz.role == GroupRole.OWNER) {
@@ -255,14 +237,15 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   // Loads the picture of a question into cache
-  Future<void> _refreshQuestionPicture(int quizId, Question question) async {
+  Future<void> refreshQuestionPicture(int quizId, Question question,
+      {String token}) async {
     // No picture
     if (question.pictureId == null) return;
     // Picture cached
     if (await _picStash.getPic(question.pictureId) != null) return;
     // Get picture and cache
     var picture = await _quizApi.getQuestionPicture(
-        _authStateModel.token, quizId, question.id);
+        token ?? _authStateModel.token, quizId, question.id);
     _picStash.storePic(question.pictureId, picture);
   }
 
