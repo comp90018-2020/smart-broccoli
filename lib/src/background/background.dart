@@ -164,19 +164,28 @@ Future<bool> checkCalendar(BackgroundDatabase db) async {
   List<CalEvent> calEvent = await db.getEvents();
   DateTime time = DateTime.now();
   for (var i = 0; i < calEvent.length; i++) {
-    /// 3 600 000 is exactly an hour in miliseconds 900000 is 15 minutes
-    if ((calEvent[i].start > time.millisecondsSinceEpoch &&
-            calEvent[i].start < time.millisecondsSinceEpoch + 900000) &&
-        (calEvent[i].end > time.millisecondsSinceEpoch &&
-                calEvent[i].end < time.millisecondsSinceEpoch + 900000) |
-            (calEvent[i].start < time.millisecondsSinceEpoch &&
-                calEvent[i].end > time.millisecondsSinceEpoch + 900000)) {
-      // Return 0
-      log("The user is busy today accoridng to cal return 0", name: "Backend");
+    // Get event start/end in DateTime
+    var eventStart = DateTime.fromMillisecondsSinceEpoch(calEvent[i].start);
+    var eventEnd = DateTime.fromMillisecondsSinceEpoch(calEvent[i].end);
+
+    // In middle of event right now
+    if (timeIsBetween(time, eventStart, eventEnd)) {
+      log("In middle of event", name: "Backend");
+      return false;
+    }
+
+    // Event start in next 15 minutes
+    if (timeIsBetween(eventStart, time, time.add(Duration(minutes: 15)))) {
+      log("Event start in next 15 minutes", name: "Backend");
       return false;
     }
   }
   return true;
+}
+
+/// Returns value indicating whether time is between start and end
+bool timeIsBetween(DateTime time, DateTime start, DateTime end) {
+  return time.isAfter(start) && time.isBefore(end);
 }
 
 Future<bool> checkGyro() async {
