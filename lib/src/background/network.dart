@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:wifi_info_plugin/wifi_info_plugin.dart';
@@ -9,8 +10,37 @@ class Network {
   WifiInfoWrapper _wifiObject;
   String _connectionStatus;
 
-  get connectionStatus => _connectionStatus;
-  get wifiObject => _wifiObject;
+
+
+  Future<List<String>> getNetworkStatus() async {
+    await initConnectivity();
+    if(_connectionStatus ==  ConnectivityResult.wifi.toString()) {
+      await initWifiInfro();
+      return [_connectionStatus,_wifiObject.ssid];
+    }
+    else{
+      return [_connectionStatus,null];
+    }
+  }
+
+  Future<bool> isAtWork(Network network) async{
+    List<String> networkStats = await network.getNetworkStatus();
+
+    if (networkStats[0] == ConnectivityResult.wifi.toString()) {
+      if (networkStats[1].contains("staff") ||
+          networkStats[1].contains("work")) {
+        // Return 0
+        log("The user's wifi appears to be work wifi return 0",
+            name: "Backend");
+
+        return true;
+      }
+    }
+    return false;
+
+  }
+
+
 
   /// Connectivity, determines if WIFI or Mobile connection
 // Platform messages are asynchronous, so we initialize in an async method.

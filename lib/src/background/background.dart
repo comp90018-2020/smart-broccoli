@@ -9,8 +9,6 @@ import 'package:sensors/sensors.dart';
 import 'package:smart_broccoli/src/background/light_sensor.dart';
 import 'package:smart_broccoli/src/background/network.dart';
 import 'package:smart_broccoli/src/background_database.dart';
-import 'package:smart_broccoli/src/store/remote/location_api.dart';
-import 'package:wifi_info_plugin/wifi_info_plugin.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'gyro.dart';
@@ -34,129 +32,15 @@ void callbackDispatcher() {
           /// Out.
           Network network = new Network();
 
-          await network.initConnectivity();
 
-          String status = await network.connectionStatus;
-
-          if (status == ConnectivityResult.wifi.toString()) {
-            await network.initWifiInfro();
-            WifiInfoWrapper wifiObj = network.wifiObject;
-            print(wifiObj.ssid);
-
-            if (wifiObj.ssid.contains("staff") ||
-                wifiObj.ssid.contains("work")) {
-              // Return 0
-              log("The user's wifi appears to be work wifi return 0",
-                  name: "Backend");
-
-              break;
-            }
-          }
-
-          log("Connectivity Status" + status, name: "Backend");
-
-          /// Start location stuff
-          BackgroundLocation backgroundLocation = new BackgroundLocation();
-
-          /// Get current long lat
-          Position position1 = await backgroundLocation.getPosition();
-
-          /// If in Geofence
-          if ((await backgroundLocation.inGeoFence(position1))) {
-            /// Return 1
-            log("The user is in a geofence return 1", name: "Backend");
+          if(await network.isAtWork(network)){
+            // return 0;
             break;
           }
 
-          /*
-          /// Foreground test code
-          LocationAPI fl = new LocationAPI();
-
-          await fl.queryLonLat(position1.longitude, position1.latitude);
-
-          await fl.queryString("Melbourne");
-
-           */
-
-          /// Idle for 30 seconds
-          Duration duration = new Duration(seconds: 30);
-
-          /// Idle background process for a while
-          sleep(duration);
-
-          /// Get second location
-          Position position2 = await backgroundLocation.getPosition();
-
-          /// Check distance between the two
-          double distance = Geolocator.distanceBetween(position1.latitude,
-              position1.longitude, position2.latitude, position2.longitude);
-
-          log("Position 1" + distance.toString(), name: "Backend");
-
-          /// Determine if the user has moved about 100 m in 30 + a few seconds
-          /// Todo add perf logic
-          /// If the user is moving
-          if (distance > 100) {
-            log("The user is on a train", name: "Backend TODO");
-            // Check if on train
-            if ((await backgroundLocation.onTrain(position2))) {
-              log("The user is on a train", name: "Backend TODO");
-
-              /// If allow prompts on move or not logic here
-              break;
-            }
-
-            /// Not on train and moving
-            /// Check if allow prompts on the move
-            else {
-              log("Not on a train and moving", name: "Backend TODO");
-              break;
-            }
-          }
-
-          /// If the user is not moving
-          else {
-            String data = await backgroundLocation.placeMarkType(position1);
-
-            /// Not at a residential address or university
-            if (data.contains("office") ||
-                data.contains("commercial") ||
-                data.contains("gym") ||
-                data.contains("park")) {
-              // Return 0
-              log("The defult location is GOOGLE HQ", name: "Backend-NOTE");
-              log("We are at a Do not send notif area", name: "Backend");
-              break;
-            }
-
-            // Access Light sensor
-            LightSensor lightSensor = new LightSensor();
-            int lum = await lightSensor.whenLight();
-
-            log("Lum" + lum.toString(), name: "Backend");
-
-            lightSensor.close();
-
-            // Todo you may want to change 20 to a config value
-            if (lum > 10 /*&& reading < 70 */) {
-              log("Reason: high light, return 1", name: "Backend");
-
-              break;
-            } else {
-              /// If the time is at night //todo add config
-              DateTime dateTime = DateTime.now();
-              if (dateTime.hour > 18 && dateTime.hour < 23) {
-                log("Reason: notif sent because time is at night, return 1",
-                    name: "Backend");
-                break;
-              } else {
-                // Check if the phone is stationary and not being used
-                if (await checkGyro()) {
-                  // Send notif
-                  break;
-                }
-              }
-            }
+          /// Check location sensitive issues
+          if (await locationCheck()) {
+            return true;
           }
 
           /// Return 0
@@ -174,6 +58,118 @@ void callbackDispatcher() {
       return Future.value(true);
     }
   });
+}
+
+/// Location sensitive functions
+Future<bool> locationCheck() async {
+  /// Start location stuff
+  BackgroundLocation backgroundLocation = new BackgroundLocation();
+
+  /// Get current long lat
+  Position position1 = await backgroundLocation.getPosition();
+
+  /// If in Geofence
+  if ((await backgroundLocation.inGeoFence(position1))) {
+    /// Return 1
+    log("The user is in a geofence return 1", name: "Backend");
+    return true;
+  }
+
+  /*
+          /// Foreground test code
+          LocationAPI fl = new LocationAPI();
+
+          await fl.queryLonLat(position1.longitude, position1.latitude);
+
+          await fl.queryString("Melbourne");
+
+           */
+
+  /// Idle for 30 seconds
+  Duration duration = new Duration(seconds: 30);
+
+  /// Idle background process for a while
+  sleep(duration);
+
+  /// Get second location
+  Position position2 = await backgroundLocation.getPosition();
+
+  /// Check distance between the two
+  double distance = Geolocator.distanceBetween(position1.latitude,
+      position1.longitude, position2.latitude, position2.longitude);
+
+  log("Position 1" + distance.toString(), name: "Backend");
+
+  /// Determine if the user has moved about 100 m in 30 + a few seconds
+  /// Todo add perf logic
+  /// If the user is moving
+  if (distance > 100) {
+    log("The user is on a train", name: "Backend TODO");
+    // Check if on train
+    if ((await backgroundLocation.onTrain(position2))) {
+      log("The user is on a train", name: "Backend TODO");
+
+      /// If allow prompts on move or not logic here
+      return false;
+    }
+
+    /// Not on train and moving
+    /// Check if allow prompts on the move
+    else {
+      log("Not on a train and moving", name: "Backend TODO");
+      return false;
+    }
+  }
+
+  /// If the user is not moving
+  else {
+    String data = await backgroundLocation.placeMarkType(position1);
+
+    /// Not at a residential address or university
+    if (data.contains("office") ||
+        data.contains("commercial") ||
+        data.contains("gym") ||
+        data.contains("park")) {
+      // Return 0
+      log("The defult location is GOOGLE HQ", name: "Backend-NOTE");
+      log("We are at a Do not send notif area", name: "Backend");
+      return false;
+    } else {
+      return lightGyro();
+    }
+  }
+}
+
+Future<bool> lightGyro() async {
+  // Access Light sensor
+  LightSensor lightSensor = new LightSensor();
+  int lum = await lightSensor.whenLight();
+
+  log("Lum" + lum.toString(), name: "Backend");
+
+  lightSensor.close();
+
+  // Todo you may want to change 20 to a config value
+  if (lum > 10 /*&& reading < 70 */) {
+    log("Reason: high light, return 1", name: "Backend");
+
+    return true;
+  } else {
+    /// If the time is at night //todo add config
+    DateTime dateTime = DateTime.now();
+    if (dateTime.hour > 18 && dateTime.hour < 23) {
+      log("Reason: notif sent because time is at night, return 1",
+          name: "Backend");
+      return true;
+    } else {
+      // Check if the phone is stationary and not being used
+      if (await checkGyro()) {
+        // Send notif
+        return false;
+      }
+    }
+  }
+  return false;
 }
 
 Future<bool> checkCalendar() async {
