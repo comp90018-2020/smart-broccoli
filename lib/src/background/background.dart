@@ -179,7 +179,9 @@ Future<bool> checkCalendar() async {
     if ((calEvent[i].start > time.millisecondsSinceEpoch &&
             calEvent[i].start < time.millisecondsSinceEpoch + 900000) &&
         (calEvent[i].end > time.millisecondsSinceEpoch &&
-            calEvent[i].end < time.millisecondsSinceEpoch + 900000)) {
+                calEvent[i].end < time.millisecondsSinceEpoch + 900000) |
+            (calEvent[i].start < time.millisecondsSinceEpoch &&
+                calEvent[i].end > time.millisecondsSinceEpoch + 900000)) {
       // Return 0
       log("The user is busy today accoridng to cal return 0", name: "Backend");
       return false;
