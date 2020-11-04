@@ -9,108 +9,124 @@ import 'package:smart_broccoli/theme.dart';
 /// Leaderboard page
 class QuizLeaderboard extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => CustomPage(
-        title: "Leaderboard",
-        background: [
-          // The clip for the current user's rank
-          Consumer<GameSessionModel>(
-            builder: (context, model, child) => Container(
-              child: model.role == GroupRole.MEMBER
-                  ? ClipPath(
-                      clipper: _BackgroundRectClipper(),
-                      child: Container(
-                        color: Color(0xFFFEC12D),
-                      ),
-                    )
-                  : Container(),
-            ),
-          ),
-          // Overall wavy clip
-          Container(
-            child: ClipPath(
-              clipper: _BackgroundClipper(),
-              child: Container(
-                color: Theme.of(context).colorScheme.background,
+  Widget build(BuildContext context) => Consumer<GameSessionModel>(
+        builder: (context, model, child) => CustomPage(
+          title: "Leaderboard",
+          appbarActions: [
+            if (model.role == GroupRole.OWNER ||
+                model.state == SessionState.FINISHED)
+              IconButton(
+                onPressed: () => model.state == SessionState.FINISHED
+                    ? Navigator.of(context).popUntil(
+                        (route) => !route.settings.name.startsWith('/session'))
+                    : model.nextQuestion(),
+                icon: model.state == SessionState.FINISHED
+                    ? Icon(Icons.flag)
+                    : Icon(Icons.arrow_forward),
+              )
+          ],
+          background: [
+            // The clip for the current user's rank
+            Consumer<GameSessionModel>(
+              builder: (context, model, child) => Container(
+                child: model.role == GroupRole.MEMBER
+                    ? ClipPath(
+                        clipper: _BackgroundRectClipper(),
+                        child: Container(
+                          color: Color(0xFFFEC12D),
+                        ),
+                      )
+                    : Container(),
               ),
             ),
-          ),
-        ],
-        child: Column(
-          children: <Widget>[
-            // Top 3
+            // Overall wavy clip
             Container(
-                padding: EdgeInsets.all(16),
-                constraints: BoxConstraints(maxHeight: 165),
-                child: Consumer<GameSessionModel>(
-                  builder: (context, model, child) => Wrap(
-                    alignment: WrapAlignment.center,
-                    runAlignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 25,
-                    children: <Widget>[
-                      if (model.outcome.leaderboard.length > 2)
-                        _topThreeUsers(
-                          context,
-                          model.outcome.leaderboard[1].player.name,
-                          50,
-                          FutureBuilder(
-                            future: model.getPeerProfilePicturePath(
-                                model.outcome.leaderboard[1].player.id),
-                            builder: (BuildContext context,
-                                    AsyncSnapshot<String> snapshot) =>
-                                UserAvatar(snapshot.data, maxRadius: 50),
-                          ),
-                        ),
-                      if (model.outcome.leaderboard.length > 0)
-                        _topThreeUsers(
-                          context,
-                          model.outcome.leaderboard[0].player.name,
-                          75,
-                          FutureBuilder(
-                            future: model.getPeerProfilePicturePath(
-                                model.outcome.leaderboard[0].player.id),
-                            builder: (BuildContext context,
-                                    AsyncSnapshot<String> snapshot) =>
-                                UserAvatar(snapshot.data, maxRadius: 75),
-                          ),
-                          bold: true,
-                        ),
-                      if (model.outcome.leaderboard.length > 2)
-                        _topThreeUsers(
-                          context,
-                          model.outcome.leaderboard[2].player.name,
-                          50,
-                          FutureBuilder(
-                            future: model.getPeerProfilePicturePath(
-                                model.outcome.leaderboard[2].player.id),
-                            builder: (BuildContext context,
-                                    AsyncSnapshot<String> snapshot) =>
-                                UserAvatar(snapshot.data, maxRadius: 50),
-                          ),
-                        ),
-                    ],
-                  ),
-                )),
-
-            // Current user & ranking
-            Consumer<GameSessionModel>(
-              builder: (context, model, child) => model.role == GroupRole.MEMBER
-                  ? Container(
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      // Lowest point of green area to end of yellow (150 -> 205)
-                      // See below for more details
-                      height: 65,
-                      child: _leaderboardList([], scrollable: false),
-                    )
-                  : Container(height: 16),
+              child: ClipPath(
+                clipper: _BackgroundClipper(),
+                child: Container(
+                  color: Theme.of(context).colorScheme.background,
+                ),
+              ),
             ),
-
-            // List of users
-            Expanded(
-                child: Consumer<GameSessionModel>(
-                    builder: (context, model, child) =>
-                        _leaderboardList(model.outcome.leaderboard))),
           ],
+          child: Column(
+            children: <Widget>[
+              // Top 3
+              Container(
+                  padding: EdgeInsets.all(16),
+                  constraints: BoxConstraints(maxHeight: 165),
+                  child: Consumer<GameSessionModel>(
+                    builder: (context, model, child) => Wrap(
+                      alignment: WrapAlignment.center,
+                      runAlignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 25,
+                      children: <Widget>[
+                        if (model.outcome.leaderboard.length > 2)
+                          _topThreeUsers(
+                            context,
+                            model.outcome.leaderboard[1].player.name,
+                            50,
+                            FutureBuilder(
+                              future: model.getPeerProfilePicturePath(
+                                  model.outcome.leaderboard[1].player.id),
+                              builder: (BuildContext context,
+                                      AsyncSnapshot<String> snapshot) =>
+                                  UserAvatar(snapshot.data, maxRadius: 50),
+                            ),
+                          ),
+                        if (model.outcome.leaderboard.length > 0)
+                          _topThreeUsers(
+                            context,
+                            model.outcome.leaderboard[0].player.name,
+                            75,
+                            FutureBuilder(
+                              future: model.getPeerProfilePicturePath(
+                                  model.outcome.leaderboard[0].player.id),
+                              builder: (BuildContext context,
+                                      AsyncSnapshot<String> snapshot) =>
+                                  UserAvatar(snapshot.data, maxRadius: 75),
+                            ),
+                            bold: true,
+                          ),
+                        if (model.outcome.leaderboard.length > 2)
+                          _topThreeUsers(
+                            context,
+                            model.outcome.leaderboard[2].player.name,
+                            50,
+                            FutureBuilder(
+                              future: model.getPeerProfilePicturePath(
+                                  model.outcome.leaderboard[2].player.id),
+                              builder: (BuildContext context,
+                                      AsyncSnapshot<String> snapshot) =>
+                                  UserAvatar(snapshot.data, maxRadius: 50),
+                            ),
+                          ),
+                      ],
+                    ),
+                  )),
+
+              // Current user & ranking
+              Consumer<GameSessionModel>(
+                builder: (context, model, child) =>
+                    model.role == GroupRole.MEMBER
+                        ? Container(
+                            margin: EdgeInsets.symmetric(vertical: 8),
+                            // Lowest point of green area to end of yellow (150 -> 205)
+                            // See below for more details
+                            height: 65,
+                            child: _leaderboardList([], scrollable: false),
+                          )
+                        : Container(height: 16),
+              ),
+
+              // List of users
+              Expanded(
+                  child: Consumer<GameSessionModel>(
+                      builder: (context, model, child) =>
+                          _leaderboardList(model.outcome.leaderboard))),
+            ],
+          ),
         ),
       );
 }
