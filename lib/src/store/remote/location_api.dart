@@ -4,7 +4,6 @@ import 'dart:developer';
 
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
-import 'package:smart_broccoli/src/remote.dart';
 
 class LocationData {
   final String name;
@@ -15,16 +14,16 @@ class LocationData {
 }
 
 class LocationAPI {
-  Future<List<LocationData>> queryString(String input) async {
+  // Query by name string
+  Future<List<LocationData>> queryByName(String input) async {
     String uri =
         "https://nominatim.openstreetmap.org/?addressdetails=1&q=$input&format=json&limit=20";
     var encodedUri = Uri.encodeFull(uri);
-
     log("Query: " + uri, name: "Foreground Location");
 
-    http.Response response = await http.post(encodedUri);
-
     try {
+      http.Response response = await http.post(encodedUri);
+
       if (response.statusCode == 200) {
         String httpResult = response.body.toString();
         log(
@@ -35,38 +34,26 @@ class LocationAPI {
             name: "Foreground Location");
 
         List<dynamic> jsonObject = json.decode(httpResult);
-
-        List<LocationData> output = [];
-
-        for (var i = 0; i < jsonObject.length; i++) {
-          LocationData loc = new LocationData(
-            name: jsonObject[i]["display_name"].toString(),
-            lon: double.tryParse(jsonObject[i]["lon"]),
-            lat: double.tryParse(jsonObject[i]["lat"]),
-          );
-          print(i);
-          print(jsonObject.length);
-          print(jsonObject[i]["display_name"]);
-          output.add(loc);
-        }
+        List<LocationData> output = jsonObject.map((obj) => LocationData(
+              name: obj["display_name"].toString(),
+              lon: double.tryParse(obj["lon"]),
+              lat: double.tryParse(obj["lat"]),
+            ));
 
         return output;
       }
-
-      if (response.statusCode == 401) throw UnauthorisedRequestException();
-      if (response.statusCode == 403) throw ForbiddenRequestException();
-      throw Exception('Unable to get groups: unknown error occurred');
+      return Future.error(response);
     } catch (e) {
-      print(e);
+      return Future.error(e);
     }
-    return null;
   }
 
-  Future<String> queryLonLat(double long, double lati) async {
-    Placemark placemark = (await placemarkFromCoordinates(lati, long)).first;
+  // Query by latitude and longitude
+  Future<String> queryLonLat(double long, double lat) async {
+    Placemark placemark = (await placemarkFromCoordinates(lat, long)).first;
     log(
         " Lat " +
-            lati.toString() +
+            lat.toString() +
             " Lon " +
             long.toString() +
             " Name: " +

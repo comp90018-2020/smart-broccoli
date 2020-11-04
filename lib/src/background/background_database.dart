@@ -5,43 +5,44 @@ import 'package:sqflite/sqflite.dart';
 /// And all Geo Fences
 
 class BackgroundDatabase {
-  static Database db;
+  final Database db;
 
-  static Future<void> closeDB() async {
+  BackgroundDatabase._internal(this.db);
+
+  Future<void> closeDB() async {
     await db.close();
   }
 
   // Initialise the database
-  static init() async {
-    db = await openDatabase(
+  static Future<BackgroundDatabase> init() async {
+    var db = await openDatabase(
       join(await getDatabasesPath(), 'backend_database.db'),
       onCreate: (db, version) {
         db.execute(
           "CREATE TABLE events(id INTEGER PRIMARY KEY,start INTEGER, end INTEGER)",
         );
-
-        // Run the CREATE TABLE statement on the database.
         return db.execute(
           "CREATE TABLE geo(id INTEGER PRIMARY KEY, lon DOUBLE, lat DOUBLE)",
         );
       },
       version: 1,
     );
+    return BackgroundDatabase._internal(db);
   }
 
   /// Clears out the GeoFence Database for later use
-  static Future<void> cleanGeo() async {
-    //here we execute a query to drop the table if exists which is called "tableName"
-    //and could be given as method's input parameter too
+  Future<void> cleanGeo() async {
+    // here we execute a query to drop the table if exists which is called
+    // "tableName" and could be given as method's input parameter too
     await db.execute("DROP TABLE IF geo events");
 
-    //and finally here we recreate our beloved "tableName" again which needs
-    //some columns initialization
+    // and finally here we recreate our beloved "tableName" again which needs
+    // some columns initialization
     await db.execute(
         "CREATE TABLE geo (id INTEGER PRIMARY KEY, lon DOUBLE, lat DOUBLE)");
   }
 
-  static Future<void> cleanEvent() async {
+  Future<void> cleanEvents() async {
     await db.execute("DROP TABLE IF EXISTS events");
     await db.execute(
       "CREATE TABLE events(id INTEGER PRIMARY KEY,start INTEGER, end INTEGER)",
@@ -49,7 +50,7 @@ class BackgroundDatabase {
   }
 
   // Define a function that inserts events into the database
-  static Future<void> insertEvent(CalEvent calEvent) async {
+  Future<void> insertEvent(CalEvent calEvent) async {
     await db.insert(
       'events',
       calEvent.toMap(),
@@ -57,11 +58,10 @@ class BackgroundDatabase {
     );
   }
 
-// Define a function that inserts fence into the database
-  static Future<void> insertFence(GeoFence fence) async {
+  // Define a function that inserts fence into the database
+  Future<void> insertFence(GeoFence fence) async {
     // Insert the Fence into the correct table. You might also specify the
     // `conflictAlgorithm` to use in case the same fence is inserted twice.
-    //
     // In this case, replace any previous data.
     await db.insert(
       'geo',
@@ -71,7 +71,7 @@ class BackgroundDatabase {
   }
 
   // A method that retrieves all the  Calendar events from the events table.
-  static Future<List<CalEvent>> getEvents() async {
+  Future<List<CalEvent>> getEvents() async {
     // Query the table for all The events.
     final List<Map<String, dynamic>> maps = await db.query('events');
 
@@ -86,12 +86,10 @@ class BackgroundDatabase {
   }
 
   // A method that retrieves all the events from the events table.
-  static Future<List<GeoFence>> getGeoFence() async {
+  Future<List<GeoFence>> getGeoFence() async {
     try {
       // Query the table for all The events.
       final List<Map<String, dynamic>> maps = await db.query('geo');
-
-      // Convert the List<Map<String, dynamic> into a List<Dog>.
       return List.generate(maps.length, (i) {
         return GeoFence(
           id: maps[i]['id'],
@@ -105,7 +103,7 @@ class BackgroundDatabase {
     return null;
   }
 
-  static Future<void> deleteGeoFence(int id) async {
+  Future<void> deleteGeoFence(int id) async {
     // Remove the Geofence from the Database.
     await db.delete(
       'geo',
@@ -117,10 +115,10 @@ class BackgroundDatabase {
   }
 }
 
-/// Data structure
+// Data structures
+// These two are seperate since we may need to add additional data to either of
+// these in the future
 
-/// These two are seperate since we may need to add additional data to either of
-/// these in the future
 class GeoFence {
   final int id;
   final double lon;

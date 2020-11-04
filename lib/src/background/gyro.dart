@@ -1,28 +1,15 @@
 import 'dart:async';
-import 'dart:developer';
-
 import 'package:sensors/sensors.dart';
+import 'package:async/async.dart' show StreamQueue;
 
+/// Gryoscope readings
 class Gyro {
-  StreamController<GyroscopeEvent> controller =
-      StreamController<GyroscopeEvent>();
-
-  Gyro() {
+  static Future<GyroscopeEvent> getGyroEvent() async {
     try {
-      controller.addStream(gyroscopeEvents);
-    } catch(e){
-      log("Gyro Error" + e ,name: "gryo");
+      var queue = new StreamQueue(gyroscopeEvents);
+      return await queue.next;
+    } catch (e) {
+      return Future.error("Gyroscope");
     }
-  }
-
-  gyroCancel() {
-    controller.close();
-  }
-
-  Future<GyroscopeEvent> whenGyro() async {
-    await for (GyroscopeEvent value in controller.stream) {
-      return value;
-    }
-    return null;
   }
 }
