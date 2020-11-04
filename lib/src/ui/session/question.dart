@@ -84,11 +84,12 @@ class QuizQuestion extends StatelessWidget {
                       child: TimerWidget(
                           initTime: model.time, style: TextStyle(fontSize: 18)),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4.0, bottom: 16.0),
-                      child: Text('Flip the phone to select options',
-                          style: Theme.of(context).textTheme.subtitle1),
-                    ),
+                    if (model.questionHint != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0, bottom: 16.0),
+                        child: Text(model.questionHint,
+                            style: Theme.of(context).textTheme.subtitle1),
+                      ),
                   ],
                 ),
               ),

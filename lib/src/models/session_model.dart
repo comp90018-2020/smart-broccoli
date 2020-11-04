@@ -60,6 +60,14 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     return null;
   }
 
+  String get questionHint {
+    if (question is TFQuestion || (question as MCQuestion).numCorrect == 1)
+      return role == GroupRole.MEMBER ? 'Select an answer' : null;
+    return role == GroupRole.MEMBER
+        ? 'Select ${(question as MCQuestion).numCorrect} answers'
+        : '${(question as MCQuestion).numCorrect} correct answers';
+  }
+
   /// The socket which we enclose
   IO.Socket socket;
 
