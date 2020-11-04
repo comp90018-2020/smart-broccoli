@@ -98,10 +98,6 @@ class _MyAppState extends State<MyApp> {
       case RouteAction.POP:
         _mainNavigatorKey.currentState.pop();
         break;
-      case RouteAction.POPALL:
-        _mainNavigatorKey.currentState
-            .pushNamedAndRemoveUntil(routeArgs.name, (route) => false);
-        break;
       case RouteAction.DIALOG_POPALL_SESSION:
         await showBasicDialog(_mainNavigatorKey.currentState.overlay.context,
             'The host aborted the session',
@@ -114,6 +110,10 @@ class _MyAppState extends State<MyApp> {
         break;
       case RouteAction.REPLACE:
         _mainNavigatorKey.currentState.pushReplacementNamed(routeArgs.name);
+        break;
+      case RouteAction.REPLACE_ALL:
+        _mainNavigatorKey.currentState
+            .pushNamedAndRemoveUntil(routeArgs.name, (route) => false);
         break;
     }
   }

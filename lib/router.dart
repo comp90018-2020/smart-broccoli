@@ -6,10 +6,10 @@ import 'package:smart_broccoli/src/ui.dart';
 enum RouteAction {
   PUSH,
   POP,
-  POPALL,
   POPALL_SESSION,
   DIALOG_POPALL_SESSION,
-  REPLACE
+  REPLACE,
+  REPLACE_ALL
 }
 
 /// Router arguemnts
