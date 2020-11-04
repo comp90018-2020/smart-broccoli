@@ -15,7 +15,9 @@ dependencies:
   device_calendar: ^3.1.0
   email_validator: ^1.0.5
   fluro: ^1.7.3
-  flutter_settings: ^1.0.2
+  flutter_settings:
+    git:
+      url: https://github.com/comp90018-2020/Flutter-settings.git
   flutter_svg: ^0.19.1
   geocoding: ^1.0.5
   geolocator: ^6.1.0
