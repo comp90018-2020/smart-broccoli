@@ -5,7 +5,7 @@ import { Player, Role } from "./datatype";
 import { GameSession } from "./session";
 
 export const handler: GameHandler = new GameHandler();
-const SESSIONS_PURNING_INTERVAL = 300000;
+const SESSIONS_PRUNING_INTERVAL = 5 * 60 * 1000;
 export let _socketIO: Server;
 export default async (socketIO: Server) => {
     // clear sessions that are not ended on startup
@@ -115,7 +115,7 @@ const pruneSessions = async () => {
         const nowTime = Date.now();
         if (
             nowTime - handler.sessions[Number(sessionId)].updatedAt >
-            SESSIONS_PURNING_INTERVAL
+            SESSIONS_PRUNING_INTERVAL
         ) {
             handler.sessions[Number(sessionId)].endSession();
             delete handler.sessions[Number(sessionId)];
@@ -123,5 +123,5 @@ const pruneSessions = async () => {
     }
     setTimeout(() => {
         pruneSessions();
-    }, SESSIONS_PURNING_INTERVAL);
+    }, SESSIONS_PRUNING_INTERVAL);
 };
