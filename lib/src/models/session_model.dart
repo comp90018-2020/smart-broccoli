@@ -110,9 +110,14 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   }
 
   Future<void> joinLiveSession(Quiz quiz) async {
-    await joinSession(quiz.sessions.firstWhere((session) =>
-        session.quizType == QuizType.LIVE &&
-        session.state != GameSessionState.ENDED));
+    try {
+      await joinSession(quiz.sessions.firstWhere((session) =>
+          session.quizType == QuizType.LIVE &&
+          session.state != GameSessionState.ENDED));
+    } on SessionNotFoundException catch (err) {
+      _quizCollectionModel.refreshAvailableQuizzes();
+      throw err;
+    }
   }
 
   Future<String> getPeerProfilePicturePath(int userId) async {

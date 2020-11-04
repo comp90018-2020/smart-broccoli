@@ -36,8 +36,19 @@ class QuizCard extends StatelessWidget {
               ? null
               : () async {
                   if (quiz.type == QuizType.LIVE) {
-                    await Provider.of<GameSessionModel>(context, listen: false)
-                        .joinLiveSession(quiz);
+                    try {
+                      await Provider.of<GameSessionModel>(context,
+                              listen: false)
+                          .joinLiveSession(quiz);
+                    } on SessionNotFoundException {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(content: Text('Session no longer exists')),
+                      );
+                    } catch (_) {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(content: Text('Something went wrong')),
+                      );
+                    }
                   } else {
                     Navigator.of(context)
                         .pushNamed("/session/start/quiz/${quiz.id}");
