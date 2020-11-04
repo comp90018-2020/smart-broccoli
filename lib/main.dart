@@ -152,6 +152,8 @@ _checkPermissions() async {
   await Geolocator.requestPermission();
   var statusCal = await Permission.calendar.status;
   var statusStorage = await Permission.storage.status;
+  var statusLocation = await Permission.locationAlways.status;
   if (statusCal.isUndetermined) await Permission.calendar.request();
   if (statusStorage.isUndetermined) await Permission.storage.request();
+  if (statusLocation.isUndetermined) await Permission.location.request();
 }
