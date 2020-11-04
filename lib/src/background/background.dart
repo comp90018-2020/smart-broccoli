@@ -63,7 +63,8 @@ Future<bool> locationCheck(BackgroundDatabase db) async {
   Position position1 = await BackgroundLocation.getPosition();
 
   /// If in Geofence
-  if (await BackgroundLocation.inGeoFence(await db.getGeoFence(), position1)) {
+  if (await BackgroundLocation.inGeoFence(
+      await db.getGeoFence(), position1, 1)) {
     /// Return 1
     log("The user is in a geofence return 1", name: "Backend");
     return true;
@@ -112,7 +113,8 @@ Future<bool> locationCheck(BackgroundDatabase db) async {
 
   /// If the user is not moving
   else {
-    String data = await BackgroundLocation.placeMarkType(position1);
+    String data = await BackgroundLocation.placeMarkType(position1)
+        .catchError((_) => null);
 
     /// Not at a residential address or university
     if (data != null &&

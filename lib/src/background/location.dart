@@ -21,9 +21,11 @@ class BackgroundLocation {
       List<Placemark> placemark = await placemarkFromCoordinates(
           userLocation.latitude, userLocation.longitude);
       // Just return the nearest place mark
-      return placemark.isNotEmpty ? placemark.first : null;
-    } catch (_) {
-      return null;
+      return placemark.isNotEmpty
+          ? placemark.first
+          : Future.error("No placemarks");
+    } catch (err) {
+      return Future.error(err.toString());
     }
   }
 
@@ -34,7 +36,9 @@ class BackgroundLocation {
   static Future<String> placeMarkType(Position position) async {
     double lat = position.latitude;
     double lon = position.longitude;
-    log("Place mark: " + (await getPlacemark(position)).street,
+    log(
+        "Place mark: " +
+            (await getPlacemark(position).catchError((_) => null))?.street,
         name: "Location");
 
     String query =
@@ -55,23 +59,20 @@ class BackgroundLocation {
         // if certain keywords is within the JSON file
         return httpResult;
       }
-      log("Unknown Error", name: "Exception Location");
+      return Future.error(response.body);
     } catch (e) {
-      print(e);
+      return Future.error(e.toString());
     }
-    return null;
   }
 
   /// Check if a long lat is within 1km of a Geofence point
   /// 1 Km as that assumes for GPS errors and other inaccuracies
-  static Future<bool> inGeoFence(
-      List<GeoFence> geofenceList, Position userLocation) async {
-    double distance;
-    // TODO define a geofence radius for now assume 1 km
+  static Future<bool> inGeoFence(List<GeoFence> geofenceList,
+      Position userLocation, int distanceKM) async {
     for (var i = 0; i < geofenceList.length; i++) {
-      distance = Geolocator.distanceBetween(geofenceList[i].lat,
+      var distance = Geolocator.distanceBetween(geofenceList[i].lat,
           geofenceList[i].lon, userLocation.latitude, userLocation.longitude);
-      if (distance < 1000) {
+      if (distance < distanceKM * 1000) {
         return true;
       }
     }

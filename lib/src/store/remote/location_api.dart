@@ -41,9 +41,9 @@ class LocationAPI {
 
         return output;
       }
-      return Future.error(response);
+      return Future.error(response.body);
     } catch (e) {
-      return Future.error(e);
+      return Future.error(e.toString());
     }
   }
 
