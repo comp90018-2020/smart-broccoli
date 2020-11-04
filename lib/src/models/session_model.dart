@@ -224,6 +224,13 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     socket.on('disconnect', (_) {
       // must stop listening immediately to avoid timing conflicts
       socket.clearListeners();
+
+      // refresh quiz information before user navigates back to take quiz pages
+      if (role == GroupRole.MEMBER)
+        _quizCollectionModel.refreshAvailableQuizzes();
+      else
+        _quizCollectionModel.refreshCreatedQuizzes();
+
       if (state == SessionState.ABORTED) {
         PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
