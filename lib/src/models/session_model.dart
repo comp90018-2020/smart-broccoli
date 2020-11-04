@@ -399,11 +399,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   }
 
   void nextQuestion() {
-    if (state == SessionState.FINISHED)
-      PubSub().publish(PubSubTopic.ROUTE,
-          arg: RouteArgs(name: '/session/finish', action: RouteAction.REPLACE));
-    else
-      socket.emit('next');
+    socket.emit('next');
   }
 
   void showLeaderBoard() {

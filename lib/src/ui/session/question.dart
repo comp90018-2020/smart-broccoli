@@ -167,10 +167,16 @@ class QuizQuestion extends StatelessWidget {
 
   /// Return the appropriate action/indicator (top right) for the user
   List<Widget> _appBarActions(BuildContext context, GameSessionModel model) => [
-        if (model.state == SessionState.FINISHED)
+        if (model.state == SessionState.FINISHED &&
+            model.role == GroupRole.OWNER)
           IconButton(
-            onPressed: () => Navigator.of(context).popUntil(
-                (route) => !route.settings.name.startsWith('/session')),
+              onPressed: () => Navigator.of(context).popUntil(
+                  (route) => !route.settings.name.startsWith('/session')),
+              icon: Icon(Icons.flag))
+        else if (model.state == SessionState.FINISHED)
+          IconButton(
+            onPressed: () =>
+                Navigator.of(context).pushReplacementNamed('/session/finish'),
             icon: Icon(Icons.flag),
           )
         else if (model.state == SessionState.ANSWER &&
