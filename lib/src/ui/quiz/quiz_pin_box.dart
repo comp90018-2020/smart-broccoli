@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/models/session_model.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
-
-import '../session/lobby.dart';
 
 class QuizPinBox extends StatefulWidget {
   QuizPinBox({Key key}) : super(key: key);
