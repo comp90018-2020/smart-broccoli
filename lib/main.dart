@@ -1,6 +1,7 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/router.dart';
@@ -17,12 +18,8 @@ List<Event> events = [];
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-// Device Calendar Plugin
-  DeviceCalendarPlugin deviceCalendarPlugin = new DeviceCalendarPlugin();
-
-  await _checkPermissions(deviceCalendarPlugin);
-
-  await BackgroundCalendar.saveCalendarData(deviceCalendarPlugin);
+  await _checkPermissions();
+  await BackgroundCalendar.saveCalendarData();
 
   /// Initialise background services
   Workmanager.initialize(
@@ -154,33 +151,17 @@ class _MyAppState extends State<MyApp> {
 }
 
 /// A permission checker
-_checkPermissions(DeviceCalendarPlugin deviceCalendarPlugin) async {
+_checkPermissions() async {
+
+  await Geolocator.requestPermission();
   var statusCal = await Permission.calendar.status;
-  if (statusCal.isUndetermined) {
+  var statusStorage = await Permission.storage.status;
+  if (statusCal.isUndetermined || statusStorage.isUndetermined) {
     // You can request multiple permissions this way just in case there is a
     // need to combine things
     Map<Permission, PermissionStatus> statuses = await [
-      Permission.calendar,
+      Permission.calendar, Permission.storage,
     ].request();
-    print(statuses[
-        Permission.storage]); // it should print PermissionStatus.granted
   }
 
-  var statusGPS = await Permission.location.status;
-  if (statusGPS.isUndetermined) {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.location,
-    ].request();
-    print(statuses[
-        Permission.storage]); // it should print PermissionStatus.granted
-  }
-
-  var statusStorage = await Permission.storage.status;
-  if (statusStorage.isUndetermined) {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.storage,
-    ].request();
-    print(statuses[
-        Permission.storage]); // it should print PermissionStatus.granted
-  }
 }

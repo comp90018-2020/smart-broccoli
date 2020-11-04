@@ -29,18 +29,20 @@ class BackgroundLocation {
   /// i.e 601 Little Lonsdale Street
   /// Nominatim also returns the type of building, where it be residential or
   /// Commercial
-  Future<String> placeMarkType(Placemark placeMark) async {
-    String name = (placeMark.street +
-            " " +
-            placeMark.postalCode +
-            " " +
-            placeMark.country)
-        .replaceAll(" ", "+");
+  Future<String> placeMarkType(Position position) async {
+    double lat = position.latitude;
+    double lon = position.longitude;
+
+    getPlacemark(position);
+
+    log("Placemark: " +  (await getPlacemark(position)).street
+        , name: "Location");
 
     String query =
-        "https://nominatim.openstreetmap.org/search?q=$name&format=json&polygon_geojson=1&addressdetails=1";
+        "https://nominatim.openstreetmap.org/reverse?format=geocodejson&lat=$lat&lon=$lon";
 
-    log("Location Name " + name + " Query " + query, name: "Backend-Location");
+    log("Query: " + query, name: "Location");
+
     http.Response response = await http.post(query);
 
     try {
@@ -56,13 +58,14 @@ class BackgroundLocation {
         // if certain keywords is within the JSON file
         return httpResult;
       }
+
       if (response.statusCode == 401) {
-        throw Exception('Unauthroised');
+        log("Unauthorised", name: "Exception Location");
       }
       if (response.statusCode == 403) {
-        throw Exception('Forbidden');
+        log("Forbidden", name: "Exception Location");
       } else {
-        throw Exception('Unable to get groups: unknown error occurred');
+        log("Unknown Error", name: "Exception Location");
       }
     } catch (e) {
       print(e);
@@ -90,11 +93,11 @@ class BackgroundLocation {
   /// Intermediate function to control the area which we scan for trains.
   Future<bool> onTrain(Position userLocation) async {
     double lon1 = userLocation.longitude + 0.001;
-    double lon2 = userLocation.longitude - 0.001;
+    double lon = userLocation.longitude - 0.001;
     double lat1 = userLocation.latitude + 0.001;
-    double lat2 = userLocation.latitude - 0.001;
+    double lat = userLocation.latitude - 0.001;
     return await _onTrain(
-        lat2.toString(), lon2.toString(), lat1.toString(), lon1.toString());
+        lat.toString(), lon.toString(), lat1.toString(), lon1.toString());
   }
 
   /// Makes an HTTP request to the overpass API and checks if the user is on the
@@ -114,16 +117,15 @@ class BackgroundLocation {
   <print e="" from="_" geometry="skeleton" ids="yes" limit="" mode="body" n="" order="id" s="" w=""/>
 </osm-script>''';
 
-    final document = XmlDocument.parse(data);
-    String _uriMsj = document.toString();
+    String uriMsj = XmlDocument.parse(data).toString();
 
-    String _uri = 'http://overpass-api.de/api/interpreter';
+    String uri = 'http://overpass-api.de/api/interpreter';
 
-    http.Response response = await http.post(_uri, body: _uriMsj, headers: {
+    http.Response response = await http.post(uri, body: uriMsj, headers: {
       'Content-type': 'text/xml',
     });
 
-    log("Input" + _uriMsj, name: "Backend-Location");
+    log("Input" + uriMsj, name: "Backend-Location");
 
     if (response.statusCode == 200) {
       try {
@@ -145,12 +147,13 @@ class BackgroundLocation {
     }
 
     if (response.statusCode == 401) {
-      throw Exception('Unauthroised');
+      log("Unauthorised", name: "Exception Location");
     }
     if (response.statusCode == 403) {
-      throw Exception('Forbidden');
+      log("Forbidden", name: "Exception Location");
     } else {
-      throw Exception('Unable to get groups: unknown error occurred');
+      log("Unknown Error", name: "Exception Location");
     }
+    return false;
   }
 }

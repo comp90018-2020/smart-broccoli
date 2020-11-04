@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:light/light.dart';
 
@@ -9,8 +10,12 @@ class LightSensor {
   StreamController<int> controller = StreamController<int>();
 
   LightSensor() {
-    _light = new Light();
-    controller.addStream(_light.lightSensorStream);
+    try {
+      _light = new Light();
+      controller.addStream(_light.lightSensorStream);
+    } catch (e) {
+      log(e, name: "Light");
+    }
   }
 
   close() {

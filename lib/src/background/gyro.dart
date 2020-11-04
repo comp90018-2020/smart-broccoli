@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:sensors/sensors.dart';
 
@@ -7,7 +8,11 @@ class Gyro {
       StreamController<GyroscopeEvent>();
 
   Gyro() {
-    controller.addStream(gyroscopeEvents);
+    try {
+      controller.addStream(gyroscopeEvents);
+    } catch(e){
+      log("Gyro Error" + e ,name: "gryo");
+    }
   }
 
   gyroCancel() {

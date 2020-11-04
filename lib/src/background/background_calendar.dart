@@ -6,15 +6,11 @@ import 'package:device_calendar/device_calendar.dart';
 import '../background_database.dart';
 
 class BackgroundCalendar {
-  /// This should only be run on release mode and on a foreground thread
-  /// https://github.com/builttoroam/device_calendar/issues/217
-  static saveCalendarData(DeviceCalendarPlugin deviceCalendarPlugin) async {
+  static saveCalendarData() async {
     await BackgroundDatabase.init();
     await BackgroundDatabase.cleanEvent();
 
-    List<Result<UnmodifiableListView<Event>>> e = [];
-    List<Event> ev = [];
-    deviceCalendarPlugin = new DeviceCalendarPlugin();
+    DeviceCalendarPlugin deviceCalendarPlugin = new DeviceCalendarPlugin();
     var cal = await deviceCalendarPlugin.retrieveCalendars();
     List<Calendar> calendar = cal.data;
 
@@ -30,34 +26,39 @@ class BackgroundCalendar {
     // Define that we want events from now to 7 days later
     RetrieveEventsParams retrieveEventsParams = new RetrieveEventsParams(
         startDate: now, endDate: now.add(new Duration(days: 7)));
+    List<Result<UnmodifiableListView<Event>>> resultEvents = [];
     // Find all events within 7 days
     for (var i = 0; i < calendar.length; i++) {
-      e.add(await deviceCalendarPlugin.retrieveEvents(
+      resultEvents.add(await deviceCalendarPlugin.retrieveEvents(
           calendar[i].id, retrieveEventsParams));
     }
 
+    List<Event> outputEvents = [];
+
     /// Intermediate step to check if every event is extracted
-    for (var j = 0; j < e.length; j++) {
-      if (e[j].isSuccess) {
-        ev = ev + e[j].data.toList();
+    for (var j = 0; j < resultEvents.length; j++) {
+      /// Check if sucess
+      if (resultEvents[j].isSuccess) {
+        outputEvents = outputEvents + resultEvents[j].data.toList();
       } else {
-        print(e[j].errorMessages);
+        log("Events error:" + resultEvents[j].errorMessages.toString(),
+            name: "Backend-Calendar");
       }
     }
 
-    log("Events:" + ev.toString(), name: "Backend-Calendar");
+    log("Events:" + outputEvents.toString(), name: "Backend-Calendar");
 
     /// Write the data into the datatebase
     /// Which only stores the start time since Epoch
     /// And end time since Epoch
-    for (var j = 0; j < ev.length; j++) {
+    for (var j = 0; j < outputEvents.length; j++) {
       CalEvent calEvent = new CalEvent(
           id: j,
-          start: ev[j].start.millisecondsSinceEpoch,
-          end: ev[j].end.millisecondsSinceEpoch);
+          start: outputEvents[j].start.millisecondsSinceEpoch,
+          end: outputEvents[j].end.millisecondsSinceEpoch);
 
       await BackgroundDatabase.insertEvent(calEvent);
     }
-    BackgroundDatabase.closeDB();
+    await BackgroundDatabase.closeDB();
   }
 }

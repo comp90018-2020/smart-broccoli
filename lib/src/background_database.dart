@@ -5,11 +5,10 @@ import 'package:sqflite/sqflite.dart';
 /// And all Geo Fences
 
 class BackgroundDatabase {
-  static String pth;
   static Database db;
 
-  static void closeDB() {
-    db.close();
+  static Future<void> closeDB() async {
+    await db.close();
   }
 
   // Initialise the database
@@ -49,7 +48,7 @@ class BackgroundDatabase {
     );
   }
 
-  // Define a function that inserts dogs into the database
+  // Define a function that inserts events into the database
   static Future<void> insertEvent(CalEvent calEvent) async {
     await db.insert(
       'events',
@@ -73,7 +72,7 @@ class BackgroundDatabase {
 
   // A method that retrieves all the  Calendar events from the events table.
   static Future<List<CalEvent>> getEvents() async {
-    // Query the table for all The Dogs.
+    // Query the table for all The events.
     final List<Map<String, dynamic>> maps = await db.query('events');
 
     // Convert the List<Map<String, dynamic> into a List<CalEvents>.
@@ -86,10 +85,10 @@ class BackgroundDatabase {
     });
   }
 
-  // A method that retrieves all the dogs from the dogs table.
+  // A method that retrieves all the events from the events table.
   static Future<List<GeoFence>> getGeoFence() async {
     try {
-      // Query the table for all The Dogs.
+      // Query the table for all The events.
       final List<Map<String, dynamic>> maps = await db.query('geo');
 
       // Convert the List<Map<String, dynamic> into a List<Dog>.
