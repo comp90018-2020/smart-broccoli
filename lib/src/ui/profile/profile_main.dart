@@ -28,9 +28,6 @@ class _ProfileMainState extends State<ProfileMain> {
   /// Whether the update has been submitted
   bool _committed = false;
 
-  /// Global key
-  GlobalKey globalKey = GlobalKey();
-
   @override
   void initState() {
     super.initState();

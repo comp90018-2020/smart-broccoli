@@ -260,7 +260,7 @@ class QuizCard extends StatelessWidget {
                                         listen: false)
                                     .setQuizActivation(quiz, value);
                               } catch (_) {
-                                showBasicDialog(
+                                showErrSnackBar(
                                     context, "Cannot update quiz status");
                               }
                             }),

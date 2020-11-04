@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/remote.dart';
-import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 
 class NetworkExceptionsHandler {
   void handle(e, BuildContext context) {
@@ -20,27 +20,27 @@ class NetworkExceptionsHandler {
   }
 
   _cannotResolveServerAddress(BuildContext context) {
-    showBasicDialog(context, "Cannot resolve server address.");
+    showErrSnackBar(context, "Cannot resolve server address.");
   }
 
   _connectionRefused(BuildContext context) {
-    showBasicDialog(context, "Connection refused.");
+    showErrSnackBar(context, "Connection refused.");
   }
 
   _handleAccessDenied(BuildContext context) {
-    showBasicDialog(context, "You don't have access to the server.");
+    showErrSnackBar(context, "You don't have access to the server.");
   }
 
   _handleUnauthorised(BuildContext context) {
-    showBasicDialog(context, "Unauthorised");
+    showErrSnackBar(context, "Unauthorised");
   }
 
   _handleForbidden(BuildContext context) {
-    showBasicDialog(context, "Forbidden");
+    showErrSnackBar(context, "Forbidden");
   }
 
   _handleUnknown(BuildContext context) {
-    showBasicDialog(context, "Unknown network error happended.");
+    showErrSnackBar(context, "Unknown network error happended.");
   }
 }
 

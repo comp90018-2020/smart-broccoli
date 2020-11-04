@@ -9,7 +9,8 @@ class CustomTabbedPage extends CustomPage {
   /// Tabs (the toggle elements) and tab views (the tabs/subpages) should be in
   /// `tabs` and `tabViews` respectively.
   CustomTabbedPage(
-      {@required String title,
+      {Key key,
+      @required String title,
       @required List<Tab> tabs,
       @required List<Widget> tabViews,
       hasDrawer = false,
@@ -19,6 +20,7 @@ class CustomTabbedPage extends CustomPage {
       Widget floatingActionButton,
       Function(int) tabTap})
       : super(
+            key: key,
             title: title,
             child: DefaultTabController(
               length: tabs.length,

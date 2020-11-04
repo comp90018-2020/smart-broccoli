@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'picture.dart';
@@ -366,7 +367,7 @@ class _QuestionCreateState extends State<QuestionCreate> {
     if (_question.text.isEmpty &&
         _question.pictureId == null &&
         _question.pendingPicturePath == null) {
-      showBasicDialog(context, "Question must have body or picture");
+      showErrSnackBar(context, "Question must have body or picture");
       return;
     }
 
@@ -377,14 +378,14 @@ class _QuestionCreateState extends State<QuestionCreate> {
                 .where((option) => option.correct)
                 .length <
             1) {
-      showBasicDialog(context, "At least one option must be correct");
+      showErrSnackBar(context, "At least one option must be correct");
       return;
     }
 
     // Options
     if (_question is MCQuestion &&
         (_question as MCQuestion).options.length <= 1) {
-      showBasicDialog(context, "Must have two or more options");
+      showErrSnackBar(context, "Must have two or more options");
       return;
     }
 

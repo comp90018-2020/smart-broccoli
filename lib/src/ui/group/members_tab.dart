@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/theme.dart';
 
 class MembersTab extends StatelessWidget {
@@ -46,7 +47,7 @@ class MembersTab extends StatelessWidget {
                               await registry.kickMemberFromGroup(
                                   group, group.members[index].id);
                             } catch (_) {
-                              showBasicDialog(context, "Cannot kick member");
+                              showErrSnackBar(context, "Cannot kick member");
                             }
                         },
                       )

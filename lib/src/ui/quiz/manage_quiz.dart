@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/group_dropdown.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -18,17 +19,18 @@ class ManageQuiz extends StatefulWidget {
 class _ManageQuizState extends State<ManageQuiz> {
   // The group that is selected
   int _groupId;
-
   // See : https://stackoverflow.com/questions/58371874
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Update created quizzes
     Provider.of<QuizCollectionModel>(context, listen: false)
-        .refreshCreatedQuizzes();
+        .refreshCreatedQuizzes()
+        .catchError((e) => showErrSnackBar(context, e.toString()));
     // Update group list
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups();
+        .refreshCreatedGroups()
+        .catchError((e) => showErrSnackBar(context, e.toString()));
   }
 
   @override
@@ -45,22 +47,26 @@ class _ManageQuizState extends State<ManageQuiz> {
               header: _groupSelector(),
               hiddenButton: true);
         }),
-        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          // Live quiz
-          return QuizContainer(
-              collection.getCreatedQuizzesWhere(
-                  groupId: _groupId, type: QuizType.LIVE),
-              header: _groupSelector(),
-              hiddenButton: true);
-        }),
-        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          /// Self-paced quiz
-          return QuizContainer(
-              collection.getCreatedQuizzesWhere(
-                  groupId: _groupId, type: QuizType.SELF_PACED),
-              header: _groupSelector(),
-              hiddenButton: true);
-        }),
+        Builder(
+            builder: (context) => Consumer<QuizCollectionModel>(
+                    builder: (context, collection, child) {
+                  // Live quiz
+                  return QuizContainer(
+                      collection.getCreatedQuizzesWhere(
+                          groupId: _groupId, type: QuizType.LIVE),
+                      header: _groupSelector(),
+                      hiddenButton: true);
+                })),
+        Builder(
+            builder: (context) => Consumer<QuizCollectionModel>(
+                    builder: (context, collection, child) {
+                  /// Self-paced quiz
+                  return QuizContainer(
+                      collection.getCreatedQuizzesWhere(
+                          groupId: _groupId, type: QuizType.SELF_PACED),
+                      header: _groupSelector(),
+                      hiddenButton: true);
+                })),
       ],
       hasDrawer: true,
       secondaryBackgroundColour: true,
@@ -81,40 +87,39 @@ class _ManageQuizState extends State<ManageQuiz> {
   /// Quiz selection dropdown
   Widget _groupSelector() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8),
-      constraints: BoxConstraints(maxWidth: 200),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text('GROUP',
-              style: TextStyle(
-                  color: SmartBroccoliColourScheme().onBackground,
-                  fontSize: 16)),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: DropdownButtonHideUnderline(
-                  child: Consumer<GroupRegistryModel>(
-                    builder: (context, collection, child) {
-                      return GroupDropdown(
-                        collection.createdGroups,
-                        _groupId,
-                        centered: true,
-                        defaultText: "All Groups",
-                        onChanged: (i) {
-                          setState(() => _groupId = i);
-                        },
-                      );
-                    },
+        padding: EdgeInsets.symmetric(horizontal: 8),
+        constraints: BoxConstraints(maxWidth: 200),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text('GROUP',
+                style: TextStyle(
+                    color: SmartBroccoliColourScheme().onBackground,
+                    fontSize: 16)),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: DropdownButtonHideUnderline(
+                    child: Consumer<GroupRegistryModel>(
+                      builder: (context, collection, child) {
+                        return GroupDropdown(
+                          collection.createdGroups,
+                          _groupId,
+                          centered: true,
+                          defaultText: "All Groups",
+                          onChanged: (i) {
+                            setState(() => _groupId = i);
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ));
   }
 }

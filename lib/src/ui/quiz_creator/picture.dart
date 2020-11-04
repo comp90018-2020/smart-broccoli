@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Widget for pictures
@@ -78,9 +79,9 @@ class _PictureCardState extends State<PictureCard> {
       widget.updatePicture(pickedFile.path);
     } catch (err) {
       if (err.code == "photo_access_denied")
-        showBasicDialog(context, "Cannot access gallery");
+        showErrSnackBar(context, "Cannot access gallery");
       else
-        showBasicDialog(context, "Cannot update profile picture");
+        showErrSnackBar(context, "Cannot update profile picture");
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
 /// Group list page
@@ -15,14 +16,24 @@ class GroupList extends StatefulWidget {
 class _GroupListState extends State<GroupList> {
   // Current tab
   int tab = 0;
+  bool _isJoinedLoading = true;
+  ChangeNotifier _joinedGroupNotifier = new ChangeNotifier();
 
   @override
   void didChangeDependencies() {
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshJoinedGroups();
+        .refreshJoinedGroups()
+        .catchError((e) => showErrSnackBar(context, e.toString()));
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups();
+        .refreshCreatedGroups()
+        .catchError((e) => showErrSnackBar(context, e.toString()));
     super.didChangeDependencies();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _joinedGroupNotifier.addListener(() => _isJoinedLoading = false);
   }
 
   @override
@@ -39,10 +50,12 @@ class _GroupListState extends State<GroupList> {
 
         // Tabs
         tabViews: [
-          Consumer<GroupRegistryModel>(
-            builder: (context, registry, child) =>
-                buildGroupList(registry.joinedGroups),
-          ),
+          ChangeNotifierProvider(
+              create: (_) => _joinedGroupNotifier,
+              child: Consumer<GroupRegistryModel>(
+                builder: (context, registry, child) =>
+                    buildGroupList(registry.joinedGroups),
+              )),
           Consumer<GroupRegistryModel>(
             builder: (context, registry, child) =>
                 buildGroupList(registry.createdGroups),
@@ -68,34 +81,36 @@ class _GroupListState extends State<GroupList> {
   // Builds a list of groups
   Widget buildGroupList(List<Group> groups) => FractionallySizedBox(
         widthFactor: 0.85,
-        child: ListView.builder(
-          itemCount: groups.length,
-          padding: EdgeInsets.symmetric(vertical: 16.0),
-          itemBuilder: (context, i) => Card(
-            child: ListTile(
-              dense: true,
-              onTap: () =>
-                  Navigator.of(context).pushNamed('/group/${groups[i].id}'),
-              title: Text(
-                groups[i].name,
-                style: TextStyle(fontSize: 16),
-              ),
-              subtitle: groups[i].members == null
-                  ? null
-                  : Row(
-                      children: [
-                        Icon(Icons.person),
-                        Text('${groups[i].members.length} member'
-                            '${groups[i].members.length > 1 ? "s" : ""}'),
-                        if (groups[i].defaultGroup) ...[
-                          Spacer(),
-                          Text('Default Group')
-                        ]
-                      ],
+        child: _isJoinedLoading
+            ? loadingIndicator(20.0)
+            : ListView.builder(
+                itemCount: groups.length,
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                itemBuilder: (context, i) => Card(
+                  child: ListTile(
+                    dense: true,
+                    onTap: () => Navigator.of(context)
+                        .pushNamed('/group/${groups[i].id}'),
+                    title: Text(
+                      groups[i].name,
+                      style: TextStyle(fontSize: 16),
                     ),
-            ),
-          ),
-        ),
+                    subtitle: groups[i].members == null
+                        ? null
+                        : Row(
+                            children: [
+                              Icon(Icons.person),
+                              Text('${groups[i].members.length} member'
+                                  '${groups[i].members.length > 1 ? "s" : ""}'),
+                              if (groups[i].defaultGroup) ...[
+                                Spacer(),
+                                Text('Default Group')
+                              ]
+                            ],
+                          ),
+                  ),
+                ),
+              ),
       );
 
   /// The join group dialog
@@ -137,11 +152,11 @@ class _GroupListState extends State<GroupList> {
       await Provider.of<GroupRegistryModel>(context, listen: false)
           .joinGroup(name: groupName);
     } on GroupNotFoundException {
-      showBasicDialog(context, "Group does not exist: $groupName");
+      showErrSnackBar(context, "Group does not exist: $groupName");
     } on AlreadyInGroupException {
-      showBasicDialog(context, "Already a member of group: $groupName");
+      showErrSnackBar(context, "Already a member of group: $groupName");
     } catch (err) {
-      showBasicDialog(context, "Something went wrong");
+      showErrSnackBar(context, "Something went wrong");
     }
   }
 }

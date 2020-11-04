@@ -2,15 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// A page extending scaffold
 /// Supports tabs, drawer
 class CustomPage extends StatelessWidget {
-  /// Global key
-  final GlobalKey key;
-
   /// Title of page
   final String title;
 
@@ -43,7 +39,7 @@ class CustomPage extends StatelessWidget {
 
   /// Constructs a custom page
   CustomPage(
-      {this.key,
+      {Key key,
       @required this.title,
       @required this.child,
       this.hasDrawer = false,
@@ -53,7 +49,8 @@ class CustomPage extends StatelessWidget {
       this.appbarLeading,
       this.automaticallyImplyLeading = true,
       this.appbarActions,
-      this.floatingActionButton});
+      this.floatingActionButton})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +65,6 @@ class CustomPage extends StatelessWidget {
     );
 
     return Scaffold(
-      key: this.key,
       backgroundColor: this.secondaryBackgroundColour
           ? Theme.of(context).backgroundColor
           : Theme.of(context).colorScheme.onBackground,

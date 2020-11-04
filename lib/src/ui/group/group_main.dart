@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 
 import 'members_tab.dart';
 import 'quiz_tab.dart';
@@ -92,7 +93,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                           Navigator.of(context).pop();
                         }
                       } catch (_) {
-                        showBasicDialog(context, "Cannot leave group");
+                        showErrSnackBar(context, "Cannot leave group");
                       }
                       break;
                     case UserAction.RENAME_GROUP:
@@ -103,10 +104,10 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                                 listen: false)
                             .renameGroup(group, newName);
                       } on GroupCreateException {
-                        showBasicDialog(
+                        showErrSnackBar(
                             context, "Name already in use: $newName");
                       } catch (_) {
-                        showBasicDialog(
+                        showErrSnackBar(
                             context, "Cannot rename group to: $newName");
                       }
                       break;
@@ -121,7 +122,7 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                           Navigator.of(context).pop();
                         }
                       } catch (_) {
-                        showBasicDialog(context, "Cannot delete group");
+                        showErrSnackBar(context, "Cannot delete group");
                       }
                       break;
                     default:

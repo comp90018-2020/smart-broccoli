@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 
 import 'quiz_card.dart';
 
@@ -53,32 +54,35 @@ class _BuildQuiz extends State<QuizContainer> {
             // The list of quiz
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                // Minimum height, or will be height of longest child
-                // if exceeding minimum height
-                constraints: BoxConstraints(minHeight: 300),
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: mapIndexed(
-                      widget.items,
-                      ((index, item) => Container(
-                            constraints: BoxConstraints(maxWidth: 200),
-                            margin:
-                                index == 0 || index == widget.items.length - 1
-                                    ? EdgeInsets.only(
-                                        left: index == 0 ? 20 : 0,
-                                        right: index == 0 ? 0 : 20)
-                                    : EdgeInsets.zero,
-                            width: MediaQuery.of(context).size.width * 0.4,
-                            child: QuizCard(item, alwaysShowPicture: true),
-                          )),
-                    ).toList(),
-                  ),
-                ),
-              ),
+              child: widget.items.isEmpty
+                  ? loadingIndicator(10.0)
+                  : ConstrainedBox(
+                      // Minimum height, or will be height of longest child
+                      // if exceeding minimum height
+                      constraints: BoxConstraints(minHeight: 300),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: mapIndexed(
+                            widget.items,
+                            ((index, item) => Container(
+                                  constraints: BoxConstraints(maxWidth: 200),
+                                  margin: index == 0 ||
+                                          index == widget.items.length - 1
+                                      ? EdgeInsets.only(
+                                          left: index == 0 ? 20 : 0,
+                                          right: index == 0 ? 0 : 20)
+                                      : EdgeInsets.zero,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.4,
+                                  child:
+                                      QuizCard(item, alwaysShowPicture: true),
+                                )),
+                          ).toList(),
+                        ),
+                      ),
+                    ),
             ),
-
             // Leave some space for a hidden floating action button
             if (widget.hiddenButton)
               Visibility(

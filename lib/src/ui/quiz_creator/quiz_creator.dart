@@ -8,7 +8,7 @@ import 'package:smart_broccoli/src/ui/shared/group_dropdown.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/snack_bar.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/theme.dart';
 
 import 'question_creator.dart';
@@ -421,23 +421,23 @@ class _QuizCreateState extends State<QuizCreate> {
     }
 
     if (_quiz.title.isEmpty) {
-      showSnackBar(context, 'Quiz name cannot be empty');
+      showErrSnackBar(context, 'Quiz name cannot be empty');
       return;
     }
 
     if (_quiz.groupId == null) {
-      showSnackBar(context, 'Quiz must belong to a group');
+      showErrSnackBar(context, 'Quiz must belong to a group');
       return;
     }
 
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .saveQuiz(_quiz);
-      showSnackBar(context, 'Quiz saved');
+      showErrSnackBar(context, 'Quiz saved');
       context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
     } catch (err) {
-      showSnackBar(context, err.toString());
+      showErrSnackBar(context, err.toString());
     }
     setState(() => _isCommited = false);
   }
@@ -462,7 +462,7 @@ class _QuizCreateState extends State<QuizCreate> {
       context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
     } on Exception catch (err) {
-      showSnackBar(context, err.toString());
+      showErrSnackBar(context, err.toString());
     }
     setState(() => _isCommited = false);
   }

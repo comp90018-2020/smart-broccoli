@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'quiz_pin_box.dart';
@@ -24,7 +25,10 @@ class _TakeQuizState extends State<TakeQuiz> {
     super.didChangeDependencies();
     // Update available quizzes
     Provider.of<QuizCollectionModel>(context, listen: false)
-        .refreshAvailableQuizzes();
+        .refreshAvailableQuizzes()
+        .catchError(
+            (e) => showErrSnackBar(_buildQuizKey.currentContext, e.toString()));
+    ;
   }
 
   @override
