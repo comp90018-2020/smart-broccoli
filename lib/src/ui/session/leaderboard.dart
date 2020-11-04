@@ -53,16 +53,26 @@ class QuizLeaderboard extends StatelessWidget {
                           context,
                           model.outcome.leaderboard[1].player.name,
                           50,
-                          Text('2',
-                              style: SmartBroccoliTheme.leaderboardRankStyle),
+                          FutureBuilder(
+                            future: model.getPeerProfilePicturePath(
+                                model.outcome.leaderboard[1].player.id),
+                            builder: (BuildContext context,
+                                    AsyncSnapshot<String> snapshot) =>
+                                UserAvatar(snapshot.data, maxRadius: 50),
+                          ),
                         ),
                       if (model.outcome.leaderboard.length > 0)
                         _topThreeUsers(
                           context,
                           model.outcome.leaderboard[0].player.name,
                           75,
-                          Text('1',
-                              style: SmartBroccoliTheme.leaderboardRankStyle),
+                          FutureBuilder(
+                            future: model.getPeerProfilePicturePath(
+                                model.outcome.leaderboard[0].player.id),
+                            builder: (BuildContext context,
+                                    AsyncSnapshot<String> snapshot) =>
+                                UserAvatar(snapshot.data, maxRadius: 75),
+                          ),
                           bold: true,
                         ),
                       if (model.outcome.leaderboard.length > 2)
@@ -70,8 +80,13 @@ class QuizLeaderboard extends StatelessWidget {
                           context,
                           model.outcome.leaderboard[2].player.name,
                           50,
-                          Text('3',
-                              style: SmartBroccoliTheme.leaderboardRankStyle),
+                          FutureBuilder(
+                            future: model.getPeerProfilePicturePath(
+                                model.outcome.leaderboard[2].player.id),
+                            builder: (BuildContext context,
+                                    AsyncSnapshot<String> snapshot) =>
+                                UserAvatar(snapshot.data, maxRadius: 50),
+                          ),
                         ),
                     ],
                   ),

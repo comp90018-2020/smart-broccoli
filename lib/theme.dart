@@ -219,7 +219,9 @@ class UserAvatar extends ClipOval {
                   color: Color(0xFF4CAF50))
               : Container(
                   child: CircleAvatar(
-                      backgroundImage: Image.file(File(filePath)).image),
+                    backgroundImage: Image.file(File(filePath)).image,
+                    maxRadius: maxRadius,
+                  ),
                 ),
         );
 }
