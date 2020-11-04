@@ -142,9 +142,12 @@ class QuizCard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    quiz.type == QuizType.LIVE
-                        ? liveIndicator(context)
-                        : selfPacedIndicator(context),
+                    if (quiz.type == QuizType.LIVE)
+                      liveIndicator(context)
+                    else if (quiz.type == QuizType.SELF_PACED)
+                      selfPacedIndicator(context)
+                    else if (quiz.type == QuizType.SMART_LIVE)
+                      smartIndicator(),
                     if (quiz.complete)
                       Text(
                         'Complete',
