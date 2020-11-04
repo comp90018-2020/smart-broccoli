@@ -326,7 +326,6 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     socket.emit('abort');
     // for host, transition to ABANDONED to avoid getting dialogue box
     _transitionTo(SessionState.ABANDONED);
-    socket.disconnect();
   }
 
   void toggleAnswer(int index) {
