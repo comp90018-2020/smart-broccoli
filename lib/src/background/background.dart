@@ -182,7 +182,7 @@ Future<bool> checkCalendar(BackgroundDatabase db) async {
 Future<bool> checkGyro() async {
   // Check if the phone is stationary and not being used
   GyroscopeEvent gyroscopeEvent =
-      await Gyro.getGyroEvent().catchError((_) => {});
+      await Gyro.getGyroEvent().catchError((_) => null);
   log("Gyro Data Raw: " + gyroscopeEvent.toString(), name: "Backend");
   if (gyroscopeEvent == null) return true;
 
