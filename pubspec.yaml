@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations: 
+    sdk: flutter
 
   http: ^0.12.2
   path_provider: ^1.6.18
@@ -25,6 +27,7 @@ dependencies:
   collection: ^1.14.13
   flutter_svg: ^0.19.1
   weekday_selector: ^0.4.0
+  flutter_settings: ^1.0.2
 
 dev_dependencies:
   flutter_test:
@@ -37,6 +40,7 @@ flutter_icons:
   android: "ic_launcher"
   ios: true
   image_path: "LOGO.png"
+
 
 flutter:
   uses-material-design: true
