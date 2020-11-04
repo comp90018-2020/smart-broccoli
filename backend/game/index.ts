@@ -110,7 +110,7 @@ const verify = async (
     return [true, session, player];
 };
 
-const pruneSessions = async () => {
+const pruneSessions = () => {
     const nowTime = Date.now();
     for (const sessionId of Object.keys(handler.sessions)) {
         if (
