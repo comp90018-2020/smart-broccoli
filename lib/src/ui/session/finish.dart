@@ -15,13 +15,16 @@ class SessionFinish extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPage(
       title: 'Finished!',
-      appbarLeading: IconButton(
-        icon: Icon(Icons.done),
-        enableFeedback: false,
-        splashRadius: 20,
-        onPressed: () => Navigator.of(context)
-            .popUntil((route) => !route.settings.name.startsWith('/session')),
-      ),
+      automaticallyImplyLeading: false,
+      appbarActions: [
+        IconButton(
+          icon: Icon(Icons.done),
+          enableFeedback: false,
+          splashRadius: 20,
+          onPressed: () => Navigator.of(context)
+              .popUntil((route) => !route.settings.name.startsWith('/session')),
+        ),
+      ],
       background: [
         Container(
           child: ClipPath(

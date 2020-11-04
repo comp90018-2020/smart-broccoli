@@ -28,6 +28,9 @@ class CustomPage extends StatelessWidget {
   /// AppBar leading widget
   final Widget appbarLeading;
 
+  /// Whether to automatically imply leading if appbarLeading is false
+  final bool automaticallyImplyLeading;
+
   /// AppBar trailing widget
   final List<Widget> appbarActions;
 
@@ -43,6 +46,7 @@ class CustomPage extends StatelessWidget {
       this.background,
       this.secondaryBackgroundColour = false,
       this.appbarLeading,
+      this.automaticallyImplyLeading = true,
       this.appbarActions,
       this.floatingActionButton});
 
@@ -80,6 +84,7 @@ class CustomPage extends StatelessWidget {
                   centerTitle: true,
                   elevation: 0,
                   leading: appbarLeading,
+                  automaticallyImplyLeading: automaticallyImplyLeading,
                   actions: appbarActions,
                 ),
               ),
