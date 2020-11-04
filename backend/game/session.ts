@@ -254,7 +254,7 @@ export class GameSession {
     }
 
     isAnswerNoCorrect(answer: Answer) {
-        return answer.questionNo === this.questionIndex;
+        return answer.question === this.questionIndex;
     }
 
     hasAllPlayerAnswered() {
@@ -285,7 +285,7 @@ export class GameSession {
     canAnswer(player: Player, answer: Answer) {
         // is player
         return (
-            answer.questionNo === this.questionIndex &&
+            answer.question === this.questionIndex &&
             player.role === Role.player &&
             // and there is a conducting question
             (!this._isReadyForNextQuestion || this.questionIndex === 0)
@@ -344,7 +344,7 @@ export class GameSession {
         const player = this.playerMap[playerId];
 
         let correct;
-        if (answer.questionNo !== correctAnswer.questionNo) {
+        if (answer.question !== correctAnswer.question) {
             correct = false;
         } else {
             if (correctAnswer.MCSelection !== null) {
@@ -371,16 +371,15 @@ export class GameSession {
         ].record;
         const previousRecord = this.playerMap[playerId].previousRecord;
         this.playerMap[playerId].record = {
-            questionNo: answer.questionNo,
+            questionNo: answer.question,
             oldPos:
-                previousRecord.questionNo === answer.questionNo
+                previousRecord.questionNo === answer.question
                     ? this.playerMap[playerId].previousRecord.newPos
                     : null,
             newPos: null,
             bonusPoints: points,
             points: points + this.playerMap[playerId].previousRecord.points,
-            streak:
-                previousRecord.questionNo === answer.questionNo ? streak : 0,
+            streak: previousRecord.questionNo === answer.question ? streak : 0,
         };
 
         if (!this.hasMoreQuestions()) {

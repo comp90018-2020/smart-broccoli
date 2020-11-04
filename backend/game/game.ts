@@ -167,7 +167,7 @@ export class GameHandler {
                     whichRoom(session, Role.all),
                     Event.questionAnswered,
                     {
-                        question: answer.questionNo,
+                        question: answer.question,
                         count: session.pointSys.answeredPlayers.size,
                         total: Object.keys(session.playerMap).length,
                     }

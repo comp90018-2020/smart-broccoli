@@ -92,7 +92,7 @@ export class Player {
 
 export class Answer {
     constructor(
-        readonly questionNo: number,
+        readonly question: number,
         readonly MCSelection: number[],
         readonly TFSelection: boolean
     ) {
