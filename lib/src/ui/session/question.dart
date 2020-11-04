@@ -214,7 +214,7 @@ class QuizQuestion extends StatelessWidget {
           (model.correctAnswer.answer.tfSelection && index == 1 ||
               !model.correctAnswer.answer.tfSelection && index == 0))
         return AnswerColours.correct;
-      // incorrect selected answer
+      // selected answer
       else if (model.answer.tfSelection != null &&
           (model.answer.tfSelection && index == 1 ||
               !model.answer.tfSelection && index == 0))
@@ -227,12 +227,15 @@ class QuizQuestion extends StatelessWidget {
               .contains(model.state) &&
           model.correctAnswer.answer.mcSelection.contains(index))
         return AnswerColours.correct;
-      // incorrect selected answer
+      // selected answer
       if (model.answer.mcSelection != null &&
           model.answer.mcSelection.contains(index))
-        return AnswerColours.selected;
+        return model.answer.mcSelection.length ==
+                (model.question as MCQuestion).numCorrect
+            ? AnswerColours.selected
+            : AnswerColours.pending;
     }
-    // incorrect unselected answer
+    // unselected answer
     return AnswerColours.normal;
   }
 }

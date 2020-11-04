@@ -183,6 +183,9 @@ class AnswerColours {
   /// Selected
   static Color selected = Color(0xFFFEC12D);
 
+  /// Pending (more answers need to be selected)
+  static Color pending = Color(0xFFFCDA88);
+
   /// Default
   static Color normal = Colors.white;
 }
