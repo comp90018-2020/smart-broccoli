@@ -169,26 +169,26 @@ class QuizLobby extends StatelessWidget {
     );
   }
 
-  // final userList = ["A", "B", "C", "D", "E", "F", "G"]; // mia: get userList
   // Quiz users list
   Widget _quizUsers() {
     return Consumer<GameSessionModel>(
-        builder: (context, socketModel, child) => ListView.separated(
+        builder: (context, model, child) => ListView.separated(
               padding: EdgeInsets.symmetric(vertical: 8),
               shrinkWrap: true,
-              itemCount: socketModel.players.length,
+              itemCount: model.players.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
                     dense: true,
                     // Avatar
-                    leading: Container(
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(100))),
+                    leading: FutureBuilder(
+                      future: model.getPeerProfilePicturePath(
+                          model.players.values.toList()[index].id),
+                      builder: (BuildContext context,
+                              AsyncSnapshot<String> snapshot) =>
+                          UserAvatar(snapshot.data, maxRadius: 20),
+                    ),
                     // Name
-                    title: Text(socketModel.players.values.toList()[index].name,
+                    title: Text(model.players.values.toList()[index].name,
                         style: SmartBroccoliTheme.listItemTextStyle));
               },
               separatorBuilder: (BuildContext context, int index) =>
