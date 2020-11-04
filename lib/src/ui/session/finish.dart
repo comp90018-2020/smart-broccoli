@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
+
 import 'vertical_clip.dart';
 
 /// Finish page for self-paced solo quizzes

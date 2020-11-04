@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
-import 'package:smart_broccoli/src/models/quiz_collection.dart';
-import 'package:smart_broccoli/src/models/session_model.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
+
 import 'vertical_clip.dart';
 
 /// Widget for Lobby
