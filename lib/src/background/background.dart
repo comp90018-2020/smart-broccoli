@@ -60,12 +60,13 @@ void callbackDispatcher() {
 /// Location sensitive functions
 Future<bool> locationCheck(BackgroundDatabase db) async {
   /// Get current long lat
-  Position position1 = await BackgroundLocation.getPosition();
+  Position position1 =
+      await BackgroundLocation.getPosition().catchError((_) => null);
 
   /// If in Geofence
+  if (position1 == null) return false;
   if (await BackgroundLocation.inGeoFence(
       await db.getGeoFence(), position1, 1)) {
-    /// Return 1
     log("The user is in a geofence return 1", name: "Backend");
     return true;
   }
@@ -77,18 +78,17 @@ Future<bool> locationCheck(BackgroundDatabase db) async {
 
   /// Idle for 30 seconds
   Duration duration = new Duration(seconds: 30);
-
-  /// Idle background process for a while
   sleep(duration);
 
   /// Get second location
-  Position position2 = await BackgroundLocation.getPosition();
+  Position position2 =
+      await BackgroundLocation.getPosition().catchError((_) => null);
+  if (position2 == null) return false;
 
   /// Check distance between the two
   double distance = Geolocator.distanceBetween(position1.latitude,
       position1.longitude, position2.latitude, position2.longitude);
-
-  log("Position 1" + distance.toString(), name: "Backend");
+  log("Distance" + distance.toString(), name: "Backend");
 
   /// Determine if the user has moved about 100 m in 30 + a few seconds
   /// Todo add perf logic

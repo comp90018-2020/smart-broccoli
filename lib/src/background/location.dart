@@ -10,9 +10,12 @@ import 'background_database.dart';
 class BackgroundLocation {
   // get GPS lon lat reading
   static Future<Position> getPosition() async {
-    Position userLocation = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    return userLocation;
+    try {
+      return await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+    } catch (err) {
+      return Future.error(err.toString());
+    }
   }
 
   // Placemark info
