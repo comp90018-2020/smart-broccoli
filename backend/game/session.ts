@@ -37,6 +37,7 @@ export class GameSession {
     private invalidTokens: Set<String> = new Set([]);
     public boardReleased: Set<number> = new Set([]);
     public questionReleased: Set<number> = new Set([]);
+    public answerReleased: Set<number> = new Set([]);
     public totalQuestions: number = 0;
     public updatedAt: number = Date.now();
 

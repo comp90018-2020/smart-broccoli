@@ -372,7 +372,7 @@ export class GameHandler {
             if (!session.isEmitValid(player)) return;
 
             if (session.canAbort(player)) {
-                if (session.hasMoreQuestions())
+                if (session.answerReleased.size < session.totalQuestions)
                     // Broadcast that quiz has been cancelled
                     emitToRoom(
                         whichRoom(session, Role.all),
@@ -481,7 +481,7 @@ export class GameHandler {
             Event.correctAnswer,
             correctAnswer
         );
-
+        session.answerReleased.add(questionIndex);
         session.setToNextQuestion(questionIndex + 1);
         if (session.isSelfPacedGroup()) {
             if (!session.hasFinalBoardReleased())
