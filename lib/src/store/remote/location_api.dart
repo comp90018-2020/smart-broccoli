@@ -41,8 +41,8 @@ class LocationAPI {
         for (var i = 0; i < jsonObject.length; i++) {
           LocationData loc = new LocationData(
             name: jsonObject[i]["display_name"].toString(),
-            lon: 0.0,
-            lat: 0.0,
+            lon: double.tryParse(jsonObject[i]["lon"]),
+            lat: double.tryParse(jsonObject[i]["lat"]),
           );
           print(i);
           print(jsonObject.length);

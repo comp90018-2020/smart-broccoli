@@ -31,8 +31,7 @@ void callbackDispatcher() {
           /// Out.
           Network network = new Network();
 
-
-          if(await network.isAtWork(network)){
+          if (await network.isAtWork(network)) {
             // return 0;
             break;
           }
