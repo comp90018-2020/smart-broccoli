@@ -349,7 +349,19 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       notifyListeners();
     }
 
-    // MC question: multiple answers may be possible
+    // MC question with only one correct answer
+    else if ((question as MCQuestion).numCorrect == 1) {
+      // repeat tap: no need to resend
+      if (answer.mcSelection.contains(index)) return;
+      // first selection or change of selection
+      answer.mcSelection
+        ..clear()
+        ..add(index);
+      answerQuestion();
+      notifyListeners();
+    }
+
+    // MC question with multiple answers
     else {
       // deselection
       if (answer.mcSelection.contains(index)) {
