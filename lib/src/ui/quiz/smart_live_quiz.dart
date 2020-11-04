@@ -10,6 +10,7 @@ import 'package:flutter_settings/models/settings_list_item.dart';
 import 'package:flutter_settings/widgets/SettingsCheckBox.dart';
 import 'package:flutter_settings/widgets/SettingsInputField.dart';
 import 'package:flutter_settings/widgets/SettingsSlider.dart';
+import 'package:day_picker/day_picker.dart';
 
 /// Smart quiz page
 class SmartQuiz extends StatefulWidget {
@@ -160,6 +161,35 @@ class _SmartQuizState extends State<SmartQuiz> {
             ]),
         Divider(height: 10, color: Colors.white),
         SettingsSection(
+          title: Text(
+            'Days of week',
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: SelectWeekDays(
+            padding: 0,
+            border: false,
+            daysBorderColor: Colors.white,
+            selectedDayTextColor: Colors.black54,
+            boxDecoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(45.0),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                // colors: [const Color(0xFFE55CE4), const Color(0xFFBB75FB)],
+                colors: [const Color(0xFFFEC12D), const Color(0xFFFEC12D)],
+                tileMode:
+                    TileMode.repeated, // repeats the gradient over the canvas
+              ),
+            ),
+            onSelect: (values) {
+              // <== Callback to handle the selected days
+              print(values);
+            },
+          ),
+        ),
+        Divider(height: 10, color: Colors.white),
+        SettingsSection(
             title: Text(
               'Self-paced quiz setting',
             ),
@@ -244,11 +274,6 @@ class _SmartQuizState extends State<SmartQuiz> {
               ),
             ]),
         Divider(height: 10, color: Colors.white),
-        SettingsSection(
-          title: Text(
-            'Days of week',
-          ),
-        )
       ]),
     );
   }
