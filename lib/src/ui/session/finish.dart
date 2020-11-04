@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
+import 'package:smart_broccoli/theme.dart';
 
 import 'vertical_clip.dart';
 
@@ -32,11 +34,11 @@ class SessionFinish extends StatelessWidget {
       ],
       child: Padding(
         padding: const EdgeInsets.only(top: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Consumer<GameSessionModel>(
-              builder: (context, model, child) => Container(
+        child: Consumer<GameSessionModel>(
+          builder: (context, model, child) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                 margin: EdgeInsets.only(bottom: 12),
@@ -48,10 +50,25 @@ class SessionFinish extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ],
+              if (_finalPoints(model) != null)
+                Column(
+                  children: [
+                    Center(
+                        child: Text('Final Score',
+                            style: SmartBroccoliTheme.finalScoreCaptionStyle)),
+                    Center(
+                        child: Text('${_finalPoints(model)}',
+                            style: SmartBroccoliTheme.finishScreenPointsStyle)),
+                  ],
+                )
+            ],
+          ),
         ),
       ),
     );
   }
+
+  int _finalPoints(GameSessionModel model) =>
+      model?.correctAnswer?.record?.points ??
+      (model?.outcome as OutcomeUser)?.record?.points;
 }

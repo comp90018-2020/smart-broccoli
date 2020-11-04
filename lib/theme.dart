@@ -84,6 +84,13 @@ class SmartBroccoliTheme {
   /// List item text style
   static final TextStyle listItemTextStyle =
       TextStyle(color: Color(0xFF656565), fontWeight: FontWeight.bold);
+
+  /// Style for points shown on finish screen
+  static final TextStyle finishScreenPointsStyle =
+      TextStyle(fontSize: 36, fontWeight: FontWeight.bold);
+
+  /// Style for 'final score' caption
+  static final TextStyle finalScoreCaptionStyle = TextStyle(fontSize: 16);
 }
 
 /// Widget to hold the app logo on auth screen
