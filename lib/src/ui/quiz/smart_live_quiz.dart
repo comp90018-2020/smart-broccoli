@@ -238,6 +238,7 @@ class _SmartQuizState extends State<SmartQuiz> {
                 context: context,
               ),
               SettingsInputField(
+                titleStyle: TextStyle(fontSize: 16),
                 dialogButtonText: 'Done',
                 title: ('Edit Working address'),
                 // titleStyle: TextStyle(fontSize: 16),
