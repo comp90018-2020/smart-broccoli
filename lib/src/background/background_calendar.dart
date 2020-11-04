@@ -12,28 +12,34 @@ class BackgroundCalendar {
     await db.cleanEvents();
 
     // Retrieve calendars
-    DeviceCalendarPlugin deviceCalendarPlugin = new DeviceCalendarPlugin();
-    var cal = await deviceCalendarPlugin.retrieveCalendars();
-    List<Calendar> calendar = cal.data;
-
-    log(
-        "Calendar" +
-            calendar.toString() +
-            "Length:" +
-            calendar.length.toString(),
-        name: "Backend-Calendar");
-
-    // Define the time frame
-    var now = new DateTime.now();
-    // Define that we want events from now to 7 days later
-    RetrieveEventsParams retrieveEventsParams = new RetrieveEventsParams(
-        startDate: now, endDate: now.add(new Duration(days: 7)));
-
-    // Find all events within 7 days
     List<Result<UnmodifiableListView<Event>>> resultEvents = [];
-    for (var i = 0; i < calendar.length; i++) {
-      resultEvents.add(await deviceCalendarPlugin.retrieveEvents(
-          calendar[i].id, retrieveEventsParams));
+    try {
+      DeviceCalendarPlugin deviceCalendarPlugin = new DeviceCalendarPlugin();
+      var cal = await deviceCalendarPlugin.retrieveCalendars();
+
+      List<Calendar> calendar = cal.data;
+      log(
+          "Calendar" +
+              calendar.toString() +
+              "Length:" +
+              calendar.length.toString(),
+          name: "Backend-Calendar");
+
+      // Define the time frame
+      var now = new DateTime.now();
+      // Define that we want events from now to 7 days later
+      RetrieveEventsParams retrieveEventsParams = new RetrieveEventsParams(
+          startDate: now, endDate: now.add(new Duration(days: 7)));
+
+      // Find all events within 7 days
+
+      for (var i = 0; i < calendar.length; i++) {
+        resultEvents.add(await deviceCalendarPlugin.retrieveEvents(
+            calendar[i].id, retrieveEventsParams));
+      }
+    } catch (err) {
+      log(err.toString(), name: "Backend calendar");
+      return;
     }
 
     /// Intermediate step to check if every event is extracted
@@ -44,10 +50,10 @@ class BackgroundCalendar {
         outputEvents = outputEvents + resultEvents[i].data.toList();
       } else {
         log("Events error:" + resultEvents[i].errorMessages.toString(),
-            name: "Backend-Calendar");
+            name: "Backend calendar");
       }
     }
-    log("Events:" + outputEvents.toString(), name: "Backend-Calendar");
+    log("Events:" + outputEvents.toString(), name: "Backend calendar");
 
     /// Write the data into the database which only stores the start time since
     /// epoch and end time since Epoch
