@@ -118,13 +118,15 @@ class BackgroundLocation {
     log("Input" + body, name: "Backend-Location");
 
     if (response.statusCode == 200) {
+      log(
+          "Response code " +
+              response.statusCode.toString() +
+              "Response body " +
+              response.body.toString(),
+          name: "Backend-Location");
+
       try {
-        log(
-            "Response code " +
-                response.statusCode.toString() +
-                "Response body " +
-                response.body.toString(),
-            name: "Backend-Location");
+        // Parse XML
         final result = XmlDocument.parse(response.body);
         // The user is very likely on a train
         if (result.findAllElements('tag').length != 0) {
@@ -132,7 +134,6 @@ class BackgroundLocation {
         }
       } catch (e) {
         print(e);
-        return false;
       }
     }
     return false;
