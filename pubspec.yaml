@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations: 
+  flutter_localizations:
     sdk: flutter
 
   http: ^0.12.2
@@ -27,7 +27,8 @@ dependencies:
   collection: ^1.14.13
   flutter_svg: ^0.19.1
   weekday_selector: ^0.4.0
-  flutter_settings: ^1.0.2
+  flutter_settings:
+    path: ./vendor/Flutter-settings
 
 dev_dependencies:
   flutter_test:
