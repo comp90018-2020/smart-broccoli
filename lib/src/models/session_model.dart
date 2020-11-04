@@ -1,12 +1,10 @@
 import 'package:flutter/widgets.dart';
-import 'package:smart_broccoli/router.dart';
-import 'package:smart_broccoli/src/base.dart';
-import 'package:smart_broccoli/src/models/quiz_collection.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import 'package:smart_broccoli/router.dart';
+import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/models/model_change.dart';
 import 'package:smart_broccoli/src/remote.dart';
 
 enum SessionState {

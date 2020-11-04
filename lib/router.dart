@@ -42,13 +42,13 @@ class BroccoliRouter {
   static const String manageQuiz = "/manage_quiz";
 
   // Session
+  static const String sessionStart = "/session/start/quiz/:id";
   static const String sessionLobby = "/session/lobby";
   static const String sessionQuestion = "/session/question";
   static const String sessionLeaderboard = "/session/leaderboard";
   static const String sessionFinish = "/session/finish";
 
   // Group
-  static const String sessionStart = "/session/start/quiz/:id";
   static const String group = "/group/:id";
   static const String groupHome = "/group/home";
   static const String groupCreate = "/group/create";
