@@ -32,7 +32,7 @@ class QuizQuestion extends StatelessWidget {
         ),
 
         // Points/next/finish button
-        appbarActions: [_userAction(context, model)],
+        appbarActions: _appBarActions(context, model),
 
         // Container
         child: Padding(
@@ -158,46 +158,48 @@ class QuizQuestion extends StatelessWidget {
   }
 
   /// Return the appropriate action/indicator (top right) for the user
-  Widget _userAction(BuildContext context, GameSessionModel model) =>
-      // if (a) session finished; or
-      //    (b) answer released; and
-      //        i. user is host; or
-      //        ii. session is self-paced solo
-      // then show next/finish button
-      model.state == SessionState.FINISHED ||
-              model.state == SessionState.ANSWER &&
-                  (model.role == GroupRole.OWNER ||
-                      model.session.quizType == QuizType.SELF_PACED &&
-                          model.session.type == GameSessionType.INDIVIDUAL)
-          ? IconButton(
-              onPressed: () => model.role == GroupRole.OWNER
-                  ? model.state == SessionState.FINISHED
-                      ? Navigator.of(context).popUntil((route) =>
-                          !route.settings.name.startsWith('/session'))
-                      : model.showLeaderBoard()
-                  : model.nextQuestion(),
-              icon: model.state == SessionState.FINISHED
-                  ? Icon(Icons.flag)
-                  : Icon(Icons.arrow_forward),
-            )
+  List<Widget> _appBarActions(BuildContext context, GameSessionModel model) => [
+        // if (a) session finished; or
+        //    (b) answer released; and
+        //        i. user is host; or
+        //        ii. session is self-paced solo
+        // then show next/finish button
+        if (model.state == SessionState.FINISHED ||
+            model.state == SessionState.ANSWER &&
+                (model.role == GroupRole.OWNER ||
+                    model.session.quizType == QuizType.SELF_PACED &&
+                        model.session.type == GameSessionType.INDIVIDUAL))
+          IconButton(
+            onPressed: () => model.role == GroupRole.OWNER
+                ? model.state == SessionState.FINISHED
+                    ? Navigator.of(context).popUntil(
+                        (route) => !route.settings.name.startsWith('/session'))
+                    : model.showLeaderBoard()
+                : model.nextQuestion(),
+            icon: model.state == SessionState.FINISHED
+                ? Icon(Icons.flag)
+                : Icon(Icons.arrow_forward),
+          )
 
-          // otherwise, show points
-          : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    '${_getPoints(model) ?? 0}',
-                    style: TextStyle(
-                        color: Color(0xFFECC030),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Text("Points"),
-                ],
-              ),
-            );
+        // otherwise, show points if not host
+        else if (model.role == GroupRole.MEMBER)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  '${_getPoints(model) ?? 0}',
+                  style: TextStyle(
+                      color: Color(0xFFECC030),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                Text("Points"),
+              ],
+            ),
+          )
+      ];
 
   int _getPoints(GameSessionModel model) =>
       model.correctAnswer?.record?.points ??
