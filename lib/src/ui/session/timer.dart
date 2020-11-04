@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
+import 'package:quiver/iterables.dart';
 import 'package:smart_broccoli/src/base.dart';
 
 class TimerWidget extends StatefulWidget {
@@ -24,10 +25,7 @@ class _TimerWidgetState extends State<TimerWidget> {
         (Timer timer) {
           if (mounted)
             setState(() {
-              if (_millisecondsRemaining < 1)
-                timer.cancel();
-              else
-                _millisecondsRemaining -= 100;
+              _millisecondsRemaining = max([0, _millisecondsRemaining - 100]);
             });
         },
       );
