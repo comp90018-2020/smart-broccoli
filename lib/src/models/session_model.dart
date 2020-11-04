@@ -300,6 +300,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
           PubSub().publish(PubSubTopic.ROUTE,
               arg: RouteArgs(action: RouteAction.POP));
           PubSub().publish(PubSubTopic.TIMER, arg: time);
+          notifyListeners();
         } else {
           PubSub().publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
