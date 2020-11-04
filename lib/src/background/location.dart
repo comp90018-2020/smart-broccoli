@@ -18,9 +18,6 @@ class BackgroundLocation {
 
   // Placemark info
   Future<Placemark> getPlacemark(Position userLocation) async {
-
-
-
     List<Placemark> placemark = await placemarkFromCoordinates(
         userLocation.latitude, userLocation.longitude);
 
@@ -38,10 +35,8 @@ class BackgroundLocation {
 
     getPlacemark(position);
 
-    await
-
-    log("Placemark: " +  (await getPlacemark(position)).street
-        , name: "Location");
+    log("Place mark: " + (await getPlacemark(position)).street,
+        name: "Location");
 
     String query =
         "https://nominatim.openstreetmap.org/reverse?format=geocodejson&lat=$lat&lon=$lon";

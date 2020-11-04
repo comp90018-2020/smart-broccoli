@@ -16,7 +16,6 @@ class LocationData {
 
 class LocationAPI {
   Future<List<LocationData>> queryString(String input) async {
-    List<String> output;
     String uri =
         "https://nominatim.openstreetmap.org/?addressdetails=1&q=$input&format=json&limit=20";
     var encodedUri = Uri.encodeFull(uri);
@@ -37,14 +36,13 @@ class LocationAPI {
 
         List<dynamic> jsonObject = json.decode(httpResult);
 
-
         List<LocationData> output = [];
 
-        for(var i = 0; i < jsonObject.length; i++){
+        for (var i = 0; i < jsonObject.length; i++) {
           LocationData loc = new LocationData(
-          name: jsonObject[i]["display_name"].toString(),
+            name: jsonObject[i]["display_name"].toString(),
             lon: 0.0,
-            lat : 0.0,
+            lat: 0.0,
           );
           print(i);
           print(jsonObject.length);
