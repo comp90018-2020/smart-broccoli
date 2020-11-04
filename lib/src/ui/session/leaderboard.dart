@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
@@ -108,16 +109,74 @@ class QuizLeaderboard extends StatelessWidget {
 
               // Current user & ranking
               Consumer<GameSessionModel>(
-                builder: (context, model, child) =>
-                    model.role == GroupRole.MEMBER
-                        ? Container(
-                            margin: EdgeInsets.symmetric(vertical: 8),
-                            // Lowest point of green area to end of yellow (150 -> 205)
-                            // See below for more details
-                            height: 65,
-                            child: null,
-                          )
-                        : Container(height: 16),
+                builder: (context, model, child) => model.role ==
+                        GroupRole.MEMBER
+                    ? Container(
+                        margin: EdgeInsets.symmetric(vertical: 8),
+                        height: 65,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                          child: Consumer<UserProfileModel>(
+                            builder: (context, profile, child) => ListTile(
+                              leading: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Rank
+
+                                  Text(
+                                    '${(model.outcome as OutcomeUser).record.newPos + 1}',
+                                    style: SmartBroccoliTheme.listItemTextStyle,
+                                  ),
+
+                                  // Name/image
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24),
+                                    child: Row(children: [
+                                      // Profile image
+                                      FutureBuilder(
+                                        future: profile.getUserPicture(),
+                                        builder: (BuildContext context,
+                                                AsyncSnapshot<String>
+                                                    snapshot) =>
+                                            UserAvatar(snapshot.data,
+                                                maxRadius: 20),
+                                      ),
+                                      // Name
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 15),
+                                        child: FutureBuilder(
+                                          future: profile.getUser(),
+                                          builder: (BuildContext context,
+                                                  AsyncSnapshot<User>
+                                                      snapshot) =>
+                                              Text(
+                                                  '${_nameFromSnapshot(snapshot)}',
+                                                  style: SmartBroccoliTheme
+                                                      .listItemTextStyle),
+                                        ),
+                                      ),
+                                    ]),
+                                  )
+                                ],
+                              ),
+                              // Score
+                              trailing: Wrap(
+                                  spacing: 5,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Text(
+                                        '${(model.outcome as OutcomeUser).record.points}',
+                                        style: SmartBroccoliTheme
+                                            .listItemTextStyle),
+                                    Icon(Icons.star, color: Color(0xFF656565))
+                                  ]),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Container(height: 16),
               ),
 
               // List of users
@@ -131,6 +190,11 @@ class QuizLeaderboard extends StatelessWidget {
         ),
       );
 }
+
+String _nameFromSnapshot(AsyncSnapshot<User> snapshot) =>
+    snapshot.hasData && snapshot.data != null
+        ? snapshot.data.name + ' (you)'
+        : 'You';
 
 // Creates user image and name
 Widget _topThreeUsers(
