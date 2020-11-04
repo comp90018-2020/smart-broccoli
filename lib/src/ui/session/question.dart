@@ -32,7 +32,7 @@ class QuizQuestion extends StatelessWidget {
         ),
 
         // Points/next/finish button
-        appbarActions: [_userAction(model)],
+        appbarActions: [_userAction(context, model)],
 
         // Container
         child: Padding(
@@ -158,7 +158,7 @@ class QuizQuestion extends StatelessWidget {
   }
 
   /// Return the appropriate action/indicator (top right) for the user
-  Widget _userAction(GameSessionModel model) =>
+  Widget _userAction(BuildContext context, GameSessionModel model) =>
       // if (a) session finished; or
       //    (b) answer released; and
       //        i. user is host; or
@@ -171,7 +171,10 @@ class QuizQuestion extends StatelessWidget {
                           model.session.type == GameSessionType.INDIVIDUAL)
           ? IconButton(
               onPressed: () => model.role == GroupRole.OWNER
-                  ? model.showLeaderBoard()
+                  ? model.state == SessionState.FINISHED
+                      ? Navigator.of(context).popUntil((route) =>
+                          !route.settings.name.startsWith('/session'))
+                      : model.showLeaderBoard()
                   : model.nextQuestion(),
               icon: model.state == SessionState.FINISHED
                   ? Icon(Icons.flag)
