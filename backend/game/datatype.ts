@@ -48,7 +48,7 @@ export class PlayerRecord {
 
 export class Player {
     public records: PlayerRecord[] = [];
-    public state: PlayerState = PlayerState.NotSeen;
+    public state: PlayerState = PlayerState.Joined;
     constructor(
         readonly id: number,
         readonly name: string,
