@@ -18,17 +18,23 @@ class QuizQuestion extends StatelessWidget {
       builder: (context, model, child) => CustomPage(
         title: 'Question ${model.question.no + 1}',
 
-        appbarLeading: IconButton(
-          icon: Icon(Icons.close),
-          enableFeedback: false,
-          splashRadius: 20,
-          onPressed: () async {
-            if (model.state != SessionState.FINISHED &&
-                !await showConfirmDialog(
-                    context, "You are about to quit this session")) return;
-            Provider.of<GameSessionModel>(context, listen: false).quitQuiz();
-          },
-        ),
+        appbarLeading: model.state == SessionState.FINISHED
+            ? null
+            : IconButton(
+                icon: Icon(Icons.close),
+                enableFeedback: false,
+                splashRadius: 20,
+                onPressed: () async {
+                  if (model.state != SessionState.FINISHED &&
+                      !await showConfirmDialog(
+                          context, "You are about to quit this session"))
+                    return;
+                  Provider.of<GameSessionModel>(context, listen: false)
+                      .quitQuiz();
+                },
+              ),
+
+        automaticallyImplyLeading: false,
 
         // Points/next/finish button
         appbarActions: _appBarActions(context, model),
