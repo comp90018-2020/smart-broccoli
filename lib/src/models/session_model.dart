@@ -25,24 +25,56 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
 
+  /// QuizCollectionModel used to obtain pictures and refresh quizzes
   final QuizCollectionModel _quizCollectionModel;
 
+  /// UserRepository used to obtain participant avatars
   final UserRepository _userRepo;
 
+  /// API provider for the session API (non-websocket)
   SessionApi _sessionApi;
 
+  /// The current session in which the user is participating
   GameSession session;
+
+  /// All players currently in the session
   Map<int, SocketUser> players = {};
-  int startCountDown;
-  Question question;
-  int time;
-  int totalQuestion;
-  Outcome outcome;
-  QuestionAnswered questionAnswered;
-  CorrectAnswer correctAnswer;
+
+  /// The user role (host = GroupRole.OWNER, participant = GroupRole.MEMBER)
   GroupRole role;
-  Answer answer;
+
+  /// Total number of questions in the quiz
+  int totalQuestions;
+
+  /// Current state of the session (determines navigation)
   SessionState state;
+
+  ////// Lobby //////
+
+  /// Countdown (when known) for lobby to first question
+  int startCountDown;
+
+  ////// Question //////
+
+  /// The current question of the session
+  Question question;
+
+  /// Allocated time for the current question
+  int time;
+
+  /// The user's submitted answer
+  Answer answer;
+
+  /// Record of how many people have answered the current question (unused)
+  QuestionAnswered questionAnswered;
+
+  ////// Answer //////
+
+  /// Leaderboard (all users) and record (participants only)
+  Outcome outcome;
+
+  /// The correct answer(s) to the question
+  CorrectAnswer correctAnswer;
 
   String get waitHint {
     if (session.quizType == QuizType.SELF_PACED)
@@ -201,7 +233,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       else
         question = MCQuestion.fromJson(message['question']);
       time = message['time'];
-      totalQuestion = message['totalQuestions'];
+      totalQuestions = message['totalQuestions'];
 
       // empty answer object for this question
       answer = Answer(question.no);
@@ -416,7 +448,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     startCountDown = null;
     question = null;
     time = null;
-    totalQuestion = null;
+    totalQuestions = null;
     outcome = null;
     questionAnswered = null;
     correctAnswer = null;
