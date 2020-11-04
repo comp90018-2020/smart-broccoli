@@ -59,7 +59,7 @@ export class Player {
         public token: string
     ) {}
 
-    lastestRecord() {
+    latestRecord() {
         if (this.records.length > 0)
             return this.records[this.records.length - 1];
         else return null;
@@ -88,7 +88,7 @@ export class Player {
             },
             record: {},
         };
-        const _lastestRecord = this.lastestRecord();
+        const _lastestRecord = this.latestRecord();
         if (
             _lastestRecord !== null &&
             _lastestRecord.questionNo === questionIndex

@@ -356,7 +356,7 @@ export class GameSession {
                 answer.TFSelection === correctAnswer.TFSelection ? true : false;
         }
 
-        const latestRecord = this.playerMap[playerId].lastestRecord();
+        const latestRecord = this.playerMap[playerId].latestRecord();
 
         // get points and streak
         const { points, streak } = this.pointSys.getPointsAndStreak(
@@ -412,14 +412,14 @@ export class GameSession {
 
         // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
         playersArray.sort((a, b) => {
-            const aRecord = a.lastestRecord();
-            const bRecord = b.lastestRecord();
+            const aRecord = a.latestRecord();
+            const bRecord = b.latestRecord();
             return aRecord.points < bRecord.points ? 1 : -1;
         });
 
         playersArray.forEach(({ id }, ranking) => {
             const lastRecordIndex = this.playerMap[id].records.length - 1;
-            const lastestRecord = this.playerMap[id].lastestRecord();
+            const lastestRecord = this.playerMap[id].latestRecord();
             if (lastestRecord !== null) {
                 this.playerMap[id].records[lastRecordIndex].newPos = ranking;
                 this.playerMap[id].records[lastRecordIndex].oldPos =
