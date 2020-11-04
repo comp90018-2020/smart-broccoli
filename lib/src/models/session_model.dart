@@ -189,8 +189,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
     socket.on('cancelled', (message) {
       print("cancelled");
-      socket.disconnect();
       _transitionTo(SessionState.ABORTED);
+      socket.disconnect();
     });
 
     socket.on('nextQuestion', (message) async {
@@ -321,8 +321,6 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         state = SessionState.FINISHED;
         break;
       case SessionState.ABORTED:
-        PubSub().publish(PubSubTopic.ROUTE,
-            arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
         state = SessionState.ABORTED;
         break;
       case SessionState.ABANDONED:
