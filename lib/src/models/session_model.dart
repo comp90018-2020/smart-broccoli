@@ -54,10 +54,34 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// Countdown (when known) for lobby to first question
   int startCountDown;
 
+  /// Hint text shown while user is in the lobby
+  String get waitHint {
+    if (session.quizType == QuizType.SELF_PACED)
+      return 'Waiting for quiz to start...';
+
+    if (state == SessionState.PENDING)
+      return role == GroupRole.MEMBER
+          ? 'Waiting for host to start...'
+          : 'Tap to start for everyone';
+
+    if (state == SessionState.STARTING) return 'Quiz starting!';
+
+    return null;
+  }
+
   ////// Question //////
 
   /// The current question of the session
   Question question;
+
+  /// Hint text shown while user is on a question
+  String get questionHint {
+    if (question is TFQuestion || (question as MCQuestion).numCorrect == 1)
+      return role == GroupRole.MEMBER ? 'Select an answer' : null;
+    return role == GroupRole.MEMBER
+        ? 'Select ${(question as MCQuestion).numCorrect} answers'
+        : '${(question as MCQuestion).numCorrect} correct answers';
+  }
 
   /// Allocated time for the current question
   int time;
@@ -76,28 +100,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The correct answer(s) to the question
   CorrectAnswer correctAnswer;
 
-  String get waitHint {
-    if (session.quizType == QuizType.SELF_PACED)
-      return 'Waiting for quiz to start...';
-
-    if (state == SessionState.PENDING)
-      return role == GroupRole.MEMBER
-          ? 'Waiting for host to start...'
-          : 'Tap to start for everyone';
-
-    if (state == SessionState.STARTING) return 'Quiz starting!';
-
-    return null;
-  }
-
-  String get questionHint {
-    if (question is TFQuestion || (question as MCQuestion).numCorrect == 1)
-      return role == GroupRole.MEMBER ? 'Select an answer' : null;
-    return role == GroupRole.MEMBER
-        ? 'Select ${(question as MCQuestion).numCorrect} answers'
-        : '${(question as MCQuestion).numCorrect} correct answers';
-  }
-
+  /// The most up-to-date value of the user's points (where available)
   int get points =>
       correctAnswer?.record?.points ?? (outcome as OutcomeUser)?.record?.points;
 
