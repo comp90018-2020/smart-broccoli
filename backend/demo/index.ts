@@ -254,14 +254,13 @@ export const generateDemoData = async () => {
             userRegister.email,
             PASSWORD
         );
-        const user: any = {
+        users.push({
             id: userLogin.id,
             token: userLogin.token,
             name: userRegister.name,
             email: userRegister.email,
             groupsCreated: [],
-        };
-        users.push(user);
+        });
 
         // Upload picture
         uploadProfilePicture(
@@ -326,7 +325,7 @@ const generateQuestionArray = (questions: CustomMCQQuestion[]): any => {
             text: question.question,
             type: "choice",
             options: question.answers,
-            imgUrl: question.imgUrl
+            imgUrl: question.imgUrl,
         };
     });
 };
