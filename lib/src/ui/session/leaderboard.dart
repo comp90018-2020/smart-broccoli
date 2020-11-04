@@ -115,16 +115,17 @@ class QuizLeaderboard extends StatelessWidget {
                             // Lowest point of green area to end of yellow (150 -> 205)
                             // See below for more details
                             height: 65,
-                            child: _leaderboardList([], scrollable: false),
+                            child: null,
                           )
                         : Container(height: 16),
               ),
 
               // List of users
               Expanded(
-                  child: Consumer<GameSessionModel>(
-                      builder: (context, model, child) =>
-                          _leaderboardList(model.outcome.leaderboard))),
+                child: Consumer<GameSessionModel>(
+                  builder: (context, model, child) => _leaderboardList(model),
+                ),
+              ),
             ],
           ),
         ),
@@ -158,10 +159,10 @@ Widget _topThreeUsers(
   );
 }
 
-Widget _leaderboardList(List<UserRank> ranks, {bool scrollable = true}) {
+Widget _leaderboardList(GameSessionModel model, {bool scrollable = true}) {
   return ListView.separated(
     shrinkWrap: true,
-    itemCount: ranks.length,
+    itemCount: model.outcome.leaderboard.length,
     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
     physics: scrollable ? null : NeverScrollableScrollPhysics(),
     itemBuilder: (BuildContext context, int index) {
@@ -179,16 +180,17 @@ Widget _leaderboardList(List<UserRank> ranks, {bool scrollable = true}) {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(children: [
                 // Profile image
-                Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(100))),
+                FutureBuilder(
+                  future: model.getPeerProfilePicturePath(
+                      model.outcome.leaderboard[index].player.id),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String> snapshot) =>
+                          UserAvatar(snapshot.data, maxRadius: 20),
+                ),
                 // Name
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Text(ranks[index].player.name,
+                  child: Text(model.outcome.leaderboard[index].player.name,
                       style: SmartBroccoliTheme.listItemTextStyle),
                 )
               ]),
@@ -200,7 +202,7 @@ Widget _leaderboardList(List<UserRank> ranks, {bool scrollable = true}) {
             spacing: 5,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text('${ranks[index].record.points}',
+              Text('${model.outcome.leaderboard[index].record.points}',
                   style: SmartBroccoliTheme.listItemTextStyle),
               Icon(Icons.star, color: Color(0xFF656565))
             ]),
