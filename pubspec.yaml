@@ -28,6 +28,7 @@ dependencies:
   flutter_svg: ^0.19.1
   weekday_selector: ^0.4.0
   flutter_settings: ^1.0.2
+  day_picker: ^1.0.1
 
 dev_dependencies:
   flutter_test:
