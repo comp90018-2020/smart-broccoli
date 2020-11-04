@@ -29,6 +29,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
 
   final QuizCollectionModel _quizCollectionModel;
 
+  final UserRepository _userRepo;
+
   SessionApi _sessionApi;
 
   GameSession session;
@@ -61,7 +63,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// The socket which we enclose
   IO.Socket socket;
 
-  GameSessionModel(this._authStateModel, this._quizCollectionModel,
+  GameSessionModel(
+      this._authStateModel, this._quizCollectionModel, this._userRepo,
       {SessionApi sessionApi}) {
     _sessionApi = sessionApi ?? SessionApi();
     socket = IO.io(SERVER_URL, {
@@ -98,6 +101,15 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     await joinSession(quiz.sessions.firstWhere((session) =>
         session.quizType == QuizType.LIVE &&
         session.state != GameSessionState.ENDED));
+  }
+
+  Future<String> getPeerProfilePicturePath(int userId) async {
+    String path;
+    // check if cached
+    if ((path = await _userRepo.getUserPicture(userId)) != null) return path;
+    // if not, retrieve from server
+    await _userRepo.getUserBy(session.token, userId);
+    return _userRepo.getUserPicture(userId);
   }
 
   /// Establish a websocket connection with the gameplay server.
