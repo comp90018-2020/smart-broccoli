@@ -49,7 +49,7 @@ class LocationAPI {
   }
 
   // Query by latitude and longitude
-  Future<String> queryLonLat(double long, double lat) async {
+  Future<String> queryLatLon(double lat, double long) async {
     Placemark placemark = (await placemarkFromCoordinates(lat, long)).first;
     log(
         " Lat " +
