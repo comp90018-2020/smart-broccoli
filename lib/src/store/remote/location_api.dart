@@ -15,7 +15,7 @@ class LocationData {
 
 class LocationAPI {
   // Query by name string
-  Future<List<LocationData>> queryByName(String input) async {
+  static Future<List<LocationData>> queryByName(String input) async {
     String uri =
         "https://nominatim.openstreetmap.org/?addressdetails=1&q=$input&format=json&limit=20";
     var encodedUri = Uri.encodeFull(uri);
@@ -48,7 +48,7 @@ class LocationAPI {
   }
 
   // Query by latitude and longitude
-  Future<String> queryAddressByLatLon(double lat, double long) async {
+  static Future<String> queryAddressByLatLon(double lat, double long) async {
     // Get placemarks
     try {
       // Get placemarks
