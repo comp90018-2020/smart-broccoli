@@ -100,13 +100,16 @@ class QuizLeaderboard extends StatelessWidget {
                       // Lowest point of green area to end of yellow (150 -> 205)
                       // See below for more details
                       height: 65,
-                      child: _leaderboardList(["A"], scrollable: false),
+                      child: _leaderboardList([], scrollable: false),
                     )
                   : Container(height: 16),
             ),
 
             // List of users
-            Expanded(child: _leaderboardList(["A", "B", "C"])),
+            Expanded(
+                child: Consumer<GameSessionModel>(
+                    builder: (context, model, child) =>
+                        _leaderboardList(model.outcome.leaderboard))),
           ],
         ),
       );
@@ -139,10 +142,10 @@ Widget _topThreeUsers(
   );
 }
 
-Widget _leaderboardList(List<String> list, {bool scrollable = true}) {
+Widget _leaderboardList(List<UserRank> ranks, {bool scrollable = true}) {
   return ListView.separated(
     shrinkWrap: true,
-    itemCount: list.length,
+    itemCount: ranks.length,
     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
     physics: scrollable ? null : NeverScrollableScrollPhysics(),
     itemBuilder: (BuildContext context, int index) {
@@ -152,7 +155,7 @@ Widget _leaderboardList(List<String> list, {bool scrollable = true}) {
           children: [
             // Rank
             Text(
-              '1',
+              '${index + 1}',
               style: SmartBroccoliTheme.listItemTextStyle,
             ),
             // Name/image
@@ -169,8 +172,8 @@ Widget _leaderboardList(List<String> list, {bool scrollable = true}) {
                 // Name
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child:
-                      Text('name', style: SmartBroccoliTheme.listItemTextStyle),
+                  child: Text(ranks[index].player.name,
+                      style: SmartBroccoliTheme.listItemTextStyle),
                 )
               ]),
             )
@@ -181,7 +184,8 @@ Widget _leaderboardList(List<String> list, {bool scrollable = true}) {
             spacing: 5,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text('3,500', style: SmartBroccoliTheme.listItemTextStyle),
+              Text('${ranks[index].record.points}',
+                  style: SmartBroccoliTheme.listItemTextStyle),
               Icon(Icons.star, color: Color(0xFF656565))
             ]),
       );
