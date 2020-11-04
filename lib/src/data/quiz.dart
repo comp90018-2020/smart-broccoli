@@ -177,9 +177,9 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
     var smartSession = this.sessions?.firstWhere(
         (session) =>
             session.quizType == QuizType.SELF_PACED &&
-            session.state != GameSessionState.ENDED, orElse: () {
-      return null;
-    });
+            session.state != GameSessionState.ENDED &&
+            session.type == GameSessionType.GROUP,
+        orElse: () => null);
     return smartSession == null ? QuizType.SELF_PACED : QuizType.SMART_LIVE;
   }
 
