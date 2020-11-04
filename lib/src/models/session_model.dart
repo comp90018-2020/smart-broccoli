@@ -344,6 +344,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   void toggleAnswer(int index) {
     // TF question: only one answer can be selected
     if (question is TFQuestion) {
+      // repeat tap: no need to resend
+      if (answer.tfSelection != null &&
+          (answer.tfSelection && index == 1 ||
+              !answer.tfSelection && index == 0)) return;
+      // first selection or change of selection
       answer.tfSelection = index == 0 ? false : true;
       answerQuestion();
       notifyListeners();
