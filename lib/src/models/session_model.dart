@@ -117,6 +117,9 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   /// This method also routes the user to the appropriate initial screen via
   /// PubSub() event.
   void _connect(String token) {
+    // clear previous session data
+    _clearFields();
+
     // Set query
     socket.opts['query'] = {};
     socket.opts['query']['token'] = token;
