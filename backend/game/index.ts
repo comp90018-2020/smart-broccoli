@@ -111,8 +111,8 @@ const verify = async (
 };
 
 const pruneSessions = async () => {
+    const nowTime = Date.now();
     for (const sessionId of Object.keys(handler.sessions)) {
-        const nowTime = Date.now();
         if (
             nowTime - handler.sessions[Number(sessionId)].updatedAt >
             SESSIONS_PRUNING_INTERVAL

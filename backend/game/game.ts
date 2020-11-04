@@ -389,8 +389,8 @@ export class GameHandler {
     }
 
     endSession(session: GameSession) {
-        delete this.sessions[session.id];
         session.endSession();
+        delete this.sessions[session.id];
         if (
             _socketIO !== undefined &&
             _socketIO.sockets.adapter.rooms.hasOwnProperty(
