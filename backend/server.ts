@@ -29,11 +29,6 @@ export default (async () => {
         console.log(
             `Postgres connection on ${sequelize.config.host}:${sequelize.config.port}`
         );
-
-        // Initialise demo data if necessary
-        if (process.env.DEMO) {
-            await generateDemoData();
-        }
     } catch (err) {
         console.error(err);
         process.exit(1);
@@ -44,6 +39,11 @@ export default (async () => {
 
     // Listen on provided port, on all network interfaces
     server.listen(port);
+
+    // Initialise demo data if necessary
+    if (process.env.DEMO) {
+        await generateDemoData();
+    }
 })();
 
 // Event listener for HTTP server "error" event

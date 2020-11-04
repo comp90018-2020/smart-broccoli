@@ -5,15 +5,19 @@ import axios from "axios";
 import formData from "form-data";
 import rebuild from "../tests/rebuild";
 import { Group } from "models";
+import fs from "fs";
+import path from "path";
 
 /**
  * The script generates 10 users, 10 groups, 2 quizzes that are filled, and 8 quizzes that are empty.
  * 2 filled quizzes are within the "Fine Arts" group that is joined by all users.
  * The script starts with completely erasing the database.
 
- * To see quiz creator login under haydon@gmail.com and look for quizes Painting and Sculpture
- * TO sse quiz taker login under shawn@gmail.com and look for quizes Painting and Sculpture
+ * To see quiz creator login under haydon@gmail.com and look for quizzes Painting and Sculpture
+ * TO see quiz taker login under shawn@gmail.com and look for quizzes Painting and Sculpture
  */
+
+const PICTURE_DIRECTORY = "demo_pictures/";
 
 interface CustomQuiz {
     name: string;
@@ -227,6 +231,9 @@ export const generateDemoData = async () => {
     // Reset database
     await rebuild();
 
+    // Download pictures
+    const pictures = await downloadPictures();
+
     const users: {
         id: number;
         token: string;
@@ -257,7 +264,11 @@ export const generateDemoData = async () => {
         users.push(user);
 
         // Upload picture
-        // uploadProfilePicture(userLogin.token, PROFILE_PICTURES[index]);
+        uploadProfilePicture(
+            pictures,
+            userLogin.token,
+            PROFILE_PICTURES[index]
+        );
     }
 
     // Generating groups for two members
@@ -285,24 +296,24 @@ export const generateDemoData = async () => {
 
     // Quiz generation for arts
     for (const [i, quiz] of QUIZ_NAMES_FINE_ARTS.entries()) {
-        await quizDataGen(
-            users[0],
-            users[0].groupsCreated[0].id,
+        await generateQuiz(pictures, users[0], users[0].groupsCreated[0].id, {
+            name: quiz.name,
+            type: QUIZ_TYPE[i % 2],
+            imgUrl: quiz.imgUrl,
             // Has questions, process questions, otherwise empty
-            quiz.questions ? generateQuestionArray(quiz.questions) : [],
-            quiz.name,
-            QUIZ_TYPE[i % 2]
-        );
+            questions: quiz.questions
+                ? generateQuestionArray(quiz.questions)
+                : [],
+        });
     }
     // Quiz generation for business
     for (const [i, quiz] of QUIZ_NAMES_MANAGEMENT.entries()) {
-        await quizDataGen(
-            users[1],
-            users[1].groupsCreated[0].id,
-            [],
-            quiz.name,
-            QUIZ_TYPE[i % 2]
-        );
+        await generateQuiz(pictures, users[1], users[1].groupsCreated[0].id, {
+            name: quiz.name,
+            type: QUIZ_TYPE[i % 2],
+            imgUrl: quiz.imgUrl,
+            questions: [],
+        });
     }
 
     console.log("[*] Finished generating demo data");
@@ -315,120 +326,189 @@ const generateQuestionArray = (questions: CustomMCQQuestion[]): any => {
             text: question.question,
             type: "choice",
             options: question.answers,
+            imgUrl: question.imgUrl
         };
     });
 };
 
-async function quizDataGen(
+// Creates and uploads quiz/questions and pictures
+async function generateQuiz(
+    pictures: Map<string, string>,
     user: any,
     groupId: number,
-    questions: any,
-    name: string,
-    quizType: string
+    quizInfo: {
+        questions: any;
+        name: string;
+        type: string;
+        imgUrl: string;
+    }
 ) {
+    // Create quiz
     const quiz = await quizController.createQuiz(user.id, {
         groupId: groupId,
-        type: quizType,
-        title: name,
+        type: quizInfo.type,
+        title: quizInfo.name,
         timeLimit: 10,
-        questions: questions,
+        questions: quizInfo.questions,
     });
-    // uploadQuizPicture(user, quiz.id, quizInfo.imgUrl);
+    // Upload quiz picture
+    uploadQuizPicture(pictures, user, quiz.id, quizInfo.imgUrl);
 
-    // for (let j = 0; j < quiz.questions.length; j++) {
-    //     uploadQuestionPicture(
-    //         user,
-    //         quiz.id,
-    //         questions[j].imgUrl,
-    //         quiz.questions[j].id
-    //     );
-    // }
+    // Upload question pictures
+    for (const [index, question] of quiz.questions.entries()) {
+        uploadQuestionPicture(
+            pictures,
+            user,
+            quiz.id,
+            quizInfo.questions[index].imgUrl,
+            question.id
+        );
+    }
 }
 
-// async function uploadQuizPicture(user: any, quizId: number, imgUrl: string) {
-//     imgUrl = imgUrl + "/download?force=true";
-//     console.log(imgUrl);
-//     const responseUnsplash = await axios({
-//         url: imgUrl,
-//         method: "GET",
-//         responseType: "stream",
-//     });
-//     const form = new formData();
-//     form.append("picture", responseUnsplash.data);
-//     const formHeaders = form.getHeaders();
-//     axios.put("http://localhost:3000/quiz/" + quizId + "/picture", form, {
-//         headers: {
-//             ...formHeaders,
-//             authorization: "Bearer " + user.token,
-//         },
-//     })
-//         .then(function (response: any) {
-//             console.log("Quiz pictures uploaded");
-//         })
-//         .catch(function (error: any) {
-//             console.log("catch");
-//             console.log(error);
-//         });
-// }
-// async function uploadQuestionPicture(
-//     user: any,
-//     quizId: number,
-//     imgUrl: string,
-//     questionId: string
-// ) {
-//     const responseWiki = await axios({
-//         url: imgUrl,
-//         method: "GET",
-//         responseType: "stream",
-//     });
-//     const form = new formData();
-//     form.append("picture", responseWiki.data);
+// Downloads all requires pictures
+const downloadPictures = async () => {
+    // All the pictures
+    const allPictures = [
+        ...QUESTIONS_PAINTING.map((q) => q.imgUrl),
+        ...QUESTIONS_SCULPTURE.map((q) => q.imgUrl),
+        ...QUIZ_NAMES_MANAGEMENT.map((q) => q.imgUrl),
+        ...QUIZ_NAMES_FINE_ARTS.map((q) => q.imgUrl),
+        ...PROFILE_PICTURES,
+    ];
+    // Give unique filenames
+    const filename = (url: string): string => {
+        const urlSplit = url.split("/");
+        return urlSplit[urlSplit.length - 1];
+    };
+    const filenameMap = new Map(allPictures.map((url) => [url, filename(url)]));
 
-//     const formHeaders = form.getHeaders();
-//     axios.put(
-//         "http://localhost:3000/quiz/" +
-//             quizId +
-//             "/question/" +
-//             questionId +
-//             "/picture",
-//         form,
-//         {
-//             headers: {
-//                 ...formHeaders,
-//                 authorization: "Bearer " + user.token,
-//             },
-//         }
-//     )
-//         .then(function (response: any) {
-//             console.log("Question pictures uploaded well");
-//         })
-//         .catch(function (error: any) {
-//             console.log("catch");
-//             console.log(error);
-//         });
-// }
+    // Make picture directory
+    await mkdirp(PICTURE_DIRECTORY);
 
-// async function uploadProfilePicture(userToken: any, imgUrl: string) {
-//     const responseUnsplash = await axios({
-//         url: imgUrl + "/download?force=true",
-//         method: "GET",
-//         responseType: "stream",
-//     });
-//     const form = new formData();
-//     form.append("avatar", responseUnsplash.data);
+    // Download
+    for (const picture of allPictures) {
+        await downloadPicture(picture, filenameMap.get(picture));
+    }
+    return filenameMap;
+};
 
-//     const formHeaders = form.getHeaders();
-//     axios.put("http://localhost:3000/user/profile/picture", form, {
-//         headers: {
-//             ...formHeaders,
-//             authorization: "Bearer " + userToken,
-//         },
-//     })
-//         .then(function (response: any) {
-//             console.log("Profile pictures uploaded");
-//         })
-//         .catch(function (error: any) {
-//             console.log("catch");
-//             console.log(error);
-//         });
-// }
+// Downloads a picture into path
+const downloadPicture = async (url: string, picturePath: string) => {
+    const completePath = path.join(PICTURE_DIRECTORY, picturePath);
+    if (fs.existsSync(completePath)) return completePath;
+    const response = await axios.get(
+        url.includes("unsplash") ? `${url}/download?force=true` : url,
+        { responseType: "stream" }
+    );
+    response.data.pipe(fs.createWriteStream(completePath));
+};
+
+// mkdir -p
+const mkdirp = (path: string) => {
+    return new Promise((resolve, reject) => {
+        fs.mkdir(path, { recursive: true }, (err) => {
+            if (err) return reject(err);
+            return resolve();
+        });
+    });
+};
+
+// Makes http request to upload quiz picture
+async function uploadQuizPicture(
+    pictureMap: Map<string, string>,
+    user: any,
+    quizId: number,
+    imgUrl: string
+) {
+    const form = new formData();
+    form.append(
+        "picture",
+        fs.readFileSync(path.join(PICTURE_DIRECTORY, pictureMap.get(imgUrl))),
+        { filename: imgUrl }
+    );
+
+    const formHeaders = form.getHeaders();
+    try {
+        await axios.put(
+            "http://localhost:3000/quiz/" + quizId + "/picture",
+            form,
+            {
+                headers: {
+                    ...formHeaders,
+                    authorization: "Bearer " + user.token,
+                },
+            }
+        );
+    } catch (err) {
+        console.error(imgUrl);
+        console.error(err);
+        process.exit(1);
+    }
+}
+
+// Makes http request to upload question picture
+async function uploadQuestionPicture(
+    pictureMap: Map<string, string>,
+    user: any,
+    quizId: number,
+    imgUrl: string,
+    questionId: string
+) {
+    const form = new formData();
+    form.append(
+        "picture",
+        fs.readFileSync(path.join(PICTURE_DIRECTORY, pictureMap.get(imgUrl))),
+        { filename: imgUrl }
+    );
+
+    const formHeaders = form.getHeaders();
+    try {
+        axios.put(
+            "http://localhost:3000/quiz/" +
+                quizId +
+                "/question/" +
+                questionId +
+                "/picture",
+            form,
+            {
+                headers: {
+                    ...formHeaders,
+                    authorization: "Bearer " + user.token,
+                },
+            }
+        );
+    } catch (err) {
+        console.error(imgUrl);
+        console.error(err);
+        process.exit(1);
+    }
+}
+
+// Makes http request to upload profile picture
+async function uploadProfilePicture(
+    pictureMap: Map<string, string>,
+    userToken: any,
+    imgUrl: string
+) {
+    const form = new formData();
+    form.append(
+        "avatar",
+        fs.readFileSync(path.join(PICTURE_DIRECTORY, pictureMap.get(imgUrl))),
+        { filename: imgUrl }
+    );
+
+    const formHeaders = form.getHeaders();
+    try {
+        await axios.put("http://localhost:3000/user/profile/picture", form, {
+            headers: {
+                ...formHeaders,
+                authorization: "Bearer " + userToken,
+            },
+        });
+    } catch (err) {
+        console.error(imgUrl);
+        console.error(err);
+        process.exit(1);
+    }
+}
