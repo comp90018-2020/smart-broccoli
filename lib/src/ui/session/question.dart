@@ -95,7 +95,9 @@ class QuizQuestion extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 4.0, bottom: 16.0),
                         child: Text(model.questionHint,
                             style: Theme.of(context).textTheme.subtitle1),
-                      ),
+                      )
+                    else
+                      Container(height: 16)
                   ],
                 ),
               ),
@@ -165,29 +167,31 @@ class QuizQuestion extends StatelessWidget {
 
   /// Return the appropriate action/indicator (top right) for the user
   List<Widget> _appBarActions(BuildContext context, GameSessionModel model) => [
-        // if (a) session finished; or
-        //    (b) answer released; and
-        //        i. user is host; or
-        //        ii. session is self-paced solo
-        // then show next/finish button
-        if (model.state == SessionState.FINISHED ||
-            model.state == SessionState.ANSWER &&
-                (model.role == GroupRole.OWNER ||
-                    model.session.quizType == QuizType.SELF_PACED &&
-                        model.session.type == GameSessionType.INDIVIDUAL))
+        if (model.state == SessionState.FINISHED)
           IconButton(
-            onPressed: () => model.role == GroupRole.OWNER
-                ? model.state == SessionState.FINISHED
-                    ? Navigator.of(context).popUntil(
-                        (route) => !route.settings.name.startsWith('/session'))
-                    : model.showLeaderBoard()
-                : model.nextQuestion(),
-            icon: model.state == SessionState.FINISHED
-                ? Icon(Icons.flag)
-                : Icon(Icons.arrow_forward),
+            onPressed: () => Navigator.of(context).popUntil(
+                (route) => !route.settings.name.startsWith('/session')),
+            icon: Icon(Icons.flag),
           )
-
-        // otherwise, show points if not host
+        else if (model.state == SessionState.ANSWER &&
+            model.role == GroupRole.OWNER)
+          IconButton(
+            onPressed: () => model.showLeaderBoard(),
+            icon: Icon(Icons.arrow_forward),
+          )
+        else if (model.state == SessionState.OUTCOME &&
+            model.role == GroupRole.OWNER)
+          IconButton(
+            onPressed: () => model.nextQuestion(),
+            icon: Icon(Icons.arrow_forward),
+          )
+        else if (model.state == SessionState.ANSWER &&
+            model.session.quizType == QuizType.SELF_PACED &&
+            model.session.type == GameSessionType.INDIVIDUAL)
+          IconButton(
+            onPressed: () => model.nextQuestion(),
+            icon: Icon(Icons.arrow_forward),
+          )
         else if (model.role == GroupRole.MEMBER)
           Padding(
             padding: const EdgeInsets.all(8.0),

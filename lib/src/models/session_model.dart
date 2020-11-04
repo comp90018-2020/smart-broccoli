@@ -320,6 +320,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         state = SessionState.ANSWER;
         break;
       case SessionState.OUTCOME:
+        notifyListeners();
         PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(
                 name: '/session/leaderboard', action: RouteAction.PUSH));
