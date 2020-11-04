@@ -5,7 +5,7 @@ import 'package:smart_broccoli/src/store/remote/api_base.dart';
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { LIVE, SELF_PACED_ALONE, SMART_LIVE, SELF_PACED }
+enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
 
 /// Stores a pending picture
 abstract class PendingPicture {
@@ -161,11 +161,8 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
 
   @override
   int compareTo(Quiz other) {
-    final int nQuizType = QuizType.values.length;
-    int thisType =
-        this.complete ? this.type.index - nQuizType : this.type.index;
-    int otherType =
-        other.complete ? other.type.index - nQuizType : other.type.index;
+    int thisType = this.type.index;
+    int otherType = other.type.index;
 
     if (thisType == otherType)
       return other.updatedTimestamp.compareTo(this.updatedTimestamp);
@@ -181,9 +178,15 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
     var smartSession = this.sessions?.firstWhere(
         (session) =>
             session.quizType == QuizType.SELF_PACED &&
+<<<<<<< HEAD
             session.state != GameSessionState.ENDED &&
             session.type == GameSessionType.GROUP,
         orElse: () => null);
+=======
+            session.state != GameSessionState.ENDED, orElse: () {
+      return null;
+    });
+>>>>>>> 669cc29 (revert quiz card files)
     return smartSession == null ? QuizType.SELF_PACED : QuizType.SMART_LIVE;
   }
 

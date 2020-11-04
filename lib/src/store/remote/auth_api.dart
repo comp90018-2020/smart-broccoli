@@ -43,6 +43,7 @@ class AuthApi {
 
     if (response.statusCode == 201)
       return User.fromJson(json.decode(response.body));
+
     if (response.statusCode == 409) throw RegistrationConflictException();
     throw RegistrationException();
   }
