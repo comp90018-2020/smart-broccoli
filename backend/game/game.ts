@@ -159,9 +159,10 @@ export class GameHandler {
                 content.TFSelection
             );
 
-            if (session.canAnswer(player, answer)) {
+            const currentQuestionIndex = session.getQuestionIndex();
+            if (session.canAnswer(player, answer, currentQuestionIndex)) {
                 // assess answer
-                session.assessAns(player.id, answer);
+                session.assessAns(player.id, answer, currentQuestionIndex);
 
                 // braodcast that question has been answered
                 emitToRoom(
@@ -300,11 +301,9 @@ export class GameHandler {
     disconnectOtherPlayersAndCopyRecords(session: GameSession, player: Player) {
         player.role = Role.player;
         const players = Object.values(session.playerMap);
-        if (players.length > 0) {
-            const theFirstExistedPlayer = players[0];
-            player.record = theFirstExistedPlayer.record;
-            player.previousRecord = theFirstExistedPlayer.previousRecord;
-        }
+
+        if (players.length > 0 && players[0].records.length > 0)
+            player.records = players[0].records;
 
         for (const existedPlayer of Object.values(session.playerMap)) {
             this.disconnectPast(session, existedPlayer, player);
@@ -463,7 +462,7 @@ export class GameHandler {
     emitCorrectAnswer(player: Player, correctAnswer: Answer) {
         emitToOne(player.socketId, Event.correctAnswer, {
             answer: correctAnswer,
-            record: player.formatRecord().record,
+            record: player.formatRecord(correctAnswer.question).record,
         });
     }
 
@@ -504,6 +503,7 @@ export class GameHandler {
             session.updatingTime();
             if (!session.isEmitValid(player)) return;
             if (session.canShowBoard(player)) {
+                const questionIndex = session.questionIndex - 1;
                 //  get ranked records of players
                 const rank = session.rankPlayers();
                 const top5 = rankSlice(rank, 5);
@@ -511,7 +511,13 @@ export class GameHandler {
                     emitToOne(
                         player.socketId,
                         Event.questionOutcome,
-                        formatQuestionOutcome(session, player, rank, top5)
+                        formatQuestionOutcome(
+                            session,
+                            player,
+                            questionIndex,
+                            rank,
+                            top5
+                        )
                     );
                 }
                 //  emit questionOutcome to the host

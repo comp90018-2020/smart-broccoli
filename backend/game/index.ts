@@ -47,7 +47,7 @@ export default async (socketIO: Server) => {
             socket.on("next", () => {
                 handler.releaseQuestion(
                     session,
-                    session.getQuestionIndex(),
+                    session.getQuestionIndex() + 1,
                     player
                 );
             });
