@@ -17,10 +17,14 @@ class BackgroundLocation {
 
   // Placemark info
   static Future<Placemark> getPlacemark(Position userLocation) async {
-    List<Placemark> placemark = await placemarkFromCoordinates(
-        userLocation.latitude, userLocation.longitude);
-    // Just return the nearest place mark
-    return placemark.isNotEmpty ? placemark.first : null;
+    try {
+      List<Placemark> placemark = await placemarkFromCoordinates(
+          userLocation.latitude, userLocation.longitude);
+      // Just return the nearest place mark
+      return placemark.isNotEmpty ? placemark.first : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// The API to get details of a specific placemark

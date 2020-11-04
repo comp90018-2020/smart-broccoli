@@ -23,7 +23,6 @@ class LocationAPI {
 
     try {
       http.Response response = await http.post(encodedUri);
-
       if (response.statusCode == 200) {
         String httpResult = response.body.toString();
         log(
@@ -49,18 +48,29 @@ class LocationAPI {
   }
 
   // Query by latitude and longitude
-  Future<String> queryLatLon(double lat, double long) async {
-    Placemark placemark = (await placemarkFromCoordinates(lat, long)).first;
-    log(
-        " Lat " +
-            lat.toString() +
-            " Lon " +
-            long.toString() +
-            " Name: " +
-            placemark.name +
-            " Address: " +
-            placemark.street,
-        name: "Foreground Location");
-    return placemark.street.toString();
+  Future<String> queryAddressByLatLon(double lat, double long) async {
+    // Get placemarks
+    try {
+      // Get placemarks
+      var placemarks = await placemarkFromCoordinates(lat, long);
+      // No placemarks
+      if (placemarks.isEmpty) return Future.error("No placemarks");
+
+      // Get street
+      Placemark placemark = placemarks.first;
+      log(
+          " Lat " +
+              lat.toString() +
+              " Lon " +
+              long.toString() +
+              " Name: " +
+              placemark.name +
+              " Address: " +
+              placemark.street,
+          name: "Foreground Location");
+      return placemark.street.toString();
+    } catch (err) {
+      return Future.error(err.toString());
+    }
   }
 }
