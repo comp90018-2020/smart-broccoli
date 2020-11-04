@@ -41,6 +41,7 @@ void callbackDispatcher() {
           }
 
           // Send status to API (API always needs status)
+          log("calendarFree: $calendarFree, free: $free");
           log("Reason: Phone is not stationary or asked not to be prompted or calendar is busy return 0",
               name: "Backend");
 
