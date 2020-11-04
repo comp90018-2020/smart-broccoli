@@ -131,17 +131,13 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     // Set query
     socket.opts['query'] = {};
     socket.opts['query']['token'] = token;
-    print(socket.opts);
     socket.connect();
 
     socket.on('connect', (message) {
-      print('connected');
       notifyListeners();
     });
 
     socket.on('welcome', (message) {
-      print('welcome');
-      print(message);
       List users = message['players'] as List;
       players = Map.fromIterable(users.map((u) => SocketUser.fromJson(u)),
           key: (u) => u.id);
@@ -163,47 +159,31 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         default:
           _transitionTo(SessionState.ABORTED);
       }
-
-      print(players);
-      print(role);
-      print(state);
     });
 
     socket.on('playerJoin', (message) {
-      print(message);
       var user = SocketUser.fromJson(message);
       players[user.id] = user;
-      print("playerJoin");
-      print(players);
       notifyListeners();
     });
 
     socket.on('playerLeave', (message) {
-      print("playerLeave");
-      print(message);
       var user = SocketUser.fromJson(message);
       players.remove(user.id);
-      print(players);
       notifyListeners();
     });
 
     socket.on('starting', (message) {
-      print("starting");
-      print(message);
       startCountDown = int.parse(message);
-      print(startCountDown);
       _transitionTo(SessionState.STARTING);
     });
 
     socket.on('cancelled', (message) {
-      print("cancelled");
       _transitionTo(SessionState.ABORTED);
       socket.disconnect();
     });
 
     socket.on('nextQuestion', (message) async {
-      print("nextQuestion");
-      print(message);
       if (message['question']['options'] == null)
         question = TFQuestion.fromJson(message['question']);
       else
@@ -211,9 +191,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       time = message['time'];
       totalQuestion = message['totalQuestions'];
 
-      print(question);
-      print(time);
-      print(totalQuestion);
+      // empty answer object for this question
       answer = Answer(question.no);
       try {
         await _quizCollectionModel.refreshQuestionPicture(
@@ -229,29 +207,19 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     });
 
     socket.on('correctAnswer', (message) {
-      print("correctAnswer");
-      print(message);
       correctAnswer = CorrectAnswer.fromJson(message);
-      print(correctAnswer);
       _transitionTo(SessionState.ANSWER);
     });
 
     socket.on('questionOutcome', (message) {
-      print("questionOutcome: ");
-      print(message);
-      print(role);
-      if (role == GroupRole.OWNER) {
+      if (role == GroupRole.OWNER)
         outcome = Outcome.fromJson(message);
-        print(outcome);
-      } else {
+      else
         outcome = OutcomeUser.fromJson(message);
-        print(outcome);
-      }
       _transitionTo(SessionState.OUTCOME);
     });
 
     socket.on('end', (_) {
-      print('end');
       _transitionTo(SessionState.FINISHED);
     });
 
@@ -310,10 +278,9 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         state = SessionState.QUESTION;
         break;
       case SessionState.ANSWER:
-        if (state == SessionState.QUESTION) {
-          print('QUESTION TO ANSWER TRANSITION');
+        if (state == SessionState.QUESTION)
           notifyListeners();
-        } else
+        else
           PubSub().publish(PubSubTopic.ROUTE,
               arg: RouteArgs(
                   name: '/session/question', action: RouteAction.PUSH));
