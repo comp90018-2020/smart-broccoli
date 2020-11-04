@@ -342,6 +342,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
   }
 
   void toggleAnswer(int index) {
+    if (role == GroupRole.OWNER) return;
+
     // TF question: only one answer can be selected
     if (question is TFQuestion) {
       // repeat tap: no need to resend
