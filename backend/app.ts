@@ -7,7 +7,6 @@ import fs from "fs";
 import path from "path";
 import router from "./routers";
 import ErrorStatus from "./helpers/error";
-import { generateDemoData } from "./demo";
 
 const app = express();
 
@@ -83,13 +82,6 @@ app.use(express.static(swaggerUI.getAbsoluteFSPath()));
 
 // Router
 app.use(router);
-
-// Initialise demo data if necessary
-if (process.env.DEMO) {
-    (async () => {
-        await generateDemoData();
-    })();
-}
 
 // 404 handler
 app.use((req, res, next) => {

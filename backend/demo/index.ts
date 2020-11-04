@@ -3,7 +3,6 @@ import * as groupController from "../controllers/group";
 import * as quizController from "../controllers/quiz";
 import axios from "axios";
 import formData from "form-data";
-import { OptionAttributes } from "../models/question";
 import rebuild from "../tests/rebuild";
 import { Group } from "models";
 
@@ -16,47 +15,24 @@ import { Group } from "models";
  * TO sse quiz taker login under shawn@gmail.com and look for quizes Painting and Sculpture
  */
 
-/* Question Assets */
-class TempQuestion {
+interface CustomQuiz {
+    name: string;
+    imgUrl: string;
+    questions?: CustomMCQQuestion[];
+}
+interface CustomMCQAnswer {
+    correct: boolean;
     text: string;
-    type: string;
-    tf: boolean;
-    options: OptionAttributes[];
-    imgUrl?: string;
+}
+interface CustomMCQQuestion {
+    question: string;
+    imgUrl: string;
+    answers: CustomMCQAnswer[];
 }
 
 const QUIZ_TYPE = ["live", "self paced"];
-const QUIZ_NAMES_FINE_ARTS = [
-    { name: "Painting", imgUrl: "https://unsplash.com/photos/1rBg5YSi00c" },
-    { name: "Sculpture", imgUrl: "https://unsplash.com/photos/AUgTvvQxDhg" },
-    { name: "Mosaics", imgUrl: "https://unsplash.com/photos/jy4oF77LQmM" },
-    { name: "Music", imgUrl: "https://unsplash.com/photos/laHwVPkMTzY" },
-    { name: "Poetry", imgUrl: "https://unsplash.com/photos/FDzRG30DeVM" },
-];
-const QUIZ_NAMES_MANAGEMENT = [
-    {
-        name: "Human Resource Fundamentals",
-        imgUrl: "https://unsplash.com/photos/DsCfl94sWz4",
-    },
-    {
-        name: "Managerial Economics",
-        imgUrl: "https://unsplash.com/photos/OtfnlTw0lH4",
-    },
-    {
-        name: "Managing People",
-        imgUrl: "https://unsplash.com/photos/fznQW-kn5VU",
-    },
-    {
-        name: "Managerial Psychology",
-        imgUrl: "https://unsplash.com/photos/cAQZuqdvba8",
-    },
-    {
-        name: "Business Analysis & Decision Making",
-        imgUrl: "https://unsplash.com/photos/J3AV8F-B42M",
-    },
-];
 
-const QUESTIONS_PAINTING = [
+const QUESTIONS_PAINTING: CustomMCQQuestion[] = [
     {
         question:
             "The Birth of Venus is considered to be one of the top 10 paintings of all time. Who made it?",
@@ -105,7 +81,7 @@ const QUESTIONS_PAINTING = [
         ],
     },
 ];
-const QUESTIONs_SCULPTURE = [
+const QUESTIONS_SCULPTURE: CustomMCQQuestion[] = [
     {
         question: "What can you infer about prehistoric sculpture?",
         imgUrl:
@@ -159,6 +135,43 @@ const QUESTIONs_SCULPTURE = [
         ],
     },
 ];
+const QUIZ_NAMES_FINE_ARTS: CustomQuiz[] = [
+    {
+        name: "Painting",
+        imgUrl: "https://unsplash.com/photos/1rBg5YSi00c",
+        questions: QUESTIONS_PAINTING,
+    },
+    {
+        name: "Sculpture",
+        imgUrl: "https://unsplash.com/photos/AUgTvvQxDhg",
+        questions: QUESTIONS_SCULPTURE,
+    },
+    { name: "Mosaics", imgUrl: "https://unsplash.com/photos/jy4oF77LQmM" },
+    { name: "Music", imgUrl: "https://unsplash.com/photos/laHwVPkMTzY" },
+    { name: "Poetry", imgUrl: "https://unsplash.com/photos/FDzRG30DeVM" },
+];
+const QUIZ_NAMES_MANAGEMENT: CustomQuiz[] = [
+    {
+        name: "Human Resource Fundamentals",
+        imgUrl: "https://unsplash.com/photos/DsCfl94sWz4",
+    },
+    {
+        name: "Managerial Economics",
+        imgUrl: "https://unsplash.com/photos/OtfnlTw0lH4",
+    },
+    {
+        name: "Managing People",
+        imgUrl: "https://unsplash.com/photos/fznQW-kn5VU",
+    },
+    {
+        name: "Managerial Psychology",
+        imgUrl: "https://unsplash.com/photos/cAQZuqdvba8",
+    },
+    {
+        name: "Business Analysis & Decision Making",
+        imgUrl: "https://unsplash.com/photos/J3AV8F-B42M",
+    },
+];
 
 const NAMES = [
     "Haydon Holding",
@@ -209,6 +222,8 @@ const PASSWORD = "12345678";
 const EMAIL_HOST = "@gmail.com";
 
 export const generateDemoData = async () => {
+    console.log("[*] Generating demo data");
+
     // Reset database
     await rebuild();
 
@@ -222,7 +237,7 @@ export const generateDemoData = async () => {
     for (const [index, name] of NAMES.entries()) {
         // Register
         const userRegister = await authController.register({
-            email: `${name.split(" ")[0].toLowerCase}${EMAIL_HOST}`,
+            email: `${name.split(" ")[0].toLowerCase()}${EMAIL_HOST}`,
             password: PASSWORD,
             name: name,
         });
@@ -268,126 +283,53 @@ export const generateDemoData = async () => {
         }
     }
 
-    // // Generation of genuine quizes
-    // let questionArray = await questionDataGen(QUESTIONS_PAINTING);
-    // await quizDataGen(
-    //     users[0],
-    //     users[0].groupsCreated[0].id,
-    //     questionArray,
-    //     QUIZ_NAMES_FINE_ARTS[0],
-    //     QUIZ_TYPE[0]
-    // );
-    // questionArray = await questionDataGen(QUESTIONs_SCULPTURE);
-    // await quizDataGen(
-    //     users[0],
-    //     users[0].groupsCreated[0].id,
-    //     questionArray,
-    //     QUIZ_NAMES_FINE_ARTS[1],
-    //     QUIZ_TYPE[1]
-    // );
+    // Quiz generation for arts
+    for (const [i, quiz] of QUIZ_NAMES_FINE_ARTS.entries()) {
+        await quizDataGen(
+            users[0],
+            users[0].groupsCreated[0].id,
+            // Has questions, process questions, otherwise empty
+            quiz.questions ? generateQuestionArray(quiz.questions) : [],
+            quiz.name,
+            QUIZ_TYPE[i % 2]
+        );
+    }
+    // Quiz generation for business
+    for (const [i, quiz] of QUIZ_NAMES_MANAGEMENT.entries()) {
+        await quizDataGen(
+            users[1],
+            users[1].groupsCreated[0].id,
+            [],
+            quiz.name,
+            QUIZ_TYPE[i % 2]
+        );
+    }
 
-    // // Generation of dummy quizzes for arts
-    // for (let i = 2; i < QUIZ_NAMES_FINE_ARTS.length; i++) {
-    //     await quizDataGen(
-    //         users[0],
-    //         users[0].groupsCreated[0].id,
-    //         [],
-    //         QUIZ_NAMES_FINE_ARTS[i],
-    //         QUIZ_TYPE[i % 2]
-    //     );
-    // }
-
-    // // Generation of dummy quizzes for business
-    // for (let i = 0; i < QUIZ_NAMES_MANAGEMENT.length; i++) {
-    //     await quizDataGen(
-    //         users[1],
-    //         users[1].groupsCreated[0].id,
-    //         [],
-    //         QUIZ_NAMES_MANAGEMENT[i],
-    //         QUIZ_TYPE[i % 2]
-    //     );
-    // }
+    console.log("[*] Finished generating demo data");
 };
 
-// Users join all groups that were not created by themselves
-async function generateGroupsForUsers(usersAndGroupNames: any[]) {
-    for (let i = 0; i < usersAndGroupNames.length; i++) {
-        for (let j = 0; j < usersAndGroupNames[i].groupNames.length; j++) {
-            const group = await groupController.createGroup(
-                usersAndGroupNames[i].user.id,
-                usersAndGroupNames[i].groupNames[j],
-                false
-            );
-            usersAndGroupNames[i].user.groupsCreated.push(group);
-        }
-    }
-}
-
-async function joinGroups(users: any[]) {
-    const allGroupsNames = [];
-    for (let i = 0; i < users.length; i++) {
-        if (users[i].groupsCreated != null) {
-            for (let j = 0; j < users[i].groupsCreated.length; j++) {
-                allGroupsNames.push(users[i].groupsCreated[j].name);
-            }
-        }
-    }
-
-    for (let i = 0; i < users.length; i++) {
-        const userId = users[i].id;
-        for (let e = 0; e < allGroupsNames.length; e++) {
-            const groupName = allGroupsNames[e];
-
-            let isOwner = false;
-            if (users[i].groupsCreated != null) {
-                for (let j = 0; j < users[i].groupsCreated.length; j++) {
-                    const createdGroupName = users[i].groupsCreated[j].name;
-                    if (createdGroupName == groupName) {
-                        isOwner = true;
-                    }
-                }
-            }
-            if (isOwner == false) {
-                const result = await groupController.joinGroup(userId, {
-                    name: groupName,
-                });
-            }
-        }
-    }
-}
-
-// Questions generated only by the first user
-async function questionDataGen(questionsNotobject: any[]) {
-    const questionsObjectArray: TempQuestion[] = [];
-
-    for (let i = 0; i < questionsNotobject.length; i++) {
-        const qN = questionsNotobject[i];
-        const question = new TempQuestion();
-        question.text = qN.question;
-        question.imgUrl = qN.imgUrl;
-        question.type = "choice";
-        question.tf = false;
-        question.options = [];
-        for (let e = 0; e < qN.answers.length; e++) {
-            const answer = qN.answers[e];
-            question.options.push(answer);
-        }
-        questionsObjectArray.push(question);
-    }
-    return questionsObjectArray;
-}
+/// Generates questions from question defined in this file
+const generateQuestionArray = (questions: CustomMCQQuestion[]): any => {
+    return questions.map((question) => {
+        return {
+            text: question.question,
+            type: "choice",
+            options: question.answers,
+        };
+    });
+};
 
 async function quizDataGen(
     user: any,
-    groupId: number[][],
-    questions: TempQuestion[],
-    quizInfo: any,
+    groupId: number,
+    questions: any,
+    name: string,
     quizType: string
 ) {
     const quiz = await quizController.createQuiz(user.id, {
         groupId: groupId,
         type: quizType,
-        title: quizInfo.name,
+        title: name,
         timeLimit: 10,
         questions: questions,
     });

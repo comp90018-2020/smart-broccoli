@@ -5,6 +5,7 @@ import app from "./app";
 import sequelize from "./models";
 import socket from "socket.io";
 import io from "./game/index";
+import { generateDemoData } from "./demo";
 
 if (!process.env.TOKEN_SECRET) {
     console.error("TOKEN_SECRET not set, exiting...");
@@ -28,6 +29,11 @@ export default (async () => {
         console.log(
             `Postgres connection on ${sequelize.config.host}:${sequelize.config.port}`
         );
+
+        // Initialise demo data if necessary
+        if (process.env.DEMO) {
+            await generateDemoData();
+        }
     } catch (err) {
         console.error(err);
         process.exit(1);
