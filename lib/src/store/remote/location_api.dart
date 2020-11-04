@@ -6,8 +6,16 @@ import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'package:smart_broccoli/src/remote.dart';
 
+class LocationData {
+  final String name;
+  final double lon;
+  final double lat;
+
+  LocationData({this.name, this.lon, this.lat});
+}
+
 class LocationAPI {
-  Future<List<String>> queryString(String input) async {
+  Future<List<LocationData>> queryString(String input) async {
     List<String> output;
     String uri =
         "https://nominatim.openstreetmap.org/?addressdetails=1&q=$input&format=json&limit=20";
@@ -27,15 +35,22 @@ class LocationAPI {
                 httpResult,
             name: "Foreground Location");
 
-        List<dynamic> lst = jsonDecode(httpResult);
+        List<dynamic> jsonObject = json.decode(httpResult);
 
-        log("lst: " + httpResult, name: "Foreground Location");
 
-        for (var i = 0; i < lst.length; i++) {
-          output[i] = lst[i]["display_name"];
+        List<LocationData> output = [];
+
+        for(var i = 0; i < jsonObject.length; i++){
+          LocationData loc = new LocationData(
+          name: jsonObject[i]["display_name"].toString(),
+            lon: 0.0,
+            lat : 0.0,
+          );
+          print(i);
+          print(jsonObject.length);
+          print(jsonObject[i]["display_name"]);
+          output.add(loc);
         }
-        log("Query: " + uri + "Output: " + output.toString(),
-            name: "Foreground Location");
 
         return output;
       }

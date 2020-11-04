@@ -24,7 +24,6 @@ void callbackDispatcher() {
         case "backgroundReading":
           await BackgroundDatabase.init();
 
-
           if (!(await checkCalendar())) {
             // Don't send notification
             break;
@@ -69,6 +68,7 @@ void callbackDispatcher() {
             break;
           }
 
+          /*
           /// Foreground test code
           LocationAPI fl = new LocationAPI();
 
@@ -76,7 +76,7 @@ void callbackDispatcher() {
 
           await fl.queryString("Melbourne");
 
-
+           */
 
           /// Idle for 30 seconds
           Duration duration = new Duration(seconds: 30);
