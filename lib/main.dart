@@ -1,4 +1,3 @@
-import 'package:device_calendar/device_calendar.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -12,8 +11,6 @@ import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:workmanager/workmanager.dart';
-
-List<Event> events = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +27,15 @@ void main() async {
   // Cancel all ongoing background tasks upon running the app
   await Workmanager.cancelAll();
 
+  /// Schedule the background task
+  /// Default is 15 minutes per refresh
+  Workmanager.registerPeriodicTask("1", "backgroundReading",
+      initialDelay: Duration(seconds: 30),
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+        requiresBatteryNotLow: true,
+        requiresDeviceIdle: false,
+      ));
 
   // Local storage
   final KeyValueStore keyValueStore = await SharedPrefsKeyValueStore.create();
@@ -127,18 +133,6 @@ class _MyAppState extends State<MyApp> {
       inSession = state.inSession;
     }
 
-    if(state.inSession) {
-      /// Schedule the background task
-      /// Default is 15 minutes per refresh
-      Workmanager.registerPeriodicTask("1", "backgroundReading",
-          initialDelay: Duration(seconds: 30),
-          constraints: Constraints(
-            networkType: NetworkType.connected,
-            requiresBatteryNotLow: true,
-            requiresDeviceIdle: false,
-          ));
-    }
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Smart Broccoli',
@@ -155,16 +149,9 @@ class _MyAppState extends State<MyApp> {
 
 /// A permission checker
 _checkPermissions() async {
-
   await Geolocator.requestPermission();
   var statusCal = await Permission.calendar.status;
   var statusStorage = await Permission.storage.status;
-  if (statusCal.isUndetermined || statusStorage.isUndetermined) {
-    // You can request multiple permissions this way just in case there is a
-    // need to combine things
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.calendar, Permission.storage,
-    ].request();
-  }
-
+  if (statusCal.isUndetermined) await Permission.calendar.request();
+  if (statusStorage.isUndetermined) await Permission.storage.request();
 }
