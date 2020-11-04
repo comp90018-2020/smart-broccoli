@@ -103,6 +103,12 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     notifyListeners();
   }
 
+  Future<void> joinSessionByPin(String pin) async {
+    session = await _sessionApi.joinSession(_authStateModel.token, pin);
+    _connect(session.token);
+    notifyListeners();
+  }
+
   Future<void> joinLiveSession(Quiz quiz) async {
     await joinSession(quiz.sessions.firstWhere((session) =>
         session.quizType == QuizType.LIVE &&
