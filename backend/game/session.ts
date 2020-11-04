@@ -38,6 +38,7 @@ export class GameSession {
     public boardReleased: Set<number> = new Set([]);
     public questionReleased: Set<number> = new Set([]);
     public totalQuestions: number = 0;
+    public updatedAt: number = Date.now();
 
     constructor(
         $quiz: QuizAttributes,
@@ -65,6 +66,10 @@ export class GameSession {
                 this.setToNextQuestion(0);
             }
         }
+    }
+
+    updatingTime() {
+        this.updatedAt = Date.now();
     }
 
     hasFinalBoardReleased() {
@@ -210,17 +215,13 @@ export class GameSession {
         }
     }
 
-    async endSession() {
-        const progress: { userId: number; data: any; state?: string }[] = [];
+    endSession() {
         const rank = this.rankPlayers();
-
-        rank.forEach(function ({ id, record, state }) {
-            progress.push({
-                userId: id,
-                data: record,
-                state: state,
-            });
-        });
+        const progress = rank.map(({ id, record, state }) => ({
+            userId: id,
+            data: record,
+            state: state,
+        }));
 
         if (process.env.SOCKET_MODE !== "debug") {
             endSessionInController(

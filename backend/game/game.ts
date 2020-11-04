@@ -151,6 +151,7 @@ export class GameHandler {
 
     answer(content: any, session: GameSession, player: Player) {
         try {
+            session.updatingTime();
             // create answer from emit
             const answer: Answer = new Answer(
                 content.question,
@@ -180,6 +181,7 @@ export class GameHandler {
 
     async welcome(socket: Socket, session: GameSession, player: Player) {
         try {
+            session.updatingTime();
             if (!session.hasUser(player)) {
                 emitToRoom(
                     whichRoom(session, Role.all),
@@ -312,9 +314,9 @@ export class GameHandler {
 
     async quit(socket: Socket, session: GameSession, player: Player) {
         try {
+            session.updatingTime();
             // Host should not use this
             if (player.role === Role.host) return;
-
             // leave from socket room
             socket.leave(whichRoom(session, player.role));
             socket.leave(whichRoom(session, Role.all));
@@ -338,6 +340,7 @@ export class GameHandler {
 
     async start(session: GameSession, player: Player) {
         try {
+            session.updatingTime();
             if (!session.isEmitValid(player)) return;
 
             if (session.canStart(player)) {
@@ -365,6 +368,7 @@ export class GameHandler {
 
     abort(session: GameSession, player?: Player) {
         try {
+            session.updatingTime();
             if (!session.isEmitValid(player)) return;
 
             if (session.canAbort(player)) {
@@ -388,8 +392,8 @@ export class GameHandler {
     }
 
     endSession(session: GameSession) {
-        delete this.sessions[session.id];
         session.endSession();
+        delete this.sessions[session.id];
         if (
             _socketIO !== undefined &&
             _socketIO.sockets.adapter.rooms.hasOwnProperty(
@@ -415,8 +419,8 @@ export class GameHandler {
         player?: Player
     ) {
         try {
+            session.updatingTime();
             if (!session.isEmitValid(player)) return;
-
             if (session.canReleaseNextQuestion(player, questionIndex)) {
                 session.setQuestionReleaseTime(
                     questionIndex,
@@ -497,6 +501,7 @@ export class GameHandler {
 
     showBoard(session: GameSession, player?: Player) {
         try {
+            session.updatingTime();
             if (!session.isEmitValid(player)) return;
             if (session.canShowBoard(player)) {
                 //  get ranked records of players
