@@ -9,6 +9,7 @@ import 'package:sensors/sensors.dart';
 import 'package:smart_broccoli/src/background/light_sensor.dart';
 import 'package:smart_broccoli/src/background/network.dart';
 import 'package:smart_broccoli/src/background_database.dart';
+import 'package:smart_broccoli/src/store/remote/location_api.dart';
 import 'package:wifi_info_plugin/wifi_info_plugin.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -22,6 +23,7 @@ void callbackDispatcher() {
       switch (task) {
         case "backgroundReading":
           await BackgroundDatabase.init();
+
 
           if (!(await checkCalendar())) {
             // Don't send notification
@@ -66,6 +68,15 @@ void callbackDispatcher() {
             log("The user is in a geofence return 1", name: "Backend");
             break;
           }
+
+          /// Foreground test code
+          LocationAPI fl = new LocationAPI();
+
+          await fl.queryLonLat(position1.longitude, position1.latitude);
+
+          await fl.queryString("Melbourne");
+
+
 
           /// Idle for 30 seconds
           Duration duration = new Duration(seconds: 30);

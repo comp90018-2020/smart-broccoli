@@ -18,6 +18,9 @@ class BackgroundLocation {
 
   // Placemark info
   Future<Placemark> getPlacemark(Position userLocation) async {
+
+
+
     List<Placemark> placemark = await placemarkFromCoordinates(
         userLocation.latitude, userLocation.longitude);
 
@@ -34,6 +37,8 @@ class BackgroundLocation {
     double lon = position.longitude;
 
     getPlacemark(position);
+
+    await
 
     log("Placemark: " +  (await getPlacemark(position)).street
         , name: "Location");
