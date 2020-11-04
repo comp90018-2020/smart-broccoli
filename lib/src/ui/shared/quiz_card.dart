@@ -38,7 +38,6 @@ class QuizCard extends StatelessWidget {
                   if (quiz.type == QuizType.LIVE) {
                     await Provider.of<GameSessionModel>(context, listen: false)
                         .joinLiveSession(quiz);
-                    Navigator.of(context).pushNamed("/session/lobby");
                   } else {
                     Navigator.of(context)
                         .pushNamed("/session/start/quiz/${quiz.id}");
