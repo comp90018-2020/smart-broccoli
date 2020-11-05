@@ -73,7 +73,7 @@ const checkOptions = (options: any): OptionAttributes[] => {
     }
     return options.map((option) => {
         return {
-            correct: option.correct ? true : false,
+            correct: option.correct,
             text: option.text ? option.text : "",
         };
     });

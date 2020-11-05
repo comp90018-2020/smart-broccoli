@@ -272,7 +272,7 @@ export class GameHandler {
                         formatQuestion(
                             session.visibleQuestionIndex(),
                             session,
-                            player.role === Role.host ? true : false
+                            player.role === Role.host
                         )
                     );
                     if (session.canEmitCorrectAnswer()) {
@@ -506,7 +506,7 @@ export class GameHandler {
                 const questionIndex = session.questionIndex - 1;
                 //  get ranked records of players
                 const rank = session.rankPlayers();
-                const top5 = rankSlice(rank, 5);
+                const top5 = rankSlice(rank, questionIndex, 5);
                 for (const player of Object.values(session.playerMap)) {
                     emitToOne(
                         player.socketId,

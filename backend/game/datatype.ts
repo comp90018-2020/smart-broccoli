@@ -59,10 +59,11 @@ export class Player {
         public token: string
     ) {}
 
-    latestRecord() {
-        if (this.records.length > 0)
-            return this.records[this.records.length - 1];
-        else return null;
+    latestRecord(questionIndex: number) {
+        const _latestRecord = this.records
+            .slice()
+            .find((record) => record.questionNo === questionIndex);
+        return _latestRecord === undefined ? null : _latestRecord;
     }
 
     /**
@@ -88,7 +89,7 @@ export class Player {
             },
             record: {},
         };
-        const _lastestRecord = this.latestRecord();
+        const _lastestRecord = this.latestRecord(questionIndex);
         if (
             _lastestRecord !== null &&
             _lastestRecord.questionNo === questionIndex

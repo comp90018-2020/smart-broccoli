@@ -69,16 +69,16 @@ export const formatQuestionOutcome = (
     rankAll: Player[],
     rankFormated: any[]
 ) => {
-    const latestRecord = player.latestRecord();
+    const _latestRecord = player.latestRecord(questionIndex);
     const playerAheadRecord =
         questionIndex === 0 ||
         rankAll.length === 0 ||
-        (latestRecord !== null && latestRecord.newPos === 0)
+        (_latestRecord !== null && _latestRecord.newPos === 0)
             ? null
             : rankAll[
-                  latestRecord === null
+                  _latestRecord === null
                       ? rankAll.length - 1
-                      : latestRecord.newPos
+                      : _latestRecord.newPos
               ].formatRecord(questionIndex);
 
     const questionOutcome = {
@@ -90,13 +90,16 @@ export const formatQuestionOutcome = (
     return questionOutcome;
 };
 
-export const rankSlice = (rank: Player[], count?: number) => {
+export const rankSlice = (
+    rank: Player[],
+    currentIndex: number,
+    count?: number
+) => {
     if (count === undefined) count = rank.length;
-
     const topX: any[] = [];
     rank.slice(0, count).forEach((player) => {
         const { id, name, pictureId } = player;
-        const record = player.latestRecord();
+        const record = player.latestRecord(currentIndex);
         const { oldPos, newPos, bonusPoints, points, streak } = record;
         topX.push({
             player: {

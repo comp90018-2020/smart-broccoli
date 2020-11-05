@@ -352,19 +352,20 @@ export class GameSession {
                 JSON.stringify(answer.MCSelection) ===
                 JSON.stringify(correctAnswer.MCSelection);
         } else {
-            correct =
-                answer.TFSelection === correctAnswer.TFSelection ? true : false;
+            correct = answer.TFSelection === correctAnswer.TFSelection;
         }
 
-        const latestRecord = this.playerMap[playerId].latestRecord();
+        const _latestRecord = this.playerMap[playerId].latestRecord(
+            currentQuestionIndex
+        );
 
         // get points and streak
         const { points, streak } = this.pointSys.getPointsAndStreak(
             correct,
             playerId,
-            latestRecord !== null &&
-                latestRecord.questionNo + 1 === answer.question
-                ? latestRecord.streak
+            _latestRecord !== null &&
+                _latestRecord.questionNo + 1 === answer.question
+                ? _latestRecord.streak
                 : 0,
             this.activePlayersNum
         );
@@ -372,15 +373,15 @@ export class GameSession {
         this.playerMap[playerId].records.push(
             new PlayerRecord(
                 answer.question,
-                latestRecord !== null &&
-                latestRecord.questionNo + 1 === answer.question
-                    ? latestRecord.newPos
+                _latestRecord !== null &&
+                    _latestRecord.questionNo + 1 === answer.question
+                    ? _latestRecord.newPos
                     : null,
                 null,
                 points,
-                points + (latestRecord !== null ? latestRecord.points : 0),
-                latestRecord !== null &&
-                latestRecord.questionNo + 1 === answer.question
+                points + (_latestRecord !== null ? _latestRecord.points : 0),
+                _latestRecord !== null &&
+                    _latestRecord.questionNo + 1 === answer.question
                     ? streak
                     : 0
             )
@@ -409,17 +410,19 @@ export class GameSession {
 
     rankPlayers() {
         const playersArray: Player[] = Object.values(this.playerMap);
-
+        const currentQuestionIndex = this.getQuestionIndex();
         // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
         playersArray.sort((a, b) => {
-            const aRecord = a.latestRecord();
-            const bRecord = b.latestRecord();
-            return aRecord.points < bRecord.points ? 1 : -1;
+            const aRecord = a.latestRecord(currentQuestionIndex);
+            const bRecord = b.latestRecord(currentQuestionIndex);
+            return bRecord === null || aRecord.points < bRecord.points ? 1 : -1;
         });
 
         playersArray.forEach(({ id }, ranking) => {
             const lastRecordIndex = this.playerMap[id].records.length - 1;
-            const lastestRecord = this.playerMap[id].latestRecord();
+            const lastestRecord = this.playerMap[id].latestRecord(
+                currentQuestionIndex
+            );
             if (lastestRecord !== null) {
                 this.playerMap[id].records[lastRecordIndex].newPos = ranking;
                 this.playerMap[id].records[lastRecordIndex].oldPos =
