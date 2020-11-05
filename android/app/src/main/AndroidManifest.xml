@@ -22,7 +22,7 @@
         android:label="Smart Broccoli"
         android:icon="@mipmap/ic_launcher">
         <activity
-            android:name=".MainActivity"
+            android:name=".Application"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -50,6 +50,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <!-- Firebase notification -->
                 <action android:name="SESSION_START"/>
+            </intent-filter>
+
+            <!-- Notification services -->
+            <intent-filter>
+                <action android:name="FLUTTER_NOTIFICATION_CLICK" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
