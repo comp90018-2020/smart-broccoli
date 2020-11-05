@@ -28,7 +28,6 @@ class _TakeQuizState extends State<TakeQuiz> {
         .refreshAvailableQuizzes()
         .catchError(
             (e) => showErrSnackBar(_buildQuizKey.currentContext, e.toString()));
-    ;
   }
 
   @override
