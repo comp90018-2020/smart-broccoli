@@ -6,6 +6,7 @@ import sequelize, {
     User,
     Group,
     UserGroup,
+    Question,
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
@@ -219,7 +220,16 @@ export const createSession = async (userId: number, opts: any) => {
     }
 
     // Get quiz
-    const quiz = await Quiz.findByPk(quizId, { include: ["questions"] });
+    const quiz = await Quiz.findByPk(quizId, {
+        include: [
+            {
+                // @ts-ignore
+                model: Question,
+                order: [["index", "ASC"]],
+                as: "questions",
+            },
+        ],
+    });
     if (!quiz) {
         throw new ErrorStatus("Quiz not found", 404);
     }

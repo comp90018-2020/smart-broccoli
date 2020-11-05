@@ -25,7 +25,7 @@ server.on("listening", onListening);
 export default (async () => {
     // DB connection
     try {
-        await sequelize.sync();
+        await sequelize.sync({ force: true });
         console.log(
             `Postgres connection on ${sequelize.config.host}:${sequelize.config.port}`
         );
