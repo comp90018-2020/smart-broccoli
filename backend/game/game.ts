@@ -14,7 +14,6 @@ import { _socketIO } from "./index";
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const CORRECT_ANSWER_SHOW_TIME = 3 * 1000;
 const BOARD_SHOW_TIME = 5 * 1000;
-const playerCache: { [userId: number]: Player } = {};
 
 export class GameHandler {
     sessions: {
@@ -108,24 +107,9 @@ export class GameHandler {
         sessionId: number,
         role: string
     ): Promise<Player> {
-        if (playerCache.hasOwnProperty(userId)) {
-            const player = playerCache[userId];
-            if (player.sessionId !== sessionId)
-                return new Player(
-                    userId,
-                    player.name,
-                    player.pictureId,
-                    socket.id,
-                    sessionId,
-                    role,
-                    socket.handshake.query.token
-                );
-            player.socketId = socket.id;
-            return player;
-        }
         if (process.env.SOCKET_MODE === "debug") {
             const userId = Number(socket.handshake.query.userId);
-            const player = new Player(
+            return new Player(
                 userId,
                 userId.toString(),
                 null,
@@ -134,19 +118,19 @@ export class GameHandler {
                 Number(userId) === 1 ? Role.host : Role.player,
                 null
             );
-            playerCache[userId] = player;
-            return player;
-        } else {
-            const player = await this.getUserInfo(
-                userId,
-                socket.id,
-                sessionId,
-                role,
-                socket.handshake.query.token
-            );
-            playerCache[userId] = player;
-            return player;
         }
+
+        const { name, pictureId } = await getUserSessionProfile(userId);
+
+        return new Player(
+            userId,
+            name,
+            pictureId,
+            socket.id,
+            sessionId,
+            role,
+            socket.handshake.query.token
+        );
     }
 
     answer(content: any, session: GameSession, player: Player) {
@@ -183,13 +167,13 @@ export class GameHandler {
     async welcome(socket: Socket, session: GameSession, player: Player) {
         try {
             session.updatingTime();
-            if (!session.hasUser(player)) {
+
+            if (!session.hasUser(player))
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.playerJoin,
                     player.profile()
                 );
-            }
 
             // add user to session
             if (player.role === Role.host) {
@@ -203,13 +187,15 @@ export class GameHandler {
             } else {
                 this.disconnectPast(
                     session,
-                    session.getPlayer(player.id),
+                    session.playerMap[player.id],
                     player
                 );
                 if (session.type === GameType.SelfPaced_NotGroup)
                     this.disconnectOtherPlayersAndCopyRecords(session, player);
                 session.playerJoin(player);
             }
+
+            player = session.playerMap[player.id];
 
             // add user to socket room
             socket.join(whichRoom(session, player.role));
@@ -549,40 +535,6 @@ export class GameHandler {
             }
         } catch (error) {
             sendErr(error, player === undefined ? undefined : player.socketId);
-        }
-    }
-
-    async getUserInfo(
-        userId: number,
-        socketId?: string,
-        sessionId?: number,
-        role?: string,
-        token?: string
-    ): Promise<Player> {
-        if (playerCache.hasOwnProperty(userId)) {
-            const { name, pictureId } = playerCache[userId];
-            return new Player(
-                userId,
-                name,
-                pictureId,
-                socketId,
-                sessionId,
-                role,
-                token
-            );
-        } else {
-            const { name, pictureId } = await getUserSessionProfile(userId);
-            const player = new Player(
-                userId,
-                name,
-                pictureId,
-                socketId,
-                sessionId,
-                role,
-                token
-            );
-            playerCache[userId] = player;
-            return player;
         }
     }
 }

@@ -101,6 +101,8 @@ export class GameSession {
     }
 
     playerJoin(player: Player) {
+        if (this.playerMap.hasOwnProperty(player.id))
+            player.records = this.playerMap[player.id].records;
         this.playerMap[player.id] = player;
         this.setPlayerState(player, PlayerState.Joined);
     }
@@ -121,10 +123,6 @@ export class GameSession {
         if (questionIndex === this.questionIndex) {
             this._isReadyForNextQuestion = false;
         }
-    }
-
-    getPlayer(playerId: number) {
-        return this.playerMap[playerId];
     }
 
     isSelfPacedGroupAndHasNotStarted() {
@@ -374,14 +372,14 @@ export class GameSession {
             new PlayerRecord(
                 answer.question,
                 _latestRecord !== null &&
-                    _latestRecord.questionNo + 1 === answer.question
+                _latestRecord.questionNo + 1 === answer.question
                     ? _latestRecord.newPos
                     : null,
                 null,
                 points,
                 points + (_latestRecord !== null ? _latestRecord.points : 0),
                 _latestRecord !== null &&
-                    _latestRecord.questionNo + 1 === answer.question
+                _latestRecord.questionNo + 1 === answer.question
                     ? streak
                     : 0
             )

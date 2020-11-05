@@ -95,6 +95,7 @@ const verify = async (
     if (!_socketIO.sockets.connected.hasOwnProperty(socket.id)) {
         _socketIO.sockets.connected[socket.id] = socket;
     }
+
     const { userId, sessionId, role } = await decrypt(socket);
     if (
         sessionId === undefined ||
@@ -102,6 +103,7 @@ const verify = async (
     ) {
         return [false, null, null];
     }
+
     const session = handler.sessions[Number(sessionId)];
     const player = await handler.createPlayer(socket, userId, sessionId, role);
 
