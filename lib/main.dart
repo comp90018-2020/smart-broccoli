@@ -1,16 +1,44 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/router.dart';
+import 'package:smart_broccoli/src/background/background.dart';
+import 'package:smart_broccoli/src/background/background_calendar.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
+import 'package:workmanager/workmanager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await _checkPermissions();
+  await BackgroundCalendar.saveCalendarData();
+
+  /// Initialise background services
+  Workmanager.initialize(
+    callbackDispatcher,
+    isInDebugMode: true,
+  );
+
+  // Cancel all ongoing background tasks upon running the app
+  await Workmanager.cancelAll();
+
+  /// Schedule the background task
+  /// Default is 15 minutes per refresh
+  Workmanager.registerPeriodicTask("1", "backgroundReading",
+      initialDelay: Duration(seconds: 30),
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+        requiresBatteryNotLow: true,
+        requiresDeviceIdle: false,
+      ));
+
   // Local storage
   final KeyValueStore keyValueStore = await SharedPrefsKeyValueStore.create();
   final PictureStash picStash = await PictureStash.create();
@@ -150,4 +178,15 @@ class _MyAppState extends State<MyApp> {
       initialRoute: state.inSession ? '/take_quiz' : '/auth',
     );
   }
+}
+
+/// A permission checker
+_checkPermissions() async {
+  await Geolocator.requestPermission();
+  var statusCal = await Permission.calendar.status;
+  var statusStorage = await Permission.storage.status;
+  var statusLocation = await Permission.locationAlways.status;
+  if (statusCal.isUndetermined) await Permission.calendar.request();
+  if (statusStorage.isUndetermined) await Permission.storage.request();
+  if (statusLocation.isUndetermined) await Permission.location.request();
 }
