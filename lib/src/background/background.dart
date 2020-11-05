@@ -36,7 +36,7 @@ void callbackDispatcher() {
           }
 
           /// Check location sensitive issues
-          if (free && await locationCheck(db)) {
+          if (free && !(await locationCheck(db))) {
             free = false;
           }
 
