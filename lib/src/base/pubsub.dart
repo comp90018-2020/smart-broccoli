@@ -1,5 +1,5 @@
 /// Publish subscribe topics
-enum PubSubTopic { ROUTE, TIMER }
+enum PubSubTopic { ROUTE, TIMER, NOTIFICATION }
 
 /// Base class for publish subscribe class
 abstract class PubSubBase {
