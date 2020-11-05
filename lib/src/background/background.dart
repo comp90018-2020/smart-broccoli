@@ -31,7 +31,7 @@ void callbackDispatcher() {
           }
 
           // Check wifi
-          if (await Network.isAtWork("blabh blah")) {
+          if (await Network.workWifiMatch("blabh blah")) {
             free = false;
           }
 
