@@ -60,7 +60,7 @@ class QuizQuestion extends StatelessWidget {
                               widthFactor: 0.8,
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 16.0),
-                                // Replace with Container when there's no picture
+                                // broccoli logo placeholder while image is loading
                                 child: FutureBuilder(
                                   future: Provider.of<QuizCollectionModel>(
                                           context,
@@ -77,7 +77,7 @@ class QuizQuestion extends StatelessWidget {
                                               image: AssetImage(
                                                   'assets/icon.png')));
                                     return Image.file(File(snapshot.data),
-                                        fit: BoxFit.cover);
+                                        fit: BoxFit.contain);
                                   },
                                 ),
                               ),
