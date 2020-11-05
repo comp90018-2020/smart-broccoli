@@ -37,6 +37,7 @@ class _ProfileRegisteredState extends ProfileEditorState {
   @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       child: Column(
         children: [
           Padding(
@@ -69,19 +70,20 @@ class _ProfileRegisteredState extends ProfileEditorState {
           // Password
           if (widget.isEdit)
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              padding: const EdgeInsets.fromLTRB(32, 24, 24, 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 0, bottom: 12),
                     child: Text('Change password',
-                        style: Theme.of(context).textTheme.headline6),
+                        style: Theme.of(context).textTheme.subtitle2),
                   ),
                   PasswordField(
                     widget.isEdit,
                     _passwordController,
                     _formSubmitted,
+                    canBeEmpty: true,
                     textInputAction: TextInputAction.next,
                     onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                   ),

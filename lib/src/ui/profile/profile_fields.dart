@@ -66,9 +66,10 @@ class PasswordField extends StatefulWidget {
   final TextInputAction textInputAction;
   final bool alwaysValidate;
   final void Function(String) onFieldSubmitted;
+  final bool canBeEmpty;
 
   PasswordField(this.isEdit, this.textEditingController, this.alwaysValidate,
-      {this.textInputAction, this.onFieldSubmitted});
+      {this.textInputAction, this.onFieldSubmitted, this.canBeEmpty = false});
 
   @override
   _PasswordFieldState createState() => _PasswordFieldState();
@@ -83,8 +84,11 @@ class _PasswordFieldState extends State<PasswordField> {
       autovalidateMode: widget.alwaysValidate
           ? AutovalidateMode.onUserInteraction
           : AutovalidateMode.disabled,
-      validator: (value) =>
-          value.length < 8 ? "Passwords must be at least 8 characters" : null,
+      validator: (value) {
+        if (widget.canBeEmpty && (value == null || value.isEmpty)) return null;
+        if (value.length < 8) return "Passwords must be at least 8 characters";
+        return null;
+      },
       textAlignVertical: TextAlignVertical.center,
       decoration: InputDecoration(
         labelText: "Password",
