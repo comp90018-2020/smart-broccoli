@@ -62,11 +62,11 @@ Future<bool> locationCheck(BackgroundDatabase db) async {
   /// Get current long lat
   Position position1 =
       await BackgroundLocation.getPosition().catchError((_) => null);
+  List<GeoFence> geoFenceList = await db.getGeoFence();
 
   /// If in Geofence
   if (position1 == null) return false;
-  if (await BackgroundLocation.inGeoFence(
-      await db.getGeoFence(), position1, 1)) {
+  if (await BackgroundLocation.inGeoFence(geoFenceList, position1, 1)) {
     log("The user is in a geofence return 1", name: "Backend");
     return true;
   }
