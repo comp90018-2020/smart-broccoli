@@ -40,9 +40,7 @@ class _AuthScreenState extends State<AuthScreen> {
               TabHolder(
                   constraints: BoxConstraints(maxWidth: 225),
                   onTap: (index) {
-                    setState(() {
-                      _tabIndex = index;
-                    });
+                    setState(() => _tabIndex = index);
                   },
                   margin: const EdgeInsets.only(top: 35, bottom: 25),
                   tabs: [Tab(text: "LOGIN"), Tab(text: "SIGN UP")]),

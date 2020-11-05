@@ -40,11 +40,6 @@ class UserRepository {
     return _users[id];
   }
 
-  Future<User> updateUser(String token,
-          {String email, String password, String name}) async =>
-      await _userApi.updateUser(token,
-          email: email, password: password, name: name);
-
   Future<List<User>> getMembersOf(String token, int id) async {
     List<User> members = await _groupApi.getMembers(token, id);
     await Future.wait(members.map((member) async {

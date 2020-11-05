@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:provider/provider.dart';
 
-import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
+import 'package:smart_broccoli/theme.dart';
 
 // Login tab
 class Login extends StatefulWidget {
@@ -26,6 +26,17 @@ class _LoginState extends State<Login> {
 
   // Whether password is visible
   bool _passwordVisible = false;
+
+  // Whether login button is disabled
+  bool _isLoginButtonDisabled = false;
+
+  // Prevent setState error resulting from auth -> login transition
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void dispose() {
@@ -85,15 +96,13 @@ class _LoginState extends State<Login> {
                     _passwordVisible ? Icons.visibility : Icons.visibility_off,
                   ),
                   onPressed: () {
-                    setState(() {
-                      _passwordVisible = !_passwordVisible;
-                    });
+                    setState(() => _passwordVisible = !_passwordVisible);
                   },
                 ),
               ),
               keyboardType: TextInputType.visiblePassword,
               obscureText: !_passwordVisible,
-              onFieldSubmitted: (_) => _loginPressed(context),
+              onFieldSubmitted: (_) => _loginPressed(),
             ),
             // Spacing
             Container(height: 0),
@@ -101,22 +110,13 @@ class _LoginState extends State<Login> {
             SizedBox(
               width: double.infinity,
               child: RaisedButton(
-                onPressed: () => _loginPressed(context),
+                disabledColor:
+                    SmartBroccoliColourScheme.disabledButtonTextColor,
+                onPressed:
+                    _isLoginButtonDisabled ? null : () => _loginPressed(),
                 child: const Text("LOGIN"),
               ),
             ),
-
-            // Optional: Forgot password button
-            // FlatButton(
-            //   child: const Text(
-            //     'Forgot Password?',
-            //     style: TextStyle(
-            //         fontWeight: FontWeight.normal,
-            //         decoration: TextDecoration.underline,
-            //         color: Colors.white),
-            //   ),
-            //   onPressed: _passwordReset,
-            // )
 
             // Join without registering button
             SizedBox(
@@ -133,19 +133,21 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void _loginPressed(BuildContext context) async {
+  void _loginPressed() async {
+    // Disable button
+    setState(() => _isLoginButtonDisabled = true);
+
+    // Request
     if (_formKey.currentState.validate()) {
-      try {
-        await Provider.of<AuthStateModel>(context, listen: false)
-            .login(_emailController.text, _passwordController.text);
-      } on LoginFailedException {
-        showBasicDialog(context, "Incorrect email or password",
-            title: "Login failed");
-      }
+      // Call
+      await Provider.of<AuthStateModel>(context, listen: false)
+          .login(_emailController.text, _passwordController.text)
+          .catchError((err) => showErrSnackBar(context, err.toString()));
     } else {
-      setState(() {
-        _formSubmitted = true;
-      });
+      setState(() => _formSubmitted = true);
     }
+
+    // Enable login button
+    setState(() => _isLoginButtonDisabled = false);
   }
 }

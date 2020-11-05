@@ -33,6 +33,25 @@ class ApiBase {
   }
 }
 
-class UnauthorisedRequestException implements Exception {}
+// General API exception
+class ApiException implements Exception {
+  final String msg;
 
-class ForbiddenRequestException implements Exception {}
+  ApiException(this.msg);
+
+  @override
+  String toString() => msg;
+}
+
+// Auth exception
+class ApiAuthException extends ApiException {
+  ApiAuthException(String msg) : super(msg);
+}
+
+class UnauthorisedRequestException extends ApiAuthException {
+  UnauthorisedRequestException() : super("Unauthorized");
+}
+
+class ForbiddenRequestException extends ApiAuthException {
+  ForbiddenRequestException() : super("Forbidden");
+}

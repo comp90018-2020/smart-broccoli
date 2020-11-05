@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:provider/provider.dart';
 
-import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
+import 'package:smart_broccoli/theme.dart';
 
 // Register tab
 class Register extends StatefulWidget {
@@ -28,6 +28,17 @@ class _RegisterState extends State<Register> {
 
   // Used to determine Autovalidatemode
   bool _formSubmitted = false;
+
+  // Whether register button is disabled
+  bool _isRegisterButtonDisabled = false;
+
+  // Prevent setState error resulting from auth -> login transition
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void dispose() {
@@ -108,16 +119,13 @@ class _RegisterState extends State<Register> {
                   icon: Icon(
                     _passwordVisible ? Icons.visibility : Icons.visibility_off,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _passwordVisible = !_passwordVisible;
-                    });
-                  },
+                  onPressed: () =>
+                      setState(() => _passwordVisible = !_passwordVisible),
                 ),
               ),
               keyboardType: TextInputType.visiblePassword,
               obscureText: !_passwordVisible,
-              onFieldSubmitted: (_) => _createAccountPressed(context),
+              onFieldSubmitted: (_) => _createAccountPressed,
             ),
             // Spacing
             Container(height: 0),
@@ -125,7 +133,10 @@ class _RegisterState extends State<Register> {
             SizedBox(
               width: double.infinity,
               child: RaisedButton(
-                onPressed: () => _createAccountPressed(context),
+                disabledColor:
+                    SmartBroccoliColourScheme.disabledButtonTextColor,
+                onPressed:
+                    _isRegisterButtonDisabled ? null : _createAccountPressed,
                 child: const Text("CREATE ACCOUNT"),
               ),
             ),
@@ -135,26 +146,31 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  void _createAccountPressed(BuildContext context) async {
+  void _createAccountPressed() async {
     if (_formKey.currentState.validate()) {
+      // Disable button
+      setState(() => _isRegisterButtonDisabled = true);
+
+      Future<void> register() =>
+          Provider.of<AuthStateModel>(context, listen: false).register(
+              _emailController.text,
+              _passwordController.text,
+              _nameController.text);
+      Future<void> login() =>
+          Provider.of<AuthStateModel>(context, listen: false)
+              .login(_emailController.text, _passwordController.text);
+
       try {
-        await Provider.of<AuthStateModel>(context, listen: false).register(
-            _emailController.text,
-            _passwordController.text,
-            _nameController.text);
-        Provider.of<AuthStateModel>(context, listen: false)
-            .login(_emailController.text, _passwordController.text);
-      } on RegistrationConflictException {
-        showBasicDialog(context, 'Email already in use',
-            title: 'Registration failed');
-      } catch (_) {
-        showBasicDialog(context, 'Something went wrong',
-            title: 'Registration failed');
+        await register();
+        await login();
+      } catch (err) {
+        showErrSnackBar(context, err.toString());
       }
+
+      // Enable button
+      setState(() => _isRegisterButtonDisabled = false);
     } else {
-      setState(() {
-        _formSubmitted = true;
-      });
+      setState(() => _formSubmitted = true);
     }
   }
 }

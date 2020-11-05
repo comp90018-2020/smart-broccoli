@@ -31,36 +31,72 @@ class AuthStateModel extends ChangeNotifier {
   }
 
   Future<void> join() async {
-    String token = await _authApi.join();
-    this._token = token;
-    await _keyValueStore.setString('token', token);
-    notifyListeners();
+    try {
+      String token = await _authApi.join();
+      this._token = token;
+      await _keyValueStore.setString('token', token);
+      notifyListeners();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
   }
 
   Future<void> register(String email, String password, String name) async {
-    await _authApi.register(email, password, name);
+    try {
+      await _authApi.register(email, password, name);
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
   }
 
   Future<void> promote(String email, String password, String name) async {
     await _authApi.promote(_token, email, password, name);
   }
 
+  /// Handles user login, caches token locally
   Future<void> login(String email, String password) async {
-    String token = await _authApi.login(email, password);
-    this._token = token;
-    await _keyValueStore.setString('token', token);
-    notifyListeners();
+    try {
+      String token = await _authApi.login(email, password);
+      this._token = token;
+      await _keyValueStore.setString('token', token);
+      notifyListeners();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
   }
 
   Future<void> checkSession() async {
-    if (token == null || await _authApi.sessionIsValid(_token)) return;
+    // No token in the first place
+    if (token == null) return;
+
+    try {
+      // No problems
+      if (await _authApi.sessionIsValid(_token)) return;
+    } catch (_) {
+      // Likely network error
+      return;
+    }
+
+    // Session no longer value
     _token = null;
     await _keyValueStore.clear();
     notifyListeners();
   }
 
   Future<void> logout() async {
-    await _authApi.logout(_token);
+    try {
+      await _authApi.logout(_token);
+    } catch (_) {
+      // Avoid to be stuck when the server is down
+      return;
+    }
+
     _token = null;
     await _keyValueStore.clear();
     notifyListeners();

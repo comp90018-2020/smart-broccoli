@@ -218,7 +218,8 @@ class CustomPage extends StatelessWidget {
                     leading: const Icon(Icons.exit_to_app),
                     title: Text('Sign out',
                         style: TextStyle(color: Colors.grey[700])),
-                    onTap: Provider.of<AuthStateModel>(context).logout,
+                    onTap: Provider.of<AuthStateModel>(context, listen: false)
+                        .logout,
                   ),
                 ],
               ),
