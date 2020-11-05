@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -155,12 +156,15 @@ class QuizQuestion extends StatelessWidget {
             width: double.maxFinite,
             child: Center(
               child: model.question is TFQuestion
-                  ? Text('${index == 0 ? 'False' : 'True'}',
-                      style: TextStyle(fontSize: 36))
-                  : Text(
+                  ? AutoSizeText(
+                      '${index == 0 ? 'False' : 'True'}',
+                      style: TextStyle(fontSize: 36),
+                    )
+                  : AutoSizeText(
                       (model.question as MCQuestion).options[index].text,
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 24),
                       textAlign: TextAlign.center,
+                      maxLines: 3,
                     ),
             ),
           ),
