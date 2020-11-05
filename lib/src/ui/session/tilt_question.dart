@@ -17,7 +17,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<bool> chosen = [false, false, false, false];
+  List<bool> chosen = [true, true, true, true];
 
   double width;
   double height;
@@ -57,8 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
     print("x + " + event.x.toString());
     print("y +" + event.y.toString());
 
-    cord[0] = cord[0] + event.x / 7.0;
-    cord[1] = cord[1] + event.y / 7.0;
+    cord[0] = cord[0] + event.x;
+    cord[1] = cord[1] + event.y;
 
     if (cord[0] >= width + 40) {
       cord[0] = width;
@@ -187,6 +187,10 @@ class _MyHomePageState extends State<MyHomePage> {
               fourCorners2(),
               fourCorners3(),
               fourCorners4(),
+              positionedText1(),
+              positionedText2(),
+              positionedText3(),
+              positionedText4(),
               Container(
                 margin: EdgeInsets.only(top: top, left: left - 20),
                 child: Container(
@@ -231,6 +235,38 @@ class _MyHomePageState extends State<MyHomePage> {
     chosen = [false, false, false, false];
   }
 
+  Widget positionedText1() {
+    return Positioned(
+      child: Text("Choice1"),
+      left: 0,
+      top: 30,
+    );
+  }
+
+  Widget positionedText2() {
+    return Positioned(
+      child: Text("Choice2"),
+      left: width - 60,
+      top: height - 140,
+    );
+  }
+
+  Widget positionedText4() {
+    return Positioned(
+      child: Text("Choice3"),
+      left: width - 400,
+      top: height - 140,
+    );
+  }
+
+  Widget positionedText3() {
+    return Positioned(
+      child: Text("Choice4"),
+      left: width - 60,
+      top: 30,
+    );
+  }
+
   Widget tiltFalse() {
     return ClipPath(
       clipper: CustomClipperCorner3(),
@@ -258,8 +294,8 @@ class _MyHomePageState extends State<MyHomePage> {
       clipper: CustomClipperCorner1(),
       child: Container(
         color: chosen[0] ? Colors.green : null,
-        height: width / 4,
-        width: width / 4,
+        height: height - 105.2,
+        width: width,
       ),
     );
   }
@@ -269,7 +305,7 @@ class _MyHomePageState extends State<MyHomePage> {
       clipper: CustomClipperCorner2(),
       child: Container(
         color: chosen[1] ? Colors.green : null,
-        height: width / 4,
+        height: height - 105.2,
         width: width,
       ),
     );

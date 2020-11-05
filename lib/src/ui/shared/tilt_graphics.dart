@@ -71,6 +71,8 @@ class CustomClipperCorner2 extends CustomClipper<Path> {
       shapeSize = size.width;
     }
 
+    shapeSize = shapeSize/4;
+
     var path = Path();
     path.moveTo(size.width - shapeSize, 0);
     path.lineTo(size.width, shapeSize);
@@ -151,6 +153,8 @@ class CustomClipperCorner1 extends CustomClipper<Path> {
     } else {
       shapeSize = size.width;
     }
+
+    shapeSize = shapeSize/4;
 
     var path = Path();
     path.lineTo(shapeSize, 0);
