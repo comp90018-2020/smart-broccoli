@@ -10,13 +10,16 @@ import 'package:smart_broccoli/src/background/background_calendar.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/session/tilt_question.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:workmanager/workmanager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp2());
 
+  /*
   await _checkPermissions();
   await BackgroundCalendar.saveCalendarData();
 
@@ -80,7 +83,21 @@ void main() async {
       ],
       child: MyApp(),
     ),
-  );
+  ); */
+}
+
+
+class MyApp2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Accelerometer',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(title: 'Accelerometer'),
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
