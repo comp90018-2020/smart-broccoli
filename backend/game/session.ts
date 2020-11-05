@@ -33,11 +33,13 @@ export class GameSession {
     public preQuestionReleasedAt: number = 0;
     public _isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
-    private activePlayersNum: number = 0;
+    public activePlayersNum: number = 0;
     private invalidTokens: Set<String> = new Set([]);
     public boardReleased: Set<number> = new Set([]);
     public questionReleased: Set<number> = new Set([]);
+    public answerReleased: Set<number> = new Set([]);
     public totalQuestions: number = 0;
+    public updatedAt: number = Date.now();
 
     constructor(
         $quiz: QuizAttributes,
@@ -66,9 +68,15 @@ export class GameSession {
             }
         }
     }
+
+    updatingTime() {
+        this.updatedAt = Date.now();
+    }
+
     hasFinalBoardReleased() {
         return this.boardReleased.has(this.totalQuestions - 1);
     }
+
     deactivateToken(token: string) {
         this.invalidTokens.add(token);
     }
@@ -78,12 +86,19 @@ export class GameSession {
     }
 
     hasUser(player: Player) {
-        return this.playerMap.hasOwnProperty(player.id);
+        if (player.role == Role.player)
+            return (
+                this.playerMap.hasOwnProperty(player.id) &&
+                this.playerMap[player.id].state !== PlayerState.Left
+            );
+        return true;
     }
 
     hostJoin(player: Player) {
         this.host = player;
+        this.setPlayerState(player, PlayerState.Joined);
     }
+
     playerJoin(player: Player) {
         this.playerMap[player.id] = player;
         this.setPlayerState(player, PlayerState.Joined);
@@ -92,6 +107,7 @@ export class GameSession {
     canSendQuesionAfterReconnection() {
         return this.visibleQuestionIndex() !== -1;
     }
+
     visibleQuestionIndex() {
         if (this._isReadyForNextQuestion) {
             return this.questionIndex - 1;
@@ -117,6 +133,7 @@ export class GameSession {
                 this.status === GameStatus.Starting)
         );
     }
+
     isSelfPacedNotGroupAndHasNotStart() {
         return (
             this.questionIndex === 0 &&
@@ -124,6 +141,7 @@ export class GameSession {
             this.type === GameType.SelfPaced_NotGroup
         );
     }
+
     isEmitValid(player: Player) {
         return (
             (player !== undefined &&
@@ -132,12 +150,15 @@ export class GameSession {
             player == undefined
         );
     }
+
     isSelfPacedGroup() {
         return this.type === GameType.SelfPaced_Group;
     }
+
     isSelfPacedNotGroup() {
         return this.type === GameType.SelfPaced_NotGroup;
     }
+
     isReadyForNextQuestion() {
         return this._isReadyForNextQuestion;
     }
@@ -145,6 +166,7 @@ export class GameSession {
     is(status: GameStatus) {
         return this.status === status;
     }
+
     hasMoreQuestions() {
         return this.questionIndex < this.totalQuestions - 1;
     }
@@ -155,31 +177,34 @@ export class GameSession {
         }
         this.setPlayerState(player, PlayerState.Left);
     }
+
     getQuizTimeLimit() {
         return this.quiz.timeLimit === undefined
             ? 10 * 1000
             : this.quiz.timeLimit * 1000;
     }
+
     setQuestionReleaseTime(questionIndex: number, afterTime: number) {
         this.QuestionReleaseAt[questionIndex] = Date.now() + afterTime;
     }
+
     setPlayerState(player: Player, state: PlayerState) {
-        if (state === PlayerState.Joined) {
-            this.activePlayersNum += 1;
-        } else if (state === PlayerState.Left) {
-            this.activePlayersNum -= 1;
+        if (player.role === Role.player) {
+            if (state === PlayerState.Joined) {
+                this.activePlayersNum += 1;
+            } else if (state === PlayerState.Left) {
+                this.activePlayersNum -= 1;
+            }
+            this.playerMap[player.id].state = state;
+        } else if (player.role === Role.host) {
+            this.host.state = state;
         }
-        this.playerMap[player.id].state = state;
     }
 
     canAbort(player: Player) {
-        return (
-            this.type === GameType.SelfPaced_Group ||
-            this.type === GameType.SelfPaced_NotGroup ||
-            (player === undefined && !this.hasMoreQuestions()) ||
-            player.role === Role.host
-        );
+        return player === undefined || player.role === Role.host;
     }
+
     async setStatus(status: GameStatus) {
         this.status = status;
         if (status === GameStatus.Starting) {
@@ -190,22 +215,19 @@ export class GameSession {
             }
         }
     }
-    async endSession() {
-        const progress: { userId: number; data: any; state?: string }[] = [];
-        const rank = this.rankPlayers();
 
-        rank.forEach(function ({ id, record, state }) {
-            progress.push({
-                userId: id,
-                data: record,
-                state: state,
-            });
-        });
+    endSession() {
+        const rank = this.rankPlayers();
+        const progress = rank.map(({ id, record, state }) => ({
+            userId: id,
+            data: record,
+            state: state,
+        }));
 
         if (process.env.SOCKET_MODE !== "debug") {
             endSessionInController(
                 this.id,
-                this.hasMoreQuestions() && this._isReadyForNextQuestion,
+                this.questionReleased.size === this.totalQuestions,
                 progress
             );
         }
@@ -214,6 +236,7 @@ export class GameSession {
     getStatus() {
         return this.status;
     }
+
     canStart(player: Player) {
         // and game is pending
         return (
@@ -224,15 +247,18 @@ export class GameSession {
                 player.role === Role.host)
         );
     }
+
     canReleaseTheFirstQuestion() {
         return (
             this.QuestionReleaseAt.hasOwnProperty(0) &&
             Date.now() > this.QuestionReleaseAt[0]
         );
     }
+
     isAnswerNoCorrect(answer: Answer) {
-        return answer.questionNo === this.questionIndex;
+        return answer.question === this.questionIndex;
     }
+
     hasAllPlayerAnswered() {
         return this.pointSys.answeredPlayers.size >= this.activePlayersNum;
     }
@@ -257,10 +283,11 @@ export class GameSession {
             this.type === GameType.SelfPaced_NotGroup
         );
     }
+
     canAnswer(player: Player, answer: Answer) {
         // is player
         return (
-            answer.questionNo === this.questionIndex &&
+            answer.question === this.questionIndex &&
             player.role === Role.player &&
             // and there is a conducting question
             (!this._isReadyForNextQuestion || this.questionIndex === 0)
@@ -319,7 +346,7 @@ export class GameSession {
         const player = this.playerMap[playerId];
 
         let correct;
-        if (answer.questionNo !== correctAnswer.questionNo) {
+        if (answer.question !== correctAnswer.question) {
             correct = false;
         } else {
             if (correctAnswer.MCSelection !== null) {
@@ -346,22 +373,22 @@ export class GameSession {
         ].record;
         const previousRecord = this.playerMap[playerId].previousRecord;
         this.playerMap[playerId].record = {
-            questionNo: answer.questionNo,
+            questionNo: answer.question,
             oldPos:
-                previousRecord.questionNo === answer.questionNo
+                previousRecord.questionNo === answer.question
                     ? this.playerMap[playerId].previousRecord.newPos
                     : null,
             newPos: null,
             bonusPoints: points,
             points: points + this.playerMap[playerId].previousRecord.points,
-            streak:
-                previousRecord.questionNo === answer.questionNo ? streak : 0,
+            streak: previousRecord.questionNo === answer.question ? streak : 0,
         };
 
         if (!this.hasMoreQuestions()) {
             this.playerMap[player.id].state = PlayerState.Complete;
         }
     }
+
     getQuestionIndex() {
         return this._isReadyForNextQuestion
             ? this.questionIndex

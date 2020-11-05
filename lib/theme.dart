@@ -84,6 +84,13 @@ class SmartBroccoliTheme {
   /// List item text style
   static final TextStyle listItemTextStyle =
       TextStyle(color: Color(0xFF656565), fontWeight: FontWeight.bold);
+
+  /// Style for points shown on finish screen
+  static final TextStyle finishScreenPointsStyle =
+      TextStyle(fontSize: 36, fontWeight: FontWeight.bold);
+
+  /// Style for 'final score' caption
+  static final TextStyle finalScoreCaptionStyle = TextStyle(fontSize: 16);
 }
 
 /// Widget to hold the app logo on auth screen
@@ -176,6 +183,9 @@ class AnswerColours {
   /// Selected
   static Color selected = Color(0xFFFEC12D);
 
+  /// Pending (more answers need to be selected)
+  static Color pending = Color(0xFFFCDA88);
+
   /// Default
   static Color normal = Colors.white;
 }
@@ -219,7 +229,9 @@ class UserAvatar extends ClipOval {
                   color: Color(0xFF4CAF50))
               : Container(
                   child: CircleAvatar(
-                      backgroundImage: Image.file(File(filePath)).image),
+                    backgroundImage: Image.file(File(filePath)).image,
+                    maxRadius: maxRadius,
+                  ),
                 ),
         );
 }

@@ -23,6 +23,10 @@ const schema: Sequelize.ModelAttributes = {
         type: Sequelize.JSONB,
         allowNull: true,
     },
+    index: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+    },
     // Number of correct answers
     numCorrect: {
         type: Sequelize.VIRTUAL,

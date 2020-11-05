@@ -6,24 +6,29 @@ class CorrectAnswer {
 
   CorrectAnswer._internal(this.answer, this.record);
 
-  factory CorrectAnswer.fromJson(Map<String, dynamic> json) =>
-      CorrectAnswer._internal(
-        Answer.fromJson(json['answer']),
-        Record.fromJson(json['record']),
-      );
+  factory CorrectAnswer.fromJson(Map<String, dynamic> json) {
+    if (!json.containsKey('answer'))
+      return CorrectAnswer._internal(Answer.fromJson(json), null);
+
+    return CorrectAnswer._internal(
+      Answer.fromJson(json['answer']),
+      Record.fromJson(json['record']),
+    );
+  }
 }
 
 class Answer {
   int question;
-  List<dynamic> mcSelection;
+  final List<dynamic> mcSelection;
   bool tfSelection;
 
-  Answer._internal(this.question, this.mcSelection, this.tfSelection);
+  Answer(this.question, {List<dynamic> mcSelection, this.tfSelection})
+      : this.mcSelection = mcSelection ?? [];
 
-  factory Answer.fromJson(Map<String, dynamic> json) => Answer._internal(
+  factory Answer.fromJson(Map<String, dynamic> json) => Answer(
         json['question'],
-        json['MCSelection'],
-        json['TFSelection'],
+        mcSelection: json['MCSelection'],
+        tfSelection: json['TFSelection'],
       );
 
   Map<String, dynamic> toJson() {

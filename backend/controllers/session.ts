@@ -6,6 +6,7 @@ import sequelize, {
     User,
     Group,
     UserGroup,
+    Question,
 } from "../models";
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
@@ -219,7 +220,16 @@ export const createSession = async (userId: number, opts: any) => {
     }
 
     // Get quiz
-    const quiz = await Quiz.findByPk(quizId, { include: ["questions"] });
+    const quiz = await Quiz.findByPk(quizId, {
+        include: [
+            {
+                // @ts-ignore
+                model: Question,
+                order: [["index", "ASC"]],
+                as: "questions",
+            },
+        ],
+    });
     if (!quiz) {
         throw new ErrorStatus("Quiz not found", 404);
     }
@@ -500,7 +510,7 @@ export const endSession = async (
                 }
             );
 
-            // Update user entries
+            // Update user entries according to progress held by game
             for (const entry of progress) {
                 await SessionParticipant.update(
                     {
@@ -513,6 +523,13 @@ export const endSession = async (
                     }
                 );
             }
+
+            // Those who are still in the joined state should be removed
+            // Or they will be in limbo
+            await SessionParticipant.update(
+                { state: "lost" },
+                { where: { state: "joined" }, transaction }
+            );
         });
     } catch (err) {
         throw err;

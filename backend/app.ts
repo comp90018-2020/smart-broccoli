@@ -1,12 +1,12 @@
 import express, { Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import bodyParser from "body-parser";
-import router from "./routers";
-import ErrorStatus from "helpers/error";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-dist";
 import fs from "fs";
 import path from "path";
+import router from "./routers";
+import ErrorStatus from "./helpers/error";
 
 const app = express();
 

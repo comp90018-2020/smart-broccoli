@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
+
 import 'vertical_clip.dart';
 
 /// Widget for Lobby
-class StartQuiz extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => new _StartQuizState();
-}
+class StartQuiz extends StatelessWidget {
+  final int quizId;
 
-class _StartQuizState extends State<StartQuiz> {
-  // Entry function
+  StartQuiz(this.quizId);
+
   @override
   Widget build(BuildContext context) {
     return CustomPage(
@@ -40,11 +43,12 @@ class _StartQuizState extends State<StartQuiz> {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 margin: EdgeInsets.only(bottom: 12),
-                child: QuizCard(
-                  // placeholder
-                  Quiz.fromJson(
-                      {'title': 'Quiz title', 'groupId': 1, 'complete': false}),
-                  aspectRatio: 2.3,
+                child: Consumer<QuizCollectionModel>(
+                  builder: (context, collection, child) => QuizCard(
+                    collection.getQuiz(quizId),
+                    aspectRatio: 2.3,
+                    optionsEnabled: false,
+                  ),
                 ),
               ),
 
@@ -62,7 +66,9 @@ class _StartQuizState extends State<StartQuiz> {
                 children: [
                   Expanded(
                     child: RaisedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        showBasicDialog(context, "Feature coming soon!");
+                      },
                       child: Column(
                         children: [
                           Icon(
@@ -77,7 +83,16 @@ class _StartQuizState extends State<StartQuiz> {
                   SizedBox(width: 8),
                   Expanded(
                     child: RaisedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        try {
+                          await Provider.of<GameSessionModel>(context,
+                                  listen: false)
+                              .createSession(
+                                  quizId, GameSessionType.INDIVIDUAL);
+                        } catch (_) {
+                          showBasicDialog(context, "Cannot start session");
+                        }
+                      },
                       child: Column(
                         children: [
                           Icon(

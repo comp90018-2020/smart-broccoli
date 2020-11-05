@@ -5,11 +5,12 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Represents a quiz card
-class QuizCard extends StatefulWidget {
+class QuizCard extends StatelessWidget {
   final Quiz quiz;
 
   /// Aspect ratio
@@ -24,36 +25,51 @@ class QuizCard extends StatefulWidget {
   QuizCard(this.quiz,
       {Key key,
       this.aspectRatio = 1.4,
-      this.optionsEnabled = false,
+      this.optionsEnabled = true,
       this.alwaysShowPicture = false});
 
-  @override
-  State<StatefulWidget> createState() => new _QuizCardState();
-}
-
-class _QuizCardState extends State<QuizCard> {
   @override
   Widget build(BuildContext context) => Card(
         elevation: 2,
         child: InkWell(
-          onTap: () {},
-          child: widget.alwaysShowPicture
+          onTap: !optionsEnabled || quiz.role == GroupRole.OWNER
+              ? null
+              : () async {
+                  if (quiz.type == QuizType.LIVE) {
+                    try {
+                      await Provider.of<GameSessionModel>(context,
+                              listen: false)
+                          .joinLiveSession(quiz);
+                    } on SessionNotFoundException {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(content: Text('Session no longer exists')),
+                      );
+                    } catch (_) {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(content: Text('Something went wrong')),
+                      );
+                    }
+                  } else {
+                    Navigator.of(context)
+                        .pushNamed("/session/start/quiz/${quiz.id}");
+                  }
+                },
+          child: alwaysShowPicture
               // Always show picture
-              ? _quizInner(true)
+              ? _quizInner(context, true)
               : LayoutBuilder(
                   builder: (context, constraints) {
                     // If the height of the picture is less than 0.4 of the
                     // viewporp height, show it
-                    bool showPicture =
-                        constraints.maxWidth / widget.aspectRatio <
-                            MediaQuery.of(context).size.height * 0.4;
-                    return _quizInner(showPicture);
+                    bool showPicture = constraints.maxWidth / aspectRatio <
+                        MediaQuery.of(context).size.height * 0.4;
+                    return _quizInner(context, showPicture);
                   },
                 ),
         ),
       );
 
-  Widget _quizInner(bool showPicture) => Column(
+  Widget _quizInner(BuildContext context, bool showPicture) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         mainAxisSize: MainAxisSize.min,
@@ -65,10 +81,10 @@ class _QuizCardState extends State<QuizCard> {
               // Quiz picture
               if (showPicture)
                 AspectRatio(
-                  aspectRatio: widget.aspectRatio,
+                  aspectRatio: aspectRatio,
                   child: FutureBuilder(
                     future: Provider.of<QuizCollectionModel>(context)
-                        .getQuizPicturePath(widget.quiz),
+                        .getQuizPicturePath(quiz),
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
                       if (!snapshot.hasData || snapshot.data == null)
@@ -89,13 +105,13 @@ class _QuizCardState extends State<QuizCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.quiz.title,
+                      quiz.title,
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 4),
                     FutureBuilder(
                         future: Provider.of<GroupRegistryModel>(context)
-                            .getGroup(widget.quiz.groupId),
+                            .getGroup(quiz.groupId),
                         builder: (BuildContext context,
                             AsyncSnapshot<Group> snapshot) {
                           if (snapshot.hasData) {
@@ -117,7 +133,8 @@ class _QuizCardState extends State<QuizCard> {
           Column(
             children: [
               // Admin options
-              if (widget.quiz.role == GroupRole.OWNER) buildAdmin(),
+              if (quiz.role == GroupRole.OWNER && optionsEnabled)
+                buildAdmin(context),
 
               // Quiz status
               Container(
@@ -125,10 +142,13 @@ class _QuizCardState extends State<QuizCard> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    widget.quiz.type == QuizType.LIVE
-                        ? liveIndicator()
-                        : selfPacedIndicator(),
-                    if (widget.quiz.complete)
+                    if (quiz.type == QuizType.LIVE)
+                      liveIndicator(context)
+                    else if (quiz.type == QuizType.SELF_PACED)
+                      selfPacedIndicator(context)
+                    else if (quiz.type == QuizType.SMART_LIVE)
+                      smartIndicator(),
+                    if (quiz.complete)
                       Text(
                         'Complete',
                         style: TextStyle(
@@ -157,7 +177,7 @@ class _QuizCardState extends State<QuizCard> {
       Text('Smart Live', style: TextStyle(fontSize: 13)));
 
   // Live indicator
-  Widget liveIndicator() => buildIndicator(
+  Widget liveIndicator(BuildContext context) => buildIndicator(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 1.5),
         child: Icon(
@@ -169,7 +189,7 @@ class _QuizCardState extends State<QuizCard> {
       Text('Live', style: TextStyle(fontSize: 13)));
 
   // Self-paced
-  Widget selfPacedIndicator() => buildIndicator(
+  Widget selfPacedIndicator(BuildContext context) => buildIndicator(
         Icon(
           Icons.schedule,
           size: 15,
@@ -190,18 +210,18 @@ class _QuizCardState extends State<QuizCard> {
       );
 
   /// Build admin options row
-  Widget buildAdmin() {
+  Widget buildAdmin(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          widget.quiz.type == QuizType.LIVE
+          quiz.type == QuizType.LIVE
               // Activate live quiz
               ? Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10, right: 6),
-                    child: widget.quiz.isActive
+                    child: quiz.isActive
                         ? OutlineButton(
                             onPressed: null,
                             child: Text('Activated'),
@@ -213,14 +233,14 @@ class _QuizCardState extends State<QuizCard> {
                               if (!await showConfirmDialog(
                                   context,
                                   "You are about to start a live session " +
-                                      "for the quiz: ${widget.quiz.title}",
+                                      "for the quiz: ${quiz.title}",
                                   title: "Confirm start session",
                                   barrierDismissable: true)) return;
                               try {
-                                Provider.of<QuizCollectionModel>(context,
+                                Provider.of<GameSessionModel>(context,
                                         listen: false)
-                                    .startQuizSession(widget.quiz,
-                                        GameSessionType.INDIVIDUAL);
+                                    .createSession(
+                                        quiz.id, GameSessionType.INDIVIDUAL);
                               } catch (_) {
                                 showBasicDialog(
                                     context, "Cannot start live session");
@@ -244,12 +264,12 @@ class _QuizCardState extends State<QuizCard> {
                         Switch(
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
-                            value: widget.quiz.isActive,
+                            value: quiz.isActive,
                             onChanged: (bool value) async {
                               try {
                                 await Provider.of<QuizCollectionModel>(context,
                                         listen: false)
-                                    .setQuizActivation(widget.quiz, value);
+                                    .setQuizActivation(quiz, value);
                               } catch (_) {
                                 showBasicDialog(
                                     context, "Cannot update quiz status");
@@ -269,7 +289,7 @@ class _QuizCardState extends State<QuizCard> {
             color: Theme.of(context).accentColor,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             onPressed: () {
-              Navigator.of(context).pushNamed("/quiz/${widget.quiz.id}");
+              Navigator.of(context).pushNamed("/quiz/${quiz.id}");
             },
             elevation: 2.0,
             child: Icon(

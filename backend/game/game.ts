@@ -35,8 +35,8 @@ export class GameHandler {
                 title: "Fruits Master",
                 active: true,
                 description: "Test Quiz",
-                type: "self paced",
-                isGroup: true,
+                type: "live",
+                isGroup: false,
                 timeLimit: 20,
                 groupId: 2,
                 pictureId: null,
@@ -151,6 +151,7 @@ export class GameHandler {
 
     answer(content: any, session: GameSession, player: Player) {
         try {
+            session.updatingTime();
             // create answer from emit
             const answer: Answer = new Answer(
                 content.question,
@@ -167,7 +168,7 @@ export class GameHandler {
                     whichRoom(session, Role.all),
                     Event.questionAnswered,
                     {
-                        question: answer.questionNo,
+                        question: answer.question,
                         count: session.pointSys.answeredPlayers.size,
                         total: Object.keys(session.playerMap).length,
                     }
@@ -180,6 +181,7 @@ export class GameHandler {
 
     async welcome(socket: Socket, session: GameSession, player: Player) {
         try {
+            session.updatingTime();
             if (!session.hasUser(player)) {
                 emitToRoom(
                     whichRoom(session, Role.all),
@@ -312,9 +314,9 @@ export class GameHandler {
 
     async quit(socket: Socket, session: GameSession, player: Player) {
         try {
+            session.updatingTime();
             // Host should not use this
             if (player.role === Role.host) return;
-
             // leave from socket room
             socket.leave(whichRoom(session, player.role));
             socket.leave(whichRoom(session, Role.all));
@@ -325,6 +327,9 @@ export class GameHandler {
                 player.profile()
             );
             await session.playerLeave(player);
+            if (session.host === null && session.activePlayersNum === 0)
+                this.abort(session);
+
             session.deactivateToken(player.token);
             // disconnect
             socket.disconnect(true);
@@ -335,6 +340,7 @@ export class GameHandler {
 
     async start(session: GameSession, player: Player) {
         try {
+            session.updatingTime();
             if (!session.isEmitValid(player)) return;
 
             if (session.canStart(player)) {
@@ -362,10 +368,11 @@ export class GameHandler {
 
     abort(session: GameSession, player?: Player) {
         try {
+            session.updatingTime();
             if (!session.isEmitValid(player)) return;
 
             if (session.canAbort(player)) {
-                if (session.hasMoreQuestions())
+                if (session.answerReleased.size < session.totalQuestions)
                     // Broadcast that quiz has been cancelled
                     emitToRoom(
                         whichRoom(session, Role.all),
@@ -385,8 +392,8 @@ export class GameHandler {
     }
 
     endSession(session: GameSession) {
-        delete this.sessions[session.id];
         session.endSession();
+        delete this.sessions[session.id];
         if (
             _socketIO !== undefined &&
             _socketIO.sockets.adapter.rooms.hasOwnProperty(
@@ -412,8 +419,8 @@ export class GameHandler {
         player?: Player
     ) {
         try {
+            session.updatingTime();
             if (!session.isEmitValid(player)) return;
-
             if (session.canReleaseNextQuestion(player, questionIndex)) {
                 session.setQuestionReleaseTime(
                     questionIndex,
@@ -474,7 +481,7 @@ export class GameHandler {
             Event.correctAnswer,
             correctAnswer
         );
-
+        session.answerReleased.add(questionIndex);
         session.setToNextQuestion(questionIndex + 1);
         if (session.isSelfPacedGroup()) {
             if (!session.hasFinalBoardReleased())
@@ -485,15 +492,16 @@ export class GameHandler {
         }
         if (
             session.isSelfPacedNotGroup() &&
-            session.questionIndex == session.totalQuestions
+            session.questionIndex === session.totalQuestions
         ) {
-            this.abort(session, player);
+            this.abort(session);
             return;
         }
     }
 
     showBoard(session: GameSession, player?: Player) {
         try {
+            session.updatingTime();
             if (!session.isEmitValid(player)) return;
             if (session.canShowBoard(player)) {
                 //  get ranked records of players

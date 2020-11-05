@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:smart_broccoli/theme.dart';
+import 'package:provider/provider.dart';
 
-import '../session/lobby.dart';
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/theme.dart';
 
 class QuizPinBox extends StatefulWidget {
   QuizPinBox({Key key}) : super(key: key);
@@ -30,7 +33,7 @@ class _QuizPinBoxState extends State<QuizPinBox> {
           keyboardType: TextInputType.number,
           maxLength: 6,
           textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _verifyPin(),
+          onSubmitted: (_) => _verifyPin(context),
         ),
       ),
 
@@ -38,7 +41,7 @@ class _QuizPinBoxState extends State<QuizPinBox> {
       Padding(
         padding: const EdgeInsets.all(12.0),
         child: RaisedButton(
-          onPressed: _verifyPin,
+          onPressed: () => _verifyPin(context),
           shape: SmartBroccoliTheme.raisedButtonShape,
           child: Padding(
             padding: SmartBroccoliTheme.raisedButtonTextPadding,
@@ -67,12 +70,14 @@ class _QuizPinBoxState extends State<QuizPinBox> {
     ]);
   }
 
-  /// The verify pin function currently is used for debug purposes
-  /// Please change this to the desired result which should be like the method
-  /// Above
-  void _verifyPin() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => QuizLobby()),
-    );
+  Future<void> _verifyPin(BuildContext context) async {
+    try {
+      await Provider.of<GameSessionModel>(context, listen: false)
+          .joinSessionByPin(_pinFilter.text);
+    } on SessionNotFoundException {
+      showBasicDialog(context, "Invalid session PIN");
+    } catch (_) {
+      showBasicDialog(context, "Cannot join session");
+    }
   }
 }

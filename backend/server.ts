@@ -5,6 +5,7 @@ import app from "./app";
 import sequelize from "./models";
 import socket from "socket.io";
 import io from "./game/index";
+import { generateDemoData } from "./demo";
 
 if (!process.env.TOKEN_SECRET) {
     console.error("TOKEN_SECRET not set, exiting...");
@@ -24,7 +25,7 @@ server.on("listening", onListening);
 export default (async () => {
     // DB connection
     try {
-        await sequelize.sync();
+        await sequelize.sync({ force: true });
         console.log(
             `Postgres connection on ${sequelize.config.host}:${sequelize.config.port}`
         );
@@ -38,6 +39,11 @@ export default (async () => {
 
     // Listen on provided port, on all network interfaces
     server.listen(port);
+
+    // Initialise demo data if necessary
+    if (process.env.DEMO) {
+        await generateDemoData();
+    }
 })();
 
 // Event listener for HTTP server "error" event
