@@ -8,7 +8,9 @@ class LightSensor {
     try {
       Light light = new Light();
       var queue = new StreamQueue(light.lightSensorStream);
-      return await queue.next;
+      int val = await queue.next;
+      queue.cancel();
+      return val;
     } catch (e) {
       return Future.error("Light failed");
     }

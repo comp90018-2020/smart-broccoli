@@ -7,7 +7,9 @@ class Gyro {
   static Future<GyroscopeEvent> getGyroEvent() async {
     try {
       var queue = new StreamQueue(gyroscopeEvents);
-      return await queue.next;
+      GyroscopeEvent gyroscopeEvent = await queue.next;
+      queue.cancel();
+      return gyroscopeEvent;
     } catch (e) {
       return Future.error("Gyroscope");
     }
