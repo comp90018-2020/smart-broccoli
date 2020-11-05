@@ -94,9 +94,9 @@ class ProfilePicture extends StatelessWidget {
       if (pickedFile == null) return;
     } catch (err) {
       if (err.code == "photo_access_denied")
-        showErrSnackBar(context, "Cannot access gallery");
+        return showErrSnackBar(context, "Cannot access gallery", dim: true);
       else
-        showErrSnackBar(context, err.toString());
+        return showErrSnackBar(context, err.toString(), dim: true);
     }
 
     // Update image
