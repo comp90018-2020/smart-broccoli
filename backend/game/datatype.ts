@@ -126,13 +126,12 @@ export class Player {
 
         const _latestRecord = this.latestRecord();
         if (_latestRecord === null) return record;
-        const { oldPos, newPos, bonusPoints, points, streak } = _latestRecord;
         record.record = {
-            oldPos: oldPos,
-            newPos: newPos,
-            bonusPoints: bonusPoints,
-            points: points,
-            streak: streak,
+            oldPos: null,
+            newPos: null,
+            bonusPoints: 0,
+            points: _latestRecord.points,
+            streak: 0,
         };
         return record;
     }
