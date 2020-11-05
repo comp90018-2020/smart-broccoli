@@ -34,7 +34,7 @@ export class GameHandler {
                 title: "Fruits Master",
                 active: true,
                 description: "Test Quiz",
-                type: "live",
+                type: "self paced",
                 isGroup: false,
                 timeLimit: 20,
                 groupId: 2,

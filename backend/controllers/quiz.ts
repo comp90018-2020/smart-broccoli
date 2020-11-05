@@ -155,7 +155,7 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
             model: Question,
             as: "questions",
         },
-        order: [["questions", "index", "ASC"]]
+        order: [["questions", "index", "ASC"]],
     });
     if (!quiz) {
         throw new ErrorStatus("Quiz not found", 404);
@@ -335,7 +335,7 @@ export const getQuiz = async (userId: number, quizId: number) => {
                 ],
             },
         ],
-        order: [["questions", "index", "ASC"]]
+        order: [["questions", "index", "ASC"]],
     });
 
     // Questions

@@ -228,7 +228,7 @@ export const createSession = async (userId: number, opts: any) => {
                 as: "questions",
             },
         ],
-        order: [["questions", "index", "ASC"]]
+        order: [["questions", "index", "ASC"]],
     });
     if (!quiz) {
         throw new ErrorStatus("Quiz not found", 404);

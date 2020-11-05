@@ -92,12 +92,20 @@ export class Player {
                 name: this.name,
                 pictureId: this.pictureId,
             },
-            record: {},
+            record: {
+                // @ts-ignore
+                oldPos: null,
+                // @ts-ignore
+                newPos: null,
+                bonusPoints: 0,
+                points: 0,
+                streak: 0,
+            },
         };
-        const _lastestRecord = this.latestRecord(questionIndex);
+        const _latestPreviousQuestionRecord = this.latestRecord(questionIndex);
         if (
-            _lastestRecord !== null &&
-            _lastestRecord.questionNo === questionIndex
+            _latestPreviousQuestionRecord !== null &&
+            _latestPreviousQuestionRecord.questionNo === questionIndex
         ) {
             const {
                 oldPos,
@@ -105,7 +113,7 @@ export class Player {
                 bonusPoints,
                 points,
                 streak,
-            } = _lastestRecord;
+            } = _latestPreviousQuestionRecord;
             record.record = {
                 oldPos: oldPos,
                 newPos: newPos,
@@ -113,7 +121,19 @@ export class Player {
                 points: points,
                 streak: streak,
             };
-        } else record.record = null;
+            return record;
+        }
+
+        const _latestRecord = this.latestRecord();
+        if (_latestRecord === null) return record;
+        const { oldPos, newPos, bonusPoints, points, streak } = _latestRecord;
+        record.record = {
+            oldPos: oldPos,
+            newPos: newPos,
+            bonusPoints: bonusPoints,
+            points: points,
+            streak: streak,
+        };
         return record;
     }
 }
