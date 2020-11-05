@@ -101,7 +101,7 @@ class _ProfileMainState extends State<ProfileMain> {
           setState(() => _isEdit = false);
         }
       }).catchError((err) {
-        showErrSnackBar(context, err.toString());
+        showErrSnackBar(context, err.toString(), dim: true);
       });
 
       setState(() => _committed = false);

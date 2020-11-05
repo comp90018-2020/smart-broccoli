@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 void showErrSnackBar(BuildContext context, String text, {bool dim = false}) {
   showSnackBar(context, text,
-      backgroundColor: dim ? Colors.red[600] : Colors.red[400]);
+      backgroundColor: dim ? Colors.red[400] : Colors.red[600]);
 }
 
 void showSnackBar(BuildContext context, String text,
