@@ -58,7 +58,7 @@ void main() async {
 
   await Firebase.initializeApp();
   FirebaseNotification();
-  // LocalNotification();
+  LocalNotification();
   runApp(
     MultiProvider(
       providers: [
