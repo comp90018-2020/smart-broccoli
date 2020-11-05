@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:smart_broccoli/src/store/remote/location_api.dart';
 
 ///Address selection page
 class MapSetting extends StatefulWidget {
@@ -9,26 +10,14 @@ class MapSetting extends StatefulWidget {
   _MapSettingState createState() => new _MapSettingState();
 }
 
+List<LocationData> location = [];
+
 class _MapSettingState extends State<MapSetting> {
   TextEditingController controller = new TextEditingController();
-
-  // Get json result and convert it to model. Then add
-  Future<Null> getUserDetails() async {
-    final response = await http.get(url);
-    final responseJson = json.decode(response.body);
-
-    setState(() {
-      for (Map user in responseJson) {
-        _userDetails.add(UserDetails.fromJson(user));
-      }
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-
-    getUserDetails();
   }
 
   @override
@@ -52,43 +41,40 @@ class _MapSettingState extends State<MapSetting> {
                     controller: controller,
                     decoration: new InputDecoration(
                         hintText: 'Search', border: InputBorder.none),
-                    onChanged: onSearchTextChanged,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: getLocations,
                   ),
                   trailing: new IconButton(
                     icon: new Icon(Icons.cancel_rounded),
                     onPressed: () {
                       controller.clear();
-                      onSearchTextChanged('');
+                      location.clear();
+                      setState(() {});
                     },
                   ),
-                  // contentPadding: EdgeInsets.symmetric(horizontal: 0.0),
                 ),
               ),
             ),
           ),
           new Expanded(
-            child: _searchResult.length != 0 || controller.text.isNotEmpty
+            child: location.length != 0 || controller.text.isNotEmpty
                 ? new ListView.builder(
-                    itemCount: _searchResult.length,
+                    itemCount: location.length,
                     itemBuilder: (context, i) {
                       return new Card(
                         child: new ListTile(
-                          title: new Text(_searchResult[i].firstName +
-                              ' ' +
-                              _searchResult[i].lastName),
+                          title: new Text(location[i].name),
                         ),
                         margin: const EdgeInsets.all(0.0),
                       );
                     },
                   )
                 : new ListView.builder(
-                    itemCount: _userDetails.length,
+                    itemCount: location.length,
                     itemBuilder: (context, index) {
                       return new Card(
                         child: new ListTile(
-                          title: new Text(_userDetails[index].firstName +
-                              ' ' +
-                              _userDetails[index].lastName),
+                          title: new Text(location[index].name),
                         ),
                         margin: const EdgeInsets.all(0.0),
                       );
@@ -100,39 +86,10 @@ class _MapSettingState extends State<MapSetting> {
     );
   }
 
-  onSearchTextChanged(String text) async {
-    _searchResult.clear();
-    if (text.isEmpty) {
-      setState(() {});
-      return;
-    }
-
-    _userDetails.forEach((userDetail) {
-      if (userDetail.firstName.contains(text) ||
-          userDetail.lastName.contains(text)) _searchResult.add(userDetail);
+  getLocations(String text) async {
+    var _location = await LocationAPI.queryByName(text);
+    setState(() {
+      location = _location;
     });
-
-    setState(() {});
-  }
-}
-
-List<UserDetails> _searchResult = [];
-
-List<UserDetails> _userDetails = [];
-
-final String url = 'https://jsonplaceholder.typicode.com/users';
-
-class UserDetails {
-  final int id;
-  final String firstName, lastName;
-
-  UserDetails({this.id, this.firstName, this.lastName});
-
-  factory UserDetails.fromJson(Map<String, dynamic> json) {
-    return new UserDetails(
-      id: json['id'],
-      firstName: json['name'],
-      lastName: json['username'],
-    );
   }
 }
