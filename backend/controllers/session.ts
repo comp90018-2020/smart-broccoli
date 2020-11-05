@@ -225,8 +225,8 @@ export const createSession = async (userId: number, opts: any) => {
             {
                 // @ts-ignore
                 model: Question,
-                order: [["id", "ASC"]],
-                as: "questions"
+                order: [["index", "ASC"]],
+                as: "questions",
             },
         ],
     });

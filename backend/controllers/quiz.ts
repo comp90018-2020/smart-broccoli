@@ -154,7 +154,7 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
         include: {
             model: Question,
             as: "questions",
-            order: [["id", "ASC"]],
+            order: [["index", "ASC"]],
         },
     });
     if (!quiz) {

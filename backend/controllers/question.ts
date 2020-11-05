@@ -14,6 +14,7 @@ interface QuestionInfo {
     type: string;
     tf?: boolean;
     options?: OptionAttributes[];
+    index?: number;
 }
 
 /**
@@ -34,7 +35,12 @@ export const processQuestions = async (
     }
 
     // First parse updated into QuestionInfo[]
-    const updatedQuestions = updated.map((q) => checkQuestionInfo(q));
+    const updatedQuestions = [];
+    for (const [index, question] of updated.entries()) {
+        const checkedQuestion = checkQuestionInfo(question);
+        checkedQuestion.index = index;
+        updatedQuestions.push(checkedQuestion);
+    }
 
     // Now get Ids
     const originalIds = original.map((q) => q.id);
@@ -42,28 +48,30 @@ export const processQuestions = async (
         .filter((q) => q.id !== undefined)
         .map((q) => q.id);
 
+    const promises = [];
+
     // Delete missing ids
     const deletedIds = originalIds.filter((id) => !updatedIds.includes(id));
     for (const id of deletedIds) {
-        await deleteQuestion(transaction, quizId, id);
+        promises.push(deleteQuestion(transaction, quizId, id));
     }
 
-    const questions: Question[] = [];
+    // Insert update
     for (const question of updatedQuestions) {
         if (!question.id) {
             // Insert new questions (no id)
-            questions.push(await addQuestion(transaction, quizId, question));
+            promises.push(addQuestion(transaction, quizId, question));
         } else if (originalIds.includes(question.id)) {
             // If updated
-            questions.push(
-                await updateQuestion(transaction, quizId, question.id, question)
+            promises.push(
+                updateQuestion(transaction, quizId, question.id, question)
             );
         }
     }
 
-    // Sort questions
-    questions.sort((a, b) => a.id - b.id);
-    return questions;
+    // Complete
+    const questions = await Promise.all(promises);
+    return questions.filter((q) => q != null);
 };
 
 /**
@@ -173,7 +181,7 @@ const deleteQuestion = async (
     transaction: Transaction,
     quizId: number,
     questionId: number
-) => {
+): Promise<Question> => {
     const deleted = await Question.destroy({
         where: {
             id: questionId,
@@ -184,6 +192,7 @@ const deleteQuestion = async (
     if (deleted == 0) {
         throw new ErrorStatus("Cannot delete specified question", 400);
     }
+    return null;
 };
 
 /**
