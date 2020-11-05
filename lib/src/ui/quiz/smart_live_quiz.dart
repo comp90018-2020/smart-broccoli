@@ -13,8 +13,6 @@ import 'package:flutter_settings/widgets/SettingsInputField.dart';
 import 'package:flutter_settings/widgets/SettingsSlider.dart';
 import 'package:day_picker/day_picker.dart';
 import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
-import 'package:dropdown_search/dropdown_search.dart';
-// import 'package:dio/dio.dart';
 
 /// Smart quiz page
 class SmartQuiz extends StatefulWidget {
@@ -275,53 +273,8 @@ class _SmartQuizState extends State<SmartQuiz> {
                 type: CheckBoxWidgetType.Switch,
               ),
             ]),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: DropdownSearch<int>(
-            items: [
-              // UserModel(name: "Offline name1", id: "999"),
-              // UserModel(name: "Offline name2", id: "0101")
-              1,
-              2
-            ],
-            maxHeight: 300,
-            // onFind: (String filter) => getData(filter),
-            label: "Work address",
-            onChanged: print,
-            showSearchBox: true,
-            dropdownSearchDecoration: new InputDecoration(
-              icon: Icon(
-                Icons.location_on_rounded,
-                color: Colors.green,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(20),
-                ),
-                borderSide: BorderSide(color: Colors.black26, width: 0.5),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(20),
-                ),
-                borderSide: BorderSide(color: Colors.black26, width: 0.5),
-              ),
-            ),
-          ),
-        ),
-        Divider(),
         Divider(height: 5, color: Colors.white),
       ]),
     );
   }
-
-  // Future<List<UserModel>> getData(filter) async {
-  //   var response = await Dio().get(
-  //     "http://5d85ccfb1e61af001471bf60.mockapi.io/user",
-  //     queryParameters: {"filter": filter},
-  //   );
-
-  //   var models = UserModel.fromJsonList(response.data);
-  //   return models;
-  // }
 }
