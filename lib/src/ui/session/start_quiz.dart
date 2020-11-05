@@ -74,8 +74,14 @@ class StartQuiz extends StatelessWidget {
                 children: [
                   Expanded(
                     child: RaisedButton(
-                      onPressed: () {
-                        showBasicDialog(context, "Feature coming soon!");
+                      onPressed: () async {
+                        try {
+                          await Provider.of<GameSessionModel>(context,
+                                  listen: false)
+                              .createSession(quizId, GameSessionType.GROUP);
+                        } catch (_) {
+                          showBasicDialog(context, "Cannot start session");
+                        }
                       },
                       child: Column(
                         children: [
