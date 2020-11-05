@@ -367,9 +367,7 @@ export class GameSession {
         } = this.pointSys.getPointsAndStreak(
             correct,
             playerId,
-            _latestRecordOfPreviousQuestion !== null &&
-                _latestRecordOfPreviousQuestion.questionNo + 1 ===
-                    answer.question
+            _latestRecordOfPreviousQuestion !== null
                 ? _latestRecordOfPreviousQuestion.streak
                 : 0,
             this.activePlayersNum
@@ -378,19 +376,13 @@ export class GameSession {
         this.playerMap[playerId].records.push(
             new PlayerRecord(
                 answer.question,
-                _latestRecordOfPreviousQuestion !== null &&
-                _latestRecordOfPreviousQuestion.questionNo + 1 ===
-                    answer.question
+                _latestRecordOfPreviousQuestion !== null
                     ? _latestRecordOfPreviousQuestion.newPos
                     : null,
                 null,
                 bonusPoints,
                 points + bonusPoints,
-                _latestRecordOfPreviousQuestion !== null &&
-                _latestRecordOfPreviousQuestion.questionNo + 1 ===
-                    answer.question
-                    ? streak
-                    : 0
+                streak
             )
         );
 
