@@ -39,8 +39,7 @@ class CustomPage extends StatelessWidget {
 
   /// Constructs a custom page
   CustomPage(
-      {Key key,
-      @required this.title,
+      {@required this.title,
       @required this.child,
       this.hasDrawer = false,
       this.primary = true,
@@ -49,8 +48,7 @@ class CustomPage extends StatelessWidget {
       this.appbarLeading,
       this.automaticallyImplyLeading = true,
       this.appbarActions,
-      this.floatingActionButton})
-      : super(key: key);
+      this.floatingActionButton});
 
   @override
   Widget build(BuildContext context) {
