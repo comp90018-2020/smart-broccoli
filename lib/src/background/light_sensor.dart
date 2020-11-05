@@ -1,29 +1,18 @@
 import 'dart:async';
-import 'dart:developer';
-
 import 'package:light/light.dart';
+import 'package:async/async.dart' show StreamQueue;
 
 /// The Luminosity sensor
-/// Gets light data
 class LightSensor {
-  Light _light;
-  StreamController<int> controller = StreamController<int>();
-
-  close() {
-    controller.close();
-  }
-
-  Future<int> whenLight() async {
+  static Future<int> getLightReading() async {
     try {
-      _light = new Light();
-      controller.addStream(_light.lightSensorStream);
+      Light light = new Light();
+      var queue = new StreamQueue(light.lightSensorStream);
+      int val = await queue.next;
+      queue.cancel();
+      return val;
     } catch (e) {
-      log(e, name: "Light");
+      return Future.error("Light failed");
     }
-
-    await for (int value in controller.stream) {
-      return value;
-    }
-    return null;
   }
 }
