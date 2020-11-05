@@ -78,7 +78,7 @@ class _ProfileJoinedState extends ProfileEditorState {
                     ),
                   ],
                 ),
-        )
+        ),
       ],
     );
   }
