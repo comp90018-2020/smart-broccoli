@@ -33,12 +33,16 @@ class LocationAPI {
             name: "Foreground Location");
 
         List<dynamic> jsonObject = json.decode(httpResult);
-        List<LocationData> output = jsonObject.map((obj) => LocationData(
-              name: obj["display_name"].toString(),
-              lon: double.tryParse(obj["lon"]),
-              lat: double.tryParse(obj["lat"]),
-            ));
+        List<LocationData> output = [];
 
+        for (var i = 0; i < jsonObject.length; i++) {
+          LocationData loc = new LocationData(
+            name: jsonObject[i]["display_name"].toString(),
+            lon: double.tryParse(jsonObject[i]["lon"]),
+            lat: double.tryParse(jsonObject[i]["lat"]),
+          );
+          output.add(loc);
+        }
         return output;
       }
       return Future.error(response.body);

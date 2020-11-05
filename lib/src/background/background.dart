@@ -5,9 +5,9 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sensors/sensors.dart';
+import 'package:smart_broccoli/src/background/background_database.dart';
 import 'package:smart_broccoli/src/background/light_sensor.dart';
 import 'package:smart_broccoli/src/background/network.dart';
-import 'package:smart_broccoli/src/background/background_database.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'gyro.dart';
