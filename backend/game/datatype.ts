@@ -34,10 +34,21 @@ export enum PlayerState {
     Complete = "complete",
     Left = "complete",
 }
+
+export class PlayerRecord {
+    constructor(
+        public questionNo: number = null,
+        public oldPos: number = null,
+        public newPos: number = null,
+        public bonusPoints: number = 0,
+        public points: number = 0,
+        public streak: number = 0
+    ) {}
+}
+
 export class Player {
-    public record: { [key: string]: any } = {};
-    public previousRecord: { [key: string]: any } = {};
-    public state: PlayerState;
+    public records: PlayerRecord[] = [];
+    public state: PlayerState = PlayerState.Joined;
     constructor(
         readonly id: number,
         readonly name: string,
@@ -46,15 +57,18 @@ export class Player {
         public sessionId: number,
         public role: string,
         public token: string
-    ) {
-        this.record.questionNo = 0;
-        this.record.oldPos = null;
-        this.record.newPos = null;
-        this.record.bonusPoints = 0;
-        this.record.points = 0;
-        this.record.streak = 0;
-        // deep copy
-        this.previousRecord = JSON.parse(JSON.stringify(this.record));
+    ) {}
+
+    latestRecord(questionIndex?: number) {
+        if (questionIndex === undefined) {
+            if (this.records.length === 0) return null;
+            return this.records[this.records.length - 1];
+        }
+
+        const _latestRecord = this.records
+            .slice()
+            .find((record) => record.questionNo === questionIndex);
+        return _latestRecord === undefined ? null : _latestRecord;
     }
 
     /**
@@ -71,22 +85,36 @@ export class Player {
     /**
      * format record for event-> questionOutcome
      */
-    formatRecord() {
-        const { oldPos, newPos, bonusPoints, points, streak } = this.record;
-        return {
+    formatRecord(questionIndex: number) {
+        const record = {
             player: {
                 id: this.id,
                 name: this.name,
                 pictureId: this.pictureId,
             },
-            record: {
+            record: {},
+        };
+        const _lastestRecord = this.latestRecord(questionIndex);
+        if (
+            _lastestRecord !== null &&
+            _lastestRecord.questionNo === questionIndex
+        ) {
+            const {
+                oldPos,
+                newPos,
+                bonusPoints,
+                points,
+                streak,
+            } = _lastestRecord;
+            record.record = {
                 oldPos: oldPos,
                 newPos: newPos,
                 bonusPoints: bonusPoints,
                 points: points,
                 streak: streak,
-            },
-        };
+            };
+        } else record.record = null;
+        return record;
     }
 }
 

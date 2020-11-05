@@ -334,7 +334,6 @@ class _QuizCreateState extends State<QuizCreate> {
 
     if (returnArgs is QuestionReturnArguments) {
       // No change
-      print(returnArgs.question == _quiz.questions[index]);
       if (returnArgs.question != null &&
           returnArgs.question == _quiz.questions[index]) return;
       // If saved
@@ -343,9 +342,7 @@ class _QuizCreateState extends State<QuizCreate> {
           _quiz.questions.removeAt(index);
         } else {
           _quiz.questions.removeAt(index);
-          print(returnArgs.question.pendingPicturePath);
           _quiz.questions.insert(index, returnArgs.question);
-          print(_quiz.questions[index].pendingPicturePath);
         }
       });
     }

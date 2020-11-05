@@ -66,7 +66,7 @@ class AuthApi {
       return User.fromJson(json.decode(response.body));
 
     if (response.statusCode == 409) throw RegistrationConflictException();
-    throw ParticipantPromotionException();
+    throw ApiException("Cannot promote participant");
   }
 
   /// Authenticate a registered user.
@@ -88,6 +88,7 @@ class AuthApi {
     if (token == null) return false;
     final http.Response response = await _http.get('$AUTH_URL/session',
         headers: ApiBase.headers(authToken: token));
+    if (response.statusCode == 502) return true;
     return response.statusCode == 200;
   }
 

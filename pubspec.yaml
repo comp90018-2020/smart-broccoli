@@ -24,7 +24,6 @@ dependencies:
   socket_io_client: ^0.9.11
   workmanager: ^0.2.0
   geolocator: ^6.1.0
-  connectivity: ^2.0.0
   wifi_info_plugin: ^1.1.5
   light: ^1.0.0
   device_calendar: ^3.1.0

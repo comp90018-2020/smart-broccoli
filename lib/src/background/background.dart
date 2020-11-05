@@ -31,12 +31,12 @@ void callbackDispatcher() {
           }
 
           // Check wifi
-          if (await Network.isAtWork("blabh blah")) {
+          if (await Network.workWifiMatch("blabh blah")) {
             free = false;
           }
 
           /// Check location sensitive issues
-          if (free && await locationCheck(db)) {
+          if (free && !(await locationCheck(db))) {
             free = false;
           }
 

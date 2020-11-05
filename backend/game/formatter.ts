@@ -65,39 +65,50 @@ export const formatWelcome = (
 export const formatQuestionOutcome = (
     session: GameSession,
     player: Player,
+    questionIndex: number,
     rankAll: Player[],
     rankFormated: any[]
 ) => {
-    const { id: playerId, record } = player;
+    // This question has been answered
+    const _latestRecord = player.latestRecord(questionIndex);
     const playerAheadRecord =
-        record.newPos === null || record.newPos === 0
+        questionIndex === 0 ||
+        rankAll.length === 0 ||
+        (_latestRecord !== null && _latestRecord.newPos === 0)
             ? null
-            : rankAll[record.newPos - 1].formatRecord();
+            : rankAll[
+                  _latestRecord === null
+                      ? rankAll.length - 1
+                      : _latestRecord.newPos
+              ].formatRecord(questionIndex);
 
     const questionOutcome = {
-        question: session.questionIndex - 1,
+        question: questionIndex,
         leaderboard: rankFormated,
-        record: session.playerMap[Number(playerId)].formatRecord().record,
+        record: session.playerMap[player.id].formatRecord(questionIndex).record,
         playerAhead: playerAheadRecord,
     };
     return questionOutcome;
 };
 
-export const rankSlice = (rank: Player[], count?: number) => {
-    if (count === undefined) {
-        count = rank.length;
-    }
-    const top5: any[] = [];
+export const rankSlice = (
+    rank: Player[],
+    currentIndex: number,
+    count?: number
+) => {
+    if (count === undefined) count = rank.length;
+    const topX: any[] = [];
     rank.slice(0, count).forEach((player) => {
-        const { id, name, pictureId, record } = player;
+        const { id, name, pictureId } = player;
+        const record = player.latestRecord(currentIndex);
         const { oldPos, newPos, bonusPoints, points, streak } = record;
-        top5.push({
+        topX.push({
             player: {
                 id: id,
                 name: name,
                 pictureId: pictureId,
             },
-            record: {
+            record: record ?? {
                 oldPos: oldPos,
                 newPos: newPos,
                 bonusPoints: bonusPoints,
@@ -106,5 +117,5 @@ export const rankSlice = (rank: Player[], count?: number) => {
             },
         });
     });
-    return top5;
+    return topX;
 };

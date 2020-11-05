@@ -1,4 +1,4 @@
-import { Player } from "./datatype";
+import { Player, PlayerRecord } from "./datatype";
 
 export class PointSystem {
     // base points for each question before apply streak factor etc
@@ -27,7 +27,8 @@ export class PointSystem {
             // greater streak get greater factor
             const factorStreak = streak * 0.1;
             // the higher rank and the more players are, the greater factor is given
-            const factorRank = (1 - rank / totalPlayer) / 2;
+            const factorRank =
+                rank > totalPlayer ? 0 : (1 - rank / totalPlayer) / 2;
             return factor + (factorStreak < 1 ? factorStreak : 1) + factorRank;
         }
         return factor;
@@ -40,26 +41,29 @@ export class PointSystem {
 
     public getPointsAndStreak(
         correct: boolean,
-        player: Player,
-        totalPlayer: number
+        playerId: number,
+        previousStreak: number,
+        activePlayersNumber: number
     ) {
-        if (this.answeredPlayers.has(player.id)) {
+        if (this.answeredPlayers.has(playerId)) {
             return {
                 points: correct ? this.pointsEachQuestion : 0,
-                streak: correct ? 0 : 1,
+                streak: correct ? previousStreak + 1 : 0,
             };
         } else {
-            this.answeredPlayers.add(player.id);
+            this.answeredPlayers.add(playerId);
             return {
                 points: Math.floor(
                     this.getFactor(
                         correct,
-                        correct ? this.getRankForARightAns() : totalPlayer,
-                        player.record.streak,
-                        totalPlayer
+                        correct
+                            ? this.getRankForARightAns()
+                            : activePlayersNumber,
+                        previousStreak,
+                        activePlayersNumber
                     ) * this.pointsEachQuestion
                 ),
-                streak: correct ? player.record.streak + 1 : 0,
+                streak: correct ? previousStreak + 1 : 0,
             };
         }
     }

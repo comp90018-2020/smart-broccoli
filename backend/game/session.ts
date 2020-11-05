@@ -6,6 +6,7 @@ import {
     PlayerState,
     Answer,
     Role,
+    PlayerRecord,
 } from "./datatype";
 import { QuizAttributes } from "../models/quiz";
 import {
@@ -100,6 +101,8 @@ export class GameSession {
     }
 
     playerJoin(player: Player) {
+        if (this.playerMap.hasOwnProperty(player.id))
+            player.records = this.playerMap[player.id].records;
         this.playerMap[player.id] = player;
         this.setPlayerState(player, PlayerState.Joined);
     }
@@ -120,10 +123,6 @@ export class GameSession {
         if (questionIndex === this.questionIndex) {
             this._isReadyForNextQuestion = false;
         }
-    }
-
-    getPlayer(playerId: number) {
-        return this.playerMap[playerId];
     }
 
     isSelfPacedGroupAndHasNotStarted() {
@@ -218,9 +217,9 @@ export class GameSession {
 
     endSession() {
         const rank = this.rankPlayers();
-        const progress = rank.map(({ id, record, state }) => ({
+        const progress = rank.map(({ id, records, state }) => ({
             userId: id,
-            data: record,
+            data: records,
             state: state,
         }));
 
@@ -265,7 +264,7 @@ export class GameSession {
 
     canReleaseNextQuestion(player: Player, nextQuestionIndex: number) {
         return (
-            nextQuestionIndex <= this.totalQuestions &&
+            nextQuestionIndex < this.totalQuestions &&
             !this.questionReleased.has(nextQuestionIndex) &&
             this.questionIndex === nextQuestionIndex &&
             this._isReadyForNextQuestion &&
@@ -284,13 +283,13 @@ export class GameSession {
         );
     }
 
-    canAnswer(player: Player, answer: Answer) {
+    canAnswer(player: Player, answer: Answer, currentQuestionIndex: number) {
         // is player
         return (
+            !this._isReadyForNextQuestion &&
             answer.question === this.questionIndex &&
-            player.role === Role.player &&
-            // and there is a conducting question
-            (!this._isReadyForNextQuestion || this.questionIndex === 0)
+            this.questionIndex === currentQuestionIndex &&
+            player.role === Role.player
         );
     }
 
@@ -341,63 +340,73 @@ export class GameSession {
         }
     }
 
-    assessAns(playerId: number, answer: Answer) {
-        const correctAnswer = this.getAnsOfQuestion(this.questionIndex);
+    assessAns(playerId: number, answer: Answer, currentQuestionIndex: number) {
+        const correctAnswer = this.getAnsOfQuestion(currentQuestionIndex);
         const player = this.playerMap[playerId];
 
         let correct;
-        if (answer.question !== correctAnswer.question) {
-            correct = false;
+        if (correctAnswer.MCSelection !== null) {
+            correct =
+                JSON.stringify(answer.MCSelection) ===
+                JSON.stringify(correctAnswer.MCSelection);
         } else {
-            if (correctAnswer.MCSelection !== null) {
-                correct =
-                    JSON.stringify(answer.MCSelection) ===
-                    JSON.stringify(correctAnswer.MCSelection);
-            } else {
-                correct =
-                    answer.TFSelection === correctAnswer.TFSelection
-                        ? true
-                        : false;
-            }
+            correct = answer.TFSelection === correctAnswer.TFSelection;
         }
+
+        const _latestRecordOfPreviousQuestion = this.playerMap[
+            playerId
+        ].latestRecord(currentQuestionIndex - 1);
+
+        const _latestRecord = this.playerMap[playerId].latestRecord();
+        const points = _latestRecord === null ? 0 : _latestRecord.points;
 
         // get points and streak
-        const { points, streak } = this.pointSys.getPointsAndStreak(
+        const {
+            points: bonusPoints,
+            streak,
+        } = this.pointSys.getPointsAndStreak(
             correct,
-            player,
-            Object.keys(this.playerMap).length
+            playerId,
+            _latestRecordOfPreviousQuestion !== null &&
+                _latestRecordOfPreviousQuestion.questionNo + 1 ===
+                    answer.question
+                ? _latestRecordOfPreviousQuestion.streak
+                : 0,
+            this.activePlayersNum
         );
 
-        this.playerMap[playerId].previousRecord = this.playerMap[
-            playerId
-        ].record;
-        const previousRecord = this.playerMap[playerId].previousRecord;
-        this.playerMap[playerId].record = {
-            questionNo: answer.question,
-            oldPos:
-                previousRecord.questionNo === answer.question
-                    ? this.playerMap[playerId].previousRecord.newPos
+        this.playerMap[playerId].records.push(
+            new PlayerRecord(
+                answer.question,
+                _latestRecordOfPreviousQuestion !== null &&
+                _latestRecordOfPreviousQuestion.questionNo + 1 ===
+                    answer.question
+                    ? _latestRecordOfPreviousQuestion.newPos
                     : null,
-            newPos: null,
-            bonusPoints: points,
-            points: points + this.playerMap[playerId].previousRecord.points,
-            streak: previousRecord.questionNo === answer.question ? streak : 0,
-        };
+                null,
+                bonusPoints,
+                points + bonusPoints,
+                _latestRecordOfPreviousQuestion !== null &&
+                _latestRecordOfPreviousQuestion.questionNo + 1 ===
+                    answer.question
+                    ? streak
+                    : 0
+            )
+        );
 
-        if (!this.hasMoreQuestions()) {
+        if (this.answerReleased.size === this.totalQuestions)
             this.playerMap[player.id].state = PlayerState.Complete;
-        }
     }
 
     getQuestionIndex() {
-        return this._isReadyForNextQuestion
+        return !this._isReadyForNextQuestion
             ? this.questionIndex
             : this.questionIndex - 1;
     }
 
     setToNextQuestion(nextQuestionIndex: number) {
         if (
-            this.questionIndex === nextQuestionIndex - 1 &&
+            0 <= nextQuestionIndex &&
             nextQuestionIndex <= this.totalQuestions
         ) {
             this.questionIndex = nextQuestionIndex;
@@ -407,20 +416,28 @@ export class GameSession {
     }
 
     rankPlayers() {
-        const playersArray: Player[] = [];
-        for (const player of Object.values(this.playerMap)) {
-            playersArray.push(player);
-        }
+        const playersArray: Player[] = Object.values(this.playerMap);
+        const currentQuestionIndex = this.getQuestionIndex();
         // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
-        playersArray.sort((a, b) =>
-            a.record.points < b.record.points ? 1 : -1
-        );
+        playersArray.sort((a, b) => {
+            const aRecord = a.latestRecord(currentQuestionIndex);
+            const bRecord = b.latestRecord(currentQuestionIndex);
+            return bRecord === null || aRecord.points < bRecord.points ? 1 : -1;
+        });
 
-        playersArray.forEach(({ id, record }, ranking) => {
-            this.playerMap[id].record.newPos = ranking;
-            this.playerMap[id].record.oldPos = record.newPos;
-            playersArray[ranking].record.newPos = ranking;
-            playersArray[ranking].record.oldPos = record.newPos;
+        playersArray.forEach(({ id }, ranking) => {
+            const lastRecordIndex = this.playerMap[id].records.length - 1;
+            const lastestRecord = this.playerMap[id].latestRecord(
+                currentQuestionIndex
+            );
+            if (lastestRecord !== null) {
+                this.playerMap[id].records[lastRecordIndex].newPos = ranking;
+                this.playerMap[id].records[lastRecordIndex].oldPos =
+                    lastestRecord.newPos;
+                playersArray[ranking].records[lastRecordIndex].newPos = ranking;
+                playersArray[ranking].records[lastRecordIndex].oldPos =
+                    lastestRecord.newPos;
+            }
         });
         return playersArray;
     }

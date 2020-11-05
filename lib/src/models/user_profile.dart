@@ -8,15 +8,11 @@ import 'package:smart_broccoli/src/remote.dart';
 import 'model_change.dart';
 
 import 'auth_state.dart';
-import 'user_repository.dart';
 
 /// View model for the user's profile
 class UserProfileModel extends ChangeNotifier implements AuthChange {
   /// AuthStateModel object used to obtain token for requests
   final AuthStateModel _authStateModel;
-
-  /// Cached provider for user profile service
-  UserRepository _userRepo;
 
   /// Local storage service
   KeyValueStore _keyValueStore;
@@ -31,8 +27,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
   User get user => _user;
 
   /// Constructor for external use
-  UserProfileModel(
-      this._keyValueStore, this._authStateModel, this._userRepo, this._picStash,
+  UserProfileModel(this._keyValueStore, this._authStateModel, this._picStash,
       {UserApi userApi}) {
     _userApi = userApi ?? UserApi();
     // load last record of profile and picture
@@ -49,7 +44,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       return user;
     }
     // If not, retrieve user
-    return await _refreshUser();
+    return _refreshUser();
   }
 
   /// Retrieve user picture from cache
@@ -61,35 +56,84 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
   /// Retrieve user and image from API
   Future<User> _refreshUser() async {
     if (!_authStateModel.inSession) return null;
-    _user = await _userApi.getUser(_authStateModel.token);
-    _keyValueStore.setString('user', json.encode(_user.toJson()));
+
+    try {
+      _user = await _userApi.getUser(_authStateModel.token);
+      _keyValueStore.setString('user', json.encode(_user.toJson()));
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+
     // If user has picture and picture is not stored in cache
     if (_user.pictureId != null &&
         await _picStash.getPic(_user.pictureId) == null) {
-      var picture = await _userApi.getProfilePic(_authStateModel.token);
-      await _picStash.storePic(user.pictureId, picture);
+      try {
+        var picture = await _userApi.getProfilePic(_authStateModel.token);
+        await _picStash.storePic(user.pictureId, picture);
+      } on ApiAuthException {
+        _authStateModel.checkSession();
+      } on Exception {
+        // Ignore
+      }
     }
+
     notifyListeners();
     return _user;
   }
 
+  /// Updates user profile information
   Future<void> updateUser({String email, String password, String name}) async {
     if (!_authStateModel.inSession) return null;
-    _user = await _userRepo.updateUser(_authStateModel.token,
-        email: email, password: password, name: name);
-    _keyValueStore.setString('user', json.encode(_user.toJson()));
-    notifyListeners();
+
+    try {
+      _user = await _userApi.updateUser(_authStateModel.token,
+          email: email, password: password, name: name);
+      _keyValueStore.setString('user', json.encode(_user.toJson()));
+      notifyListeners();
+    } on ApiAuthException {
+      await _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
   }
 
+  /// Updates user's profile picture
   Future<void> updateProfilePic(Uint8List bytes) async {
     if (!_authStateModel.inSession) return null;
-    await _userApi.setProfilePic(_authStateModel.token, bytes);
+
+    try {
+      await _userApi.setProfilePic(_authStateModel.token, bytes);
+    } on ApiAuthException {
+      await _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+
     _refreshUser();
   }
 
+  /// Promotes user from joined to registered
   Future<void> promoteUser(String email, String password, String name) async {
     if (!_authStateModel.inSession) return null;
-    await _authStateModel.promote(email, password, name);
+
+    try {
+      await _authStateModel.promote(email, password, name);
+    } on ApiAuthException {
+      await _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+
     _refreshUser();
   }
 

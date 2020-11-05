@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:smart_broccoli/src/ui/shared/centered_page.dart';
 
@@ -17,10 +18,21 @@ class _NamePromptState extends State<NamePrompt> {
 
   bool _nameEmpty = true;
 
+  /// whether JOIN is clicked
+  bool _joinButtonClicked = false;
+
   @override
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  // Prevent setState error resulting from auth -> login transition
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
   }
 
   @override
@@ -63,24 +75,40 @@ class _NamePromptState extends State<NamePrompt> {
             // join button
             Container(
               width: double.infinity,
-              child: RaisedButton(
-                child: const Text("JOIN"),
-                disabledTextColor:
-                    SmartBroccoliColourScheme.disabledButtonTextColor,
-                onPressed: _nameEmpty
-                    ? null
-                    : () async {
-                        AuthStateModel auth =
-                            Provider.of<AuthStateModel>(context, listen: false);
-                        UserProfileModel profile =
-                            Provider.of<UserProfileModel>(context,
-                                listen: false);
-                        await auth.join();
-                        profile.updateUser(name: _nameController.text);
-                      },
+              child: Builder(
+                builder: (BuildContext context) => RaisedButton(
+                  child: const Text("JOIN"),
+                  disabledTextColor:
+                      SmartBroccoliColourScheme.disabledButtonTextColor,
+                  onPressed: _nameEmpty || _joinButtonClicked
+                      ? null
+                      : () => _join(context),
+                ),
               ),
             ),
           ],
         ),
       );
+
+  void _join(BuildContext context) async {
+    // Disable button
+    setState(() => _joinButtonClicked = true);
+
+    Future<void> join() =>
+        Provider.of<AuthStateModel>(context, listen: false).join();
+    Future<void> setName() =>
+        Provider.of<UserProfileModel>(context, listen: false)
+            .updateUser(name: _nameController.text);
+
+    // Join and set name
+    try {
+      await join();
+      await setName();
+    } catch (err) {
+      showErrSnackBar(context, err.toString());
+    }
+
+    // Enable button
+    setState(() => _joinButtonClicked = false);
+  }
 }

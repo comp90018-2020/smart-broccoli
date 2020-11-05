@@ -29,7 +29,7 @@ class UserApi {
       return User.fromJson(json.decode(response.body));
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to get user: unknown error occurred');
+    throw ApiException("Unable to get user: unknown error occurred");
   }
 
   /// Get the profile of a different user.
@@ -43,7 +43,7 @@ class UserApi {
       return User.fromJson(json.decode(response.body));
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to get user: unknown error occurred');
+    throw ApiException("Unable to get user: unknown error occurred");
   }
 
   /// Update the profile of the logged-in/joined user.
@@ -67,7 +67,7 @@ class UserApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 409) throw RegistrationConflictException();
-    throw Exception('Unable to update user: unknown error occurred');
+    throw ApiException('Unable to update user: unknown error occurred');
   }
 
   /// Get the profile picture of a user.
@@ -81,7 +81,8 @@ class UserApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) return null; // user has no profile pic
-    throw Exception('Unable to get user profile pic: unknown error occurred');
+    throw ApiException(
+        'Unable to get user profile pic: unknown error occurred');
   }
 
   /// Get the profile picture of a different user.
@@ -96,7 +97,8 @@ class UserApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) return null; // user has no profile pic
-    throw Exception('Unable to get user profile pic: unknown error occurred');
+    throw ApiException(
+        'Unable to get user profile pic: unknown error occurred');
   }
 
   /// Set the profile pic of a user.
@@ -115,7 +117,8 @@ class UserApi {
     if (response.statusCode == 200) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to set user profile pic: unknown error occurred');
+    throw ApiException(
+        'Unable to set user profile pic: unknown error occurred');
   }
 
   /// Delete the profile pic of a user.
@@ -127,7 +130,7 @@ class UserApi {
     if (response.statusCode == 204) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception(
+    throw ApiException(
         'Unable to delete user profile pic: unknown error occurred');
   }
 }

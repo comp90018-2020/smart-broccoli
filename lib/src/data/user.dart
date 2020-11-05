@@ -1,3 +1,5 @@
+import 'package:smart_broccoli/src/store/remote/api_base.dart';
+
 import 'group.dart';
 
 enum UserType { REGISTERED, UNREGISTERED }
@@ -50,18 +52,24 @@ class User {
       };
 }
 
-class RegistrationException implements Exception {}
+class RegistrationException extends ApiException {
+  RegistrationException() : super("Failed to register");
+}
 
 /// Exception thrown when attempting to register (or update the profile of a
 /// user) with an already registered email
-class RegistrationConflictException extends RegistrationException {}
+class RegistrationConflictException extends RegistrationException {
+  @override
+  String toString() => 'Another account with the same email already exists';
+}
 
 /// Exception thrown when login is unsuccessful
-class LoginFailedException implements Exception {}
+class LoginFailedException extends ApiException {
+  LoginFailedException() : super("Incorrect username or password");
+}
 
 /// Exception thrown when a participant user fails to register with the server
-class ParticipantJoinException extends RegistrationException {}
-
-/// Exception thrown when a user cannot be promoted to a registered user
-/// (e.g. the user is already registered)
-class ParticipantPromotionException extends RegistrationException {}
+class ParticipantJoinException extends RegistrationException {
+  @override
+  String toString() => 'Cannot join';
+}
