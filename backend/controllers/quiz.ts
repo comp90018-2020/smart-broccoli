@@ -154,6 +154,7 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
         include: {
             model: Question,
             as: "questions",
+            order: [["id", "ASC"]],
         },
     });
     if (!quiz) {
@@ -316,6 +317,7 @@ export const getQuiz = async (userId: number, quizId: number) => {
                 // @ts-ignore
                 model: Question,
                 as: "questions",
+                order: [["id", "ASC"]],
             },
             {
                 // @ts-ignore
@@ -345,7 +347,7 @@ export const getQuiz = async (userId: number, quizId: number) => {
         // Quiz incomplete, but can view questions
         questions = quiz.questions.map((question) => {
             return {
-                ...question.toJSON,
+                ...question.toJSON(),
                 tf: null,
                 // Number of correct answers
                 numCorrect: question.numCorrect,

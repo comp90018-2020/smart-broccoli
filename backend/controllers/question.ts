@@ -60,6 +60,9 @@ export const processQuestions = async (
             );
         }
     }
+
+    // Sort questions
+    questions.sort((a, b) => a.id - b.id);
     return questions;
 };
 
