@@ -51,8 +51,11 @@ class QuizQuestion extends StatelessWidget {
                     // spacer if question has no pic
                     if (!model.question.hasPicture) Spacer(),
                     // question text
-                    Text("${model.question.text}",
-                        style: Theme.of(context).textTheme.headline6),
+                    Text(
+                      "${model.question.text}",
+                      style: Theme.of(context).textTheme.headline6,
+                      textAlign: TextAlign.center,
+                    ),
                     // question picture or spacer if question has no pic
                     model.question.hasPicture
                         ? Expanded(
@@ -157,6 +160,7 @@ class QuizQuestion extends StatelessWidget {
                   : Text(
                       (model.question as MCQuestion).options[index].text,
                       style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
                     ),
             ),
           ),
