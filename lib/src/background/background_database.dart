@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -90,6 +92,10 @@ class BackgroundDatabase {
     try {
       // Query the table for all The events.
       final List<Map<String, dynamic>> maps = await db.query('geo');
+
+      log("Geofence List: " + maps.toString(),name: "Background Geofence Debug");
+
+
       return List.generate(maps.length, (i) {
         return GeoFence(
           id: maps[i]['id'],
