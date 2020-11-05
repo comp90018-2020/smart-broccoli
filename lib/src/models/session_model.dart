@@ -117,44 +117,79 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     });
   }
 
+  /// Get current user's session (may be null -> user not in session)
   Future<void> refreshSession() async {
     if (!_authStateModel.inSession) return;
-    if ((session = await _sessionApi.getSession(_authStateModel.token)) !=
-        null) {
-      socket.disconnect();
-      _connect(session.token);
+
+    try {
+      if ((session = await _sessionApi.getSession(_authStateModel.token)) !=
+          null) {
+        socket.disconnect();
+        _connect(session.token);
+      }
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
     }
   }
 
+  /// Create session (supporting multiple creation types)
   Future<void> createSession(int quizId, GameSessionType type,
       {bool autoSubscribe = false}) async {
-    session = await _sessionApi.createSession(
-        _authStateModel.token, quizId, type,
-        autoSubscribe: autoSubscribe);
-    _connect(session.token);
+    try {
+      session = await _sessionApi.createSession(
+          _authStateModel.token, quizId, type,
+          autoSubscribe: autoSubscribe);
+      _connect(session.token);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
   }
 
-  Future<void> joinSession(GameSession quizSession) async {
+  Future<void> joinSessionByPin(String pin) async {
+    try {
+      session = await _sessionApi.joinSession(_authStateModel.token, pin);
+      _connect(session.token);
+      notifyListeners();
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on SessionNotFoundException catch (e) {
+      throw e;
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+  }
+
+  Future<void> _joinSession(GameSession quizSession) async {
     session = await _sessionApi.joinSession(
         _authStateModel.token, quizSession.joinCode);
     _connect(session.token);
     notifyListeners();
   }
 
-  Future<void> joinSessionByPin(String pin) async {
-    session = await _sessionApi.joinSession(_authStateModel.token, pin);
-    _connect(session.token);
-    notifyListeners();
-  }
-
   Future<void> joinLiveSession(Quiz quiz) async {
     try {
-      await joinSession(quiz.sessions.firstWhere((session) =>
+      await _joinSession(quiz.sessions.firstWhere((session) =>
           session.quizType == QuizType.LIVE &&
           session.state != GameSessionState.ENDED));
-    } on SessionNotFoundException catch (err) {
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on SessionNotFoundException {
       _quizCollectionModel.refreshAvailableQuizzes();
-      throw err;
+      return Future.error("Session no longer exists, refreshing...");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
     }
   }
 

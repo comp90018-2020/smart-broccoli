@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -114,7 +115,11 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub
         .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
-    Provider.of<GameSessionModel>(context, listen: false).refreshSession();
+
+    // Refresh user sessions on startup
+    Provider.of<GameSessionModel>(context, listen: false)
+        .refreshSession()
+        .catchError((_) => null);
   }
 
   /// Navigate to route
@@ -161,7 +166,11 @@ class _MyAppState extends State<MyApp> {
       if (inSession != null) {
         _mainNavigatorKey.currentState.pushNamedAndRemoveUntil(
             state.inSession ? '/take_quiz' : '/auth', (route) => false);
-        Provider.of<GameSessionModel>(context, listen: false).refreshSession();
+        // Refresh sessions, note that refreshSession returns immediately
+        // when the user is not authenticated
+        Provider.of<GameSessionModel>(context, listen: false)
+            .refreshSession()
+            .catchError((_) => null);
       }
       inSession = state.inSession;
     }
