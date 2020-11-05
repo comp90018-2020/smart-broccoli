@@ -65,11 +65,8 @@ Future<bool> locationCheck(BackgroundDatabase db) async {
 
   /// If in Geofence
   if (position1 == null) return false;
-  /// For all intents and purposes the geofence should return a []
-  /// Test to see if it is an order of execution issue
-  List<GeoFence> geoFence = await db.getGeoFence();
   if (await BackgroundLocation.inGeoFence(
-      geoFence, position1, 1)) {
+      await db.getGeoFence(), position1, 1)) {
     log("The user is in a geofence return 1", name: "Backend");
     return true;
   }
