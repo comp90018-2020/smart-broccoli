@@ -14,7 +14,6 @@ import { _socketIO } from "./index";
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const CORRECT_ANSWER_SHOW_TIME = 3 * 1000;
 const BOARD_SHOW_TIME = 5 * 1000;
-const playerCache: { [userId: number]: Player } = {};
 
 export class GameHandler {
     sessions: {
@@ -108,24 +107,9 @@ export class GameHandler {
         sessionId: number,
         role: string
     ): Promise<Player> {
-        if (playerCache.hasOwnProperty(userId)) {
-            const player = playerCache[userId];
-            if (player.sessionId !== sessionId)
-                return new Player(
-                    userId,
-                    player.name,
-                    player.pictureId,
-                    socket.id,
-                    sessionId,
-                    role,
-                    socket.handshake.query.token
-                );
-            player.socketId = socket.id;
-            return player;
-        }
         if (process.env.SOCKET_MODE === "debug") {
             const userId = Number(socket.handshake.query.userId);
-            const player = new Player(
+            return new Player(
                 userId,
                 userId.toString(),
                 null,
@@ -134,19 +118,19 @@ export class GameHandler {
                 Number(userId) === 1 ? Role.host : Role.player,
                 null
             );
-            playerCache[userId] = player;
-            return player;
-        } else {
-            const player = await this.getUserInfo(
-                userId,
-                socket.id,
-                sessionId,
-                role,
-                socket.handshake.query.token
-            );
-            playerCache[userId] = player;
-            return player;
         }
+
+        const { name, pictureId } = await getUserSessionProfile(userId);
+
+        return new Player(
+            userId,
+            name,
+            pictureId,
+            socket.id,
+            sessionId,
+            role,
+            socket.handshake.query.token
+        );
     }
 
     answer(content: any, session: GameSession, player: Player) {
@@ -159,9 +143,10 @@ export class GameHandler {
                 content.TFSelection
             );
 
-            if (session.canAnswer(player, answer)) {
+            const currentQuestionIndex = session.getQuestionIndex();
+            if (session.canAnswer(player, answer, currentQuestionIndex)) {
                 // assess answer
-                session.assessAns(player.id, answer);
+                session.assessAns(player.id, answer, currentQuestionIndex);
 
                 // braodcast that question has been answered
                 emitToRoom(
@@ -182,13 +167,13 @@ export class GameHandler {
     async welcome(socket: Socket, session: GameSession, player: Player) {
         try {
             session.updatingTime();
-            if (!session.hasUser(player)) {
+
+            if (!session.hasUser(player))
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.playerJoin,
                     player.profile()
                 );
-            }
 
             // add user to session
             if (player.role === Role.host) {
@@ -202,7 +187,7 @@ export class GameHandler {
             } else {
                 this.disconnectPast(
                     session,
-                    session.getPlayer(player.id),
+                    session.playerMap[player.id],
                     player
                 );
                 if (session.type === GameType.SelfPaced_NotGroup)
@@ -271,7 +256,7 @@ export class GameHandler {
                         formatQuestion(
                             session.visibleQuestionIndex(),
                             session,
-                            player.role === Role.host ? true : false
+                            player.role === Role.host
                         )
                     );
                     if (session.canEmitCorrectAnswer()) {
@@ -300,11 +285,9 @@ export class GameHandler {
     disconnectOtherPlayersAndCopyRecords(session: GameSession, player: Player) {
         player.role = Role.player;
         const players = Object.values(session.playerMap);
-        if (players.length > 0) {
-            const theFirstExistedPlayer = players[0];
-            player.record = theFirstExistedPlayer.record;
-            player.previousRecord = theFirstExistedPlayer.previousRecord;
-        }
+
+        if (players.length > 0 && players[0].records.length > 0)
+            player.records = players[0].records;
 
         for (const existedPlayer of Object.values(session.playerMap)) {
             this.disconnectPast(session, existedPlayer, player);
@@ -463,7 +446,7 @@ export class GameHandler {
     emitCorrectAnswer(player: Player, correctAnswer: Answer) {
         emitToOne(player.socketId, Event.correctAnswer, {
             answer: correctAnswer,
-            record: player.formatRecord().record,
+            record: player.formatRecord(correctAnswer.question).record,
         });
     }
 
@@ -504,14 +487,21 @@ export class GameHandler {
             session.updatingTime();
             if (!session.isEmitValid(player)) return;
             if (session.canShowBoard(player)) {
+                const questionIndex = session.questionIndex - 1;
                 //  get ranked records of players
                 const rank = session.rankPlayers();
-                const top5 = rankSlice(rank, 5);
+                const top5 = rankSlice(rank, questionIndex, 5);
                 for (const player of Object.values(session.playerMap)) {
                     emitToOne(
                         player.socketId,
                         Event.questionOutcome,
-                        formatQuestionOutcome(session, player, rank, top5)
+                        formatQuestionOutcome(
+                            session,
+                            player,
+                            questionIndex,
+                            rank,
+                            top5
+                        )
                     );
                 }
                 //  emit questionOutcome to the host
@@ -543,40 +533,6 @@ export class GameHandler {
             }
         } catch (error) {
             sendErr(error, player === undefined ? undefined : player.socketId);
-        }
-    }
-
-    async getUserInfo(
-        userId: number,
-        socketId?: string,
-        sessionId?: number,
-        role?: string,
-        token?: string
-    ): Promise<Player> {
-        if (playerCache.hasOwnProperty(userId)) {
-            const { name, pictureId } = playerCache[userId];
-            return new Player(
-                userId,
-                name,
-                pictureId,
-                socketId,
-                sessionId,
-                role,
-                token
-            );
-        } else {
-            const { name, pictureId } = await getUserSessionProfile(userId);
-            const player = new Player(
-                userId,
-                name,
-                pictureId,
-                socketId,
-                sessionId,
-                role,
-                token
-            );
-            playerCache[userId] = player;
-            return player;
         }
     }
 }

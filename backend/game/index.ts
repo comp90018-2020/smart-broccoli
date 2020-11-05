@@ -47,7 +47,7 @@ export default async (socketIO: Server) => {
             socket.on("next", () => {
                 handler.releaseQuestion(
                     session,
-                    session.getQuestionIndex(),
+                    session.getQuestionIndex() + 1,
                     player
                 );
             });
@@ -91,10 +91,12 @@ const verify = async (
     socket: Socket
 ): Promise<[boolean, GameSession, Player]> => {
     const token = socket.handshake.query.token;
+
     // @ts-ignore
     if (!_socketIO.sockets.connected.hasOwnProperty(socket.id)) {
         _socketIO.sockets.connected[socket.id] = socket;
     }
+
     const { userId, sessionId, role } = await decrypt(socket);
     if (
         sessionId === undefined ||
@@ -102,10 +104,11 @@ const verify = async (
     ) {
         return [false, null, null];
     }
-    const session = handler.sessions[Number(sessionId)];
-    const player = await handler.createPlayer(socket, userId, sessionId, role);
 
+    const session = handler.sessions[Number(sessionId)];
     if (token && session.isTokenDeactivated(token)) return [false, null, null];
+
+    const player = await handler.createPlayer(socket, userId, sessionId, role);
 
     return [true, session, player];
 };
