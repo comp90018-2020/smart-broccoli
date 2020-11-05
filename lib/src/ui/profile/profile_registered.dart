@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 
 import 'profile_editor.dart';
 import 'profile_picture.dart';
@@ -99,23 +99,23 @@ class _ProfileRegisteredState extends ProfileEditorState {
   @override
   Future<bool> commitChanges() async {
     if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
-      showBasicDialog(context, "Name and email fields are both required");
+      showErrSnackBar(context, "Name and email fields are both required");
       return false;
     }
 
     if (!EmailValidator.validate(_emailController.text)) {
-      showBasicDialog(context, "Invalid email");
+      showErrSnackBar(context, "Invalid email");
       return false;
     }
 
     if (_passwordController.text.isNotEmpty &&
         _passwordController.text.length < 8) {
-      showBasicDialog(context, "Password must be at least 8 characters");
+      showErrSnackBar(context, "Password must be at least 8 characters");
       return false;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
-      showBasicDialog(context, "Passwords do not match");
+      showErrSnackBar(context, 'Passwords do not match');
       return false;
     }
 
@@ -129,12 +129,8 @@ class _ProfileRegisteredState extends ProfileEditorState {
       _passwordController.clear();
       _confirmPasswordController.clear();
       return true;
-    } on RegistrationConflictException {
-      showBasicDialog(context, "Email already in use");
-      return false;
-    } catch (_) {
-      showBasicDialog(context, "Cannot update profile");
-      return false;
+    } catch (err) {
+      return Future.error(err);
     }
   }
 

@@ -2,9 +2,9 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 import 'profile_picture.dart';
@@ -24,6 +24,9 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
   final TextEditingController _passwordController = new TextEditingController();
   final TextEditingController _confirmPasswordController =
       new TextEditingController();
+
+  /// Whether the update has been submitted
+  bool _committed = false;
 
   @override
   void dispose() {
@@ -60,7 +63,8 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
               ),
             ),
             // Submit button
-            SizedBox(
+            Container(
+              padding: EdgeInsets.only(bottom: 16),
               width: 150,
               child: RaisedButton(
                 onPressed: () => initPromote(),
@@ -89,16 +93,15 @@ class _ProfilePromotingState extends State<ProfilePromoting> {
           context, "Password must be at least 8 characters");
     if (_passwordController.text != _confirmPasswordController.text)
       return await showBasicDialog(context, "Passwords do not match");
-    try {
-      await Provider.of<UserProfileModel>(context, listen: false).promoteUser(
-          _emailController.text,
-          _passwordController.text,
-          _nameController.text);
+
+    // Perform update
+    setState(() => _committed = true);
+    await Provider.of<UserProfileModel>(context, listen: false)
+        .promoteUser(_emailController.text, _passwordController.text,
+            _nameController.text)
+        .then((_) {
       Navigator.of(context).pop();
-    } on RegistrationConflictException {
-      showBasicDialog(context, "Email already in use");
-    } catch (_) {
-      showBasicDialog(context, "Cannot register profile");
-    }
+    }).catchError((err) => showErrSnackBar(context, err.toString(), dim: true));
+    setState(() => _committed = false);
   }
 }

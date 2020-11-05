@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 
 import 'profile_picture.dart';
 import 'table_items.dart';
@@ -20,6 +22,8 @@ class ProfileJoined extends ProfileEditor {
 class _ProfileJoinedState extends ProfileEditorState {
   final _nameController = TextEditingController();
 
+  final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     discardChanges();
@@ -28,68 +32,65 @@ class _ProfileJoinedState extends ProfileEditorState {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Profile picture
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10.0),
-          child: ProfilePicture(widget.isEdit),
-        ),
-        // Table
-        Container(
-          padding: const EdgeInsets.all(24),
-          child: TableCard(
-            [
-              NameTableRow(
-                widget.isEdit,
-                _nameController,
-                hintText: widget.user.isAnonymous ? "(anonymous)" : null,
-              ),
-            ],
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          // Profile picture
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: ProfilePicture(widget.isEdit),
           ),
-        ),
-        // Promote user
-        AnimatedSwitcher(
-          duration: Duration(milliseconds: 100),
-          child: widget.isEdit
-              ? Container()
-              : Column(
-                  children: [
-                    const Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
-                      child: const Text(
-                        "Registering lets you login from another device and create groups and quizzes",
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    // The button
-                    SizedBox(
-                      width: 150,
-                      child: RaisedButton(
-                          onPressed: () => initRegister(),
-                          child: const Text("Register")),
-                    ),
-                  ],
+          // Table
+          Container(
+            padding: const EdgeInsets.all(24),
+            child: TableCard(
+              [
+                NameTableRow(
+                  widget.isEdit,
+                  _nameController,
+                  hintText: widget.user.isAnonymous ? "(anonymous)" : null,
                 ),
-        )
-      ],
+              ],
+            ),
+          ),
+          // Promote user
+          AnimatedSwitcher(
+            duration: Duration(milliseconds: 100),
+            child: widget.isEdit
+                ? Container()
+                : Column(
+                    children: [
+                      const Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
+                        child: const Text(
+                          "Registering lets you login from another device and create groups and quizzes",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      // The button
+                      SizedBox(
+                        width: 150,
+                        child: RaisedButton(
+                            onPressed: () => initRegister(),
+                            child: const Text("Register")),
+                      ),
+                    ],
+                  ),
+          )
+        ],
+      ),
     );
   }
 
   @override
   Future<bool> commitChanges() async {
-    if (_nameController.text.isEmpty) {
-      showBasicDialog(context, "Name field is required");
+    if (!_formKey.currentState.validate()) {
       return false;
     }
-    try {
-      await Provider.of<UserProfileModel>(context, listen: false)
-          .updateUser(name: _nameController.text);
-      return true;
-    } catch (_) {
-      showBasicDialog(context, "Cannot update profile");
-      return false;
-    }
+    return Provider.of<UserProfileModel>(context, listen: false)
+        .updateUser(name: _nameController.text)
+        .then((_) => true);
   }
 
   @override
