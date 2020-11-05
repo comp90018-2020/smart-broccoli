@@ -31,8 +31,12 @@ class _ProfileMainState extends State<ProfileMain> {
   @override
   void initState() {
     super.initState();
+
+    // On login, the user must be loaded
+    // So at least, the user should just be slightly out of date
     Provider.of<UserProfileModel>(context, listen: false)
-        .getUser(forceRefresh: true);
+        .getUser(forceRefresh: true)
+        .catchError((_) => null);
   }
 
   @override
