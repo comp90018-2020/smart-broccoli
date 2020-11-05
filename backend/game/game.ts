@@ -195,8 +195,6 @@ export class GameHandler {
                 session.playerJoin(player);
             }
 
-            player = session.playerMap[player.id];
-
             // add user to socket room
             socket.join(whichRoom(session, player.role));
             socket.join(whichRoom(session, Role.all));

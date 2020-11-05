@@ -353,17 +353,24 @@ export class GameSession {
             correct = answer.TFSelection === correctAnswer.TFSelection;
         }
 
-        const _latestRecord = this.playerMap[playerId].latestRecord(
-            currentQuestionIndex
-        );
+        const _latestRecordOfPreviousQuestion = this.playerMap[
+            playerId
+        ].latestRecord(currentQuestionIndex - 1);
+
+        const _latestRecord = this.playerMap[playerId].latestRecord();
+        const points = _latestRecord === null ? 0 : _latestRecord.points;
 
         // get points and streak
-        const { points, streak } = this.pointSys.getPointsAndStreak(
+        const {
+            points: bonusPoints,
+            streak,
+        } = this.pointSys.getPointsAndStreak(
             correct,
             playerId,
-            _latestRecord !== null &&
-                _latestRecord.questionNo + 1 === answer.question
-                ? _latestRecord.streak
+            _latestRecordOfPreviousQuestion !== null &&
+                _latestRecordOfPreviousQuestion.questionNo + 1 ===
+                    answer.question
+                ? _latestRecordOfPreviousQuestion.streak
                 : 0,
             this.activePlayersNum
         );
@@ -371,15 +378,17 @@ export class GameSession {
         this.playerMap[playerId].records.push(
             new PlayerRecord(
                 answer.question,
-                _latestRecord !== null &&
-                _latestRecord.questionNo + 1 === answer.question
-                    ? _latestRecord.newPos
+                _latestRecordOfPreviousQuestion !== null &&
+                _latestRecordOfPreviousQuestion.questionNo + 1 ===
+                    answer.question
+                    ? _latestRecordOfPreviousQuestion.newPos
                     : null,
                 null,
-                points,
-                points + (_latestRecord !== null ? _latestRecord.points : 0),
-                _latestRecord !== null &&
-                _latestRecord.questionNo + 1 === answer.question
+                bonusPoints,
+                points + bonusPoints,
+                _latestRecordOfPreviousQuestion !== null &&
+                _latestRecordOfPreviousQuestion.questionNo + 1 ===
+                    answer.question
                     ? streak
                     : 0
             )

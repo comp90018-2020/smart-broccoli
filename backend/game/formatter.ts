@@ -69,6 +69,7 @@ export const formatQuestionOutcome = (
     rankAll: Player[],
     rankFormated: any[]
 ) => {
+    // This question has been answered
     const _latestRecord = player.latestRecord(questionIndex);
     const playerAheadRecord =
         questionIndex === 0 ||
