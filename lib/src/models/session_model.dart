@@ -326,15 +326,12 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       else
         _quizCollectionModel.refreshCreatedQuizzes();
 
-      if (state == SessionState.ABORTED) {
+      if (state == SessionState.ABORTED)
         PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
-        _clearFields();
-      } else if (state == SessionState.ABANDONED) {
+      else if (state == SessionState.ABANDONED)
         PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.POPALL_SESSION));
-        _clearFields();
-      }
     });
   }
 
@@ -479,13 +476,13 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       if (state == SessionState.FINISHED) {
         PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.POPALL_SESSION));
-        _clearFields();
       }
       _transitionTo(SessionState.ABANDONED);
       socket.emit('quit');
     } else
       // quiz owner
       abortQuiz();
+    socket.disconnect();
   }
 
   void answerQuestion() {
