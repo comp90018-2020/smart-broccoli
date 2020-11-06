@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
 
@@ -43,12 +44,19 @@ class StartQuiz extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 margin: EdgeInsets.only(bottom: 12),
-                child: Consumer<QuizCollectionModel>(
-                  builder: (context, collection, child) => QuizCard(
-                    collection.getQuiz(quizId),
-                    aspectRatio: 2.3,
-                    optionsEnabled: false,
-                  ),
+                child: FutureBuilder(
+                  future:
+                      Provider.of<QuizCollectionModel>(context, listen: false)
+                          .getQuiz(quizId),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<Quiz> snapshot) =>
+                          snapshot.hasData && snapshot.data != null
+                              ? QuizCard(
+                                  snapshot.data,
+                                  aspectRatio: 2.3,
+                                  optionsEnabled: false,
+                                )
+                              : Container(),
                 ),
               ),
 
@@ -84,14 +92,11 @@ class StartQuiz extends StatelessWidget {
                   Expanded(
                     child: RaisedButton(
                       onPressed: () async {
-                        try {
-                          await Provider.of<GameSessionModel>(context,
-                                  listen: false)
-                              .createSession(
-                                  quizId, GameSessionType.INDIVIDUAL);
-                        } catch (_) {
-                          showBasicDialog(context, "Cannot start session");
-                        }
+                        await Provider.of<GameSessionModel>(context,
+                                listen: false)
+                            .createSession(quizId, GameSessionType.INDIVIDUAL)
+                            .catchError(
+                                (e) => showErrSnackBar(context, e.toString()));
                       },
                       child: Column(
                         children: [

@@ -1,14 +1,12 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 
 import 'profile_editor.dart';
 import 'profile_picture.dart';
-import 'table_items.dart';
+import 'profile_fields.dart';
 
 /// Profile page for listed users
 class ProfileRegistered extends ProfileEditor {
@@ -20,11 +18,15 @@ class ProfileRegistered extends ProfileEditor {
 }
 
 class _ProfileRegisteredState extends ProfileEditorState {
+  // Controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+
+  // Form
+  final _formKey = GlobalKey<FormState>();
+  // Used to determine Autovalidatemode
+  bool _formSubmitted = false;
 
   @override
   void initState() {
@@ -34,88 +36,69 @@ class _ProfileRegisteredState extends ProfileEditorState {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10.0),
-          child: ProfilePicture(widget.isEdit),
-        ),
-
-        // Name/email
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: TableCard(
-            [
-              NameTableRow(
-                widget.isEdit,
-                _nameController,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
-              ),
-              EmailTableRow(
-                widget.isEdit,
-                _emailController,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
-              ),
-            ],
-          ),
-        ),
-
-        // Password
-        if (widget.isEdit)
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 0, bottom: 12),
-                  child: Text('Change password',
-                      style: Theme.of(context).textTheme.headline6),
-                ),
-                TableCard(
-                  [
-                    PasswordTableRow(
-                      widget.isEdit,
-                      _passwordController,
-                      textInputAction: TextInputAction.next,
-                      onFieldSubmitted: (_) =>
-                          FocusScope.of(context).nextFocus(),
-                    ),
-                    PasswordConfirmTableRow(
-                      widget.isEdit,
-                      _confirmPasswordController,
-                    ),
-                  ],
-                ),
-              ],
+            padding: const EdgeInsets.only(bottom: 24.0),
+            child: ProfilePicture(widget.isEdit),
+          ),
+
+          // Name/email
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+            child: NameField(
+              widget.isEdit,
+              _nameController,
+              _formSubmitted,
+              textInputAction: TextInputAction.next,
+              onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
             ),
           ),
-      ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+            child: EmailField(
+              widget.isEdit,
+              _emailController,
+              _formSubmitted,
+              textInputAction: TextInputAction.next,
+              onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+            ),
+          ),
+
+          // Password
+          if (widget.isEdit)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 24, 24, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 0, bottom: 12),
+                    child: Text('Change password',
+                        style: Theme.of(context).textTheme.subtitle2),
+                  ),
+                  PasswordField(
+                    widget.isEdit,
+                    _passwordController,
+                    _formSubmitted,
+                    canBeEmpty: true,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 
   @override
   Future<bool> commitChanges() async {
-    if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
-      showBasicDialog(context, "Name and email fields are both required");
-      return false;
-    }
-
-    if (!EmailValidator.validate(_emailController.text)) {
-      showBasicDialog(context, "Invalid email");
-      return false;
-    }
-
-    if (_passwordController.text.isNotEmpty &&
-        _passwordController.text.length < 8) {
-      showBasicDialog(context, "Password must be at least 8 characters");
-      return false;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      showBasicDialog(context, "Passwords do not match");
+    setState(() => _formSubmitted = true);
+    if (!_formKey.currentState.validate()) {
       return false;
     }
 
@@ -127,14 +110,9 @@ class _ProfileRegisteredState extends ProfileEditorState {
               : _passwordController.text,
           email: _emailController.text);
       _passwordController.clear();
-      _confirmPasswordController.clear();
       return true;
-    } on RegistrationConflictException {
-      showBasicDialog(context, "Email already in use");
-      return false;
-    } catch (_) {
-      showBasicDialog(context, "Cannot update profile");
-      return false;
+    } catch (err) {
+      return Future.error(err);
     }
   }
 
@@ -143,6 +121,5 @@ class _ProfileRegisteredState extends ProfileEditorState {
     _nameController.text = widget.user.name;
     _emailController.text = widget.user.email;
     _passwordController.clear();
-    _confirmPasswordController.clear();
   }
 }

@@ -114,7 +114,11 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub
         .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
-    Provider.of<GameSessionModel>(context, listen: false).refreshSession();
+
+    // Refresh user sessions on startup
+    Provider.of<GameSessionModel>(context, listen: false)
+        .refreshSession()
+        .catchError((_) => null);
   }
 
   /// Navigate to route
@@ -139,6 +143,13 @@ class _MyAppState extends State<MyApp> {
       case RouteAction.POPALL_SESSION:
         _mainNavigatorKey.currentState
             .popUntil((route) => !route.settings.name.startsWith('/session'));
+        // refresh quiz information as user has just left session
+        Provider.of<QuizCollectionModel>(context, listen: false)
+            .refreshAvailableQuizzes()
+            .catchError((_) => null);
+        Provider.of<QuizCollectionModel>(context, listen: false)
+            .refreshCreatedQuizzes()
+            .catchError((_) => null);
         break;
       case RouteAction.REPLACE:
         _mainNavigatorKey.currentState.pushReplacementNamed(routeArgs.name);
@@ -161,7 +172,11 @@ class _MyAppState extends State<MyApp> {
       if (inSession != null) {
         _mainNavigatorKey.currentState.pushNamedAndRemoveUntil(
             state.inSession ? '/take_quiz' : '/auth', (route) => false);
-        Provider.of<GameSessionModel>(context, listen: false).refreshSession();
+        // Refresh sessions, note that refreshSession returns immediately
+        // when the user is not authenticated
+        Provider.of<GameSessionModel>(context, listen: false)
+            .refreshSession()
+            .catchError((_) => null);
       }
       inSession = state.inSession;
     }

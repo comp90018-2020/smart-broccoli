@@ -94,7 +94,6 @@ class AuthStateModel extends ChangeNotifier {
       await _authApi.logout(_token);
     } catch (_) {
       // Avoid to be stuck when the server is down
-      return;
     }
 
     _token = null;

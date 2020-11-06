@@ -60,7 +60,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
           {int groupId, QuizType type}) =>
       filterQuizzesWhere(_createdQuizzes.values, groupId: groupId, type: type);
 
-  Quiz getQuiz(int id) {
+  Future<Quiz> getQuiz(int id) async {
     return _createdQuizzes[id] ?? _availableQuizzes[id];
   }
 

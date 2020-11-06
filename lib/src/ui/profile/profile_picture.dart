@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 
 class ProfilePicture extends StatelessWidget {
   /// Whether picture is editable
@@ -87,16 +88,20 @@ class ProfilePicture extends StatelessWidget {
   // Selector (from package)
   void _openPictureSelector(BuildContext context, ImageSource source) async {
     final ImagePicker picker = ImagePicker();
+    PickedFile pickedFile;
     try {
-      PickedFile pickedFile = await picker.getImage(source: source);
+      pickedFile = await picker.getImage(source: source);
       if (pickedFile == null) return;
-      await Provider.of<UserProfileModel>(context, listen: false)
-          .updateProfilePic(await pickedFile.readAsBytes());
     } catch (err) {
       if (err.code == "photo_access_denied")
-        showBasicDialog(context, "Cannot access gallery");
+        return showErrSnackBar(context, "Cannot access gallery", dim: true);
       else
-        showBasicDialog(context, "Cannot update profile picture");
+        return showErrSnackBar(context, err.toString(), dim: true);
     }
+
+    // Update image
+    await Provider.of<UserProfileModel>(context, listen: false)
+        .updateProfilePic(await pickedFile.readAsBytes())
+        .catchError((err) => showErrSnackBar(context, err.toString()));
   }
 }

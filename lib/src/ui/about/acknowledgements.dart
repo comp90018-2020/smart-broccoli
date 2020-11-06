@@ -51,6 +51,11 @@ class AcknowledgementsPage extends StatelessWidget {
       'title': 'MarcinusX/NumberPicker',
       'url':
           'https://raw.githubusercontent.com/MarcinusX/NumberPicker/master/LICENSE'
+    },
+    {
+      'title': 'leisim/auto_size_text',
+      'url':
+          'https://raw.githubusercontent.com/leisim/auto_size_text/master/LICENSE'
     }
   ];
 
