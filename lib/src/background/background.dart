@@ -202,7 +202,6 @@ Future<bool> checkGyro() async {
       name: "Backend");
 
   /// If phone is stationary
-  /// TODO gyro is best tested on a real phone
   if ((x.abs() < 0.01) && (y.abs() < 0.01) && (z.abs() < 0.01)) {
     log("Reason: notif sent because phone is likely stationary, return 1",
         name: "Backend");
