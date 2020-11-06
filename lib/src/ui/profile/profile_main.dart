@@ -41,7 +41,6 @@ class _ProfileMainState extends State<ProfileMain> {
 
   @override
   Widget build(BuildContext context) {
-    // Obtain a different BuildContext by using builder
     return CustomPage(
       title: "Profile",
       hasDrawer: !_isEdit,
@@ -97,7 +96,6 @@ class _ProfileMainState extends State<ProfileMain> {
     if (_isEdit) {
       setState(() => _committed = true);
 
-<<<<<<< HEAD
       try {
         if (await key.currentState.commitChanges()) {
           showSnackBar(context, 'Profile updated');
@@ -106,18 +104,6 @@ class _ProfileMainState extends State<ProfileMain> {
       } catch (err) {
         showErrSnackBar(context, err.toString(), dim: true);
       }
-=======
-      // Note: an await keyword must be used, or it will fallthrough to the
-      // next statement
-      await key.currentState.commitChanges().then((value) {
-        if (value) {
-          showSnackBar(context, 'Profile updated');
-          setState(() => _isEdit = false);
-        }
-      }).catchError((err) {
-        showErrSnackBar(context, err.toString(), dim: true);
-      });
->>>>>>> f0f4d20 (profile)
 
       setState(() => _committed = false);
     } else
