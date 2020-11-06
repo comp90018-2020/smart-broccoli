@@ -33,7 +33,7 @@ class _ProfileMainState extends State<ProfileMain> {
     super.initState();
 
     // On login, the user must be loaded
-    // So at least, the user should just be slightly out of date
+    // So at most, the user should just be slightly out of date
     Provider.of<UserProfileModel>(context, listen: false)
         .getUser(forceRefresh: true)
         .catchError((_) => null);
@@ -41,7 +41,6 @@ class _ProfileMainState extends State<ProfileMain> {
 
   @override
   Widget build(BuildContext context) {
-    // Obtain a different BuildContext by using builder
     return CustomPage(
       title: "Profile",
       hasDrawer: !_isEdit,
