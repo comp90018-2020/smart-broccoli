@@ -157,7 +157,8 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       .where((session) =>
           session.quizType == QuizType.SELF_PACED &&
           session.type == GameSessionType.GROUP &&
-          session.state != GameSessionState.ENDED)
+          session.state != GameSessionState.ENDED &&
+          session.joinCode != null)
       .toList();
 
   Future<void> joinSessionByPin(String pin) async {

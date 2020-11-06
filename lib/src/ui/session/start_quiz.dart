@@ -151,6 +151,12 @@ class StartQuiz extends StatelessWidget {
                                   color: _sessionColour(
                                       _sessions(context, snapshot.data)[i]),
                                 ),
+                                onTap: () => Provider.of<GameSessionModel>(
+                                        context,
+                                        listen: false)
+                                    .joinSessionByPin(
+                                        _sessions(context, snapshot.data)[i]
+                                            .joinCode),
                               ),
                             ),
                           ),
