@@ -96,8 +96,6 @@ class _ProfileMainState extends State<ProfileMain> {
     if (_isEdit) {
       setState(() => _committed = true);
 
-      // Note: an await keyword must be used, or it will fallthrough to the
-      // next statement
       try {
         if (await key.currentState.commitChanges()) {
           showSnackBar(context, 'Profile updated');
