@@ -237,9 +237,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
 
       // Refresh pictures if necessary
       if (withQuestionPictures)
-        await Future.wait(quiz.questions.map((Question question) async {
-          await refreshQuestionPicture(quiz.id, question);
-        }));
+        await Future.wait(quiz.questions.map(
+            (Question question) => refreshQuestionPicture(quiz.id, question)));
       // Set
       if (quiz.role == GroupRole.OWNER)
         _createdQuizzes[quiz.id] = quiz;
