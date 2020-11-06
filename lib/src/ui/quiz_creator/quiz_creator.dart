@@ -30,6 +30,9 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Key for form
   final _formKey = GlobalKey<FormState>();
 
+  /// Whether the update has been submitted
+  bool _committed = false;
+
   /// Quiz that is held
   Quiz _quiz;
 
@@ -86,7 +89,7 @@ class _QuizCreateState extends State<QuizCreate> {
             icon: Icon(Icons.delete),
             padding: EdgeInsets.zero,
             splashRadius: 20,
-            onPressed: _deleteQuiz,
+            onPressed: _committed ? null : _deleteQuiz,
           ),
         ),
         Builder(
@@ -94,7 +97,7 @@ class _QuizCreateState extends State<QuizCreate> {
             icon: Icon(Icons.check),
             padding: EdgeInsets.zero,
             splashRadius: 20,
-            onPressed: _saveQuiz,
+            onPressed: _committed ? null : _saveQuiz,
           ),
         ),
       ],
@@ -463,6 +466,7 @@ class _QuizCreateState extends State<QuizCreate> {
       return;
     }
 
+    setState(() => _committed = true);
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .saveQuiz(_quiz);
@@ -475,6 +479,7 @@ class _QuizCreateState extends State<QuizCreate> {
     } catch (err) {
       showErrSnackBar(context, err.toString());
     }
+    setState(() => _committed = false);
   }
 
   /// Delete quiz
@@ -487,6 +492,7 @@ class _QuizCreateState extends State<QuizCreate> {
       return;
     }
 
+    setState(() => _committed = true);
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .deleteQuiz(_quiz);
@@ -498,5 +504,6 @@ class _QuizCreateState extends State<QuizCreate> {
     } on Exception catch (err) {
       showErrSnackBar(context, err.toString());
     }
+    setState(() => _committed = false);
   }
 }
