@@ -44,12 +44,19 @@ class StartQuiz extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 margin: EdgeInsets.only(bottom: 12),
-                child: Consumer<QuizCollectionModel>(
-                  builder: (context, collection, child) => QuizCard(
-                    collection.getQuiz(quizId),
-                    aspectRatio: 2.3,
-                    optionsEnabled: false,
-                  ),
+                child: FutureBuilder(
+                  future:
+                      Provider.of<QuizCollectionModel>(context, listen: false)
+                          .getQuiz(quizId),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<Quiz> snapshot) =>
+                          snapshot.hasData && snapshot.data != null
+                              ? QuizCard(
+                                  snapshot.data,
+                                  aspectRatio: 2.3,
+                                  optionsEnabled: false,
+                                )
+                              : Container(),
                 ),
               ),
 

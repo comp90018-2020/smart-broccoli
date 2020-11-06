@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/data.dart';
 
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
@@ -44,12 +45,19 @@ class SessionFinish extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                 margin: EdgeInsets.only(bottom: 12),
-                child: Consumer<QuizCollectionModel>(
-                  builder: (context, collection, child) => QuizCard(
-                    collection.getQuiz(model.session.quizId),
-                    aspectRatio: 2.3,
-                    optionsEnabled: false,
-                  ),
+                child: FutureBuilder(
+                  future:
+                      Provider.of<QuizCollectionModel>(context, listen: false)
+                          .getQuiz(model.session.quizId),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<Quiz> snapshot) =>
+                          snapshot.hasData && snapshot.data != null
+                              ? QuizCard(
+                                  snapshot.data,
+                                  aspectRatio: 2.3,
+                                  optionsEnabled: false,
+                                )
+                              : Container(),
                 ),
               ),
               if (model.points != null)
