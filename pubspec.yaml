@@ -34,7 +34,6 @@ dependencies:
   wifi_info_plugin: ^1.1.5
   workmanager: ^0.2.0
   xml: ^4.5.1
-  pull_to_refresh: ^1.6.1
 
 dev_dependencies:
   flutter_test:
