@@ -17,9 +17,7 @@ import 'package:workmanager/workmanager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp2());
 
-  /*
   await _checkPermissions();
   await BackgroundCalendar.saveCalendarData();
 
@@ -83,18 +81,10 @@ void main() async {
       ],
       child: MyApp(),
     ),
-  ); */
+  );
 }
 
 
-class MyApp2 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MyHomePage(title: 'Accelerometer'),
-    );
-  }
-}
 
 class MyApp extends StatefulWidget {
   /// Publish subscribe
