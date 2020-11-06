@@ -190,7 +190,7 @@ class _MyAppState extends State<MyApp> {
       onGenerateInitialRoutes: (route) {
         return [router.generator(RouteSettings(name: route))];
       },
-      initialRoute: state.inSession ? '/notification_settings' : '/auth',
+      initialRoute: state.inSession ? '/take_quiz' : '/auth',
     );
   }
 }

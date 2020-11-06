@@ -32,7 +32,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
     SettingsSelectionItem<int>(4, "4 hours"),
     SettingsSelectionItem<int>(5, "8 hours"),
   ];
-  String _caption = "10 minutes";
+  String _win = "10 minutes";
   List<SettingsSelectionItem<int>> numOfNotification = [
     SettingsSelectionItem<int>(0, "Unlimited"),
     SettingsSelectionItem<int>(1, "20 notifications per day"),
@@ -41,10 +41,17 @@ class _NotificationSettingState extends State<NotificationSetting> {
     SettingsSelectionItem<int>(4, "1 notifications per day"),
     SettingsSelectionItem<int>(4, "Never"),
   ];
-  String _defaultNumOfNotification = "Unlimited";
-  var _selectionIndex = 0;
-  var _workCaption = "Not set";
+  String _num = "Unlimited";
+  var _winIndex = 0;
+  var _numIndex = 0;
+  var _weekDays;
+  var _liveQuizCalendar = true;
+  var _smartQuizCalendar = false;
+  var _smartDetection = true;
   var _wifiCaption = "Not set";
+  var _workCaption = "Not set";
+  var _radius = 0.5;
+  var _commuting = true;
 
   @override
   Widget build(BuildContext context) {
@@ -57,38 +64,41 @@ class _NotificationSettingState extends State<NotificationSetting> {
           settingsChildren: [
             SettingsSelectionList<int>(
               items: turnOffList,
-              chosenItemIndex: _selectionIndex,
+              chosenItemIndex:
+                  _winIndex, //default selected item index, it will be the first item by default.
               title: 'Minimum window between notifications',
               titleStyle: TextStyle(fontSize: 16),
               dismissTitle: 'Cancel',
-              caption: _caption,
+              caption: _win,
               icon: new SettingsIcon(
                 icon: Icons.timer_off,
                 color: Colors.blue,
               ),
               onSelect: (value, index) {
                 setState(() {
-                  _selectionIndex = index;
-                  _caption = value.text;
+                  _winIndex = index;
+                  _win = value.text;
                 });
               },
               context: context,
             ),
             SettingsSelectionList<int>(
               items: numOfNotification,
-              chosenItemIndex: _selectionIndex,
+              chosenItemIndex:
+                  _numIndex, //default selected item index, it will be the first item by default.
               title: 'Max number of notifications per day',
               titleStyle: TextStyle(fontSize: 16),
               dismissTitle: 'Cancel',
-              caption: _defaultNumOfNotification,
+              caption:
+                  _num, //default selected item, it will be the first item by default.
               icon: new SettingsIcon(
                 icon: Icons.add_alert,
                 color: Colors.green,
               ),
               onSelect: (value, index) {
                 setState(() {
-                  _selectionIndex = index;
-                  _defaultNumOfNotification = value.text;
+                  _numIndex = index;
+                  _num = value.text;
                 });
               },
               context: context,
@@ -112,15 +122,15 @@ class _NotificationSettingState extends State<NotificationSetting> {
               borderRadius: BorderRadius.circular(45.0),
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
-                // colors: [const Color(0xFFE55CE4), const Color(0xFFBB75FB)],
                 colors: [const Color(0xFFFEC12D), const Color(0xFFFEC12D)],
                 tileMode:
                     TileMode.repeated, // repeats the gradient over the canvas
               ),
             ),
             onSelect: (values) {
-              // <== Callback to handle the selected days
-              print(values);
+              setState(() {
+                _weekDays = values;
+              });
             },
           ),
         ),
@@ -142,8 +152,12 @@ class _NotificationSettingState extends State<NotificationSetting> {
                       "Allow notifications for live quiz is " +
                           value.toString(),
                       context);
+                  setState(() {
+                    _liveQuizCalendar = value;
+                  });
                 },
-                value: true,
+                value:
+                    _liveQuizCalendar, //init value for widget to make it on or off
                 type: CheckBoxWidgetType.Switch,
               ),
               SettingsCheckBox(
@@ -158,8 +172,11 @@ class _NotificationSettingState extends State<NotificationSetting> {
                       "Allow notifications for smart quiz is " +
                           value.toString(),
                       context);
+                  setState(() {
+                    _smartQuizCalendar = value;
+                  });
                 },
-                value: false,
+                value: _smartQuizCalendar,
                 type: CheckBoxWidgetType.Switch,
               ),
             ]),
@@ -180,8 +197,11 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   Toast.show(
                       "Allow notifications on commuting is " + value.toString(),
                       context);
+                  setState(() {
+                    _smartDetection = value;
+                  });
                 },
-                value: true,
+                value: _smartDetection,
                 type: CheckBoxWidgetType.Switch,
               ),
               SettingsInputField(
@@ -222,7 +242,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                     });
                   }),
               SettingsSlider(
-                value: 0.5,
+                value: _radius,
                 activeColor: Colors.blue,
                 icon: new SettingsIcon(
                   icon: Icons.track_changes,
@@ -235,6 +255,9 @@ class _NotificationSettingState extends State<NotificationSetting> {
                           (value * 10).round().toString() +
                           "km",
                       context);
+                  setState(() {
+                    _radius = value;
+                  });
                 },
               ),
             ]),
@@ -255,8 +278,11 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   Toast.show(
                       "Allow notifications on commuting is " + value.toString(),
                       context);
+                  setState(() {
+                    _commuting = value;
+                  });
                 },
-                value: true,
+                value: _commuting,
                 type: CheckBoxWidgetType.Switch,
               ),
             ]),

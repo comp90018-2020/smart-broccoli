@@ -210,7 +210,7 @@ class CustomPage extends StatelessWidget {
                         style: TextStyle(
                             color: Theme.of(context).primaryColorDark)),
                     onTap: () {
-                      _navigateToNamed(context, '/smart_quiz');
+                      _navigateToNamed(context, '/notification_settings');
                     },
                   ),
                   Divider(),
