@@ -18,6 +18,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// Picture storage service
   final PictureStash _picStash;
 
+  bool _isAvailableQuizzesLoaded = false;
+  bool _isCreatedQuizzesLoaded = false;
   Map<int, Quiz> _availableQuizzes = {};
   Map<int, Quiz> _createdQuizzes = {};
 
@@ -238,7 +240,10 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes list of available quizzes
-  Future<void> refreshAvailableQuizzes({bool forceRefresh = true}) async {
+  Future<void> refreshAvailableQuizzes({bool forceRefresh = false}) async {
+    // Do not force refresh on start
+    if (!_isAvailableQuizzesLoaded && forceRefresh) return;
+
     try {
       _availableQuizzes = Map.fromIterable(
           (await _quizApi.getQuizzes(_authStateModel.token))
@@ -258,7 +263,10 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes list of created quizzes
-  Future<void> refreshCreatedQuizzes() async {
+  Future<void> refreshCreatedQuizzes({bool forceRefresh = false}) async {
+    // Do not force refresh on start
+    if (!_isCreatedQuizzesLoaded && forceRefresh) return;
+
     try {
       _createdQuizzes = Map.fromIterable(
           (await _quizApi.getQuizzes(_authStateModel.token))
