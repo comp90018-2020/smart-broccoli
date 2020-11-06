@@ -255,14 +255,11 @@ class QuizCard extends StatelessWidget {
                                 MaterialTapTargetSize.shrinkWrap,
                             value: quiz.isActive,
                             onChanged: (bool value) async {
-                              try {
-                                await Provider.of<QuizCollectionModel>(context,
-                                        listen: false)
-                                    .setQuizActivation(quiz, value);
-                              } catch (_) {
-                                showBasicDialog(
-                                    context, "Cannot update quiz status");
-                              }
+                              await Provider.of<QuizCollectionModel>(context,
+                                      listen: false)
+                                  .setQuizActivation(quiz, value)
+                                  .catchError((err) =>
+                                      showErrSnackBar(context, err.toString()));
                             }),
                         Container(
                             child: Text('Visible'),
