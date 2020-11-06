@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +11,7 @@ import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/session/timer.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
-import 'package:smart_broccoli/src/ui/shared/tilt_graphics.dart';
+import 'package:smart_broccoli/theme.dart';
 
 class TiltQuestion extends StatefulWidget {
   @override
@@ -20,19 +19,25 @@ class TiltQuestion extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<TiltQuestion> {
+  //creating Key for red panel
+  GlobalKey areaLimit = GlobalKey();
+  List<GlobalKey> globalKeyList = [
+    GlobalKey(),
+    GlobalKey(),
+    GlobalKey(),
+    GlobalKey()
+  ];
+
   List<bool> chosen = [false, false, false, false];
 
-  int selectableAnswers = 1;
-  int listOfAnswers = 4;
+  double widthLimit;
+  double heightLimit;
 
-  double width;
-  double height;
+  double widthStart;
+  double heightStart;
 
-  double sizeOfTriangle;
-
-  bool isMultipleChoice = true;
-  bool isManyChoice = true;
-  bool trueOrFalse;
+  // 0 for t/f, 1 for MC with 4, 2 for MC with 3 choices
+  int type;
 
   List<double> cord = [0.0, 0.0];
 
@@ -52,12 +57,31 @@ class _MyHomePageState extends State<TiltQuestion> {
   int selectAnswerTime = 0;
 
   setPosition(AccelerometerEvent event) {
+    print("Set position called");
     if (event == null) {
       return;
     }
 
-    // print("x " + cord[0].toString());
-    // print("y " + cord[1].toString());
+    if (cord[0] == 0.0 && cord[1] == 0.0) {
+      final RenderBox renderBoxRed =
+          areaLimit.currentContext.findRenderObject();
+      final Offset offset = renderBoxRed.localToGlobal(Offset.zero);
+      cord[0] = offset.dx;
+      cord[1] = offset.dy;
+      final Size size = renderBoxRed.size;
+      heightLimit = size.height;
+      widthLimit = size.width;
+      heightStart = cord[1];
+      widthStart = cord[0];
+    }
+
+    print(heightLimit);
+    print(widthLimit);
+    print(widthStart);
+    print(heightStart);
+
+    print("x " + cord[0].toString());
+    print("y " + cord[1].toString());
 
     // print("x + " + event.x.toString());
     // print("y +" + event.y.toString());
@@ -65,25 +89,18 @@ class _MyHomePageState extends State<TiltQuestion> {
     cord[0] = cord[0] - event.x * 2;
     cord[1] = cord[1] + event.y * 2;
 
-    if (cord[0] >= width - 40) {
-      cord[0] = width - 40;
+    if (cord[0] >= widthLimit + widthStart - 40) {
+      cord[0] = widthLimit + widthStart - 40;
     }
-    if (cord[0] <= 1) {
-      cord[0] = 1;
+    if (cord[0] <= widthStart) {
+      cord[0] = widthStart;
     }
-    if (cord[1] >= height - appBarHeight - 40) {
-      cord[1] = height - appBarHeight - 40;
+    if (cord[1] >= heightLimit + heightStart - appBarHeight) {
+      cord[1] = heightLimit + heightStart - appBarHeight;
     }
-    if (cord[1] <= 1) {
-      cord[1] = 1;
+    if (cord[1] <= heightStart - appBarHeight) {
+      cord[1] = heightStart - appBarHeight;
     }
-
-    // print("Updated x " + cord[0].toString());
-    // print("Updated y " + cord[1].toString());
-
-    // When x = 0 it should be centered horizontally
-    // The left positin should equal (width - 100) / 2
-    // The greatest absolute value of x is 10, multipling it by 12 allows the left position to move a total of 120 in either direction.
     setState(() {
       left = cord[0];
     });
@@ -92,44 +109,11 @@ class _MyHomePageState extends State<TiltQuestion> {
     setState(() {
       top = cord[1];
     });
-
-    Point p1 = Point(left, top);
-    Point p2 = Point(0, 0);
-    Point p3 = Point(width, height - appBarHeight);
-    Point p4 = Point(0, height - appBarHeight);
-    Point p5 = Point(width, 0);
-
-    if (p1.distanceTo(p2) < sizeOfTriangle) {
-      selectAnswerTime++;
-      if (selectAnswerTime > 10) {
-        updateChosen(0);
-        selectAnswerTime = 0;
-      }
-    } else if (p1.distanceTo(p3) < sizeOfTriangle && listOfAnswers > 3) {
-      print("P3");
-      selectAnswerTime++;
-      if (selectAnswerTime > 10) {
-        updateChosen(3);
-        selectAnswerTime = 0;
-      }
-    } else if (p1.distanceTo(p4) < sizeOfTriangle && listOfAnswers > 2) {
-      print("P4");
-      selectAnswerTime++;
-      if (selectAnswerTime > 10) {
-        updateChosen(2);
-        selectAnswerTime = 0;
-      }
-    } else if (p1.distanceTo(p5) < sizeOfTriangle) {
-      print("P5");
-      selectAnswerTime++;
-      if (selectAnswerTime > 10) {
-        updateChosen(1);
-        selectAnswerTime = 0;
-      }
-    } else {}
   }
 
-  startTimer() {
+  startAccel() {
+    print("ACCEL started???");
+
     // if the accelerometer subscription hasn't been created, go ahead and create it
     if (accel == null) {
       accel = accelerometerEvents.listen((AccelerometerEvent eve) {
@@ -144,9 +128,8 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     // Accelerometer events come faster than we need them so a timer is used to only proccess them every 200 milliseconds
     if (timer == null || !timer.isActive) {
-      timer = Timer.periodic(Duration(milliseconds: 50), (_) {
+      timer = Timer.periodic(Duration(milliseconds: 1000), (_) {
         // if count has increased greater than 3 call pause timer to handle success
-
         // proccess the current event
         setPosition(event);
       });
@@ -167,80 +150,44 @@ class _MyHomePageState extends State<TiltQuestion> {
   }
 
   @override
+  void initState() {
+    top = 0.0;
+    left = 0.0;
+    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
+    super.initState();
+  }
+
+  _afterLayout(_) {}
+
+  @override
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-
-    width = MediaQuery.of(context).size.width;
-    height = MediaQuery.of(context).size.height;
-    print("height" + height.toString());
-    print("width" + width.toString());
-    cord[0] = width / 2.0;
-    cord[1] = height / 2.0;
-    top = cord[1];
-    left = cord[0];
-
-    if (width > height) {
-      sizeOfTriangle = height / 4;
-    } else {
-      sizeOfTriangle = width / 4;
-    }
+    print("Width " + MediaQuery.of(context).size.width.toString());
+    print("Height" + MediaQuery.of(context).size.height.toString());
+    appBarHeight = MediaQuery.of(context).padding.top + kToolbarHeight;
   }
 
   double appBarHeight;
 
-  List<Widget> tiltWidgets(GameSessionModel model) {
-    if (model.question is TFQuestion) {
-      listOfAnswers = 2;
-      selectableAnswers = 1;
-    } else {
-      listOfAnswers = (model.question as MCQuestion).options.length;
-      selectableAnswers = (model.question as MCQuestion).numCorrect;
-    }
-
-    // print("Multiple Choice?: " + (model.question is MCQuestion).toString());
-
-    // print(listOfAnswers);
-    if (listOfAnswers == 4) {
-      return [
-        fourCorners1(),
-        fourCorners2(),
-        fourCorners3(),
-        fourCorners4(),
-        positionedText1((model.question as MCQuestion).options[0].text),
-        positionedText2((model.question as MCQuestion).options[1].text),
-        positionedText3((model.question as MCQuestion).options[2].text),
-        positionedText4((model.question as MCQuestion).options[3].text)
-      ];
-    } else if (listOfAnswers == 3) {
-      return [
-        fourCorners1(),
-        fourCorners2(),
-        fourCorners3(),
-        positionedText1((model.question as MCQuestion).options[0].text),
-        positionedText2((model.question as MCQuestion).options[1].text),
-        positionedText3((model.question as MCQuestion).options[2].text),
-      ];
-    } else {
-      return [
-        fourCorners1(),
-        fourCorners2(),
-        positionedText1(("True")),
-        positionedText2(("False")),
-      ];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    appBarHeight = MediaQuery.of(context).padding.top + kToolbarHeight;
-
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
 
-    return Consumer<GameSessionModel>(
-      builder: (context, model, child) => CustomPage(
+    return Consumer<GameSessionModel>(builder: (context, model, child) {
+      if (model.question is MCQuestion) {
+        if ((model.question as MCQuestion).options.length == 4) {
+          type = 1;
+        } else {
+          type = 2;
+        }
+      } else {
+        type = 0;
+      }
+
+      return CustomPage(
         title: 'Question ${model.question.no + 1}',
 
         appbarLeading: model.state == SessionState.FINISHED
@@ -266,115 +213,190 @@ class _MyHomePageState extends State<TiltQuestion> {
 
         child: Stack(
           children: [
-                Column(
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: <Widget>[
+                  RaisedButton(
+                    onPressed: startAccel,
+                    child: Text('Begin'),
+                    color: Theme.of(context).primaryColor,
+                    textColor: Colors.white,
+                  ),
+                  Expanded(
+                    flex: 5,
+                    child: Column(
+                      children: [
+                        // spacer if question has no pic
+                        if (!model.question.hasPicture) Spacer(),
+                        // question text
+                        Text("${model.question.text}",
+                            style: Theme.of(context).textTheme.headline6),
+                        // question picture or spacer if question has no pic
+                        model.question.hasPicture
+                            ? Expanded(
+                                child: FractionallySizedBox(
+                                  widthFactor: 0.8,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 16.0),
+                                    // Replace with Container when there's no picture
+                                    child: FutureBuilder(
+                                      future: Provider.of<QuizCollectionModel>(
+                                              context,
+                                              listen: false)
+                                          .getQuestionPicturePath(
+                                              model.question),
+                                      builder: (BuildContext context,
+                                          AsyncSnapshot<String> snapshot) {
+                                        if (!snapshot.hasData ||
+                                            snapshot.data == null)
+                                          return FractionallySizedBox(
+                                              widthFactor: 0.8,
+                                              heightFactor: 0.8,
+                                              child: Image(
+                                                  image: AssetImage(
+                                                      'assets/icon.png')));
+                                        return Image.file(File(snapshot.data),
+                                            fit: BoxFit.cover);
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16.0),
+                          child: TimerWidget(
+                              initTime: model.time,
+                              style: TextStyle(fontSize: 18)),
+                        ),
+                        if (model.questionHint != null)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(top: 4.0, bottom: 16.0),
+                            child: Text(model.questionHint,
+                                style: Theme.of(context).textTheme.subtitle1),
+                          )
+                        else
+                          Container(height: 16)
+                      ],
+                    ),
+                  ),
+                  Expanded(flex: 5, child: _quizAnswers(model)),
+                  // Answer selection boxes
+                ],
+              ),
+            ),
+
+            // Ball
+            Container(
+              margin: EdgeInsets.only(top: top, left: left),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.green,
+                ),
+                width: 40.0,
+                height: 40.0,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  // The answers grid, this is changed from Wireframe designs as this is much
+  // More flexiable than the previous offerings.
+  Widget _quizAnswers(GameSessionModel model) {
+    return Column(
+      key: areaLimit,
+      children: model.question is TFQuestion
+          ? [
+              Expanded(child: _answerTab(model, 1)),
+              Expanded(child: _answerTab(model, 0))
+            ]
+          : [
+              Expanded(child: _answerTab(model, 0)),
+              Expanded(
+                child: Row(
                   children: [
-                    Center(
-                      child: RaisedButton(
-                        onPressed: startTimer,
-                        child: Text('Begin'),
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                      ),
-                    ),
-                    Center(
-                      child: RaisedButton(
-                        onPressed: resetAnswer,
-                        child: Text('Reset Answers'),
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                      ),
-                    ),
+                    Expanded(child: _answerTab(model, 1)),
+                    if ((model.question as MCQuestion).options.length > 2)
+                      Expanded(child: _answerTab(model, 2))
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: <Widget>[
-                      Expanded(
-                        flex: 5,
-                        child: Column(
-                          children: [
-                            // spacer if question has no pic
-                            if (!model.question.hasPicture) Spacer(),
-                            // question text
-                            Text("${model.question.text}",
-                                style: Theme.of(context).textTheme.headline6),
-                            // question picture or spacer if question has no pic
-                            model.question.hasPicture
-                                ? Expanded(
-                                    child: FractionallySizedBox(
-                                      widthFactor: 0.8,
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 16.0),
-                                        // Replace with Container when there's no picture
-                                        child: FutureBuilder(
-                                          future:
-                                              Provider.of<QuizCollectionModel>(
-                                                      context,
-                                                      listen: false)
-                                                  .getQuestionPicturePath(
-                                                      model.question),
-                                          builder: (BuildContext context,
-                                              AsyncSnapshot<String> snapshot) {
-                                            if (!snapshot.hasData ||
-                                                snapshot.data == null)
-                                              return FractionallySizedBox(
-                                                  widthFactor: 0.8,
-                                                  heightFactor: 0.8,
-                                                  child: Image(
-                                                      image: AssetImage(
-                                                          'assets/icon.png')));
-                                            return Image.file(
-                                                File(snapshot.data),
-                                                fit: BoxFit.cover);
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : Spacer(),
+              ),
+              if ((model.question as MCQuestion).options.length > 3)
+                Expanded(child: _answerTab(model, 3)),
+            ],
+    );
+  }
 
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16.0),
-                              child: TimerWidget(
-                                  initTime: model.time,
-                                  style: TextStyle(fontSize: 18)),
-                            ),
-                            if (model.questionHint != null)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 4.0, bottom: 16.0),
-                                child: Text(model.questionHint,
-                                    style:
-                                        Theme.of(context).textTheme.subtitle1),
-                              )
-                            else
-                              Container(height: 16)
-                          ],
-                        ),
-                      ),
-                      // Answer selection boxes
-                      //  Expanded(flex: 5, child: _quizAnswers(model))
-                    ],
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: top, left: left),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.green,
+  // Answer selection tabs
+  Widget _answerTab(GameSessionModel model, int index) {
+    globalKeyList[index] = GlobalKey();
+
+    return Card(
+      key: globalKeyList[index],
+      color: findColour(model, index),
+      elevation: 4.0,
+      child: InkWell(
+        onTap: model.state == SessionState.QUESTION
+            ? () => model.toggleAnswer(index)
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Container(
+            height: double.maxFinite,
+            width: double.maxFinite,
+            child: Center(
+              child: model.question is TFQuestion
+                  ? Text('${index == 0 ? 'False' : 'True'}',
+                      style: TextStyle(fontSize: 36))
+                  : Text(
+                      (model.question as MCQuestion).options[index].text,
+                      style: TextStyle(fontSize: 16),
                     ),
-                    width: 40.0,
-                    height: 40.0,
-                  ),
-                ),
-              ] +
-              tiltWidgets(model),
+            ),
+          ),
         ),
       ),
     );
+  }
+
+  // Determines the correct colour to display
+  Color findColour(GameSessionModel model, int index) {
+    if (model.question is TFQuestion) {
+      // correct answer
+      if ([SessionState.ANSWER, SessionState.OUTCOME, SessionState.FINISHED]
+              .contains(model.state) &&
+          (model.correctAnswer.answer.tfSelection && index == 1 ||
+              !model.correctAnswer.answer.tfSelection && index == 0))
+        return AnswerColours.correct;
+      // selected answer
+      else if (model.answer.tfSelection != null &&
+          (model.answer.tfSelection && index == 1 ||
+              !model.answer.tfSelection && index == 0))
+        return AnswerColours.selected;
+    }
+    // MC question
+    else {
+      // correct answer
+      if ([SessionState.ANSWER, SessionState.OUTCOME, SessionState.FINISHED]
+              .contains(model.state) &&
+          model.correctAnswer.answer.mcSelection.contains(index))
+        return AnswerColours.correct;
+      // selected answer
+      if (model.answer.mcSelection != null &&
+          model.answer.mcSelection.contains(index))
+        return model.answer.mcSelection.length ==
+                (model.question as MCQuestion).numCorrect
+            ? AnswerColours.selected
+            : AnswerColours.pending;
+    }
+    // unselected answer
+    return AnswerColours.normal;
   }
 
   /// Return the appropriate action/indicator (top right) for the user
@@ -394,7 +416,8 @@ class _MyHomePageState extends State<TiltQuestion> {
         else if (model.state == SessionState.ANSWER &&
             model.role == GroupRole.OWNER)
           IconButton(
-            onPressed: () => {model.showLeaderBoard(), resetAnswer(),pauseTimer()},
+            onPressed: () =>
+                {model.showLeaderBoard(), resetAnswer(), pauseTimer()},
             icon: Icon(Icons.arrow_forward),
           )
         else if (model.state == SessionState.OUTCOME &&
@@ -431,106 +454,7 @@ class _MyHomePageState extends State<TiltQuestion> {
 
   void resetAnswer() {
     setState(() {
-      noChosen = 0;
       chosen = [false, false, false, false];
     });
-  }
-
-  Widget positionedText4(String prompt) {
-    return Positioned(
-      child: Text(prompt),
-      left: width - 55,
-      top: height - 120,
-    );
-  }
-
-  Widget positionedText3(String prompt) {
-    return Positioned(
-      child: Text(prompt),
-      left: 0,
-      top: height - 120,
-    );
-  }
-
-  Widget positionedText2(String prompt) {
-    return Positioned(
-      child: Text(prompt),
-      left: width - 55,
-      top: 30,
-    );
-  }
-
-  Widget positionedText1(String prompt) {
-    return Positioned(
-      child: Text(prompt),
-      left: 0,
-      top: 30,
-    );
-  }
-
-  Widget fourCorners1() {
-    return ClipPath(
-      clipper: CustomClipperCorner1(),
-      child: Container(
-        color: chosen[0] ? Colors.green : null,
-        height: height - appBarHeight,
-        width: width,
-      ),
-    );
-  }
-
-  Widget fourCorners2() {
-    return ClipPath(
-      clipper: CustomClipperCorner2(),
-      child: Container(
-        color: chosen[1] ? Colors.green : null,
-        height: height - appBarHeight,
-        width: width,
-      ),
-    );
-  }
-
-  Widget fourCorners3() {
-    return ClipPath(
-      clipper: CustomClipperCorner3(),
-      child: Container(
-        color: chosen[2] ? Colors.green : null,
-        height: height - appBarHeight,
-        width: width,
-      ),
-    );
-  }
-
-  Widget fourCorners4() {
-    return ClipPath(
-      clipper: CustomClipperCorner4(),
-      child: Container(
-        color: chosen[3] ? Colors.green : null,
-        height: height - appBarHeight,
-        width: width,
-      ),
-    );
-  }
-
-  int noChosen = 0;
-
-  void updateChosen(int i) {
-    if (isMultipleChoice) {
-      if (selectableAnswers > noChosen &&
-          !chosen[i] &&
-          Provider.of<GameSessionModel>(context, listen: false).state ==
-              SessionState.QUESTION) {
-        chosen[i] = true;
-        noChosen++;
-        Provider.of<GameSessionModel>(context, listen: false).toggleAnswer(i);
-      }
-    } else {
-      if (chosen[0] == chosen[1]) {
-        chosen[i] = true;
-        trueOrFalse = chosen[0];
-        Provider.of<GameSessionModel>(context, listen: false).toggleAnswer(i);
-      }
-    }
-    return;
   }
 }
