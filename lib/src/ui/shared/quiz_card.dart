@@ -7,6 +7,7 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/models/session_model.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Represents a quiz card
@@ -36,19 +37,10 @@ class QuizCard extends StatelessWidget {
               ? null
               : () async {
                   if (quiz.type == QuizType.LIVE) {
-                    try {
-                      await Provider.of<GameSessionModel>(context,
-                              listen: false)
-                          .joinLiveSession(quiz);
-                    } on SessionNotFoundException {
-                      Scaffold.of(context).showSnackBar(
-                        SnackBar(content: Text('Session no longer exists')),
-                      );
-                    } catch (_) {
-                      Scaffold.of(context).showSnackBar(
-                        SnackBar(content: Text('Something went wrong')),
-                      );
-                    }
+                    await Provider.of<GameSessionModel>(context, listen: false)
+                        .joinLiveSession(quiz)
+                        .catchError(
+                            (e) => showErrSnackBar(context, e.toString()));
                   } else {
                     Navigator.of(context)
                         .pushNamed("/session/start/quiz/${quiz.id}");
@@ -236,15 +228,12 @@ class QuizCard extends StatelessWidget {
                                       "for the quiz: ${quiz.title}",
                                   title: "Confirm start session",
                                   barrierDismissable: true)) return;
-                              try {
-                                Provider.of<GameSessionModel>(context,
-                                        listen: false)
-                                    .createSession(
-                                        quiz.id, GameSessionType.INDIVIDUAL);
-                              } catch (_) {
-                                showBasicDialog(
-                                    context, "Cannot start live session");
-                              }
+                              Provider.of<GameSessionModel>(context,
+                                      listen: false)
+                                  .createSession(
+                                      quiz.id, GameSessionType.INDIVIDUAL)
+                                  .catchError((e) =>
+                                      showBasicDialog(context, e.toString()));
                             },
                             color: Theme.of(context).accentColor,
                             textColor:

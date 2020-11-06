@@ -1,7 +1,10 @@
 import 'dart:io';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:smart_broccoli/router.dart';
+import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
@@ -51,8 +54,11 @@ class QuizQuestion extends StatelessWidget {
                     // spacer if question has no pic
                     if (!model.question.hasPicture) Spacer(),
                     // question text
-                    Text("${model.question.text}",
-                        style: Theme.of(context).textTheme.headline6),
+                    Text(
+                      "${model.question.text}",
+                      style: Theme.of(context).textTheme.headline6,
+                      textAlign: TextAlign.center,
+                    ),
                     // question picture or spacer if question has no pic
                     model.question.hasPicture
                         ? Expanded(
@@ -60,7 +66,7 @@ class QuizQuestion extends StatelessWidget {
                               widthFactor: 0.8,
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 16.0),
-                                // Replace with Container when there's no picture
+                                // broccoli logo placeholder while image is loading
                                 child: FutureBuilder(
                                   future: Provider.of<QuizCollectionModel>(
                                           context,
@@ -77,7 +83,7 @@ class QuizQuestion extends StatelessWidget {
                                               image: AssetImage(
                                                   'assets/icon.png')));
                                     return Image.file(File(snapshot.data),
-                                        fit: BoxFit.cover);
+                                        fit: BoxFit.contain);
                                   },
                                 ),
                               ),
@@ -152,11 +158,15 @@ class QuizQuestion extends StatelessWidget {
             width: double.maxFinite,
             child: Center(
               child: model.question is TFQuestion
-                  ? Text('${index == 0 ? 'False' : 'True'}',
-                      style: TextStyle(fontSize: 36))
-                  : Text(
+                  ? AutoSizeText(
+                      '${index == 0 ? 'False' : 'True'}',
+                      style: TextStyle(fontSize: 36),
+                    )
+                  : AutoSizeText(
                       (model.question as MCQuestion).options[index].text,
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 24),
+                      textAlign: TextAlign.center,
+                      maxLines: 3,
                     ),
             ),
           ),
@@ -170,13 +180,14 @@ class QuizQuestion extends StatelessWidget {
         if (model.state == SessionState.FINISHED &&
             model.role == GroupRole.OWNER)
           IconButton(
-              onPressed: () => Navigator.of(context).popUntil(
-                  (route) => !route.settings.name.startsWith('/session')),
+              onPressed: () => PubSub().publish(PubSubTopic.ROUTE,
+                  arg: RouteArgs(action: RouteAction.POPALL_SESSION)),
               icon: Icon(Icons.flag))
         else if (model.state == SessionState.FINISHED)
           IconButton(
-            onPressed: () =>
-                Navigator.of(context).pushReplacementNamed('/session/finish'),
+            onPressed: () => PubSub().publish(PubSubTopic.ROUTE,
+                arg: RouteArgs(
+                    name: '/session/finish', action: RouteAction.REPLACE)),
             icon: Icon(Icons.flag),
           )
         else if (model.state == SessionState.ANSWER &&

@@ -5,6 +5,7 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 
 import 'profile_editor.dart';
 import 'profile_registered.dart';
@@ -24,11 +25,18 @@ class _ProfileMainState extends State<ProfileMain> {
   /// Whether edit mode is activated
   bool _isEdit = false;
 
+  /// Whether the update has been submitted
+  bool _committed = false;
+
   @override
   void initState() {
     super.initState();
+
+    // On login, the user must be loaded
+    // So at most, the user should just be slightly out of date
     Provider.of<UserProfileModel>(context, listen: false)
-        .getUser(forceRefresh: true);
+        .getUser(forceRefresh: true)
+        .catchError((_) => null);
   }
 
   @override
@@ -36,7 +44,6 @@ class _ProfileMainState extends State<ProfileMain> {
     return CustomPage(
       title: "Profile",
       hasDrawer: !_isEdit,
-
       // discard changes
       appbarLeading: _isEdit
           ? IconButton(
@@ -47,9 +54,7 @@ class _ProfileMainState extends State<ProfileMain> {
                 if (!await showConfirmDialog(
                     context, "No changes will be saved",
                     barrierDismissable: true)) return;
-                setState(() {
-                  _isEdit = false;
-                });
+                setState(() => _isEdit = false);
                 key.currentState.discardChanges();
               },
             )
@@ -57,23 +62,14 @@ class _ProfileMainState extends State<ProfileMain> {
 
       // Save/edit
       appbarActions: [
-        IconButton(
-          icon: Icon(_isEdit ? Icons.check : Icons.edit),
-          padding: EdgeInsets.zero,
-          splashRadius: 20,
-          onPressed: () async {
-            if (_isEdit && await key.currentState.commitChanges()) {
-              showBasicDialog(context, "Profile updated", title: "Success");
-              setState(() {
-                _isEdit = false;
-              });
-            } else if (!_isEdit) {
-              setState(() {
-                _isEdit = true;
-              });
-            }
-          },
-        )
+        Builder(
+            builder: (context) => IconButton(
+                  disabledColor: Color(0x65ffffff),
+                  icon: Icon(_isEdit ? Icons.check : Icons.edit),
+                  padding: EdgeInsets.zero,
+                  splashRadius: 20,
+                  onPressed: _committed ? null : () => _edit(context),
+                ))
       ],
 
       // Render appropriate page
@@ -93,5 +89,24 @@ class _ProfileMainState extends State<ProfileMain> {
         ),
       ),
     );
+  }
+
+  /// Profile edits
+  void _edit(BuildContext context) async {
+    if (_isEdit) {
+      setState(() => _committed = true);
+
+      try {
+        if (await key.currentState.commitChanges()) {
+          showSnackBar(context, 'Profile updated');
+          setState(() => _isEdit = false);
+        }
+      } catch (err) {
+        showErrSnackBar(context, err.toString(), dim: true);
+      }
+
+      setState(() => _committed = false);
+    } else
+      setState(() => _isEdit = true);
   }
 }
