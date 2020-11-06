@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:smart_broccoli/router.dart';
+import 'package:smart_broccoli/src/base.dart';
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
@@ -20,8 +23,8 @@ class SessionFinish extends StatelessWidget {
           icon: Icon(Icons.done),
           enableFeedback: false,
           splashRadius: 20,
-          onPressed: () => Navigator.of(context)
-              .popUntil((route) => !route.settings.name.startsWith('/session')),
+          onPressed: () => PubSub().publish(PubSubTopic.ROUTE,
+              arg: RouteArgs(action: RouteAction.POPALL_SESSION)),
         ),
       ],
       background: [
@@ -44,12 +47,19 @@ class SessionFinish extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                 margin: EdgeInsets.only(bottom: 12),
-                child: Consumer<QuizCollectionModel>(
-                  builder: (context, collection, child) => QuizCard(
-                    collection.getQuiz(model.session.quizId),
-                    aspectRatio: 2.3,
-                    optionsEnabled: false,
-                  ),
+                child: FutureBuilder(
+                  future:
+                      Provider.of<QuizCollectionModel>(context, listen: false)
+                          .getQuiz(model.session.quizId),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<Quiz> snapshot) =>
+                          snapshot.hasData && snapshot.data != null
+                              ? QuizCard(
+                                  snapshot.data,
+                                  aspectRatio: 2.3,
+                                  optionsEnabled: false,
+                                )
+                              : Container(),
                 ),
               ),
               if (model.points != null)

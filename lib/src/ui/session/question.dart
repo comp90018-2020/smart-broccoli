@@ -3,6 +3,8 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:smart_broccoli/router.dart';
+import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
@@ -178,13 +180,14 @@ class QuizQuestion extends StatelessWidget {
         if (model.state == SessionState.FINISHED &&
             model.role == GroupRole.OWNER)
           IconButton(
-              onPressed: () => Navigator.of(context).popUntil(
-                  (route) => !route.settings.name.startsWith('/session')),
+              onPressed: () => PubSub().publish(PubSubTopic.ROUTE,
+                  arg: RouteArgs(action: RouteAction.POPALL_SESSION)),
               icon: Icon(Icons.flag))
         else if (model.state == SessionState.FINISHED)
           IconButton(
-            onPressed: () =>
-                Navigator.of(context).pushReplacementNamed('/session/finish'),
+            onPressed: () => PubSub().publish(PubSubTopic.ROUTE,
+                arg: RouteArgs(
+                    name: '/session/finish', action: RouteAction.REPLACE)),
             icon: Icon(Icons.flag),
           )
         else if (model.state == SessionState.ANSWER &&
