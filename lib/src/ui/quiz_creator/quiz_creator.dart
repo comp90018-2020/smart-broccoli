@@ -431,7 +431,6 @@ class _QuizCreateState extends State<QuizCreate> {
         return;
       }
     }
-    context.read<QuizCollectionModel>().clearSelectedQuiz();
     Navigator.of(context).pop();
   }
 
@@ -439,7 +438,6 @@ class _QuizCreateState extends State<QuizCreate> {
   void _saveQuiz() async {
     // Quiz not loaded or no change
     if (_quiz == null || _quiz.id != null && !await quizModified()) {
-      context.read<QuizCollectionModel>().clearSelectedQuiz();
       return Navigator.of(context).pop();
     }
 
@@ -458,7 +456,6 @@ class _QuizCreateState extends State<QuizCreate> {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .saveQuiz(_quiz);
       await showBasicDialog(context, "Quiz saved", title: "Success");
-      context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
     } on QuizNotFoundException {
       await showBasicDialog(context, "Quiz no longer exists");
@@ -483,7 +480,6 @@ class _QuizCreateState extends State<QuizCreate> {
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .deleteQuiz(_quiz);
-      context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
     } on QuizNotFoundException {
       await showBasicDialog(context, "Quiz no longer exists");

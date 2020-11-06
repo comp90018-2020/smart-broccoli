@@ -26,10 +26,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   GameSession _currentSession;
   GameSession get currentSession => _currentSession;
 
-  /// Quiz that is selected in quiz page
-  Quiz _selectedQuiz;
-  Quiz get selectedQuiz => _selectedQuiz;
-
   /// Constructor for external use
   QuizCollectionModel(this._authStateModel, this._picStash, {QuizApi quizApi}) {
     _quizApi = quizApi ?? QuizApi();
@@ -68,17 +64,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
         (_createdQuizzes.containsKey(id) || _availableQuizzes.containsKey(id)))
       return _createdQuizzes[id] ?? _availableQuizzes[id];
     return _refreshQuiz(id);
-  }
-
-  /// Select quiz (used by the quiz page)
-  Future<void> selectQuiz(int id) async {
-    _selectedQuiz = await _refreshQuiz(id, withQuestionPictures: true);
-    notifyListeners();
-  }
-
-  /// Deselect quiz (used by the quiz page)
-  void clearSelectedQuiz() {
-    _selectedQuiz = null;
   }
 
   /// Gets the specified quiz's picture from cache
@@ -370,7 +355,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     if (!_authStateModel.inSession) {
       _availableQuizzes = {};
       _createdQuizzes = {};
-      _selectedQuiz = null;
+      _isAvailableQuizzesLoaded = false;
+      _isCreatedQuizzesLoaded = false;
     }
   }
 }
