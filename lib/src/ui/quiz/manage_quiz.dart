@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/group_dropdown.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
+import 'package:smart_broccoli/src/ui/shared/load_list.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/theme.dart';
@@ -38,31 +40,38 @@ class _ManageQuizState extends State<ManageQuiz> {
     return CustomTabbedPage(
       title: "Manage Quiz",
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-      tabViews: [
-        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          // All quizzes
-          return QuizContainer(
-              collection.getCreatedQuizzesWhere(groupId: _groupId),
-              header: _groupSelector(),
-              hiddenButton: true);
-        }),
-        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          // Live quiz
-          return QuizContainer(
-              collection.getCreatedQuizzesWhere(
-                  groupId: _groupId, type: QuizType.LIVE),
-              header: _groupSelector(),
-              hiddenButton: true);
-        }),
-        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          /// Self-paced quiz
-          return QuizContainer(
-              collection.getCreatedQuizzesWhere(
-                  groupId: _groupId, type: QuizType.SELF_PACED),
-              header: _groupSelector(),
-              hiddenButton: true);
-        }),
-      ],
+      tabViews: futureTabs(
+        // TODO: Reload button
+        errorIndicator: Text("An error has occurred, cannot load"),
+        loadingIndicator: LoadingIndicator(EdgeInsets.symmetric(vertical: 32)),
+        future: Provider.of<QuizCollectionModel>(context, listen: false)
+            .refreshCreatedQuizzes(),
+        children: [
+          Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+            // All quizzes
+            return QuizContainer(
+                collection.getCreatedQuizzesWhere(groupId: _groupId),
+                header: _groupSelector(),
+                hiddenButton: true);
+          }),
+          Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+            // Live quiz
+            return QuizContainer(
+                collection.getCreatedQuizzesWhere(
+                    groupId: _groupId, type: QuizType.LIVE),
+                header: _groupSelector(),
+                hiddenButton: true);
+          }),
+          Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+            /// Self-paced quiz
+            return QuizContainer(
+                collection.getCreatedQuizzesWhere(
+                    groupId: _groupId, type: QuizType.SELF_PACED),
+                header: _groupSelector(),
+                hiddenButton: true);
+          }),
+        ],
+      ),
       hasDrawer: true,
       secondaryBackgroundColour: true,
       floatingActionButton: FloatingActionButton.extended(

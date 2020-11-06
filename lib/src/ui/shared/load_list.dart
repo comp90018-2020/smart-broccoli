@@ -11,20 +11,23 @@ List<Widget> futureTabs({
   @required Widget errorIndicator,
 }) {
   return mapIndexed(children, ((index, child) {
-    return Column(children: [
-      if (headers != null)
-        Padding(
-          padding: headerPadding,
-          child: headers[index],
+    return SingleChildScrollView(
+      child: Column(children: [
+        if (headers != null)
+          Padding(
+            padding: headerPadding,
+            child: headers[index],
+          ),
+        FutureBuilder(
+          future: future,
+          builder: (context, snapshot) {
+            print(snapshot);
+            if (snapshot.hasData) return child;
+            if (snapshot.hasError) return errorIndicator;
+            return loadingIndicator;
+          },
         ),
-      FutureBuilder(
-        future: future,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) return child;
-          if (snapshot.hasError) return errorIndicator;
-          return loadingIndicator;
-        },
-      ),
-    ]);
+      ]),
+    );
   })).toList();
 }

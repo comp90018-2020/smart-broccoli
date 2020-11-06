@@ -54,7 +54,7 @@ class _TakeQuizState extends State<TakeQuiz> {
       tabViews: futureTabs(
         // TODO: Reload button
         errorIndicator: Text("An error has occurred, cannot load"),
-        loadingIndicator: Center(child: LoadingIndicator(EdgeInsets.all(5))),
+        loadingIndicator: LoadingIndicator(EdgeInsets.all(16)),
         future: Provider.of<QuizCollectionModel>(context, listen: false)
             .refreshAvailableQuizzes(),
         headerPadding: const EdgeInsets.fromLTRB(8, 20, 8, 16),

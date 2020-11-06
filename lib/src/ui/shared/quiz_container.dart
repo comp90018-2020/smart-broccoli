@@ -10,8 +10,8 @@ class QuizContainer extends StatefulWidget {
   QuizContainer(this.items,
       {Key key,
       this.header,
-      this.padding = EdgeInsets.zero,
-      this.headerPadding = const EdgeInsets.fromLTRB(8, 12, 8, 16),
+      this.padding = const EdgeInsets.symmetric(vertical: 8),
+      this.headerPadding = const EdgeInsets.fromLTRB(8, 24, 8, 16),
       this.hiddenButton = false})
       : super(key: key);
 
@@ -45,6 +45,13 @@ class _BuildQuiz extends State<QuizContainer> {
         padding: widget.padding,
         child: Column(
           children: <Widget>[
+            // Header widgets
+            if (widget.header != null)
+              Padding(
+                padding: widget.headerPadding,
+                child: widget.header,
+              ),
+
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
@@ -58,12 +65,13 @@ class _BuildQuiz extends State<QuizContainer> {
                       widget.items,
                       ((index, item) => Container(
                             constraints: BoxConstraints(maxWidth: 200),
-                            margin:
-                                index == 0 || index == widget.items.length - 1
-                                    ? EdgeInsets.only(
-                                        left: index == 0 ? 20 : 0,
-                                        right: index == 0 ? 0 : 20)
-                                    : EdgeInsets.zero,
+                            margin: index == 0 ||
+                                    index == widget.items.length - 1
+                                ? EdgeInsets.only(
+                                    left: index == 0 ? 20 : 0,
+                                    right:
+                                        index == widget.items.length ? 0 : 20)
+                                : EdgeInsets.zero,
                             width: MediaQuery.of(context).size.width * 0.4,
                             child: QuizCard(item, alwaysShowPicture: true),
                           )),
