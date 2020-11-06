@@ -89,25 +89,6 @@ class QuizLobby extends StatelessWidget {
               ]),
             ),
 
-            // Chip for group subscriptions
-            Consumer<GameSessionModel>(
-              builder: (context, model, child) => model.role == GroupRole.MEMBER
-                  ? FutureBuilder(
-                      future: Provider.of<GroupRegistryModel>(context,
-                              listen: false)
-                          .getGroup(model.session.groupId),
-                      builder: (BuildContext context,
-                              AsyncSnapshot<Group> snapshot) =>
-                          snapshot.hasData && snapshot.data != null
-                              ? Chip(
-                                  label: Text('Subscribed to group'),
-                                  avatar: Icon(Icons.check_sharp),
-                                )
-                              : SizedBox(height: 8),
-                    )
-                  : SizedBox(height: 8),
-            ),
-
             // Text describing status
             Consumer<GameSessionModel>(
               builder: (context, socketModel, child) => Padding(
