@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/store/remote/location_api.dart';
+import 'package:smart_broccoli/src/ui/quiz/smart_live_quiz.dart';
 
 ///Address selection page
 class MapSetting extends StatefulWidget {
@@ -57,30 +58,20 @@ class _MapSettingState extends State<MapSetting> {
             ),
           ),
           new Expanded(
-            child: location.length != 0 || controller.text.isNotEmpty
-                ? new ListView.builder(
-                    itemCount: location.length,
-                    itemBuilder: (context, i) {
-                      return new Card(
-                        child: new ListTile(
-                          title: new Text(location[i].name),
-                        ),
-                        margin: const EdgeInsets.all(0.0),
-                      );
-                    },
-                  )
-                : new ListView.builder(
-                    itemCount: location.length,
-                    itemBuilder: (context, index) {
-                      return new Card(
-                        child: new ListTile(
-                          title: new Text(location[index].name),
-                        ),
-                        margin: const EdgeInsets.all(0.0),
-                      );
-                    },
-                  ),
-          ),
+              child: new ListView.builder(
+            itemCount: location.length,
+            itemBuilder: (context, i) {
+              return new Card(
+                child: new ListTile(
+                  title: new Text(location[i].name),
+                  onTap: () {
+                    Navigator.of(context).pop(location[i]);
+                  },
+                ),
+                margin: const EdgeInsets.all(0.0),
+              );
+            },
+          )),
         ],
       ),
     );

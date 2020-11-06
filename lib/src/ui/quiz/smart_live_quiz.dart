@@ -16,9 +16,9 @@ import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
 
 /// Smart quiz page
 class SmartQuiz extends StatefulWidget {
-  SmartQuiz({Key key, this.title}) : super(key: key);
+  SmartQuiz({Key key, this.address}) : super(key: key);
 
-  final String title;
+  final String address;
 
   @override
   _SmartQuizState createState() => new _SmartQuizState();
@@ -230,7 +230,7 @@ class _SmartQuizState extends State<SmartQuiz> {
                   color: Colors.orange,
                 ),
                 context: context,
-                caption: _workCaption,
+                caption: this._workCaption,
                 //replace it with your widget which need to move on.
                 targetWidget: MapSetting(),
               ),
