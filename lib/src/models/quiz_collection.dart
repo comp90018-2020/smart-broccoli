@@ -114,8 +114,17 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       }
     } on ApiAuthException {
       _authStateModel.checkSession();
+    } on QuizNotFoundException {
+      _createdQuizzes.remove(quiz.id);
+      _availableQuizzes.remove(quiz.id);
+      notifyListeners();
+      return Future.error("Quiz not found");
     } on ApiException catch (e) {
-      await _refreshQuiz(quiz.id);
+      try {
+        await _refreshQuiz(quiz.id);
+      } catch (err) {
+        return Future.error(e.toString());
+      }
       return Future.error(e.toString());
     } catch (err) {
       return Future.error("Something went wrong");
@@ -135,6 +144,9 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     } on ApiAuthException {
       _authStateModel.checkSession();
     } on QuizNotFoundException catch (e) {
+      _createdQuizzes.remove(quiz.id);
+      _availableQuizzes.remove(quiz.id);
+      notifyListeners();
       throw e;
     } on ApiException catch (e) {
       return Future.error(e.toString());
@@ -157,6 +169,9 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       _authStateModel.checkSession();
       return Future.error("Authentication failed");
     } on QuizNotFoundException catch (e) {
+      _createdQuizzes.remove(quiz.id);
+      _availableQuizzes.remove(quiz.id);
+      notifyListeners();
       throw e;
     } on ApiException catch (e) {
       return Future.error(e.toString());
@@ -194,6 +209,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     } on ApiAuthException {
       _authStateModel.checkSession();
     } on QuizNotFoundException catch (e) {
+      _createdQuizzes.remove(quiz.id);
+      _availableQuizzes.remove(quiz.id);
       throw e;
     } on ApiException catch (e) {
       return Future.error(e.toString());
@@ -202,7 +219,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     }
 
     // Refresh quiz (since picture IDs may have changed by this point)
-    _refreshQuiz(updated.id, withQuestionPictures: true);
+    _refreshQuiz(updated.id, withQuestionPictures: true)
+        .catchError((_) => null);
   }
 
   /// Refreshes the specified quiz
@@ -231,6 +249,9 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       _authStateModel.checkSession();
       return Future.error("Authentication failed");
     } on QuizNotFoundException {
+      _createdQuizzes.remove(quizId);
+      _availableQuizzes.remove(quizId);
+      notifyListeners();
       return null;
     } on ApiException catch (e) {
       return Future.error(e.toString());
