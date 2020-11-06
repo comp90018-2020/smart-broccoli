@@ -161,6 +161,9 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
           session.joinCode != null)
       .toList();
 
+  Color getSessionColour(GameSession session) =>
+      Color(int.parse('FF${session.joinCode}', radix: 16));
+
   Future<void> joinSessionByPin(String pin) async {
     try {
       session = await _sessionApi.joinSession(_authStateModel.token, pin);

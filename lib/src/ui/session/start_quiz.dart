@@ -148,8 +148,10 @@ class StartQuiz extends StatelessWidget {
                                 // session's unique coloured dot
                                 trailing: Icon(
                                   Icons.lens,
-                                  color: _sessionColour(
-                                      _sessions(context, snapshot.data)[i]),
+                                  color: Provider.of<GameSessionModel>(context,
+                                          listen: false)
+                                      .getSessionColour(
+                                          _sessions(context, snapshot.data)[i]),
                                 ),
                                 onTap: () => Provider.of<GameSessionModel>(
                                         context,
@@ -172,7 +174,4 @@ class StartQuiz extends StatelessWidget {
   List<GameSession> _sessions(BuildContext context, Quiz quiz) =>
       Provider.of<GameSessionModel>(context, listen: false)
           .getGroupSessions(quiz);
-
-  Color _sessionColour(GameSession session) =>
-      Color(int.parse('FF${session.joinCode}', radix: 16));
 }
