@@ -263,7 +263,8 @@ class QuizCard extends StatelessWidget {
                                       showErrSnackBar(context, err.toString()));
                             }),
                         Container(
-                            child: Text('Visible'),
+                            child: Text('Visible',
+                                overflow: TextOverflow.fade, maxLines: 1),
                             transform: Matrix4.translationValues(-3, 0, 0))
                       ],
                     ),
