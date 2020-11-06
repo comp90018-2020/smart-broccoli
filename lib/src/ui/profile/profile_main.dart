@@ -98,14 +98,14 @@ class _ProfileMainState extends State<ProfileMain> {
 
       // Note: an await keyword must be used, or it will fallthrough to the
       // next statement
-      await key.currentState.commitChanges().then((value) {
-        if (value) {
+      try {
+        if (await key.currentState.commitChanges()) {
           showSnackBar(context, 'Profile updated');
           setState(() => _isEdit = false);
         }
-      }).catchError((err) {
+      } catch (err) {
         showErrSnackBar(context, err.toString(), dim: true);
-      });
+      }
 
       setState(() => _committed = false);
     } else
