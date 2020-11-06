@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:smart_broccoli/src/store/remote/location_api.dart';
 
 ///Address selection page
@@ -10,10 +7,10 @@ class MapSetting extends StatefulWidget {
   _MapSettingState createState() => new _MapSettingState();
 }
 
-List<LocationData> location = [];
-
 class _MapSettingState extends State<MapSetting> {
   TextEditingController controller = new TextEditingController();
+
+  List<LocationData> location = [];
 
   @override
   void initState() {
@@ -45,7 +42,10 @@ class _MapSettingState extends State<MapSetting> {
                     onSubmitted: getLocations,
                   ),
                   trailing: new IconButton(
-                    icon: new Icon(Icons.cancel_rounded),
+                    icon: new Icon(
+                      Icons.clear,
+                      size: 20,
+                    ),
                     onPressed: () {
                       controller.clear();
                       location.clear();
