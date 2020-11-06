@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_broccoli/src/data.dart';
 
+import 'package:smart_broccoli/router.dart';
+import 'package:smart_broccoli/src/base.dart';
+import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_card.dart';
@@ -21,8 +23,8 @@ class SessionFinish extends StatelessWidget {
           icon: Icon(Icons.done),
           enableFeedback: false,
           splashRadius: 20,
-          onPressed: () => Navigator.of(context)
-              .popUntil((route) => !route.settings.name.startsWith('/session')),
+          onPressed: () => PubSub().publish(PubSubTopic.ROUTE,
+              arg: RouteArgs(action: RouteAction.POPALL_SESSION)),
         ),
       ],
       background: [
