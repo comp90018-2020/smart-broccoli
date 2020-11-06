@@ -131,8 +131,8 @@ class QuizCard extends StatelessWidget {
               // Quiz status
               Container(
                 padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
                   children: [
                     if (quiz.type == QuizType.LIVE)
                       liveIndicator(context)
@@ -141,13 +141,17 @@ class QuizCard extends StatelessWidget {
                     else if (quiz.type == QuizType.SMART_LIVE)
                       smartIndicator(),
                     if (quiz.complete)
-                      Text(
-                        'Complete',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4.0),
+                        child: Text(
+                          'Complete',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                    if (!quiz.complete) Container()
                   ],
                 ),
               )
@@ -193,6 +197,7 @@ class QuizCard extends StatelessWidget {
   /// Builds indicator widget
   /// |icon|text|
   static Widget buildIndicator(Widget icon, Widget text) => Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           icon,
           Padding(

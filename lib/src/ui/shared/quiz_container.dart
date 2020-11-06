@@ -64,14 +64,17 @@ class _BuildQuiz extends State<QuizContainer> {
                     children: mapIndexed(
                       widget.items,
                       ((index, item) => Container(
-                            constraints: BoxConstraints(maxWidth: 200),
-                            margin: index == 0 ||
-                                    index == widget.items.length - 1
-                                ? EdgeInsets.only(
-                                    left: index == 0 ? 20 : 0,
-                                    right:
-                                        index == widget.items.length ? 0 : 20)
-                                : EdgeInsets.zero,
+                            constraints:
+                                // 190 max, 180 min
+                                BoxConstraints(minWidth: 180, maxWidth: 190),
+                            margin:
+                                index == 0 || index == widget.items.length - 1
+                                    ? EdgeInsets.only(
+                                        left: index == 0 ? 20 : 0,
+                                        right: index == widget.items.length - 1
+                                            ? 20
+                                            : 0)
+                                    : EdgeInsets.zero,
                             width: MediaQuery.of(context).size.width * 0.4,
                             child: QuizCard(item, alwaysShowPicture: true),
                           )),
