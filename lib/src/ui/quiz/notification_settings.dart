@@ -13,16 +13,16 @@ import 'package:day_picker/day_picker.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Smart quiz page
-class SmartQuiz extends StatefulWidget {
-  SmartQuiz({Key key, this.title}) : super(key: key);
+class NotificationSetting extends StatefulWidget {
+  NotificationSetting({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _SmartQuizState createState() => new _SmartQuizState();
+  _NotificationSettingState createState() => new _NotificationSettingState();
 }
 
-class _SmartQuizState extends State<SmartQuiz> {
+class _NotificationSettingState extends State<NotificationSetting> {
   WidgetDirection direction;
   List<SettingsSelectionItem<int>> turnOffList = [
     SettingsSelectionItem<int>(0, "10 minutes"),
@@ -68,8 +68,8 @@ class _SmartQuizState extends State<SmartQuiz> {
               ),
               onSelect: (value, index) {
                 setState(() {
-                  _selectionIndex = turnOffList[index].value;
-                  // _caption = value.text;
+                  _selectionIndex = index;
+                  _caption = value.text;
                 });
               },
               context: context,

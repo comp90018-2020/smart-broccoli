@@ -206,7 +206,7 @@ class CustomPage extends StatelessWidget {
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.notifications),
-                    title: Text('NOTIFICATION SETTING',
+                    title: Text('NOTIFICATION SETTINGS',
                         style: TextStyle(
                             color: Theme.of(context).primaryColorDark)),
                     onTap: () {

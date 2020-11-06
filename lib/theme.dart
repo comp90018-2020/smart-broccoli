@@ -31,11 +31,11 @@ class SmartBroccoliTheme {
     disabledColor: Colors.green[900],
     colorScheme: SmartBroccoliColourScheme(),
     buttonTheme: ButtonThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(6)),
-        ),
-        padding: EdgeInsets.symmetric(vertical: 15),
-        colorScheme: SmartBroccoliColourScheme()),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(6)),
+      ),
+      padding: EdgeInsets.symmetric(vertical: 15),
+    ),
     floatingActionButtonTheme:
         FloatingActionButtonThemeData(backgroundColor: Color(0xFFFEC12D)),
     textTheme: TextTheme(

@@ -17,5 +17,5 @@ export 'ui/quiz_creator/question_creator.dart';
 export 'ui/quiz_creator/quiz_creator.dart';
 export 'ui/profile/profile_main.dart';
 export 'ui/profile/profile_promoting.dart';
-export 'ui/quiz/smart_live_quiz.dart';
+export 'ui/quiz/notification_settings.dart';
 export 'ui/quiz/work_address.dart';

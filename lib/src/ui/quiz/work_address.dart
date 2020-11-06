@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/store/remote/location_api.dart';
+import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 ///Address selection page
 class MapSetting extends StatefulWidget {
@@ -8,9 +9,9 @@ class MapSetting extends StatefulWidget {
 }
 
 class _MapSettingState extends State<MapSetting> {
-  TextEditingController controller = new TextEditingController();
+  TextEditingController searchTextController = new TextEditingController();
 
-  List<LocationData> location = [];
+  List<LocationData> locationResults = [];
 
   @override
   void initState() {
@@ -19,52 +20,47 @@ class _MapSettingState extends State<MapSetting> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Work address'),
-        centerTitle: true,
-        elevation: 1.0,
-      ),
-      body: new Column(
+    return CustomPage(
+      title: "Notification setting",
+      hasDrawer: false,
+      child: new Column(
         children: <Widget>[
-          new Container(
-            // color: Theme.of(context).primaryColor,
-            child: new Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: new Card(
-                child: new ListTile(
-                  leading: new Icon(Icons.search),
-                  title: new TextField(
-                    controller: controller,
-                    decoration: new InputDecoration(
-                        hintText: 'Search', border: InputBorder.none),
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: getLocations,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new Card(
+              child: new ListTile(
+                leading: new Icon(Icons.search),
+                title: new TextField(
+                  controller: searchTextController,
+                  decoration: new InputDecoration(
+                      hintText: 'Search', border: InputBorder.none),
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: getLocations,
+                ),
+                trailing: new IconButton(
+                  icon: new Icon(
+                    Icons.clear,
+                    size: 20,
                   ),
-                  trailing: new IconButton(
-                    icon: new Icon(
-                      Icons.clear,
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      controller.clear();
-                      location.clear();
-                      setState(() {});
-                    },
-                  ),
+                  onPressed: () {
+                    setState(() {
+                      searchTextController.clear();
+                      locationResults.clear();
+                    });
+                  },
                 ),
               ),
             ),
           ),
           new Expanded(
               child: new ListView.builder(
-            itemCount: location.length,
+            itemCount: locationResults.length,
             itemBuilder: (context, i) {
               return new Card(
                 child: new ListTile(
-                  title: new Text(location[i].name),
+                  title: new Text(locationResults[i].name),
                   onTap: () {
-                    Navigator.of(context).pop(location[i].name);
+                    Navigator.of(context).pop(locationResults[i].name);
                   },
                 ),
                 margin: const EdgeInsets.all(0.0),
@@ -79,7 +75,7 @@ class _MapSettingState extends State<MapSetting> {
   getLocations(String text) async {
     var _location = await LocationAPI.queryByName(text);
     setState(() {
-      location = _location;
+      locationResults = _location;
     });
   }
 }
