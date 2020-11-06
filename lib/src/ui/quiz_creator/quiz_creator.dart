@@ -474,7 +474,7 @@ class _QuizCreateState extends State<QuizCreate> {
     // Quiz not loaded
     if (_quiz == null) return Navigator.of(context).pop();
     if (!await showConfirmDialog(
-        context, "Are you sure you want to delete the question?",
+        context, "Are you sure you want to delete the quiz?",
         title: "Delete question")) {
       return;
     }
