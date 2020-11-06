@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/ui/shared/helper.dart';
 
 import 'quiz_card.dart';
 
@@ -9,7 +10,7 @@ class QuizContainer extends StatefulWidget {
   QuizContainer(this.items,
       {Key key,
       this.header,
-      this.padding = const EdgeInsets.only(top: 8, bottom: 8),
+      this.padding = EdgeInsets.zero,
       this.headerPadding = const EdgeInsets.fromLTRB(8, 12, 8, 16),
       this.hiddenButton = false})
       : super(key: key);
@@ -44,13 +45,6 @@ class _BuildQuiz extends State<QuizContainer> {
         padding: widget.padding,
         child: Column(
           children: <Widget>[
-            // Header widgets
-            Padding(
-              padding: widget.headerPadding,
-              child: widget.header,
-            ),
-
-            // The list of quiz
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
@@ -95,17 +89,5 @@ class _BuildQuiz extends State<QuizContainer> {
         ),
       ),
     );
-  }
-}
-
-/// .map() with index
-/// From: https://stackoverflow.com/a/57371764
-Iterable<E> mapIndexed<E, T>(
-    Iterable<T> items, E Function(int index, T item) f) sync* {
-  var index = 0;
-
-  for (final item in items) {
-    yield f(index, item);
-    index = index + 1;
   }
 }

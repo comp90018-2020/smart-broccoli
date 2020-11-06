@@ -240,9 +240,11 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes list of available quizzes
-  Future<void> refreshAvailableQuizzes({bool forceRefresh = false}) async {
+  Future<bool> refreshAvailableQuizzes({bool forceRefresh = false}) async {
     // Do not force refresh on start
-    if (!_isAvailableQuizzesLoaded && forceRefresh) return;
+    if (!_isAvailableQuizzesLoaded && forceRefresh) return false;
+    // Get from cache
+    if (!forceRefresh && _isAvailableQuizzesLoaded) return true;
 
     try {
       _availableQuizzes = Map.fromIterable(
@@ -251,7 +253,9 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
           key: (quiz) => quiz.id);
       await Future.wait(_availableQuizzes.values
           .map((Quiz quiz) => _refreshQuizPicture(quiz)));
+      _isAvailableQuizzesLoaded = true;
       notifyListeners();
+      return true;
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("API exception has occurred");
