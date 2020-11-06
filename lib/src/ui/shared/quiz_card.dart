@@ -131,8 +131,8 @@ class QuizCard extends StatelessWidget {
               // Quiz status
               Container(
                 padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
                   children: [
                     if (quiz.type == QuizType.LIVE)
                       liveIndicator(context)
@@ -148,6 +148,7 @@ class QuizCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                    if (!quiz.complete) Container()
                   ],
                 ),
               )
@@ -193,11 +194,11 @@ class QuizCard extends StatelessWidget {
   /// Builds indicator widget
   /// |icon|text|
   static Widget buildIndicator(Widget icon, Widget text) => Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           icon,
           Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: text),
+              padding: const EdgeInsets.fromLTRB(4.0, 0, 8.0, 0), child: text),
         ],
       );
 
@@ -255,18 +256,18 @@ class QuizCard extends StatelessWidget {
                                 MaterialTapTargetSize.shrinkWrap,
                             value: quiz.isActive,
                             onChanged: (bool value) async {
-                              try {
-                                await Provider.of<QuizCollectionModel>(context,
-                                        listen: false)
-                                    .setQuizActivation(quiz, value);
-                              } catch (_) {
-                                showBasicDialog(
-                                    context, "Cannot update quiz status");
-                              }
+                              await Provider.of<QuizCollectionModel>(context,
+                                      listen: false)
+                                  .setQuizActivation(quiz, value)
+                                  .catchError((err) =>
+                                      showErrSnackBar(context, err.toString()));
                             }),
-                        Container(
-                            child: Text('Visible'),
-                            transform: Matrix4.translationValues(-3, 0, 0))
+                        Expanded(
+                          child: Container(
+                              child: Text('Visible',
+                                  overflow: TextOverflow.ellipsis, maxLines: 1),
+                              transform: Matrix4.translationValues(-3, 0, 0)),
+                        )
                       ],
                     ),
                   ),

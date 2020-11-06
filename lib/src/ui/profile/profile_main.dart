@@ -35,7 +35,7 @@ class _ProfileMainState extends State<ProfileMain> {
     // On login, the user must be loaded
     // So at most, the user should just be slightly out of date
     Provider.of<UserProfileModel>(context, listen: false)
-        .getUser(forceRefresh: true)
+        .getUser(refresh: true)
         .catchError((_) => null);
   }
 
