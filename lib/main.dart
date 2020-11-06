@@ -143,6 +143,13 @@ class _MyAppState extends State<MyApp> {
       case RouteAction.POPALL_SESSION:
         _mainNavigatorKey.currentState
             .popUntil((route) => !route.settings.name.startsWith('/session'));
+        // refresh quiz information as user has just left session
+        Provider.of<QuizCollectionModel>(context, listen: false)
+            .refreshAvailableQuizzes()
+            .catchError((_) => null);
+        Provider.of<QuizCollectionModel>(context, listen: false)
+            .refreshCreatedQuizzes()
+            .catchError((_) => null);
         break;
       case RouteAction.REPLACE:
         _mainNavigatorKey.currentState.pushReplacementNamed(routeArgs.name);
