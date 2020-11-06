@@ -42,29 +42,22 @@ export class PointSystem {
     public getPointsAndStreak(
         correct: boolean,
         playerId: number,
-        previousStreak: number,
+        streak: number,
         activePlayersNumber: number
     ) {
         if (this.answeredPlayers.has(playerId)) {
-            return {
-                points: correct ? this.pointsEachQuestion : 0,
-                streak: correct ? previousStreak + 1 : 0,
-            };
+            // Changed answer
+            return correct ? this.pointsEachQuestion : 0;
         } else {
             this.answeredPlayers.add(playerId);
-            return {
-                points: Math.floor(
-                    this.getFactor(
-                        correct,
-                        correct
-                            ? this.getRankForARightAns()
-                            : activePlayersNumber,
-                        previousStreak,
-                        activePlayersNumber
-                    ) * this.pointsEachQuestion
-                ),
-                streak: correct ? previousStreak + 1 : 0,
-            };
+            return Math.floor(
+                this.getFactor(
+                    correct,
+                    correct ? this.getRankForARightAns() : activePlayersNumber,
+                    streak,
+                    activePlayersNumber
+                ) * this.pointsEachQuestion
+            );
         }
     }
 }

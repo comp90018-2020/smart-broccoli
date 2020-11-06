@@ -360,16 +360,17 @@ export class GameSession {
         const _latestRecord = this.playerMap[playerId].latestRecord();
         const points = _latestRecord === null ? 0 : _latestRecord.points;
 
-        // get points and streak
-        const {
-            points: bonusPoints,
-            streak,
-        } = this.pointSys.getPointsAndStreak(
-            correct,
-            playerId,
+        const last_streak =
             _latestRecordOfPreviousQuestion !== null
                 ? _latestRecordOfPreviousQuestion.streak
-                : 0,
+                : 0;
+        const streak = correct ? last_streak + 1 : 0;
+
+        // get points and streak
+        const bonusPoints = this.pointSys.getPointsAndStreak(
+            correct,
+            playerId,
+            streak,
             this.activePlayersNum
         );
 
