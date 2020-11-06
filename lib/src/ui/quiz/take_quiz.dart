@@ -26,7 +26,7 @@ class _TakeQuizState extends State<TakeQuiz> {
     super.didChangeDependencies();
     // Update available quizzes
     Provider.of<QuizCollectionModel>(context, listen: false)
-        .refreshAvailableQuizzes(forceRefresh: true)
+        .refreshAvailableQuizzes(refresh: true)
         .catchError((_) => null);
   }
 

@@ -105,7 +105,7 @@ class _QuizCreateState extends State<QuizCreate> {
             : widget.quizId != null
                 // Get quiz if quiz id
                 ? Provider.of<QuizCollectionModel>(context, listen: false)
-                    .getQuiz(widget.quizId, forceRefresh: true)
+                    .getQuiz(widget.quizId, refresh: true)
                 // Otherwise just create a new one
                 : newQuiz(),
         builder: (context, snapshot) {

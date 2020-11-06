@@ -27,7 +27,7 @@ class _ManageQuizState extends State<ManageQuiz> {
     super.didChangeDependencies();
     // Update created quizzes
     Provider.of<QuizCollectionModel>(context, listen: false)
-        .refreshCreatedQuizzes(forceRefresh: true)
+        .refreshCreatedQuizzes(refresh: true)
         .catchError((_) => null);
     // Update group list
     Provider.of<GroupRegistryModel>(context, listen: false)

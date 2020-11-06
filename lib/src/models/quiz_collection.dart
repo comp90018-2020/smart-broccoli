@@ -62,9 +62,9 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
           {int groupId, QuizType type}) =>
       filterQuizzesWhere(_createdQuizzes.values, groupId: groupId, type: type);
 
-  Future<Quiz> getQuiz(int id, {bool forceRefresh = false}) async {
+  Future<Quiz> getQuiz(int id, {bool refresh = false}) async {
     // If can get from cache, get from cache
-    if (!forceRefresh &&
+    if (!refresh &&
         (_createdQuizzes.containsKey(id) || _availableQuizzes.containsKey(id)))
       return _createdQuizzes[id] ?? _availableQuizzes[id];
     return _refreshQuiz(id);
@@ -264,11 +264,11 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes list of available quizzes
-  Future<bool> refreshAvailableQuizzes({bool forceRefresh = false}) async {
+  Future<bool> refreshAvailableQuizzes({bool refresh = false}) async {
     // Do not force refresh on start
-    if (!_isAvailableQuizzesLoaded && forceRefresh) return false;
+    if (!_isAvailableQuizzesLoaded && refresh) return false;
     // Get from cache
-    if (!forceRefresh && _isAvailableQuizzesLoaded) return true;
+    if (!refresh && _isAvailableQuizzesLoaded) return true;
 
     try {
       _availableQuizzes = Map.fromIterable(
@@ -291,11 +291,11 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes list of created quizzes
-  Future<bool> refreshCreatedQuizzes({bool forceRefresh = false}) async {
+  Future<bool> refreshCreatedQuizzes({bool refresh = false}) async {
     // Do not force refresh on start
-    if (!_isCreatedQuizzesLoaded && forceRefresh) return false;
+    if (!_isCreatedQuizzesLoaded && refresh) return false;
     // Get from cache
-    if (!forceRefresh && _isCreatedQuizzesLoaded) return true;
+    if (!refresh && _isCreatedQuizzesLoaded) return true;
 
     try {
       _createdQuizzes = Map.fromIterable(

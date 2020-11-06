@@ -38,9 +38,9 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Function to get user
-  Future<User> getUser({bool forceRefresh = false}) async {
+  Future<User> getUser({bool refresh = false}) async {
     // If in cache and we don't force refresh
-    if (!forceRefresh && user != null) {
+    if (!refresh && user != null) {
       return user;
     }
     // If not, retrieve user
@@ -48,7 +48,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Retrieve user picture from cache
-  Future<String> getUserPicture({bool forceRefresh = false}) async {
+  Future<String> getUserPicture({bool refresh = false}) async {
     if (user?.pictureId == null) return null;
     return await _picStash.getPic(user.pictureId);
   }
