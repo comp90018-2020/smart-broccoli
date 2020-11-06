@@ -33,91 +33,109 @@ class StartQuiz extends StatelessWidget {
         ),
       ],
 
-      // Body
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8, left: 30, right: 30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              // Quiz card
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                margin: EdgeInsets.only(bottom: 12),
-                child: FutureBuilder(
-                  future:
-                      Provider.of<QuizCollectionModel>(context, listen: false)
-                          .getQuiz(quizId),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<Quiz> snapshot) =>
-                          snapshot.hasData && snapshot.data != null
-                              ? QuizCard(
-                                  snapshot.data,
-                                  aspectRatio: 2.3,
-                                  optionsEnabled: false,
-                                )
-                              : Container(),
-                ),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 14),
-                child: Center(
-                    child: Text(
-                  "Choose how to take this quiz",
-                  style: TextStyle(fontSize: 16),
-                )),
-              ),
-
-              // Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: RaisedButton(
-                      onPressed: () async {
-                        try {
-                          await Provider.of<GameSessionModel>(context,
-                                  listen: false)
-                              .createSession(quizId, GameSessionType.GROUP);
-                        } catch (_) {
-                          showBasicDialog(context, "Cannot start session");
-                        }
-                      },
-                      child: Column(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16, left: 30, right: 30),
+        child: Expanded(
+          child: FutureBuilder(
+            future: Provider.of<QuizCollectionModel>(context, listen: false)
+                .getQuiz(quizId),
+            builder: (BuildContext context, AsyncSnapshot<Quiz> snapshot) =>
+                snapshot.hasData && snapshot.data != null
+                    ? Column(
                         children: [
-                          Icon(
-                            Icons.people,
-                            size: 48,
+                          QuizCard(
+                            snapshot.data,
+                            aspectRatio: 2.3,
+                            optionsEnabled: false,
                           ),
-                          Text('With others'),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: RaisedButton(
-                      onPressed: () async {
-                        await Provider.of<GameSessionModel>(context,
-                                listen: false)
-                            .createSession(quizId, GameSessionType.INDIVIDUAL)
-                            .catchError(
-                                (e) => showErrSnackBar(context, e.toString()));
-                      },
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.person,
-                            size: 48,
+
+                          // text and group/solo buttons
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                            child: Center(
+                              child: Text(
+                                "Choose how to take this quiz",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
                           ),
-                          Text('Solo'),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: RaisedButton(
+                                  onPressed: () async {
+                                    try {
+                                      await Provider.of<GameSessionModel>(
+                                              context,
+                                              listen: false)
+                                          .createSession(
+                                              quizId, GameSessionType.GROUP);
+                                    } catch (_) {
+                                      showBasicDialog(
+                                          context, "Cannot start session");
+                                    }
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Icon(Icons.people, size: 48),
+                                      Text(
+                                        'With others',
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: RaisedButton(
+                                  onPressed: () async {
+                                    await Provider.of<GameSessionModel>(context,
+                                            listen: false)
+                                        .createSession(
+                                            quizId, GameSessionType.INDIVIDUAL)
+                                        .catchError((e) => showErrSnackBar(
+                                            context, e.toString()));
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Icon(Icons.person, size: 48),
+                                      Text(
+                                        'Solo',
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // text and existing session list
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(top: 20.0, bottom: 4.0),
+                            child: Align(
+                              child: Text(
+                                'or join an existing session',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: 10,
+                              itemBuilder: (context, i) => Card(
+                                child: ListTile(
+                                  title: Text('Session $i'),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                      )
+                    : Container(),
           ),
         ),
       ),
