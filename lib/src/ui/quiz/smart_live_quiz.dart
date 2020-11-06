@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/ui/quiz/work_address.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
@@ -16,9 +17,9 @@ import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
 
 /// Smart quiz page
 class SmartQuiz extends StatefulWidget {
-  SmartQuiz({Key key, this.address}) : super(key: key);
+  SmartQuiz({Key key, this.title}) : super(key: key);
 
-  final String address;
+  final String title;
 
   @override
   _SmartQuizState createState() => new _SmartQuizState();
@@ -223,17 +224,22 @@ class _SmartQuizState extends State<SmartQuiz> {
                 context: context,
               ),
               SettingsNavigatorButton(
-                title: 'Work address',
-                titleStyle: TextStyle(fontSize: 16),
-                icon: new SettingsIcon(
-                  icon: Icons.location_on_outlined,
-                  color: Colors.orange,
-                ),
-                context: context,
-                caption: this._workCaption,
-                //replace it with your widget which need to move on.
-                targetWidget: MapSetting(),
-              ),
+                  title: 'Work address',
+                  titleStyle: TextStyle(fontSize: 16),
+                  icon: new SettingsIcon(
+                    icon: Icons.location_on_outlined,
+                    color: Colors.orange,
+                  ),
+                  context: context,
+                  caption: _workCaption,
+                  //replace it with your widget which need to move on.
+                  onPressed: () async {
+                    var location =
+                        await Navigator.of(context).pushNamed("work_address");
+                    setState(() {
+                      _workCaption = location;
+                    });
+                  }),
               SettingsSlider(
                 value: 0.5,
                 activeColor: Colors.blue,

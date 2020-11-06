@@ -41,6 +41,7 @@ class BroccoliRouter {
   static const String takeQuiz = "/take_quiz";
   static const String manageQuiz = "/manage_quiz";
   static const String smartQuiz = "/smart_quiz";
+  static const String workAddress = "work_address";
 
   // Session
   static const String sessionStart = "/session/start/quiz/:id";
@@ -196,6 +197,12 @@ class BroccoliRouter {
     router.define(smartQuiz, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return SmartQuiz();
+    }));
+
+    //Work address page
+    router.define(workAddress, handler: Handler(
+        handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+      return MapSetting();
     }));
   }
 }
