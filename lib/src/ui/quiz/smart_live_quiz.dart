@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:flutter_settings/widgets/SettingsSection.dart';
 import 'package:flutter_settings/widgets/SettingsIcon.dart';
-import 'package:toast/toast.dart';
 import 'package:flutter_settings/util/SettingsConstants.dart';
 import 'package:flutter_settings/widgets/SettingsSelectionList.dart';
 import 'package:flutter_settings/models/settings_list_item.dart';
 import 'package:flutter_settings/widgets/SettingsCheckBox.dart';
 import 'package:flutter_settings/widgets/SettingsInputField.dart';
 import 'package:flutter_settings/widgets/SettingsSlider.dart';
-import 'package:day_picker/day_picker.dart';
 import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
+import 'package:toast/toast.dart';
+import 'package:day_picker/day_picker.dart';
+import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Smart quiz page
 class SmartQuiz extends StatefulWidget {
@@ -25,39 +24,27 @@ class SmartQuiz extends StatefulWidget {
 
 class _SmartQuizState extends State<SmartQuiz> {
   WidgetDirection direction;
-  var turnOffList;
-  var numOfNotification;
-  var _caption = "After 15 seconds of inactivity";
-  var _defaultNumOfNotification = "Unlimited";
+  List<SettingsSelectionItem<int>> turnOffList = [
+    SettingsSelectionItem<int>(0, "10 minutes"),
+    SettingsSelectionItem<int>(1, "30 minutes"),
+    SettingsSelectionItem<int>(2, "1 hour"),
+    SettingsSelectionItem<int>(3, "2 hours"),
+    SettingsSelectionItem<int>(4, "4 hours"),
+    SettingsSelectionItem<int>(5, "8 hours"),
+  ];
+  String _caption = "10 minutes";
+  List<SettingsSelectionItem<int>> numOfNotification = [
+    SettingsSelectionItem<int>(0, "Unlimited"),
+    SettingsSelectionItem<int>(1, "20 notifications per day"),
+    SettingsSelectionItem<int>(2, "10 notifications per day"),
+    SettingsSelectionItem<int>(3, "5 notifications per day"),
+    SettingsSelectionItem<int>(4, "1 notifications per day"),
+    SettingsSelectionItem<int>(4, "Never"),
+  ];
+  String _defaultNumOfNotification = "Unlimited";
   var _selectionIndex = 0;
   var _workCaption = "Not set";
   var _wifiCaption = "Not set";
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    turnOffList = new List<SettingsSelectionItem<int>>();
-    turnOffList.add(SettingsSelectionItem<int>(0, "10 " + "minutes"));
-    turnOffList.add(SettingsSelectionItem<int>(1, "30 " + "minutes"));
-    turnOffList.add(SettingsSelectionItem<int>(2, "1 " + "hour"));
-    turnOffList.add(SettingsSelectionItem<int>(3, "2 " + "hours"));
-    turnOffList.add(SettingsSelectionItem<int>(4, "4 " + "hours"));
-    turnOffList.add(SettingsSelectionItem<int>(5, "8 " + "hours"));
-    _caption = "10 minutes";
-
-    numOfNotification = new List<SettingsSelectionItem<int>>();
-    numOfNotification.add(SettingsSelectionItem<int>(0, "Unlimited"));
-    numOfNotification
-        .add(SettingsSelectionItem<int>(1, "20 notifications per day"));
-    numOfNotification
-        .add(SettingsSelectionItem<int>(2, "10 notifications per day"));
-    numOfNotification
-        .add(SettingsSelectionItem<int>(3, "5 notifications per day"));
-    numOfNotification
-        .add(SettingsSelectionItem<int>(4, "1 notifications per day"));
-    numOfNotification.add(SettingsSelectionItem<int>(5, "Never"));
-    _defaultNumOfNotification = "Unlimited";
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,11 +67,9 @@ class _SmartQuizState extends State<SmartQuiz> {
                 color: Colors.blue,
               ),
               onSelect: (value, index) {
-                Toast.show(
-                    "You have selected " + value.text.toString(), context);
                 setState(() {
-                  _selectionIndex = index;
-                  _caption = value.text;
+                  _selectionIndex = turnOffList[index].value;
+                  // _caption = value.text;
                 });
               },
               context: context,
@@ -101,8 +86,6 @@ class _SmartQuizState extends State<SmartQuiz> {
                 color: Colors.green,
               ),
               onSelect: (value, index) {
-                Toast.show(
-                    "You have selected " + value.text.toString(), context);
                 setState(() {
                   _selectionIndex = index;
                   _defaultNumOfNotification = value.text;

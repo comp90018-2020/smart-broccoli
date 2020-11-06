@@ -41,7 +41,7 @@ class BroccoliRouter {
   static const String takeQuiz = "/take_quiz";
   static const String manageQuiz = "/manage_quiz";
   static const String smartQuiz = "/smart_quiz";
-  static const String workAddress = "work_address";
+  static const String workAddress = "/work_address";
 
   // Session
   static const String sessionStart = "/session/start/quiz/:id";
