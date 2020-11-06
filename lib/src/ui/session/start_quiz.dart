@@ -125,10 +125,22 @@ class StartQuiz extends StatelessWidget {
                           ),
                           Expanded(
                             child: ListView.builder(
-                              itemCount: 10,
+                              itemCount:
+                                  _sessions(context, snapshot.data).length,
                               itemBuilder: (context, i) => Card(
+                                elevation: 1.5,
                                 child: ListTile(
-                                  title: Text('Session $i'),
+                                  title: Text(
+                                    'Session ' +
+                                        _sessions(context, snapshot.data)[i]
+                                            .joinCode,
+                                  ),
+                                  // session's unique coloured dot
+                                  trailing: Icon(
+                                    Icons.lens,
+                                    color: _sessionColour(
+                                        _sessions(context, snapshot.data)[i]),
+                                  ),
                                 ),
                               ),
                             ),
@@ -141,4 +153,11 @@ class StartQuiz extends StatelessWidget {
       ),
     );
   }
+
+  List<GameSession> _sessions(BuildContext context, Quiz quiz) =>
+      Provider.of<GameSessionModel>(context, listen: false)
+          .getGroupSessions(quiz);
+
+  Color _sessionColour(GameSession session) =>
+      Color(int.parse('FF${session.joinCode}', radix: 16));
 }
