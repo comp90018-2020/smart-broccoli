@@ -44,7 +44,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
   String _num = "Unlimited";
   var _winIndex = 0;
   var _numIndex = 0;
-  // var _weekDays;
+  // var _weekDays; //comment on _weekDays temporarily, uncomment it when later needed
   var _liveQuizCalendar = true;
   var _smartQuizCalendar = false;
   var _smartDetection = true;
@@ -128,9 +128,9 @@ class _NotificationSettingState extends State<NotificationSetting> {
               ),
             ),
             onSelect: (values) {
-              setState(() {
-                // _weekDays = values;
-              });
+              // setState(() {
+              //   _weekDays = values; //comment on _weekDays temporarily, uncomment it when later needed
+              // });
             },
           ),
         ),
