@@ -43,7 +43,7 @@ class SessionApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuizNotFoundException();
-    throw Exception('Unable to create session: unknown error occurred');
+    throw ApiException('Unable to create session: unknown error occurred');
   }
 
   /// Get the user's current session.
@@ -61,7 +61,7 @@ class SessionApi {
     if (response.statusCode == 204) return null;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to get session: unknown error occurred');
+    throw ApiException('Unable to get session: unknown error occurred');
   }
 
   /// Join an existing game session.
@@ -85,6 +85,6 @@ class SessionApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw SessionNotFoundException();
-    throw Exception('Unable to join session: unknown error occurred');
+    throw ApiException('Unable to join session: unknown error occurred');
   }
 }

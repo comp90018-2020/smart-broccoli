@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:quiver/core.dart';
+import 'package:smart_broccoli/src/store/remote/api_base.dart';
 
 import 'game.dart';
 import 'group.dart';
@@ -330,8 +331,12 @@ class QuestionOption {
 }
 
 /// Exception thrown when a quiz cannot be found by the server
-class QuizNotFoundException implements Exception {}
+class QuizNotFoundException extends ApiException {
+  QuizNotFoundException() : super("Quiz not found");
+}
 
 /// Exception thrown when a question cannot be found by the server
 /// (thrown when setting a question picture)
-class QuestionNotFoundException implements Exception {}
+class QuestionNotFoundException extends ApiException {
+  QuestionNotFoundException() : super("Question not found");
+}
