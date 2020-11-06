@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sensors/sensors.dart';
+import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/tilt_graphics.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -17,7 +18,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<bool> chosen = [true, true, true, true];
+  List<bool> chosen = [false, false, false, false];
+
+  int selectableAnswers = 1;
+  int listOfAnswers = 4;
 
   double width;
   double height;
@@ -43,38 +47,37 @@ class _MyHomePageState extends State<MyHomePage> {
   double top = 125;
   double left;
   int count = 0;
+  int selectAnswerTime = 0;
 
   setPosition(AccelerometerEvent event) {
     if (event == null) {
       return;
     }
 
-    double offset = AppBar().preferredSize.height + 100;
+    // print("x " + cord[0].toString());
+    // print("y " + cord[1].toString());
 
-    print("x " + cord[0].toString());
-    print("y " + cord[1].toString());
+    // print("x + " + event.x.toString());
+    // print("y +" + event.y.toString());
 
-    print("x + " + event.x.toString());
-    print("y +" + event.y.toString());
+    cord[0] = cord[0] - event.x*2;
+    cord[1] = cord[1] + event.y*2;
 
-    cord[0] = cord[0] + event.x;
-    cord[1] = cord[1] + event.y;
-
-    if (cord[0] >= width + 40) {
-      cord[0] = width;
+    if (cord[0] >= width - 40) {
+      cord[0] = width - 40;
     }
-    if (cord[0] <= 20) {
-      cord[0] = 20;
+    if (cord[0] <= 1) {
+      cord[0] = 1;
     }
-    if (cord[1] >= height - offset) {
-      cord[1] = height - offset;
+    if (cord[1] >= height - appBarHeight - 40) {
+      cord[1] = height - appBarHeight - 40;
     }
-    if (cord[1] <= 20) {
-      cord[1] = 20;
+    if (cord[1] <= 1) {
+      cord[1] = 1;
     }
 
-    print("Updated x " + cord[0].toString());
-    print("Updated y " + cord[1].toString());
+    // print("Updated x " + cord[0].toString());
+    // print("Updated y " + cord[1].toString());
 
     // When x = 0 it should be centered horizontally
     // The left positin should equal (width - 100) / 2
@@ -90,14 +93,37 @@ class _MyHomePageState extends State<MyHomePage> {
 
     Point p1 = Point(left, top);
     Point p2 = Point(0, 0);
-    Point p3 = Point(width, height);
-    Point p4 = Point(0, height);
+    Point p3 = Point(width, height - appBarHeight);
+    Point p4 = Point(0, height - appBarHeight);
     Point p5 = Point(width, 0);
 
     if (p1.distanceTo(p2) < sizeOfTriangle) {
+      selectAnswerTime++;
+      if (selectAnswerTime > 10) {
+        updateChosen(0);
+        selectAnswerTime = 0;
+      }
     } else if (p1.distanceTo(p3) < sizeOfTriangle) {
+      print("P3");
+      selectAnswerTime++;
+      if (selectAnswerTime > 10) {
+        updateChosen(3);
+        selectAnswerTime = 0;
+      }
     } else if (p1.distanceTo(p4) < sizeOfTriangle) {
+      print("P4");
+      selectAnswerTime++;
+      if (selectAnswerTime > 10) {
+        updateChosen(2);
+        selectAnswerTime = 0;
+      }
     } else if (p1.distanceTo(p5) < sizeOfTriangle) {
+      print("P5");
+      selectAnswerTime++;
+      if (selectAnswerTime > 10) {
+        updateChosen(1);
+        selectAnswerTime = 0;
+      }
     } else {}
   }
 
@@ -157,8 +183,8 @@ class _MyHomePageState extends State<MyHomePage> {
     height = MediaQuery.of(context).size.height;
     print("height" + height.toString());
     print("width" + width.toString());
-    cord[0] = width / 2.0 - 40;
-    cord[1] = height / 2.0 - offset;
+    cord[0] = width / 2.0;
+    cord[1] = height / 2.0;
     top = cord[1];
     left = cord[0];
 
@@ -169,30 +195,48 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  double appBarHeight;
+
   @override
   Widget build(BuildContext context) {
+    appBarHeight = MediaQuery.of(context).padding.top + kToolbarHeight;
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Column(
+    return CustomPage(
+      title: "Test Title",
+      child: Column(
         children: [
           Stack(
             children: [
+              listOfAnswers == 4 ? [
               fourCorners1(),
               fourCorners2(),
               fourCorners3(),
               fourCorners4(),
-              positionedText1(),
-              positionedText2(),
-              positionedText3(),
-              positionedText4(),
+              positionedText1("Option 1"),
+              positionedText2("Option 2"),
+              positionedText3("Option 3"),
+              positionedText4("Option 4"),
+              ] : Container(),
+              listOfAnswers == 3 ? [
+                fourCorners1(),
+                fourCorners2(),
+                fourCorners3(),
+                positionedText1("Option 1"),
+                positionedText2("Option 2"),
+                positionedText3("Option 3"),
+              ] : Container(),
+              listOfAnswers == 2 ? [
+                fourCorners1(),
+                fourCorners2(),
+                positionedText1("True"),
+                positionedText2("False"),
+              ] : Container(),
               Container(
-                margin: EdgeInsets.only(top: top, left: left - 20),
+                margin: EdgeInsets.only(top: top, left: left),
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -232,60 +276,41 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void resetAnswer() {
-    chosen = [false, false, false, false];
+    setState(() {
+      noChosen = 0;
+      chosen = [false, false, false, false];
+    });
   }
 
-  Widget positionedText1() {
+  Widget positionedText4(String prompt) {
     return Positioned(
-      child: Text("Choice1"),
+      child: Text(prompt),
+      left: width - 55,
+      top: height - 120,
+    );
+  }
+
+  Widget positionedText3(String prompt) {
+    return Positioned(
+      child: Text(prompt),
+      left: 0,
+      top: height - 120,
+    );
+  }
+
+  Widget positionedText2(String prompt) {
+    return Positioned(
+      child: Text(prompt),
+      left: width - 55,
+      top: 30,
+    );
+  }
+
+  Widget positionedText1(String prompt) {
+    return Positioned(
+      child: Text(prompt),
       left: 0,
       top: 30,
-    );
-  }
-
-  Widget positionedText2() {
-    return Positioned(
-      child: Text("Choice2"),
-      left: width - 60,
-      top: height - 140,
-    );
-  }
-
-  Widget positionedText4() {
-    return Positioned(
-      child: Text("Choice3"),
-      left: width - 400,
-      top: height - 140,
-    );
-  }
-
-  Widget positionedText3() {
-    return Positioned(
-      child: Text("Choice4"),
-      left: width - 60,
-      top: 30,
-    );
-  }
-
-  Widget tiltFalse() {
-    return ClipPath(
-      clipper: CustomClipperCorner3(),
-      child: Container(
-        color: chosen[1] ? Colors.green : null,
-        height: height - 105.2,
-        width: width,
-      ),
-    );
-  }
-
-  Widget tiltTrue() {
-    return ClipPath(
-      clipper: CustomClipperCorner3(),
-      child: Container(
-        color: chosen[0] ? Colors.green : null,
-        height: height - 105.2,
-        width: width,
-      ),
     );
   }
 
@@ -294,7 +319,7 @@ class _MyHomePageState extends State<MyHomePage> {
       clipper: CustomClipperCorner1(),
       child: Container(
         color: chosen[0] ? Colors.green : null,
-        height: height - 105.2,
+        height: height - appBarHeight,
         width: width,
       ),
     );
@@ -305,7 +330,7 @@ class _MyHomePageState extends State<MyHomePage> {
       clipper: CustomClipperCorner2(),
       child: Container(
         color: chosen[1] ? Colors.green : null,
-        height: height - 105.2,
+        height: height - appBarHeight,
         width: width,
       ),
     );
@@ -316,7 +341,7 @@ class _MyHomePageState extends State<MyHomePage> {
       clipper: CustomClipperCorner3(),
       child: Container(
         color: chosen[2] ? Colors.green : null,
-        height: height - 105.2,
+        height: height - appBarHeight,
         width: width,
       ),
     );
@@ -327,26 +352,22 @@ class _MyHomePageState extends State<MyHomePage> {
       clipper: CustomClipperCorner4(),
       child: Container(
         color: chosen[3] ? Colors.green : null,
-        height: height - 105.2,
+        height: height - appBarHeight,
         width: width,
       ),
     );
   }
 
+  int noChosen = 0;
+
   void updateChosen(int i) {
     if (isMultipleChoice) {
-      if (isManyChoice) {
+      if (selectableAnswers > noChosen && !chosen[i]) {
         chosen[i] = true;
-      } else {
-        for (var j = 0; j < chosen.length; j++) {
-          if (chosen[j]) {
-            return;
-          }
-        }
-        chosen[i] = true;
+        noChosen++;
       }
     } else {
-      if (chosen[0] != chosen[1]) {
+      if (chosen[0] == chosen[1]) {
         chosen[i] = true;
       }
     }
