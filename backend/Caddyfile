@@ -1,0 +1,13 @@
+{
+	experimental_http3
+}
+
+fuzzybroccoli.com {
+	reverse_proxy web:3000
+	tls /etc/certs/cert.pem /etc/certs/key.pem
+
+	log {
+		output file /var/log/access.log
+		format console
+	}
+}

@@ -5,10 +5,15 @@ node_modules/
 .dockerignore
 .env
 .env.sample
-docker-compose.yml
+docker-compose*.yml
+Caddyfile
 tmp/
 data/
 coverage/
 dist/
 uploads/
 package-lock.json
+.vscode/
+.eslintrc
+nodemon.json
+README.md
