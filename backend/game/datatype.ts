@@ -29,6 +29,7 @@ export enum GameType {
     Live_Group = "Live Group",
     Live_NotGroup = "Live Not Group",
 }
+
 export enum PlayerState {
     Joined = "joined",
     Complete = "complete",
@@ -46,6 +47,7 @@ export class Record {
     ) {}
 }
 
+// Player information
 class PlayerBase {
     constructor(
         public id: number,
@@ -79,12 +81,8 @@ export class Player extends PlayerBase {
     /**
      * get profile of the player {id, name, pictureId}
      */
-    profile() {
-        return {
-            id: this.id,
-            name: this.name,
-            pictureId: this.pictureId,
-        };
+    profile(): PlayerBase {
+        return new PlayerBase(this.id, this.name, this.pictureId);
     }
 
     /**
