@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -51,8 +52,11 @@ class QuizQuestion extends StatelessWidget {
                     // spacer if question has no pic
                     if (!model.question.hasPicture) Spacer(),
                     // question text
-                    Text("${model.question.text}",
-                        style: Theme.of(context).textTheme.headline6),
+                    Text(
+                      "${model.question.text}",
+                      style: Theme.of(context).textTheme.headline6,
+                      textAlign: TextAlign.center,
+                    ),
                     // question picture or spacer if question has no pic
                     model.question.hasPicture
                         ? Expanded(
@@ -60,7 +64,7 @@ class QuizQuestion extends StatelessWidget {
                               widthFactor: 0.8,
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 16.0),
-                                // Replace with Container when there's no picture
+                                // broccoli logo placeholder while image is loading
                                 child: FutureBuilder(
                                   future: Provider.of<QuizCollectionModel>(
                                           context,
@@ -77,7 +81,7 @@ class QuizQuestion extends StatelessWidget {
                                               image: AssetImage(
                                                   'assets/icon.png')));
                                     return Image.file(File(snapshot.data),
-                                        fit: BoxFit.cover);
+                                        fit: BoxFit.contain);
                                   },
                                 ),
                               ),
@@ -152,11 +156,15 @@ class QuizQuestion extends StatelessWidget {
             width: double.maxFinite,
             child: Center(
               child: model.question is TFQuestion
-                  ? Text('${index == 0 ? 'False' : 'True'}',
-                      style: TextStyle(fontSize: 36))
-                  : Text(
+                  ? AutoSizeText(
+                      '${index == 0 ? 'False' : 'True'}',
+                      style: TextStyle(fontSize: 36),
+                    )
+                  : AutoSizeText(
                       (model.question as MCQuestion).options[index].text,
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 24),
+                      textAlign: TextAlign.center,
+                      maxLines: 3,
                     ),
             ),
           ),
