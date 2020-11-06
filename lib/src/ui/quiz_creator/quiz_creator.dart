@@ -45,7 +45,7 @@ class _QuizCreateState extends State<QuizCreate> {
     _timeController.text = _getTimeString(_quiz.timeLimit);
   }
 
-  Future<Quiz> newQuiz() {
+  Future<Quiz> _newQuiz() {
     return Future.value(Quiz("", widget.groupId, QuizType.LIVE, timeLimit: 10));
   }
 
@@ -98,7 +98,7 @@ class _QuizCreateState extends State<QuizCreate> {
                 ? Provider.of<QuizCollectionModel>(context, listen: false)
                     .getQuiz(widget.quizId, refresh: true)
                 // Otherwise just create a new one
-                : newQuiz(),
+                : _newQuiz(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             WidgetsBinding.instance.addPostFrameCallback((_) async {
