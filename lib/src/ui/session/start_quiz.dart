@@ -78,7 +78,13 @@ class StartQuiz extends StatelessWidget {
                                   },
                                   child: Column(
                                     children: [
-                                      Icon(Icons.people, size: 48),
+                                      Icon(
+                                        Icons.people,
+                                        size: _sessions(context, snapshot.data)
+                                                .isEmpty
+                                            ? 48
+                                            : 26,
+                                      ),
                                       Text(
                                         'With others',
                                         style: TextStyle(fontSize: 14),
@@ -100,7 +106,13 @@ class StartQuiz extends StatelessWidget {
                                   },
                                   child: Column(
                                     children: [
-                                      Icon(Icons.person, size: 48),
+                                      Icon(
+                                        Icons.person,
+                                        size: _sessions(context, snapshot.data)
+                                                .isEmpty
+                                            ? 48
+                                            : 26,
+                                      ),
                                       Text(
                                         'Solo',
                                         style: TextStyle(fontSize: 14),
@@ -113,16 +125,17 @@ class StartQuiz extends StatelessWidget {
                           ),
 
                           // text and existing session list
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(top: 20.0, bottom: 4.0),
-                            child: Align(
-                              child: Text(
-                                'or join an existing session',
-                                style: TextStyle(fontSize: 16),
+                          if (_sessions(context, snapshot.data).isNotEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 20.0, bottom: 4.0),
+                              child: Align(
+                                child: Text(
+                                  'or join an existing session',
+                                  style: TextStyle(fontSize: 16),
+                                ),
                               ),
                             ),
-                          ),
                           Expanded(
                             child: ListView.builder(
                               itemCount:
