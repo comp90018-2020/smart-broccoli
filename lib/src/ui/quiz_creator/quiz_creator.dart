@@ -39,7 +39,12 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Sets the quiz that this widget holds
   void _setQuiz(Quiz quiz) {
     _quiz = quiz;
+    print(quiz);
     _timeController.text = _getTimeString(_quiz.timeLimit);
+  }
+
+  Future<Quiz> newQuiz() {
+    return Future.value(Quiz("", widget.groupId, QuizType.LIVE, timeLimit: 10));
   }
 
   @override
@@ -50,16 +55,11 @@ class _QuizCreateState extends State<QuizCreate> {
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups();
 
-    // From group or new quiz
-    if (widget.groupId != null || widget.quizId == null) {
-      _setQuiz(new Quiz("", widget.groupId, QuizType.LIVE, timeLimit: 10));
-    }
-
     // From quiz id
-    if (widget.quizId != null) {
-      Provider.of<QuizCollectionModel>(context, listen: false)
-          .selectQuiz(widget.quizId);
-    }
+    // if (widget.quizId != null) {
+    //   Provider.of<QuizCollectionModel>(context, listen: false)
+    //       .selectQuiz(widget.quizId);
+    // }
   }
 
   @override
@@ -81,22 +81,40 @@ class _QuizCreateState extends State<QuizCreate> {
 
       // Delete and Save on AppBar
       appbarActions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.delete),
-          padding: EdgeInsets.zero,
-          splashRadius: 20,
-          onPressed: _deleteQuiz,
+        Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.delete),
+            padding: EdgeInsets.zero,
+            splashRadius: 20,
+            onPressed: _deleteQuiz,
+          ),
         ),
-        IconButton(
-          icon: Icon(Icons.check),
-          padding: EdgeInsets.zero,
-          splashRadius: 20,
-          onPressed: _saveQuiz,
+        Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.check),
+            padding: EdgeInsets.zero,
+            splashRadius: 20,
+            onPressed: _saveQuiz,
+          ),
         ),
       ],
-      child: _quiz == null
-          ? Container()
-          : SingleChildScrollView(
+      child: FutureBuilder(
+        future: _quiz != null
+            // If quiz is loaded, use loaded quiz
+            ? Future.value(_quiz)
+            : widget.quizId != null
+                // Get quiz if quiz id
+                ? Provider.of<QuizCollectionModel>(context, listen: false)
+                    .getQuiz(widget.quizId, forceRefresh: true)
+                // Otherwise just create a new one
+                : newQuiz(),
+        builder: (context, snapshot) {
+          print(snapshot);
+          if (snapshot.hasError) return Container();
+          if (snapshot.hasData) {
+            if (_quiz == null) _setQuiz(snapshot.data);
+
+            return SingleChildScrollView(
               child: Form(
                 key: _formKey,
                 child: Padding(
@@ -282,7 +300,12 @@ class _QuizCreateState extends State<QuizCreate> {
                   ),
                 ),
               ),
-            ),
+            );
+          }
+          return Center(
+              child: LoadingIndicator(EdgeInsets.symmetric(vertical: 8)));
+        },
+      ),
     );
   }
 
@@ -396,8 +419,8 @@ class _QuizCreateState extends State<QuizCreate> {
   }
 
   /// Whether the quiz has been modified
-  bool quizModified() => !_quiz
-      .partialEqual(context.read<QuizCollectionModel>().getQuiz(_quiz.id));
+  Future<bool> quizModified() async => !_quiz.partialEqual(
+      await context.read<QuizCollectionModel>().getQuiz(_quiz.id));
 
   // Exit page
   void _close() async {
@@ -405,7 +428,7 @@ class _QuizCreateState extends State<QuizCreate> {
     if (_quiz == null) return Navigator.of(context).pop();
 
     // Unsaved changes
-    if (_quiz.id == null || _quiz.id != null && quizModified()) {
+    if (_quiz.id == null || _quiz.id != null && await quizModified()) {
       if (!await showConfirmDialog(
           context, "Are you sure you want to discard changes?",
           title: "Discard quiz changes", barrierDismissable: true)) {
@@ -419,7 +442,7 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Save quiz
   void _saveQuiz() async {
     // Quiz not loaded or no change
-    if (_quiz == null || _quiz.id != null && !quizModified()) {
+    if (_quiz == null || _quiz.id != null && !await quizModified()) {
       context.read<QuizCollectionModel>().clearSelectedQuiz();
       return Navigator.of(context).pop();
     }

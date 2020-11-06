@@ -62,8 +62,12 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
           {int groupId, QuizType type}) =>
       filterQuizzesWhere(_createdQuizzes.values, groupId: groupId, type: type);
 
-  Future<Quiz> getQuiz(int id) async {
-    return _createdQuizzes[id] ?? _availableQuizzes[id];
+  Future<Quiz> getQuiz(int id, {bool forceRefresh = false}) async {
+    // If can get from cache, get from cache
+    if (!forceRefresh &&
+        (_createdQuizzes.containsKey(id) || _availableQuizzes.containsKey(id)))
+      return _createdQuizzes[id] ?? _availableQuizzes[id];
+    return _refreshQuiz(id);
   }
 
   /// Select quiz (used by the quiz page)
@@ -238,11 +242,10 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
           await refreshQuestionPicture(quiz.id, question);
         }));
       // Set
-      if (quiz.role == GroupRole.OWNER) {
+      if (quiz.role == GroupRole.OWNER)
         _createdQuizzes[quiz.id] = quiz;
-      } else {
+      else
         _availableQuizzes[quiz.id] = quiz;
-      }
       notifyListeners();
       return quiz;
     } on ApiAuthException {
