@@ -58,15 +58,20 @@ class QuizLobby extends StatelessWidget {
                     future:
                         Provider.of<QuizCollectionModel>(context, listen: false)
                             .getQuiz(model.session.quizId),
-                    builder:
-                        (BuildContext context, AsyncSnapshot<Quiz> snapshot) =>
-                            snapshot.hasData && snapshot.data != null
-                                ? QuizCard(
-                                    snapshot.data,
-                                    aspectRatio: 2.3,
-                                    optionsEnabled: false,
-                                  )
-                                : Container(),
+                    builder: (BuildContext context,
+                            AsyncSnapshot<Quiz> snapshot) =>
+                        snapshot.hasData && snapshot.data != null
+                            ? QuizCard(
+                                snapshot.data,
+                                aspectRatio: 2.3,
+                                optionsEnabled: false,
+                                // coloured strip if self-paced group (smart auto)
+                                supplementary:
+                                    model.session.type == GameSessionType.GROUP
+                                        ? _colouredStrip(context, model)
+                                        : null,
+                              )
+                            : Container(),
                   ),
                 ),
 
@@ -144,6 +149,20 @@ class QuizLobby extends StatelessWidget {
       ),
     );
   }
+
+  // Coloured strip for self-paced group (smart auto)
+  Widget _colouredStrip(BuildContext context, GameSessionModel model) =>
+      Container(
+        decoration: BoxDecoration(
+          color: Provider.of<GameSessionModel>(context, listen: false)
+              .getSessionColour(model.session),
+          borderRadius: BorderRadius.only(
+            bottomLeft: const Radius.circular(4.0),
+            bottomRight: const Radius.circular(4.0),
+          ),
+        ),
+        height: 4,
+      );
 
   // Timer display functionality
   Widget _quizTimer(GameSessionModel model) {

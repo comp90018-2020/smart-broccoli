@@ -153,6 +153,17 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     }
   }
 
+  List<GameSession> getGroupSessions(Quiz quiz) => quiz.sessions
+      .where((session) =>
+          session.quizType == QuizType.SELF_PACED &&
+          session.type == GameSessionType.GROUP &&
+          session.state != GameSessionState.ENDED &&
+          session.joinCode != null)
+      .toList();
+
+  Color getSessionColour(GameSession session) =>
+      Color(int.parse('FF${session.joinCode}', radix: 16));
+
   Future<void> joinSessionByPin(String pin) async {
     try {
       session = await _sessionApi.joinSession(_authStateModel.token, pin);

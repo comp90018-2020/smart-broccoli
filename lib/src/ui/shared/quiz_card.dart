@@ -23,11 +23,15 @@ class QuizCard extends StatelessWidget {
   /// Whether to force no intrinsic height
   final bool alwaysShowPicture;
 
+  /// Optional supplementary widget to be appended to the bottom of the card
+  final Widget supplementary;
+
   QuizCard(this.quiz,
       {Key key,
       this.aspectRatio = 1.4,
       this.optionsEnabled = true,
-      this.alwaysShowPicture = false});
+      this.alwaysShowPicture = false,
+      this.supplementary});
 
   @override
   Widget build(BuildContext context) => Card(
@@ -151,7 +155,8 @@ class QuizCard extends StatelessWidget {
                     if (!quiz.complete) Container()
                   ],
                 ),
-              )
+              ),
+              if (supplementary != null) supplementary,
             ],
           )
         ],
