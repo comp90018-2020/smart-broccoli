@@ -83,10 +83,9 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
 
   /// Gets the specified quiz's picture from cache
   /// note: _refresh functions will retrieve pictures
-  Future<String> getQuizPicturePath(Quiz quiz) {
+  Future<String> getQuizPicturePath(Quiz quiz) async {
     if (quiz == null || !quiz.hasPicture) return null;
-    if (quiz.pendingPicturePath != null)
-      return Future.value(quiz.pendingPicturePath);
+    if (quiz.pendingPicturePath != null) return quiz.pendingPicturePath;
     return _picStash.getPic(quiz.pictureId);
   }
 

@@ -41,7 +41,7 @@ class _QuizCreateState extends State<QuizCreate> {
 
   /// Sets the quiz that this widget holds
   void _setQuiz(Quiz quiz) {
-    _quiz = quiz;
+    _quiz = Quiz.fromJson(quiz.toJson());
     print(quiz);
     _timeController.text = _getTimeString(_quiz.timeLimit);
   }
@@ -57,21 +57,10 @@ class _QuizCreateState extends State<QuizCreate> {
     /// TODO: optimise group retrieval (this retrieves quiz/members of group) repeatedly
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups();
-
-    // From quiz id
-    // if (widget.quizId != null) {
-    //   Provider.of<QuizCollectionModel>(context, listen: false)
-    //       .selectQuiz(widget.quizId);
-    // }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Clone and set quiz after selectQuiz
-    var quiz =
-        Provider.of<QuizCollectionModel>(context, listen: true).selectedQuiz;
-    if (_quiz == null && quiz != null) _setQuiz(Quiz.fromJson(quiz.toJson()));
-
     return CustomPage(
       title: "Quiz",
       secondaryBackgroundColour: true,
@@ -162,7 +151,7 @@ class _QuizCreateState extends State<QuizCreate> {
                       // Picture selection
                       FutureBuilder(
                         future: Provider.of<QuizCollectionModel>(context)
-                            .getQuizPicturePath(quiz),
+                            .getQuizPicturePath(_quiz),
                         builder: (BuildContext context,
                             AsyncSnapshot<String> snapshot) {
                           return PictureCard(
