@@ -290,7 +290,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         await _quizCollectionModel.refreshQuestionPicture(
             session.quizId, question,
             token: session.token);
-      } catch (_) {}
+      } on ApiAuthException {
+        _authStateModel.checkSession();
+      } catch (_) {
+        // Do nothing, picture is not loaded
+      }
       _transitionTo(SessionState.QUESTION);
       PubSub().publish(PubSubTopic.TIMER, arg: time);
     });

@@ -33,7 +33,7 @@ class QuizApi {
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to get quizzes: unknown error occurred');
+    throw ApiException('Unable to get quizzes: unknown error occurred');
   }
 
   /// Return a list of all quizzes of a group.
@@ -49,7 +49,7 @@ class QuizApi {
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to get quizzes: unknown error occurred');
+    throw ApiException('Unable to get quizzes: unknown error occurred');
   }
 
   /// Return the quiz with specified [id].
@@ -63,7 +63,7 @@ class QuizApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuizNotFoundException();
-    throw Exception('Unable to get specified quiz: unknown error occurred');
+    throw ApiException('Unable to get specified quiz: unknown error occurred');
   }
 
   /// Synchronise an updated [quiz] with the server.
@@ -89,7 +89,7 @@ class QuizApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuizNotFoundException();
-    throw Exception('Unable to update quiz: unknown error occurred');
+    throw ApiException('Unable to update quiz: unknown error occurred');
   }
 
   /// Upload a new [quiz] to the server.
@@ -113,7 +113,7 @@ class QuizApi {
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to create quiz: unknown error occurred');
+    throw ApiException('Unable to create quiz: unknown error occurred');
   }
 
   /// Delete a quiz with specified [id].
@@ -125,7 +125,7 @@ class QuizApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuizNotFoundException();
-    throw Exception('Unable to delete quiz: unknown error occurred');
+    throw ApiException('Unable to delete quiz: unknown error occurred');
   }
 
   /// Get the picture of a quiz with specified [id] as a list of bytes.
@@ -139,7 +139,7 @@ class QuizApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) return null;
-    throw Exception('Unable to get quiz picture: unknown error occurred');
+    throw ApiException('Unable to get quiz picture: unknown error occurred');
   }
 
   /// Set the picture of a [quiz].
@@ -161,7 +161,7 @@ class QuizApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuizNotFoundException();
-    throw Exception('Unable to set quiz picture: unknown error occurred');
+    throw ApiException('Unable to set quiz picture: unknown error occurred');
   }
 
   /// Delete the picture of a quiz with specified [id].
@@ -175,7 +175,7 @@ class QuizApi {
     if (response.statusCode == 204) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to delete quiz picture: unknown error occurred');
+    throw ApiException('Unable to delete quiz picture: unknown error occurred');
   }
 
   /// Get the picture of a question as a list of bytes.
@@ -191,7 +191,8 @@ class QuizApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) return null;
-    throw Exception('Unable to get question picture: unknown error occurred');
+    throw ApiException(
+        'Unable to get question picture: unknown error occurred');
   }
 
   /// Set the picture of a question.
@@ -210,7 +211,8 @@ class QuizApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuestionNotFoundException();
-    throw Exception('Unable to set question picture: unknown error occurred');
+    throw ApiException(
+        'Unable to set question picture: unknown error occurred');
   }
 
   /// Delete the picture of a question.
@@ -223,6 +225,7 @@ class QuizApi {
     if (response.statusCode == 204) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to get question picture: unknown error occurred');
+    throw ApiException(
+        'Unable to get question picture: unknown error occurred');
   }
 }

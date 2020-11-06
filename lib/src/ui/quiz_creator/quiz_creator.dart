@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/group_dropdown.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
@@ -439,8 +440,11 @@ class _QuizCreateState extends State<QuizCreate> {
       await showBasicDialog(context, "Quiz saved", title: "Success");
       context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
+    } on QuizNotFoundException {
+      await showBasicDialog(context, "Quiz no longer exists");
+      Navigator.of(context).pop();
     } catch (err) {
-      showBasicDialog(context, err.toString());
+      showErrSnackBar(context, err.toString());
     }
   }
 
@@ -459,8 +463,11 @@ class _QuizCreateState extends State<QuizCreate> {
           .deleteQuiz(_quiz);
       context.read<QuizCollectionModel>().clearSelectedQuiz();
       Navigator.of(context).pop();
+    } on QuizNotFoundException {
+      await showBasicDialog(context, "Quiz no longer exists");
+      Navigator.of(context).pop();
     } on Exception catch (err) {
-      showBasicDialog(context, err.toString());
+      showErrSnackBar(context, err.toString());
     }
   }
 }

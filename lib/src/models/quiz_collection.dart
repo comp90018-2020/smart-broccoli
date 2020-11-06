@@ -64,16 +64,19 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     return _createdQuizzes[id] ?? _availableQuizzes[id];
   }
 
+  /// Select quiz (used by the quiz page)
   Future<void> selectQuiz(int id) async {
     _selectedQuiz = await _refreshQuiz(id, withQuestionPictures: true);
     notifyListeners();
   }
 
+  /// Deselect quiz (used by the quiz page)
   void clearSelectedQuiz() {
     _selectedQuiz = null;
   }
 
-  /// Gets the specified quiz's picture.
+  /// Gets the specified quiz's picture from cache
+  /// note: _refresh functions will retrieve pictures
   Future<String> getQuizPicturePath(Quiz quiz) {
     if (quiz == null || !quiz.hasPicture) return null;
     if (quiz.pendingPicturePath != null)
@@ -82,6 +85,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Get question picture
+  /// note: _refresh functions will retrieve pictures
   Future<String> getQuestionPicturePath(Question question) {
     if (question == null || !question.hasPicture) return null;
     if (question.pendingPicturePath != null)
@@ -106,47 +110,72 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
         quiz.isActive = updated.isActive;
         notifyListeners();
       }
-    } catch (err) {
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on ApiException catch (e) {
       await _refreshQuiz(quiz.id);
-      throw err;
+      return Future.error(e.toString());
+    } catch (err) {
+      return Future.error("Something went wrong");
     }
   }
 
   /// Deletes a quiz
   Future<void> deleteQuiz(Quiz quiz) async {
     if (quiz == null || quiz.id == null) return;
-    await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
-    if (quiz.role == GroupRole.MEMBER)
-      _availableQuizzes.remove(quiz.id);
-    else
-      _createdQuizzes.remove(quiz.id);
-    notifyListeners();
+    try {
+      await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
+      if (quiz.role == GroupRole.MEMBER)
+        _availableQuizzes.remove(quiz.id);
+      else
+        _createdQuizzes.remove(quiz.id);
+      notifyListeners();
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on QuizNotFoundException catch (e) {
+      throw e;
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something unexpected has happened");
+    }
   }
 
   /// Save selected quiz
   Future<void> saveQuiz(Quiz quiz) async {
     if (quiz == null) return;
     // First save the quiz
-    Quiz updated = quiz.id == null
-        ? await _quizApi.createQuiz(_authStateModel.token, quiz)
-        : await _quizApi.updateQuiz(_authStateModel.token, quiz);
+    Quiz updated;
+
+    try {
+      updated = quiz.id == null
+          ? await _quizApi.createQuiz(_authStateModel.token, quiz)
+          : await _quizApi.updateQuiz(_authStateModel.token, quiz);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failed");
+    } on QuizNotFoundException catch (e) {
+      throw e;
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
 
     // Exit if unexpected happens
-    if (updated.questions.length != quiz.questions.length) return;
+    if (updated.questions.length != quiz.questions.length)
+      return Future.error("Question length mismatch");
 
     // Futures
     var futures = <Future>[];
-
     // Has quiz picture to save
     if (quiz.pendingPicturePath != null)
       futures.add(_quizApi.setQuizPicture(_authStateModel.token, updated.id,
           await File(quiz.pendingPicturePath).readAsBytes()));
-
     // Has quiz question pictures to save
     for (var i = 0; i < quiz.questions.length; i++) {
       var question = quiz.questions[i];
       var questionUpdated = updated.questions[i];
-
       // Has question picture
       if (question.pendingPicturePath != null) {
         futures.add(_quizApi.setQuestionPicture(
@@ -156,8 +185,18 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
             await File(question.pendingPicturePath).readAsBytes()));
       }
     }
-    if (futures.length > 0) {
-      await Future.wait(futures);
+
+    // Wait for futures
+    try {
+      if (futures.length > 0) await Future.wait(futures);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on QuizNotFoundException catch (e) {
+      throw e;
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
     }
 
     // Refresh quiz (since picture IDs may have changed by this point)
@@ -168,64 +207,102 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   Future<Quiz> _refreshQuiz(int quizId,
       {bool withQuestionPictures = false}) async {
     // Refreshes the specified quiz
-    var quiz = await _quizApi.getQuiz(_authStateModel.token, quizId);
-    await _refreshQuizPicture(quiz);
-    // Refresh pictures if necessary
-    if (withQuestionPictures)
-      await Future.wait(quiz.questions.map((Question question) async {
-        await refreshQuestionPicture(quiz.id, question);
-      }));
-    // Set
-    if (quiz.role == GroupRole.OWNER) {
-      _createdQuizzes[quiz.id] = quiz;
-    } else {
-      _availableQuizzes[quiz.id] = quiz;
+    try {
+      // Get quiz and quiz picture
+      var quiz = await _quizApi.getQuiz(_authStateModel.token, quizId);
+      await _refreshQuizPicture(quiz);
+
+      // Refresh pictures if necessary
+      if (withQuestionPictures)
+        await Future.wait(quiz.questions.map((Question question) async {
+          await refreshQuestionPicture(quiz.id, question);
+        }));
+      // Set
+      if (quiz.role == GroupRole.OWNER) {
+        _createdQuizzes[quiz.id] = quiz;
+      } else {
+        _availableQuizzes[quiz.id] = quiz;
+      }
+      notifyListeners();
+      return quiz;
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failed");
+    } on QuizNotFoundException {
+      return null;
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
     }
-    notifyListeners();
-    return quiz;
   }
 
   /// Refreshes list of available quizzes
-  Future<void> refreshAvailableQuizzes() async {
-    if (!_authStateModel.inSession) return;
-    _availableQuizzes = Map.fromIterable(
-        (await _quizApi.getQuizzes(_authStateModel.token))
-            .where((quiz) => quiz.role == GroupRole.MEMBER),
-        key: (quiz) => quiz.id);
-    await Future.wait(_availableQuizzes.values.map((Quiz quiz) async {
-      await _refreshQuizPicture(quiz);
-    }));
-    notifyListeners();
+  Future<void> refreshAvailableQuizzes({bool forceRefresh = true}) async {
+    try {
+      _availableQuizzes = Map.fromIterable(
+          (await _quizApi.getQuizzes(_authStateModel.token))
+              .where((quiz) => quiz.role == GroupRole.MEMBER),
+          key: (quiz) => quiz.id);
+      await Future.wait(_availableQuizzes.values
+          .map((Quiz quiz) => _refreshQuizPicture(quiz)));
+      notifyListeners();
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("API exception has occurred");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
   }
 
   /// Refreshes list of created quizzes
   Future<void> refreshCreatedQuizzes() async {
-    if (!_authStateModel.inSession) return;
-    _createdQuizzes = Map.fromIterable(
-        (await _quizApi.getQuizzes(_authStateModel.token))
-            .where((quiz) => quiz.role == GroupRole.OWNER),
-        key: (quiz) => quiz.id);
-    await Future.wait(_createdQuizzes.values.map((Quiz quiz) async {
-      await _refreshQuizPicture(quiz);
-    }));
-    notifyListeners();
+    try {
+      _createdQuizzes = Map.fromIterable(
+          (await _quizApi.getQuizzes(_authStateModel.token))
+              .where((quiz) => quiz.role == GroupRole.OWNER),
+          key: (quiz) => quiz.id);
+      await Future.wait(
+          _createdQuizzes.values.map((Quiz quiz) => _refreshQuizPicture(quiz)));
+      notifyListeners();
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("API exception has occurred");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
   }
 
   /// Refreshes specific group's quizzes.
   Future<void> refreshGroupQuizzes(int groupId) async {
-    if (!_authStateModel.inSession) return;
-    List<Quiz> quizzes =
-        await _quizApi.getGroupQuizzes(_authStateModel.token, groupId);
-    await Future.wait(quizzes.map((quiz) async {
-      if (quiz.role == GroupRole.OWNER)
-        _createdQuizzes[quiz.id] = quiz;
-      else
-        _availableQuizzes[quiz.id] = quiz;
-      await _refreshQuizPicture(quiz);
-    }));
+    try {
+      // Get quizzes
+      List<Quiz> quizzes =
+          await _quizApi.getGroupQuizzes(_authStateModel.token, groupId);
+      // Add to maps and refresh
+      await Future.wait(quizzes.map((quiz) async {
+        if (quiz.role == GroupRole.OWNER)
+          _createdQuizzes[quiz.id] = quiz;
+        else
+          _availableQuizzes[quiz.id] = quiz;
+        await _refreshQuizPicture(quiz);
+      }));
+      notifyListeners();
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
   }
 
   /// Loads the picture of a quiz into cache
+  /// Caller is responsible for catching exceptions
   Future<void> _refreshQuizPicture(Quiz quiz) async {
     // No picture
     if (quiz.pictureId == null) return;
@@ -236,7 +313,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     _picStash.storePic(quiz.pictureId, picture);
   }
 
-  // Loads the picture of a question into cache
+  /// Loads the picture of a question into cache
+  /// Caller is responsible for catching exceptions
   Future<void> refreshQuestionPicture(int quizId, Question question,
       {String token}) async {
     // No picture
