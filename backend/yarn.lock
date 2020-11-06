@@ -135,10 +135,10 @@
     retry-request "^4.1.1"
     teeny-request "^7.0.0"
 
-"@google-cloud/firestore@^4.0.0":
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/@google-cloud/firestore/-/firestore-4.6.1.tgz#3050f80f023528b1ec80b1a955582a796a36d035"
-  integrity sha512-GZ5tBdg05ANAp2+9voMQauH+WF9s2ZjY51MpIqju74j6MH3z31A0Gm+Wukl6FJ30XMUP316tFUUVpTyUyAd8+g==
+"@google-cloud/firestore@^4.0.0", "@google-cloud/firestore@^4.7.0":
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/firestore/-/firestore-4.7.0.tgz#8a176e41773b2a06320e1281d93994624b321541"
+  integrity sha512-srkT0LxbKBEo3hWlgjJenT6+bPJK4D+vuKiV/EZFc6sWhDNQwgOgKF6Rf16mggHwKOL9Sx08Veu0BUaX1uyh4g==
   dependencies:
     fast-deep-equal "^3.1.1"
     functional-red-black-tree "^1.0.1"
