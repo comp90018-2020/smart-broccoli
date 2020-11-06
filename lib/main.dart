@@ -145,10 +145,10 @@ class _MyAppState extends State<MyApp> {
             .popUntil((route) => !route.settings.name.startsWith('/session'));
         // refresh quiz information as user has just left session
         Provider.of<QuizCollectionModel>(context, listen: false)
-            .refreshAvailableQuizzes(refresh: true)
+            .refreshAvailableQuizzes(refreshIfLoaded: true)
             .catchError((_) => null);
         Provider.of<QuizCollectionModel>(context, listen: false)
-            .refreshCreatedQuizzes(refresh: true)
+            .refreshCreatedQuizzes(refreshIfLoaded: true)
             .catchError((_) => null);
         break;
       case RouteAction.REPLACE:

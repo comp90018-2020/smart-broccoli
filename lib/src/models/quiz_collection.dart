@@ -262,11 +262,11 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes list of available quizzes
-  Future<bool> refreshAvailableQuizzes({bool refresh = false}) async {
+  Future<bool> refreshAvailableQuizzes({bool refreshIfLoaded = false}) async {
     // Do not force refresh on start
-    if (!_isAvailableQuizzesLoaded && refresh) return true;
+    if (!_isAvailableQuizzesLoaded && refreshIfLoaded) return true;
     // Get from cache
-    if (!refresh && _isAvailableQuizzesLoaded) return true;
+    if (!refreshIfLoaded && _isAvailableQuizzesLoaded) return true;
 
     try {
       _availableQuizzes = Map.fromIterable(
@@ -289,11 +289,11 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes list of created quizzes
-  Future<bool> refreshCreatedQuizzes({bool refresh = false}) async {
+  Future<bool> refreshCreatedQuizzes({bool refreshIfLoaded = false}) async {
     // Do not force refresh on start
-    if (!_isCreatedQuizzesLoaded && refresh) return true;
+    if (!_isCreatedQuizzesLoaded && refreshIfLoaded) return true;
     // Get from cache
-    if (!refresh && _isCreatedQuizzesLoaded) return true;
+    if (!refreshIfLoaded && _isCreatedQuizzesLoaded) return true;
 
     try {
       _createdQuizzes = Map.fromIterable(
