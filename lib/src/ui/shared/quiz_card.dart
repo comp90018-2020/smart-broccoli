@@ -233,7 +233,7 @@ class QuizCard extends StatelessWidget {
                                   .createSession(
                                       quiz.id, GameSessionType.INDIVIDUAL)
                                   .catchError((e) =>
-                                      showErrSnackBar(context, e.toString()));
+                                      showBasicDialog(context, e.toString()));
                             },
                             color: Theme.of(context).accentColor,
                             textColor:
