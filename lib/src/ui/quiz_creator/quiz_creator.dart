@@ -484,7 +484,7 @@ class _QuizCreateState extends State<QuizCreate> {
     } on QuizNotFoundException {
       await showBasicDialog(context, "Quiz no longer exists");
       Navigator.of(context).pop();
-    } on Exception catch (err) {
+    } catch (err) {
       showErrSnackBar(context, err.toString());
     }
     setState(() => _committed = false);

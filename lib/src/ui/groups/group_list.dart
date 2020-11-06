@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
 /// Group list page
@@ -15,6 +15,9 @@ class GroupList extends StatefulWidget {
 class _GroupListState extends State<GroupList> {
   // Current tab
   int tab = 0;
+
+  // Whether currently in joining operation
+  bool _committed = false;
 
   @override
   void didChangeDependencies() {
@@ -53,10 +56,13 @@ class _GroupListState extends State<GroupList> {
 
         // Action buttons
         floatingActionButton: tab == 0
-            ? FloatingActionButton.extended(
-                onPressed: _joinGroup,
-                label: Text('JOIN GROUP'),
-                icon: Icon(Icons.add),
+            ? Builder(
+                builder: (BuildContext context) =>
+                    FloatingActionButton.extended(
+                  onPressed: _committed ? null : () => _joinGroup(context),
+                  label: Text('JOIN GROUP'),
+                  icon: Icon(Icons.add),
+                ),
               )
             : FloatingActionButton.extended(
                 onPressed: () {
@@ -132,18 +138,14 @@ class _GroupListState extends State<GroupList> {
     );
   }
 
-  void _joinGroup() async {
+  void _joinGroup(BuildContext context) async {
     final String groupName = await joinDialog();
     if (groupName == null) return;
-    try {
-      await Provider.of<GroupRegistryModel>(context, listen: false)
-          .joinGroup(name: groupName);
-    } on GroupNotFoundException {
-      showBasicDialog(context, "Group does not exist: $groupName");
-    } on AlreadyInGroupException {
-      showBasicDialog(context, "Already a member of group: $groupName");
-    } catch (err) {
-      showBasicDialog(context, "Something went wrong");
-    }
+
+    setState(() => _committed = true);
+    await Provider.of<GroupRegistryModel>(context, listen: false)
+        .joinGroup(name: groupName)
+        .catchError((value) => showErrSnackBar(context, value));
+    setState(() => _committed = false);
   }
 }

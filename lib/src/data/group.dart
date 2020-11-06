@@ -1,3 +1,6 @@
+import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/store/remote/api_base.dart';
+
 import 'user.dart';
 
 enum GroupRole { OWNER, MEMBER }
@@ -49,16 +52,25 @@ class Group {
 
 /// Exception thrown when the server is unable to create a group due to the
 /// name already being in use.
-class GroupCreateException implements Exception {}
+class GroupCreateException extends ApiException {
+  GroupCreateException()
+      : super("Cannot create group, group name already exists");
+}
 
 /// Exception thrown when the server is unable to change a group name due to
 /// the new name already being in use.
-class GroupRenameException implements Exception {}
+class GroupRenameException extends ApiException {
+  GroupRenameException() : super("Cannot rename group, name is already in use");
+}
 
 /// Exception thrown when attempting to join a group of which the user is
 /// already a member.
-class AlreadyInGroupException implements Exception {}
+class AlreadyInGroupException extends ApiException {
+  AlreadyInGroupException() : super("Already in group");
+}
 
 /// Exception thrown when attempting an operation on a group which could not
 /// be found.
-class GroupNotFoundException implements Exception {}
+class GroupNotFoundException extends ApiException {
+  GroupNotFoundException() : super("Group not found");
+}

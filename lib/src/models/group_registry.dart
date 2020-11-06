@@ -171,14 +171,36 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   ///
   /// This callback refreshes [createdGroups].
   Future<void> createGroup(String name) async {
-    await _groupApi.createGroup(_authStateModel.token, name);
-    refreshCreatedGroups();
+    try {
+      await _groupApi.createGroup(_authStateModel.token, name);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on GroupCreateException catch (e) {
+      throw e;
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+    refreshCreatedGroups().catchError((_) => null);
   }
 
   /// Join a group.
   Future<void> joinGroup({String name, String code}) async {
-    await _groupApi.joinGroup(_authStateModel.token, name: name, code: code);
-    refreshJoinedGroups();
+    try {
+      await _groupApi.joinGroup(_authStateModel.token, name: name, code: code);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on GroupNotFoundException {
+      return Future.error("Group does not exist: $name");
+    } on AlreadyInGroupException {
+      return Future.error("Already member of group: $name");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+    refreshJoinedGroups().catchError((_) => null);
   }
 
   void authUpdated() {

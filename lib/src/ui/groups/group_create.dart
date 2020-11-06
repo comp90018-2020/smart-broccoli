@@ -5,6 +5,7 @@ import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/centered_page.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// Create group page
@@ -16,6 +17,9 @@ class GroupCreate extends StatefulWidget {
 class _GroupCreateState extends State<GroupCreate> {
   final TextEditingController controller = TextEditingController();
   bool _isTextFormFieldEmpty = true;
+
+  // Whether currently in network operation
+  bool _committed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +49,15 @@ class _GroupCreateState extends State<GroupCreate> {
             padding: EdgeInsets.symmetric(vertical: 8),
             child: SizedBox(
               width: double.infinity,
-              child: RaisedButton(
-                disabledTextColor:
-                    SmartBroccoliColourScheme.disabledButtonTextColor,
-                onPressed: _isTextFormFieldEmpty ? null : _createGroup,
-                child: const Text("CREATE"),
+              child: Builder(
+                builder: (BuildContext context) => RaisedButton(
+                  disabledTextColor:
+                      SmartBroccoliColourScheme.disabledButtonTextColor,
+                  onPressed: _isTextFormFieldEmpty || _committed
+                      ? null
+                      : () => _createGroup(context),
+                  child: const Text("CREATE"),
+                ),
               ),
             ),
           ),
@@ -58,10 +66,8 @@ class _GroupCreateState extends State<GroupCreate> {
     );
   }
 
-  void _createGroup() async {
-    if (controller.text == "")
-      return showBasicDialog(context, "Name required",
-          title: "Cannot create group");
+  void _createGroup(BuildContext context) async {
+    setState(() => _committed = true);
     try {
       await Provider.of<GroupRegistryModel>(context, listen: false)
           .createGroup(controller.text);
@@ -69,6 +75,9 @@ class _GroupCreateState extends State<GroupCreate> {
     } on GroupCreateException {
       showBasicDialog(context, "Name already in use",
           title: "Cannot create group");
+    } catch (e) {
+      showErrSnackBar(context, e.toString());
     }
+    setState(() => _committed = false);
   }
 }
