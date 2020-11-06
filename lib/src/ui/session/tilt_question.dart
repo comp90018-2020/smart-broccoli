@@ -191,11 +191,9 @@ class _MyHomePageState extends State<TiltQuestion> {
 
   List<Widget> tiltWidgets(GameSessionModel model) {
     if (model.question is TFQuestion) {
-      print("TFQ");
       listOfAnswers = 2;
       selectableAnswers = 1;
     } else {
-      print("MCQ");
       listOfAnswers = (model.question as MCQuestion).options.length;
       selectableAnswers = (model.question as MCQuestion).numCorrect;
     }
