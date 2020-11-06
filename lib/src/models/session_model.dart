@@ -193,12 +193,23 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     }
   }
 
+  /// Get path of peer's profile picture, where path is cached local path
+  /// Should be called from a FutureBuilder
   Future<String> getPeerProfilePicturePath(int userId) async {
     String path;
     // check if cached
     if ((path = await _userRepo.getUserPicture(userId)) != null) return path;
+
     // if not, retrieve from server
-    await _userRepo.getUserBy(session.token, userId);
+    try {
+      await _userRepo.getUserBy(session.token, userId);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
     return _userRepo.getUserPicture(userId);
   }
 
