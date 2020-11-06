@@ -48,7 +48,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Retrieve user picture from cache
-  Future<String> getUserPicture({bool refresh = false}) async {
+  Future<String> getUserPicture() async {
     if (user?.pictureId == null) return null;
     return await _picStash.getPic(user.pictureId);
   }
