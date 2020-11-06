@@ -344,7 +344,7 @@ export class GameSession {
         // Get the correct answer of this question
         const correctAnswer = this.getAnsOfQuestion(answer.question);
         const player = this.playerMap[playerId];
-        // Check whether the answer provided is correct
+        // Check whether the provided answer is correct
         let correct;
         if (correctAnswer.MCSelection !== null)
             correct =
@@ -361,7 +361,7 @@ export class GameSession {
         const previousStreak = hasAnsweredPreviousQuestion
             ? recordOfPreciousQuestion.streak
             : 0;
-        // Get points with pre vious streak
+        // Use the previous streak to get points
         const bonusPoints = this.pointSys.getPoints(
             correct,
             playerId,
@@ -373,15 +373,15 @@ export class GameSession {
         // Generate record
         const [record, hasAnswered] = player.genreateRecord(this.questionIndex);
         if (hasAnswered)
-            // If has answerd, roll back points
+            // If has answerd, roll back points first
             record.points -= record.bonusPoints;
         record.bonusPoints = bonusPoints;
         record.points += bonusPoints;
         record.streak = streak;
 
-        // Has record for this question
+        // If has record for this question, overwrite
         if (hasAnswered) player.records[player.records.length - 1] = record;
-        // Does not have
+        // Otherwise, add it to tail
         else this.playerMap[playerId].records.push(record);
 
         if (this.answerReleased.size === this.totalQuestions)
@@ -406,7 +406,7 @@ export class GameSession {
     }
 
     rankPlayers(): RecordWithPlayerInfo[] {
-        // Convert to list for sorting
+        // Convert players map to list for sorting
         const playersArray: Player[] = Object.values(this.playerMap);
         // Current question index
         const questionIndex = this.getQuestionIndex();
@@ -414,10 +414,13 @@ export class GameSession {
         playersArray.forEach((player, index) => {
             const [record, hasAnswered] = player.genreateRecord(questionIndex);
             if (!hasAnswered)
-                // Generate records for players that didn't answer
+                // Player didn't answer, generate a record for him
                 this.playerMap[player.id].records.push(record);
         });
 
+        // Every user should have record of current question now
+
+        // Sort records by points desc
         // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
         playersArray.sort((playerA, playerB) => {
             // All players should be ranked with their latest record
@@ -427,13 +430,14 @@ export class GameSession {
             return playerARecord.points < playerBRecord.points ? 1 : -1;
         });
 
+        // Update players new position and new position
         playersArray.forEach(({ id }, position) => {
-            // Update players' new position
+            // Update player's new position
             this.playerMap[id].records[questionIndex].newPos = position;
             playersArray[position].records[questionIndex].newPos = position;
-            // Update old position
+            // Update the old position
             if (questionIndex === 0) {
-                // If this is the first question
+                // If this is the first question, make them null
                 this.playerMap[id].records[questionIndex].oldPos = null;
                 playersArray[position].records[questionIndex].oldPos = null;
             } else {
@@ -450,7 +454,7 @@ export class GameSession {
                 ].oldPos = previousPosition;
             }
         });
-        // Filter unused keys according to protocol
+        // Filter unused keys for emits according to the protocol
         this.rankedRecords = playersArray.map(
             (player) =>
                 new RecordWithPlayerInfo(
