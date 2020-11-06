@@ -21,7 +21,6 @@ List<Widget> futureTabs({
         FutureBuilder(
           future: future,
           builder: (context, snapshot) {
-            print(snapshot);
             if (snapshot.hasData) return child;
             if (snapshot.hasError) return errorIndicator;
             return loadingIndicator;

@@ -42,7 +42,6 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Sets the quiz that this widget holds
   void _setQuiz(Quiz quiz) {
     _quiz = Quiz.fromJson(quiz.toJson());
-    print(quiz);
     _timeController.text = _getTimeString(_quiz.timeLimit);
   }
 
@@ -101,7 +100,6 @@ class _QuizCreateState extends State<QuizCreate> {
                 // Otherwise just create a new one
                 : newQuiz(),
         builder: (context, snapshot) {
-          print(snapshot);
           if (snapshot.hasError) {
             WidgetsBinding.instance.addPostFrameCallback((_) async {
               await showBasicDialog(context, snapshot.error.toString());
