@@ -35,7 +35,7 @@ export enum PlayerState {
     Left = "complete",
 }
 
-export class PlayerRecord {
+export class Record {
     constructor(
         public questionNo: number = null,
         public oldPos: number = null,
@@ -46,8 +46,23 @@ export class PlayerRecord {
     ) {}
 }
 
-export class Player {
-    public records: PlayerRecord[] = [];
+class PlayerBase {
+    constructor(
+        public id: number,
+        public name: string,
+        public pictureId: number
+    ) {}
+}
+
+export class RecordWithPlayerInfo {
+    constructor(
+        public player: PlayerBase,
+        public record: Record = new Record()
+    ) {}
+}
+
+export class Player extends PlayerBase {
+    public records: Record[] = [];
     public state: PlayerState = PlayerState.Joined;
     constructor(
         readonly id: number,
@@ -57,18 +72,8 @@ export class Player {
         public sessionId: number,
         public role: string,
         public token: string
-    ) {}
-
-    latestRecord(questionIndex?: number) {
-        if (questionIndex === undefined) {
-            if (this.records.length === 0) return null;
-            return this.records[this.records.length - 1];
-        }
-
-        const _latestRecord = this.records
-            .slice()
-            .find((record) => record.questionNo === questionIndex);
-        return _latestRecord === undefined ? null : _latestRecord;
+    ) {
+        super(id, name, pictureId);
     }
 
     /**
@@ -83,57 +88,59 @@ export class Player {
     }
 
     /**
-     * format record for event-> questionOutcome
+     * Get record of a question, if does not exist, return [false, Record]
+     * @param questionIndex
      */
-    formatRecord(questionIndex: number) {
-        const record = {
-            player: {
-                id: this.id,
-                name: this.name,
-                pictureId: this.pictureId,
-            },
-            record: {
-                // @ts-ignore
-                oldPos: null,
-                // @ts-ignore
-                newPos: null,
-                bonusPoints: 0,
-                points: 0,
-                streak: 0,
-            },
-        };
-        const _latestPreviousQuestionRecord = this.latestRecord(questionIndex);
-        if (
-            _latestPreviousQuestionRecord !== null &&
-            _latestPreviousQuestionRecord.questionNo === questionIndex
-        ) {
-            const {
-                oldPos,
-                newPos,
-                bonusPoints,
-                points,
-                streak,
-            } = _latestPreviousQuestionRecord;
-            record.record = {
-                oldPos: oldPos,
-                newPos: newPos,
-                bonusPoints: bonusPoints,
-                points: points,
-                streak: streak,
-            };
-            return record;
-        }
+    getRecordOfQuestion(questionIndex: number): [boolean, Record] {
+        // Find record of the question
+        const record = this.records.find(
+            (record) => record.questionNo === questionIndex
+        );
+        // Did not find
+        if (record === undefined)
+            // Return initial record
+            return [false, new Record(questionIndex, null, null, 0, 0, 0)];
+        return [true, record];
+    }
 
-        const _latestRecord = this.latestRecord();
-        if (_latestRecord === null) return record;
-        record.record = {
-            oldPos: null,
-            newPos: null,
-            bonusPoints: 0,
-            points: _latestRecord.points,
-            streak: 0,
-        };
-        return record;
+    /**
+     * Get the latest record, boolean is false if cannot find
+     */
+    getLatestRecord(): [boolean, Record] {
+        if (this.records.length === 0) return [false, null];
+        return [true, this.records[this.records.length - 1]];
+    }
+
+    /**
+     * Genreate the record of a question
+     * @param questionIndex Question index
+     */
+    genreateRecord(questionIndex: number): [Record, boolean] {
+        // Get record of this question
+        const [
+            didAnswerThisQuesion,
+            recordOfThisQuestion,
+        ] = this.getRecordOfQuestion(questionIndex);
+        // Did answer this question
+        if (didAnswerThisQuesion) return [recordOfThisQuestion, true];
+        // Get latest record
+        const [hasRecord, latestRecord] = this.getLatestRecord();
+        if (!hasRecord)
+            // If does not have record in history
+            return [new Record(questionIndex, null, null, 0, 0, 0), false];
+        // Otherwise, generate a new record of this question
+        return [
+            new Record(questionIndex, null, null, 0, latestRecord.points, 0),
+            false,
+        ];
+    }
+
+    /**
+     * Get record of question index and return as the protocol describes
+     */
+    formatRecordWithPlayerInfo(questionIndex: number): RecordWithPlayerInfo {
+        const [record] = this.genreateRecord(questionIndex);
+        return new RecordWithPlayerInfo(this, record);
     }
 }
 

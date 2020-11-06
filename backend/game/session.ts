@@ -6,7 +6,8 @@ import {
     PlayerState,
     Answer,
     Role,
-    PlayerRecord,
+    Record,
+    RecordWithPlayerInfo,
 } from "./datatype";
 import { QuizAttributes } from "../models/quiz";
 import {
@@ -41,6 +42,8 @@ export class GameSession {
     public answerReleased: Set<number> = new Set([]);
     public totalQuestions: number = 0;
     public updatedAt: number = Date.now();
+    // Stores the sorted records of the latest finished question
+    public rankedRecords: RecordWithPlayerInfo[];
 
     constructor(
         $quiz: QuizAttributes,
@@ -217,10 +220,11 @@ export class GameSession {
 
     endSession() {
         const rank = this.rankPlayers();
-        const progress = rank.map(({ id, records, state }) => ({
+        // Pass players' records to contoller
+        const progress = rank.map(({ player: { id } }) => ({
             userId: id,
-            data: records,
-            state: state,
+            data: this.playerMap[id].records,
+            state: this.playerMap[id].state,
         }));
 
         if (process.env.SOCKET_MODE !== "debug") {
@@ -256,10 +260,6 @@ export class GameSession {
 
     isAnswerNoCorrect(answer: Answer) {
         return answer.question === this.questionIndex;
-    }
-
-    hasAllPlayerAnswered() {
-        return this.pointSys.answeredPlayers.size >= this.activePlayersNum;
     }
 
     canReleaseNextQuestion(player: Player, nextQuestionIndex: number) {
@@ -340,52 +340,49 @@ export class GameSession {
         }
     }
 
-    assessAns(playerId: number, answer: Answer, currentQuestionIndex: number) {
-        const correctAnswer = this.getAnsOfQuestion(currentQuestionIndex);
+    assessAns(playerId: number, answer: Answer) {
+        // Get the correct answer of this question
+        const correctAnswer = this.getAnsOfQuestion(answer.question);
         const player = this.playerMap[playerId];
-
+        // Check whether the answer provided is correct
         let correct;
-        if (correctAnswer.MCSelection !== null) {
+        if (correctAnswer.MCSelection !== null)
             correct =
                 JSON.stringify(answer.MCSelection) ===
                 JSON.stringify(correctAnswer.MCSelection);
-        } else {
-            correct = answer.TFSelection === correctAnswer.TFSelection;
-        }
+        else correct = answer.TFSelection === correctAnswer.TFSelection;
 
-        const _latestRecordOfPreviousQuestion = this.playerMap[
-            playerId
-        ].latestRecord(currentQuestionIndex - 1);
+        // Get the record of previous question
+        const [
+            hasAnsweredPreviousQuestion,
+            recordOfPreciousQuestion,
+        ] = player.getRecordOfQuestion(answer.question - 1);
 
-        const _latestRecord = this.playerMap[playerId].latestRecord();
-        const points = _latestRecord === null ? 0 : _latestRecord.points;
-
-        const last_streak =
-            _latestRecordOfPreviousQuestion !== null
-                ? _latestRecordOfPreviousQuestion.streak
-                : 0;
-        const streak = correct ? last_streak + 1 : 0;
-
-        // get points and streak
+        const previousStreak = hasAnsweredPreviousQuestion
+            ? recordOfPreciousQuestion.streak
+            : 0;
+        // Get points with pre vious streak
         const bonusPoints = this.pointSys.getPointsAndStreak(
             correct,
             playerId,
-            streak,
-            this.activePlayersNum
+            previousStreak
         );
+        // New streak
+        const streak = correct ? previousStreak + 1 : 0;
 
-        this.playerMap[playerId].records.push(
-            new PlayerRecord(
-                answer.question,
-                _latestRecordOfPreviousQuestion !== null
-                    ? _latestRecordOfPreviousQuestion.newPos
-                    : null,
-                null,
-                bonusPoints,
-                points + bonusPoints,
-                streak
-            )
-        );
+        // Generate record
+        const [record, hasAnswered] = player.genreateRecord(this.questionIndex);
+        if (hasAnswered)
+            // If has answerd, roll back points
+            record.points -= record.bonusPoints;
+        record.bonusPoints = bonusPoints;
+        record.points += bonusPoints;
+        record.streak = streak;
+
+        // Has record for this question
+        if (hasAnswered) player.records[player.records.length - 1] = record;
+        // Does not have
+        else this.playerMap[playerId].records.push(record);
 
         if (this.answerReleased.size === this.totalQuestions)
             this.playerMap[player.id].state = PlayerState.Complete;
@@ -408,30 +405,59 @@ export class GameSession {
         }
     }
 
-    rankPlayers() {
+    rankPlayers(): RecordWithPlayerInfo[] {
+        // Convert to list for sorting
         const playersArray: Player[] = Object.values(this.playerMap);
-        const currentQuestionIndex = this.getQuestionIndex();
-        // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
-        playersArray.sort((a, b) => {
-            const aRecord = a.latestRecord(currentQuestionIndex);
-            const bRecord = b.latestRecord(currentQuestionIndex);
-            return bRecord === null || aRecord.points < bRecord.points ? 1 : -1;
+        // Current question index
+        const questionIndex = this.getQuestionIndex();
+        // Make sure every user has record of current question
+        playersArray.forEach((player, index) => {
+            const [record, hasAnswered] = player.genreateRecord(questionIndex);
+            if (!hasAnswered)
+                // Generate records for players that didn't answer
+                this.playerMap[player.id].records.push(record);
         });
 
-        playersArray.forEach(({ id }, ranking) => {
-            const lastRecordIndex = this.playerMap[id].records.length - 1;
-            const lastestRecord = this.playerMap[id].latestRecord(
-                currentQuestionIndex
-            );
-            if (lastestRecord !== null) {
-                this.playerMap[id].records[lastRecordIndex].newPos = ranking;
-                this.playerMap[id].records[lastRecordIndex].oldPos =
-                    lastestRecord.newPos;
-                playersArray[ranking].records[lastRecordIndex].newPos = ranking;
-                playersArray[ranking].records[lastRecordIndex].oldPos =
-                    lastestRecord.newPos;
+        // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
+        playersArray.sort((playerA, playerB) => {
+            // All players should be ranked with their latest record
+            // if they do not have record, use an initial one
+            const [, playerARecord] = playerA.getLatestRecord();
+            const [, playerBRecord] = playerB.getLatestRecord();
+            return playerARecord.points < playerBRecord.points ? 1 : -1;
+        });
+
+        playersArray.forEach(({ id }, position) => {
+            // Update players' new position
+            this.playerMap[id].records[questionIndex].newPos = position;
+            playersArray[position].records[questionIndex].newPos = position;
+            // Update old position
+            if (questionIndex === 0) {
+                // If this is the first question
+                this.playerMap[id].records[questionIndex].oldPos = null;
+                playersArray[position].records[questionIndex].oldPos = null;
+            } else {
+                // Otherwise, get position from the record of previous questions
+                const previousPosition = this.playerMap[id].records[
+                    questionIndex - 1
+                ].newPos;
+                //  Update
+                this.playerMap[id].records[
+                    questionIndex
+                ].oldPos = previousPosition;
+                playersArray[position].records[
+                    questionIndex
+                ].oldPos = previousPosition;
             }
         });
-        return playersArray;
+        // Filter unused keys according to protocol
+        this.rankedRecords = playersArray.map(
+            (player) =>
+                new RecordWithPlayerInfo(
+                    player.profile(),
+                    player.records[player.records.length - 1]
+                )
+        );
+        return this.rankedRecords;
     }
 }

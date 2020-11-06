@@ -5,7 +5,6 @@ import {
     formatQuestion,
     formatWelcome,
     formatQuestionOutcome,
-    rankSlice,
 } from "./formatter";
 import { Event, Role, GameStatus, Player, Answer, GameType } from "./datatype";
 import { QuizAttributes } from "models/quiz";
@@ -146,7 +145,7 @@ export class GameHandler {
             const currentQuestionIndex = session.getQuestionIndex();
             if (session.canAnswer(player, answer, currentQuestionIndex)) {
                 // assess answer
-                session.assessAns(player.id, answer, currentQuestionIndex);
+                session.assessAns(player.id, answer);
 
                 // braodcast that question has been answered
                 emitToRoom(
@@ -154,7 +153,7 @@ export class GameHandler {
                     Event.questionAnswered,
                     {
                         question: answer.question,
-                        count: session.pointSys.answeredPlayers.size,
+                        count: Object.keys(session.pointSys.answers).length,
                         total: Object.keys(session.playerMap).length,
                     }
                 );
@@ -405,6 +404,8 @@ export class GameHandler {
             session.updatingTime();
             if (!session.isEmitValid(player)) return;
             if (session.canReleaseNextQuestion(player, questionIndex)) {
+                session.pointSys.playersCountInThisQuestion =
+                    session.activePlayersNum;
                 session.setQuestionReleaseTime(
                     questionIndex,
                     session.getQuizTimeLimit()
@@ -426,11 +427,7 @@ export class GameHandler {
                 }
                 setTimeout(
                     (questionIndex: number) => {
-                        this.releaseCorrectAnswer(
-                            session,
-                            questionIndex,
-                            player
-                        );
+                        this.releaseCorrectAnswer(session, questionIndex);
                     },
                     process.env.SOCKET_MODE === "debug"
                         ? 10000
@@ -444,28 +441,30 @@ export class GameHandler {
     }
 
     emitCorrectAnswer(player: Player, correctAnswer: Answer) {
+        const [record] = player.genreateRecord(correctAnswer.question);
         emitToOne(player.socketId, Event.correctAnswer, {
             answer: correctAnswer,
-            record: player.formatRecord(correctAnswer.question).record,
+            record: record,
         });
     }
 
-    releaseCorrectAnswer(
-        session: GameSession,
-        questionIndex: number,
-        player?: Player
-    ) {
+    releaseCorrectAnswer(session: GameSession, questionIndex: number) {
+        // Rank player records when this question is end
+        session.rankPlayers();
         const correctAnswer = session.getAnsOfQuestion(questionIndex);
         for (const player of Object.values(session.playerMap)) {
             this.emitCorrectAnswer(player, correctAnswer);
         }
+
         emitToRoom(
             whichRoom(session, Role.host),
             Event.correctAnswer,
             correctAnswer
         );
+
         session.answerReleased.add(questionIndex);
         session.setToNextQuestion(questionIndex + 1);
+
         if (session.isSelfPacedGroup()) {
             if (!session.hasFinalBoardReleased())
                 setTimeout(() => {
@@ -473,13 +472,12 @@ export class GameHandler {
                 }, CORRECT_ANSWER_SHOW_TIME);
             return;
         }
+
         if (
             session.isSelfPacedNotGroup() &&
             session.questionIndex === session.totalQuestions
-        ) {
+        )
             this.abort(session);
-            return;
-        }
     }
 
     showBoard(session: GameSession, player?: Player) {
@@ -489,19 +487,11 @@ export class GameHandler {
             if (session.canShowBoard(player)) {
                 const questionIndex = session.questionIndex - 1;
                 //  get ranked records of players
-                const rank = session.rankPlayers();
-                const top5 = rankSlice(rank, questionIndex, 5);
                 for (const player of Object.values(session.playerMap)) {
                     emitToOne(
                         player.socketId,
                         Event.questionOutcome,
-                        formatQuestionOutcome(
-                            session,
-                            player,
-                            questionIndex,
-                            rank,
-                            top5
-                        )
+                        formatQuestionOutcome(session, player, questionIndex)
                     );
                 }
                 //  emit questionOutcome to the host
@@ -510,8 +500,7 @@ export class GameHandler {
                     Event.questionOutcome,
                     {
                         question: session.questionIndex - 1,
-                        // leaderboard: rankSlice(rank, 5),
-                        leaderboard: top5,
+                        leaderboard: session.rankedRecords.slice(0, 5),
                     }
                 );
                 session.boardReleased.add(session.questionIndex - 1);

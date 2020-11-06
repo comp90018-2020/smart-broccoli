@@ -1,63 +1,62 @@
-import { Player, PlayerRecord } from "./datatype";
+const POINTS_PER_QUESTION = 1000;
 
 export class PointSystem {
-    // base points for each question before apply streak factor etc
-    private readonly pointsEachQuestion = 1000;
-    // set of answered player, mainly used for calculate points factor
-    public answeredPlayers: Set<number> = new Set([]);
-    // the number of players that have give the right answer
+    // Stores the points of last try if it exists
+    public answers: { [id: number]: number };
+    // The number of players that have give the correct answer
     private rankOfNextRightAns: number = 0;
+    // How many players are in this question
+    public playersCountInThisQuestion: number = 0;
 
-    constructor() {
-        this.setForNewQuestion();
-    }
+    constructor() {}
 
-    public getRankForARightAns(): number {
+    public getRankForCorrectAnswer(): number {
         return this.rankOfNextRightAns++;
     }
 
-    private getFactor(
-        correct: boolean,
-        rank: number,
-        streak: number,
-        totalPlayer: number
-    ): number {
-        const factor: number = correct ? 1 : 0;
-        if (factor !== 0) {
-            // greater streak get greater factor
-            const factorStreak = streak * 0.1;
-            // the higher rank and the more players are, the greater factor is given
-            const factorRank =
-                rank > totalPlayer ? 0 : (1 - rank / totalPlayer) / 2;
-            return factor + (factorStreak < 1 ? factorStreak : 1) + factorRank;
-        }
-        return factor;
+    private getFactorForCorrectAnswer(streak: number): number {
+        // Get rank
+        const rank = this.getRankForCorrectAnswer();
+        // Calculate strak factor
+        const factorStreak = streak * 0.271828;
+        // Galculate rank factor
+        const factorRank =
+            (1 - (rank + 1) / this.playersCountInThisQuestion) / 3.141592;
+        // Add them and return
+        return 1 + factorStreak + factorRank;
     }
 
     public setForNewQuestion() {
+        // Reset
         this.rankOfNextRightAns = 0;
-        this.answeredPlayers.clear();
+        this.answers = {};
+        this.playersCountInThisQuestion = 0;
     }
 
     public getPointsAndStreak(
         correct: boolean,
         playerId: number,
-        streak: number,
-        activePlayersNumber: number
+        streak: number
     ) {
-        if (this.answeredPlayers.has(playerId)) {
-            // Changed answer
-            return correct ? this.pointsEachQuestion : 0;
-        } else {
-            this.answeredPlayers.add(playerId);
-            return Math.floor(
-                this.getFactor(
-                    correct,
-                    correct ? this.getRankForARightAns() : activePlayersNumber,
-                    streak,
-                    activePlayersNumber
-                ) * this.pointsEachQuestion
+        // Answer is not correct
+        if (!correct) {
+            this.answers[playerId] = 0;
+            return 0;
+        }
+        if (this.answers.hasOwnProperty(playerId))
+            if (this.answers[playerId] === 0) {
+                // Was wrong
+                this.answers[playerId] = POINTS_PER_QUESTION;
+                return POINTS_PER_QUESTION;
+            }
+            // Was correct
+            else return this.answers[playerId];
+        else {
+            // First time to answer
+            this.answers[playerId] = Math.floor(
+                POINTS_PER_QUESTION * this.getFactorForCorrectAnswer(streak)
             );
+            return this.answers[playerId];
         }
     }
 }
