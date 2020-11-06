@@ -3527,10 +3527,10 @@ swagger-parser@10.0.2:
   dependencies:
     "@apidevtools/swagger-parser" "10.0.2"
 
-swagger-ui-dist@^3.36.1:
-  version "3.36.1"
-  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-3.36.1.tgz#0aa2ab80fb958aa3265811da5b69a5c8e06cc815"
-  integrity sha512-p7lx/OubaaCzOfSYDuMbkRvf/a+rTnQAOySN/NhL+k6D5o9WXEEeKZwj/6fRHRoLSHKZq28jc1xQcz8HuYcgwQ==
+swagger-ui-dist@^3.36.2:
+  version "3.36.2"
+  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-3.36.2.tgz#353e01ae4c6d4a324319e4325e2b0a96aa7b5366"
+  integrity sha512-jbxorhRC/FKk8yMx5zEbg1A1sXc/vsW2vrDTJ3clmaMr9F12zsy161kwnxjVt/vVkMglDOz+BC8ZMY01toxHwA==
 
 table@^5.2.3:
   version "5.4.6"

@@ -27,7 +27,7 @@
     "sharp": "^0.26.2",
     "socket.io": "^2.3.0",
     "swagger-jsdoc": "^5.0.0",
-    "swagger-ui-dist": "^3.36.1"
+    "swagger-ui-dist": "^3.36.2"
   },
   "devDependencies": {
     "@firebase/app-types": "0.x",
