@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:smart_broccoli/src/ui/quiz/work_address.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:flutter_settings/widgets/SettingsSection.dart';
