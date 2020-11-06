@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class FirebaseNotification {
   FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  LocalNotification localNotification = LocalNotification();
 
   /// Instance held locally
   static final FirebaseNotification _singleton =
@@ -13,7 +14,7 @@ class FirebaseNotification {
   /// Internal constructor
   FirebaseNotification._internal() {
     _requestPermisison();
-    _onForegroundMesseage();
+    _onForegroudMesseage();
     _onBackgroudMesseage();
   }
 
@@ -34,13 +35,16 @@ class FirebaseNotification {
     print('User granted permission: ${settings.authorizationStatus}');
   }
 
-  void _onForegroundMesseage() {
+  void _onForegroudMesseage() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Got a message whilst in the foreground!');
       print('Message data: ${message.data}');
       const quizId = 1;
       PubSub().publish(PubSubTopic.NOTIFICATION, arg: quizId);
       if (message.notification != null) {
+        // localNotification.displayNotification(
+        //     'From Foregroud: ${message.notification.title}',
+        //     message.notification.body);
         print('Message also contained a notification: ${message.notification}');
       }
     });
@@ -56,27 +60,28 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp();
   print("Handling a background message: ${message.messageId}");
+  LocalNotification localNotification = LocalNotification();
+
+  localNotification.displayNotification(
+      'From Background: ${message.notification.title}',
+      message.notification.body);
 }
 
 class LocalNotification {
-  /// Instance held locally
-  static final LocalNotification _singleton = LocalNotification._internal();
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
-  /// Internal constructor
-  LocalNotification._internal() {
+  static const CHANNEL_ID = 'SmartBroccoliChannelID';
+  static const CHANNEL_NAME = 'SmartBroccoliChannel';
+  static const CHANNEL_DESC = 'Notification channel of SmartBroccoli';
+
+  LocalNotification() {
     _initialise();
   }
 
-  factory LocalNotification() {
-    return _singleton;
-  }
-
   void _initialise() async {
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
-// initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('icon.png');
+        AndroidInitializationSettings('icon');
     final IOSInitializationSettings initializationSettingsIOS =
         IOSInitializationSettings(
             requestSoundPermission: false,
@@ -94,11 +99,10 @@ class LocalNotification {
             android: initializationSettingsAndroid,
             iOS: initializationSettingsIOS,
             macOS: initializationSettingsMacOS);
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: selectNotification);
 
-    _askForApplePermissions(flutterLocalNotificationsPlugin);
-    _displayNotification(flutterLocalNotificationsPlugin);
+    _askForApplePermissions();
   }
 
   Future didReceiveLocalNotification(
@@ -120,10 +124,9 @@ class LocalNotification {
     // );
   }
 
-  void _askForApplePermissions(
-      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
+  void _askForApplePermissions() async {
     /// iOS
-    await flutterLocalNotificationsPlugin
+    await _flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>()
         ?.requestPermissions(
@@ -133,7 +136,7 @@ class LocalNotification {
         );
 
     /// MacOS
-    await flutterLocalNotificationsPlugin
+    await _flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             MacOSFlutterLocalNotificationsPlugin>()
         ?.requestPermissions(
@@ -143,19 +146,15 @@ class LocalNotification {
         );
   }
 
-  void _displayNotification(
-      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
-    print("Reached here!!!!");
+  void displayNotification(String title, String body) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-            'your channel id', 'your channel name', 'your channel description',
+        AndroidNotificationDetails(CHANNEL_ID, CHANNEL_NAME, CHANNEL_DESC,
             importance: Importance.max,
             priority: Priority.high,
             showWhen: false);
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
-        0, 'plain title', 'plain body', platformChannelSpecifics,
-        payload: 'item x');
+    await _flutterLocalNotificationsPlugin
+        .show(0, title, body, platformChannelSpecifics, payload: 'item x');
   }
 }
