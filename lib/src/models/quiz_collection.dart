@@ -264,7 +264,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// Refreshes list of available quizzes
   Future<bool> refreshAvailableQuizzes({bool refresh = false}) async {
     // Do not force refresh on start
-    if (!_isAvailableQuizzesLoaded && refresh) return false;
+    if (!_isAvailableQuizzesLoaded && refresh) return true;
     // Get from cache
     if (!refresh && _isAvailableQuizzesLoaded) return true;
 
@@ -291,7 +291,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// Refreshes list of created quizzes
   Future<bool> refreshCreatedQuizzes({bool refresh = false}) async {
     // Do not force refresh on start
-    if (!_isCreatedQuizzesLoaded && refresh) return false;
+    if (!_isCreatedQuizzesLoaded && refresh) return true;
     // Get from cache
     if (!refresh && _isCreatedQuizzesLoaded) return true;
 
