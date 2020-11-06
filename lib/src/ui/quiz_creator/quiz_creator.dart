@@ -110,7 +110,13 @@ class _QuizCreateState extends State<QuizCreate> {
                 : newQuiz(),
         builder: (context, snapshot) {
           print(snapshot);
-          if (snapshot.hasError) return Container();
+          if (snapshot.hasError) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              await showBasicDialog(context, snapshot.error.toString());
+              Navigator.of(context).pop();
+            });
+            return Container();
+          }
           if (snapshot.hasData) {
             if (_quiz == null) _setQuiz(snapshot.data);
 
