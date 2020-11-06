@@ -17,27 +17,29 @@ export class PointSystem {
     private getFactorForCorrectAnswer(streak: number): number {
         // Get rank
         const rank = this.getRankForCorrectAnswer();
-        // Calculate strak factor
+        // Calculate the factor of streak
         const factorStreak = streak * 0.271828;
-        // Galculate rank factor
+        // Calculate the factor of rank
         const factorRank =
             (1 - (rank + 1) / this.playersCountInThisQuestion) / 3.141592;
         // Add them and return
         return 1 + factorStreak + factorRank;
     }
 
-    public setForNewQuestion() {
+    public reset() {
         // Reset
         this.rankOfNextRightAns = 0;
         this.answers = {};
         this.playersCountInThisQuestion = 0;
     }
 
-    public getPointsAndStreak(
-        correct: boolean,
-        playerId: number,
-        streak: number
-    ) {
+    /**
+     * Get points according to the passed in params
+     * @param correct if the answer is correct or not
+     * @param playerId player id
+     * @param streak the times that get correct answers without break
+     */
+    public getPoints(correct: boolean, playerId: number, streak: number) {
         // Answer is not correct
         if (!correct) {
             this.answers[playerId] = 0;
@@ -45,7 +47,7 @@ export class PointSystem {
         }
         if (this.answers.hasOwnProperty(playerId))
             if (this.answers[playerId] === 0) {
-                // Was wrong
+                // Has answered and was wrong
                 this.answers[playerId] = POINTS_PER_QUESTION;
                 return POINTS_PER_QUESTION;
             }

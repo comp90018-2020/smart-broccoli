@@ -362,7 +362,7 @@ export class GameSession {
             ? recordOfPreciousQuestion.streak
             : 0;
         // Get points with pre vious streak
-        const bonusPoints = this.pointSys.getPointsAndStreak(
+        const bonusPoints = this.pointSys.getPoints(
             correct,
             playerId,
             previousStreak
@@ -401,7 +401,7 @@ export class GameSession {
         ) {
             this.questionIndex = nextQuestionIndex;
             this._isReadyForNextQuestion = true;
-            this.pointSys.setForNewQuestion();
+            this.pointSys.reset();
         }
     }
 
