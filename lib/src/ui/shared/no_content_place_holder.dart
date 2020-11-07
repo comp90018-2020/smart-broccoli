@@ -23,13 +23,10 @@ class NoContentPlaceholder extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(
                     top: 40, bottom: 20, right: 10, left: 10),
-                child: Text(
-                  "🤔",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 100,
-                  ),
+                child: Image(
+                  width: 140,
+                  height: 140,
+                  image: AssetImage('assets/posing_broccoli.png'),
                 ),
               ),
               Padding(
