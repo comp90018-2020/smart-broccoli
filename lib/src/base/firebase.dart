@@ -22,11 +22,11 @@ class FirebaseNotification {
 
   FirebaseNotification._internal() {
     // Request notification permissions
-    _requestPermisison();
+    _requestPermission();
     // Listen on notification when app is in foreground
-    _onForegroudMesseage();
+    _onForegroudMessage();
     // Listen on notification when app is in background
-    _onBackgroudMesseage();
+    _onBackgroudMessage();
   }
 
   factory FirebaseNotification() {
@@ -39,7 +39,7 @@ class FirebaseNotification {
   }
 
   /// Request permissions. May not work on iOS
-  void _requestPermisison() async {
+  void _requestPermission() async {
     await _messaging.requestPermission(
       alert: true,
       announcement: false,
@@ -51,7 +51,7 @@ class FirebaseNotification {
     );
   }
 
-  void _onForegroudMesseage() {
+  void _onForegroudMessage() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       // If notification contains data
       if (message.data != null) {
@@ -82,7 +82,7 @@ class FirebaseNotification {
     });
   }
 
-  void _onBackgroudMesseage() {
+  void _onBackgroudMessage() {
     // Background service
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
