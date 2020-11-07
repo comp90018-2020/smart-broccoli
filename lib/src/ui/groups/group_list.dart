@@ -42,8 +42,6 @@ class _GroupListState extends State<GroupList> {
       ///Checking whether user is registered, and adding only relevant tabs
       return Consumer<UserProfileModel>(
           builder: (context, profile, child) {
-            print("here");
-
             return CustomTabbedPage(
               title: "Groups",
               ///Hiding tab for unregistered user
@@ -74,7 +72,7 @@ class _GroupListState extends State<GroupList> {
                       buildGroupList(registry.createdGroups),
                 )
 
-                ///Hiding tab for unregistered user
+                ///Only displaying one tab for unregistered user
               ] : [Consumer<GroupRegistryModel>(
                 builder: (context, registry, child) =>
                 registry.joinedGroups.length > 0 ?
