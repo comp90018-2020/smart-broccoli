@@ -198,7 +198,7 @@ class QuizCard extends StatelessWidget {
 
   /// Builds indicator widget
   /// |icon|text|
-  static Widget buildIndicator(Widget icon, Widget text) => Row(
+  Widget buildIndicator(Widget icon, Widget text) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           icon,

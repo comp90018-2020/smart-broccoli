@@ -301,7 +301,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Refreshes specific group's quizzes.
-  Future<void> refreshGroupQuizzes(int groupId) async {
+  Future<List<Quiz>> refreshGroupQuizzes(int groupId) async {
     try {
       // Get quizzes
       List<Quiz> quizzes =
@@ -315,8 +315,10 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
         await _refreshQuizPicture(quiz);
       }));
       notifyListeners();
+      return quizzes;
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {

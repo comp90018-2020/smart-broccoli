@@ -52,8 +52,12 @@ class UserRepository {
       // If user has picture and picture is not stored in cache
       if (member.pictureId != null &&
           await _picStash.getPic(member.pictureId) == null) {
-        var picture = await _userApi.getProfilePicOf(token, member.id);
-        await _picStash.storePic(member.pictureId, picture);
+        try {
+          var picture = await _userApi.getProfilePicOf(token, member.id);
+          await _picStash.storePic(member.pictureId, picture);
+        } on Exception {
+          // Ignore; If picture is not loaded, so be it
+        }
       }
     }));
     return members;
