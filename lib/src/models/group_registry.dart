@@ -54,10 +54,10 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Function to get group
-  Future<Group> getGroup(int id, {bool refresh = false}) async {
+  Future<Group> getGroup(int id, {bool refresh = false}) {
     // If in cache and we don't force refresh
     if (!refresh && (_joinedGroups[id] != null || _createdGroups[id] != null)) {
-      return getGroupFromCache(id);
+      return Future.value(getGroupFromCache(id));
     }
     // If not, retrieve group
     return refreshGroup(id);
@@ -71,16 +71,9 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   /// Get a group's members
   Future<List<User>> getGroupMembers(int groupId,
       {bool refresh = false}) async {
-    // Already exists and no refresh? get from cache
+    // Already exists and no refresh, get from cache
     if (_groupMembers.containsKey(groupId) && !refresh)
       return _groupMembers[groupId];
-    // Group does not exist
-    try {
-      if (!_joinedGroups.containsKey(groupId) &&
-          !_createdGroups.containsKey(groupId)) await getGroup(groupId);
-    } catch (e) {
-      return Future.error(e);
-    }
     // Return the future
     return _refreshGroupMembers(groupId);
   }
@@ -88,15 +81,12 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   /// Get a group's quizzes
   Future<List<Quiz>> getGroupQuizzes(int groupId,
       {bool refresh = false}) async {
+    // Already exists and no refresh, get from cache
     if (_groupQuizLoaded.containsKey(groupId) && !refresh)
       return Future.value(
           _quizCollectionModel.getQuizzesWhere(groupId: groupId));
 
-    // Group does not exist
     try {
-      // Get group
-      if (!_joinedGroups.containsKey(groupId) &&
-          _createdGroups.containsKey(groupId)) await getGroup(groupId);
       // Refresh quizzes
       await _quizCollectionModel.refreshGroupQuizzes(groupId);
       _groupQuizLoaded[groupId] = true;
@@ -111,7 +101,6 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   /// Rename a group.
   Future<void> renameGroup(Group group, String newName) async {
     try {
-      // rename the group
       await _groupApi.updateGroup(_authStateModel.token, group.id, newName);
     } on ApiAuthException {
       _authStateModel.checkSession();
@@ -152,7 +141,6 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   /// Kick a member from a group.
   Future<void> kickMemberFromGroup(Group group, int memberId) async {
     try {
-      // kick the member
       await _groupApi.kickMember(_authStateModel.token, group.id, memberId);
     } on ApiAuthException {
       _authStateModel.checkSession();
