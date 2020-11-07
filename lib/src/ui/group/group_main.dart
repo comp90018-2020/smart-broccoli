@@ -62,6 +62,10 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
           actions: [
             Consumer<GroupRegistryModel>(builder: (context, registry, child) {
               Group group = registry.getGroupFromCache(widget.groupId);
+              // Default groups cannot be renamed or deleted
+              if (group.defaultGroup && group.role == GroupRole.OWNER)
+                return Container();
+              // Otherwise, show actions
               return PopupMenuButton(
                 itemBuilder: (BuildContext context) =>
                     group.role == GroupRole.MEMBER
