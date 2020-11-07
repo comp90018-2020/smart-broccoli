@@ -158,6 +158,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   Future<void> deleteGroup(Group group) async {
     try {
       await _groupApi.deleteGroup(_authStateModel.token, group.id);
+      _createdGroups.remove(group.id);
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("Authentication failure");
@@ -166,7 +167,6 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     } on Exception {
       return Future.error("Something went wrong");
     }
-    _createdGroups.remove(group.id);
     notifyListeners();
   }
 
