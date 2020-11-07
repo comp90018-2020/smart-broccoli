@@ -144,15 +144,28 @@ class _MyHomePageState extends State<TiltQuestion> {
     double xLimitHalfWay = (widthLimit) / 2.0 + xStart;
     double yLimitHalfWay = (heightLimit) / 2.0 + yStart;
 
+    List<bool> selected = [false, false, false, false];
+
     //TODO make answer selections here
 
     /// top side
     /// if ball is near the y start line and the xLimit line
     if (cord[1] <= yStart + 40 && cord[0] <= xLimit) {
       /// Determine on which side
+      /// A TF question
+      if (model.question is TFQuestion) {
+        selected[1] = true;
+        selected[0] = true;
+        print("TRUE/ TOP RIGHT and TOP LEFT");
+        model.selectAnswer(1);
+        return;
+      }
+
       if (cord[0] <= xLimitHalfWay - 20) {
+        selected[0] = true;
         print("Top Left");
       } else if (cord[0] >= xLimitHalfWay + 20) {
+        selected[1] = true;
         print("Top Right");
       }
 
@@ -160,16 +173,44 @@ class _MyHomePageState extends State<TiltQuestion> {
       else {
         /// If True/False Question
         if (model.question is TFQuestion) {
+          selected[1] = true;
+          selected[0] = true;
           print("TRUE/ TOP RIGHT and TOP LEFT");
+          model.selectAnswer(1);
+          return;
         }
+
+        /// Otherwise ignore
       }
     }
 
     /// left side
     else if (cord[1] <= yLimit && cord[0] <= xStart + 40) {
       if (cord[1] <= yLimitHalfWay - 20) {
+        /// If True/False Question
+        if (model.question is TFQuestion) {
+          selected[1] = true;
+          selected[0] = true;
+          print("TRUE/ TOP RIGHT and TOP LEFT");
+          model.selectAnswer(1);
+          return;
+        }
+        selected[0] = true;
         print("Top Left");
       } else if (cord[1] >= yLimitHalfWay + 20) {
+        if (model.question is TFQuestion) {
+          model.selectAnswer(0);
+          print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
+          return;
+        } else {
+          if ((model.question as MCQuestion).options.length == 3) {
+            print("BOTTOM RIGHT and BOTTOM LEFT");
+            model.selectAnswer(2);
+            return;
+          }
+        }
+
+        selected[2] = true;
         print("Bottom Left");
       }
 
@@ -178,16 +219,36 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     /// Bottom Side
     else if (cord[0] <= xLimit && cord[1] >= yLimit - 40) {
+      /// We check if TF first
+      if (model.question is TFQuestion) {
+        model.selectAnswer(0);
+        print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
+        return;
+      } else {
+        if ((model.question as MCQuestion).options.length == 3) {
+          print("BOTTOM RIGHT and BOTTOM LEFT");
+          model.selectAnswer(2);
+          return;
+        }
+      }
+
       if (cord[0] <= xLimitHalfWay - 20) {
+        selected[2] = true;
         print("Bottom Left");
       } else if (cord[0] >= xLimitHalfWay + 20) {
+        selected[3] = true;
         print("Bottom Right");
       } else {
+        /// If it somehow lands in the middle we do the following two checks
         if (model.question is TFQuestion) {
+          model.selectAnswer(0);
           print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
+          return;
         } else {
           if ((model.question as MCQuestion).options.length == 3) {
             print("BOTTOM RIGHT and BOTTOM LEFT");
+            model.selectAnswer(2);
+            return;
           }
         }
       }
@@ -195,11 +256,44 @@ class _MyHomePageState extends State<TiltQuestion> {
     // Right Side
     else if (cord[0] >= xLimit - 40 && cord[1] <= yLimit) {
       if (cord[1] <= yLimitHalfWay - 20) {
+        /// If True/False Question
+        if (model.question is TFQuestion) {
+          selected[1] = true;
+          selected[0] = true;
+          print("TRUE/ TOP RIGHT and TOP LEFT");
+          model.selectAnswer(1);
+          return;
+        }
+
         print("Top Right");
+        selected[1] = true;
       } else if (cord[1] >= yLimitHalfWay + 20) {
+        if (model.question is TFQuestion) {
+          model.selectAnswer(0);
+          print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
+          return;
+        } else {
+          if ((model.question as MCQuestion).options.length == 3) {
+            print("BOTTOM RIGHT and BOTTOM LEFT");
+            model.selectAnswer(2);
+            return;
+          }
+        }
+
         print("Bottom Right");
+        selected[3] = true;
       } else {}
     } else {}
+
+    if (selected[0]) {
+      model.selectAnswer(0);
+    } else if (selected[1]) {
+      model.selectAnswer(1);
+    } else if (selected[2]) {
+      model.selectAnswer(2);
+    } else if (selected[3]) {
+      model.selectAnswer(3);
+    }
   }
 
   startAccel(GameSessionModel model) {
@@ -227,8 +321,12 @@ class _MyHomePageState extends State<TiltQuestion> {
 
   pauseTimer() {
     // stop the timer and pause the accelerometer stream
-    timer.cancel();
-    accel.pause();
+    if (timer != null) {
+      timer.cancel();
+    }
+    if (accel != null) {
+      accel.pause();
+    }
   }
 
   @override
