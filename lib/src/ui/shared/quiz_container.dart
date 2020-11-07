@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
 import 'package:smart_broccoli/src/data.dart';
-
 import 'no_content_place_holder.dart';
 import 'quiz_card.dart';
 
@@ -61,7 +59,7 @@ class _BuildQuiz extends State<QuizContainer> {
               child: ConstrainedBox(
                 // Minimum height, or will be height of longest child
                 // if exceeding minimum height
-                constraints: BoxConstraints(minHeight: 300),
+                constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height * 0.4),
                 child: widget.items.length == 0
                     ? NoContentPlaceholder(
                         parentWidget: widget, text: returnPlaceholderText())
