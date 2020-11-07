@@ -64,6 +64,9 @@ flutter:
     - assets/account_circle-black-24dp.svg
     - assets/posing_broccoli.png
 
+    # Licenses
+    - assets/licenses/flutter
+
   fonts:
     - family: PatrickHandSC
       fonts:
