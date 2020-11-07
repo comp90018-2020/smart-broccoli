@@ -35,8 +35,6 @@ class _ManageQuizState extends State<ManageQuiz> {
         .catchError((_) => null);
   }
 
-  String title = "Manage Quiz";
-
   @override
   Widget build(BuildContext context) {
     return Consumer<QuizCollectionModel>(
