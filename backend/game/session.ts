@@ -23,7 +23,7 @@ export class GameSession {
     // quiz from database
     public quiz: QuizAttributes;
     // game status
-    private status: GameStatus = GameStatus.Pending;
+    public status: GameStatus = GameStatus.Pending;
     // host info
     public host: Player = null;
     // players info, user id to map
@@ -96,15 +96,26 @@ export class GameSession {
         return true;
     }
 
-    hostJoin(player: Player) {
-        this.host = player;
-        this.setPlayerState(player, PlayerState.Joined);
-    }
-
+    /**
+     * Player join this session and copy precious records if any
+     * @param player Player
+     */
     playerJoin(player: Player) {
+        if (player.role === Role.host) {
+            // If this is host
+            this.host = player;
+            // Set host's state to be joined
+            this.setPlayerState(player, PlayerState.Joined);
+            return;
+        }
+        // Otherwise, this is a player
         if (this.playerMap.hasOwnProperty(player.id))
+            // If there is existed player with the same id
+            // Copy records
             player.records = this.playerMap[player.id].records;
+        // Set player table with the new connection
         this.playerMap[player.id] = player;
+        // Set player state to be Joined
         this.setPlayerState(player, PlayerState.Joined);
     }
 
@@ -134,7 +145,7 @@ export class GameSession {
         );
     }
 
-    isSelfPacedNotGroupAndHasNotStart() {
+    isSelfPacedNotGroupAndHasNotStarted() {
         return (
             this.questionIndex === 0 &&
             this._isReadyForNextQuestion &&
@@ -205,13 +216,7 @@ export class GameSession {
         return player === undefined || player.role === Role.host;
     }
 
-    async setStatus(status: GameStatus) {
-        this.status = status;
-        if (status === GameStatus.Starting)
-            this.QuestionReleaseAt[0] = Date.now() + WAIT_TIME_BEFORE_START;
-    }
-
-    async endSession() {
+    endSession() {
         const rank = this.rankPlayers();
         // Pass players' records to contoller
         const progress = rank.map(({ player: { id } }) => ({
@@ -221,16 +226,12 @@ export class GameSession {
         }));
 
         if (process.env.SOCKET_MODE !== "debug") {
-            await endSessionInController(
+            endSessionInController(
                 this.id,
                 this.questionReleased.size === this.totalQuestions,
                 progress
             );
         }
-    }
-
-    getStatus() {
-        return this.status;
     }
 
     canStart(player: Player) {
