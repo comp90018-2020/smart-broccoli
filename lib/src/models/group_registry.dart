@@ -49,18 +49,18 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     _groupApi = groupApi ?? GroupApi();
   }
 
+  Group getGroupFromCache(int id) {
+    return _joinedGroups[id] ?? _createdGroups[id];
+  }
+
   /// Function to get group
   Future<Group> getGroup(int id, {bool refresh = false}) async {
     // If in cache and we don't force refresh
     if (!refresh && (_joinedGroups[id] != null || _createdGroups[id] != null)) {
-      return _joinedGroups[id] ?? _createdGroups[id];
+      return getGroupFromCache(id);
     }
     // If not, retrieve group
     return refreshGroup(id);
-  }
-
-  Group getGroupFromCache(int id) {
-    return _joinedGroups[id] ?? _createdGroups[id];
   }
 
   /// Gets a group member's picture.
@@ -71,9 +71,9 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   /// Get a group's members
   Future<List<User>> getGroupMembers(int groupId,
       {bool refresh = false}) async {
+    // Already exists and no refresh? get from cache
     if (_groupMembers.containsKey(groupId) && !refresh)
       return Future.value(_groupMembers[groupId]);
-
     // Group does not exist
     try {
       if (!_joinedGroups.containsKey(groupId) &&
@@ -81,7 +81,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     } catch (e) {
       return Future.error(e);
     }
-
+    // Return the future
     return _refreshGroupMembers(groupId);
   }
 
@@ -97,7 +97,6 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       // Get group
       if (!_joinedGroups.containsKey(groupId) &&
           _createdGroups.containsKey(groupId)) await getGroup(groupId);
-
       // Refresh quizzes
       await _quizCollectionModel.refreshGroupQuizzes(groupId);
       _groupQuizLoaded[groupId] = true;
@@ -105,6 +104,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       return Future.error(e);
     }
 
+    // Return retrieved quizzes
     return Future.value(_quizCollectionModel.getQuizzesWhere(groupId: groupId));
   }
 
@@ -113,9 +113,31 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     try {
       // rename the group
       await _groupApi.updateGroup(_authStateModel.token, group.id, newName);
-      // fetch the updated group and save it to the map
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+
+    // fetch the updated group and save it to the map
+    try {
       _createdGroups[group.id] =
           await _groupApi.getGroup(_authStateModel.token, group.id);
+    } catch (e) {
+      return Future.error(e);
+    }
+    notifyListeners();
+  }
+
+  /// Leave a group.
+  Future<void> leaveGroup(Group group) async {
+    try {
+      await _groupApi.leaveGroup(_authStateModel.token, group.id);
+      _joinedGroups.remove(group.id);
+      _createdGroups.remove(group.id);
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("Authentication failure");
@@ -127,29 +149,11 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     notifyListeners();
   }
 
-  /// Leave a group.
-  Future<void> leaveGroup(Group group) async {
-    try {
-      await _groupApi.leaveGroup(_authStateModel.token, group.id);
-    } on ApiAuthException {
-      _authStateModel.checkSession();
-      return Future.error("Authentication failure");
-    } on ApiException catch (e) {
-      return Future.error(e.toString());
-    } on Exception {
-      return Future.error("Something went wrong");
-    }
-    getJoinedGroups(refreshIfLoaded: true).catchError((_) => null);
-  }
-
   /// Kick a member from a group.
   Future<void> kickMemberFromGroup(Group group, int memberId) async {
     try {
       // kick the member
       await _groupApi.kickMember(_authStateModel.token, group.id, memberId);
-      // fetch the members list
-      await getGroupMembers(group.id);
-      notifyListeners();
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("Authentication failure");
@@ -158,6 +162,15 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     } on Exception {
       return Future.error("Something went wrong");
     }
+
+    try {
+      // fetch the members list
+      _groupMembers[group.id] = await _refreshGroupMembers(group.id);
+    } catch (err) {
+      return Future.error(err);
+    }
+
+    notifyListeners();
   }
 
   /// Delete a group.
@@ -172,7 +185,8 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     } on Exception {
       return Future.error("Something went wrong");
     }
-    getCreatedGroups(refreshIfLoaded: true).catchError((_) => null);
+    _createdGroups.remove(group.id);
+    notifyListeners();
   }
 
   /// Refresh the ListView of groups the user has joined.
@@ -267,7 +281,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       if (withQuizzes) await _quizCollectionModel.refreshGroupQuizzes(id);
       // fetch members
       if (withMembers)
-        _groupMembers[group.id] = await getGroupMembers(group.id);
+        _groupMembers[group.id] = await _refreshGroupMembers(group.id);
       notifyListeners();
       return group;
     } catch (err) {
