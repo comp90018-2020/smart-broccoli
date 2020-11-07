@@ -88,8 +88,8 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     /// We need to save the previous cord for now to see if there has been
     /// Significant changes
-    double nextCordx = cord[0] - event.x;
-    double nextCordy = cord[1] + event.y;
+    double nextCordx = cord[0] - event.x * 2;
+    double nextCordy = cord[1] + event.y * 2;
 
     /// Boundary checks width = x, height = y
     /// If the ball is out of the width limit
