@@ -23,4 +23,5 @@ Note: portions of code have been adapted from [COMP30022-Russia/COMP30022\_Serve
 |FIREBASE\_CLIENT\_EMAIL|-|Firebase client email|
 |FIREBASE\_DATABASE\_URL|-|Firebase database URL|
 |TOKEN\_SECRET|foo|Secret used to sign JWT tokens (authentication)|
+|SOCKET\_MODE|undefined|Debug mode is enabled for socket.io game server when value is DEBUG
 |DEMO|undefined|Used to initialise/replace database with demo data on load|
