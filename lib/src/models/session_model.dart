@@ -425,6 +425,39 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     _transitionTo(SessionState.ABANDONED);
   }
 
+  /// Select an answer.
+  ///
+  /// No deselection behaviour is enabled. This method should be called by
+  /// the class controlling the pinball.
+  void selectAnswer(int index) {
+    if (role == GroupRole.OWNER) return;
+
+    if (question is TFQuestion) {
+      // repeat selection: no need to resend
+      if (answer.tfSelection != null &&
+          (answer.tfSelection && index == 1 ||
+              !answer.tfSelection && index == 0)) return;
+      // first selection or change of selection
+      answer.tfSelection = index == 0 ? false : true;
+      answerQuestion();
+      notifyListeners();
+
+      // MC question
+    } else if (answer.mcSelection.length <
+        (question as MCQuestion).numCorrect) {
+      answer.mcSelection.add(index);
+      notifyListeners();
+      // send answer if no. selections == no. correct
+      if (answer.mcSelection.length == (question as MCQuestion).numCorrect)
+        answerQuestion();
+    }
+  }
+
+  /// Toggle an answer.
+  ///
+  /// Deselection behaviour is enabled for MC questions with multiple correct
+  /// answers. The class controlling the pinball should not call this method.
+  /// This is only be invoked by a user performing a button tap.
   void toggleAnswer(int index) {
     if (role == GroupRole.OWNER) return;
 
