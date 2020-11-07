@@ -260,9 +260,10 @@ export class GameSession {
             this.questionIndex === questionIndex &&
             // And game is ready to move to next question
             this._isReadyForNextQuestion &&
-            // And This call is from inner or this is a self-paced not group 
+            // And This call is from inner or this is a self-paced not group
             // or the call is from the host
-            (player === undefined || this.type === GameType.SelfPaced_NotGroup||
+            (player === undefined ||
+                this.type === GameType.SelfPaced_NotGroup ||
                 (player !== undefined && player.role === Role.host)) &&
             // And current time is after the expected releasing time
             // Or this self-paced not group || this is live game

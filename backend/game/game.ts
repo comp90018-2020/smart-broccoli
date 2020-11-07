@@ -7,7 +7,15 @@ import {
     formatQuestionOutcome,
 } from "./formatter";
 import { activateSession } from "../controllers/session";
-import { Event, Role, GameStatus, Player, Answer, GameType } from "./datatype";
+import {
+    Event,
+    Role,
+    GameStatus,
+    Player,
+    Answer,
+    GameType,
+    QuestionAnswered,
+} from "./datatype";
 import { QuizAttributes } from "models/quiz";
 import { _socketIO } from "./index";
 
@@ -36,7 +44,7 @@ export class GameHandler {
                 title: "Fruits Master",
                 active: true,
                 description: "Test Quiz",
-                type: "self paced",
+                type: "live",
                 isGroup: false,
                 timeLimit: 20,
                 groupId: 2,
@@ -154,11 +162,11 @@ export class GameHandler {
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.questionAnswered,
-                    {
-                        question: answer.question,
-                        count: Object.keys(session.pointSys.answers).length,
-                        total: Object.keys(session.playerMap).length,
-                    }
+                    new QuestionAnswered(
+                        answer.question,
+                        Object.keys(session.pointSys.answers).length,
+                        Object.keys(session.playerMap).length
+                    )
                 );
             }
         } catch (error) {
@@ -341,26 +349,38 @@ export class GameHandler {
                 // And this game is running
                 if (session.canSendQuesionAfterReconnection()) {
                     // If can release the question after reconnection
+                    // Get current question index
+                    const questionIndex = session.visibleQuestionIndex();
                     // Emit a nextQuestion event which carries the question
                     emitToOne(
                         player.socketId,
                         Event.nextQuestion,
                         formatQuestion(
-                            session.visibleQuestionIndex(),
+                            questionIndex,
                             session,
                             player.role === Role.host
                         )
                     );
 
-                    if (session.canEmitCorrectAnswer()) {
-                        // If the corrct answer can also be released
-                        // Get the correct answer
-                        const correctAnswer = session.getAnsOfQuestion(
-                            session.visibleQuestionIndex()
+                    if (!session._isReadyForNextQuestion)
+                        emitToOne(
+                            player.socketId,
+                            Event.questionAnswered,
+                            new QuestionAnswered(
+                                questionIndex,
+                                Object.keys(session.pointSys.answers).length,
+                                Object.keys(session.playerMap).length
+                            )
                         );
-                        // Emit a correct answer event
-                        this.emitCorrectAnswer(player, correctAnswer);
-                    }
+
+                    if (!session.canEmitCorrectAnswer()) return;
+                    // If the corrct answer can also be released
+                    // Get the correct answer
+                    const correctAnswer = session.getAnsOfQuestion(
+                        questionIndex
+                    );
+                    // Emit a correct answer event
+                    this.emitCorrectAnswer(player, correctAnswer);
                 }
             }
         } catch (error) {
@@ -613,7 +633,7 @@ export class GameHandler {
             // If game is self-paced and not group game
             session.type === GameType.SelfPaced_NotGroup &&
             // And if this is the last question
-            session.questionIndex  === session.totalQuestions
+            session.questionIndex === session.totalQuestions
         )
             // End game
             this.abort(session);
