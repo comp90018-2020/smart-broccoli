@@ -4,7 +4,7 @@ import 'package:smart_broccoli/src/base/pubsub.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationContent {
-  final PubSubTopic type;
+  final String type;
   final Object data;
   NotificationContent._internal(this.type, this.data);
   factory NotificationContent.fromJson(Map<String, dynamic> json) =>
@@ -59,17 +59,17 @@ class FirebaseNotification {
         NotificationContent content =
             NotificationContent.fromJson(message.data);
 
-        if (content.type == PubSubTopic.QUIZ_RECOMMENDATION)
+        if (content.type == "QUIZ_RECOMMENDATION")
           // A quiz recommendation,
           // data like quizId will be found in content.data, same as below
           PubSub().publish(PubSubTopic.QUIZ_RECOMMENDATION, arg: content.data);
-        else if (content.type == PubSubTopic.GROUP_CHANGE)
+        else if (content.type == "GROUP_CHANGE")
           // Group has been changed
           PubSub().publish(PubSubTopic.GROUP_CHANGE, arg: content.data);
-        else if (content.type == PubSubTopic.QUIZ_CHANGE)
+        else if (content.type == "QUIZ_CHANGE")
           // Quiz has been changed
           PubSub().publish(PubSubTopic.QUIZ_CHANGE, arg: content.data);
-        else if (content.type == PubSubTopic.GENERAL_CHANGE)
+        else if (content.type == "GENERAL_CHANGE")
           // General changes, this is for extension
           PubSub().publish(PubSubTopic.GENERAL_CHANGE, arg: content.data);
       }
