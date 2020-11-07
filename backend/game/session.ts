@@ -55,20 +55,19 @@ export class GameSession {
         this.totalQuestions = this.quiz.questions.length;
 
         if (isGroup) {
-            // "live", "self paced"
-            if (sessionType === "live") {
+            // If this is a group game
+            if (sessionType === "live")
+                // and is a "live" game
                 this.type = GameType.Live_Group;
-            } else {
-                this.type = GameType.SelfPaced_Group;
-            }
+            // or is a "self paced" game
+            else this.type = GameType.SelfPaced_Group;
         } else {
-            if (sessionType === "live") {
+            // Otherwise is not a group game
+            if (sessionType === "live")
+                // and is a "live" game
                 this.type = GameType.Live_NotGroup;
-            } else {
-                this.type = GameType.SelfPaced_NotGroup;
-                this.status = GameStatus.Running;
-                this.setToNextQuestion(0);
-            }
+            // or is a "self paced" game
+            else this.type = GameType.SelfPaced_NotGroup;
         }
     }
 
@@ -167,10 +166,6 @@ export class GameSession {
         return this.type === GameType.SelfPaced_Group;
     }
 
-    isSelfPacedNotGroup() {
-        return this.type === GameType.SelfPaced_NotGroup;
-    }
-
     isReadyForNextQuestion() {
         return this._isReadyForNextQuestion;
     }
@@ -246,28 +241,34 @@ export class GameSession {
         );
     }
 
-    canReleaseTheFirstQuestion() {
-        return (
-            this.questionReleaseAt.hasOwnProperty(0) &&
-            Date.now() > this.questionReleaseAt[0]
-        );
-    }
-
     isAnswerNoCorrect(answer: Answer) {
         return answer.question === this.questionIndex;
     }
 
-    canReleaseNextQuestion(player: Player, nextQuestionIndex: number) {
+    /**
+     * Whether can release the question or not
+     * @param questionIndex number, question index
+     * @param player Player || undefined
+     */
+    canReleaseQuestion(questionIndex: number, player?: Player) {
         return (
-            nextQuestionIndex < this.totalQuestions &&
-            !this.questionReleased.has(nextQuestionIndex) &&
-            this.questionIndex === nextQuestionIndex &&
+            // Question index is less than total questions
+            questionIndex < this.totalQuestions &&
+            // And question has not been released
+            !this.questionReleased.has(questionIndex) &&
+            // And the question try to release is the same in current memory
+            this.questionIndex === questionIndex &&
+            // And game is ready to move to next question
             this._isReadyForNextQuestion &&
-            this.status === GameStatus.Running &&
-            // if no host or player is host
-            (this.type === GameType.SelfPaced_Group ||
-                this.type === GameType.SelfPaced_NotGroup ||
-                (player !== undefined && player.role === Role.host))
+            // And This call is from inner or this is a self-paced not group 
+            // or the call is from the host
+            (player === undefined || this.type === GameType.SelfPaced_NotGroup||
+                (player !== undefined && player.role === Role.host)) &&
+            // And current time is after the expected releasing time
+            // Or this self-paced not group || this is live game
+            (Date.now() >= this.questionReleaseAt[questionIndex] ||
+                this.type === GameType.Live_NotGroup ||
+                this.type === GameType.SelfPaced_NotGroup)
         );
     }
 
@@ -389,7 +390,7 @@ export class GameSession {
             : this.questionIndex - 1;
     }
 
-    setToNextQuestion(nextQuestionIndex: number) {
+    setToQuestion(nextQuestionIndex: number) {
         if (
             0 <= nextQuestionIndex &&
             nextQuestionIndex <= this.totalQuestions
