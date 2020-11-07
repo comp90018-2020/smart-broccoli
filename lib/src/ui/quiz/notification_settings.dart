@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_settings/widgets/SettingsSection.dart';
 import 'package:flutter_settings/widgets/SettingsIcon.dart';
 import 'package:flutter_settings/util/SettingsConstants.dart';
+import 'package:flutter_settings/widgets/SettingsSection.dart';
 import 'package:flutter_settings/widgets/SettingsSelectionList.dart';
 import 'package:flutter_settings/models/settings_list_item.dart';
 import 'package:flutter_settings/widgets/SettingsCheckBox.dart';
@@ -9,7 +9,6 @@ import 'package:flutter_settings/widgets/SettingsInputField.dart';
 import 'package:flutter_settings/widgets/SettingsSlider.dart';
 import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
 import 'package:toast/toast.dart';
-import 'package:day_picker/day_picker.dart';
 import 'package:selection_picker/selectionpicker.dart';
 import 'package:selection_picker/selection_item.dart' as day;
 import 'package:smart_broccoli/src/ui/shared/page.dart';
@@ -41,7 +40,6 @@ class _NotificationSettingState extends State<NotificationSetting> {
   ];
   var _minWindowIndex = 0;
   var _maxNumberIndex = 0;
-  List<bool> _weekDays = [true, true, true, true, true, true, true];
   var _liveQuizCalendar = true;
   var _smartQuizCalendar = false;
   var _smartDetection = true;
@@ -50,6 +48,9 @@ class _NotificationSettingState extends State<NotificationSetting> {
   var _radius = 0.5;
   var _onMove = true;
   var _commuting = true;
+
+  // isSelect is used to determine whether day is selected
+  // on tap, isSelected is mutated
   List<day.SelectionItem> days = [
     day.SelectionItem(name: "MO", isSelected: true, identifier: 0),
     day.SelectionItem(name: "TU", isSelected: true, identifier: 1),
@@ -66,7 +67,6 @@ class _NotificationSettingState extends State<NotificationSetting> {
       title: "Notification setting",
       hasDrawer: true,
       child: Container(
-        color: Color(0xFFFAFAFA),
         child: ListView(children: <Widget>[
           SettingsSection(
             title: Text('General settings'),
@@ -108,11 +108,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
             ],
           ),
           Divider(height: 8, color: Colors.white),
-          SettingsSection(
-            title: Text(
-              'Days of week',
-            ),
-          ),
+          SettingsSection(title: Text('Days of week')),
 
           //Days of week
           Container(
@@ -145,9 +141,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                     color: Colors.blueAccent,
                   ),
                   onPressed: (bool value) {
-                    setState(() {
-                      _liveQuizCalendar = value;
-                    });
+                    setState(() => _liveQuizCalendar = value);
                   },
                   value: _liveQuizCalendar,
                   type: CheckBoxWidgetType.Switch,
@@ -162,9 +156,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                     color: Colors.orange,
                   ),
                   onPressed: (bool value) {
-                    setState(() {
-                      _smartQuizCalendar = value;
-                    });
+                    setState(() => _smartQuizCalendar = value);
                   },
                   value: _smartQuizCalendar,
                   type: CheckBoxWidgetType.Switch,
@@ -174,9 +166,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
 
           //Work setting
           SettingsSection(
-              title: Text(
-                'Don\'t notify me at work',
-              ),
+              title: Text('Don\'t notify me at work'),
               settingsChildren: [
                 //Smart detection
                 SettingsCheckBox(
@@ -187,9 +177,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                     color: Colors.green,
                   ),
                   onPressed: (bool value) {
-                    setState(() {
-                      _smartDetection = value;
-                    });
+                    setState(() => _smartDetection = value);
                   },
                   value: _smartDetection,
                   type: CheckBoxWidgetType.Switch,
@@ -207,9 +195,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   caption: _wifiCaption == null ? "Not set" : _wifiCaption,
                   onPressed: (value) {
                     if (value != null && value.isNotEmpty) {
-                      setState(() {
-                        _wifiCaption = value;
-                      });
+                      setState(() => _wifiCaption = value);
                     }
                   },
                   context: context,
@@ -229,9 +215,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                       var location = await Navigator.of(context)
                           .pushNamed("/work_address");
                       if (location != null)
-                        setState(() {
-                          _workCaption = location;
-                        });
+                        setState(() => _workCaption = location);
                     }),
 
                 // Radius setting
@@ -245,59 +229,83 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   ),
                   onChange: (value) {
                     Toast.show(
-                        "Radius centered from work place: " +
-                            (value * 10).round().toString() +
-                            "km",
+                        "Radius centered from work place: ${(value * 10).round().toString()} km",
                         context);
-                    setState(() {
-                      _radius = value;
-                    });
+                    setState(() => _radius = value);
                   },
                 ),
               ]),
           Divider(height: 10, color: Colors.white),
 
           //Move settings
-          SettingsSection(
-              title: Text(
-                'When moving',
-              ),
-              settingsChildren: [
-                //Move switch
-                SettingsCheckBox(
-                  title: 'Allow notification on the move',
-                  titleStyle: TextStyle(fontSize: 16),
-                  icon: new SettingsIcon(
-                    icon: Icons.directions_walk,
-                    color: Colors.amber,
-                  ),
-                  onPressed: (bool value) {
-                    setState(() {
-                      _onMove = value;
-                    });
-                  },
-                  value: _onMove,
-                  type: CheckBoxWidgetType.Switch,
-                ),
+          SettingsSection(title: Text('When moving'), settingsChildren: [
+            //Move switch
 
-                //Commute switch
-                SettingsCheckBox(
-                  title: 'Allow notification on commute',
-                  titleStyle: TextStyle(fontSize: 16),
-                  icon: new SettingsIcon(
-                    icon: Icons.train,
-                    color: Colors.blueAccent,
-                  ),
-                  onPressed: (bool value) {
-                    setState(() {
-                      _commuting = value;
-                    });
-                  },
-                  value: _commuting,
-                  type: CheckBoxWidgetType.Switch,
+            // SettingsCheckBox(
+            //   title: 'Allow notification on the move',
+            //   titleStyle: TextStyle(fontSize: 16),
+            //   icon: new SettingsIcon(
+            //     icon: Icons.directions_walk,
+            //     color: Colors.amber,
+            //   ),
+            //   onPressed: (bool value) {
+            //     setState(() {
+            //       _onMove = value;
+            //       print(value);
+            //       if (!value) _commuting = false;
+            //       print(_commuting);
+            //     });
+            //   },
+            //   value: _onMove,
+            //   type: CheckBoxWidgetType.Switch,
+            // ),
+
+            // //Commute switch
+            // SettingsCheckBox(
+            //   title: 'Allow notification on commute',
+            //   titleStyle: TextStyle(fontSize: 16),
+            //   icon: new SettingsIcon(
+            //     icon: Icons.train,
+            //     color: Colors.blueAccent,
+            //   ),
+            //   disabled: _onMove == false,
+            //   onPressed: (bool value) {
+            //     setState(() => _commuting = value);
+            //   },
+            //   value: _commuting,
+            //   type: CheckBoxWidgetType.Switch,
+            // ),
+          ]),
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+            title: Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Icon(Icons.directions_walk, color: Colors.amber),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(
+                  "Allow notifications on the move",
+                  style: TextStyle(fontSize: 16),
                 ),
-              ]),
-          Divider(height: 5, color: Colors.white),
+              ),
+            ]),
+            onTap: () {
+              setState(() {
+                _onMove = !_onMove;
+                if (!_onMove) _commuting = false;
+              });
+            },
+            trailing: Switch(
+                value: _onMove,
+                onChanged: (bool value) {
+                  setState(() {
+                    _onMove = value;
+                    if (!value) _commuting = false;
+                  });
+                }),
+          ),
         ]),
       ),
     );

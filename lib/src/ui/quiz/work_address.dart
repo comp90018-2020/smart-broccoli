@@ -73,6 +73,7 @@ class _MapSettingState extends State<MapSetting> {
       setState(() {
         _locationResults = _location;
       });
+      showErrSnackBar(context, "asdklfj");
     } catch (err) {
       return showErrSnackBar(
           context, "No valid results were found, please enter a valid address",
