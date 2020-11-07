@@ -21,7 +21,7 @@ void callbackDispatcher() {
       switch (task) {
         case "backgroundReading":
           var db = await BackgroundDatabase.init();
-
+          // load prefs
           var calendarFree = true;
           var free = true;
 
