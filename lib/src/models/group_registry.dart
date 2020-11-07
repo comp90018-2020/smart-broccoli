@@ -238,7 +238,6 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       }
       notifyListeners();
     }
-    print(_createdGroups);
     return _createdGroups.values.toList();
   }
 
