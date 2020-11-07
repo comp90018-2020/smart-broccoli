@@ -55,17 +55,16 @@ class QuizLeaderboard extends StatelessWidget {
             children: <Widget>[
               // Top 3
               Container(
-                  padding: EdgeInsets.all(16),
-                  constraints: BoxConstraints(maxHeight: 165),
-                  child: Consumer<GameSessionModel>(
-                    builder: (context, model, child) => Wrap(
-                      alignment: WrapAlignment.center,
-                      runAlignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 25,
-                      children: <Widget>[
-                        if (model.outcome.leaderboard.length > 2)
-                          _topThreeUsers(
+                padding: EdgeInsets.all(16),
+                constraints: BoxConstraints(maxHeight: 165),
+                child: Consumer<GameSessionModel>(
+                  builder: (context, model, child) => Wrap(
+                    spacing: 25,
+                    children: <Widget>[
+                      if (model.outcome.leaderboard.length > 2)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: _topThreeUsers(
                             context,
                             model.outcome.leaderboard[1].player.name,
                             50,
@@ -77,22 +76,25 @@ class QuizLeaderboard extends StatelessWidget {
                                   UserAvatar(snapshot.data, maxRadius: 50),
                             ),
                           ),
-                        if (model.outcome.leaderboard.length > 0)
-                          _topThreeUsers(
-                            context,
-                            model.outcome.leaderboard[0].player.name,
-                            75,
-                            FutureBuilder(
-                              future: model.getPeerProfilePicturePath(
-                                  model.outcome.leaderboard[0].player.id),
-                              builder: (BuildContext context,
-                                      AsyncSnapshot<String> snapshot) =>
-                                  UserAvatar(snapshot.data, maxRadius: 75),
-                            ),
-                            bold: true,
+                        ),
+                      if (model.outcome.leaderboard.length > 0)
+                        _topThreeUsers(
+                          context,
+                          model.outcome.leaderboard[0].player.name,
+                          75,
+                          FutureBuilder(
+                            future: model.getPeerProfilePicturePath(
+                                model.outcome.leaderboard[0].player.id),
+                            builder: (BuildContext context,
+                                    AsyncSnapshot<String> snapshot) =>
+                                UserAvatar(snapshot.data, maxRadius: 75),
                           ),
-                        if (model.outcome.leaderboard.length > 2)
-                          _topThreeUsers(
+                          bold: true,
+                        ),
+                      if (model.outcome.leaderboard.length > 2)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: _topThreeUsers(
                             context,
                             model.outcome.leaderboard[2].player.name,
                             50,
@@ -104,9 +106,11 @@ class QuizLeaderboard extends StatelessWidget {
                                   UserAvatar(snapshot.data, maxRadius: 50),
                             ),
                           ),
-                      ],
-                    ),
-                  )),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
 
               // Current user & ranking
               Consumer<GameSessionModel>(
@@ -213,11 +217,19 @@ Widget _topThreeUsers(
       // Name
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Text(
-          text,
-          style: TextStyle(
+        child: Container(
+          // divide viewport width in 3 and subtract padding around each bubble
+          width: MediaQuery.of(context).size.width / 3 - 48,
+          child: Text(
+            text,
+            style: TextStyle(
               color: Theme.of(context).colorScheme.onBackground,
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
         ),
       ),
     ],
