@@ -79,13 +79,10 @@ class _MyHomePageState extends State<TiltQuestion> {
       widthStart = cord[0];
     }
 
-    print(heightLimit);
-    print(widthLimit);
-    print(widthStart);
-    print(heightStart);
-
     print("x " + cord[0].toString());
     print("y " + cord[1].toString());
+    print("event x" + event.x.toString());
+    print("event y" + event.y.toString());
 
     if(event.x > 2 && event.y > 2){
       canSelect = true;
@@ -124,6 +121,8 @@ class _MyHomePageState extends State<TiltQuestion> {
   }
 
   selectGrid(GameSessionModel model) {
+    print("Select Grid Called");
+
     Point<double> p1 = Point(cord[0], cord[1]);
     Point<double> p2 = Point(widthStart, heightStart - appBarHeight);
     Point<double> p3 = Point(0, heightLimit + heightStart - appBarHeight);
@@ -138,31 +137,38 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     if (d1 <= d2 && d1 <= d3 && d1 <= d4) {
       model.toggleAnswer(0);
+      print("Toggle Answer 1");
     } else if (d2 <= d1 && d2 <= d3 && d2 <= d4) {
       if (model.question is TFQuestion) {
         model.toggleAnswer(0);
+        print("Toggle True");
       }
       else {
         model.toggleAnswer(1);
+        print("Toggle Answer 2");
       }
     } else if (d3 <= d1 && d3 <= d2 && d3 <= d4) {
       if (model.question is TFQuestion) {
         model.toggleAnswer(1);
+        print("Toggle False");
       }
       else {
         MCQuestion mcQuestion = model.question as MCQuestion;
         if (mcQuestion.options.length >= 3) {
           model.toggleAnswer(2);
+          print("Toggle Answer 3");
         }
       }
     } else if (d4 <= d1 && d4 <= d2 && d4 <= d3) {
       if (model.question is TFQuestion) {
         model.toggleAnswer(1);
+        print("Toggle False");
       }
       else {
         MCQuestion mcQuestion = model.question as MCQuestion;
         if (mcQuestion.options.length >= 4) {
           model.toggleAnswer(3);
+          print("Toggle Answer 4");
         }
       }
     } else {
@@ -172,7 +178,6 @@ class _MyHomePageState extends State<TiltQuestion> {
 
 
 startAccel(GameSessionModel model) {
-  print("ACCEL started???");
 
   // if the accelerometer subscription hasn't been created, go ahead and create it
   if (accel == null) {

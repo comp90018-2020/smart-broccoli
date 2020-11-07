@@ -154,7 +154,7 @@ Future<bool> lightGyro() async {
     // Check if the phone is stationary and not being used
     if (await checkGyro()) {
       // Send notifification
-      return false;
+      return true;
     }
   }
   return false;
