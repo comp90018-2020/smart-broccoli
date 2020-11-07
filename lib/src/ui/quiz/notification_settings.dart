@@ -21,8 +21,7 @@ class NotificationSetting extends StatefulWidget {
 }
 
 class _NotificationSettingState extends State<NotificationSetting> {
-  WidgetDirection direction;
-  List<SettingsSelectionItem<int>> turnOffList = [
+  final List<SettingsSelectionItem<int>> _minWindowList = [
     SettingsSelectionItem<int>(0, "Unlimited"),
     SettingsSelectionItem<int>(10, "10 minutes"),
     SettingsSelectionItem<int>(30, "30 minutes"),
@@ -31,23 +30,23 @@ class _NotificationSettingState extends State<NotificationSetting> {
     SettingsSelectionItem<int>(240, "4 hours"),
     SettingsSelectionItem<int>(480, "8 hours"),
   ];
-  List<SettingsSelectionItem<int>> numOfNotification = [
-    SettingsSelectionItem<int>(100, "Unlimited"),
+  final List<SettingsSelectionItem<int>> _maxNumberList = [
+    SettingsSelectionItem<int>(0, "Unlimited"),
     SettingsSelectionItem<int>(20, "20 notifications per day"),
     SettingsSelectionItem<int>(10, "10 notifications per day"),
     SettingsSelectionItem<int>(5, "5 notifications per day"),
     SettingsSelectionItem<int>(1, "1 notifications per day"),
-    SettingsSelectionItem<int>(0, "Never"),
   ];
-  var _winIndex = 0;
-  var _numIndex = 0;
+  var _minWindowIndex = 0;
+  var _maxNumberIndex = 0;
   List<bool> _weekDays = [false, false, false, false, false, false, false];
   var _liveQuizCalendar = true;
   var _smartQuizCalendar = false;
   var _smartDetection = true;
-  var _wifiCaption = "Not set";
-  var _workCaption = "Not set";
+  var _wifiCaption;
+  var _workCaption;
   var _radius = 0.5;
+  var _onMove = true;
   var _commuting = true;
 
   @override
@@ -60,36 +59,36 @@ class _NotificationSettingState extends State<NotificationSetting> {
           title: Text('General settings'),
           settingsChildren: [
             SettingsSelectionList<int>(
-              items: turnOffList,
+              items: _minWindowList,
               //default selected item index, it will be the first item by default.
-              chosenItemIndex: _winIndex,
+              chosenItemIndex: _minWindowIndex,
               title: 'Minimum window between notifications',
               titleStyle: TextStyle(fontSize: 16),
               dismissTitle: 'Cancel',
-              caption: turnOffList[_winIndex].text,
+              caption: _minWindowList[_minWindowIndex].text,
               icon: new SettingsIcon(
                 icon: Icons.timer_off,
                 color: Colors.blue,
               ),
               onSelect: (value, index) {
-                setState(() => _winIndex = index);
+                setState(() => _minWindowIndex = index);
               },
               context: context,
             ),
             SettingsSelectionList<int>(
-              items: numOfNotification,
+              items: _maxNumberList,
               //default selected item index, it will be the first item by default.
-              chosenItemIndex: _numIndex,
+              chosenItemIndex: _maxNumberIndex,
               title: 'Max number of notifications per day',
               titleStyle: TextStyle(fontSize: 16),
               dismissTitle: 'Cancel',
-              caption: numOfNotification[_numIndex].text,
+              caption: _maxNumberList[_maxNumberIndex].text,
               icon: new SettingsIcon(
                 icon: Icons.add_alert,
                 color: Colors.green,
               ),
               onSelect: (value, index) {
-                setState(() => _numIndex = index);
+                setState(() => _maxNumberIndex = index);
               },
               context: context,
             ),
@@ -120,34 +119,15 @@ class _NotificationSettingState extends State<NotificationSetting> {
             onSelect: (List<String> values) {
               print(values);
               setState(() {
-                if (values.contains("Sunday"))
-                  _weekDays[0] = true;
-                else
-                  _weekDays[0] = false;
-                if (values.contains("Monday"))
-                  _weekDays[1] = true;
-                else
-                  _weekDays[1] = false;
-                if (values.contains("Tuesday"))
-                  _weekDays[2] = true;
-                else
-                  _weekDays[2] = false;
-                if (values.contains("Wednesday"))
-                  _weekDays[3] = true;
-                else
-                  _weekDays[3] = false;
-                if (values.contains("Thursday"))
-                  _weekDays[4] = true;
-                else
-                  _weekDays[4] = false;
-                if (values.contains("Friday"))
-                  _weekDays[5] = true;
-                else
-                  _weekDays[5] = false;
-                if (values.contains("Saturday"))
-                  _weekDays[6] = true;
-                else
-                  _weekDays[6] = false;
+                _weekDays = [
+                  values.contains("Sunday"),
+                  values.contains("Monday"),
+                  values.contains("Tuesday"),
+                  values.contains("Wednesday"),
+                  values.contains("Thursday"),
+                  values.contains("Friday"),
+                  values.contains("Saturday"),
+                ];
                 print(_weekDays);
               });
             },
@@ -219,7 +199,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   icon: Icons.wifi,
                   color: Colors.green,
                 ),
-                caption: _wifiCaption,
+                caption: _wifiCaption == null ? "Not set" : _wifiCaption,
                 onPressed: (value) {
                   if (value != null && value.isNotEmpty) {
                     setState(() {
@@ -237,7 +217,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                     color: Colors.orange,
                   ),
                   context: context,
-                  caption: _workCaption,
+                  caption: _workCaption == null ? "Not set" : _workCaption,
                   onPressed: () async {
                     var location =
                         await Navigator.of(context).pushNamed("/work_address");
@@ -269,15 +249,30 @@ class _NotificationSettingState extends State<NotificationSetting> {
         Divider(height: 10, color: Colors.white),
         SettingsSection(
             title: Text(
-              'Self-paced quiz settings',
+              'When moving',
             ),
             settingsChildren: [
               SettingsCheckBox(
-                title: 'Allow notification when commuting',
+                title: 'Allow notification on the move',
                 titleStyle: TextStyle(fontSize: 16),
                 icon: new SettingsIcon(
                   icon: Icons.directions_walk,
-                  color: Colors.red,
+                  color: Colors.amber,
+                ),
+                onPressed: (bool value) {
+                  setState(() {
+                    _onMove = value;
+                  });
+                },
+                value: _commuting,
+                type: CheckBoxWidgetType.Switch,
+              ),
+              SettingsCheckBox(
+                title: 'Allow notification on commute',
+                titleStyle: TextStyle(fontSize: 16),
+                icon: new SettingsIcon(
+                  icon: Icons.train,
+                  color: Colors.blueAccent,
                 ),
                 onPressed: (bool value) {
                   setState(() {
