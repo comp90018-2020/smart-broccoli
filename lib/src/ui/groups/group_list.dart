@@ -83,7 +83,10 @@ class _GroupListState extends State<GroupList> {
                           ? buildGroupList(registry.joinedGroups)
                           : Column(children: [
                               ConstrainedBox(
-                                constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height * 0.3),
+                                constraints: BoxConstraints(
+                                    minHeight:
+                                        MediaQuery.of(context).size.height *
+                                            0.3),
                                 child: NoContentPlaceholder(
                                     parentWidget: widget,
                                     text:

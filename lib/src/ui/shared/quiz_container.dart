@@ -59,7 +59,8 @@ class _BuildQuiz extends State<QuizContainer> {
               child: ConstrainedBox(
                 // Minimum height, or will be height of longest child
                 // if exceeding minimum height
-                constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height * 0.4),
+                constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height * 0.4),
                 child: widget.items.length == 0
                     ? NoContentPlaceholder(
                         parentWidget: widget, text: returnPlaceholderText())
