@@ -622,7 +622,7 @@ class _MyHomePageState extends State<TiltQuestion> {
           )
         else if (model.role == GroupRole.MEMBER)
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
