@@ -127,7 +127,6 @@ class QuizLeaderboard extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   // Rank
-
                                   Text(
                                     '${(model.outcome as OutcomeUser).record.newPos + 1}',
                                     style: SmartBroccoliTheme.listItemTextStyle,
@@ -242,43 +241,46 @@ Widget _leaderboardList(GameSessionModel model, {bool scrollable = true}) {
     itemCount: model.outcome.leaderboard.length,
     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
     physics: scrollable ? null : NeverScrollableScrollPhysics(),
-    itemBuilder: (BuildContext context, int index) => Row(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        // Rank
-        Text(
-          '${index + 1}',
-          style: SmartBroccoliTheme.listItemTextStyle,
-        ),
-        // Profile pic
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: FutureBuilder(
-            future: model.getPeerProfilePicturePath(
-                model.outcome.leaderboard[index].player.id),
-            builder: (BuildContext context, AsyncSnapshot<String> snapshot) =>
-                UserAvatar(snapshot.data, maxRadius: 20),
+    itemBuilder: (BuildContext context, int index) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          // Rank
+          Text(
+            '${index + 1}',
+            style: SmartBroccoliTheme.listItemTextStyle,
           ),
-        ),
-        // Name
-        Expanded(
-          child: Container(
-            child: Text(
-              model.outcome.leaderboard[index].player.name,
-              style: SmartBroccoliTheme.listItemTextStyle,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
+          // Profile pic
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: FutureBuilder(
+              future: model.getPeerProfilePicturePath(
+                  model.outcome.leaderboard[index].player.id),
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) =>
+                  UserAvatar(snapshot.data, maxRadius: 20),
             ),
           ),
-        ),
+          // Name
+          Expanded(
+            child: Container(
+              child: Text(
+                model.outcome.leaderboard[index].player.name,
+                style: SmartBroccoliTheme.listItemTextStyle,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
+          ),
 
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text('${model.outcome.leaderboard[index].record.points}',
-              style: SmartBroccoliTheme.listItemTextStyle),
-        ),
-        Icon(Icons.star, color: Color(0xFF656565))
-      ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+            child: Text('${model.outcome.leaderboard[index].record.points}',
+                style: SmartBroccoliTheme.listItemTextStyle),
+          ),
+          Icon(Icons.star, color: Color(0xFF656565))
+        ],
+      ),
     ),
     separatorBuilder: (BuildContext context, int index) => const Divider(),
   );
