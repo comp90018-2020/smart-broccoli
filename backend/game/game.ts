@@ -10,7 +10,6 @@ import { activateSession } from "../controllers/session";
 import { Event, Role, GameStatus, Player, Answer, GameType } from "./datatype";
 import { QuizAttributes } from "models/quiz";
 import { _socketIO } from "./index";
-import { threadId } from "worker_threads";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
 const WAIT_TIME_SELFPACED_GROUP = 60 * 1000;
