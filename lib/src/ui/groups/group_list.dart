@@ -54,7 +54,8 @@ class _GroupListState extends State<GroupList> {
               builder: (context, snapshot) {
                 log("Group list future ${snapshot.toString()}");
                 if (snapshot.hasError)
-                  return Text("An error has occurred, cannot load");
+                  return Center(
+                      child: Text("An error has occurred, cannot load"));
                 if (snapshot.hasData)
                   return buildGroupList(
                       snapshot.data, registry.getGroupMembers);
@@ -67,7 +68,8 @@ class _GroupListState extends State<GroupList> {
               future: registry.getCreatedGroups(withMembers: true),
               builder: (context, snapshot) {
                 if (snapshot.hasError)
-                  return Text("An error has occurred, cannot load");
+                  return Center(
+                      child: Text("An error has occurred, cannot load"));
                 if (snapshot.hasData)
                   return buildGroupList(
                       snapshot.data, registry.getGroupMembers);
