@@ -2,10 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class NoContentPlaceholder extends StatelessWidget {
-  const NoContentPlaceholder({Key key, this.parentWidget, this.text})
-      : super(key: key);
+  const NoContentPlaceholder({Key key, this.text}) : super(key: key);
 
-  final Object parentWidget;
   final String text;
 
   @override

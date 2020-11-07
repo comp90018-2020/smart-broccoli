@@ -64,9 +64,8 @@ class _BuildQuiz extends State<QuizContainer> {
                 child: widget.items.length == 0
                     ? Container(
                         width: MediaQuery.of(context).size.width * 0.8,
-                        child: NoContentPlaceholder(
-                            parentWidget: widget,
-                            text: returnPlaceholderText()),
+                        child:
+                            NoContentPlaceholder(text: returnPlaceholderText()),
                       )
                     : IntrinsicHeight(
                         child: Row(

@@ -64,7 +64,6 @@ class _GroupListState extends State<GroupList> {
                                 Padding(
                                   padding: const EdgeInsets.all(35.0),
                                   child: NoContentPlaceholder(
-                                    parentWidget: widget,
                                     text: "Seems like you are not part of " +
                                         "any group yet️",
                                   ),
@@ -89,7 +88,6 @@ class _GroupListState extends State<GroupList> {
                                 Padding(
                                   padding: const EdgeInsets.all(35.0),
                                   child: NoContentPlaceholder(
-                                    parentWidget: widget,
                                     text: "Seems like you are not part of " +
                                         "any group yet️",
                                   ),
