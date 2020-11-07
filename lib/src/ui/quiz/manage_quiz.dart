@@ -88,6 +88,9 @@ class _ManageQuizState extends State<ManageQuiz> {
                           ? collection.getCreatedQuizzesWhere(
                               groupId: _groupId, type: QuizType.SELF_PACED)
                           : null,
+                      error: snapshot.hasError
+                          ? Center(child: Text("Cannot load quizzes"))
+                          : null,
                       header: _groupSelector(),
                       hiddenButton: true);
                 }),
