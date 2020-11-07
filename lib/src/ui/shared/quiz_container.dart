@@ -62,10 +62,14 @@ class _BuildQuiz extends State<QuizContainer> {
                 constraints: BoxConstraints(
                     minHeight: MediaQuery.of(context).size.height * 0.4),
                 child: widget.items.length == 0
-                    ? Container(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        child:
-                            NoContentPlaceholder(text: returnPlaceholderText()),
+                    ? Column(
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            child: NoContentPlaceholder(
+                                text: returnPlaceholderText()),
+                          )
+                        ],
                       )
                     : IntrinsicHeight(
                         child: Row(
