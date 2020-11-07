@@ -153,6 +153,17 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     }
   }
 
+  List<GameSession> getGroupSessions(Quiz quiz) => quiz.sessions
+      .where((session) =>
+          session.quizType == QuizType.SELF_PACED &&
+          session.type == GameSessionType.GROUP &&
+          session.state != GameSessionState.ENDED &&
+          session.joinCode != null)
+      .toList();
+
+  Color getSessionColour(GameSession session) =>
+      Color(int.parse('FF${session.joinCode}', radix: 16));
+
   Future<void> joinSessionByPin(String pin) async {
     try {
       session = await _sessionApi.joinSession(_authStateModel.token, pin);
@@ -184,7 +195,9 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     } on ApiAuthException {
       _authStateModel.checkSession();
     } on SessionNotFoundException {
-      _quizCollectionModel.refreshAvailableQuizzes();
+      _quizCollectionModel
+          .refreshAvailableQuizzes(refreshIfLoaded: true)
+          .catchError((_) => null);
       return Future.error("Session no longer exists, refreshing...");
     } on ApiException catch (e) {
       return Future.error(e.toString());
@@ -290,7 +303,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         await _quizCollectionModel.refreshQuestionPicture(
             session.quizId, question,
             token: session.token);
-      } catch (_) {}
+      } on ApiAuthException {
+        _authStateModel.checkSession();
+      } catch (_) {
+        // Do nothing, picture is not loaded
+      }
       _transitionTo(SessionState.QUESTION);
       PubSub().publish(PubSubTopic.TIMER, arg: time);
     });

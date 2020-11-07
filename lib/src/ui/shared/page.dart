@@ -134,7 +134,7 @@ class CustomPage extends StatelessWidget {
                               child: Consumer<UserProfileModel>(
                                 builder: (context, profile, child) =>
                                     FutureBuilder(
-                                  future: profile.getUser(forceRefresh: false),
+                                  future: profile.getUser(refresh: false),
                                   builder: (BuildContext context,
                                       AsyncSnapshot<User> snapshot) {
                                     return Wrap(
