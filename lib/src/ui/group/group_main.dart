@@ -84,44 +84,38 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                 onSelected: (UserAction action) async {
                   switch (action) {
                     case UserAction.LEAVE_GROUP:
-                      try {
-                        if (await _confirmLeaveGroup()) {
+                      if (await _confirmLeaveGroup()) {
+                        try {
                           await Provider.of<GroupRegistryModel>(context,
                                   listen: false)
                               .leaveGroup(group);
                           Navigator.of(context).pop();
+                        } catch (e) {
+                          await showBasicDialog(context, e.toString());
                         }
-                      } catch (_) {
-                        showBasicDialog(context, "Cannot leave group");
                       }
                       break;
                     case UserAction.RENAME_GROUP:
                       String newName = await _editNameDialogue();
                       if (newName == null) break;
-                      try {
-                        await Provider.of<GroupRegistryModel>(context,
-                                listen: false)
-                            .renameGroup(group, newName);
-                      } on GroupCreateException {
-                        showBasicDialog(
-                            context, "Name already in use: $newName");
-                      } catch (_) {
-                        showBasicDialog(
-                            context, "Cannot rename group to: $newName");
-                      }
+                      await Provider.of<GroupRegistryModel>(context,
+                              listen: false)
+                          .renameGroup(group, newName)
+                          .catchError(
+                              (e) => showBasicDialog(context, e.toString()));
                       break;
                     case UserAction.DELETE_GROUP:
-                      try {
-                        if (await showConfirmDialog(
-                            context, "This cannot be undone",
-                            title: "Confirm group deletion")) {
+                      if (await showConfirmDialog(
+                          context, "This cannot be undone",
+                          title: "Confirm group deletion")) {
+                        try {
                           await Provider.of<GroupRegistryModel>(context,
                                   listen: false)
                               .deleteGroup(group);
                           Navigator.of(context).pop();
+                        } catch (e) {
+                          showBasicDialog(context, e.toString());
                         }
-                      } catch (_) {
-                        showBasicDialog(context, "Cannot delete group");
                       }
                       break;
                     default:

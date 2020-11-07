@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'no_content_place_holder.dart';
+import 'package:smart_broccoli/src/ui/shared/helper.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'quiz_card.dart';
 
 /// Build a list of quizzes
 class QuizContainer extends StatefulWidget {
   QuizContainer(this.items,
       {Key key,
-      this.screen,
       this.header,
-      this.padding = const EdgeInsets.only(top: 8, bottom: 8),
-      this.headerPadding = const EdgeInsets.fromLTRB(8, 12, 8, 16),
-      this.hiddenButton = false})
+      this.padding = const EdgeInsets.symmetric(vertical: 8),
+      this.headerPadding = const EdgeInsets.fromLTRB(8, 24, 8, 16),
+      this.hiddenButton = false,
+      @required this.noQuizPlaceholder,
+      this.error})
       : super(key: key);
 
   ///Which screen this is on, for conditional rendering
-  final String screen;
+  final String noQuizPlaceholder;
+
+  /// Passed by parent to indicate error
+  final Widget error;
 
   /// List of items
   final List<Quiz> items;
@@ -48,49 +54,59 @@ class _BuildQuiz extends State<QuizContainer> {
         child: Column(
           children: <Widget>[
             // Header widgets
-            Padding(
-              padding: widget.headerPadding,
-              child: widget.header,
-            ),
+            if (widget.header != null)
+              Padding(
+                padding: widget.headerPadding,
+                child: widget.header,
+              ),
 
-            widget.items.length == 0
-                // Placeholder if no quizzes
-                ? FractionallySizedBox(
-                    widthFactor: 0.8,
-                    child: NoContentPlaceholder(text: returnPlaceholderText()),
-                  )
+            // Render error widget
+            if (widget.error != null) widget.error,
 
-                // The list of quiz
-                : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      // Minimum height, or will be height of longest child
-                      // if exceeding minimum height
-                      constraints: BoxConstraints(
-                          minHeight: MediaQuery.of(context).size.height * 0.4),
-                      child: IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: mapIndexed(
-                            widget.items,
-                            ((index, item) => Container(
-                                  constraints: BoxConstraints(maxWidth: 200),
-                                  margin: index == 0 ||
-                                          index == widget.items.length - 1
-                                      ? EdgeInsets.only(
-                                          left: index == 0 ? 20 : 0,
-                                          right: index == 0 ? 0 : 20)
-                                      : EdgeInsets.zero,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.4,
-                                  child:
-                                      QuizCard(item, alwaysShowPicture: true),
-                                )),
-                          ).toList(),
-                        ),
-                      ),
+            // Loading...
+            if (widget.items == null && widget.error == null)
+              LoadingIndicator(EdgeInsets.symmetric(vertical: 32)),
+
+            // Placeholder if no quizzes
+            if (widget.items != null && widget.items.length == 0)
+              FractionallySizedBox(
+                widthFactor: 0.8,
+                child: NoContentPlaceholder(text: widget.noQuizPlaceholder),
+              ),
+
+            // List has been loaded
+            if (widget.items != null && widget.items.length > 0)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  // Minimum height, or will be height of longest child
+                  // if exceeding minimum height
+                  constraints: BoxConstraints(minHeight: 300),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: mapIndexed(
+                        widget.items,
+                        ((index, item) => Container(
+                              constraints:
+                                  // 190 max, 180 min
+                                  BoxConstraints(minWidth: 180, maxWidth: 190),
+                              margin: index == 0 ||
+                                      index == widget.items.length - 1
+                                  ? EdgeInsets.only(
+                                      left: index == 0 ? 20 : 0,
+                                      right: index == widget.items.length - 1
+                                          ? 20
+                                          : 0)
+                                  : EdgeInsets.zero,
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              child: QuizCard(item, alwaysShowPicture: true),
+                            )),
+                      ).toList(),
                     ),
                   ),
+                ),
+              ),
 
             // Leave some space for a hidden floating action button
             if (widget.hiddenButton)
@@ -108,29 +124,5 @@ class _BuildQuiz extends State<QuizContainer> {
         ),
       ),
     );
-  }
-
-  returnPlaceholderText() {
-    String text;
-    if (widget.screen == "Manage Quiz") {
-      text = "No created quizzes...\n Try creating some!";
-    } else if (widget.screen == "Self-Paced") {
-    } else {
-      text = "There aren't any active quizzes";
-    }
-
-    return text;
-  }
-}
-
-/// .map() with index
-/// From: https://stackoverflow.com/a/57371764
-Iterable<E> mapIndexed<E, T>(
-    Iterable<T> items, E Function(int index, T item) f) sync* {
-  var index = 0;
-
-  for (final item in items) {
-    yield f(index, item);
-    index = index + 1;
   }
 }

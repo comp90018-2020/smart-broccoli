@@ -1,5 +1,7 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/group_dropdown.dart';
@@ -25,61 +27,99 @@ class _ManageQuizState extends State<ManageQuiz> {
     super.didChangeDependencies();
     // Update created quizzes
     Provider.of<QuizCollectionModel>(context, listen: false)
-        .refreshCreatedQuizzes();
-    // Update group list
+        .refreshCreatedQuizzes(refreshIfLoaded: true)
+        .catchError((_) => null);
+    // Ensure that group list is up to date
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups();
+        .getCreatedGroups(refreshIfLoaded: true)
+        .catchError((_) => null);
   }
 
   String title = "Manage Quiz";
 
   @override
   Widget build(BuildContext context) {
-    // Somewhat wasteful to have multiple widgets, but that's how tabs work
-    return CustomTabbedPage(
-      title: title,
-      tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-      tabViews: [
-        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          // All quizzes
-          return QuizContainer(
-              collection.getCreatedQuizzesWhere(groupId: _groupId),
-              header: _groupSelector(),
-              hiddenButton: true,
-              screen: title);
-        }),
-        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          // Live quiz
-          return QuizContainer(
-              collection.getCreatedQuizzesWhere(
-                  groupId: _groupId, type: QuizType.LIVE),
-              header: _groupSelector(),
-              hiddenButton: true,
-              screen: title);
-        }),
-        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          /// Self-paced quiz
-          return QuizContainer(
-              collection.getCreatedQuizzesWhere(
-                  groupId: _groupId, type: QuizType.SELF_PACED),
-              header: _groupSelector(),
-              hiddenButton: true,
-              screen: title);
-        }),
-      ],
-      hasDrawer: true,
-      secondaryBackgroundColour: true,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          if (_groupId == null) {
-            Navigator.of(context).pushNamed('/quiz/');
-          } else {
-            Navigator.of(context).pushNamed('/group/$_groupId/quiz');
-          }
-        },
-        label: Text('CREATE QUIZ'),
-        icon: Icon(Icons.add),
-      ),
+    return Consumer<QuizCollectionModel>(
+      builder: (context, collection, child) {
+        return FutureBuilder(
+          future: Provider.of<QuizCollectionModel>(context, listen: false)
+              .refreshCreatedQuizzes(),
+          builder: (context, snapshot) {
+            log("Manage quiz future ${snapshot.toString()}");
+
+            return CustomTabbedPage(
+              title: "Manage Quiz",
+              tabs: [
+                Tab(text: "ALL"),
+                Tab(text: "LIVE"),
+                Tab(text: "SELF-PACED")
+              ],
+              tabViews: [
+                Consumer<QuizCollectionModel>(
+                    builder: (context, collection, child) {
+                  // All quizzes
+                  return QuizContainer(
+                      snapshot.hasData
+                          ? collection.getCreatedQuizzesWhere(groupId: _groupId)
+                          : null,
+                      error: snapshot.hasError
+                          ? Center(child: Text("Cannot load quizzes"))
+                          : null,
+                      noQuizPlaceholder:
+                          "No created quizzes...\n Try creating some!",
+                      header: _groupSelector(),
+                      hiddenButton: true);
+                }),
+                Consumer<QuizCollectionModel>(
+                    builder: (context, collection, child) {
+                  // Live quiz
+                  return QuizContainer(
+                      snapshot.hasData
+                          ? collection.getCreatedQuizzesWhere(
+                              groupId: _groupId, type: QuizType.LIVE)
+                          : null,
+                      error: snapshot.hasError
+                          ? Center(child: Text("Cannot load quizzes"))
+                          : null,
+                      noQuizPlaceholder:
+                          "No created quizzes...\n Try creating some!",
+                      header: _groupSelector(),
+                      hiddenButton: true);
+                }),
+                Consumer<QuizCollectionModel>(
+                    builder: (context, collection, child) {
+                  /// Self-paced quiz
+                  return QuizContainer(
+                      snapshot.hasData
+                          ? collection.getCreatedQuizzesWhere(
+                              groupId: _groupId, type: QuizType.SELF_PACED)
+                          : null,
+                      error: snapshot.hasError
+                          ? Center(child: Text("Cannot load quizzes"))
+                          : null,
+                      noQuizPlaceholder:
+                          "No created quizzes...\n Try creating some!",
+                      header: _groupSelector(),
+                      hiddenButton: true);
+                }),
+              ],
+              hasDrawer: true,
+              secondaryBackgroundColour: true,
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: () {
+                  if (_groupId == null) {
+                    Navigator.of(context).pushNamed('/quiz/');
+                  } else {
+                    Navigator.of(context).pushNamed('/group/$_groupId/quiz');
+                  }
+                },
+                label: Text('CREATE QUIZ'),
+                icon: Icon(Icons.add),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

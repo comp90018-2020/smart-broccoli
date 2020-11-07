@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,11 +19,14 @@ class QuizTab extends StatelessWidget {
       body: Container(
         child: Consumer2<GroupRegistryModel, QuizCollectionModel>(
             builder: (context, registry, collection, child) {
-          final Group group = registry.getGroupFromCache(groupId);
+          return FutureBuilder(
+              future: registry.getGroupQuizzes(groupId),
+              builder: (context, snapshot) {
+                log("Quiz tab future ${snapshot.toString()}");
+                // To get into the members tab, the group must be loaded
+                var group = registry.getGroupFromCache(groupId);
 
-          return group == null
-              ? Container()
-              : CustomTabbedPage(
+                return CustomTabbedPage(
                   secondaryBackgroundColour: true,
                   title: "YES",
                   tabs: [
@@ -33,25 +37,43 @@ class QuizTab extends StatelessWidget {
                   tabViews: [
                     // all quizzes
                     QuizContainer(
-                        collection.getQuizzesWhere(
-                          groupId: group.id,
-                        ),
-                        hiddenButton: true,
-                        screen: "Manage Quiz"),
+                      snapshot.hasData
+                          ? collection.getQuizzesWhere(groupId: group.id)
+                          : null,
+                      error: snapshot.hasError
+                          ? Center(child: Text("Cannot load quizzes"))
+                          : null,
+                      noQuizPlaceholder: "There aren't any active quizzes",
+                      hiddenButton: true,
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                    ),
 
                     // live quizzes
                     QuizContainer(
-                        collection.getQuizzesWhere(
-                            groupId: group.id, type: QuizType.LIVE),
-                        hiddenButton: true,
-                        screen: "Manage Quiz"),
+                      snapshot.hasData
+                          ? collection.getQuizzesWhere(
+                              groupId: group.id, type: QuizType.LIVE)
+                          : null,
+                      error: snapshot.hasError
+                          ? Center(child: Text("Cannot load quizzes"))
+                          : null,
+                      noQuizPlaceholder: "There aren't any active quizzes",
+                      hiddenButton: true,
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                    ),
 
                     // self-paced quizzes
                     QuizContainer(
-                      collection.getQuizzesWhere(
-                          groupId: group.id, type: QuizType.SELF_PACED),
-                      screen: "Manage Quiz",
+                      snapshot.hasData
+                          ? collection.getQuizzesWhere(
+                              groupId: group.id, type: QuizType.SELF_PACED)
+                          : null,
+                      error: snapshot.hasError
+                          ? Center(child: Text("Cannot load quizzes"))
+                          : null,
+                      noQuizPlaceholder: "There aren't any active quizzes",
                       hiddenButton: true,
+                      padding: EdgeInsets.symmetric(vertical: 24),
                     ),
                   ],
                   hasDrawer: false,
@@ -65,6 +87,7 @@ class QuizTab extends StatelessWidget {
                         )
                       : null,
                 );
+              });
         }),
       ),
     );

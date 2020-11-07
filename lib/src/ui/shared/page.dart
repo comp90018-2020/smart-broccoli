@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
@@ -5,10 +7,7 @@ import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// A page extending scaffold
-/// Supports tabs, drawer
-///
-
-class CustomPage extends StatefulWidget {
+class CustomPage extends StatelessWidget {
   /// Title of page
   final String title;
 
@@ -51,17 +50,6 @@ class CustomPage extends StatefulWidget {
       this.automaticallyImplyLeading = true,
       this.appbarActions,
       this.floatingActionButton});
-  @override
-  State<StatefulWidget> createState() => new _CustomPageState();
-}
-
-class _CustomPageState extends State<CustomPage> {
-  void initState() {
-    super.initState();
-    Provider.of<UserProfileModel>(context, listen: false)
-        .getUser(forceRefresh: true)
-        .catchError((_) => null);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,22 +57,22 @@ class _CustomPageState extends State<CustomPage> {
     // https://stackoverflow.com/questions/51652897
     Widget wrappedChild = GestureDetector(
       behavior: HitTestBehavior.translucent,
-      child: widget.child,
+      child: child,
       onTap: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
 
     return Scaffold(
-      backgroundColor: widget.secondaryBackgroundColour
+      backgroundColor: secondaryBackgroundColour
           ? Theme.of(context).backgroundColor
           : Theme.of(context).colorScheme.onBackground,
 
       // At top
-      primary: widget.primary,
+      primary: primary,
 
       // Appbar
-      appBar: widget.primary
+      appBar: primary
           ? PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight),
               child: Container(
@@ -93,21 +81,42 @@ class _CustomPageState extends State<CustomPage> {
                   BoxShadow(color: Colors.white, offset: const Offset(0, .2))
                 ]),
                 child: AppBar(
-                  title: Text(widget.title),
+                  title: Text(title),
                   centerTitle: true,
                   elevation: 0,
-                  leading: widget.appbarLeading,
-                  automaticallyImplyLeading: widget.automaticallyImplyLeading,
-                  actions: widget.appbarActions,
+                  leading: appbarLeading,
+                  automaticallyImplyLeading: automaticallyImplyLeading,
+                  actions: appbarActions,
                 ),
               ),
             )
           : null,
 
       // Drawer (or hamberger menu)
-      drawer: widget.hasDrawer
-          ? Drawer(
-              child: ListView(
+      drawer: hasDrawer ? _drawer(context) : null,
+
+      // Floating action button
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+
+      // Body of page
+      // https://stackoverflow.com/questions/54837854
+      body: background == null
+          ? wrappedChild
+          : Stack(
+              children: [...background, Positioned.fill(child: wrappedChild)],
+            ),
+    );
+  }
+
+  Widget _drawer(BuildContext context) {
+    return Drawer(
+      child: Consumer<UserProfileModel>(
+        builder: (context, profile, child) => FutureBuilder(
+            future: profile.getUser(refresh: false),
+            builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+              log("Drawer future ${snapshot.toString()}");
+              return ListView(
                 // Important: Remove any padding from the ListView.
                 padding: EdgeInsets.zero,
                 children: <Widget>[
@@ -142,43 +151,37 @@ class _CustomPageState extends State<CustomPage> {
                           // Name/email
                           Expanded(
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 18),
-                              child: Consumer<UserProfileModel>(
-                                builder: (context, profile, child) =>
-                                    FutureBuilder(
-                                  future: profile.getUser(forceRefresh: false),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<User> snapshot) {
-                                    return Wrap(
-                                      direction: Axis.vertical,
-                                      spacing: 2,
-                                      children: snapshot.hasData
-                                          ? [
-                                              Text(snapshot.data.name,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyText1),
-                                              Text(
-                                                  snapshot.data.type ==
-                                                          UserType.UNREGISTERED
-                                                      ? "Unregistered"
-                                                      : snapshot.data.email,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyText2),
-                                            ]
-                                          : [
-                                              Text('Unknown User',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyText1)
-                                            ],
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 18),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: snapshot.hasData
+                                      ? [
+                                          Text(snapshot.data.name,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText1,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis),
+                                          Text(
+                                              snapshot.data.type ==
+                                                      UserType.UNREGISTERED
+                                                  ? "Unregistered"
+                                                  : snapshot.data.email,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText2,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis),
+                                        ]
+                                      : [
+                                          Text('Unknown User',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText1)
+                                        ],
+                                )),
                           ),
                           Icon(Icons.chevron_right, color: Colors.grey[700]),
                         ],
@@ -196,24 +199,18 @@ class _CustomPageState extends State<CustomPage> {
                       _navigateToNamed(context, '/take_quiz');
                     },
                   ),
-                  Consumer<UserProfileModel>(
-                    builder: (context, profile, child) {
-                      if (profile.user.type != UserType.UNREGISTERED) {
-                        return ListTile(
-                          dense: true,
-                          leading: const Icon(Icons.edit),
-                          title: Text('MANAGE QUIZ',
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColorDark)),
-                          onTap: () {
-                            _navigateToNamed(context, '/manage_quiz');
-                          },
-                        );
-                      } else {
-                        return Container();
-                      }
-                    },
-                  ),
+                  if (snapshot.hasData &&
+                      snapshot.data.type != UserType.UNREGISTERED)
+                    ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.edit),
+                      title: Text('MANAGE QUIZ',
+                          style: TextStyle(
+                              color: Theme.of(context).primaryColorDark)),
+                      onTap: () {
+                        _navigateToNamed(context, '/manage_quiz');
+                      },
+                    ),
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.people),
@@ -222,6 +219,16 @@ class _CustomPageState extends State<CustomPage> {
                             color: Theme.of(context).primaryColorDark)),
                     onTap: () {
                       _navigateToNamed(context, '/group/home');
+                    },
+                  ),
+                  ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.notifications),
+                    title: Text('NOTIFICATION SETTINGS',
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColorDark)),
+                    onTap: () {
+                      _navigateToNamed(context, '/notification_settings');
                     },
                   ),
                   Divider(),
@@ -243,24 +250,9 @@ class _CustomPageState extends State<CustomPage> {
                         .logout,
                   ),
                 ],
-              ),
-            )
-          : null,
-
-      // Floating action button
-      floatingActionButton: widget.floatingActionButton,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-
-      // Body of page
-      // https://stackoverflow.com/questions/54837854
-      body: widget.background == null
-          ? wrappedChild
-          : Stack(
-              children: [
-                ...widget.background,
-                Positioned.fill(child: wrappedChild)
-              ],
-            ),
+              );
+            }),
+      ),
     );
   }
 

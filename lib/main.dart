@@ -8,11 +8,13 @@ import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/background/background_calendar.dart';
 import 'package:smart_broccoli/src/base.dart';
+import 'package:smart_broccoli/src/base/firebase.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +55,9 @@ void main() async {
       GroupRegistryModel(authStateModel, userRepo, quizCollectionModel);
   final GameSessionModel gameSessionModel =
       GameSessionModel(authStateModel, quizCollectionModel, userRepo);
+
+  await Firebase.initializeApp();
+  FirebaseNotification();
 
   runApp(
     MultiProvider(
@@ -145,10 +150,10 @@ class _MyAppState extends State<MyApp> {
             .popUntil((route) => !route.settings.name.startsWith('/session'));
         // refresh quiz information as user has just left session
         Provider.of<QuizCollectionModel>(context, listen: false)
-            .refreshAvailableQuizzes()
+            .refreshAvailableQuizzes(refreshIfLoaded: true)
             .catchError((_) => null);
         Provider.of<QuizCollectionModel>(context, listen: false)
-            .refreshCreatedQuizzes()
+            .refreshCreatedQuizzes(refreshIfLoaded: true)
             .catchError((_) => null);
         break;
       case RouteAction.REPLACE:

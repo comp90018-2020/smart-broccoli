@@ -1,6 +1,8 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_broccoli/src/data.dart';
+
+import 'package:smart_broccoli/src/data/quiz.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/quiz_container.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
@@ -24,7 +26,8 @@ class _TakeQuizState extends State<TakeQuiz> {
     super.didChangeDependencies();
     // Update available quizzes
     Provider.of<QuizCollectionModel>(context, listen: false)
-        .refreshAvailableQuizzes();
+        .refreshAvailableQuizzes(refreshIfLoaded: true)
+        .catchError((_) => null);
   }
 
   @override
@@ -45,51 +48,82 @@ class _TakeQuizState extends State<TakeQuiz> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomTabbedPage(
-      title: "Take Quiz",
-      tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
-      tabViews: [
-        // All quizzes
-        Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-          return QuizContainer(collection.getAvailableQuizzesWhere(),
-              header: QuizPinBox(key: _buildQuizKey));
-        }),
+    return Consumer<QuizCollectionModel>(builder: (context, collection, child) {
+      return FutureBuilder(
+          future: Provider.of<QuizCollectionModel>(context, listen: false)
+              .refreshCreatedQuizzes(),
+          builder: (context, snapshot) {
+            log("Joined quiz future ${snapshot.toString()}");
 
-        // Live quiz
-        Consumer<QuizCollectionModel>(
-          builder: (context, collection, child) {
-            return QuizContainer(
-                collection.getAvailableQuizzesWhere(type: QuizType.LIVE),
-                header: QuizPinBox());
-          },
-        ),
+            return CustomTabbedPage(
+              title: "Take Quiz",
+              tabs: [
+                Tab(text: "ALL"),
+                Tab(text: "LIVE"),
+                Tab(text: "SELF-PACED")
+              ],
+              tabViews: [
+                // All quizzes
+                QuizContainer(
+                    snapshot.hasData
+                        ? collection.getAvailableQuizzesWhere()
+                        : null,
+                    error: snapshot.hasError
+                        ? Center(child: Text("Cannot load quizzes"))
+                        : null,
+                    noQuizPlaceholder: "There aren't any active quizzes",
+                    header: QuizPinBox(key: _buildQuizKey)),
 
-        /// Self-paced quiz
-        Consumer<QuizCollectionModel>(
-          builder: (context, collection, child) {
-            return QuizContainer(
-              collection.getAvailableQuizzesWhere(type: QuizType.SELF_PACED),
-              header: collection
-                          .getAvailableQuizzesWhere(type: QuizType.SELF_PACED)
-                          .length >
-                      0
-                  ? ConstrainedBox(
-                      // Has text to fill up vertical space
-                      constraints: BoxConstraints(minHeight: _height ?? 175),
-                      child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Take a self-paced quiz...\nHave some fun',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white),
-                          )))
-                  : null,
+                // Live quiz
+                QuizContainer(
+                    snapshot.hasData
+                        ? collection.getAvailableQuizzesWhere(
+                            type: QuizType.LIVE)
+                        : null,
+                    error: snapshot.hasError
+                        ? Center(
+                            child: Text(
+                            "Cannot load quizzes",
+                          ))
+                        : null,
+                    noQuizPlaceholder: "There aren't any active quizzes",
+                    header: QuizPinBox()),
+
+                /// Self-paced quiz
+                QuizContainer(
+                  snapshot.hasData
+                      ? collection.getAvailableQuizzesWhere(
+                          type: QuizType.SELF_PACED)
+                      : null,
+                  error: snapshot.hasError
+                      ? Center(child: Text("Cannot load quizzes"))
+                      : null,
+                  noQuizPlaceholder: "There aren't any active quizzes",
+                  header: snapshot.hasData &&
+                          collection
+                                  .getAvailableQuizzesWhere(
+                                      type: QuizType.SELF_PACED)
+                                  .length >
+                              0
+                      ? ConstrainedBox(
+                          // Has text to fill up vertical space
+                          constraints:
+                              BoxConstraints(minHeight: _height ?? 175),
+                          child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Take a self-paced quiz...\nHave some fun',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.white),
+                              )))
+                      // No header if not quiz
+                      : null,
+                ),
+              ],
+              hasDrawer: true,
+              secondaryBackgroundColour: true,
             );
-          },
-        ),
-      ],
-      hasDrawer: true,
-      secondaryBackgroundColour: true,
-    );
+          });
+    });
   }
 }

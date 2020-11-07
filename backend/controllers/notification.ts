@@ -145,7 +145,8 @@ export const updateNotificationSettings = async (userId: number, opts: any) => {
  * Gets the user's notification settings.
  */
 export const getNotificationSettings = async (userId: number) => {
-    return await NotificationSettings.findOrCreate({ where: { userId } });
+     const res = await NotificationSettings.findOrCreate({ where: { userId } });
+     return res[0];
 };
 
 /**
