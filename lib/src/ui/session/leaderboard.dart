@@ -122,60 +122,56 @@ class QuizLeaderboard extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
                           child: Consumer<UserProfileModel>(
-                            builder: (context, profile, child) => ListTile(
-                              leading: Row(
-                                mainAxisSize: MainAxisSize.min,
+                            builder: (context, profile, child) => Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
                                 children: [
                                   // Rank
                                   Text(
                                     '${(model.outcome as OutcomeUser).record.newPos + 1}',
                                     style: SmartBroccoliTheme.listItemTextStyle,
                                   ),
-
-                                  // Name/image
+                                  // Profile image
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 24),
-                                    child: Row(children: [
-                                      // Profile image
-                                      FutureBuilder(
-                                        future: profile.getUserPicture(),
-                                        builder: (BuildContext context,
-                                                AsyncSnapshot<String>
-                                                    snapshot) =>
-                                            UserAvatar(snapshot.data,
-                                                maxRadius: 20),
+                                        horizontal: 12.0),
+                                    child: FutureBuilder(
+                                      future: profile.getUserPicture(),
+                                      builder: (BuildContext context,
+                                              AsyncSnapshot<String> snapshot) =>
+                                          UserAvatar(snapshot.data,
+                                              maxRadius: 20),
+                                    ),
+                                  ),
+                                  // Name
+                                  Expanded(
+                                    child: FutureBuilder(
+                                      future: profile.getUser(),
+                                      builder: (BuildContext context,
+                                              AsyncSnapshot<User> snapshot) =>
+                                          Text(
+                                        '${_nameFromSnapshot(snapshot)}',
+                                        style: SmartBroccoliTheme
+                                            .listItemTextStyle,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
                                       ),
-                                      // Name
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 15),
-                                        child: FutureBuilder(
-                                          future: profile.getUser(),
-                                          builder: (BuildContext context,
-                                                  AsyncSnapshot<User>
-                                                      snapshot) =>
-                                              Text(
-                                                  '${_nameFromSnapshot(snapshot)}',
-                                                  style: SmartBroccoliTheme
-                                                      .listItemTextStyle),
-                                        ),
-                                      ),
-                                    ]),
-                                  )
-                                ],
-                              ),
-                              // Score
-                              trailing: Wrap(
-                                  spacing: 5,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: [
-                                    Text(
+                                    ),
+                                  ),
+                                  // Points
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6.0),
+                                    child: Text(
                                         '${(model.outcome as OutcomeUser).record.points}',
                                         style: SmartBroccoliTheme
                                             .listItemTextStyle),
-                                    Icon(Icons.star, color: Color(0xFF656565))
-                                  ]),
+                                  ),
+                                  Icon(Icons.star, color: Color(0xFF656565))
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -272,7 +268,7 @@ Widget _leaderboardList(GameSessionModel model, {bool scrollable = true}) {
               ),
             ),
           ),
-
+          // Points
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6.0),
             child: Text('${model.outcome.leaderboard[index].record.points}',
