@@ -69,7 +69,7 @@ class _TakeQuizState extends State<TakeQuiz> {
                         ? collection.getAvailableQuizzesWhere()
                         : null,
                     error: snapshot.hasError
-                        ? Center(child: Text("Cannot load quizzes"))
+                        ? Center(child: const Text("Cannot load quizzes"))
                         : null,
                     noQuizPlaceholder: "There aren't any active quizzes",
                     header: QuizPinBox(key: _buildQuizKey)),
@@ -81,10 +81,7 @@ class _TakeQuizState extends State<TakeQuiz> {
                             type: QuizType.LIVE)
                         : null,
                     error: snapshot.hasError
-                        ? Center(
-                            child: Text(
-                            "Cannot load quizzes",
-                          ))
+                        ? Center(child: const Text("Cannot load quizzes"))
                         : null,
                     noQuizPlaceholder: "There aren't any active quizzes",
                     header: QuizPinBox()),
@@ -114,10 +111,17 @@ class _TakeQuizState extends State<TakeQuiz> {
                               child: Text(
                                 'Take a self-paced quiz...\nHave some fun',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Colors.white),
                               )))
-                      // No header if not quiz
-                      : null,
+                      // No header if no quiz
+                      : Container(),
+                  headerPadding: collection
+                              .getAvailableQuizzesWhere(
+                                  type: QuizType.SELF_PACED)
+                              .length >
+                          0
+                      ? const EdgeInsets.fromLTRB(8, 24, 8, 16)
+                      : const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 ),
               ],
               hasDrawer: true,
