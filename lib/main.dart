@@ -58,6 +58,8 @@ void main() async {
 
   await Firebase.initializeApp();
   FirebaseNotification();
+  print("Firebase Token");
+  print(await FirebaseNotification().getToken());
   LocalNotification();
   runApp(
     MultiProvider(
