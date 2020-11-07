@@ -52,10 +52,10 @@ class _QuizCreateState extends State<QuizCreate> {
   @override
   void initState() {
     super.initState();
-
-    /// TODO: optimise group retrieval (this retrieves quiz/members of group) repeatedly
+    // Ensure that groups are fully loaded
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups();
+        .getCreatedGroups(refreshIfLoaded: true)
+        .catchError((_) => null);
   }
 
   @override
@@ -484,7 +484,7 @@ class _QuizCreateState extends State<QuizCreate> {
     } on QuizNotFoundException {
       await showBasicDialog(context, "Quiz no longer exists");
       Navigator.of(context).pop();
-    } on Exception catch (err) {
+    } catch (err) {
       showErrSnackBar(context, err.toString());
     }
     setState(() => _committed = false);

@@ -32,7 +32,7 @@ class GroupApi {
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to get groups: unknown error occurred');
+    throw ApiException('Unable to get groups: unknown error occurred');
   }
 
   /// Get a group by specified [id].
@@ -49,7 +49,7 @@ class GroupApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw GroupNotFoundException();
-    throw Exception('Unable to get specified group: unknown error occurred');
+    throw ApiException('Unable to get specified group: unknown error occurred');
   }
 
   /// Return a list of members (as User) for a group with specified [id].
@@ -64,7 +64,7 @@ class GroupApi {
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception(
+    throw ApiException(
         'Unable to get members of specified group: unknown error occurred');
   }
 
@@ -80,7 +80,7 @@ class GroupApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 409) throw GroupCreateException();
-    throw Exception('Unable to create group: unknown error occurred');
+    throw ApiException('Unable to create group: unknown error occurred');
   }
 
   /// Update the name of a group with specified [id].
@@ -100,7 +100,7 @@ class GroupApi {
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 409) throw GroupCreateException();
-    throw Exception('Unable to update group: unknown error occurred');
+    throw ApiException('Unable to update group: unknown error occurred');
   }
 
   /// Delete a group with specified [id].
@@ -111,7 +111,7 @@ class GroupApi {
     if (response.statusCode == 204) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to delete group: unknown error occurred');
+    throw ApiException('Unable to delete group: unknown error occurred');
   }
 
   /// Refresh the unique code for a group with specified [id].
@@ -131,7 +131,7 @@ class GroupApi {
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to refresh group token: unknown error occurred');
+    throw ApiException('Unable to refresh group token: unknown error occurred');
   }
 
   /// Join a group, either by specified [name] or [code].
@@ -152,7 +152,7 @@ class GroupApi {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw GroupNotFoundException();
     if (response.statusCode == 422) throw AlreadyInGroupException();
-    throw Exception('Unable to join group: unknown error occurred');
+    throw ApiException('Unable to join group: unknown error occurred');
   }
 
   /// Leave a group with specified [id].
@@ -163,7 +163,7 @@ class GroupApi {
     if (response.statusCode == 204) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to leave group: unknown error occurred');
+    throw ApiException('Unable to leave group: unknown error occurred');
   }
 
   /// Remove a member from a group.
@@ -175,6 +175,6 @@ class GroupApi {
     if (response.statusCode == 204) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
-    throw Exception('Unable to kick member: unknown error occurred');
+    throw ApiException('Unable to kick member: unknown error occurred');
   }
 }

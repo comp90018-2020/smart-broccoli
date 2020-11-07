@@ -65,57 +65,29 @@ export const formatWelcome = (
 export const formatQuestionOutcome = (
     session: GameSession,
     player: Player,
-    questionIndex: number,
-    rankAll: Player[],
-    rankFormated: any[]
+    questionIndex: number
 ) => {
     // This question has been answered
-    const _latestRecord = player.latestRecord(questionIndex);
-    const playerAheadRecord =
-        questionIndex === 0 ||
-        rankAll.length === 0 ||
-        (_latestRecord !== null && _latestRecord.newPos === 0)
-            ? null
-            : rankAll[
-                  _latestRecord === null
-                      ? rankAll.length - 1
-                      : _latestRecord.newPos
-              ].formatRecord(questionIndex);
+    const [record] = player.genreateRecord(questionIndex);
+    const { newPos } = record;
+
+    let recordOfPlayerAhead: any;
+    // Player does not has record but others have
+    if (newPos === null && session.rankedRecords.length > 0)
+        // Player ahead is the last one of the rank
+        recordOfPlayerAhead = recordOfPlayerAhead =
+            session.rankedRecords[session.rankedRecords.length - 1];
+    // Player has record which is not at top1
+    else if (newPos !== null && newPos !== 0)
+        recordOfPlayerAhead = session.rankedRecords[newPos - 1];
+    // Otherwise, player does not have player ahead
+    else recordOfPlayerAhead = null;
 
     const questionOutcome = {
         question: questionIndex,
-        leaderboard: rankFormated,
-        record: session.playerMap[player.id].formatRecord(questionIndex).record,
-        playerAhead: playerAheadRecord,
+        leaderboard: session.rankedRecords.slice(0, 5),
+        record: record,
+        playerAhead: recordOfPlayerAhead,
     };
     return questionOutcome;
-};
-
-export const rankSlice = (
-    rank: Player[],
-    currentIndex: number,
-    count?: number
-) => {
-    if (count === undefined) count = rank.length;
-    const topX: any[] = [];
-    rank.slice(0, count).forEach((player) => {
-        const { id, name, pictureId } = player;
-        const record = player.latestRecord(currentIndex);
-        const { oldPos, newPos, bonusPoints, points, streak } = record;
-        topX.push({
-            player: {
-                id: id,
-                name: name,
-                pictureId: pictureId,
-            },
-            record: record ?? {
-                oldPos: oldPos,
-                newPos: newPos,
-                bonusPoints: bonusPoints,
-                points: points,
-                streak: streak,
-            },
-        });
-    });
-    return topX;
 };
