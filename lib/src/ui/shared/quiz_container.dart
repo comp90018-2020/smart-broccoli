@@ -17,7 +17,7 @@ class QuizContainer extends StatefulWidget {
       this.error})
       : super(key: key);
 
-  ///Which screen this is on, for conditional rendering
+  /// Placeholder text when there is no quiz
   final String noQuizPlaceholder;
 
   /// Passed by parent to indicate error
