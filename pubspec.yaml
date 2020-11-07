@@ -13,7 +13,10 @@ dependencies:
   collection: ^1.14.13
   device_calendar: ^3.1.0
   email_validator: ^1.0.5
+  firebase_core: ^0.5.1
+  firebase_messaging: ^8.0.0-dev.5
   fluro: ^1.7.3
+  flutter_local_notifications: ^3.0.1+2
   flutter_settings:
     git:
       url: https://github.com/comp90018-2020/Flutter-settings.git

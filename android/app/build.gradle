@@ -25,6 +25,9 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
+// Firebase
+apply plugin: 'com.google.gms.google-services'
+
 android {
     compileSdkVersion 29
 
@@ -73,4 +76,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     // https://issuetracker.google.com/issues/116154359
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
+    // Firebase messaging dev docs
+    implementation 'com.google.firebase:firebase-messaging:20.0.1'
+    implementation 'com.android.support:multidex:1.0.3'
 }
