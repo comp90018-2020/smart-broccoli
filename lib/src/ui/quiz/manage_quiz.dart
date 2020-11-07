@@ -31,11 +31,13 @@ class _ManageQuizState extends State<ManageQuiz> {
         .refreshCreatedGroups();
   }
 
+  String title = "Manage Quiz";
+
   @override
   Widget build(BuildContext context) {
     // Somewhat wasteful to have multiple widgets, but that's how tabs work
     return CustomTabbedPage(
-      title: "Manage Quiz",
+      title: title,
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: [
         Consumer<QuizCollectionModel>(builder: (context, collection, child) {
@@ -43,7 +45,7 @@ class _ManageQuizState extends State<ManageQuiz> {
           return QuizContainer(
               collection.getCreatedQuizzesWhere(groupId: _groupId),
               header: _groupSelector(),
-              hiddenButton: true);
+              hiddenButton: true, screen: title);
         }),
         Consumer<QuizCollectionModel>(builder: (context, collection, child) {
           // Live quiz
@@ -51,7 +53,7 @@ class _ManageQuizState extends State<ManageQuiz> {
               collection.getCreatedQuizzesWhere(
                   groupId: _groupId, type: QuizType.LIVE),
               header: _groupSelector(),
-              hiddenButton: true);
+              hiddenButton: true, screen: title);
         }),
         Consumer<QuizCollectionModel>(builder: (context, collection, child) {
           /// Self-paced quiz
@@ -59,7 +61,8 @@ class _ManageQuizState extends State<ManageQuiz> {
               collection.getCreatedQuizzesWhere(
                   groupId: _groupId, type: QuizType.SELF_PACED),
               header: _groupSelector(),
-              hiddenButton: true);
+              hiddenButton: true,
+              screen: title);
         }),
       ],
       hasDrawer: true,

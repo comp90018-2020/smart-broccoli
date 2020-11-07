@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/no_content_place_holder.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 
 /// Group list page
@@ -16,6 +17,8 @@ class _GroupListState extends State<GroupList> {
   // Current tab
   int tab = 0;
 
+
+
   @override
   void didChangeDependencies() {
     Provider.of<GroupRegistryModel>(context, listen: false)
@@ -25,47 +28,84 @@ class _GroupListState extends State<GroupList> {
     super.didChangeDependencies();
   }
 
+  void initState() {
+    super.initState();
+    Provider.of<UserProfileModel>(context, listen: false)
+        .getUser(forceRefresh: true)
+        .catchError((_) => null);
+  }
+
+
+
   @override
-  Widget build(BuildContext context) => CustomTabbedPage(
-        title: "Groups",
-        tabs: [Tab(text: "JOINED"), Tab(text: "CREATED")],
-        hasDrawer: true,
-        secondaryBackgroundColour: true,
+  Widget build(BuildContext context) {
+      ///Checking whether user is registered, and adding only relevant tabs
+      return Consumer<UserProfileModel>(
+          builder: (context, profile, child) {
+            print("here");
 
-        // Handle tab tap
-        tabTap: (value) {
-          setState(() {
-            tab = value;
-          });
-        },
+            return CustomTabbedPage(
+              title: "Groups",
+              ///Hiding tab for unregistered user
+              tabs: profile.user.type != UserType.UNREGISTERED ? [Tab(text: "JOINED"),Tab(text: "CREATED")] : [Tab(text: "JOINED")],
+              hasDrawer: true,
+              secondaryBackgroundColour: true,
+              // Handle tab tap
+              tabTap: (value) {
+                setState(() {
+                  tab = value;
+                });
+              },
+              // Tabs
+              tabViews: profile.user.type != UserType.UNREGISTERED ? [
+                Consumer<GroupRegistryModel>(
+                builder: (context, registry, child) =>
+                registry.joinedGroups.length > 0 ?
+                buildGroupList(registry.joinedGroups) :
+                Column(children:[
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: 300),
+                    child: NoContentPlaceholder(parentWidget: widget,
+                      text: "Seems like you are not part of any group yet️"),
+                  )
+                ]),
+              ), Consumer<GroupRegistryModel>(
+                  builder: (context, registry, child) =>
+                      buildGroupList(registry.createdGroups),
+                )
 
-        // Tabs
-        tabViews: [
-          Consumer<GroupRegistryModel>(
-            builder: (context, registry, child) =>
-                buildGroupList(registry.joinedGroups),
-          ),
-          Consumer<GroupRegistryModel>(
-            builder: (context, registry, child) =>
-                buildGroupList(registry.createdGroups),
-          )
-        ],
+                ///Hiding tab for unregistered user
+              ] : [Consumer<GroupRegistryModel>(
+                builder: (context, registry, child) =>
+                registry.joinedGroups.length > 0 ?
+                buildGroupList(registry.joinedGroups) :
+                Column(children:[
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: 300),
+                    child: NoContentPlaceholder(parentWidget: widget,
+                      text: "Seems like you are not part of any group yet️"),
+                  )
+                ]),
+              )],
 
-        // Action buttons
-        floatingActionButton: tab == 0
-            ? FloatingActionButton.extended(
+              // Action buttons
+              floatingActionButton: tab == 0
+                  ? FloatingActionButton.extended(
                 onPressed: _joinGroup,
                 label: Text('JOIN GROUP'),
                 icon: Icon(Icons.add),
               )
-            : FloatingActionButton.extended(
+                  : FloatingActionButton.extended(
                 onPressed: () {
                   Navigator.of(context).pushNamed('/group/create');
                 },
                 label: Text('CREATE GROUP'),
                 icon: Icon(Icons.group_add),
               ),
+            );
+          }
       );
+  }
 
   // Builds a list of groups
   Widget buildGroupList(List<Group> groups) => FractionallySizedBox(

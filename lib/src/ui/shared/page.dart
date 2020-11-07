@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
+import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
+import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// A page extending scaffold
 /// Supports tabs, drawer
-class CustomPage extends StatelessWidget {
+///
+
+class CustomPage extends StatefulWidget {
+
+
   /// Title of page
   final String title;
 
@@ -40,15 +47,27 @@ class CustomPage extends StatelessWidget {
   /// Constructs a custom page
   CustomPage(
       {@required this.title,
-      @required this.child,
-      this.hasDrawer = false,
-      this.primary = true,
-      this.background,
-      this.secondaryBackgroundColour = false,
-      this.appbarLeading,
-      this.automaticallyImplyLeading = true,
-      this.appbarActions,
-      this.floatingActionButton});
+        @required this.child,
+        this.hasDrawer = false,
+        this.primary = true,
+        this.background,
+        this.secondaryBackgroundColour = false,
+        this.appbarLeading,
+        this.automaticallyImplyLeading = true,
+        this.appbarActions,
+        this.floatingActionButton});
+  @override
+  State<StatefulWidget> createState() => new _CustomPageState();
+}
+
+class _CustomPageState extends State<CustomPage> {
+
+  void initState() {
+    super.initState();
+    Provider.of<UserProfileModel>(context, listen: false)
+        .getUser(forceRefresh: true)
+        .catchError((_) => null);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,22 +75,22 @@ class CustomPage extends StatelessWidget {
     // https://stackoverflow.com/questions/51652897
     Widget wrappedChild = GestureDetector(
       behavior: HitTestBehavior.translucent,
-      child: child,
+      child: widget.child,
       onTap: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
 
     return Scaffold(
-      backgroundColor: this.secondaryBackgroundColour
+      backgroundColor: widget.secondaryBackgroundColour
           ? Theme.of(context).backgroundColor
           : Theme.of(context).colorScheme.onBackground,
 
       // At top
-      primary: primary,
+      primary: widget.primary,
 
       // Appbar
-      appBar: primary
+      appBar: widget.primary
           ? PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight),
               child: Container(
@@ -80,19 +99,19 @@ class CustomPage extends StatelessWidget {
                   BoxShadow(color: Colors.white, offset: const Offset(0, .2))
                 ]),
                 child: AppBar(
-                  title: Text(this.title),
+                  title: Text(widget.title),
                   centerTitle: true,
                   elevation: 0,
-                  leading: appbarLeading,
-                  automaticallyImplyLeading: automaticallyImplyLeading,
-                  actions: appbarActions,
+                  leading: widget.appbarLeading,
+                  automaticallyImplyLeading: widget.automaticallyImplyLeading,
+                  actions: widget.appbarActions,
                 ),
               ),
             )
           : null,
 
       // Drawer (or hamberger menu)
-      drawer: hasDrawer
+      drawer: widget.hasDrawer
           ? Drawer(
               child: ListView(
                 // Important: Remove any padding from the ListView.
@@ -183,14 +202,23 @@ class CustomPage extends StatelessWidget {
                       _navigateToNamed(context, '/take_quiz');
                     },
                   ),
-                  ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.edit),
-                    title: Text('MANAGE QUIZ',
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColorDark)),
-                    onTap: () {
-                      _navigateToNamed(context, '/manage_quiz');
+                  Consumer<UserProfileModel>(
+                    builder: (context, profile, child) {
+                      if (profile.user.type != UserType.UNREGISTERED){
+                        return ListTile(
+                          dense: true,
+                          leading: const Icon(Icons.edit),
+                          title: Text('MANAGE QUIZ',
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColorDark)),
+                          onTap: () {
+                            _navigateToNamed(context, '/manage_quiz');
+                          },
+                        );
+                      }else{
+                        return Container();
+                      }
+
                     },
                   ),
                   ListTile(
@@ -227,18 +255,19 @@ class CustomPage extends StatelessWidget {
           : null,
 
       // Floating action button
-      floatingActionButton: floatingActionButton,
+      floatingActionButton: widget.floatingActionButton,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
       // Body of page
       // https://stackoverflow.com/questions/54837854
-      body: background == null
+      body: widget.background == null
           ? wrappedChild
           : Stack(
-              children: [...background, Positioned.fill(child: wrappedChild)],
+              children: [...widget.background, Positioned.fill(child: wrappedChild)],
             ),
     );
   }
+
 
   /// Navigate to named route
   void _navigateToNamed(context, routeName) {

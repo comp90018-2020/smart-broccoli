@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 
+import 'no_content_place_holder.dart';
 import 'quiz_card.dart';
 
 /// Build a list of quizzes
 class QuizContainer extends StatefulWidget {
   QuizContainer(this.items,
       {Key key,
+        this.screen,
       this.header,
       this.padding = const EdgeInsets.only(top: 8, bottom: 8),
       this.headerPadding = const EdgeInsets.fromLTRB(8, 12, 8, 16),
       this.hiddenButton = false})
       : super(key: key);
+
+  ///Which screen this is on, for conditional rendering
+  final String screen;
 
   /// List of items
   final List<Quiz> items;
@@ -57,7 +62,11 @@ class _BuildQuiz extends State<QuizContainer> {
                 // Minimum height, or will be height of longest child
                 // if exceeding minimum height
                 constraints: BoxConstraints(minHeight: 300),
-                child: IntrinsicHeight(
+                child:
+                widget.items.length == 0 ? NoContentPlaceholder(parentWidget: widget,
+                    text:returnPlaceholderText())
+                    :
+                IntrinsicHeight(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: mapIndexed(
@@ -96,6 +105,20 @@ class _BuildQuiz extends State<QuizContainer> {
       ),
     );
   }
+  returnPlaceholderText() {
+    String text;
+    if(widget.screen == "Manage Quiz" ){
+      text = "No created quizzes...\n Try creating some!";
+    }
+    else if(widget.screen == "Self-Paced"){
+
+    }
+    else{
+      text = "There aren't any active quizzes";
+    }
+
+    return text;
+  }
 }
 
 /// .map() with index
@@ -108,4 +131,6 @@ Iterable<E> mapIndexed<E, T>(
     yield f(index, item);
     index = index + 1;
   }
+
+
 }

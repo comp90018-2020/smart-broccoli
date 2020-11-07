@@ -69,7 +69,7 @@ class _TakeQuizState extends State<TakeQuiz> {
           builder: (context, collection, child) {
             return QuizContainer(
               collection.getAvailableQuizzesWhere(type: QuizType.SELF_PACED),
-              header: ConstrainedBox(
+              header: collection.getAvailableQuizzesWhere(type: QuizType.SELF_PACED).length > 0 ? ConstrainedBox(
                   // Has text to fill up vertical space
                   constraints: BoxConstraints(minHeight: _height ?? 175),
                   child: Align(
@@ -78,7 +78,7 @@ class _TakeQuizState extends State<TakeQuiz> {
                         'Take a self-paced quiz...\nHave some fun',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white),
-                      ))),
+                      ))):null,
             );
           },
         ),
