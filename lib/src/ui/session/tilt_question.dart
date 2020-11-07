@@ -22,6 +22,7 @@ class _MyHomePageState extends State<TiltQuestion> {
   //creating Key for red panel
   GlobalKey areaLimit = GlobalKey();
 
+  bool useGyro = false;
 
   List<bool> chosen = [false, false, false, false];
 
@@ -75,8 +76,8 @@ class _MyHomePageState extends State<TiltQuestion> {
       widthStart = cord[0];
     }
 
-    double nextCordx = cord[0] - event.x * 2;
-    double nextCordy = cord[1] + event.y * 2;
+    double nextCordx = cord[0] - event.x * 4;
+    double nextCordy = cord[1] + event.y * 4;
 
     if (nextCordx >= widthLimit + widthStart - 40) {
       nextCordx = widthLimit + widthStart - 40;
@@ -91,8 +92,8 @@ class _MyHomePageState extends State<TiltQuestion> {
       nextCordy = heightStart - appBarHeight;
     }
 
-   // print("x + " + nextCordx.toString());
-   // print("y +" + nextCordy.toString());
+    // print("x + " + nextCordx.toString());
+    // print("y +" + nextCordy.toString());
 
     if ((cord[0] - nextCordx).abs() < 4 && (cord[1] - nextCordy).abs() < 4) {
       canSelect = true;
@@ -122,13 +123,12 @@ class _MyHomePageState extends State<TiltQuestion> {
     double xLimitHalfWay = (widthLimit) / 2.0 + xStart;
     double yLimitHalfWay = (heightLimit) / 2.0 + yStart;
 
-
     // top side
     if (cord[1] <= yStart + 40 && cord[0] <= xLimit) {
       if (cord[0] <= xLimitHalfWay - 20) {
-        print("Top Right");
-      } else if (cord[0] >= xLimitHalfWay + 20) {
         print("Top Left");
+      } else if (cord[0] >= xLimitHalfWay + 20) {
+        print("Top Right");
       } // Center Resolution
       else {
         if (model.question is TFQuestion) {
@@ -139,7 +139,7 @@ class _MyHomePageState extends State<TiltQuestion> {
     // left side
     else if (cord[1] <= yLimit && cord[0] <= xStart + 40) {
       if (cord[1] <= yLimitHalfWay - 20) {
-        print("Top Right");
+        print("Top Left");
       } else if (cord[1] >= yLimitHalfWay + 20) {
         print("Bottom Left");
       }
@@ -235,9 +235,17 @@ class _MyHomePageState extends State<TiltQuestion> {
     ]);
 
     return Consumer<GameSessionModel>(builder: (context, model, child) {
-      if (model.state == SessionState.ANSWER) {
+      // Todo determine if it is much better to check SessionState.Question instead
+      if (model.state == SessionState.ANSWER ||
+          model.state == SessionState.OUTCOME ||
+          model.state == SessionState.FINISHED) {
         pauseTimer();
+      } else {
+        if (useGyro) {
+          startAccel(model);
+        }
       }
+
       return CustomPage(
         title: 'Question ${model.question.no + 1}',
 
@@ -268,12 +276,19 @@ class _MyHomePageState extends State<TiltQuestion> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: <Widget>[
-                  RaisedButton(
-                    child: Text('Begin'),
-                    onPressed: () => {startAccel(model)},
-                    color: Theme.of(context).primaryColor,
-                    textColor: Colors.white,
-                  ),
+                  !useGyro
+                      ? RaisedButton(
+                          child: Text('Begin'),
+                          onPressed: () => {
+                            setState(() {
+                              useGyro = true;
+                            }),
+                            startAccel(model)
+                          },
+                          color: Theme.of(context).primaryColor,
+                          textColor: Colors.white,
+                        )
+                      : Container(),
                   Expanded(
                     flex: 5,
                     child: Column(
@@ -340,17 +355,19 @@ class _MyHomePageState extends State<TiltQuestion> {
             ),
 
             // Ball
-            Container(
-                margin: EdgeInsets.only(top: top, left: left),
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.green,
-                  ),
-                  width: 40.0,
-                  height: 40.0,
-                ),
-              ),
+            useGyro
+                ? Container(
+                    margin: EdgeInsets.only(top: top, left: left),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.green,
+                      ),
+                      width: 40.0,
+                      height: 40.0,
+                    ),
+                  )
+                : Container(),
           ],
         ),
       );
@@ -477,7 +494,7 @@ class _MyHomePageState extends State<TiltQuestion> {
         else if (model.state == SessionState.OUTCOME &&
             model.role == GroupRole.OWNER)
           IconButton(
-            onPressed: () => model.nextQuestion(),
+            onPressed: () => {model.nextQuestion()},
             icon: Icon(Icons.arrow_forward),
           )
         else if (model.state == SessionState.ANSWER &&
