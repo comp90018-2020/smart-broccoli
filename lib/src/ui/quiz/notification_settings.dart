@@ -10,6 +10,8 @@ import 'package:flutter_settings/widgets/SettingsSlider.dart';
 import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
 import 'package:toast/toast.dart';
 import 'package:day_picker/day_picker.dart';
+import 'package:selection_picker/selectionpicker.dart';
+import 'package:selection_picker/selection_item.dart' as day;
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Smart quiz page
@@ -39,7 +41,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
   ];
   var _minWindowIndex = 0;
   var _maxNumberIndex = 0;
-  List<bool> _weekDays = [false, false, false, false, false, false, false];
+  List<bool> _weekDays = [true, true, true, true, true, true, true];
   var _liveQuizCalendar = true;
   var _smartQuizCalendar = false;
   var _smartDetection = true;
@@ -48,6 +50,15 @@ class _NotificationSettingState extends State<NotificationSetting> {
   var _radius = 0.5;
   var _onMove = true;
   var _commuting = true;
+  List<day.SelectionItem> days = [
+    day.SelectionItem(name: "MO", isSelected: true, identifier: 0),
+    day.SelectionItem(name: "TU", isSelected: true, identifier: 1),
+    day.SelectionItem(name: "WE", isSelected: false, identifier: 2),
+    day.SelectionItem(name: "TH", isSelected: false, identifier: 3),
+    day.SelectionItem(name: "FR", isSelected: false, identifier: 4),
+    day.SelectionItem(name: "SA", isSelected: false, identifier: 5),
+    day.SelectionItem(name: "SU", isSelected: false, identifier: 6)
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +111,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
             'Days of week',
           ),
         ),
+
+        //Days of week
         Padding(
           padding: const EdgeInsets.all(15.0),
           child: SelectWeekDays(
@@ -134,11 +147,60 @@ class _NotificationSettingState extends State<NotificationSetting> {
           ),
         ),
         Divider(height: 10, color: Colors.white),
+
+        //Days of week
+        // Container(
+        //   height: 90,
+        //   child: Row(
+        //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //     children: [
+        //       getText("Mon"),
+        //       getText("Tue"),
+        //       getText("Wed"),
+        //       getText("Thu"),
+        //       getText("Fri"),
+        //       getText("Sat")
+        //     ],
+        //   ),
+        // ),
+
+        Container(
+          height: 90,
+          child: SelectionPicker(
+            items: days,
+            showSelectAll: false,
+            showTitle: false,
+            textColor: Colors.black54,
+            backgroundColorNoSelected: Colors.grey[200],
+            backgroundColorSelected: Color(0xFFFEC12D),
+            onSelected: (List<day.SelectionItem> items) {
+              print(items);
+              setState(() {
+                // _weekDays = [
+                //   items.contains(day.SelectionItem(
+                //       name: "MO", isSelected: true, identifier: 0)),
+                //   items.contains(days[0]),
+                //   items.contains("Tuesday"),
+                //   items.contains("Wednesday"),
+                //   items.contains("Thursday"),
+                //   items.contains("Friday"),
+                //   items.contains("Saturday"),
+                // ];
+                print(_weekDays);
+              });
+            },
+            aligment: Alignment.center,
+          ),
+        ),
+        Divider(height: 10, color: Colors.white),
+
+        //Calendar
         SettingsSection(
             title: Text(
               'When there my calendar is not free',
             ),
             settingsChildren: [
+              //Calendar for live quiz
               SettingsCheckBox(
                 title: 'Allow notifications for live quiz',
                 titleStyle: TextStyle(fontSize: 16),
@@ -154,6 +216,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                 value: _liveQuizCalendar,
                 type: CheckBoxWidgetType.Switch,
               ),
+
+              //Calendar for smart quiz
               SettingsCheckBox(
                 title: 'Allow notifications for smart quiz',
                 titleStyle: TextStyle(fontSize: 16),
@@ -171,11 +235,14 @@ class _NotificationSettingState extends State<NotificationSetting> {
               ),
             ]),
         Divider(height: 10, color: Colors.white),
+
+        //Work setting
         SettingsSection(
             title: Text(
               'Don\'t notify me at work',
             ),
             settingsChildren: [
+              //Smart detection
               SettingsCheckBox(
                 title: 'Smart detection',
                 titleStyle: TextStyle(fontSize: 16),
@@ -191,6 +258,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                 value: _smartDetection,
                 type: CheckBoxWidgetType.Switch,
               ),
+
+              //wifi setting
               SettingsInputField(
                 titleStyle: TextStyle(fontSize: 16),
                 dialogButtonText: 'Done',
@@ -209,6 +278,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                 },
                 context: context,
               ),
+
+              // Address setting
               SettingsNavigatorButton(
                   title: 'Work address',
                   titleStyle: TextStyle(fontSize: 16),
@@ -226,6 +297,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                         _workCaption = location;
                       });
                   }),
+
+              // Radius setting
               SettingsSlider(
                 value: _radius,
                 activeColor: Colors.blue,
@@ -247,11 +320,14 @@ class _NotificationSettingState extends State<NotificationSetting> {
               ),
             ]),
         Divider(height: 10, color: Colors.white),
+
+        //Move settings
         SettingsSection(
             title: Text(
               'When moving',
             ),
             settingsChildren: [
+              //Move switch
               SettingsCheckBox(
                 title: 'Allow notification on the move',
                 titleStyle: TextStyle(fontSize: 16),
@@ -264,9 +340,11 @@ class _NotificationSettingState extends State<NotificationSetting> {
                     _onMove = value;
                   });
                 },
-                value: _commuting,
+                value: _onMove,
                 type: CheckBoxWidgetType.Switch,
               ),
+
+              //Commute switch
               SettingsCheckBox(
                 title: 'Allow notification on commute',
                 titleStyle: TextStyle(fontSize: 16),
@@ -287,4 +365,25 @@ class _NotificationSettingState extends State<NotificationSetting> {
       ]),
     );
   }
+
+  // Stack getText(String text) {
+  //   return Stack(
+  //     alignment: AlignmentDirectional.center,
+  //     children: [
+  //       new CircleAvatar(
+  //         backgroundColor: Colors.white,
+  //         radius: 20.0,
+  //       ),
+  //       new Container(
+  //         child: new Text(
+  //           text,
+  //           style: new TextStyle(
+  //               color: Colors.black54,
+  //               fontSize: 16.0,
+  //               fontWeight: FontWeight.bold),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 }
