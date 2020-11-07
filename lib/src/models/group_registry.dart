@@ -286,7 +286,12 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     } on Exception {
       return Future.error("Something went wrong");
     }
-    getCreatedGroups(refreshIfLoaded: true).catchError((_) => null);
+    // Refresh created groups
+    try {
+      await getCreatedGroups(refreshIfLoaded: true);
+    } catch (e) {
+      return Future.error(e);
+    }
   }
 
   /// Join a group.
@@ -305,7 +310,12 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     } on Exception {
       return Future.error("Something went wrong");
     }
-    getJoinedGroups(refreshIfLoaded: true).catchError((_) => null);
+    // Refresh joined groups
+    try {
+      await getJoinedGroups(refreshIfLoaded: true);
+    } catch (e) {
+      return Future.error(e);
+    }
   }
 
   /// Refreshes group members
