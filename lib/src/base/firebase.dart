@@ -59,19 +59,26 @@ class FirebaseNotification {
         NotificationContent content =
             NotificationContent.fromJson(message.data);
 
-        if (content.type == "QUIZ_RECOMMENDATION")
+        // Publish topics
+        if (content.type == "SESSION_START")
           // A quiz recommendation,
           // data like quizId will be found in content.data, same as below
-          PubSub().publish(PubSubTopic.QUIZ_RECOMMENDATION, arg: content.data);
-        else if (content.type == "GROUP_CHANGE")
+          PubSub().publish(PubSubTopic.SESSION_START, arg: content.data);
+        else if (content.type == "SESSION_ACTIVATED")
           // Group has been changed
-          PubSub().publish(PubSubTopic.GROUP_CHANGE, arg: content.data);
-        else if (content.type == "QUIZ_CHANGE")
+          PubSub().publish(PubSubTopic.SESSION_ACTIVATED, arg: content.data);
+        else if (content.type == "SESSION_ACTIVATED")
           // Quiz has been changed
-          PubSub().publish(PubSubTopic.QUIZ_CHANGE, arg: content.data);
-        else if (content.type == "GENERAL_CHANGE")
+          PubSub().publish(PubSubTopic.GROUP_CHANGE, arg: content.data);
+        else if (content.type == "GROUP_MEMBER_CHANGE")
           // General changes, this is for extension
-          PubSub().publish(PubSubTopic.GENERAL_CHANGE, arg: content.data);
+          PubSub().publish(PubSubTopic.GROUP_MEMBER_CHANGE, arg: content.data);
+        else if (content.type == "QUIZ_UPDATE")
+          // General changes, this is for extension
+          PubSub().publish(PubSubTopic.QUIZ_UPDATE, arg: content.data);
+        else if (content.type == "GROUP_MEMBER_CHANGE")
+          // General changes, this is for extension
+          PubSub().publish(PubSubTopic.GROUP_MEMBER_CHANGE, arg: content.data);
       }
 
       // When app is on foreground, this is needed to show notification
