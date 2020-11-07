@@ -14,31 +14,31 @@ class NoContentPlaceholder extends StatelessWidget {
       child: DecoratedBox(
         decoration: new BoxDecoration(
             color: Color(0xFF125E12), borderRadius: BorderRadius.circular(16)),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 40, bottom: 20, right: 10, left: 10),
-              child: Text(
-                "🤔",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 100,
-                ),
-              ),
-            ),
-            Padding(
-                padding: const EdgeInsets.only(bottom: 10, right: 20, left: 20),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20.0),
                 child: Text(
-                  text,
+                  "🤔",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 25,
+                    fontSize: 100,
                   ),
-                )),
-          ],
+                ),
+              ),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 25,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
