@@ -441,10 +441,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       answer.tfSelection = index == 0 ? false : true;
       answerQuestion();
       notifyListeners();
+    }
 
-      // MC question
-    } else if (answer.mcSelection.length <
-        (question as MCQuestion).numCorrect) {
+    // MCQ with no. selections < no. correct and answer not already selected
+    else if (answer.mcSelection.length < (question as MCQuestion).numCorrect &&
+        !answer.mcSelection.contains(index)) {
       answer.mcSelection.add(index);
       notifyListeners();
       // send answer if no. selections == no. correct
