@@ -362,7 +362,9 @@ export class GameHandler {
                         )
                     );
 
-                    if (!session._isReadyForNextQuestion)
+                    if (!session.answerReleased.has(questionIndex))
+                        // If question is conducting
+                        // Emit a questionAnswered event
                         emitToOne(
                             player.socketId,
                             Event.questionAnswered,
@@ -373,14 +375,36 @@ export class GameHandler {
                             )
                         );
 
-                    if (!session.canEmitCorrectAnswer()) return;
-                    // If the corrct answer can also be released
+                    if (!session.answerReleased.has(questionIndex)) return;
+                    // If the corrct answer has not been released
                     // Get the correct answer
                     const correctAnswer = session.getAnsOfQuestion(
                         questionIndex
                     );
                     // Emit a correct answer event
                     this.emitCorrectAnswer(player, correctAnswer);
+
+                    if (
+                        // If answer has released
+                        session.answerReleased.has(questionIndex) &&
+                        // And the board is not preparing by a delayed call
+                        !session.boardPreparing.has(questionIndex) &&
+                        // And if this is self-paced group game or
+                        // this is live game and the host released leaderboard
+                        (session.type === GameType.SelfPaced_Group ||
+                            (session.type === GameType.Live_NotGroup &&
+                                session.boardReleased.has(questionIndex)))
+                    )
+                        // Emit a questionOutcome event
+                        emitToOne(
+                            player.socketId,
+                            Event.questionOutcome,
+                            formatQuestionOutcome(
+                                session,
+                                player,
+                                questionIndex
+                            )
+                        );
                 }
             }
         } catch (error) {
@@ -402,9 +426,7 @@ export class GameHandler {
             // And that socket id is different from this one
             session.host.socketId !== player.socketId &&
             // And that socket id is connected
-            _socketIO.sockets.connected.hasOwnProperty(
-                session.playerMap[player.id].socketId
-            )
+            _socketIO.sockets.connected.hasOwnProperty(session.host.socketId)
         ) {
             // Disconnect the existed one
             _socketIO.sockets.connected[session.host.socketId].disconnect();
@@ -622,10 +644,15 @@ export class GameHandler {
         session.setToQuestion(questionIndex + 1);
 
         if (session.isSelfPacedGroup()) {
-            if (!session.hasFinalBoardReleased())
+            if (!session.hasFinalBoardReleased()) {
                 setTimeout(() => {
                     this.showBoard(session);
                 }, CORRECT_ANSWER_SHOW_TIME);
+                // Put question in the set so that reconnected players
+                // can not get leaderboard immediately
+                session.boardPreparing.add(questionIndex);
+            }
+
             return;
         }
 
@@ -658,11 +685,14 @@ export class GameHandler {
                     whichRoom(session, Role.host),
                     Event.questionOutcome,
                     {
-                        question: session.questionIndex - 1,
+                        question: questionIndex,
                         leaderboard: session.rankedRecords.slice(0, 5),
                     }
                 );
-                session.boardReleased.add(session.questionIndex - 1);
+                // Remove question index from preparing so that reconnected user
+                // can get their board
+                session.boardPreparing.delete(questionIndex);
+                session.boardReleased.add(questionIndex);
                 if (session.isSelfPacedGroup()) {
                     // If this is a self-paced and grouo game
                     if (!session.hasFinalBoardReleased()) {

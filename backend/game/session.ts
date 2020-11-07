@@ -37,6 +37,7 @@ export class GameSession {
     public activePlayersNum: number = 0;
     private invalidTokens: Set<String> = new Set([]);
     public boardReleased: Set<number> = new Set([]);
+    public boardPreparing: Set<number> = new Set([]);
     public questionReleased: Set<number> = new Set([]);
     public answerReleased: Set<number> = new Set([]);
     public totalQuestions: number = 0;
@@ -252,6 +253,8 @@ export class GameSession {
      */
     canReleaseQuestion(questionIndex: number, player?: Player) {
         return (
+            // Question is running
+            this.status === GameStatus.Running &&
             // Question index is less than total questions
             questionIndex < this.totalQuestions &&
             // And question has not been released
@@ -290,7 +293,7 @@ export class GameSession {
         );
     }
 
-    canShowBoard(player: Player) {
+    canShowBoard(player?: Player) {
         return (
             this.questionIndex !== -1 &&
             this._isReadyForNextQuestion &&
