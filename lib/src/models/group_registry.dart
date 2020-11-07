@@ -83,8 +83,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       {bool refresh = false}) async {
     // Already exists and no refresh, get from cache
     if (_groupQuizLoaded.containsKey(groupId) && !refresh)
-      return Future.value(
-          _quizCollectionModel.getQuizzesWhere(groupId: groupId));
+      return _quizCollectionModel.getQuizzesWhere(groupId: groupId);
 
     try {
       // Refresh quizzes
