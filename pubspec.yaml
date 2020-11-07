@@ -14,6 +14,9 @@ dependencies:
   device_calendar: ^3.1.0
   email_validator: ^1.0.5
   fluro: ^1.7.3
+  flutter_settings:
+    git:
+      url: https://github.com/comp90018-2020/Flutter-settings.git
   flutter_svg: ^0.19.1
   geocoding: ^1.0.5
   geolocator: ^6.1.0
@@ -26,6 +29,9 @@ dependencies:
   permission_handler: ^5.0.1+1
   provider: ^4.3.2
   quiver: ^2.1.4
+  selection_picker:
+    git:
+      url: https://github.com/comp90018-2020/selection_picker.git
   sensors: ^0.4.2+6
   shared_preferences: ^0.5.12
   socket_io_client: ^0.9.11
