@@ -123,6 +123,8 @@ class _MyHomePageState extends State<TiltQuestion> {
     double xLimitHalfWay = (widthLimit) / 2.0 + xStart;
     double yLimitHalfWay = (heightLimit) / 2.0 + yStart;
 
+    //TODO make selections here
+
     // top side
     if (cord[1] <= yStart + 40 && cord[0] <= xLimit) {
       if (cord[0] <= xLimitHalfWay - 20) {
@@ -189,7 +191,7 @@ class _MyHomePageState extends State<TiltQuestion> {
         // if count has increased greater than 3 call pause timer to handle success
         // proccess the current event
         setPosition(event);
-        if (canSelect) selectGrid(model);
+        if (canSelect &&  model.role != GroupRole.OWNER) selectGrid(model);
       });
     }
   }
@@ -276,7 +278,7 @@ class _MyHomePageState extends State<TiltQuestion> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: <Widget>[
-                  !useGyro
+                  (!useGyro &&  model.role != GroupRole.OWNER)
                       ? RaisedButton(
                           child: Text('Begin'),
                           onPressed: () => {
