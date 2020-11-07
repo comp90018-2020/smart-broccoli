@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/ui/shared/helper.dart';
 
@@ -23,6 +25,7 @@ List<Widget> futureTabs({
           builder: (context, snapshot) {
             if (snapshot.hasData) return child;
             if (snapshot.hasError) return errorIndicator;
+            log("Quiz page futures ${snapshot.toString()}");
             return loadingIndicator;
           },
         ),

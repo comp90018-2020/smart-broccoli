@@ -15,9 +15,6 @@ class Group {
   final String code;
   final GroupRole role;
 
-  /// List of members; mutating this list will have no effect on the server
-  // List<User> members;
-
   /// Constructor for internal use only
   Group._internal(this.id, this.name, this.defaultGroup, this.code, this.role);
 

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -48,17 +50,28 @@ class _GroupListState extends State<GroupList> {
         tabViews: [
           Consumer<GroupRegistryModel>(
             builder: (context, registry, child) => FutureBuilder(
-              future: registry.getJoinedGroups(),
+              future: registry.getJoinedGroups(withMembers: true),
               builder: (context, snapshot) {
-                return buildGroupList(snapshot.data);
+                log("Group list future ${snapshot.toString()}");
+                if (snapshot.hasError)
+                  return Text("An error has occurred, cannot load");
+                if (snapshot.hasData)
+                  return buildGroupList(
+                      snapshot.data, registry.getGroupMembers);
+                return Center(child: LoadingIndicator(EdgeInsets.all(16)));
               },
             ),
           ),
           Consumer<GroupRegistryModel>(
             builder: (context, registry, child) => FutureBuilder(
-              future: registry.getJoinedGroups(),
+              future: registry.getCreatedGroups(withMembers: true),
               builder: (context, snapshot) {
-                return buildGroupList(snapshot.data);
+                if (snapshot.hasError)
+                  return Text("An error has occurred, cannot load");
+                if (snapshot.hasData)
+                  return buildGroupList(
+                      snapshot.data, registry.getGroupMembers);
+                return Center(child: LoadingIndicator(EdgeInsets.all(16)));
               },
             ),
           ),
@@ -84,8 +97,10 @@ class _GroupListState extends State<GroupList> {
       );
 
   // Builds a list of groups
-  Widget buildGroupList(List<Group> groups) => FractionallySizedBox(
-        widthFactor: 0.85,
+  Widget buildGroupList(List<Group> groups,
+          Future<List<User>> Function(int) getGroupMembers) =>
+      FractionallySizedBox(
+        widthFactor: 0.8,
         child: ListView.builder(
           itemCount: groups.length,
           padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -98,19 +113,22 @@ class _GroupListState extends State<GroupList> {
                 groups[i].name,
                 style: TextStyle(fontSize: 16),
               ),
-              subtitle: groups[i].members == null
-                  ? null
-                  : Row(
+              subtitle: FutureBuilder(
+                  future: getGroupMembers(groups[i].id),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return Container();
+                    return Row(
                       children: [
                         Icon(Icons.person),
-                        Text('${groups[i].members.length} member'
-                            '${groups[i].members.length > 1 ? "s" : ""}'),
+                        Text('${snapshot.data.length} member'
+                            '${snapshot.data.length > 1 ? "s" : ""}'),
                         if (groups[i].defaultGroup) ...[
                           Spacer(),
                           Text('Default Group')
                         ]
                       ],
-                    ),
+                    );
+                  }),
             ),
           ),
         ),

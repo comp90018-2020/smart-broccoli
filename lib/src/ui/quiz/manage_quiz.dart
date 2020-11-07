@@ -42,7 +42,6 @@ class _ManageQuizState extends State<ManageQuiz> {
       title: "Manage Quiz",
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: futureTabs(
-        // TODO: Reload button
         errorIndicator: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: Text("An error has occurred, cannot load"),

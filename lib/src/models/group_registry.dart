@@ -85,6 +85,29 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     return _refreshGroupMembers(groupId);
   }
 
+  /// Get a group's quizzes
+  Future<List<Quiz>> getGroupQuizzes(int groupId,
+      {bool refresh = false}) async {
+    if (_groupQuizLoaded.containsKey(groupId) && !refresh)
+      return Future.value(
+          _quizCollectionModel.getQuizzesWhere(groupId: groupId));
+
+    // Group does not exist
+    try {
+      // Get group
+      if (!_joinedGroups.containsKey(groupId) &&
+          _createdGroups.containsKey(groupId)) await getGroup(groupId);
+
+      // Refresh quizzes
+      await _quizCollectionModel.refreshGroupQuizzes(groupId);
+      _groupQuizLoaded[groupId] = true;
+    } catch (e) {
+      return Future.error(e);
+    }
+
+    return Future.value(_quizCollectionModel.getQuizzesWhere(groupId: groupId));
+  }
+
   /// Rename a group.
   Future<void> renameGroup(Group group, String newName) async {
     try {
@@ -182,12 +205,11 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       }
       notifyListeners();
     }
-
-    return _joinedGroups.values;
+    return _joinedGroups.values.toList();
   }
 
   /// Refresh the ListView of groups the user has created.
-  Future<void> getCreatedGroups(
+  Future<List<Group>> getCreatedGroups(
       {bool refreshIfLoaded = false, bool withMembers = false}) async {
     // If not loaded and we want to refresh
     if (refreshIfLoaded && !_createdGroupsLoaded) return null;
@@ -216,24 +238,42 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       }
       notifyListeners();
     }
+    print(_createdGroups);
+    return _createdGroups.values.toList();
   }
 
   /// Refreshes the specified group.
   Future<Group> refreshGroup(int id,
       {bool withMembers = true, bool withQuizzes = true}) async {
-    // fetch group
-    var group = await _groupApi.getGroup(_authStateModel.token, id);
-    if (group.role == GroupRole.OWNER) {
-      _createdGroups[group.id] = group;
-    } else {
-      _joinedGroups[group.id] = group;
+    var group;
+    try {
+      // fetch group
+      group = await _groupApi.getGroup(_authStateModel.token, id);
+      if (group.role == GroupRole.OWNER) {
+        _createdGroups[group.id] = group;
+      } else {
+        _joinedGroups[group.id] = group;
+      }
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
     }
-    // fetch quizzes
-    if (withQuizzes) await _quizCollectionModel.refreshGroupQuizzes(id);
-    // fetch members
-    if (withMembers) _groupMembers[group.id] = await getGroupMembers(group.id);
-    notifyListeners();
-    return group;
+
+    try {
+      // fetch quizzes
+      if (withQuizzes) await _quizCollectionModel.refreshGroupQuizzes(id);
+      // fetch members
+      if (withMembers)
+        _groupMembers[group.id] = await getGroupMembers(group.id);
+      notifyListeners();
+      return group;
+    } catch (err) {
+      return Future.error(err);
+    }
   }
 
   /// Create a new group.

@@ -52,7 +52,6 @@ class _TakeQuizState extends State<TakeQuiz> {
       title: "Take Quiz",
       tabs: [Tab(text: "ALL"), Tab(text: "LIVE"), Tab(text: "SELF-PACED")],
       tabViews: futureTabs(
-        // TODO: Reload button
         errorIndicator: Text("An error has occurred, cannot load"),
         loadingIndicator: LoadingIndicator(EdgeInsets.all(16)),
         future: Provider.of<QuizCollectionModel>(context, listen: false)
