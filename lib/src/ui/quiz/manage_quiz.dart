@@ -29,9 +29,10 @@ class _ManageQuizState extends State<ManageQuiz> {
     Provider.of<QuizCollectionModel>(context, listen: false)
         .refreshCreatedQuizzes(refreshIfLoaded: true)
         .catchError((_) => null);
-    // Update group list
+    // Ensure that group list is up to date
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups();
+        .getCreatedGroups(refreshIfLoaded: true)
+        .catchError((_) => null);
   }
 
   @override

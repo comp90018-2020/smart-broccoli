@@ -55,8 +55,8 @@ main() async {
       ],
     );
 
-    model.refreshJoinedGroups();
-    model.refreshCreatedGroups();
+    model.getJoinedGroups();
+    model.getCreatedGroups();
     await untilCalled(api.getGroups(any));
     expect(model.joinedGroups, isA<List<Group>>());
     expect(model.createdGroups, isA<List<Group>>());
@@ -107,17 +107,18 @@ main() async {
       ],
     );
 
-    await model.refreshJoinedGroups(withMembers: true);
+    await model.getJoinedGroups(withMembers: true);
     expect(model.joinedGroups, isA<List<Group>>());
     expect(model.joinedGroups.length, 1);
-    expect(model.joinedGroups[0].members, isA<List<User>>());
-    expect(model.joinedGroups[0].members.length, 2);
-    model.joinedGroups[0].members.sort((m0, m1) => m0.id.compareTo(m1.id));
-    expect(model.joinedGroups[0].members[0].id, 1);
-    expect(model.joinedGroups[0].members[1].id, 2);
-    expect(model.joinedGroups[0].members[0].name, "Aaron Harwood");
-    expect(model.joinedGroups[0].members[1].name, "Harald Søndergaard");
-    expect(model.joinedGroups[0].members[0].groupRole, GroupRole.MEMBER);
-    expect(model.joinedGroups[0].members[1].groupRole, GroupRole.OWNER);
+    var members = await model.getGroupMembers(3);
+    expect(members, isA<List<User>>());
+    expect(members.length, 2);
+    members.sort((m0, m1) => m0.id.compareTo(m1.id));
+    expect(members[0].id, 1);
+    expect(members[1].id, 2);
+    expect(members[0].name, "Aaron Harwood");
+    expect(members[1].name, "Harald Søndergaard");
+    expect(members[0].groupRole, GroupRole.MEMBER);
+    expect(members[1].groupRole, GroupRole.OWNER);
   });
 }

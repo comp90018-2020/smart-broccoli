@@ -46,7 +46,6 @@ main() async {
     expect(g.code, "abc123");
     expect(g.name, "Lorem ipsum");
     expect(g.defaultGroup, false);
-    expect(g.members, null);
   });
 
   test('Create group (name already taken)', () async {

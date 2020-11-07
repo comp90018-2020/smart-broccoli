@@ -52,10 +52,10 @@ class _QuizCreateState extends State<QuizCreate> {
   @override
   void initState() {
     super.initState();
-
-    /// TODO: optimise group retrieval (this retrieves quiz/members of group) repeatedly
+    // Ensure that groups are fully loaded
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups();
+        .getCreatedGroups(refreshIfLoaded: true)
+        .catchError((_) => null);
   }
 
   @override
