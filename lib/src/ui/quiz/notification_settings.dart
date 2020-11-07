@@ -16,6 +16,7 @@ import 'package:smart_broccoli/src/ui/shared/page.dart';
 class NotificationSetting extends StatefulWidget {
   NotificationSetting({Key key, this.title}) : super(key: key);
 
+  // TODO
   final String title;
 
   @override
@@ -25,14 +26,14 @@ class NotificationSetting extends StatefulWidget {
 class _NotificationSettingState extends State<NotificationSetting> {
   WidgetDirection direction;
   List<SettingsSelectionItem<int>> turnOffList = [
-    SettingsSelectionItem<int>(0, "10 minutes"),
-    SettingsSelectionItem<int>(1, "30 minutes"),
-    SettingsSelectionItem<int>(2, "1 hour"),
-    SettingsSelectionItem<int>(3, "2 hours"),
-    SettingsSelectionItem<int>(4, "4 hours"),
-    SettingsSelectionItem<int>(5, "8 hours"),
+    SettingsSelectionItem<int>(0, "Unlimited"),
+    SettingsSelectionItem<int>(10, "10 minutes"),
+    SettingsSelectionItem<int>(30, "30 minutes"),
+    SettingsSelectionItem<int>(60, "1 hour"),
+    SettingsSelectionItem<int>(120, "2 hours"),
+    SettingsSelectionItem<int>(240, "4 hours"),
+    SettingsSelectionItem<int>(480, "8 hours"),
   ];
-  String _win = "10 minutes";
   List<SettingsSelectionItem<int>> numOfNotification = [
     SettingsSelectionItem<int>(0, "Unlimited"),
     SettingsSelectionItem<int>(1, "20 notifications per day"),
@@ -64,24 +65,22 @@ class _NotificationSettingState extends State<NotificationSetting> {
           settingsChildren: [
             SettingsSelectionList<int>(
               items: turnOffList,
-              chosenItemIndex:
-                  _winIndex, //default selected item index, it will be the first item by default.
+              //default selected item index, it will be the first item by default.
+              chosenItemIndex: _winIndex,
               title: 'Minimum window between notifications',
               titleStyle: TextStyle(fontSize: 16),
               dismissTitle: 'Cancel',
-              caption: _win,
+              caption: turnOffList[_winIndex].text,
               icon: new SettingsIcon(
                 icon: Icons.timer_off,
                 color: Colors.blue,
               ),
               onSelect: (value, index) {
-                setState(() {
-                  _winIndex = index;
-                  _win = value.text;
-                });
+                setState(() => _winIndex = index);
               },
               context: context,
             ),
+            // TODO
             SettingsSelectionList<int>(
               items: numOfNotification,
               chosenItemIndex:
@@ -127,7 +126,12 @@ class _NotificationSettingState extends State<NotificationSetting> {
                     TileMode.repeated, // repeats the gradient over the canvas
               ),
             ),
-            onSelect: (values) {
+            onSelect: (List<String> values) {
+              print(values);
+              // TODO
+              // List of 7 booleans
+              // [values.contains("Monday"), value.contains("Tuesday")]
+
               // setState(() {
               //   _weekDays = values; //comment on _weekDays temporarily, uncomment it when later needed
               // });
@@ -215,7 +219,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                 ),
                 caption: _wifiCaption,
                 onPressed: (value) {
-                  if (value.toString().isNotEmpty) {
+                  if (value != null && value.isNotEmpty) {
                     // Toast.show("You have Entered " + value, context);
                     setState(() {
                       _wifiCaption = value;
@@ -236,7 +240,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   //replace it with your widget which need to move on.
                   onPressed: () async {
                     var location =
-                        await Navigator.of(context).pushNamed("work_address");
+                        await Navigator.of(context).pushNamed("/work_address");
+                    // TODO: don't do anything if location is null
                     setState(() {
                       _workCaption = location;
                     });
