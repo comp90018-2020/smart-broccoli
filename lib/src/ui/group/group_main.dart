@@ -108,12 +108,14 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                       if (await showConfirmDialog(
                           context, "This cannot be undone",
                           title: "Confirm group deletion")) {
-                        await Provider.of<GroupRegistryModel>(context,
-                                listen: false)
-                            .deleteGroup(group)
-                            .catchError(
-                                (e) => showBasicDialog(context, e.toString()));
-                        Navigator.of(context).pop();
+                        try {
+                          await Provider.of<GroupRegistryModel>(context,
+                                  listen: false)
+                              .deleteGroup(group);
+                          Navigator.of(context).pop();
+                        } catch (e) {
+                          showBasicDialog(context, e.toString());
+                        }
                       }
                       break;
                     default:
