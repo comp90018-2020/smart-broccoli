@@ -358,12 +358,10 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     return Consumer<GameSessionModel>(builder: (context, model, child) {
       // Todo determine if it is much better to check SessionState.Question instead
-      if (model.state == SessionState.ANSWER ||
-          model.state == SessionState.OUTCOME ||
-          model.state == SessionState.FINISHED) {
+      if (model.state != SessionState.QUESTION) {
         pauseTimer();
       } else {
-        if (useAccel) {
+        if (useAccel && model.role != GroupRole.OWNER) {
           startAccel(model);
         }
       }
@@ -477,7 +475,7 @@ class _MyHomePageState extends State<TiltQuestion> {
             ),
 
             // Ball
-            useAccel
+            (useAccel && model.state == SessionState.QUESTION)
                 ? Container(
                     margin: EdgeInsets.only(top: top, left: left),
                     child: Container(
