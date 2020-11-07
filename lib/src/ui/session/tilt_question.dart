@@ -64,7 +64,7 @@ class _MyHomePageState extends State<TiltQuestion> {
     /// TODO handle rotation changes if that happens
     if (cord[0] == 0.0 && cord[1] == 0.0) {
       final RenderBox renderBoxRed =
-          areaLimit.currentContext.findRenderObject();
+      areaLimit.currentContext.findRenderObject();
       if (renderBoxRed == null) {
         return;
       }
@@ -145,7 +145,6 @@ class _MyHomePageState extends State<TiltQuestion> {
     double yLimitHalfWay = (heightLimit) / 2.0 + yStart;
 
     List<bool> selected = [false, false, false, false];
-
 
     /// top side
     /// if ball is near the y start line and the xLimit line
@@ -346,7 +345,10 @@ class _MyHomePageState extends State<TiltQuestion> {
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    appBarHeight = MediaQuery.of(context).padding.top + kToolbarHeight;
+    appBarHeight = MediaQuery
+        .of(context)
+        .padding
+        .top + kToolbarHeight;
   }
 
   @override
@@ -371,18 +373,18 @@ class _MyHomePageState extends State<TiltQuestion> {
         appbarLeading: model.state == SessionState.FINISHED
             ? null
             : IconButton(
-                icon: Icon(Icons.close),
-                enableFeedback: false,
-                splashRadius: 20,
-                onPressed: () async {
-                  if (model.state != SessionState.FINISHED &&
-                      !await showConfirmDialog(
-                          context, "You are about to quit this session"))
-                    return;
-                  Provider.of<GameSessionModel>(context, listen: false)
-                      .quitQuiz();
-                },
-              ),
+          icon: Icon(Icons.close),
+          enableFeedback: false,
+          splashRadius: 20,
+          onPressed: () async {
+            if (model.state != SessionState.FINISHED &&
+                !await showConfirmDialog(
+                    context, "You are about to quit this session"))
+              return;
+            Provider.of<GameSessionModel>(context, listen: false)
+                .quitQuiz();
+          },
+        ),
 
         automaticallyImplyLeading: false,
 
@@ -397,16 +399,19 @@ class _MyHomePageState extends State<TiltQuestion> {
                 children: <Widget>[
                   (!useAccel && model.role != GroupRole.OWNER)
                       ? RaisedButton(
-                          child: Text('Ball Mode'),
-                          onPressed: () => {
-                            setState(() {
-                              useAccel = true;
-                            }),
-                            startAccel(model)
-                          },
-                          color: Theme.of(context).primaryColor,
-                          textColor: Colors.white,
-                        )
+                    child: Text('Ball Mode'),
+                    onPressed: () =>
+                    {
+                      setState(() {
+                        useAccel = true;
+                      }),
+                      startAccel(model)
+                    },
+                    color: Theme
+                        .of(context)
+                        .primaryColor,
+                    textColor: Colors.white,
+                  )
                       : Container(),
                   Expanded(
                     flex: 5,
@@ -416,38 +421,41 @@ class _MyHomePageState extends State<TiltQuestion> {
                         if (!model.question.hasPicture) Spacer(),
                         // question text
                         Text("${model.question.text}",
-                            style: Theme.of(context).textTheme.headline6),
+                            style: Theme
+                                .of(context)
+                                .textTheme
+                                .headline6),
                         // question picture or spacer if question has no pic
                         model.question.hasPicture
                             ? Expanded(
-                                child: FractionallySizedBox(
-                                  widthFactor: 0.8,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 16.0),
-                                    // Replace with Container when there's no picture
-                                    child: FutureBuilder(
-                                      future: Provider.of<QuizCollectionModel>(
-                                              context,
-                                              listen: false)
-                                          .getQuestionPicturePath(
-                                              model.question),
-                                      builder: (BuildContext context,
-                                          AsyncSnapshot<String> snapshot) {
-                                        if (!snapshot.hasData ||
-                                            snapshot.data == null)
-                                          return FractionallySizedBox(
-                                              widthFactor: 0.8,
-                                              heightFactor: 0.8,
-                                              child: Image(
-                                                  image: AssetImage(
-                                                      'assets/icon.png')));
-                                        return Image.file(File(snapshot.data),
-                                            fit: BoxFit.cover);
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              )
+                          child: FractionallySizedBox(
+                            widthFactor: 0.8,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              // Replace with Container when there's no picture
+                              child: FutureBuilder(
+                                future: Provider.of<QuizCollectionModel>(
+                                    context,
+                                    listen: false)
+                                    .getQuestionPicturePath(
+                                    model.question),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<String> snapshot) {
+                                  if (!snapshot.hasData ||
+                                      snapshot.data == null)
+                                    return FractionallySizedBox(
+                                        widthFactor: 0.8,
+                                        heightFactor: 0.8,
+                                        child: Image(
+                                            image: AssetImage(
+                                                'assets/icon.png')));
+                                  return Image.file(File(snapshot.data),
+                                      fit: BoxFit.cover);
+                                },
+                              ),
+                            ),
+                          ),
+                        )
                             : Spacer(),
                         Padding(
                           padding: const EdgeInsets.only(top: 16.0),
@@ -458,9 +466,12 @@ class _MyHomePageState extends State<TiltQuestion> {
                         if (model.questionHint != null)
                           Padding(
                             padding:
-                                const EdgeInsets.only(top: 4.0, bottom: 16.0),
+                            const EdgeInsets.only(top: 4.0, bottom: 16.0),
                             child: Text(model.questionHint,
-                                style: Theme.of(context).textTheme.subtitle1),
+                                style: Theme
+                                    .of(context)
+                                    .textTheme
+                                    .subtitle1),
                           )
                         else
                           Container(height: 16)
@@ -476,16 +487,16 @@ class _MyHomePageState extends State<TiltQuestion> {
             // Ball
             (useAccel && model.state == SessionState.QUESTION)
                 ? Container(
-                    margin: EdgeInsets.only(top: top, left: left),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.green,
-                      ),
-                      width: 40.0,
-                      height: 40.0,
-                    ),
-                  )
+              margin: EdgeInsets.only(top: top, left: left),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.green,
+                ),
+                width: 40.0,
+                height: 40.0,
+              ),
+            )
                 : Container(),
           ],
         ),
@@ -500,29 +511,29 @@ class _MyHomePageState extends State<TiltQuestion> {
       key: areaLimit,
       children: model.question is TFQuestion
           ? [
-              Expanded(child: _answerTab(model, 1)),
-              Expanded(child: _answerTab(model, 0))
-            ]
+        Expanded(child: _answerTab(model, 1)),
+        Expanded(child: _answerTab(model, 0))
+      ]
           : [
-              Expanded(
-                child: Row(
-                  children: [
-                    Expanded(child: _answerTab(model, 0)),
-                    Expanded(child: _answerTab(model, 1)),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Row(
-                  children: [
-                    if ((model.question as MCQuestion).options.length > 2)
-                      Expanded(child: _answerTab(model, 2)),
-                    if ((model.question as MCQuestion).options.length > 3)
-                      Expanded(child: _answerTab(model, 3)),
-                  ],
-                ),
-              ),
+        Expanded(
+          child: Row(
+            children: [
+              Expanded(child: _answerTab(model, 0)),
+              Expanded(child: _answerTab(model, 1)),
             ],
+          ),
+        ),
+        Expanded(
+          child: Row(
+            children: [
+              if ((model.question as MCQuestion).options.length > 2)
+                Expanded(child: _answerTab(model, 2)),
+              if ((model.question as MCQuestion).options.length > 3)
+                Expanded(child: _answerTab(model, 3)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -543,11 +554,11 @@ class _MyHomePageState extends State<TiltQuestion> {
             child: Center(
               child: model.question is TFQuestion
                   ? Text('${index == 0 ? 'False' : 'True'}',
-                      style: TextStyle(fontSize: 36))
+                  style: TextStyle(fontSize: 36))
                   : Text(
-                      (model.question as MCQuestion).options[index].text,
-                      style: TextStyle(fontSize: 16),
-                    ),
+                (model.question as MCQuestion).options[index].text,
+                style: TextStyle(fontSize: 16),
+              ),
             ),
           ),
         ),
@@ -560,7 +571,7 @@ class _MyHomePageState extends State<TiltQuestion> {
     if (model.question is TFQuestion) {
       // correct answer
       if ([SessionState.ANSWER, SessionState.OUTCOME, SessionState.FINISHED]
-              .contains(model.state) &&
+          .contains(model.state) &&
           (model.correctAnswer.answer.tfSelection && index == 1 ||
               !model.correctAnswer.answer.tfSelection && index == 0))
         return AnswerColours.correct;
@@ -574,14 +585,14 @@ class _MyHomePageState extends State<TiltQuestion> {
     else {
       // correct answer
       if ([SessionState.ANSWER, SessionState.OUTCOME, SessionState.FINISHED]
-              .contains(model.state) &&
+          .contains(model.state) &&
           model.correctAnswer.answer.mcSelection.contains(index))
         return AnswerColours.correct;
       // selected answer
       if (model.answer.mcSelection != null &&
           model.answer.mcSelection.contains(index))
         return model.answer.mcSelection.length ==
-                (model.question as MCQuestion).numCorrect
+            (model.question as MCQuestion).numCorrect
             ? AnswerColours.selected
             : AnswerColours.pending;
     }
@@ -590,54 +601,62 @@ class _MyHomePageState extends State<TiltQuestion> {
   }
 
   /// Return the appropriate action/indicator (top right) for the user
-  List<Widget> _appBarActions(BuildContext context, GameSessionModel model) => [
+  List<Widget> _appBarActions(BuildContext context, GameSessionModel model) =>
+      [
         if (model.state == SessionState.FINISHED &&
             model.role == GroupRole.OWNER)
           IconButton(
-              onPressed: () => Navigator.of(context).popUntil(
-                  (route) => !route.settings.name.startsWith('/session')),
+              onPressed: () =>
+                  Navigator.of(context).popUntil(
+                          (route) =>
+                      !route.settings.name.startsWith('/session')),
               icon: Icon(Icons.flag))
-        else if (model.state == SessionState.FINISHED)
-          IconButton(
-            onPressed: () =>
-                Navigator.of(context).pushReplacementNamed('/session/finish'),
-            icon: Icon(Icons.flag),
-          )
-        else if (model.state == SessionState.ANSWER &&
-            model.role == GroupRole.OWNER)
-          IconButton(
-            onPressed: () => {model.showLeaderBoard(), pauseTimer()},
-            icon: Icon(Icons.arrow_forward),
-          )
-        else if (model.state == SessionState.OUTCOME &&
-            model.role == GroupRole.OWNER)
-          IconButton(
-            onPressed: () => {model.nextQuestion()},
-            icon: Icon(Icons.arrow_forward),
-          )
-        else if (model.state == SessionState.ANSWER &&
-            model.session.quizType == QuizType.SELF_PACED &&
-            model.session.type == GameSessionType.INDIVIDUAL)
-          IconButton(
-            onPressed: () => model.nextQuestion(),
-            icon: Icon(Icons.arrow_forward),
-          )
-        else if (model.role == GroupRole.MEMBER)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  '${model.points ?? 0}',
-                  style: TextStyle(
-                      color: Color(0xFFECC030),
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
-                ),
-                Text("Points"),
-              ],
-            ),
-          )
+        else
+          if (model.state == SessionState.FINISHED)
+            IconButton(
+              onPressed: () =>
+                  Navigator.of(context).pushReplacementNamed('/session/finish'),
+              icon: Icon(Icons.flag),
+            )
+          else
+            if (model.state == SessionState.ANSWER &&
+                model.role == GroupRole.OWNER)
+              IconButton(
+                onPressed: () => {model.showLeaderBoard(), pauseTimer()},
+                icon: Icon(Icons.arrow_forward),
+              )
+            else
+              if (model.state == SessionState.OUTCOME &&
+                  model.role == GroupRole.OWNER)
+                IconButton(
+                  onPressed: () => {model.nextQuestion()},
+                  icon: Icon(Icons.arrow_forward),
+                )
+              else
+                if (model.state == SessionState.ANSWER &&
+                    model.session.quizType == QuizType.SELF_PACED &&
+                    model.session.type == GameSessionType.INDIVIDUAL)
+                  IconButton(
+                    onPressed: () => model.nextQuestion(),
+                    icon: Icon(Icons.arrow_forward),
+                  )
+                else
+                  if (model.role == GroupRole.MEMBER)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            '${model.points ?? 0}',
+                            style: TextStyle(
+                                color: Color(0xFFECC030),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Text("Points"),
+                        ],
+                      ),
+                    )
       ];
 }
