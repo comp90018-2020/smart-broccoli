@@ -53,25 +53,22 @@ class _BuildQuiz extends State<QuizContainer> {
               child: widget.header,
             ),
 
-            // The list of quiz
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                // Minimum height, or will be height of longest child
-                // if exceeding minimum height
-                constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height * 0.4),
-                child: widget.items.length == 0
-                    ? Column(
-                        children: [
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.8,
-                            child: NoContentPlaceholder(
-                                text: returnPlaceholderText()),
-                          )
-                        ],
-                      )
-                    : IntrinsicHeight(
+            widget.items.length == 0
+                // Placeholder if no quizzes
+                ? FractionallySizedBox(
+                    widthFactor: 0.8,
+                    child: NoContentPlaceholder(text: returnPlaceholderText()),
+                  )
+
+                // The list of quiz
+                : SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      // Minimum height, or will be height of longest child
+                      // if exceeding minimum height
+                      constraints: BoxConstraints(
+                          minHeight: MediaQuery.of(context).size.height * 0.4),
+                      child: IntrinsicHeight(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: mapIndexed(
@@ -92,8 +89,8 @@ class _BuildQuiz extends State<QuizContainer> {
                           ).toList(),
                         ),
                       ),
-              ),
-            ),
+                    ),
+                  ),
 
             // Leave some space for a hidden floating action button
             if (widget.hiddenButton)
