@@ -197,7 +197,7 @@ class BroccoliRouter {
     router.define(notificationSetting, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
       return NotificationSetting();
-    }));
+    }), transitionType: TransitionType.inFromLeft);
 
     //Work address page
     router.define(workAddress, handler: Handler(

@@ -14,11 +14,6 @@ class _MapSettingState extends State<MapSetting> {
   List<LocationData> locationResults = [];
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return CustomPage(
       title: "Notification setting",
@@ -28,27 +23,30 @@ class _MapSettingState extends State<MapSetting> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: new Card(
-              child: new ListTile(
-                leading: new Icon(Icons.search),
-                title: new TextField(
-                  controller: searchTextController,
-                  decoration: new InputDecoration(
-                      hintText: 'Search', border: InputBorder.none),
-                  textInputAction: TextInputAction.search,
-                  onSubmitted: getLocations,
-                ),
-                trailing: new IconButton(
-                  icon: new Icon(
-                    Icons.clear,
-                    size: 20,
+              child: new TextField(
+                controller: searchTextController,
+                decoration: new InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.only(top: 14),
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Search',
+                  hintStyle: TextStyle(fontSize: 16.0),
+                  border: InputBorder.none,
+                  suffixIcon: new IconButton(
+                    icon: new Icon(
+                      Icons.clear,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        searchTextController.clear();
+                        locationResults.clear();
+                      });
+                    },
                   ),
-                  onPressed: () {
-                    setState(() {
-                      searchTextController.clear();
-                      locationResults.clear();
-                    });
-                  },
                 ),
+                textInputAction: TextInputAction.search,
+                onSubmitted: getLocations,
               ),
             ),
           ),

@@ -14,10 +14,7 @@ import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Smart quiz page
 class NotificationSetting extends StatefulWidget {
-  NotificationSetting({Key key, this.title}) : super(key: key);
-
-  // TODO
-  final String title;
+  NotificationSetting({Key key}) : super(key: key);
 
   @override
   _NotificationSettingState createState() => new _NotificationSettingState();
@@ -35,17 +32,16 @@ class _NotificationSettingState extends State<NotificationSetting> {
     SettingsSelectionItem<int>(480, "8 hours"),
   ];
   List<SettingsSelectionItem<int>> numOfNotification = [
-    SettingsSelectionItem<int>(0, "Unlimited"),
-    SettingsSelectionItem<int>(1, "20 notifications per day"),
-    SettingsSelectionItem<int>(2, "10 notifications per day"),
-    SettingsSelectionItem<int>(3, "5 notifications per day"),
-    SettingsSelectionItem<int>(4, "1 notifications per day"),
-    SettingsSelectionItem<int>(4, "Never"),
+    SettingsSelectionItem<int>(100, "Unlimited"),
+    SettingsSelectionItem<int>(20, "20 notifications per day"),
+    SettingsSelectionItem<int>(10, "10 notifications per day"),
+    SettingsSelectionItem<int>(5, "5 notifications per day"),
+    SettingsSelectionItem<int>(1, "1 notifications per day"),
+    SettingsSelectionItem<int>(0, "Never"),
   ];
-  String _num = "Unlimited";
   var _winIndex = 0;
   var _numIndex = 0;
-  // var _weekDays; //comment on _weekDays temporarily, uncomment it when later needed
+  List<bool> _weekDays = [false, false, false, false, false, false, false];
   var _liveQuizCalendar = true;
   var _smartQuizCalendar = false;
   var _smartDetection = true;
@@ -80,25 +76,20 @@ class _NotificationSettingState extends State<NotificationSetting> {
               },
               context: context,
             ),
-            // TODO
             SettingsSelectionList<int>(
               items: numOfNotification,
-              chosenItemIndex:
-                  _numIndex, //default selected item index, it will be the first item by default.
+              //default selected item index, it will be the first item by default.
+              chosenItemIndex: _numIndex,
               title: 'Max number of notifications per day',
               titleStyle: TextStyle(fontSize: 16),
               dismissTitle: 'Cancel',
-              caption:
-                  _num, //default selected item, it will be the first item by default.
+              caption: numOfNotification[_numIndex].text,
               icon: new SettingsIcon(
                 icon: Icons.add_alert,
                 color: Colors.green,
               ),
               onSelect: (value, index) {
-                setState(() {
-                  _numIndex = index;
-                  _num = value.text;
-                });
+                setState(() => _numIndex = index);
               },
               context: context,
             ),
@@ -128,13 +119,37 @@ class _NotificationSettingState extends State<NotificationSetting> {
             ),
             onSelect: (List<String> values) {
               print(values);
-              // TODO
-              // List of 7 booleans
-              // [values.contains("Monday"), value.contains("Tuesday")]
-
-              // setState(() {
-              //   _weekDays = values; //comment on _weekDays temporarily, uncomment it when later needed
-              // });
+              setState(() {
+                if (values.contains("Sunday"))
+                  _weekDays[0] = true;
+                else
+                  _weekDays[0] = false;
+                if (values.contains("Monday"))
+                  _weekDays[1] = true;
+                else
+                  _weekDays[1] = false;
+                if (values.contains("Tuesday"))
+                  _weekDays[2] = true;
+                else
+                  _weekDays[2] = false;
+                if (values.contains("Wednesday"))
+                  _weekDays[3] = true;
+                else
+                  _weekDays[3] = false;
+                if (values.contains("Thursday"))
+                  _weekDays[4] = true;
+                else
+                  _weekDays[4] = false;
+                if (values.contains("Friday"))
+                  _weekDays[5] = true;
+                else
+                  _weekDays[5] = false;
+                if (values.contains("Saturday"))
+                  _weekDays[6] = true;
+                else
+                  _weekDays[6] = false;
+                print(_weekDays);
+              });
             },
           ),
         ),
@@ -152,16 +167,11 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   color: Colors.blueAccent,
                 ),
                 onPressed: (bool value) {
-                  Toast.show(
-                      "Allow notifications for live quiz is " +
-                          value.toString(),
-                      context);
                   setState(() {
                     _liveQuizCalendar = value;
                   });
                 },
-                value:
-                    _liveQuizCalendar, //init value for widget to make it on or off
+                value: _liveQuizCalendar,
                 type: CheckBoxWidgetType.Switch,
               ),
               SettingsCheckBox(
@@ -172,10 +182,6 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   color: Colors.orange,
                 ),
                 onPressed: (bool value) {
-                  Toast.show(
-                      "Allow notifications for smart quiz is " +
-                          value.toString(),
-                      context);
                   setState(() {
                     _smartQuizCalendar = value;
                   });
@@ -198,9 +204,6 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   color: Colors.green,
                 ),
                 onPressed: (bool value) {
-                  Toast.show(
-                      "Allow notifications on commuting is " + value.toString(),
-                      context);
                   setState(() {
                     _smartDetection = value;
                   });
@@ -212,7 +215,6 @@ class _NotificationSettingState extends State<NotificationSetting> {
                 titleStyle: TextStyle(fontSize: 16),
                 dialogButtonText: 'Done',
                 title: ('Wifi at work place'),
-                // titleStyle: TextStyle(fontSize: 16),
                 icon: new SettingsIcon(
                   icon: Icons.wifi,
                   color: Colors.green,
@@ -220,7 +222,6 @@ class _NotificationSettingState extends State<NotificationSetting> {
                 caption: _wifiCaption,
                 onPressed: (value) {
                   if (value != null && value.isNotEmpty) {
-                    // Toast.show("You have Entered " + value, context);
                     setState(() {
                       _wifiCaption = value;
                     });
@@ -237,14 +238,13 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   ),
                   context: context,
                   caption: _workCaption,
-                  //replace it with your widget which need to move on.
                   onPressed: () async {
                     var location =
                         await Navigator.of(context).pushNamed("/work_address");
-                    // TODO: don't do anything if location is null
-                    setState(() {
-                      _workCaption = location;
-                    });
+                    if (location != null)
+                      setState(() {
+                        _workCaption = location;
+                      });
                   }),
               SettingsSlider(
                 value: _radius,
@@ -280,9 +280,6 @@ class _NotificationSettingState extends State<NotificationSetting> {
                   color: Colors.red,
                 ),
                 onPressed: (bool value) {
-                  Toast.show(
-                      "Allow notifications on commuting is " + value.toString(),
-                      context);
                   setState(() {
                     _commuting = value;
                   });
