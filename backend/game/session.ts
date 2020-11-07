@@ -6,13 +6,11 @@ import {
     PlayerState,
     Answer,
     Role,
-    Record,
     RecordWithPlayerInfo,
 } from "./datatype";
 import { QuizAttributes } from "../models/quiz";
 import {
     leaveSession,
-    activateSession,
     endSession as endSessionInController,
 } from "../controllers/session";
 
@@ -209,13 +207,8 @@ export class GameSession {
 
     async setStatus(status: GameStatus) {
         this.status = status;
-        if (status === GameStatus.Starting) {
+        if (status === GameStatus.Starting)
             this.QuestionReleaseAt[0] = Date.now() + WAIT_TIME_BEFORE_START;
-
-            if (process.env.SOCKET_MODE !== "debug") {
-                await activateSession(this.id);
-            }
-        }
     }
 
     endSession() {
