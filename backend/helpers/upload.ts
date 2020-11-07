@@ -99,6 +99,7 @@ const profileImageProcessor = async (filePath: string) => {
             fit: "cover",
             withoutEnlargement: true,
         })
+        .withMetadata()
         .png({ quality: 100 })
         .toFile(`${filePath}.thumb`);
 };
@@ -114,6 +115,7 @@ const quizPictureProcessor = async (filePath: string) => {
             fit: "inside",
             withoutEnlargement: true,
         })
+        .withMetadata()
         .png({ quality: 100 })
         .toFile(`${filePath}.thumb`);
 };
