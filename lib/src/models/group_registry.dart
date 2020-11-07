@@ -26,6 +26,8 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   // Internal storage
   Map<int, Group> _joinedGroups = {};
   Map<int, Group> _createdGroups = {};
+  Map<int, bool> _groupQuizLoaded = {};
+  Map<int, List<User>> _groupMembers = {};
 
   /// List of groups which the user has joined
   UnmodifiableListView<Group> get joinedGroups =>
@@ -63,54 +65,66 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     return _userRepo.getUserPicture(id);
   }
 
-  /// Refresh the code to join a group (ask server for new one).
-  Future<void> refreshGroupCode(Group group) async {
-    await _groupApi.refreshCode(_authStateModel.token, group.id);
-    refreshCreatedGroups();
-  }
-
   /// Rename a group.
   Future<void> renameGroup(Group group, String newName) async {
-    // rename the group
-    await _groupApi.updateGroup(_authStateModel.token, group.id, newName);
-    // fetch the updated group and save it to the map
-    _createdGroups[group.id] =
-        await _groupApi.getGroup(_authStateModel.token, group.id);
-    // fetch the members list
-    _createdGroups[group.id].members =
-        await _userRepo.getMembersOf(_authStateModel.token, group.id);
+    try {
+      // rename the group
+      await _groupApi.updateGroup(_authStateModel.token, group.id, newName);
+      // fetch the updated group and save it to the map
+      _createdGroups[group.id] =
+          await _groupApi.getGroup(_authStateModel.token, group.id);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
     notifyListeners();
   }
 
   /// Leave a group.
   Future<void> leaveGroup(Group group) async {
-    await _groupApi.leaveGroup(_authStateModel.token, group.id);
-    refreshJoinedGroups();
+    try {
+      await _groupApi.leaveGroup(_authStateModel.token, group.id);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+    refreshJoinedGroups().catchError((_) => null);
   }
 
   /// Kick a member from a group.
   Future<void> kickMemberFromGroup(Group group, int memberId) async {
     // kick the member
     await _groupApi.kickMember(_authStateModel.token, group.id, memberId);
-    // fetch the updated group and save it to the map
-    _createdGroups[group.id] =
-        await _groupApi.getGroup(_authStateModel.token, group.id);
     // fetch the members list
-    _createdGroups[group.id].members =
+    _groupMembers[group.id] =
         await _userRepo.getMembersOf(_authStateModel.token, group.id);
     notifyListeners();
   }
 
   /// Delete a group.
   Future<void> deleteGroup(Group group) async {
-    await _groupApi.deleteGroup(_authStateModel.token, group.id);
-    refreshCreatedGroups();
+    try {
+      await _groupApi.deleteGroup(_authStateModel.token, group.id);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+    refreshCreatedGroups().catchError((_) => null);
   }
 
   /// Refresh the ListView of groups the user has joined.
-  ///
-  /// This callback does not populate the `members` field of each group if the
-  /// optional [withMembers] parameter is `false`.
   Future<void> refreshJoinedGroups({bool withMembers = true}) async {
     if (!_authStateModel.inSession) return;
     // fetch from API and save into map
@@ -118,19 +132,15 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
         (await _groupApi.getGroups(_authStateModel.token))
             .where((group) => group.role == GroupRole.MEMBER),
         key: (group) => group.id);
-    // fetch members of each group
     if (withMembers)
       await Future.wait(_joinedGroups.values.map((group) async {
-        group.members =
+        _groupMembers[group.id] =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       }));
     notifyListeners();
   }
 
   /// Refresh the ListView of groups the user has created.
-  ///
-  /// This callback does not populate the `members` field of each group if the
-  /// optional [withMembers] parameter is `false`.
   Future<void> refreshCreatedGroups({bool withMembers = true}) async {
     if (!_authStateModel.inSession) return;
     // fetch from API and save into map
@@ -141,7 +151,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     // fetch members of each group
     if (withMembers)
       await Future.wait(_createdGroups.values.map((group) async {
-        group.members =
+        _groupMembers[group.id] =
             await _userRepo.getMembersOf(_authStateModel.token, group.id);
       }));
     notifyListeners();
@@ -175,6 +185,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       await _groupApi.createGroup(_authStateModel.token, name);
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on GroupCreateException catch (e) {
       throw e;
     } on ApiException catch (e) {
@@ -191,6 +202,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       await _groupApi.joinGroup(_authStateModel.token, name: name, code: code);
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on GroupNotFoundException {
       return Future.error("Group does not exist: $name");
     } on AlreadyInGroupException {
@@ -207,6 +219,8 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     if (!_authStateModel.inSession) {
       _joinedGroups = {};
       _createdGroups = {};
+      _groupQuizLoaded = {};
+      _groupMembers = {};
     }
   }
 }

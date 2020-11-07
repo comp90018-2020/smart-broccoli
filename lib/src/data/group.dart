@@ -1,7 +1,4 @@
-import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/store/remote/api_base.dart';
-
-import 'user.dart';
 
 enum GroupRole { OWNER, MEMBER }
 
@@ -19,11 +16,10 @@ class Group {
   final GroupRole role;
 
   /// List of members; mutating this list will have no effect on the server
-  List<User> members;
+  // List<User> members;
 
   /// Constructor for internal use only
-  Group._internal(this.id, this.name, this.defaultGroup, this.code, this.role,
-      this.members);
+  Group._internal(this.id, this.name, this.defaultGroup, this.code, this.role);
 
   /// Name with default group annotation
   String get nameWithDefaultGroup =>
@@ -35,7 +31,6 @@ class Group {
         json['defaultGroup'],
         json['code'],
         json['role'] == 'member' ? GroupRole.MEMBER : GroupRole.OWNER,
-        (json['members'] as List)?.map((repr) => User.fromJson(repr))?.toList(),
       );
 
   Map<String, dynamic> toJson() {
@@ -45,7 +40,6 @@ class Group {
       'defaultGroup': defaultGroup,
       'code': code,
       'role': role == GroupRole.MEMBER ? 'member' : 'owner',
-      'members': members?.map((member) => member.toJson())?.toList(),
     };
   }
 }
