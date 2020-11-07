@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,12 +21,7 @@ class TiltQuestion extends StatefulWidget {
 class _MyHomePageState extends State<TiltQuestion> {
   //creating Key for red panel
   GlobalKey areaLimit = GlobalKey();
-  List<GlobalKey> globalKeyList = [
-    GlobalKey(),
-    GlobalKey(),
-    GlobalKey(),
-    GlobalKey()
-  ];
+
 
   List<bool> chosen = [false, false, false, false];
 
@@ -68,6 +62,9 @@ class _MyHomePageState extends State<TiltQuestion> {
     if (cord[0] == 0.0 && cord[1] == 0.0) {
       final RenderBox renderBoxRed =
           areaLimit.currentContext.findRenderObject();
+      if (renderBoxRed == null) {
+        return;
+      }
       final Offset offset = renderBoxRed.localToGlobal(Offset.zero);
       cord[0] = offset.dx;
       cord[1] = offset.dy;
@@ -81,9 +78,6 @@ class _MyHomePageState extends State<TiltQuestion> {
     double nextCordx = cord[0] - event.x * 2;
     double nextCordy = cord[1] + event.y * 2;
 
-    // print("x + " + event.x.toString());
-    // print("y +" + event.y.toString());
-
     if (nextCordx >= widthLimit + widthStart - 40) {
       nextCordx = widthLimit + widthStart - 40;
     }
@@ -96,6 +90,9 @@ class _MyHomePageState extends State<TiltQuestion> {
     if (nextCordy <= heightStart - appBarHeight) {
       nextCordy = heightStart - appBarHeight;
     }
+
+   // print("x + " + nextCordx.toString());
+   // print("y +" + nextCordy.toString());
 
     if ((cord[0] - nextCordx).abs() < 4 && (cord[1] - nextCordy).abs() < 4) {
       canSelect = true;
@@ -117,62 +114,59 @@ class _MyHomePageState extends State<TiltQuestion> {
   }
 
   selectGrid(GameSessionModel model) {
-    Point<double> p1 = Point(cord[0], cord[1]);
-    Point<double> p2 = Point(widthStart, heightStart - appBarHeight);
-    Point<double> p3 =
-        Point(widthStart, heightLimit + heightStart - appBarHeight);
-    Point<double> p4 =
-        Point(widthLimit + widthStart - 40, heightStart - appBarHeight);
-    Point<double> p5 = Point(
-        widthLimit + widthStart - 40, heightLimit + heightStart - appBarHeight);
+    double xLimit = widthLimit + widthStart - 40;
+    double yLimit = heightLimit + heightStart - appBarHeight - 40;
+    double xStart = widthStart;
+    double yStart = heightStart - appBarHeight;
 
-    double d1 = p2.distanceTo(p1);
-    double d2 = p4.distanceTo(p1);
-    double d3 = p3.distanceTo(p1);
-    double d4 = p5.distanceTo(p1);
+    double xLimitHalfWay = (widthLimit) / 2.0 + xStart;
+    double yLimitHalfWay = (heightLimit) / 2.0 + yStart;
 
-    if (d1 <= d2 && d1 <= d3 && d1 <= d4) {
-      if (model.question is TFQuestion) {
-        model.toggleAnswer(1);
-        print("Toggle True on Top left grid");
-      } else {
-        model.toggleAnswer(0);
-        print("Toggle Top Left Grid MC 1");
-      }
-    } else if (d2 <= d1 && d2 <= d3 && d2 <= d4) {
-      if (model.question is TFQuestion) {
-        model.toggleAnswer(1);
-        print("Toggle True on Top Right Grid");
-      } else {
-        model.toggleAnswer(1);
-        print("Toggle Top Right Grid MC 2");
-      }
-    } else if (d3 <= d1 && d3 <= d2 && d3 <= d4) {
-      if (model.question is TFQuestion) {
-        model.toggleAnswer(0);
-        print("Toggle False on Bottom Left Grid");
-      } else {
-        MCQuestion mcQuestion = model.question as MCQuestion;
-        if (mcQuestion.options.length >= 3) {
-          model.toggleAnswer(2);
-          print("Toggle Bottom Left Grid MC 3");
+
+    // top side
+    if (cord[1] <= yStart + 40 && cord[0] <= xLimit) {
+      if (cord[0] <= xLimitHalfWay - 20) {
+        print("Top Right");
+      } else if (cord[0] >= xLimitHalfWay + 20) {
+        print("Top Left");
+      } // Center Resolution
+      else {
+        if (model.question is TFQuestion) {
+          print("TRUE/ TOP RIGHT and TOP LEFT");
         }
       }
-    } else if (d4 <= d1 && d4 <= d2 && d4 <= d3) {
-      if (model.question is TFQuestion) {
-        model.toggleAnswer(0);
-        print("Toggle False on Bottom Right Grid");
+    }
+    // left side
+    else if (cord[1] <= yLimit && cord[0] <= xStart + 40) {
+      if (cord[1] <= yLimitHalfWay - 20) {
+        print("Top Right");
+      } else if (cord[1] >= yLimitHalfWay + 20) {
+        print("Bottom Left");
+      }
+    }
+    // Bottom Side
+    else if (cord[0] <= xLimit && cord[1] >= yLimit - 40) {
+      if (cord[0] <= xLimitHalfWay - 20) {
+        print("Bottom Left");
+      } else if (cord[0] >= xLimitHalfWay + 20) {
+        print("Bottom Right");
       } else {
-        MCQuestion mcQuestion = model.question as MCQuestion;
-        if (mcQuestion.options.length == 4) {
-          model.toggleAnswer(3);
-          print("Toggle Bottom Right Grid MC 4");
-        }
-        if (mcQuestion.options.length == 3) {
-          model.toggleAnswer(2);
-          print("Toggle Bottom Right Grid MC 4 ________");
+        if (model.question is TFQuestion) {
+          print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
+        } else {
+          if ((model.question as MCQuestion).options.length == 3) {
+            print("BOTTOM RIGHT and BOTTOM LEFT");
+          }
         }
       }
+    }
+    // Right Side
+    else if (cord[0] >= xLimit - 40 && cord[1] <= yLimit) {
+      if (cord[1] <= yLimitHalfWay - 20) {
+        print("Top Right");
+      } else if (cord[1] >= yLimitHalfWay + 20) {
+        print("Bottom Right");
+      } else {}
     } else {}
   }
 
@@ -241,16 +235,9 @@ class _MyHomePageState extends State<TiltQuestion> {
     ]);
 
     return Consumer<GameSessionModel>(builder: (context, model, child) {
-      if (model.question is MCQuestion) {
-        if ((model.question as MCQuestion).options.length == 4) {
-          type = 1;
-        } else {
-          type = 2;
-        }
-      } else {
-        type = 0;
+      if (model.state == SessionState.ANSWER) {
+        pauseTimer();
       }
-
       return CustomPage(
         title: 'Question ${model.question.no + 1}',
 
@@ -282,8 +269,8 @@ class _MyHomePageState extends State<TiltQuestion> {
               child: Column(
                 children: <Widget>[
                   RaisedButton(
-                    onPressed: startAccel(model),
                     child: Text('Begin'),
+                    onPressed: () => {startAccel(model)},
                     color: Theme.of(context).primaryColor,
                     textColor: Colors.white,
                   ),
@@ -354,16 +341,16 @@ class _MyHomePageState extends State<TiltQuestion> {
 
             // Ball
             Container(
-              margin: EdgeInsets.only(top: top, left: left),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.green,
+                margin: EdgeInsets.only(top: top, left: left),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.green,
+                  ),
+                  width: 40.0,
+                  height: 40.0,
                 ),
-                width: 40.0,
-                height: 40.0,
               ),
-            ),
           ],
         ),
       );
@@ -405,10 +392,7 @@ class _MyHomePageState extends State<TiltQuestion> {
 
 // Answer selection tabs
   Widget _answerTab(GameSessionModel model, int index) {
-    globalKeyList[index] = GlobalKey();
-
     return Card(
-      key: globalKeyList[index],
       color: findColour(model, index),
       elevation: 4.0,
       child: InkWell(
