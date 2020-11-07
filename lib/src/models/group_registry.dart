@@ -73,11 +73,11 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       {bool refresh = false}) async {
     // Already exists and no refresh? get from cache
     if (_groupMembers.containsKey(groupId) && !refresh)
-      return Future.value(_groupMembers[groupId]);
+      return _groupMembers[groupId];
     // Group does not exist
     try {
       if (!_joinedGroups.containsKey(groupId) &&
-          _createdGroups.containsKey(groupId)) await getGroup(groupId);
+          !_createdGroups.containsKey(groupId)) await getGroup(groupId);
     } catch (e) {
       return Future.error(e);
     }
