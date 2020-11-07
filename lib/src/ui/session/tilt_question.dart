@@ -97,7 +97,6 @@ class _MyHomePageState extends State<TiltQuestion> {
       nextCordy = heightStart - appBarHeight;
     }
 
-
     if ((cord[0] - nextCordx).abs() < 4 && (cord[1] - nextCordy).abs() < 4) {
       canSelect = true;
     } else {
@@ -118,11 +117,12 @@ class _MyHomePageState extends State<TiltQuestion> {
   }
 
   selectGrid(GameSessionModel model) {
-
     Point<double> p1 = Point(cord[0], cord[1]);
     Point<double> p2 = Point(widthStart, heightStart - appBarHeight);
-    Point<double> p3 = Point(widthStart, heightLimit + heightStart - appBarHeight);
-    Point<double> p4 = Point(widthLimit + widthStart - 40, heightStart- appBarHeight);
+    Point<double> p3 =
+        Point(widthStart, heightLimit + heightStart - appBarHeight);
+    Point<double> p4 =
+        Point(widthLimit + widthStart - 40, heightStart - appBarHeight);
     Point<double> p5 = Point(
         widthLimit + widthStart - 40, heightLimit + heightStart - appBarHeight);
 
@@ -130,7 +130,6 @@ class _MyHomePageState extends State<TiltQuestion> {
     double d2 = p4.distanceTo(p1);
     double d3 = p3.distanceTo(p1);
     double d4 = p5.distanceTo(p1);
-
 
     if (d1 <= d2 && d1 <= d3 && d1 <= d4) {
       if (model.question is TFQuestion) {
