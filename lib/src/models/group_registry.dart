@@ -323,7 +323,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     try {
       _groupMembers[groupId] =
           await _userRepo.getMembersOf(_authStateModel.token, groupId);
-      return Future.value(_groupMembers[groupId]);
+      return _groupMembers[groupId];
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("Authentication failure");
