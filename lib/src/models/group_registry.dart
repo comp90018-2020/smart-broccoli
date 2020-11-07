@@ -101,6 +101,8 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   Future<void> renameGroup(Group group, String newName) async {
     try {
       await _groupApi.updateGroup(_authStateModel.token, group.id, newName);
+      _createdGroups[group.id] =
+          await _groupApi.getGroup(_authStateModel.token, group.id);
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("Authentication failure");
@@ -108,14 +110,6 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       return Future.error(e.toString());
     } on Exception {
       return Future.error("Something went wrong");
-    }
-
-    // fetch the updated group and save it to the map
-    try {
-      _createdGroups[group.id] =
-          await _groupApi.getGroup(_authStateModel.token, group.id);
-    } catch (e) {
-      return Future.error(e);
     }
     notifyListeners();
   }
