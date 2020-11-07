@@ -29,7 +29,8 @@ export class GameSession {
     // players info, user id to map
     public playerMap: { [playerId: number]: Player } = {};
     public questionIndex: number = -1;
-    public QuestionReleaseAt: { [questionIndex: number]: number } = {};
+    // Queston release timestamp
+    public questionReleaseAt: { [questionIndex: number]: number } = {};
     public preQuestionReleasedAt: number = 0;
     public _isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
@@ -196,7 +197,7 @@ export class GameSession {
     }
 
     setQuestionReleaseTime(questionIndex: number, afterTime: number) {
-        this.QuestionReleaseAt[questionIndex] = Date.now() + afterTime;
+        this.questionReleaseAt[questionIndex] = Date.now() + afterTime;
     }
 
     setPlayerState(player: Player, state: PlayerState) {
@@ -247,8 +248,8 @@ export class GameSession {
 
     canReleaseTheFirstQuestion() {
         return (
-            this.QuestionReleaseAt.hasOwnProperty(0) &&
-            Date.now() > this.QuestionReleaseAt[0]
+            this.questionReleaseAt.hasOwnProperty(0) &&
+            Date.now() > this.questionReleaseAt[0]
         );
     }
 
@@ -300,7 +301,7 @@ export class GameSession {
     canEmitStarting() {
         return (
             this.isSelfPacedGroupAndHasNotStarted() &&
-            !this.QuestionReleaseAt.hasOwnProperty(0)
+            !this.questionReleaseAt.hasOwnProperty(0)
         );
     }
 
