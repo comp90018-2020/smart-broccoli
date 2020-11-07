@@ -314,23 +314,22 @@ const notificationUsers = async (users: User[], session: Session) => {
 
         // Now check user state
         if (user.UserState) {
-            if (session.type === "live") {
-                // Live
-                return user.NotificationSetting.calendarLive;
-            } else {
-                // Self paced
-                if (user.UserState.calendarFree) {
-                    return user.UserState.free;
-                } else {
-                    if (user.NotificationSetting.calendarSelfPaced) {
-                        // User indicated that they're ok with notifications
-                        // when they have item on calendar
-                        return user.UserState.free;
-                    } else {
-                        return false;
-                    }
+            // If user's calendar is not free
+            if (!user.UserState.calendarFree) {
+                // And they do not want notifications when their calendar
+                // is not free
+                if (
+                    (session.type === "live" &&
+                        !user.NotificationSetting.calendarLive) ||
+                    (session.type === "self paced" &&
+                        !user.NotificationSetting.calendarSelfPaced)
+                ) {
+                    return false;
                 }
             }
+            // User indicated that they're ok with notifications
+            // when they have item on calendar
+            return user.UserState.free;
         }
 
         // User has no state, true
