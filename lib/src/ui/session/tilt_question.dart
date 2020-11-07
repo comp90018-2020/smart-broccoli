@@ -146,7 +146,6 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     List<bool> selected = [false, false, false, false];
 
-    //TODO make answer selections here
 
     /// top side
     /// if ball is near the y start line and the xLimit line
