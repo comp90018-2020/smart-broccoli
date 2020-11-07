@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -72,6 +73,9 @@ class BackgroundLocation {
   /// 1 Km as that assumes for GPS errors and other inaccuracies
   static Future<bool> inGeoFence(List<GeoFence> geofenceList,
       Position userLocation, int distanceKM) async {
+    if (geofenceList == null) {
+      return false;
+    }
     for (var i = 0; i < geofenceList.length; i++) {
       var distance = Geolocator.distanceBetween(geofenceList[i].lat,
           geofenceList[i].lon, userLocation.latitude, userLocation.longitude);

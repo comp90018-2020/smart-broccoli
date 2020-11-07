@@ -135,10 +135,10 @@
     retry-request "^4.1.1"
     teeny-request "^7.0.0"
 
-"@google-cloud/firestore@^4.0.0":
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/@google-cloud/firestore/-/firestore-4.6.1.tgz#3050f80f023528b1ec80b1a955582a796a36d035"
-  integrity sha512-GZ5tBdg05ANAp2+9voMQauH+WF9s2ZjY51MpIqju74j6MH3z31A0Gm+Wukl6FJ30XMUP316tFUUVpTyUyAd8+g==
+"@google-cloud/firestore@^4.0.0", "@google-cloud/firestore@^4.7.0":
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/firestore/-/firestore-4.7.0.tgz#8a176e41773b2a06320e1281d93994624b321541"
+  integrity sha512-srkT0LxbKBEo3hWlgjJenT6+bPJK4D+vuKiV/EZFc6sWhDNQwgOgKF6Rf16mggHwKOL9Sx08Veu0BUaX1uyh4g==
   dependencies:
     fast-deep-equal "^3.1.1"
     functional-red-black-tree "^1.0.1"
@@ -3487,10 +3487,10 @@ superagent@6.1.0:
     readable-stream "^3.6.0"
     semver "^7.3.2"
 
-supertest@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/supertest/-/supertest-6.0.0.tgz#8371509fadd616217b42ff3d3be7cc0267baea1b"
-  integrity sha512-7+Skilm7kvUZIaKfALPgjS3i8zYs11zvEudAeYdqJZL3f+SGGFV4qQkkTVkYcs+zbE6de47HP8o0a0hy1BFlMA==
+supertest@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/supertest/-/supertest-6.0.1.tgz#f6b54370de85c45d6557192c8d7df604ca2c9e18"
+  integrity sha512-8yDNdm+bbAN/jeDdXsRipbq9qMpVF7wRsbwLgsANHqdjPsCoecmlTuqEcLQMGpmojFBhxayZ0ckXmLXYq7e+0g==
   dependencies:
     methods "1.1.2"
     superagent "6.1.0"
@@ -3527,10 +3527,10 @@ swagger-parser@10.0.2:
   dependencies:
     "@apidevtools/swagger-parser" "10.0.2"
 
-swagger-ui-dist@^3.36.1:
-  version "3.36.1"
-  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-3.36.1.tgz#0aa2ab80fb958aa3265811da5b69a5c8e06cc815"
-  integrity sha512-p7lx/OubaaCzOfSYDuMbkRvf/a+rTnQAOySN/NhL+k6D5o9WXEEeKZwj/6fRHRoLSHKZq28jc1xQcz8HuYcgwQ==
+swagger-ui-dist@^3.36.2:
+  version "3.36.2"
+  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-3.36.2.tgz#353e01ae4c6d4a324319e4325e2b0a96aa7b5366"
+  integrity sha512-jbxorhRC/FKk8yMx5zEbg1A1sXc/vsW2vrDTJ3clmaMr9F12zsy161kwnxjVt/vVkMglDOz+BC8ZMY01toxHwA==
 
 table@^5.2.3:
   version "5.4.6"

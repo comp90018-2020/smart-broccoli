@@ -26,6 +26,8 @@ class UserRepository {
     return _picStash.getPic(_users[id].pictureId);
   }
 
+  /// Get users by id with token
+  /// Caller is responsible for catching errors
   Future<User> getUserBy(String token, int id, {bool fromCache = true}) async {
     // first try from cache
     if (fromCache && _users.containsKey(id)) return _users[id];
@@ -40,6 +42,8 @@ class UserRepository {
     return _users[id];
   }
 
+  /// Get members by id
+  /// Caller is responsible for catching errors
   Future<List<User>> getMembersOf(String token, int id) async {
     List<User> members = await _groupApi.getMembers(token, id);
     await Future.wait(members.map((member) async {

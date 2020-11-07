@@ -117,53 +117,112 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     });
   }
 
+  /// Get current user's session (may be null -> user not in session)
   Future<void> refreshSession() async {
     if (!_authStateModel.inSession) return;
-    if ((session = await _sessionApi.getSession(_authStateModel.token)) !=
-        null) {
-      socket.disconnect();
-      _connect(session.token);
+
+    try {
+      if ((session = await _sessionApi.getSession(_authStateModel.token)) !=
+          null) {
+        socket.disconnect();
+        _connect(session.token);
+      }
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
     }
   }
 
+  /// Create session (supporting multiple creation types)
   Future<void> createSession(int quizId, GameSessionType type,
       {bool autoSubscribe = false}) async {
-    session = await _sessionApi.createSession(
-        _authStateModel.token, quizId, type,
-        autoSubscribe: autoSubscribe);
-    _connect(session.token);
+    try {
+      session = await _sessionApi.createSession(
+          _authStateModel.token, quizId, type,
+          autoSubscribe: autoSubscribe);
+      _connect(session.token);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
   }
 
-  Future<void> joinSession(GameSession quizSession) async {
+  List<GameSession> getGroupSessions(Quiz quiz) => quiz.sessions
+      .where((session) =>
+          session.quizType == QuizType.SELF_PACED &&
+          session.type == GameSessionType.GROUP &&
+          session.state != GameSessionState.ENDED &&
+          session.joinCode != null)
+      .toList();
+
+  Color getSessionColour(GameSession session) =>
+      Color(int.parse('FF${session.joinCode}', radix: 16));
+
+  Future<void> joinSessionByPin(String pin) async {
+    try {
+      session = await _sessionApi.joinSession(_authStateModel.token, pin);
+      _connect(session.token);
+      notifyListeners();
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on SessionNotFoundException catch (e) {
+      throw e;
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+  }
+
+  Future<void> _joinSession(GameSession quizSession) async {
     session = await _sessionApi.joinSession(
         _authStateModel.token, quizSession.joinCode);
     _connect(session.token);
     notifyListeners();
   }
 
-  Future<void> joinSessionByPin(String pin) async {
-    session = await _sessionApi.joinSession(_authStateModel.token, pin);
-    _connect(session.token);
-    notifyListeners();
-  }
-
   Future<void> joinLiveSession(Quiz quiz) async {
     try {
-      await joinSession(quiz.sessions.firstWhere((session) =>
+      await _joinSession(quiz.sessions.firstWhere((session) =>
           session.quizType == QuizType.LIVE &&
           session.state != GameSessionState.ENDED));
-    } on SessionNotFoundException catch (err) {
-      _quizCollectionModel.refreshAvailableQuizzes();
-      throw err;
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on SessionNotFoundException {
+      _quizCollectionModel
+          .refreshAvailableQuizzes(refreshIfLoaded: true)
+          .catchError((_) => null);
+      return Future.error("Session no longer exists, refreshing...");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
     }
   }
 
+  /// Get path of peer's profile picture, where path is cached local path
+  /// Should be called from a FutureBuilder
   Future<String> getPeerProfilePicturePath(int userId) async {
     String path;
     // check if cached
     if ((path = await _userRepo.getUserPicture(userId)) != null) return path;
+
     // if not, retrieve from server
-    await _userRepo.getUserBy(session.token, userId);
+    try {
+      await _userRepo.getUserBy(session.token, userId);
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
     return _userRepo.getUserPicture(userId);
   }
 
@@ -244,7 +303,11 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
         await _quizCollectionModel.refreshQuestionPicture(
             session.quizId, question,
             token: session.token);
-      } catch (_) {}
+      } on ApiAuthException {
+        _authStateModel.checkSession();
+      } catch (_) {
+        // Do nothing, picture is not loaded
+      }
       _transitionTo(SessionState.QUESTION);
       PubSub().publish(PubSubTopic.TIMER, arg: time);
     });
@@ -274,21 +337,12 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       // must stop listening immediately to avoid timing conflicts
       socket.clearListeners();
 
-      // refresh quiz information before user navigates back to take quiz pages
-      if (role == GroupRole.MEMBER)
-        _quizCollectionModel.refreshAvailableQuizzes();
-      else
-        _quizCollectionModel.refreshCreatedQuizzes();
-
-      if (state == SessionState.ABORTED) {
+      if (state == SessionState.ABORTED)
         PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.DIALOG_POPALL_SESSION));
-        _clearFields();
-      } else if (state == SessionState.ABANDONED) {
+      else if (state == SessionState.ABANDONED)
         PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.POPALL_SESSION));
-        _clearFields();
-      }
     });
   }
 
@@ -433,13 +487,13 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       if (state == SessionState.FINISHED) {
         PubSub().publish(PubSubTopic.ROUTE,
             arg: RouteArgs(action: RouteAction.POPALL_SESSION));
-        _clearFields();
       }
       _transitionTo(SessionState.ABANDONED);
       socket.emit('quit');
     } else
       // quiz owner
       abortQuiz();
+    socket.disconnect();
   }
 
   void answerQuestion() {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 void showErrSnackBar(BuildContext context, String text, {bool dim = false}) {
   showSnackBar(context, text,
-      backgroundColor: dim ? Colors.red[600] : Colors.red[400]);
+      backgroundColor: dim ? Colors.red[400] : Colors.red[600]);
 }
 
 void showSnackBar(BuildContext context, String text,
@@ -23,18 +23,18 @@ void showSnackBar(BuildContext context, String text,
   Scaffold.of(context).showSnackBar(snackBar);
 }
 
-Widget loadingIndicator(double margin) {
-  return Container(
-      child: Column(
-    children: [
-      Padding(padding: EdgeInsets.all(margin)),
-      Container(
+/// Generic loading indicator
+class LoadingIndicator extends Container {
+  LoadingIndicator(EdgeInsetsGeometry padding)
+      : super(
+          padding: padding,
           child: SizedBox(
-              height: 25,
-              width: 25,
-              child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white))))
-    ],
-  ));
+            height: 25,
+            width: 25,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        );
 }

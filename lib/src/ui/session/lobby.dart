@@ -54,12 +54,24 @@ class QuizLobby extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                   margin: EdgeInsets.only(bottom: 12),
-                  child: Consumer<QuizCollectionModel>(
-                    builder: (context, collection, child) => QuizCard(
-                      collection.getQuiz(model.session.quizId),
-                      aspectRatio: 2.3,
-                      optionsEnabled: false,
-                    ),
+                  child: FutureBuilder(
+                    future:
+                        Provider.of<QuizCollectionModel>(context, listen: false)
+                            .getQuiz(model.session.quizId),
+                    builder: (BuildContext context,
+                            AsyncSnapshot<Quiz> snapshot) =>
+                        snapshot.hasData && snapshot.data != null
+                            ? QuizCard(
+                                snapshot.data,
+                                aspectRatio: 2.3,
+                                optionsEnabled: false,
+                                // coloured strip if self-paced group (smart auto)
+                                supplementary:
+                                    model.session.type == GameSessionType.GROUP
+                                        ? _colouredStrip(context, model)
+                                        : null,
+                              )
+                            : Container(),
                   ),
                 ),
 
@@ -80,25 +92,6 @@ class QuizLobby extends StatelessWidget {
                     ),
                   ),
               ]),
-            ),
-
-            // Chip for group subscriptions
-            Consumer<GameSessionModel>(
-              builder: (context, model, child) => model.role == GroupRole.MEMBER
-                  ? FutureBuilder(
-                      future: Provider.of<GroupRegistryModel>(context,
-                              listen: false)
-                          .getGroup(model.session.groupId),
-                      builder: (BuildContext context,
-                              AsyncSnapshot<Group> snapshot) =>
-                          snapshot.hasData && snapshot.data != null
-                              ? Chip(
-                                  label: Text('Subscribed to group'),
-                                  avatar: Icon(Icons.check_sharp),
-                                )
-                              : SizedBox(height: 8),
-                    )
-                  : SizedBox(height: 8),
             ),
 
             // Text describing status
@@ -156,6 +149,20 @@ class QuizLobby extends StatelessWidget {
       ),
     );
   }
+
+  // Coloured strip for self-paced group (smart auto)
+  Widget _colouredStrip(BuildContext context, GameSessionModel model) =>
+      Container(
+        decoration: BoxDecoration(
+          color: Provider.of<GameSessionModel>(context, listen: false)
+              .getSessionColour(model.session),
+          borderRadius: BorderRadius.only(
+            bottomLeft: const Radius.circular(4.0),
+            bottomRight: const Radius.circular(4.0),
+          ),
+        ),
+        height: 4,
+      );
 
   // Timer display functionality
   Widget _quizTimer(GameSessionModel model) {

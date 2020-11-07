@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/group_dropdown.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
@@ -29,6 +30,9 @@ class _QuizCreateState extends State<QuizCreate> {
   /// Key for form
   final _formKey = GlobalKey<FormState>();
 
+  /// Whether the update has been submitted
+  bool _committed = false;
+
   /// Quiz that is held
   Quiz _quiz;
 
@@ -37,8 +41,12 @@ class _QuizCreateState extends State<QuizCreate> {
 
   /// Sets the quiz that this widget holds
   void _setQuiz(Quiz quiz) {
-    _quiz = quiz;
+    _quiz = Quiz.fromJson(quiz.toJson());
     _timeController.text = _getTimeString(_quiz.timeLimit);
+  }
+
+  Future<Quiz> _newQuiz() {
+    return Future.value(Quiz("", widget.groupId, QuizType.LIVE, timeLimit: 10));
   }
 
   @override
@@ -48,26 +56,10 @@ class _QuizCreateState extends State<QuizCreate> {
     /// TODO: optimise group retrieval (this retrieves quiz/members of group) repeatedly
     Provider.of<GroupRegistryModel>(context, listen: false)
         .refreshCreatedGroups();
-
-    // From group or new quiz
-    if (widget.groupId != null || widget.quizId == null) {
-      _setQuiz(new Quiz("", widget.groupId, QuizType.LIVE, timeLimit: 10));
-    }
-
-    // From quiz id
-    if (widget.quizId != null) {
-      Provider.of<QuizCollectionModel>(context, listen: false)
-          .selectQuiz(widget.quizId);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Clone and set quiz after selectQuiz
-    var quiz =
-        Provider.of<QuizCollectionModel>(context, listen: true).selectedQuiz;
-    if (_quiz == null && quiz != null) _setQuiz(Quiz.fromJson(quiz.toJson()));
-
     return CustomPage(
       title: "Quiz",
       secondaryBackgroundColour: true,
@@ -80,22 +72,45 @@ class _QuizCreateState extends State<QuizCreate> {
 
       // Delete and Save on AppBar
       appbarActions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.delete),
-          padding: EdgeInsets.zero,
-          splashRadius: 20,
-          onPressed: _deleteQuiz,
+        Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.delete),
+            padding: EdgeInsets.zero,
+            splashRadius: 20,
+            onPressed: _committed ? null : _deleteQuiz,
+          ),
         ),
-        IconButton(
-          icon: Icon(Icons.check),
-          padding: EdgeInsets.zero,
-          splashRadius: 20,
-          onPressed: _saveQuiz,
+        Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.check),
+            padding: EdgeInsets.zero,
+            splashRadius: 20,
+            onPressed: _committed ? null : _saveQuiz,
+          ),
         ),
       ],
-      child: _quiz == null
-          ? Container()
-          : SingleChildScrollView(
+      child: FutureBuilder(
+        future: _quiz != null
+            // If quiz is loaded, use loaded quiz
+            ? Future.value(_quiz)
+            : widget.quizId != null
+                // Get quiz if quiz id
+                ? Provider.of<QuizCollectionModel>(context, listen: false)
+                    .getQuiz(widget.quizId, refresh: true)
+                // Otherwise just create a new one
+                : _newQuiz(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              await showBasicDialog(context, snapshot.error.toString());
+              Navigator.of(context).pop();
+            });
+            return Container();
+          }
+          if (snapshot.hasData) {
+            if (_quiz == null) _setQuiz(snapshot.data);
+
+            return SingleChildScrollView(
               child: Form(
                 key: _formKey,
                 child: Padding(
@@ -134,7 +149,7 @@ class _QuizCreateState extends State<QuizCreate> {
                       // Picture selection
                       FutureBuilder(
                         future: Provider.of<QuizCollectionModel>(context)
-                            .getQuizPicturePath(quiz),
+                            .getQuizPicturePath(_quiz),
                         builder: (BuildContext context,
                             AsyncSnapshot<String> snapshot) {
                           return PictureCard(
@@ -281,7 +296,12 @@ class _QuizCreateState extends State<QuizCreate> {
                   ),
                 ),
               ),
-            ),
+            );
+          }
+          return Center(
+              child: LoadingIndicator(EdgeInsets.symmetric(vertical: 8)));
+        },
+      ),
     );
   }
 
@@ -395,8 +415,8 @@ class _QuizCreateState extends State<QuizCreate> {
   }
 
   /// Whether the quiz has been modified
-  bool quizModified() => !_quiz
-      .partialEqual(context.read<QuizCollectionModel>().getQuiz(_quiz.id));
+  Future<bool> quizModified() async => !_quiz.partialEqual(
+      await context.read<QuizCollectionModel>().getQuiz(_quiz.id));
 
   // Exit page
   void _close() async {
@@ -404,22 +424,20 @@ class _QuizCreateState extends State<QuizCreate> {
     if (_quiz == null) return Navigator.of(context).pop();
 
     // Unsaved changes
-    if (_quiz.id == null || _quiz.id != null && quizModified()) {
+    if (_quiz.id == null || _quiz.id != null && await quizModified()) {
       if (!await showConfirmDialog(
           context, "Are you sure you want to discard changes?",
           title: "Discard quiz changes", barrierDismissable: true)) {
         return;
       }
     }
-    context.read<QuizCollectionModel>().clearSelectedQuiz();
     Navigator.of(context).pop();
   }
 
   /// Save quiz
   void _saveQuiz() async {
     // Quiz not loaded or no change
-    if (_quiz == null || _quiz.id != null && !quizModified()) {
-      context.read<QuizCollectionModel>().clearSelectedQuiz();
+    if (_quiz == null || _quiz.id != null && !await quizModified()) {
       return Navigator.of(context).pop();
     }
 
@@ -433,15 +451,19 @@ class _QuizCreateState extends State<QuizCreate> {
       return;
     }
 
+    setState(() => _committed = true);
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .saveQuiz(_quiz);
       await showBasicDialog(context, "Quiz saved", title: "Success");
-      context.read<QuizCollectionModel>().clearSelectedQuiz();
+      Navigator.of(context).pop();
+    } on QuizNotFoundException {
+      await showBasicDialog(context, "Quiz no longer exists");
       Navigator.of(context).pop();
     } catch (err) {
-      showBasicDialog(context, err.toString());
+      showErrSnackBar(context, err.toString());
     }
+    setState(() => _committed = false);
   }
 
   /// Delete quiz
@@ -449,18 +471,22 @@ class _QuizCreateState extends State<QuizCreate> {
     // Quiz not loaded
     if (_quiz == null) return Navigator.of(context).pop();
     if (!await showConfirmDialog(
-        context, "Are you sure you want to delete the question?",
+        context, "Are you sure you want to delete the quiz?",
         title: "Delete question")) {
       return;
     }
 
+    setState(() => _committed = true);
     try {
       await Provider.of<QuizCollectionModel>(context, listen: false)
           .deleteQuiz(_quiz);
-      context.read<QuizCollectionModel>().clearSelectedQuiz();
+      Navigator.of(context).pop();
+    } on QuizNotFoundException {
+      await showBasicDialog(context, "Quiz no longer exists");
       Navigator.of(context).pop();
     } on Exception catch (err) {
-      showBasicDialog(context, err.toString());
+      showErrSnackBar(context, err.toString());
     }
+    setState(() => _committed = false);
   }
 }

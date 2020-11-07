@@ -48,10 +48,9 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Function to get group
-  Future<Group> getGroup(int id, {bool forceRefresh = false}) async {
+  Future<Group> getGroup(int id, {bool refresh = false}) async {
     // If in cache and we don't force refresh
-    if (!forceRefresh &&
-        (_joinedGroups[id] != null || _createdGroups[id] != null)) {
+    if (!refresh && (_joinedGroups[id] != null || _createdGroups[id] != null)) {
       return _joinedGroups[id] ?? _createdGroups[id];
     }
     // If not, retrieve group

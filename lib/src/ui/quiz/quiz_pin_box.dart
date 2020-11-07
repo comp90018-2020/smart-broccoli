@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/theme.dart';
 
 class QuizPinBox extends StatefulWidget {
@@ -76,8 +77,8 @@ class _QuizPinBoxState extends State<QuizPinBox> {
           .joinSessionByPin(_pinFilter.text);
     } on SessionNotFoundException {
       showBasicDialog(context, "Invalid session PIN");
-    } catch (_) {
-      showBasicDialog(context, "Cannot join session");
+    } catch (e) {
+      showErrSnackBar(context, e.toString());
     }
   }
 }

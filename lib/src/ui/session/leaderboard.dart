@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:smart_broccoli/router.dart';
+import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
@@ -17,8 +19,8 @@ class QuizLeaderboard extends StatelessWidget {
                 model.state == SessionState.FINISHED)
               IconButton(
                 onPressed: () => model.state == SessionState.FINISHED
-                    ? Navigator.of(context).popUntil(
-                        (route) => !route.settings.name.startsWith('/session'))
+                    ? PubSub().publish(PubSubTopic.ROUTE,
+                        arg: RouteArgs(action: RouteAction.POPALL_SESSION))
                     : model.nextQuestion(),
                 icon: model.state == SessionState.FINISHED
                     ? Icon(Icons.flag)

@@ -228,10 +228,13 @@ export const createSession = async (userId: number, opts: any) => {
                 as: "questions",
             },
         ],
-        order: [["questions", "index", "ASC"]]
+        order: [["questions", "index", "ASC"]],
     });
     if (!quiz) {
         throw new ErrorStatus("Quiz not found", 404);
+    }
+    if (quiz.questions.length === 0) {
+        throw new ErrorStatus("Quiz has zero questions", 400);
     }
 
     // Find group/role
