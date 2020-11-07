@@ -2,13 +2,16 @@
 // https://github.com/YC/another_authenticator
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart' show Divider, ListTile;
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/material.dart'
+    show Divider, ListTile, MaterialPageRoute;
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Acknowledgements page for used libraries and code
 class AcknowledgementsPage extends StatelessWidget {
+  static const _license_dir = 'assets/licenses';
   static const _libs = [
     {'title': 'Broccoli Logo by Yaling Deng'},
     {
@@ -20,10 +23,7 @@ class AcknowledgementsPage extends StatelessWidget {
       'title': 'indexed_stack by cirnok',
       'url': 'https://gist.github.com/cirnok/e1b70f5d841e47c9d85ccdf6ae866984'
     },
-    {
-      'title': 'Flutter',
-      'url': 'https://raw.githubusercontent.com/flutter/flutter/master/LICENSE'
-    },
+    {'title': 'flutter/flutter', 'path': '$_license_dir/flutter'},
     {
       'title': 'flutter/plugins',
       'url': 'https://raw.githubusercontent.com/flutter/plugins/master/LICENSE'
@@ -69,13 +69,43 @@ class AcknowledgementsPage extends StatelessWidget {
             const Divider(height: 0),
         itemBuilder: (BuildContext context, int index) {
           return ListTile(
-            onTap: () {
+            onTap: () async {
               if (_libs[index]['url'] != null)
                 launch(_libs[index]['url'], forceWebView: true);
+              if (_libs[index]['path'] != null) {
+                var text = await rootBundle.loadString(_libs[index]['path']);
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) =>
+                        FullScreenLicense(_libs[index]['title'], text)));
+              }
             },
             title: Text(_libs[index]['title']),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Full screen license widget
+class FullScreenLicense extends StatelessWidget {
+  /// The name
+  final String title;
+
+  /// License
+  final String license;
+
+  FullScreenLicense(this.title, this.license);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPage(
+      title: this.title,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(this.license),
+        ),
       ),
     );
   }

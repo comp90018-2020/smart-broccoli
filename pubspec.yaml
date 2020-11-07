@@ -63,6 +63,9 @@ flutter:
     - assets/icon.png
     - assets/account_circle-black-24dp.svg
 
+    # Licenses
+    - assets/licenses/flutter
+
   fonts:
     - family: PatrickHandSC
       fonts:
