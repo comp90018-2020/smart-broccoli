@@ -85,12 +85,14 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
                   switch (action) {
                     case UserAction.LEAVE_GROUP:
                       if (await _confirmLeaveGroup()) {
-                        await Provider.of<GroupRegistryModel>(context,
-                                listen: false)
-                            .leaveGroup(group)
-                            .catchError(
-                                (e) => showBasicDialog(context, e.toString()));
-                        Navigator.of(context).pop();
+                        try {
+                          await Provider.of<GroupRegistryModel>(context,
+                                  listen: false)
+                              .leaveGroup(group);
+                          Navigator.of(context).pop();
+                        } catch (e) {
+                          await showBasicDialog(context, e.toString());
+                        }
                       }
                       break;
                     case UserAction.RENAME_GROUP:
