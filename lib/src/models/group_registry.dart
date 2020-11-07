@@ -94,7 +94,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     }
 
     // Return retrieved quizzes
-    return Future.value(_quizCollectionModel.getQuizzesWhere(groupId: groupId));
+    return _quizCollectionModel.getQuizzesWhere(groupId: groupId);
   }
 
   /// Rename a group.
