@@ -36,75 +36,48 @@ class _GroupListState extends State<GroupList> {
   @override
   Widget build(BuildContext context) {
     ///Checking whether user is registered, and adding only relevant tabs
-    return Consumer<UserProfileModel>(builder: (context, profile, child) {
-      return FutureBuilder(
-        future: profile.getUser(),
-        builder: (context, snapshot) {
-          log("Group list member future ${snapshot.toString()}");
-          return CustomTabbedPage(
-            title: "Groups",
+    return Consumer<UserProfileModel>(
+      builder: (context, profile, child) {
+        return FutureBuilder(
+          future: profile.getUser(),
+          builder: (context, snapshot) {
+            log("Group list member future ${snapshot.toString()}");
+            return CustomTabbedPage(
+              title: "Groups",
 
-            ///Hiding tab for unregistered user
-            tabs: [
-              Tab(text: "JOINED"),
-              if (snapshot.hasData &&
-                  snapshot.data.type != UserType.UNREGISTERED)
-                Tab(text: "CREATED")
-            ],
-            hasDrawer: true,
-            secondaryBackgroundColour: true,
-            // Handle tab tap
-            tabTap: (value) {
-              setState(() {
-                tab = value;
-              });
-            },
-            // Tabs
-            tabViews: [
-              Consumer<GroupRegistryModel>(
-                builder: (context, registry, child) => FutureBuilder(
-                  future: registry.getJoinedGroups(withMembers: true),
-                  builder: (context, snapshot) {
-                    log("Group list future ${snapshot.toString()}");
-                    if (snapshot.hasError)
-                      return Center(
-                          child: Text("An error has occurred, cannot load"));
-                    if (snapshot.hasData && snapshot.data.length == 0)
-                      return Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(35.0),
-                            child: NoContentPlaceholder(
-                              text:
-                                  "Seems like you are not part of any group yet️",
-                            ),
-                          )
-                        ],
-                      );
-                    if (snapshot.hasData)
-                      return buildGroupList(
-                          snapshot.data, registry.getGroupMembers);
-                    return Center(child: LoadingIndicator(EdgeInsets.all(16)));
-                  },
-                ),
-              ),
-              if (snapshot.hasData &&
-                  snapshot.data.type != UserType.UNREGISTERED)
+              ///Hiding tab for unregistered user
+              tabs: [
+                Tab(text: "JOINED"),
+                if (snapshot.hasData &&
+                    snapshot.data.type != UserType.UNREGISTERED)
+                  Tab(text: "CREATED")
+              ],
+              hasDrawer: true,
+              secondaryBackgroundColour: true,
+              // Handle tab tap
+              tabTap: (value) {
+                setState(() {
+                  tab = value;
+                });
+              },
+              // Tabs
+              tabViews: [
                 Consumer<GroupRegistryModel>(
                   builder: (context, registry, child) => FutureBuilder(
-                    future: registry.getCreatedGroups(withMembers: true),
+                    future: registry.getJoinedGroups(withMembers: true),
                     builder: (context, snapshot) {
+                      log("Group list future ${snapshot.toString()}");
                       if (snapshot.hasError)
                         return Center(
                             child: Text("An error has occurred, cannot load"));
-                      // Should never happen
                       if (snapshot.hasData && snapshot.data.length == 0)
                         return Column(
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(35.0),
                               child: NoContentPlaceholder(
-                                text: "No groups available",
+                                text:
+                                    "Seems like you are not part of any group yet️",
                               ),
                             )
                           ],
@@ -117,29 +90,61 @@ class _GroupListState extends State<GroupList> {
                     },
                   ),
                 ),
-            ],
-
-            // Action buttons
-            floatingActionButton: tab == 0
-                ? Builder(
-                    builder: (BuildContext context) =>
-                        FloatingActionButton.extended(
-                      onPressed: _committed ? null : () => _joinGroup(context),
-                      label: Text('JOIN GROUP'),
-                      icon: Icon(Icons.add),
+                if (snapshot.hasData &&
+                    snapshot.data.type != UserType.UNREGISTERED)
+                  Consumer<GroupRegistryModel>(
+                    builder: (context, registry, child) => FutureBuilder(
+                      future: registry.getCreatedGroups(withMembers: true),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError)
+                          return Center(
+                              child:
+                                  Text("An error has occurred, cannot load"));
+                        // Should never happen
+                        if (snapshot.hasData && snapshot.data.length == 0)
+                          return Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(35.0),
+                                child: NoContentPlaceholder(
+                                  text: "No groups available",
+                                ),
+                              )
+                            ],
+                          );
+                        if (snapshot.hasData)
+                          return buildGroupList(
+                              snapshot.data, registry.getGroupMembers);
+                        return Center(
+                            child: LoadingIndicator(EdgeInsets.all(16)));
+                      },
                     ),
-                  )
-                : FloatingActionButton.extended(
-                    onPressed: () {
-                      Navigator.of(context).pushNamed('/group/create');
-                    },
-                    label: Text('CREATE GROUP'),
-                    icon: Icon(Icons.group_add),
                   ),
-          );
-        },
-      );
-    });
+              ],
+
+              // Action buttons
+              floatingActionButton: tab == 0
+                  ? Builder(
+                      builder: (BuildContext context) =>
+                          FloatingActionButton.extended(
+                        onPressed:
+                            _committed ? null : () => _joinGroup(context),
+                        label: Text('JOIN GROUP'),
+                        icon: Icon(Icons.add),
+                      ),
+                    )
+                  : FloatingActionButton.extended(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/group/create');
+                      },
+                      label: Text('CREATE GROUP'),
+                      icon: Icon(Icons.group_add),
+                    ),
+            );
+          },
+        );
+      },
+    );
   }
 
   // Builds a list of groups
