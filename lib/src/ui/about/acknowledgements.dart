@@ -24,38 +24,75 @@ class AcknowledgementsPage extends StatelessWidget {
       'url': 'https://gist.github.com/cirnok/e1b70f5d841e47c9d85ccdf6ae866984'
     },
     {'title': 'flutter/flutter', 'path': '$_license_dir/flutter'},
+    {'title': 'leisim/auto_size_text', 'path': '$_license_dir/auto_size_text'},
+    {'title': 'dart-lang/collection', 'path': '$_license_dir/collection'},
     {
-      'title': 'flutter/plugins',
-      'url': 'https://raw.githubusercontent.com/flutter/plugins/master/LICENSE'
-    },
-    {
-      'title': 'dart-lang/http',
-      'url': 'https://raw.githubusercontent.com/dart-lang/http/master/LICENSE'
-    },
-    {
-      'title': 'rrousselGit/provider',
-      'url':
-          'https://raw.githubusercontent.com/rrousselGit/provider/master/LICENSE',
+      'title': 'builttoroam/device_calendar',
+      'path': '$_license_dir/device_calendar'
     },
     {
       'title': 'fredeil/email-validator.dart',
-      'url':
-          'https://raw.githubusercontent.com/fredeil/email-validator.dart/master/LICENSE'
+      'path': '$_license_dir/email_validator'
     },
     {
-      'title': 'lukepighetti/fluro',
-      'url':
-          'https://raw.githubusercontent.com/lukepighetti/fluro/master/LICENSE'
+      'title': 'FirebaseExtended/flutterfire',
+      'path': '$_license_dir/firebase_core'
     },
     {
-      'title': 'MarcinusX/NumberPicker',
-      'url':
-          'https://raw.githubusercontent.com/MarcinusX/NumberPicker/master/LICENSE'
+      'title': 'FirebaseExtended/flutterfire',
+      'path': '$_license_dir/firebase_messaging'
+    },
+    {'title': 'lukepighetti/fluro', 'path': '$_license_dir/fluro'},
+    {
+      'title': 'MaikuB/flutter_local_notifications',
+      'path': '$_license_dir/flutter_local_notifications'
     },
     {
-      'title': 'leisim/auto_size_text',
-      'url':
-          'https://raw.githubusercontent.com/leisim/auto_size_text/master/LICENSE'
+      'title': 'comp90018-2020/Flutter-settings',
+      'path': '$_license_dir/flutter_settings'
+    },
+    {'title': 'dnfield/flutter_svg', 'path': '$_license_dir/flutter_svg'},
+    {'title': 'Baseflow/flutter-geocoding', 'path': '$_license_dir/geocoding'},
+    {
+      'title': 'Baseflow/flutter-geolocator',
+      'path': '$_license_dir/geolocator'
+    },
+    {'title': 'dart-lang/http', 'path': '$_license_dir/http'},
+    {'title': 'flutter/plugins', 'path': '$_license_dir/image_picker'},
+    {'title': 'cph-cachet/flutter-plugins', 'path': '$_license_dir/light'},
+    {'title': 'MarcinusX/NumberPicker', 'path': '$_license_dir/numberpicker'},
+    {'title': 'flutter/plugins', 'path': '$_license_dir/package_info'},
+    {'title': 'flutter/plugins', 'path': '$_license_dir/path_provider'},
+    {
+      'title': 'Baseflow/flutter-permission-handler',
+      'path': '$_license_dir/permission_handler'
+    },
+    {'title': 'rrousselGit/provider', 'path': '$_license_dir/provider'},
+    {'title': 'google/quiver-dart', 'path': '$_license_dir/quiver'},
+    {
+      'title': 'comp90018-2020/selection_picker',
+      'path': '$_license_dir/selection_picker'
+    },
+    {'title': 'flutter/plugins', 'path': '$_license_dir/sensors'},
+    {'title': 'flutter/plugins', 'path': '$_license_dir/shared_preferences'},
+    {
+      'title': 'rikulo/socket.io-client-dart',
+      'path': '$_license_dir/socket_io_client'
+    },
+    {'title': 'tekartik/sqflite', 'path': '$_license_dir/sqflite'},
+    {'title': 'flutter/plugins', 'path': '$_license_dir/url_launcher'},
+    {
+      'title': 'VTechJm/flutter_wifi_info_plugin',
+      'path': '$_license_dir/wifi_info_plugin'
+    },
+    {
+      'title': 'fluttercommunity/flutter_workmanager',
+      'path': '$_license_dir/workmanager'
+    },
+    {'title': 'renggli/dart-xml', 'path': '$_license_dir/xml'},
+    {
+      'title': 'flutter/plugins',
+      'url': 'https://raw.githubusercontent.com/flutter/plugins/master/LICENSE'
     }
   ];
 
