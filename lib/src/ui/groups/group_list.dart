@@ -59,15 +59,18 @@ class _GroupListState extends State<GroupList> {
                   builder: (context, registry, child) =>
                       registry.joinedGroups.length > 0
                           ? buildGroupList(registry.joinedGroups)
-                          : Column(children: [
-                              ConstrainedBox(
-                                constraints: BoxConstraints(maxHeight: 300),
-                                child: NoContentPlaceholder(
+                          : Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(35.0),
+                                  child: NoContentPlaceholder(
                                     parentWidget: widget,
-                                    text:
-                                        "Seems like you are not part of any group yet️"),
-                              )
-                            ]),
+                                    text: "Seems like you are not part of " +
+                                        "any group yet️",
+                                  ),
+                                )
+                              ],
+                            ),
                 ),
                 Consumer<GroupRegistryModel>(
                   builder: (context, registry, child) =>
@@ -81,18 +84,18 @@ class _GroupListState extends State<GroupList> {
                   builder: (context, registry, child) =>
                       registry.joinedGroups.length > 0
                           ? buildGroupList(registry.joinedGroups)
-                          : Column(children: [
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                    minHeight:
-                                        MediaQuery.of(context).size.height *
-                                            0.3),
-                                child: NoContentPlaceholder(
+                          : Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(35.0),
+                                  child: NoContentPlaceholder(
                                     parentWidget: widget,
-                                    text:
-                                        "Seems like you are not part of any group yet️"),
-                              )
-                            ]),
+                                    text: "Seems like you are not part of " +
+                                        "any group yet️",
+                                  ),
+                                )
+                              ],
+                            ),
                 )
               ],
 
