@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/ui/shared/helper.dart';
 import 'package:smart_broccoli/src/ui/shared/indicators.dart';
+import 'no_content_place_holder.dart';
 import 'quiz_card.dart';
 
 /// Build a list of quizzes
@@ -13,8 +13,12 @@ class QuizContainer extends StatefulWidget {
       this.padding = const EdgeInsets.symmetric(vertical: 8),
       this.headerPadding = const EdgeInsets.fromLTRB(8, 24, 8, 16),
       this.hiddenButton = false,
+      @required this.noQuizPlaceholder,
       this.error})
       : super(key: key);
+
+  /// Placeholder text when there is no quiz
+  final String noQuizPlaceholder;
 
   /// Passed by parent to indicate error
   final Widget error;
@@ -63,8 +67,15 @@ class _BuildQuiz extends State<QuizContainer> {
             if (widget.items == null && widget.error == null)
               LoadingIndicator(EdgeInsets.symmetric(vertical: 32)),
 
+            // Placeholder if no quizzes
+            if (widget.items != null && widget.items.length == 0)
+              FractionallySizedBox(
+                widthFactor: 0.8,
+                child: NoContentPlaceholder(text: widget.noQuizPlaceholder),
+              ),
+
             // List has been loaded
-            if (widget.items != null)
+            if (widget.items != null && widget.items.length > 0)
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: ConstrainedBox(

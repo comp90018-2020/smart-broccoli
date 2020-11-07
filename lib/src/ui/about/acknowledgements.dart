@@ -11,6 +11,7 @@ import 'package:smart_broccoli/src/ui/shared/page.dart';
 class AcknowledgementsPage extends StatelessWidget {
   static const _libs = [
     {'title': 'Broccoli Logo by Yaling Deng'},
+    {'title': 'Broccoli Icon', 'url': 'https://charatoon.com/?dl=3049'},
     {
       'title': 'Logo font: Patrick Hand SC',
       'url':
