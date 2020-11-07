@@ -22,9 +22,11 @@ class _GroupListState extends State<GroupList> {
   @override
   void didChangeDependencies() {
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshJoinedGroups();
+        .getJoinedGroups(refresh: true)
+        .catchError((_) => null);
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .refreshCreatedGroups();
+        .getCreatedGroups(refresh: true)
+        .catchError((_) => Null);
     super.didChangeDependencies();
   }
 
@@ -45,8 +47,12 @@ class _GroupListState extends State<GroupList> {
         // Tabs
         tabViews: [
           Consumer<GroupRegistryModel>(
-            builder: (context, registry, child) =>
-                buildGroupList(registry.joinedGroups),
+            builder: (context, registry, child) => FutureBuilder(
+              future: registry.getJoinedGroups(),
+              builder: (context, snapshot) {
+                return buildGroupList(registry.joinedGroups);
+              },
+            ),
           ),
           Consumer<GroupRegistryModel>(
             builder: (context, registry, child) =>
