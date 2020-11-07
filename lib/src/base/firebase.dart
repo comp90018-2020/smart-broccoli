@@ -57,6 +57,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp();
   // Notification will show automatically, do not have to use LocalNotification
+  // However there might be an innegligible delay
 }
 
 class LocalNotification {
