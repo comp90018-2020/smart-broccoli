@@ -242,49 +242,44 @@ Widget _leaderboardList(GameSessionModel model, {bool scrollable = true}) {
     itemCount: model.outcome.leaderboard.length,
     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
     physics: scrollable ? null : NeverScrollableScrollPhysics(),
-    itemBuilder: (BuildContext context, int index) {
-      return ListTile(
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Rank
-            Text(
-              '${index + 1}',
-              style: SmartBroccoliTheme.listItemTextStyle,
-            ),
-            // Name/image
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(children: [
-                // Profile image
-                FutureBuilder(
-                  future: model.getPeerProfilePicturePath(
-                      model.outcome.leaderboard[index].player.id),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<String> snapshot) =>
-                          UserAvatar(snapshot.data, maxRadius: 20),
-                ),
-                // Name
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Text(model.outcome.leaderboard[index].player.name,
-                      style: SmartBroccoliTheme.listItemTextStyle),
-                )
-              ]),
-            )
-          ],
+    itemBuilder: (BuildContext context, int index) => Row(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        // Rank
+        Text(
+          '${index + 1}',
+          style: SmartBroccoliTheme.listItemTextStyle,
         ),
-        // Score
-        trailing: Wrap(
-            spacing: 5,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text('${model.outcome.leaderboard[index].record.points}',
-                  style: SmartBroccoliTheme.listItemTextStyle),
-              Icon(Icons.star, color: Color(0xFF656565))
-            ]),
-      );
-    },
+        // Profile pic
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: FutureBuilder(
+            future: model.getPeerProfilePicturePath(
+                model.outcome.leaderboard[index].player.id),
+            builder: (BuildContext context, AsyncSnapshot<String> snapshot) =>
+                UserAvatar(snapshot.data, maxRadius: 20),
+          ),
+        ),
+        // Name
+        Expanded(
+          child: Container(
+            child: Text(
+              model.outcome.leaderboard[index].player.name,
+              style: SmartBroccoliTheme.listItemTextStyle,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+          ),
+        ),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text('${model.outcome.leaderboard[index].record.points}',
+              style: SmartBroccoliTheme.listItemTextStyle),
+        ),
+        Icon(Icons.star, color: Color(0xFF656565))
+      ],
+    ),
     separatorBuilder: (BuildContext context, int index) => const Divider(),
   );
 }
