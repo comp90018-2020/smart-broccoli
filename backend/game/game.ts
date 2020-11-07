@@ -198,82 +198,125 @@ export class GameHandler {
                 formatWelcome(player.role, session.status, session.playerMap)
             );
 
-            if (session.isSelfPacedGroupAndHasNotStarted()) {
-                // If this is a self-paced & group game
-                // And has not stated yet
-
-                if (session.status === GameStatus.Pending) {
-                    // If game is Pending
-
-                    // Set game status to starting
-                    session.status = GameStatus.Starting;
-                    // Set the timestamp that the first question will be released
-                    session.setQuestionReleaseTime(
-                        0,
-                        WAIT_TIME_SELFPACED_GROUP
-                    );
-
-                    // Emit starting event with WAIT_TIME_BEFORE_START microseconds
-                    emitToRoom(
-                        whichRoom(session, Role.all),
-                        Event.starting,
-                        WAIT_TIME_SELFPACED_GROUP.toString()
-                    );
-                } else {
-                    // If game is starting
-                    // Get current time
-                    const currentTime = Date.now();
-                    // Get how much time from now 
-                    // to when the first question should be released
-                    const timeDifference =
-                        session.questionReleaseAt[0] - currentTime;
-                    if (
-                        // If the releasing time is in the future
-                        timeDifference > 0 &&
-                        // And is less than RESET_SELFPACED_GROUP_TIME ms
-                        timeDifference < RESET_SELFPACED_GROUP_TIME
-                    ) {
-                        // Reset the timestamp that the first question will be released
-                        session.setQuestionReleaseTime(
-                            0,
-                            RESET_SELFPACED_GROUP_TIME
-                        );
-                        // Emit starting event with WAIT_TIME_BEFORE_START microseconds
-                        emitToRoom(
-                            whichRoom(session, Role.all),
-                            Event.starting,
-                            RESET_SELFPACED_GROUP_TIME.toString()
-                        );
-                    }
-                }
-
+            if (
+                // If this is a self-paced and group game
+                session.type === GameType.SelfPaced_Group &&
+                // And if game status is Pending
+                session.status === GameStatus.Pending
+            ) {
+                // Set game status to starting
+                session.status = GameStatus.Starting;
+                // Allow the first question to be released
+                session.setToQuestion(0);
+                // Set the timestamp that the first question will be released
+                session.setQuestionReleaseTime(0, WAIT_TIME_SELFPACED_GROUP);
+                // Emit starting event with WAIT_TIME_BEFORE_START microseconds
+                emitToRoom(
+                    whichRoom(session, Role.all),
+                    Event.starting,
+                    WAIT_TIME_SELFPACED_GROUP.toString()
+                );
                 setTimeout(
                     // After timeout
                     async (session: GameSession) => {
-                        // Check if can release the first question
-                        // Because the time to release may be reset by new join
+                        // Check whether the first question can be released
+                        // Because the releasomg time may be reset by new join
                         if (
                             // If this game is starting
                             session.is(GameStatus.Starting) &&
                             // And can release the first question
-                            session.canReleaseTheFirstQuestion()
+                            session.canReleaseQuestion(0)
                         ) {
                             // Set the status to be Running
                             session.status = GameStatus.Running;
                             // Allow to release the first question
-                            session.setToNextQuestion(0);
+                            session.setToQuestion(0);
                             // Release the first question
                             this.releaseQuestion(session, 0);
                         }
                     },
-                    WAIT_TIME_BEFORE_START,
+                    WAIT_TIME_SELFPACED_GROUP,
                     session
                 );
                 return;
-            } else if (session.isSelfPacedNotGroupAndHasNotStarted()) {
-                // Else, if the game is self-paced and not group
-                // and has not started yet, release the first question
-                // without waiting in Starting status
+            }
+
+            if (
+                // If this is a self-paced & group game
+                session.type === GameType.SelfPaced_Group &&
+                // If game status is Starting
+                session.status === GameStatus.Starting
+            ) {
+                // Else if game is starting
+                // Get current time
+                const currentTime = Date.now();
+                // Get how much time from now to
+                // when the first question should be released
+                const timeDifference =
+                    session.questionReleaseAt[0] - currentTime;
+                if (
+                    // If the releasing time is in the future
+                    timeDifference > 0 &&
+                    // And is less than RESET_SELFPACED_GROUP_TIME ms
+                    timeDifference < RESET_SELFPACED_GROUP_TIME
+                ) {
+                    // Reset the timestamp that the first question will be released
+                    session.setQuestionReleaseTime(
+                        0,
+                        RESET_SELFPACED_GROUP_TIME
+                    );
+                    // Emit starting event with WAIT_TIME_BEFORE_START microseconds
+                    emitToRoom(
+                        whichRoom(session, Role.all),
+                        Event.starting,
+                        RESET_SELFPACED_GROUP_TIME.toString()
+                    );
+
+                    setTimeout(
+                        // After timeout
+                        async (session: GameSession) => {
+                            // Check if can release the first question
+                            // Because the time to release may be reset by new join
+                            if (
+                                // If this game is starting
+                                session.is(GameStatus.Starting) &&
+                                // And can release the first question
+                                session.canReleaseQuestion(0)
+                            ) {
+                                // Set the status to be Running
+                                session.status = GameStatus.Running;
+                                // Allow to release the first question
+                                session.setToQuestion(0);
+                                // Release the first question
+                                this.releaseQuestion(session, 0);
+                            }
+                        },
+                        WAIT_TIME_BEFORE_START,
+                        session
+                    );
+                } else {
+                    // Emit a starting event for this new join
+                    emitToOne(
+                        player.socketId,
+                        Event.starting,
+                        (session.questionReleaseAt[0] - Date.now()).toString()
+                    );
+                }
+                return;
+            }
+
+            if (
+                // If the game is self-paced and not group
+                session.type === GameType.SelfPaced_NotGroup &&
+                // If it is Pending
+                session.status === GameStatus.Pending
+            ) {
+                // Set game status to be running
+                session.status = GameStatus.Running;
+                // Set when first question will start
+                session.setQuestionReleaseTime(0, 0);
+                // Allow the first question to be released
+                session.setToQuestion(0);
                 this.releaseQuestion(session, 0);
                 return;
             }
@@ -350,7 +393,7 @@ export class GameHandler {
         if (
             // If this is a player
             // And if exists socket connection with same player id
-            session.playerMap[player.id] !== null &&
+            session.playerMap[player.id] !== undefined &&
             // And that socket is is different from this one
             session.playerMap[player.id].socketId !== player.socketId &&
             // And that socket id is connected
@@ -425,7 +468,7 @@ export class GameHandler {
                     // After time out, set game status to be Running
                     session.status = GameStatus.Running;
                     // Allow the first question to be released
-                    session.setToNextQuestion(0);
+                    session.setToQuestion(0);
                     // Release the firt question
                     this.releaseQuestion(session, 0, player);
                 }, WAIT_TIME_BEFORE_START);
@@ -490,7 +533,7 @@ export class GameHandler {
         try {
             session.updatingTime();
             if (!session.isEmitValid(player)) return;
-            if (session.canReleaseNextQuestion(player, questionIndex)) {
+            if (session.canReleaseQuestion(questionIndex, player)) {
                 session.pointSys.playersCountInThisQuestion =
                     session.activePlayersNum;
                 session.setQuestionReleaseTime(
@@ -556,7 +599,7 @@ export class GameHandler {
         );
 
         session.answerReleased.add(questionIndex);
-        session.setToNextQuestion(questionIndex + 1);
+        session.setToQuestion(questionIndex + 1);
 
         if (session.isSelfPacedGroup()) {
             if (!session.hasFinalBoardReleased())
@@ -567,9 +610,12 @@ export class GameHandler {
         }
 
         if (
-            session.isSelfPacedNotGroup() &&
-            session.questionIndex === session.totalQuestions
+            // If game is self-paced and not group game
+            session.type === GameType.SelfPaced_NotGroup &&
+            // And if this is the last question
+            session.questionIndex  === session.totalQuestions
         )
+            // End game
             this.abort(session);
     }
 
@@ -598,8 +644,15 @@ export class GameHandler {
                 );
                 session.boardReleased.add(session.questionIndex - 1);
                 if (session.isSelfPacedGroup()) {
+                    // If this is a self-paced and grouo game
                     if (!session.hasFinalBoardReleased()) {
+                        // Set when the next question will be released
+                        session.setQuestionReleaseTime(
+                            questionIndex + 1,
+                            BOARD_SHOW_TIME
+                        );
                         setTimeout(() => {
+                            // After timeout, release question
                             this.releaseQuestion(
                                 session,
                                 session.questionIndex
@@ -607,7 +660,7 @@ export class GameHandler {
                         }, BOARD_SHOW_TIME);
                     } else this.abort(session);
                 } else if (
-                    !session.isSelfPacedNotGroup() &&
+                    session.type !== GameType.SelfPaced_NotGroup &&
                     session.hasFinalBoardReleased()
                 ) {
                     this.abort(session);
