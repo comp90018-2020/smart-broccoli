@@ -19,47 +19,49 @@ class TiltQuestion extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<TiltQuestion> {
-  //creating Key for red panel
+  ///creating Key for red panel
   GlobalKey areaLimit = GlobalKey();
 
-  bool useGyro = false;
+  /// Denotes if the Accelrometer is being used
+  bool useAccel = false;
 
-  List<bool> chosen = [false, false, false, false];
-
+  /// Values used to determine the size of the Overall answer boxes
   double widthLimit;
   double heightLimit;
 
   double widthStart;
   double heightStart;
 
+  /// Used to determine if the user's ball is so what stationary
+  /// Therefore we can make selection
   bool canSelect = false;
 
-  // 0 for t/f, 1 for MC with 4, 2 for MC with 3 choices
-  int type;
-
+  /// x and y coordinates of the ball should be all positive
   List<double> cord = [0.0, 0.0];
 
-  // color of the circle
-  Color color = Colors.greenAccent;
-
-  // event returned from accelerometer stream
+  /// event returned from accelerometer stream
   AccelerometerEvent event;
 
-  // hold a refernce to these, so that they can be disposed
+  /// hold a refernce to these, so that they can be disposed
   Timer timer;
   StreamSubscription accel;
 
-  // positions and count
+  /// positions value of the ball for use in the main app
   double top;
   double left;
-  int selectAnswerTime = 0;
-  int count = 0;
+
+  /// Used to offset the pixels taken by the appbar
+  double appBarHeight;
 
   setPosition(AccelerometerEvent event) {
     if (event == null) {
       return;
     }
 
+    double xLimit, yLimit, yStart, xStart;
+
+    /// First time initialisation
+    /// TODO handle rotation changes if that happens
     if (cord[0] == 0.0 && cord[1] == 0.0) {
       final RenderBox renderBoxRed =
           areaLimit.currentContext.findRenderObject();
@@ -76,45 +78,64 @@ class _MyHomePageState extends State<TiltQuestion> {
       widthStart = cord[0];
     }
 
+    /// The 40 number offset is to offset the size of the ball
+    /// The width and height values may change so that's why they are
+    /// put here
+    xLimit = widthLimit + widthStart - 40;
+    yLimit = heightLimit + heightStart - appBarHeight - 40;
+    xStart = widthStart;
+    yStart = heightStart - appBarHeight;
+
+    /// We need to save the previous cord for now to see if there has been
+    /// Significant changes
     double nextCordx = cord[0] - event.x * 4;
     double nextCordy = cord[1] + event.y * 4;
 
-    if (nextCordx >= widthLimit + widthStart - 40) {
-      nextCordx = widthLimit + widthStart - 40;
-    }
-    if (nextCordx <= widthStart) {
-      nextCordx = widthStart;
-    }
-    if (nextCordy >= heightLimit + heightStart - appBarHeight - 40) {
-      nextCordy = heightLimit + heightStart - appBarHeight - 40;
-    }
-    if (nextCordy <= heightStart - appBarHeight) {
-      nextCordy = heightStart - appBarHeight;
+    /// Boundary checks width = x, height = y
+    /// If the ball is out of the width limit
+    if (nextCordx >= xLimit) {
+      nextCordx = xLimit;
     }
 
-    // print("x + " + nextCordx.toString());
-    // print("y +" + nextCordy.toString());
+    /// If the ball is below the width limit
+    if (nextCordx <= xStart) {
+      nextCordx = xStart;
+    }
 
+    /// If the ball is over the height limit
+    if (nextCordy >= yLimit) {
+      nextCordy = yLimit;
+    }
+
+    /// If the ball is over the starting height limit
+    if (nextCordy <= yStart) {
+      nextCordy = yStart;
+    }
+
+    /// The ball isn't moving too much, hence you can select an option
     if ((cord[0] - nextCordx).abs() < 4 && (cord[1] - nextCordy).abs() < 4) {
       canSelect = true;
     } else {
       canSelect = false;
     }
 
+    /// After all checks complete, assign next cords
     cord[0] = nextCordx;
     cord[1] = nextCordy;
+
+    // Set the state for x and y axis
 
     setState(() {
       left = cord[0];
     });
 
-    // When y = 0 it should have a top position matching the target, which we set at 125
     setState(() {
       top = cord[1];
     });
   }
 
   selectGrid(GameSessionModel model) {
+    /// limits as same as above
     double xLimit = widthLimit + widthStart - 40;
     double yLimit = heightLimit + heightStart - appBarHeight - 40;
     double xStart = widthStart;
@@ -123,30 +144,39 @@ class _MyHomePageState extends State<TiltQuestion> {
     double xLimitHalfWay = (widthLimit) / 2.0 + xStart;
     double yLimitHalfWay = (heightLimit) / 2.0 + yStart;
 
-    //TODO make selections here
+    //TODO make answer selections here
 
-    // top side
+    /// top side
+    /// if ball is near the y start line and the xLimit line
     if (cord[1] <= yStart + 40 && cord[0] <= xLimit) {
+      /// Determine on which side
       if (cord[0] <= xLimitHalfWay - 20) {
         print("Top Left");
       } else if (cord[0] >= xLimitHalfWay + 20) {
         print("Top Right");
-      } // Center Resolution
+      }
+
+      /// If at center
       else {
+        /// If True/False Question
         if (model.question is TFQuestion) {
           print("TRUE/ TOP RIGHT and TOP LEFT");
         }
       }
     }
-    // left side
+
+    /// left side
     else if (cord[1] <= yLimit && cord[0] <= xStart + 40) {
       if (cord[1] <= yLimitHalfWay - 20) {
         print("Top Left");
       } else if (cord[1] >= yLimitHalfWay + 20) {
         print("Bottom Left");
       }
+
+      /// No need for else statement as designs don't have any changes here
     }
-    // Bottom Side
+
+    /// Bottom Side
     else if (cord[0] <= xLimit && cord[1] >= yLimit - 40) {
       if (cord[0] <= xLimitHalfWay - 20) {
         print("Bottom Left");
@@ -185,13 +215,12 @@ class _MyHomePageState extends State<TiltQuestion> {
       accel.resume();
     }
 
-    // Accelerometer events come faster than we need them so a timer is used to only proccess them every 200 milliseconds
+    // Accelerometer events may come faster than we need them so a timer is used to only proccess them every 50 milliseconds
     if (timer == null || !timer.isActive) {
       timer = Timer.periodic(Duration(milliseconds: 50), (_) {
-        // if count has increased greater than 3 call pause timer to handle success
-        // proccess the current event
+        /// Set ball position
         setPosition(event);
-        if (canSelect &&  model.role != GroupRole.OWNER) selectGrid(model);
+        if (canSelect && model.role != GroupRole.OWNER) selectGrid(model);
       });
     }
   }
@@ -213,22 +242,15 @@ class _MyHomePageState extends State<TiltQuestion> {
   void initState() {
     top = 0.0;
     left = 0.0;
-    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
     super.initState();
   }
-
-  _afterLayout(_) {}
 
   @override
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    print("Width " + MediaQuery.of(context).size.width.toString());
-    print("Height" + MediaQuery.of(context).size.height.toString());
     appBarHeight = MediaQuery.of(context).padding.top + kToolbarHeight;
   }
-
-  double appBarHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -243,7 +265,7 @@ class _MyHomePageState extends State<TiltQuestion> {
           model.state == SessionState.FINISHED) {
         pauseTimer();
       } else {
-        if (useGyro) {
+        if (useAccel) {
           startAccel(model);
         }
       }
@@ -278,12 +300,12 @@ class _MyHomePageState extends State<TiltQuestion> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: <Widget>[
-                  (!useGyro &&  model.role != GroupRole.OWNER)
+                  (!useAccel && model.role != GroupRole.OWNER)
                       ? RaisedButton(
-                          child: Text('Begin'),
+                          child: Text('Ball Mode'),
                           onPressed: () => {
                             setState(() {
-                              useGyro = true;
+                              useAccel = true;
                             }),
                             startAccel(model)
                           },
@@ -357,7 +379,7 @@ class _MyHomePageState extends State<TiltQuestion> {
             ),
 
             // Ball
-            useGyro
+            useAccel
                 ? Container(
                     margin: EdgeInsets.only(top: top, left: left),
                     child: Container(
@@ -489,8 +511,7 @@ class _MyHomePageState extends State<TiltQuestion> {
         else if (model.state == SessionState.ANSWER &&
             model.role == GroupRole.OWNER)
           IconButton(
-            onPressed: () =>
-                {model.showLeaderBoard(), resetAnswer(), pauseTimer()},
+            onPressed: () => {model.showLeaderBoard(), pauseTimer()},
             icon: Icon(Icons.arrow_forward),
           )
         else if (model.state == SessionState.OUTCOME &&
@@ -524,10 +545,4 @@ class _MyHomePageState extends State<TiltQuestion> {
             ),
           )
       ];
-
-  void resetAnswer() {
-    setState(() {
-      chosen = [false, false, false, false];
-    });
-  }
 }
