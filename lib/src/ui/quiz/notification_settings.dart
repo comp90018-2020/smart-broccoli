@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_settings/widgets/Separator.dart';
 import 'package:flutter_settings/widgets/SettingsIcon.dart';
-import 'package:flutter_settings/util/SettingsConstants.dart';
 import 'package:flutter_settings/widgets/SettingsSection.dart';
 import 'package:flutter_settings/widgets/SettingsSelectionList.dart';
 import 'package:flutter_settings/models/settings_list_item.dart';
-import 'package:flutter_settings/widgets/SettingsCheckBox.dart';
 import 'package:flutter_settings/widgets/SettingsInputField.dart';
 import 'package:flutter_settings/widgets/SettingsSlider.dart';
 import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
+import 'package:smart_broccoli/src/store/remote/location_api.dart';
 import 'package:toast/toast.dart';
 import 'package:selection_picker/selectionpicker.dart';
 import 'package:selection_picker/selection_item.dart' as day;
@@ -38,16 +38,16 @@ class _NotificationSettingState extends State<NotificationSetting> {
     SettingsSelectionItem<int>(5, "5 notifications per day"),
     SettingsSelectionItem<int>(1, "1 notifications per day"),
   ];
-  var _minWindowIndex = 0;
-  var _maxNumberIndex = 0;
-  var _liveQuizCalendar = true;
-  var _smartQuizCalendar = false;
-  var _smartDetection = true;
-  var _wifiCaption;
-  var _workCaption;
-  var _radius = 0.5;
-  var _onMove = true;
-  var _commuting = true;
+  int _minWindowIndex = 0;
+  int _maxNumberIndex = 0;
+  bool _liveQuizCalendar = true;
+  bool _smartQuizCalendar = false;
+  bool _smartDetection = true;
+  String _wifiCaption;
+  LocationData _workCaption;
+  double _radius = 0.5;
+  bool _onMove = true;
+  bool _commuting = true;
 
   // isSelect is used to determine whether day is selected
   // on tap, isSelected is mutated
@@ -67,10 +67,12 @@ class _NotificationSettingState extends State<NotificationSetting> {
       title: "Notification setting",
       hasDrawer: true,
       child: Container(
+        padding: EdgeInsets.only(top: 8),
         child: ListView(children: <Widget>[
           SettingsSection(
             title: Text('General settings'),
             settingsChildren: [
+              /// Minimum windows
               SettingsSelectionList<int>(
                 items: _minWindowList,
                 //default selected item index, it will be the first item by default.
@@ -88,6 +90,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                 },
                 context: context,
               ),
+
+              /// Max number of notifications
               SettingsSelectionList<int>(
                 items: _maxNumberList,
                 //default selected item index, it will be the first item by default.
@@ -107,10 +111,10 @@ class _NotificationSettingState extends State<NotificationSetting> {
               ),
             ],
           ),
-          Divider(height: 8, color: Colors.white),
-          SettingsSection(title: Text('Days of week')),
+          Divider(height: 4, color: Colors.white),
 
-          //Days of week
+          ///Days of week
+          SettingsSection(title: Text('Days of week')),
           Container(
             height: 90,
             child: SelectionPicker(
@@ -126,156 +130,161 @@ class _NotificationSettingState extends State<NotificationSetting> {
               aligment: Alignment.center,
             ),
           ),
-          Divider(height: 10, color: Colors.white),
+          Divider(height: 4, color: Colors.white),
 
-          //Calendar
+          ///Calendar
           SettingsSection(
-              title: Text('When there my calendar is not free'),
-              settingsChildren: [
-                //Calendar for live quiz
-                SettingsCheckBox(
-                  title: 'Allow notifications for live quiz',
-                  titleStyle: TextStyle(fontSize: 16),
-                  icon: new SettingsIcon(
-                    icon: Icons.live_tv,
-                    color: Colors.blueAccent,
-                  ),
-                  onPressed: (bool value) {
-                    setState(() => _liveQuizCalendar = value);
-                  },
-                  value: _liveQuizCalendar,
-                  type: CheckBoxWidgetType.Switch,
-                ),
+            title: Text('When there my calendar is not free'),
+          ),
 
-                //Calendar for smart quiz
-                SettingsCheckBox(
-                  title: 'Allow notifications for smart quiz',
-                  titleStyle: TextStyle(fontSize: 16),
-                  icon: new SettingsIcon(
-                    icon: Icons.lightbulb_outline,
-                    color: Colors.orange,
-                  ),
-                  onPressed: (bool value) {
-                    setState(() => _smartQuizCalendar = value);
-                  },
-                  value: _smartQuizCalendar,
-                  type: CheckBoxWidgetType.Switch,
+          ///Calendar live quiz
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+            title: Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Icon(Icons.live_tv, color: Colors.blueAccent),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(
+                  "Allow notifications for live quiz",
+                  style: TextStyle(fontSize: 16),
                 ),
-              ]),
-          Divider(height: 10, color: Colors.white),
+              ),
+            ]),
+            onTap: () {
+              setState(() => _liveQuizCalendar = !_liveQuizCalendar);
+            },
+            trailing: Switch(
+                value: _liveQuizCalendar,
+                onChanged: (bool value) {
+                  setState(() {
+                    _liveQuizCalendar = value;
+                  });
+                }),
+          ),
+          Separator(),
 
-          //Work setting
+          ///Calendar smart quiz
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+            title: Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Icon(Icons.lightbulb_outline, color: Colors.orange),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(
+                  "Allow notifications for smart quiz",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ]),
+            onTap: () {
+              setState(() => _smartQuizCalendar = !_smartQuizCalendar);
+            },
+            trailing: Switch(
+                value: _smartQuizCalendar,
+                onChanged: (bool value) {
+                  setState(() {
+                    _smartQuizCalendar = value;
+                  });
+                }),
+          ),
+          Divider(height: 4, color: Colors.white),
+
+          ///Work setting
           SettingsSection(
-              title: Text('Don\'t notify me at work'),
-              settingsChildren: [
-                //Smart detection
-                SettingsCheckBox(
-                  title: 'Smart detection',
-                  titleStyle: TextStyle(fontSize: 16),
-                  icon: new SettingsIcon(
-                    icon: Icons.auto_awesome_mosaic,
-                    color: Colors.green,
-                  ),
-                  onPressed: (bool value) {
-                    setState(() => _smartDetection = value);
-                  },
-                  value: _smartDetection,
-                  type: CheckBoxWidgetType.Switch,
+            title: Text('Don\'t notify me at work'),
+          ),
+
+          /// Smart detection
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+            title: Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child:
+                    Icon(Icons.auto_awesome_mosaic, color: Colors.blueAccent),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(
+                  "Smart detection",
+                  style: TextStyle(fontSize: 16),
                 ),
+              ),
+            ]),
+            onTap: () {
+              setState(() => _smartDetection = !_smartDetection);
+            },
+            trailing: Switch(
+                value: _smartDetection,
+                onChanged: (bool value) {
+                  setState(() {
+                    _smartDetection = value;
+                  });
+                }),
+          ),
 
-                //wifi setting
-                SettingsInputField(
-                  titleStyle: TextStyle(fontSize: 16),
-                  dialogButtonText: 'Done',
-                  title: ('Wifi at work place'),
-                  icon: new SettingsIcon(
-                    icon: Icons.wifi,
-                    color: Colors.green,
-                  ),
-                  caption: _wifiCaption == null ? "Not set" : _wifiCaption,
-                  onPressed: (value) {
-                    if (value != null && value.isNotEmpty) {
-                      setState(() => _wifiCaption = value);
-                    }
-                  },
-                  context: context,
-                ),
+          /// Wifi setting
+          SettingsInputField(
+            titleStyle: TextStyle(fontSize: 16),
+            dialogButtonText: 'Done',
+            title: ('Wifi at work place'),
+            icon: new SettingsIcon(
+              icon: Icons.wifi,
+              color: Colors.green,
+            ),
+            caption: _wifiCaption == null ? "Not set" : _wifiCaption,
+            onPressed: (value) {
+              if (value != null && value.isNotEmpty) {
+                setState(() => _wifiCaption = value);
+              }
+            },
+            context: context,
+          ),
 
-                // Address setting
-                SettingsNavigatorButton(
-                    title: 'Work address',
-                    titleStyle: TextStyle(fontSize: 16),
-                    icon: new SettingsIcon(
-                      icon: Icons.location_on_outlined,
-                      color: Colors.orange,
-                    ),
-                    context: context,
-                    caption: _workCaption == null ? "Not set" : _workCaption,
-                    onPressed: () async {
-                      var location = await Navigator.of(context)
-                          .pushNamed("/work_address");
-                      if (location != null)
-                        setState(() => _workCaption = location);
-                    }),
+          /// Address setting
+          SettingsNavigatorButton(
+              title: 'Work address',
+              titleStyle: TextStyle(fontSize: 16),
+              icon: new SettingsIcon(
+                icon: Icons.location_on_outlined,
+                color: Colors.orange,
+              ),
+              context: context,
+              caption: _workCaption == null ? "Not set" : _workCaption.name,
+              onPressed: () async {
+                var location =
+                    await Navigator.of(context).pushNamed("/work_address");
+                if (location != null) setState(() => _workCaption = location);
+              }),
 
-                // Radius setting
-                SettingsSlider(
-                  value: _radius,
-                  activeColor: Colors.blue,
-                  icon: new SettingsIcon(
-                    icon: Icons.track_changes,
-                    color: Colors.red,
-                    text: 'Radius',
-                  ),
-                  onChange: (value) {
-                    Toast.show(
-                        "Radius centered from work place: ${(value * 10).round().toString()} km",
-                        context);
-                    setState(() => _radius = value);
-                  },
-                ),
-              ]),
-          Divider(height: 10, color: Colors.white),
+          /// Radius setting
+          SettingsSlider(
+            value: _radius,
+            activeColor: Colors.blue,
+            icon: new SettingsIcon(
+              icon: Icons.track_changes,
+              color: Colors.red,
+              text: 'Radius',
+            ),
+            onChange: (value) {
+              Toast.show(
+                  "Radius centered from work place: ${(value * 10).round().toString()} km",
+                  context);
+              setState(() => _radius = value);
+            },
+          ),
+          Divider(height: 6, color: Colors.white),
 
-          //Move settings
-          SettingsSection(title: Text('When moving'), settingsChildren: [
-            //Move switch
+          ///Move settings
+          SettingsSection(title: Text('When moving')),
 
-            // SettingsCheckBox(
-            //   title: 'Allow notification on the move',
-            //   titleStyle: TextStyle(fontSize: 16),
-            //   icon: new SettingsIcon(
-            //     icon: Icons.directions_walk,
-            //     color: Colors.amber,
-            //   ),
-            //   onPressed: (bool value) {
-            //     setState(() {
-            //       _onMove = value;
-            //       print(value);
-            //       if (!value) _commuting = false;
-            //       print(_commuting);
-            //     });
-            //   },
-            //   value: _onMove,
-            //   type: CheckBoxWidgetType.Switch,
-            // ),
-
-            // //Commute switch
-            // SettingsCheckBox(
-            //   title: 'Allow notification on commute',
-            //   titleStyle: TextStyle(fontSize: 16),
-            //   icon: new SettingsIcon(
-            //     icon: Icons.train,
-            //     color: Colors.blueAccent,
-            //   ),
-            //   disabled: _onMove == false,
-            //   onPressed: (bool value) {
-            //     setState(() => _commuting = value);
-            //   },
-            //   value: _commuting,
-            //   type: CheckBoxWidgetType.Switch,
-            // ),
-          ]),
+          /// Move
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
             title: Row(children: [
@@ -294,7 +303,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
             onTap: () {
               setState(() {
                 _onMove = !_onMove;
-                if (!_onMove) _commuting = false;
+                _commuting = _onMove;
               });
             },
             trailing: Switch(
@@ -302,9 +311,42 @@ class _NotificationSettingState extends State<NotificationSetting> {
                 onChanged: (bool value) {
                   setState(() {
                     _onMove = value;
-                    if (!value) _commuting = false;
+                    _commuting = _onMove;
                   });
                 }),
+          ),
+          Separator(),
+
+          /// Commute
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+            title: Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Icon(Icons.train, color: Colors.blueAccent),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(
+                  "Allow notifications on commute",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ]),
+            onTap: () {
+              setState(() {
+                _commuting = !_commuting;
+              });
+            },
+            trailing: Switch(
+                value: _commuting,
+                onChanged: _onMove
+                    ? (bool value) {
+                        setState(() {
+                          _commuting = value;
+                        });
+                      }
+                    : null),
           ),
         ]),
       ),

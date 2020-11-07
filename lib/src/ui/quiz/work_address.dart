@@ -57,7 +57,7 @@ class _MapSettingState extends State<MapSetting> {
               return ListTile(
                 title: Text(_locationResults[i].name),
                 onTap: () {
-                  Navigator.of(context).pop(_locationResults[i].name);
+                  Navigator.of(context).pop(_locationResults[i]);
                 },
               );
             },
