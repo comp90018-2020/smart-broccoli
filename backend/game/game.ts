@@ -423,7 +423,8 @@ export class GameHandler {
                 player.profile()
             );
             await session.playerLeave(player);
-            if (session.host === null && session.activePlayersNum === 0)
+            if (session.type === GameType.SelfPaced_NotGroup)
+                // If this is solo game, abort
                 this.abort(session);
 
             session.deactivateToken(player.token);
@@ -613,7 +614,7 @@ export class GameHandler {
             // If game is self-paced and not group game
             session.type === GameType.SelfPaced_NotGroup &&
             // And if this is the last question
-            session.questionIndex  === session.totalQuestions
+            session.questionIndex === session.totalQuestions
         )
             // End game
             this.abort(session);
