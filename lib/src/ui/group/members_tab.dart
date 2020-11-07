@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
+import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/theme.dart';
 
 class MembersTab extends StatelessWidget {
   final int groupId;
-
   MembersTab(this.groupId);
 
   @override
@@ -16,42 +17,59 @@ class MembersTab extends StatelessWidget {
         color: SmartBroccoliColourScheme.membersTabBackground,
         child: Consumer<GroupRegistryModel>(
           builder: (context, registry, child) {
-            Group group = registry.getGroupFromCache(groupId);
-            return ListView.builder(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              itemCount: group.members.length,
-              itemBuilder: (BuildContext context, int index) => ListTile(
-                // Avatar
-                leading: FutureBuilder(
-                    future:
-                        registry.getGroupMemberPicture(group.members[index].id),
-                    builder:
-                        (BuildContext context, AsyncSnapshot<String> snapshot) {
-                      return UserAvatar(snapshot.data);
-                    }),
-                // Name
-                title: Text(group.members[index].name),
-                // Remove
-                trailing: group.role == GroupRole.OWNER
-                    ? IconButton(
-                        icon: Icon(Icons.person_remove),
-                        splashRadius: 20,
-                        onPressed: () async {
-                          if (await showConfirmDialog(
-                              context,
-                              "${group.members[index].name ?? 'The member'}" +
-                                  "will no longer be a member of the group",
-                              title: "Confirm kick member"))
-                            try {
-                              await registry.kickMemberFromGroup(
-                                  group, group.members[index].id);
-                            } catch (_) {
-                              showBasicDialog(context, "Cannot kick member");
-                            }
-                        },
-                      )
-                    : null,
-              ),
+            return FutureBuilder(
+              future: registry.getGroupMembers(groupId),
+              builder: (context, snapshot) {
+                log("Members tab future ${snapshot.toString()}");
+                if (snapshot.hasError)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Text("An error has occurred, cannot load"),
+                  );
+                if (snapshot.hasData) {
+                  // To get into the members tab, the group must be loaded
+                  var group = registry.getGroupFromCache(groupId);
+                  // Members from future
+                  var members = snapshot.data;
+
+                  return ListView.builder(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    itemCount: members.length,
+                    itemBuilder: (BuildContext context, int index) => ListTile(
+                      // Avatar
+                      leading: FutureBuilder(
+                          future:
+                              registry.getGroupMemberPicture(members[index].id),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<String> snapshot) {
+                            return UserAvatar(snapshot.data);
+                          }),
+                      // Name
+                      title: Text(members[index].name),
+                      // Remove
+                      trailing: group.role == GroupRole.OWNER
+                          ? IconButton(
+                              icon: Icon(Icons.person_remove),
+                              splashRadius: 20,
+                              onPressed: () async {
+                                if (await showConfirmDialog(
+                                    context,
+                                    "${members[index].name ?? 'The member'}" +
+                                        "will no longer be a member of the group",
+                                    title: "Confirm kick member"))
+                                  await registry
+                                      .kickMemberFromGroup(
+                                          group, members[index].id)
+                                      .catchError((err) => showBasicDialog(
+                                          context, err.toString()));
+                              },
+                            )
+                          : null,
+                    ),
+                  );
+                }
+                return LoadingIndicator(EdgeInsets.symmetric(vertical: 32));
+              },
             );
           },
         ),

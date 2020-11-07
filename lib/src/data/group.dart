@@ -1,4 +1,4 @@
-import 'user.dart';
+import 'package:smart_broccoli/src/store/remote/api_base.dart';
 
 enum GroupRole { OWNER, MEMBER }
 
@@ -15,12 +15,8 @@ class Group {
   final String code;
   final GroupRole role;
 
-  /// List of members; mutating this list will have no effect on the server
-  List<User> members;
-
   /// Constructor for internal use only
-  Group._internal(this.id, this.name, this.defaultGroup, this.code, this.role,
-      this.members);
+  Group._internal(this.id, this.name, this.defaultGroup, this.code, this.role);
 
   /// Name with default group annotation
   String get nameWithDefaultGroup =>
@@ -32,7 +28,6 @@ class Group {
         json['defaultGroup'],
         json['code'],
         json['role'] == 'member' ? GroupRole.MEMBER : GroupRole.OWNER,
-        (json['members'] as List)?.map((repr) => User.fromJson(repr))?.toList(),
       );
 
   Map<String, dynamic> toJson() {
@@ -42,23 +37,31 @@ class Group {
       'defaultGroup': defaultGroup,
       'code': code,
       'role': role == GroupRole.MEMBER ? 'member' : 'owner',
-      'members': members?.map((member) => member.toJson())?.toList(),
     };
   }
 }
 
 /// Exception thrown when the server is unable to create a group due to the
 /// name already being in use.
-class GroupCreateException implements Exception {}
+class GroupCreateException extends ApiException {
+  GroupCreateException()
+      : super("Cannot create group, group name already exists");
+}
 
 /// Exception thrown when the server is unable to change a group name due to
 /// the new name already being in use.
-class GroupRenameException implements Exception {}
+class GroupRenameException extends ApiException {
+  GroupRenameException() : super("Cannot rename group, name is already in use");
+}
 
 /// Exception thrown when attempting to join a group of which the user is
 /// already a member.
-class AlreadyInGroupException implements Exception {}
+class AlreadyInGroupException extends ApiException {
+  AlreadyInGroupException() : super("Already in group");
+}
 
 /// Exception thrown when attempting an operation on a group which could not
 /// be found.
-class GroupNotFoundException implements Exception {}
+class GroupNotFoundException extends ApiException {
+  GroupNotFoundException() : super("Group not found");
+}
