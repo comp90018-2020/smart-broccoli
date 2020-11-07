@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/data.dart';
-import 'no_content_place_holder.dart';
 import 'package:smart_broccoli/src/ui/shared/helper.dart';
 import 'package:smart_broccoli/src/ui/shared/indicators.dart';
+import 'no_content_place_holder.dart';
 import 'quiz_card.dart';
 
 /// Build a list of quizzes
