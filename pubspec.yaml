@@ -30,6 +30,7 @@ dependencies:
   permission_handler: ^5.0.1+1
   provider: ^4.3.2
   quiver: ^2.1.4
+  selection_picker: ^0.1.0
   sensors: ^0.4.2+6
   shared_preferences: ^0.5.12
   socket_io_client: ^0.9.11
