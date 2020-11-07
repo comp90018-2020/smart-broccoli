@@ -202,21 +202,57 @@ export class GameHandler {
             if (session.isSelfPacedGroupAndHasNotStarted()) {
                 // If this is a self-paced & group game
                 // And has not stated yet
-                // Emit starting event with WAIT_TIME_BEFORE_START microseconds
-                emitToRoom(
-                    whichRoom(session, Role.all),
-                    Event.starting,
-                    RESET_SELFPACED_GROUP_TIME.toString()
-                );
 
-                // Set game status to starting
-                session.status = GameStatus.Starting;
-                // Set the timestamp that the first question will be released
-                session.setQuestionReleaseTime(0, RESET_SELFPACED_GROUP_TIME);
+                if (session.status === GameStatus.Pending) {
+                    // If game is Pending
+
+                    // Set game status to starting
+                    session.status = GameStatus.Starting;
+                    // Set the timestamp that the first question will be released
+                    session.setQuestionReleaseTime(
+                        0,
+                        WAIT_TIME_SELFPACED_GROUP
+                    );
+
+                    // Emit starting event with WAIT_TIME_BEFORE_START microseconds
+                    emitToRoom(
+                        whichRoom(session, Role.all),
+                        Event.starting,
+                        WAIT_TIME_SELFPACED_GROUP.toString()
+                    );
+                } else {
+                    // If game is starting
+                    // Get current time
+                    const currentTime = Date.now();
+                    // Get how much time from now 
+                    // to when the first question should be released
+                    const timeDifference =
+                        session.questionReleaseAt[0] - currentTime;
+                    if (
+                        // If the releasing time is in the future
+                        timeDifference > 0 &&
+                        // And is less than RESET_SELFPACED_GROUP_TIME ms
+                        timeDifference < RESET_SELFPACED_GROUP_TIME
+                    ) {
+                        // Reset the timestamp that the first question will be released
+                        session.setQuestionReleaseTime(
+                            0,
+                            RESET_SELFPACED_GROUP_TIME
+                        );
+                        // Emit starting event with WAIT_TIME_BEFORE_START microseconds
+                        emitToRoom(
+                            whichRoom(session, Role.all),
+                            Event.starting,
+                            RESET_SELFPACED_GROUP_TIME.toString()
+                        );
+                    }
+                }
 
                 setTimeout(
                     // After timeout
                     async (session: GameSession) => {
+                        // Check if can release the first question
+                        // Because the time to release may be reset by new join
                         if (
                             // If this game is starting
                             session.is(GameStatus.Starting) &&
@@ -254,7 +290,7 @@ export class GameHandler {
                 emitToOne(
                     socket.id,
                     Event.starting,
-                    (session.QuestionReleaseAt[0] - Date.now()).toString()
+                    (session.questionReleaseAt[0] - Date.now()).toString()
                 );
                 return;
             }
@@ -382,7 +418,7 @@ export class GameHandler {
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.starting,
-                    (session.QuestionReleaseAt[0] - Date.now()).toString()
+                    (session.questionReleaseAt[0] - Date.now()).toString()
                 );
 
                 // Release the first question after timeout
@@ -464,11 +500,11 @@ export class GameHandler {
                 );
                 session.freezeQuestion(questionIndex);
 
-                // Activate session in controller 
+                // Activate session in controller
                 // just before releasing the first question
                 if (process.env.SOCKET_MODE !== "debug" && questionIndex === 0)
                     await activateSession(session.id);
-                
+
                 emitToRoom(
                     whichRoom(session, Role.player),
                     Event.nextQuestion,

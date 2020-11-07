@@ -26,7 +26,7 @@ export const formatQuestion = (
             }
         }
     }
-    const remainingTime = session.QuestionReleaseAt[questionIndex] - Date.now();
+    const remainingTime = session.questionReleaseAt[questionIndex] - Date.now();
     return {
         question: {
             id: questionCopy.id,
