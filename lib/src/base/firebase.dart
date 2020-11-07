@@ -37,14 +37,11 @@ class FirebaseNotification {
 
   void _onForegroudMesseage() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
       const quizId = 1;
       PubSub().publish(PubSubTopic.NOTIFICATION, arg: quizId);
       if (message.notification != null) {
-        // localNotification.displayNotification(
-        //     'From Foregroud: ${message.notification.title}',
-        //     message.notification.body);
+        localNotification.displayNotification(
+            '${message.notification.title}', message.notification.body);
         print('Message also contained a notification: ${message.notification}');
       }
     });
@@ -59,12 +56,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp();
-  print("Handling a background message: ${message.messageId}");
-  LocalNotification localNotification = LocalNotification();
-
-  localNotification.displayNotification(
-      'From Background: ${message.notification.title}',
-      message.notification.body);
+  // Notification will show automatically, do not have to use LocalNotification
 }
 
 class LocalNotification {
@@ -108,20 +100,12 @@ class LocalNotification {
   Future didReceiveLocalNotification(
       int a, String b, String c, String d) async {
     print('didReceiveLocalNotification: $a, $b, $c, $d');
-    // await Navigator.push(
-    //   context,
-    //   MaterialPageRoute<void>(builder: (context) => SecondScreen(payload)),
-    // );
   }
 
   Future selectNotification(String payload) async {
     if (payload != null) {
       print('notification payload: $payload');
     }
-    // await Navigator.push(
-    //   context,
-    //   MaterialPageRoute<void>(builder: (context) => SecondScreen(payload)),
-    // );
   }
 
   void _askForApplePermissions() async {
