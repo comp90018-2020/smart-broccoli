@@ -43,6 +43,7 @@ class QuizTab extends StatelessWidget {
                       error: snapshot.hasError
                           ? Center(child: Text("Cannot load quizzes"))
                           : null,
+                      noQuizPlaceholder: "There aren't any active quizzes",
                       hiddenButton: true,
                       padding: EdgeInsets.symmetric(vertical: 24),
                     ),
@@ -56,6 +57,7 @@ class QuizTab extends StatelessWidget {
                       error: snapshot.hasError
                           ? Center(child: Text("Cannot load quizzes"))
                           : null,
+                      noQuizPlaceholder: "There aren't any active quizzes",
                       hiddenButton: true,
                       padding: EdgeInsets.symmetric(vertical: 24),
                     ),
@@ -69,6 +71,7 @@ class QuizTab extends StatelessWidget {
                       error: snapshot.hasError
                           ? Center(child: Text("Cannot load quizzes"))
                           : null,
+                      noQuizPlaceholder: "There aren't any active quizzes",
                       hiddenButton: true,
                       padding: EdgeInsets.symmetric(vertical: 24),
                     ),

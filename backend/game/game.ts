@@ -6,6 +6,7 @@ import {
     formatWelcome,
     formatQuestionOutcome,
 } from "./formatter";
+import { activateSession } from "../controllers/session";
 import { Event, Role, GameStatus, Player, Answer, GameType } from "./datatype";
 import { QuizAttributes } from "models/quiz";
 import { _socketIO } from "./index";
@@ -395,7 +396,7 @@ export class GameHandler {
         }
     }
 
-    releaseQuestion(
+    async releaseQuestion(
         session: GameSession,
         questionIndex: number,
         player?: Player
@@ -411,6 +412,12 @@ export class GameHandler {
                     session.getQuizTimeLimit()
                 );
                 session.freezeQuestion(questionIndex);
+
+                // Activate session in controller 
+                // just before releasing the first question
+                if (process.env.SOCKET_MODE !== "debug" && questionIndex === 0)
+                    await activateSession(session.id);
+                
                 emitToRoom(
                     whichRoom(session, Role.player),
                     Event.nextQuestion,

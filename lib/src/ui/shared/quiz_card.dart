@@ -105,18 +105,19 @@ class QuizCard extends StatelessWidget {
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 4),
-                    FutureBuilder(
-                        future: Provider.of<GroupRegistryModel>(context)
-                            .getGroup(quiz.groupId),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<Group> snapshot) {
-                          if (snapshot.hasData) {
-                            return Text(snapshot.data.name,
+                    Consumer<GroupRegistryModel>(
+                      builder: (context, registry, child) => FutureBuilder(
+                          future: registry.getGroup(quiz.groupId),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<Group> snapshot) {
+                            if (snapshot.hasData) {
+                              return Text(snapshot.data.name,
+                                  style: TextStyle(fontSize: 15));
+                            }
+                            return Text('Loading',
                                 style: TextStyle(fontSize: 15));
-                          }
-                          return Text('Loading',
-                              style: TextStyle(fontSize: 15));
-                        }),
+                          }),
+                    ),
                   ],
                 ),
               ),

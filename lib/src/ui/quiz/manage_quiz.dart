@@ -63,6 +63,8 @@ class _ManageQuizState extends State<ManageQuiz> {
                       error: snapshot.hasError
                           ? Center(child: Text("Cannot load quizzes"))
                           : null,
+                      noQuizPlaceholder:
+                          "No created quizzes...\n Try creating some!",
                       header: _groupSelector(),
                       hiddenButton: true);
                 }),
@@ -77,6 +79,8 @@ class _ManageQuizState extends State<ManageQuiz> {
                       error: snapshot.hasError
                           ? Center(child: Text("Cannot load quizzes"))
                           : null,
+                      noQuizPlaceholder:
+                          "No created quizzes...\n Try creating some!",
                       header: _groupSelector(),
                       hiddenButton: true);
                 }),
@@ -91,6 +95,8 @@ class _ManageQuizState extends State<ManageQuiz> {
                       error: snapshot.hasError
                           ? Center(child: Text("Cannot load quizzes"))
                           : null,
+                      noQuizPlaceholder:
+                          "No created quizzes...\n Try creating some!",
                       header: _groupSelector(),
                       hiddenButton: true);
                 }),

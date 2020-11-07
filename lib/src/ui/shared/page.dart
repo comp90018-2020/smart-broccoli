@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_broccoli/src/data.dart';
@@ -5,7 +7,6 @@ import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/theme.dart';
 
 /// A page extending scaffold
-/// Supports tabs, drawer
 class CustomPage extends StatelessWidget {
   /// Title of page
   final String title;
@@ -63,7 +64,7 @@ class CustomPage extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: this.secondaryBackgroundColour
+      backgroundColor: secondaryBackgroundColour
           ? Theme.of(context).backgroundColor
           : Theme.of(context).colorScheme.onBackground,
 
@@ -80,7 +81,7 @@ class CustomPage extends StatelessWidget {
                   BoxShadow(color: Colors.white, offset: const Offset(0, .2))
                 ]),
                 child: AppBar(
-                  title: Text(this.title),
+                  title: Text(title),
                   centerTitle: true,
                   elevation: 0,
                   leading: appbarLeading,
@@ -92,139 +93,7 @@ class CustomPage extends StatelessWidget {
           : null,
 
       // Drawer (or hamberger menu)
-      drawer: hasDrawer
-          ? Drawer(
-              child: ListView(
-                // Important: Remove any padding from the ListView.
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  Container(
-                    // Margin adapted from drawer_header.dart
-                    margin: EdgeInsets.only(
-                        top: MediaQuery.of(context).padding.top),
-                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () {
-                        _navigateToNamed(context, '/profile');
-                      },
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          // User picture
-                          Consumer<UserProfileModel>(
-                            builder: (context, profile, child) => FutureBuilder(
-                              future: Provider.of<UserProfileModel>(context)
-                                  .getUserPicture(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<String> snapshot) {
-                                return UserAvatar(
-                                  snapshot.data,
-                                  maxRadius: 30,
-                                );
-                              },
-                            ),
-                          ),
-                          // Name/email
-                          Expanded(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 18),
-                              child: Consumer<UserProfileModel>(
-                                builder: (context, profile, child) =>
-                                    FutureBuilder(
-                                  future: profile.getUser(refresh: false),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<User> snapshot) {
-                                    return Wrap(
-                                      direction: Axis.vertical,
-                                      spacing: 2,
-                                      children: snapshot.hasData
-                                          ? [
-                                              Text(snapshot.data.name,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyText1),
-                                              Text(
-                                                  snapshot.data.type ==
-                                                          UserType.UNREGISTERED
-                                                      ? "Unregistered"
-                                                      : snapshot.data.email,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyText2),
-                                            ]
-                                          : [
-                                              Text('Unknown User',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyText1)
-                                            ],
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: Colors.grey[700]),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Divider(),
-                  ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.question_answer),
-                    title: Text('TAKE QUIZ',
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColorDark)),
-                    onTap: () {
-                      _navigateToNamed(context, '/take_quiz');
-                    },
-                  ),
-                  ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.edit),
-                    title: Text('MANAGE QUIZ',
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColorDark)),
-                    onTap: () {
-                      _navigateToNamed(context, '/manage_quiz');
-                    },
-                  ),
-                  ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.people),
-                    title: Text('GROUPS',
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColorDark)),
-                    onTap: () {
-                      _navigateToNamed(context, '/group/home');
-                    },
-                  ),
-                  Divider(),
-                  ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.info_outline),
-                    title: Text('About',
-                        style: TextStyle(color: Colors.grey[700])),
-                    onTap: () {
-                      _navigateToNamed(context, '/about');
-                    },
-                  ),
-                  ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.exit_to_app),
-                    title: Text('Sign out',
-                        style: TextStyle(color: Colors.grey[700])),
-                    onTap: Provider.of<AuthStateModel>(context, listen: false)
-                        .logout,
-                  ),
-                ],
-              ),
-            )
-          : null,
+      drawer: hasDrawer ? _drawer(context) : null,
 
       // Floating action button
       floatingActionButton: floatingActionButton,
@@ -237,6 +106,154 @@ class CustomPage extends StatelessWidget {
           : Stack(
               children: [...background, Positioned.fill(child: wrappedChild)],
             ),
+    );
+  }
+
+  Widget _drawer(BuildContext context) {
+    return Drawer(
+      child: Consumer<UserProfileModel>(
+        builder: (context, profile, child) => FutureBuilder(
+          future: profile.getUser(refresh: false),
+          builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+            log("Drawer future ${snapshot.toString()}");
+            return ListView(
+              // Important: Remove any padding from the ListView.
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                Container(
+                  // Margin adapted from drawer_header.dart
+                  margin:
+                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      _navigateToNamed(context, '/profile');
+                    },
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        // User picture
+                        Consumer<UserProfileModel>(
+                          builder: (context, profile, child) => FutureBuilder(
+                            future: Provider.of<UserProfileModel>(context)
+                                .getUserPicture(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<String> snapshot) {
+                              return UserAvatar(
+                                snapshot.data,
+                                maxRadius: 30,
+                              );
+                            },
+                          ),
+                        ),
+                        // Name/email
+                        Expanded(
+                          child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 18),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: snapshot.hasData
+                                    ? [
+                                        Text(snapshot.data.name,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyText1,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis),
+                                        Text(
+                                            snapshot.data.type ==
+                                                    UserType.UNREGISTERED
+                                                ? "Unregistered"
+                                                : snapshot.data.email,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyText2,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis),
+                                      ]
+                                    : [
+                                        Text('Unknown User',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyText1)
+                                      ],
+                              )),
+                        ),
+                        Icon(Icons.chevron_right, color: Colors.grey[700]),
+                      ],
+                    ),
+                  ),
+                ),
+                Divider(),
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.question_answer),
+                  title: Text('TAKE QUIZ',
+                      style:
+                          TextStyle(color: Theme.of(context).primaryColorDark)),
+                  onTap: () {
+                    _navigateToNamed(context, '/take_quiz');
+                  },
+                ),
+                if (snapshot.hasData &&
+                    snapshot.data.type != UserType.UNREGISTERED)
+                  ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.edit),
+                    title: Text('MANAGE QUIZ',
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColorDark)),
+                    onTap: () {
+                      _navigateToNamed(context, '/manage_quiz');
+                    },
+                  ),
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.people),
+                  title: Text('GROUPS',
+                      style:
+                          TextStyle(color: Theme.of(context).primaryColorDark)),
+                  onTap: () {
+                    _navigateToNamed(context, '/group/home');
+                  },
+                ),
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.notifications),
+                  title: Text('NOTIFICATION SETTINGS',
+                      style:
+                          TextStyle(color: Theme.of(context).primaryColorDark)),
+                  onTap: () {
+                    _navigateToNamed(context, '/notification_settings');
+                  },
+                ),
+                Divider(),
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.info_outline),
+                  title:
+                      Text('About', style: TextStyle(color: Colors.grey[700])),
+                  onTap: () {
+                    _navigateToNamed(context, '/about');
+                  },
+                ),
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.exit_to_app),
+                  title: Text('Sign out',
+                      style: TextStyle(color: Colors.grey[700])),
+                  onTap: Provider.of<AuthStateModel>(context, listen: false)
+                      .logout,
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 
