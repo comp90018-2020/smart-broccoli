@@ -22,6 +22,10 @@ class FirebaseNotification {
     return _singleton;
   }
 
+  Future<String> getToken() async {
+    return await FirebaseMessaging.instance.getToken();
+  }
+
   void _requestPermisison() async {
     NotificationSettings settings = await _messaging.requestPermission(
       alert: true,

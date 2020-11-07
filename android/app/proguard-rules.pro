@@ -9,3 +9,6 @@
 
 -keep class com.google.firebase.** { *; }
 -keep class com.builttoroam.devicecalendar.** { *; }
+
+# Permission
+-keep class androidx.lifecycle.** { *; }
