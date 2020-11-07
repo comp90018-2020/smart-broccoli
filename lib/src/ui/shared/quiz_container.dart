@@ -9,7 +9,7 @@ import 'quiz_card.dart';
 class QuizContainer extends StatefulWidget {
   QuizContainer(this.items,
       {Key key,
-        this.screen,
+      this.screen,
       this.header,
       this.padding = const EdgeInsets.only(top: 8, bottom: 8),
       this.headerPadding = const EdgeInsets.fromLTRB(8, 12, 8, 16),
@@ -62,29 +62,30 @@ class _BuildQuiz extends State<QuizContainer> {
                 // Minimum height, or will be height of longest child
                 // if exceeding minimum height
                 constraints: BoxConstraints(minHeight: 300),
-                child:
-                widget.items.length == 0 ? NoContentPlaceholder(parentWidget: widget,
-                    text:returnPlaceholderText())
-                    :
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: mapIndexed(
-                      widget.items,
-                      ((index, item) => Container(
-                            constraints: BoxConstraints(maxWidth: 200),
-                            margin:
-                                index == 0 || index == widget.items.length - 1
-                                    ? EdgeInsets.only(
-                                        left: index == 0 ? 20 : 0,
-                                        right: index == 0 ? 0 : 20)
-                                    : EdgeInsets.zero,
-                            width: MediaQuery.of(context).size.width * 0.4,
-                            child: QuizCard(item, alwaysShowPicture: true),
-                          )),
-                    ).toList(),
-                  ),
-                ),
+                child: widget.items.length == 0
+                    ? NoContentPlaceholder(
+                        parentWidget: widget, text: returnPlaceholderText())
+                    : IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: mapIndexed(
+                            widget.items,
+                            ((index, item) => Container(
+                                  constraints: BoxConstraints(maxWidth: 200),
+                                  margin: index == 0 ||
+                                          index == widget.items.length - 1
+                                      ? EdgeInsets.only(
+                                          left: index == 0 ? 20 : 0,
+                                          right: index == 0 ? 0 : 20)
+                                      : EdgeInsets.zero,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.4,
+                                  child:
+                                      QuizCard(item, alwaysShowPicture: true),
+                                )),
+                          ).toList(),
+                        ),
+                      ),
               ),
             ),
 
@@ -105,15 +106,13 @@ class _BuildQuiz extends State<QuizContainer> {
       ),
     );
   }
+
   returnPlaceholderText() {
     String text;
-    if(widget.screen == "Manage Quiz" ){
+    if (widget.screen == "Manage Quiz") {
       text = "No created quizzes...\n Try creating some!";
-    }
-    else if(widget.screen == "Self-Paced"){
-
-    }
-    else{
+    } else if (widget.screen == "Self-Paced") {
+    } else {
       text = "There aren't any active quizzes";
     }
 
@@ -131,6 +130,4 @@ Iterable<E> mapIndexed<E, T>(
     yield f(index, item);
     index = index + 1;
   }
-
-
 }

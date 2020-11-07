@@ -45,7 +45,8 @@ class _ManageQuizState extends State<ManageQuiz> {
           return QuizContainer(
               collection.getCreatedQuizzesWhere(groupId: _groupId),
               header: _groupSelector(),
-              hiddenButton: true, screen: title);
+              hiddenButton: true,
+              screen: title);
         }),
         Consumer<QuizCollectionModel>(builder: (context, collection, child) {
           // Live quiz
@@ -53,7 +54,8 @@ class _ManageQuizState extends State<ManageQuiz> {
               collection.getCreatedQuizzesWhere(
                   groupId: _groupId, type: QuizType.LIVE),
               header: _groupSelector(),
-              hiddenButton: true, screen: title);
+              hiddenButton: true,
+              screen: title);
         }),
         Consumer<QuizCollectionModel>(builder: (context, collection, child) {
           /// Self-paced quiz

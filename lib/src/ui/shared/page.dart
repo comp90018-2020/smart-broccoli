@@ -12,8 +12,6 @@ import 'package:smart_broccoli/theme.dart';
 ///
 
 class CustomPage extends StatefulWidget {
-
-
   /// Title of page
   final String title;
 
@@ -47,21 +45,20 @@ class CustomPage extends StatefulWidget {
   /// Constructs a custom page
   CustomPage(
       {@required this.title,
-        @required this.child,
-        this.hasDrawer = false,
-        this.primary = true,
-        this.background,
-        this.secondaryBackgroundColour = false,
-        this.appbarLeading,
-        this.automaticallyImplyLeading = true,
-        this.appbarActions,
-        this.floatingActionButton});
+      @required this.child,
+      this.hasDrawer = false,
+      this.primary = true,
+      this.background,
+      this.secondaryBackgroundColour = false,
+      this.appbarLeading,
+      this.automaticallyImplyLeading = true,
+      this.appbarActions,
+      this.floatingActionButton});
   @override
   State<StatefulWidget> createState() => new _CustomPageState();
 }
 
 class _CustomPageState extends State<CustomPage> {
-
   void initState() {
     super.initState();
     Provider.of<UserProfileModel>(context, listen: false)
@@ -204,7 +201,7 @@ class _CustomPageState extends State<CustomPage> {
                   ),
                   Consumer<UserProfileModel>(
                     builder: (context, profile, child) {
-                      if (profile.user.type != UserType.UNREGISTERED){
+                      if (profile.user.type != UserType.UNREGISTERED) {
                         return ListTile(
                           dense: true,
                           leading: const Icon(Icons.edit),
@@ -215,10 +212,9 @@ class _CustomPageState extends State<CustomPage> {
                             _navigateToNamed(context, '/manage_quiz');
                           },
                         );
-                      }else{
+                      } else {
                         return Container();
                       }
-
                     },
                   ),
                   ListTile(
@@ -263,11 +259,13 @@ class _CustomPageState extends State<CustomPage> {
       body: widget.background == null
           ? wrappedChild
           : Stack(
-              children: [...widget.background, Positioned.fill(child: wrappedChild)],
+              children: [
+                ...widget.background,
+                Positioned.fill(child: wrappedChild)
+              ],
             ),
     );
   }
-
 
   /// Navigate to named route
   void _navigateToNamed(context, routeName) {

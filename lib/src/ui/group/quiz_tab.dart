@@ -33,17 +33,18 @@ class QuizTab extends StatelessWidget {
                   tabViews: [
                     // all quizzes
                     QuizContainer(
-                      collection.getQuizzesWhere(groupId: group.id,),
-                      hiddenButton: true,
-                        screen: "Manage Quiz"
-                    ),
+                        collection.getQuizzesWhere(
+                          groupId: group.id,
+                        ),
+                        hiddenButton: true,
+                        screen: "Manage Quiz"),
 
                     // live quizzes
                     QuizContainer(
-                      collection.getQuizzesWhere(
-                          groupId: group.id, type: QuizType.LIVE),
-                      hiddenButton: true, screen: "Manage Quiz"
-                    ),
+                        collection.getQuizzesWhere(
+                            groupId: group.id, type: QuizType.LIVE),
+                        hiddenButton: true,
+                        screen: "Manage Quiz"),
 
                     // self-paced quizzes
                     QuizContainer(
