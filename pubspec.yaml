@@ -13,7 +13,10 @@ dependencies:
   collection: ^1.14.13
   device_calendar: ^3.1.0
   email_validator: ^1.0.5
+  firebase_core: ^0.5.1
+  firebase_messaging: ^8.0.0-dev.5
   fluro: ^1.7.3
+  flutter_local_notifications: ^3.0.1+2
   flutter_settings:
     git:
       url: https://github.com/comp90018-2020/Flutter-settings.git
@@ -26,6 +29,7 @@ dependencies:
   numberpicker: ^1.2.1
   package_info: ^0.4.3
   path_provider: ^1.6.18
+  permission_handler: ^5.0.1+1
   provider: ^4.3.2
   quiver: ^2.1.4
   selection_picker:
@@ -39,12 +43,6 @@ dependencies:
   wifi_info_plugin: ^1.1.5
   workmanager: ^0.2.0
   xml: ^4.5.1
-  flutter_svg: ^0.19.1
-  permission_handler: ^5.0.1+1
-  # Firebase
-  firebase_messaging: ^8.0.0-dev.5
-  firebase_core: ^0.5.1
-  flutter_local_notifications: ^3.0.1+2
 
 dev_dependencies:
   flutter_test:
