@@ -211,7 +211,7 @@ class QuizQuestion extends StatelessWidget {
           )
         else if (model.role == GroupRole.MEMBER)
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 8 ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
