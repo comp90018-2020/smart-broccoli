@@ -30,10 +30,13 @@ jobs:
     - run: flutter build apk 2>&1 | tee compile.txt
       # if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dependabot/gradle/android')
 
-    - run: git log > commit_logs.txt
+    - run: sudo apt-get install -y pango1.0-tools
       # if: github.ref == 'refs/heads/master'
 
     - run: pango-view --font=mono -qo compile.png compile.txt
+      # if: github.ref == 'refs/heads/master'
+
+    - run: git log > commit_logs.txt
       # if: github.ref == 'refs/heads/master'
 
     - name: Save artifacts
