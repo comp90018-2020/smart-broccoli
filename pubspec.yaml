@@ -82,6 +82,7 @@ flutter:
     - assets/licenses/geocoding
     - assets/licenses/geolocator
     - assets/licenses/http
+    - assets/licenses/image
     - assets/licenses/image_picker
     - assets/licenses/light
     - assets/licenses/numberpicker
