@@ -54,7 +54,7 @@ class _QuizCreateState extends State<QuizCreate> {
     super.initState();
     // Ensure that groups are fully loaded
     Provider.of<GroupRegistryModel>(context, listen: false)
-        .getCreatedGroups(refreshIfLoaded: true)
+        .getCreatedGroups()
         .catchError((_) => null);
   }
 

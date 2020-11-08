@@ -147,7 +147,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     } on ApiAuthException {
       _authStateModel.checkSession();
     } on ApiException catch (e) {
-      return Future.error(e.toString());
+      return Future.error("Cannot start session: ${e.toString()}");
     } on Exception {
       return Future.error("Something went wrong");
     }
