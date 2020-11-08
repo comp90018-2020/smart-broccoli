@@ -35,21 +35,16 @@ class AcknowledgementsPage extends StatelessWidget {
       'title': 'fredeil/email-validator.dart',
       'path': '$_license_dir/email_validator'
     },
-    {
-      'title': 'FirebaseExtended/flutterfire',
-      'path': '$_license_dir/firebase_core'
-    },
-    {
-      'title': 'FirebaseExtended/flutterfire',
-      'path': '$_license_dir/firebase_messaging'
-    },
+
+    //License of packages: 'firebase_core', 'firebase_messaging'
+    {'title': 'FirebaseExtended/flutterfire', 'path': '$_license_dir/firebase'},
     {'title': 'lukepighetti/fluro', 'path': '$_license_dir/fluro'},
     {
       'title': 'MaikuB/flutter_local_notifications',
       'path': '$_license_dir/flutter_local_notifications'
     },
     {
-      'title': 'comp90018-2020/Flutter-settings',
+      'title': 'MustafaGamalAbbas/Flutter-settings',
       'path': '$_license_dir/flutter_settings'
     },
     {'title': 'dnfield/flutter_svg', 'path': '$_license_dir/flutter_svg'},
@@ -59,11 +54,8 @@ class AcknowledgementsPage extends StatelessWidget {
       'path': '$_license_dir/geolocator'
     },
     {'title': 'dart-lang/http', 'path': '$_license_dir/http'},
-    {'title': 'flutter/plugins', 'path': '$_license_dir/image_picker'},
     {'title': 'cph-cachet/flutter-plugins', 'path': '$_license_dir/light'},
     {'title': 'MarcinusX/NumberPicker', 'path': '$_license_dir/numberpicker'},
-    {'title': 'flutter/plugins', 'path': '$_license_dir/package_info'},
-    {'title': 'flutter/plugins', 'path': '$_license_dir/path_provider'},
     {
       'title': 'Baseflow/flutter-permission-handler',
       'path': '$_license_dir/permission_handler'
@@ -71,17 +63,18 @@ class AcknowledgementsPage extends StatelessWidget {
     {'title': 'rrousselGit/provider', 'path': '$_license_dir/provider'},
     {'title': 'google/quiver-dart', 'path': '$_license_dir/quiver'},
     {
-      'title': 'comp90018-2020/selection_picker',
+      'title': 'Pixzelle/selection_picker',
       'path': '$_license_dir/selection_picker'
     },
-    {'title': 'flutter/plugins', 'path': '$_license_dir/sensors'},
-    {'title': 'flutter/plugins', 'path': '$_license_dir/shared_preferences'},
+
+    //License of packages: 'package_info', 'path_provider', 'sensors', 'shared_preferences', 'url_launcher'
+    {'title': 'flutter/plugins', 'path': '$_license_dir/flutter_plugins'},
+    {'title': 'flutter/plugins', 'path': '$_license_dir/image_picker'},
     {
       'title': 'rikulo/socket.io-client-dart',
       'path': '$_license_dir/socket_io_client'
     },
     {'title': 'tekartik/sqflite', 'path': '$_license_dir/sqflite'},
-    {'title': 'flutter/plugins', 'path': '$_license_dir/url_launcher'},
     {
       'title': 'VTechJm/flutter_wifi_info_plugin',
       'path': '$_license_dir/wifi_info_plugin'
@@ -91,10 +84,6 @@ class AcknowledgementsPage extends StatelessWidget {
       'path': '$_license_dir/workmanager'
     },
     {'title': 'renggli/dart-xml', 'path': '$_license_dir/xml'},
-    {
-      'title': 'flutter/plugins',
-      'url': 'https://raw.githubusercontent.com/flutter/plugins/master/LICENSE'
-    }
   ];
 
   @override

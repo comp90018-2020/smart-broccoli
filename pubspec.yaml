@@ -65,7 +65,32 @@ flutter:
     - assets/posing_broccoli.png
 
     # Licenses
+    - assets/licenses/auto_size_text
+    - assets/licenses/collection
+    - assets/licenses/device_calendar
+    - assets/licenses/email_validator
+    - assets/licenses/firebase
+    - assets/licenses/fluro
     - assets/licenses/flutter
+    - assets/licenses/flutter_local_notifications
+    - assets/licenses/flutter_plugins
+    - assets/licenses/flutter_settings
+    - assets/licenses/flutter_svg
+    - assets/licenses/geocoding
+    - assets/licenses/geolocator
+    - assets/licenses/http
+    - assets/licenses/image_picker
+    - assets/licenses/light
+    - assets/licenses/numberpicker
+    - assets/licenses/permission_handler
+    - assets/licenses/provider
+    - assets/licenses/quiver
+    - assets/licenses/selection_picker
+    - assets/licenses/socket_io_client
+    - assets/licenses/sqflite
+    - assets/licenses/wifi_info_plugin
+    - assets/licenses/workmanager
+    - assets/licenses/xml
 
   fonts:
     - family: PatrickHandSC
