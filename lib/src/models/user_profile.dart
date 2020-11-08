@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/base/helper.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
@@ -104,11 +104,12 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
   }
 
   /// Updates user's profile picture
-  Future<void> updateProfilePic(Uint8List bytes) async {
+  Future<void> updateProfilePic(String path) async {
     if (!_authStateModel.inSession) return null;
 
     try {
-      await _userApi.setProfilePic(_authStateModel.token, bytes);
+      await _userApi.setProfilePic(
+          _authStateModel.token, await loadFileAndBakeOrientation(path));
     } on ApiAuthException {
       await _authStateModel.checkSession();
     } on ApiException catch (e) {
