@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+import 'package:quiver/core.dart';
 import 'package:smart_broccoli/src/remote.dart';
 
 class NotificationPrefs {
@@ -79,6 +81,29 @@ class NotificationPrefs {
         'workRadius': workRadius,
         'workSmart': workSmart
       };
+
+  operator ==(Object other) {
+    return other is NotificationPrefs &&
+        dayPrefs == other.dayPrefs &&
+        timezone == other.timezone &&
+        maxPerDay == other.maxPerDay &&
+        minWindow == other.minWindow &&
+        allowOnTheMove == other.allowOnTheMove &&
+        allowOnCommute == other.allowOnCommute &&
+        allowLiveIfCalendar == other.allowLiveIfCalendar &&
+        allowSelfPacedIfCalendar == other.allowSelfPacedIfCalendar &&
+        workSSID == other.workSSID &&
+        workLocation == other.workLocation &&
+        workRadius == other.workRadius &&
+        workSmart == other.workSmart;
+  }
+
+  get hashCode => hash4(
+      dayPrefs.hashCode,
+      hash4(timezone, maxPerDay, minWindow, allowOnTheMove),
+      hash4(allowOnCommute, allowLiveIfCalendar, allowSelfPacedIfCalendar,
+          workSSID),
+      hash3(workLocation.hashCode, workRadius, workSmart));
 }
 
 enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }
@@ -93,4 +118,10 @@ class DayPrefs {
   void setPref(Day day, bool pref) {
     prefs[day.index] = pref;
   }
+
+  operator ==(Object other) {
+    return other is DayPrefs && ListEquality().equals(this.prefs, other.prefs);
+  }
+
+  get hashCode => prefs.hashCode;
 }
