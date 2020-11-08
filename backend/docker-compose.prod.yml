@@ -20,8 +20,10 @@ services:
       - FIREBASE_PROJECT_ID
       - FIREBASE_CLIENT_EMAIL
       - FIREBASE_DATABASE_URL
+      - DEMO
     volumes:
       - ./data/uploads:/app/uploads
+      - ./data/demo_pictures:/app/demo_pictures
     links:
       - postgresql
     depends_on:
