@@ -50,7 +50,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       {GroupApi groupApi}) {
     _groupApi = groupApi ?? GroupApi();
 
-    // Firebase subscriptions
+    // Firebase message handling
     PubSub().subscribe(PubSubTopic.GROUP_UPDATE, _handleGroupUpdate);
     PubSub()
         .subscribe(PubSubTopic.GROUP_MEMBER_CHANGE, _handleGroupMemberChange);
@@ -348,7 +348,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   }
 
   // Firebase function to handle GROUP_UPDATE
-  void _handleGroupUpdate(String content) {
+  void _handleGroupUpdate(dynamic content) {
     int groupId = GroupUpdatePayload.fromJson(jsonDecode(content)).groupId;
     // If group is not loaded, do nothing
     if (!_createdGroups.containsKey(groupId) &&
@@ -358,7 +358,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   }
 
   // Firebase function to handle GROUP_DELETE
-  void _handleGroupDelete(String content) {
+  void _handleGroupDelete(dynamic content) {
     int groupId = GroupUpdatePayload.fromJson(jsonDecode(content)).groupId;
     // If group is not loaded, do nothing
     if (!_createdGroups.containsKey(groupId) &&
@@ -370,7 +370,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   }
 
   // Firebase function to handle GROUP_MEMBER_CHANGE
-  void _handleGroupMemberChange(String content) {
+  void _handleGroupMemberChange(dynamic content) {
     int groupId = GroupUpdatePayload.fromJson(jsonDecode(content)).groupId;
     // If members are not loaded, do nothing
     if (!_groupMembers.containsKey(groupId)) return;

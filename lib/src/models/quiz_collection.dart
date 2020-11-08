@@ -31,8 +31,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// Constructor for external use
   QuizCollectionModel(this._authStateModel, this._picStash, {QuizApi quizApi}) {
     _quizApi = quizApi ?? QuizApi();
-
-    // Firebase subscriptions
+    // Firebase message handling
     PubSub().subscribe(PubSubTopic.QUIZ_CREATE, _handleQuizCreate);
     PubSub().subscribe(PubSubTopic.QUIZ_UPDATE, _handleQuizUpdate);
     PubSub().subscribe(PubSubTopic.QUIZ_DELETE, _handleQuizDelete);
@@ -368,7 +367,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   // Firebase function to handle QUIZ_DELETE
-  void _handleQuizDelete(String content) {
+  void _handleQuizDelete(dynamic content) {
     QuizUpdatePayload payload = QuizUpdatePayload.fromJson(jsonDecode(content));
     _createdQuizzes.remove(payload.quizId);
     _availableQuizzes.remove(payload.quizId);
@@ -376,7 +375,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   // Firebase function to handle QUIZ_UPDATE
-  void _handleQuizUpdate(String content) {
+  void _handleQuizUpdate(dynamic content) {
     QuizUpdatePayload payload = QuizUpdatePayload.fromJson(jsonDecode(content));
     int quizId = payload.quizId;
     // Quiz is not loaded, do nothing
@@ -387,10 +386,9 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   }
 
   // Firebase function to handle QUIZ_CREATE
-  void _handleQuizCreate(String content) {
+  void _handleQuizCreate(dynamic content) {
     QuizUpdatePayload payload = QuizUpdatePayload.fromJson(jsonDecode(content));
     int quizId = payload.quizId;
-
     // Quiz collection currently has no way to tell if quizzes for a group
     // are loaded, so just refresh it
     _refreshQuiz(quizId).catchError((_) => null);
