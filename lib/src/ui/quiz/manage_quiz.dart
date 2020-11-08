@@ -37,12 +37,12 @@ class _ManageQuizState extends State<ManageQuiz> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<QuizCollectionModel>(
-      builder: (context, collection, child) {
-        return FutureBuilder(
-          future: Provider.of<QuizCollectionModel>(context, listen: false)
-              .refreshCreatedQuizzes(),
-          builder: (context, snapshot) {
+    return FutureBuilder(
+      future: Provider.of<QuizCollectionModel>(context, listen: false)
+          .refreshCreatedQuizzes(),
+      builder: (context, snapshot) {
+        return Consumer<QuizCollectionModel>(
+          builder: (context, collection, child) {
             log("Manage quiz future ${snapshot.toString()}");
 
             return CustomTabbedPage(
