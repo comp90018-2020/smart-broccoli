@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/base/helper.dart';
 
@@ -169,6 +168,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
 
   Future<void> setNotificationPrefs(NotificationPrefs prefs) async {
     try {
+      prefs.timezone = DateTime.now().timeZoneName;
       await _userApi.setNotificationPrefs(_authStateModel.token, prefs);
       _keyValueStore.setString('prefs', json.encode((prefs).toJson()));
     } on ApiAuthException {
