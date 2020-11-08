@@ -32,6 +32,11 @@ class _MyHomePageState extends State<TiltQuestion> {
   double widthStart;
   double heightStart;
 
+  bool ballRespawn;
+  bool ballAnswered = false;
+
+  int noAnswered = 0;
+
   /// Used to determine if the user's ball is so what stationary
   /// Therefore we can make selection
   bool canSelect = false;
@@ -62,20 +67,29 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     /// First time initialisation
     /// TODO handle rotation changes if that happens
-    if (cord[0] == 0.0 && cord[1] == 0.0) {
+    if (left == 0.0 && top == 0.0) {
       final RenderBox renderBoxRed =
           areaLimit.currentContext.findRenderObject();
       if (renderBoxRed == null) {
         return;
       }
       final Offset offset = renderBoxRed.localToGlobal(Offset.zero);
-      cord[0] = offset.dx;
-      cord[1] = offset.dy;
+      widthStart = offset.dx;
+      heightStart = offset.dy;
       final Size size = renderBoxRed.size;
       heightLimit = size.height;
       widthLimit = size.width;
-      heightStart = cord[1];
-      widthStart = cord[0];
+      cord[0] = widthStart + (widthLimit) / 2.0 - 20;
+      cord[1] = heightStart - appBarHeight + (heightLimit) / 2.0 - 20;
+
+      setState(() {
+        left = cord[0];
+      });
+
+      setState(() {
+        top = cord[1];
+      });
+      return;
     }
 
     /// The 40 number offset is to offset the size of the ball
@@ -88,8 +102,8 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     /// We need to save the previous cord for now to see if there has been
     /// Significant changes
-    double nextCordx = cord[0] - event.x * 2;
-    double nextCordy = cord[1] + event.y * 2;
+    double nextCordx = cord[0] - event.x;
+    double nextCordy = cord[1] + event.y;
 
     /// Boundary checks width = x, height = y
     /// If the ball is out of the width limit
@@ -125,6 +139,16 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     // Set the state for x and y axis
 
+    if (ballAnswered && ballRespawn) {
+      ballAnswered = false;
+      noAnswered++;
+      cord[0] = xStart + (widthLimit) / 2.0 - 20;
+      cord[1] = yStart + (heightLimit) / 2.0 - 20;
+    } else if (ballAnswered && !ballRespawn) {
+      cord[0] = xStart + (widthLimit) / 2.0 - 20;
+      cord[1] = yStart + (heightLimit) / 2.0 - 20;
+    }
+
     setState(() {
       left = cord[0];
     });
@@ -149,23 +173,24 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     /// Ball is on the top side
     /// if ball is near the y start line and the xLimit line
-    if (cord[1] <= yStart + 40 && cord[0] <= xLimit) {
+    if (cord[1] <= yStart + 5 && cord[0] <= xLimit) {
       /// Determine on which side
       /// If it is A TF question
       if (model.question is TFQuestion) {
         //  print("TRUE/ TOP RIGHT and TOP LEFT");
         model.selectAnswer(1);
+        ballAnswered = true;
         return;
       }
 
       /// If it is the top left grid that
-      if (cord[0] <= xLimitHalfWay - 20) {
+      if (cord[0] <= xLimitHalfWay - 10) {
         selected[0] = true;
         //  print("Top Left");
       }
 
       /// If it is the top right grid
-      else if (cord[0] >= xLimitHalfWay + 20) {
+      else if (cord[0] >= xLimitHalfWay + 10) {
         selected[1] = true;
         //  print("Top Right");
       }
@@ -176,6 +201,7 @@ class _MyHomePageState extends State<TiltQuestion> {
         if (model.question is TFQuestion) {
           //   print("TRUE/ TOP RIGHT and TOP LEFT");
           model.selectAnswer(1);
+          ballAnswered = true;
           return;
         }
 
@@ -184,25 +210,28 @@ class _MyHomePageState extends State<TiltQuestion> {
     }
 
     /// left side
-    else if (cord[1] <= yLimit && cord[0] <= xStart + 40) {
-      if (cord[1] <= yLimitHalfWay - 20) {
+    else if (cord[1] <= yLimit && cord[0] <= xStart + 5) {
+      if (cord[1] <= yLimitHalfWay - 10) {
         /// CHeck if true false
         if (model.question is TFQuestion) {
           //   print("TRUE/ TOP RIGHT and TOP LEFT");
           model.selectAnswer(1);
+          ballAnswered = true;
           return;
         }
         selected[0] = true;
         //   print("Top Left");
-      } else if (cord[1] >= yLimitHalfWay + 20) {
+      } else if (cord[1] >= yLimitHalfWay + 10) {
         if (model.question is TFQuestion) {
           model.selectAnswer(0);
           //     print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
+          ballAnswered = true;
           return;
         } else {
           if ((model.question as MCQuestion).options.length == 3) {
             //      print("BOTTOM RIGHT and BOTTOM LEFT");
             model.selectAnswer(2);
+            ballAnswered = true;
             return;
           }
         }
@@ -215,24 +244,26 @@ class _MyHomePageState extends State<TiltQuestion> {
     }
 
     /// Bottom Side
-    else if (cord[0] <= xLimit && cord[1] >= yLimit - 40) {
+    else if (cord[0] <= xLimit && cord[1] >= yLimit - 5) {
       /// We check if TF first
       if (model.question is TFQuestion) {
         model.selectAnswer(0);
         //    print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
+        ballAnswered = true;
         return;
       } else {
         if ((model.question as MCQuestion).options.length == 3) {
           //      print("BOTTOM RIGHT and BOTTOM LEFT");
           model.selectAnswer(2);
+          ballAnswered = true;
           return;
         }
       }
 
-      if (cord[0] <= xLimitHalfWay - 20) {
+      if (cord[0] <= xLimitHalfWay - 10) {
         selected[2] = true;
         //    print("Bottom Left");
-      } else if (cord[0] >= xLimitHalfWay + 20) {
+      } else if (cord[0] >= xLimitHalfWay + 10) {
         selected[3] = true;
         //    print("Bottom Right");
       } else {
@@ -240,24 +271,27 @@ class _MyHomePageState extends State<TiltQuestion> {
         if (model.question is TFQuestion) {
           model.selectAnswer(0);
           //      print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
+          ballAnswered = true;
           return;
         } else {
           if ((model.question as MCQuestion).options.length == 3) {
             //       print("BOTTOM RIGHT and BOTTOM LEFT");
             model.selectAnswer(2);
+            ballAnswered = true;
             return;
           }
         }
       }
     }
     // Right Side
-    else if (cord[0] >= xLimit - 40 && cord[1] <= yLimit) {
+    else if (cord[0] >= xLimit - 5 && cord[1] <= yLimit) {
       /// If Top Right
-      if (cord[1] <= yLimitHalfWay - 20) {
+      if (cord[1] <= yLimitHalfWay - 10) {
         /// If True/False Question
         if (model.question is TFQuestion) {
           //     print("TRUE/ TOP RIGHT and TOP LEFT");
           model.selectAnswer(1);
+          ballAnswered = true;
           return;
         }
 
@@ -265,15 +299,17 @@ class _MyHomePageState extends State<TiltQuestion> {
         selected[1] = true;
 
         /// If Bottom Right
-      } else if (cord[1] >= yLimitHalfWay + 20) {
+      } else if (cord[1] >= yLimitHalfWay + 10) {
         if (model.question is TFQuestion) {
           model.selectAnswer(0);
           //     print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
+          ballAnswered = true;
           return;
         } else {
           if ((model.question as MCQuestion).options.length == 3) {
             //    print("BOTTOM RIGHT and BOTTOM LEFT");
             model.selectAnswer(2);
+            ballAnswered = true;
             return;
           }
         }
@@ -284,12 +320,16 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     if (selected[0]) {
       model.selectAnswer(0);
+      ballAnswered = true;
     } else if (selected[1]) {
       model.selectAnswer(1);
+      ballAnswered = true;
     } else if (selected[2]) {
       model.selectAnswer(2);
+      ballAnswered = true;
     } else if (selected[3]) {
       model.selectAnswer(3);
+      ballAnswered = true;
     }
   }
 
@@ -317,6 +357,7 @@ class _MyHomePageState extends State<TiltQuestion> {
   }
 
   pauseTimer() {
+    ballAnswered = false;
     // stop the timer and pause the accelerometer stream
     if (timer != null) {
       timer.cancel();
@@ -347,6 +388,8 @@ class _MyHomePageState extends State<TiltQuestion> {
     appBarHeight = MediaQuery.of(context).padding.top + kToolbarHeight;
   }
 
+  bool stopAnswer = false;
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -355,6 +398,21 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     return Consumer<GameSessionModel>(builder: (context, model, child) {
       // Todo determine if it is much better to check SessionState.Question instead
+
+      if (model.question is MCQuestion) {
+        if ((model.question as MCQuestion).numCorrect == noAnswered) {
+          stopAnswer = true;
+        }
+
+        if ((model.question as MCQuestion).numCorrect > 1) {
+          ballRespawn = true;
+        } else {
+          ballRespawn = false;
+        }
+      } else {
+        ballRespawn = false;
+      }
+
       if (model.state != SessionState.QUESTION) {
         pauseTimer();
       } else {
@@ -472,7 +530,10 @@ class _MyHomePageState extends State<TiltQuestion> {
             ),
 
             // Ball
-            (useAccel && model.state == SessionState.QUESTION)
+            (useAccel &&
+                    model.state == SessionState.QUESTION &&
+                    !(ballAnswered && !ballRespawn) &&
+                    !stopAnswer)
                 ? Container(
                     margin: EdgeInsets.only(top: top, left: left),
                     child: Container(
@@ -604,7 +665,12 @@ class _MyHomePageState extends State<TiltQuestion> {
         else if (model.state == SessionState.ANSWER &&
             model.role == GroupRole.OWNER)
           IconButton(
-            onPressed: () => {model.showLeaderBoard(), pauseTimer()},
+            onPressed: () => {
+              model.showLeaderBoard(),
+              pauseTimer(),
+              noAnswered = 0,
+              stopAnswer = false,
+            },
             icon: Icon(Icons.arrow_forward),
           )
         else if (model.state == SessionState.OUTCOME &&
@@ -617,7 +683,7 @@ class _MyHomePageState extends State<TiltQuestion> {
             model.session.quizType == QuizType.SELF_PACED &&
             model.session.type == GameSessionType.INDIVIDUAL)
           IconButton(
-            onPressed: () => model.nextQuestion(),
+            onPressed: () => {model.nextQuestion()},
             icon: Icon(Icons.arrow_forward),
           )
         else if (model.role == GroupRole.MEMBER)
