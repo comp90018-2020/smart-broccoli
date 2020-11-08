@@ -132,7 +132,7 @@ class _GroupListState extends State<GroupList> {
     if (groups.length == 0)
       return SingleChildScrollView(
           child: Padding(
-        padding: const EdgeInsets.all(35.0),
+        padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 20),
         child: NoContentPlaceholder(
           text: placeholderText,
         ),
@@ -143,7 +143,7 @@ class _GroupListState extends State<GroupList> {
       widthFactor: 0.8,
       child: ListView.builder(
         itemCount: groups.length + 1,
-        padding: EdgeInsets.symmetric(vertical: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         itemBuilder: (context, i) => i == groups.length
             // Hidden button for bottom padding
             ? Visibility(
