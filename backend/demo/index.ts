@@ -3,8 +3,7 @@ import * as groupController from "../controllers/group";
 import * as quizController from "../controllers/quiz";
 import axios from "axios";
 import formData from "form-data";
-import rebuild from "../tests/rebuild";
-import { Group } from "models";
+import sequelize, { Group } from "../models";
 import fs from "fs";
 import path from "path";
 
@@ -229,7 +228,7 @@ export const generateDemoData = async () => {
     console.log("[*] Generating demo data");
 
     // Reset database
-    await rebuild();
+    await sequelize.sync({ force: true });
 
     // Download pictures
     const pictures = await downloadPictures();

@@ -1,4 +1,4 @@
-import { Op, QueryTypes } from "sequelize";
+import { Op } from "sequelize";
 import sequelize, {
     Quiz,
     Session,
@@ -11,7 +11,7 @@ import sequelize, {
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
 import { handler } from "../game/index";
-import { sendSessionCreationNotification } from "./notification";
+import { sendSessionCreationNotification } from "./notification_session";
 
 // Represents a session token
 export interface TokenInfo {
