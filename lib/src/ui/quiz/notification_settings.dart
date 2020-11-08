@@ -9,8 +9,8 @@ import 'package:flutter_settings/widgets/SettingsSlider.dart';
 import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
 import 'package:smart_broccoli/src/store/remote/location_api.dart';
 import 'package:toast/toast.dart';
-import 'package:selection_picker/selectionpicker.dart';
-import 'package:selection_picker/selection_item.dart' as day;
+import 'selection_picker/selectionpicker.dart';
+import 'selection_picker/selection_item.dart' as day;
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Smart quiz page
