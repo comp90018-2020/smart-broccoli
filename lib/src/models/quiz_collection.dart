@@ -31,6 +31,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   /// Constructor for external use
   QuizCollectionModel(this._authStateModel, this._picStash, {QuizApi quizApi}) {
     _quizApi = quizApi ?? QuizApi();
+
+    // Firebase subscriptions
     PubSub().subscribe(PubSubTopic.QUIZ_CREATE, _handleQuizCreate);
     PubSub().subscribe(PubSubTopic.QUIZ_UPDATE, _handleQuizUpdate);
     PubSub().subscribe(PubSubTopic.QUIZ_DELETE, _handleQuizDelete);
