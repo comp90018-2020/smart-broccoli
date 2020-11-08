@@ -110,12 +110,13 @@ export const updateNotificationSettings = async (userId: number, opts: any) => {
     if (
         opts.location === undefined ||
         opts.location.lat === undefined ||
-        opts.location.lon === undefined
+        opts.location.lon === undefined ||
+        opts.location.name === undefined
     ) {
         opts.location = null;
     } else {
-        const { lat, lon } = opts.location;
-        opts.location = { lat, lon };
+        const { lat, lon, name } = opts.location;
+        opts.location = { lat, lon, name };
     }
 
     // Update

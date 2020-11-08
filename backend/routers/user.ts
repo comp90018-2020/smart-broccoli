@@ -324,6 +324,8 @@ router.get(
  *             properties:
  *               free:
  *                 type: boolean
+ *               calendarFree:
+ *                 type: boolean
  *     responses:
  *       '200':
  *         description: OK
@@ -352,11 +354,14 @@ router.put(
  *       required:
  *         - lat
  *         - lon
+ *         - name
  *       properties:
  *         lat:
  *           type: number
  *         lon:
  *           type: number
+ *         name:
+ *           type: string
  *     NotificationSettings:
  *       type: object
  *       required:
@@ -429,6 +434,7 @@ router.put(
         body("workSSID").optional({ nullable: true }).isString(),
         body("workLocation.lat").optional().isString(),
         body("workLocation.lon").optional().isString(),
+        body("workLocation.name").optional().isString(),
         body("workRadius").optional({ nullable: true }).isInt({ min: 0 }),
         body("workSmart").optional({ nullable: true }).isBoolean(),
         body("notificationWindow").isInt({ min: 0 }),
