@@ -65,6 +65,8 @@ flutter:
     - assets/posing_broccoli.png
 
     # Licenses
+    - assets/licenses/material_design_icons
+    - assets/licenses/patrick_hand
     - assets/licenses/auto_size_text
     - assets/licenses/collection
     - assets/licenses/device_calendar
