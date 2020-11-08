@@ -289,7 +289,7 @@ class QuizCard extends StatelessWidget {
             },
             elevation: 2.0,
             child: Icon(
-              Icons.settings,
+              Icons.edit,
               size: 20,
               color: Theme.of(context).colorScheme.onBackground,
             ),
