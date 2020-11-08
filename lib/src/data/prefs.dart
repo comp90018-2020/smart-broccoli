@@ -1,3 +1,5 @@
+import 'package:smart_broccoli/src/remote.dart';
+
 class NotificationPrefs {
   /// Allow/disallow by day of week
   DayPrefs dayPrefs;
@@ -27,6 +29,15 @@ class NotificationPrefs {
   /// SSID of work wifi
   bool workSSID;
 
+  /// Lat/long (and possibly name) of work
+  LocationData workLocation;
+
+  /// Work location geofence in km
+  int workRadius;
+
+  /// Whether the user has enabled residential/commercial auto-detection
+  bool workSmart;
+
   NotificationPrefs.internal(
       this.dayPrefs,
       this.timezone,
@@ -36,7 +47,10 @@ class NotificationPrefs {
       this.allowOnCommute,
       this.allowLiveIfCalendar,
       this.allowSelfPacedIfCalendar,
-      this.workSSID);
+      this.workSSID,
+      this.workLocation,
+      this.workRadius,
+      this.workSmart);
 
   factory NotificationPrefs.fromJson(Map<String, dynamic> json) =>
       NotificationPrefs.internal(
@@ -48,7 +62,10 @@ class NotificationPrefs {
           json['onCommute'],
           json['calendarLive'],
           json['calendarSelfPaced'],
-          json['workSSID']);
+          json['workSSID'],
+          LocationData.fromJson(json['workLocation']),
+          json['workRadius'],
+          json['workSmart']);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'days': dayPrefs.prefs,
@@ -57,7 +74,10 @@ class NotificationPrefs {
         'notificationWindow': minWindow,
         'calendarLive': allowLiveIfCalendar,
         'calendarSelfPaced': allowSelfPacedIfCalendar,
-        'workSSID': workSSID
+        'workSSID': workSSID,
+        'workLocation': workLocation.toJson(),
+        'workRadius': workRadius,
+        'workSmart': workSmart
       };
 }
 
