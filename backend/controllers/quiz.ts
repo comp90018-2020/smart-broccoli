@@ -439,6 +439,7 @@ export const deleteQuiz = async (userId: number, quizId: number) => {
                 model: Session,
                 required: false,
                 where: { state: { [Op.or]: ["waiting", "active"] } },
+                attributes: ["id"],
             },
         ],
     });

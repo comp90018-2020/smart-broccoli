@@ -508,7 +508,7 @@ export const deleteGroup = async (userId: number, groupId: number) => {
                         model: Session,
                         required: false,
                         where: { state: { [Op.or]: ["waiting", "active"] } },
-                        attributes: ["id"]
+                        attributes: ["id"],
                     },
                 ],
             },
