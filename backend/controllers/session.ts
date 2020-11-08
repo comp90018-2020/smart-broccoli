@@ -457,33 +457,35 @@ export const joinSession = async (userId: number, code: string) => {
  * @param sessionId
  */
 export const activateSession = async (sessionId: number) => {
+    let res;
     try {
-        const res = await Session.update(
+        res = await Session.update(
             { state: "active" },
             { where: { id: sessionId }, returning: true }
         );
-        const session = res[1][0];
-
-        // push notifications
-        if (process.env.NODE_ENV === "production") {
-            sendSessionActivateNotification(
-                sessionId,
-                session.groupId,
-                session.quizId
-            );
-        } else {
-            await sendSessionActivateNotification(
-                sessionId,
-                session.groupId,
-                session.quizId
-            );
-        }
-
-        return res[0] === 1;
     } catch (err) {
         // Game server calls function, game server should not be responsible
         // for handling errors
     }
+
+    const session = res[1][0];
+
+    // push notifications
+    if (process.env.NODE_ENV === "production") {
+        sendSessionActivateNotification(
+            sessionId,
+            session.groupId,
+            session.quizId
+        );
+    } else {
+        await sendSessionActivateNotification(
+            sessionId,
+            session.groupId,
+            session.quizId
+        );
+    }
+
+    return res[0] === 1;
 };
 
 /**
