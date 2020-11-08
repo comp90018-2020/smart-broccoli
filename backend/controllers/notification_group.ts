@@ -10,8 +10,14 @@ export const sendGroupUpdateNotification = async (
     groupId: number,
     type: string
 ) => {
-    // Get tokens of group members who is not initiator
-    const tokens = await getGroupMemberTokens(initiatorId, groupId);
+    let tokens;
+    try {
+        // Get tokens of group members who is not initiator
+        tokens = await getGroupMemberTokens(initiatorId, groupId);
+    } catch (err) {
+        console.error(err);
+        return;
+    }
 
     // Build and send
     const dataMessage = buildDataMessage(
