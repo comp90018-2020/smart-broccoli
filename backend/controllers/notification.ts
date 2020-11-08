@@ -1,8 +1,4 @@
-import {
-    NotificationSettings,
-    Token,
-    UserState,
-} from "../models";
+import { NotificationSettings, Token, UserState } from "../models";
 import { firebaseTokenValid } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
 
@@ -140,4 +136,3 @@ export const getNotificationSettings = async (userId: number) => {
     const res = await NotificationSettings.findOrCreate({ where: { userId } });
     return res[0];
 };
-
