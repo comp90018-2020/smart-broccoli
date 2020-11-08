@@ -99,7 +99,7 @@ class QuizLobby extends StatelessWidget {
                 builder: (context, model, child) => Padding(
                     padding: model.role == GroupRole.OWNER
                         ? const EdgeInsets.only(bottom: 10)
-                        : null)),
+                        : const EdgeInsets.all(0))),
 
             // Text describing status
             Consumer<GameSessionModel>(
