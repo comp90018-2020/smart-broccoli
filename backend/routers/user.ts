@@ -324,6 +324,8 @@ router.get(
  *             properties:
  *               free:
  *                 type: boolean
+ *               calendarFree:
+ *                 type: boolean
  *     responses:
  *       '200':
  *         description: OK
@@ -352,11 +354,14 @@ router.put(
  *       required:
  *         - lat
  *         - lon
+ *         - name
  *       properties:
  *         lat:
  *           type: number
  *         lon:
  *           type: number
+ *         name:
+ *           type: string
  *     NotificationSettings:
  *       type: object
  *       required:
