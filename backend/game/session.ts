@@ -211,7 +211,7 @@ export class GameSession {
             this.QuestionReleaseAt[0] = Date.now() + WAIT_TIME_BEFORE_START;
     }
 
-    endSession() {
+    async endSession() {
         const rank = this.rankPlayers();
         // Pass players' records to contoller
         const progress = rank.map(({ player: { id } }) => ({
@@ -221,7 +221,7 @@ export class GameSession {
         }));
 
         if (process.env.SOCKET_MODE !== "debug") {
-            endSessionInController(
+            await endSessionInController(
                 this.id,
                 this.questionReleased.size === this.totalQuestions,
                 progress

@@ -374,8 +374,8 @@ export class GameHandler {
         }
     }
 
-    endSession(session: GameSession) {
-        session.endSession();
+    async endSession(session: GameSession) {
+        await session.endSession();
         delete this.sessions[session.id];
         if (
             _socketIO !== undefined &&
@@ -413,11 +413,11 @@ export class GameHandler {
                 );
                 session.freezeQuestion(questionIndex);
 
-                // Activate session in controller 
+                // Activate session in controller
                 // just before releasing the first question
                 if (process.env.SOCKET_MODE !== "debug" && questionIndex === 0)
                     await activateSession(session.id);
-                
+
                 emitToRoom(
                     whichRoom(session, Role.player),
                     Event.nextQuestion,

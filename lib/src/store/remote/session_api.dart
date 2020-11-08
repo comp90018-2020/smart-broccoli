@@ -36,10 +36,8 @@ class SessionApi {
       return GameSession.fromJson(resJson["session"], token: resJson["token"]);
     }
 
-    if (response.statusCode == 400 &&
-        json.decode(response.body)["message"] ==
-            "User is already participant of ongoing quiz session")
-      throw InSessionException();
+    if (response.statusCode == 400)
+      throw ApiException(json.decode(response.body)["message"]);
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
     if (response.statusCode == 404) throw QuizNotFoundException();
