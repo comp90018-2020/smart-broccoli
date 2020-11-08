@@ -57,9 +57,7 @@ class _GroupListState extends State<GroupList> {
               secondaryBackgroundColour: true,
               // Handle tab tap
               tabTap: (value) {
-                setState(() {
-                  tab = value;
-                });
+                setState(() => tab = value);
               },
               // Tabs
               tabViews: [
@@ -144,35 +142,47 @@ class _GroupListState extends State<GroupList> {
     return FractionallySizedBox(
       widthFactor: 0.8,
       child: ListView.builder(
-        itemCount: groups.length,
+        itemCount: groups.length + 1,
         padding: EdgeInsets.symmetric(vertical: 16.0),
-        itemBuilder: (context, i) => Card(
-          child: ListTile(
-            dense: true,
-            onTap: () =>
-                Navigator.of(context).pushNamed('/group/${groups[i].id}'),
-            title: Text(
-              groups[i].name,
-              style: TextStyle(fontSize: 16),
-            ),
-            subtitle: FutureBuilder(
-                future: getGroupMembers(groups[i].id),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return Container();
-                  return Row(
-                    children: [
-                      Icon(Icons.person),
-                      Text('${snapshot.data.length} member'
-                          '${snapshot.data.length > 1 ? "s" : ""}'),
-                      if (groups[i].defaultGroup) ...[
-                        Spacer(),
-                        Text('Default Group')
-                      ]
-                    ],
-                  );
-                }),
-          ),
-        ),
+        itemBuilder: (context, i) => i == groups.length
+            // Hidden button for bottom padding
+            ? Visibility(
+                maintainState: true,
+                maintainAnimation: true,
+                maintainSize: true,
+                visible: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: FloatingActionButton(heroTag: null, onPressed: null),
+                ),
+              )
+            : Card(
+                child: ListTile(
+                  dense: true,
+                  onTap: () =>
+                      Navigator.of(context).pushNamed('/group/${groups[i].id}'),
+                  title: Text(
+                    groups[i].name,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  subtitle: FutureBuilder(
+                      future: getGroupMembers(groups[i].id),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return Container();
+                        return Row(
+                          children: [
+                            Icon(Icons.person),
+                            Text('${snapshot.data.length} member'
+                                '${snapshot.data.length > 1 ? "s" : ""}'),
+                            if (groups[i].defaultGroup) ...[
+                              Spacer(),
+                              Text('Default Group')
+                            ]
+                          ],
+                        );
+                      }),
+                ),
+              ),
       ),
     );
   }
@@ -220,6 +230,8 @@ class _GroupListState extends State<GroupList> {
     } on GroupNotFoundException {
       showBasicDialog(context,
           "Cannot find group.\nNote that playground groups (the default group of a user) cannot be joined.");
+    } on AlreadyInGroupException {
+      showBasicDialog(context, "Already member of group");
     } catch (e) {
       showErrSnackBar(context, e.toString());
     }

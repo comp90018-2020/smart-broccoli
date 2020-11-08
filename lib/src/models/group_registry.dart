@@ -303,8 +303,8 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       return Future.error("Authentication failure");
     } on GroupNotFoundException catch (e) {
       return Future.error(e);
-    } on AlreadyInGroupException {
-      return Future.error("Already member of group: $name");
+    } on AlreadyInGroupException catch (e) {
+      return Future.error(e);
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
