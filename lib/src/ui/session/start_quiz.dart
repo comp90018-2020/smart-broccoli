@@ -140,26 +140,32 @@ class StartQuiz extends StatelessWidget {
                             itemBuilder: (context, i) => Card(
                               elevation: 1.5,
                               child: ListTile(
-                                title: Text(
-                                  'Session ' +
+                                  title: Text('Session ' +
                                       _sessions(context, snapshot.data)[i]
-                                          .joinCode,
-                                ),
-                                // session's unique coloured dot
-                                trailing: Icon(
-                                  Icons.lens,
-                                  color: Provider.of<GameSessionModel>(context,
-                                          listen: false)
-                                      .getSessionColour(
-                                          _sessions(context, snapshot.data)[i]),
-                                ),
-                                onTap: () => Provider.of<GameSessionModel>(
-                                        context,
-                                        listen: false)
-                                    .joinSessionByPin(
-                                        _sessions(context, snapshot.data)[i]
-                                            .joinCode),
-                              ),
+                                          .joinCode),
+                                  // session's unique coloured dot
+                                  trailing: Icon(
+                                    Icons.lens,
+                                    color: Provider.of<GameSessionModel>(
+                                            context,
+                                            listen: false)
+                                        .getSessionColour(_sessions(
+                                            context, snapshot.data)[i]),
+                                  ),
+                                  onTap: () {
+                                    try {
+                                      Provider.of<GameSessionModel>(context,
+                                              listen: false)
+                                          .joinSessionByPin(_sessions(
+                                                  context, snapshot.data)[i]
+                                              .joinCode);
+                                    } on SessionNotFoundException {
+                                      showBasicDialog(context,
+                                          "Session is no longer active");
+                                    } catch (err) {
+                                      showErrSnackBar(context, err.toString());
+                                    }
+                                  }),
                             ),
                           ),
                         ),
