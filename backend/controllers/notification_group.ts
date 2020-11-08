@@ -24,6 +24,22 @@ export const sendGroupUpdateNotification = async (
     await sendMessage(dataMessage);
 };
 
+// Used to send group deletion notification
+export const sendGroupDeleteNotification = async (
+    groupId: number,
+    tokens: string[]
+) => {
+    // Build and send
+    const dataMessage = buildDataMessage(
+        "GROUP_DELETE",
+        {
+            groupId: groupId,
+        },
+        tokens
+    );
+    await sendMessage(dataMessage);
+};
+
 // Get tokens of group members
 export const getGroupMemberTokens = async (
     initiatorId: number,

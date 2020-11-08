@@ -1,7 +1,11 @@
 import { Op, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
 import sequelize, { Group, Session, User, UserGroup } from "../models";
-import { sendGroupUpdateNotification } from "./notification_group";
+import {
+    getGroupMemberTokens,
+    sendGroupDeleteNotification,
+    sendGroupUpdateNotification,
+} from "./notification_group";
 
 /**
  * Ensure that user is group owner.
@@ -486,6 +490,9 @@ export const deleteGroup = async (userId: number, groupId: number) => {
     // Check whether caller is owner
     await assertGroupOwnership(userId, groupId);
 
+    // Get user tokens (otherwise cannot get when group is deleted!)
+    const tokens = await getGroupMemberTokens(userId, groupId);
+
     // Destroy group
     const res = await Group.destroy({
         where: { id: groupId, defaultGroup: false },
@@ -494,9 +501,9 @@ export const deleteGroup = async (userId: number, groupId: number) => {
 
     // Send firebase notification
     if (process.env.NODE_ENV === "production") {
-        sendGroupUpdateNotification(userId, groupId, "GROUP_DELETE");
+        sendGroupDeleteNotification(groupId, tokens);
     } else {
-        await sendGroupUpdateNotification(userId, groupId, "GROUP_DELETE");
+        await sendGroupDeleteNotification(groupId, tokens);
     }
 };
 
