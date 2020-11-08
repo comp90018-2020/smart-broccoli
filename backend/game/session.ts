@@ -7,6 +7,7 @@ import {
     Answer,
     Role,
     RecordWithPlayerInfo,
+    Record,
 } from "./datatype";
 import { QuizAttributes } from "../models/quiz";
 import {
@@ -412,10 +413,28 @@ export class GameSession {
         const questionIndex = this.getQuestionIndex();
         // Make sure every user has record of current question
         playersArray.forEach((player, index) => {
-            const [record, hasAnswered] = player.genreateRecord(questionIndex);
-            if (!hasAnswered)
-                // Player didn't answer, generate a record for him
-                this.playerMap[player.id].records.push(record);
+            for (const player of playersArray) {
+                const [, hasAnswered] = player.genreateRecord(
+                    questionIndex
+                );
+                if (hasAnswered) continue;
+                const [
+                    hasLatestRecord,
+                    latestRecord,
+                ] = player.getLatestRecord();
+
+                if (hasLatestRecord) {
+                    // Player didn't answer, generate a record for him
+                    latestRecord.questionNo = questionIndex;
+                    latestRecord.bonusPoints = 0;
+                    latestRecord.streak = 0;
+                    this.playerMap[player.id].records.push(latestRecord);
+                    continue;
+                }
+                this.playerMap[player.id].records.push(
+                    new Record(questionIndex, null, null, 0, 0, 0)
+                );
+            }
         });
 
         // Every user should have record of current question now

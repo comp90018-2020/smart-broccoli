@@ -229,9 +229,8 @@ export class GameHandler {
                     async (session: GameSession) => {
                         // Check whether the first question can be released
                         // Because the releasomg time may be reset by new join
+                        session.status = GameStatus.Running;
                         if (
-                            // If this game is starting
-                            session.is(GameStatus.Starting) &&
                             // And can release the first question
                             session.canReleaseQuestion(0)
                         ) {
