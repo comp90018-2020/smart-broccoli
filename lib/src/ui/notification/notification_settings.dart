@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_settings/widgets/Separator.dart';
 import 'package:flutter_settings/widgets/SettingsIcon.dart';
 import 'package:flutter_settings/widgets/SettingsSection.dart';
@@ -7,10 +8,11 @@ import 'package:flutter_settings/models/settings_list_item.dart';
 import 'package:flutter_settings/widgets/SettingsInputField.dart';
 import 'package:flutter_settings/widgets/SettingsSlider.dart';
 import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
-import 'package:smart_broccoli/src/store/remote/location_api.dart';
 import 'package:toast/toast.dart';
 import 'package:selection_picker/selectionpicker.dart';
 import 'package:selection_picker/selection_item.dart' as day;
+
+import 'package:smart_broccoli/src/store/remote/location_api.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 /// Smart quiz page
@@ -33,11 +35,12 @@ class _NotificationSettingState extends State<NotificationSetting> {
   ];
   final List<SettingsSelectionItem<int>> _maxNumberList = [
     SettingsSelectionItem<int>(0, "Unlimited"),
+    SettingsSelectionItem<int>(1, "1 notification per day"),
+    SettingsSelectionItem<int>(5, "5 notifications per day"),
     SettingsSelectionItem<int>(20, "20 notifications per day"),
     SettingsSelectionItem<int>(10, "10 notifications per day"),
-    SettingsSelectionItem<int>(5, "5 notifications per day"),
-    SettingsSelectionItem<int>(1, "1 notifications per day"),
   ];
+
   int _minWindowIndex = 0;
   int _maxNumberIndex = 0;
   bool _liveQuizCalendar = true;
