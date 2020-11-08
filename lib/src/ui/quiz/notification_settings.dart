@@ -138,61 +138,25 @@ class _NotificationSettingState extends State<NotificationSetting> {
           ),
 
           ///Calendar live quiz
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            title: Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Icon(Icons.live_tv, color: Colors.blueAccent),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "Allow notifications for live quiz",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ]),
-            onTap: () {
-              setState(() => _liveQuizCalendar = !_liveQuizCalendar);
-            },
-            trailing: Switch(
-                value: _liveQuizCalendar,
-                onChanged: (bool value) {
-                  setState(() {
-                    _liveQuizCalendar = value;
-                  });
-                }),
-          ),
+          _switchListTile(
+              icon: Icon(Icons.live_tv, color: Colors.blueAccent),
+              title: "Allow notifications for live quiz",
+              onTap: () {
+                setState(() => _liveQuizCalendar = !_liveQuizCalendar);
+              },
+              value: _liveQuizCalendar,
+              disabled: false),
           Separator(),
 
           ///Calendar smart quiz
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            title: Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Icon(Icons.lightbulb_outline, color: Colors.orange),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "Allow notifications for smart quiz",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ]),
-            onTap: () {
-              setState(() => _smartQuizCalendar = !_smartQuizCalendar);
-            },
-            trailing: Switch(
-                value: _smartQuizCalendar,
-                onChanged: (bool value) {
-                  setState(() {
-                    _smartQuizCalendar = value;
-                  });
-                }),
-          ),
+          _switchListTile(
+              icon: Icon(Icons.lightbulb_outline, color: Colors.orange),
+              title: "Allow notifications for smart quiz",
+              onTap: () {
+                setState(() => _smartQuizCalendar = !_smartQuizCalendar);
+              },
+              value: _smartQuizCalendar,
+              disabled: false),
           Divider(height: 4, color: Colors.white),
 
           ///Work setting
@@ -201,33 +165,14 @@ class _NotificationSettingState extends State<NotificationSetting> {
           ),
 
           /// Smart detection
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            title: Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child:
-                    Icon(Icons.auto_awesome_mosaic, color: Colors.blueAccent),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "Smart detection",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ]),
-            onTap: () {
-              setState(() => _smartDetection = !_smartDetection);
-            },
-            trailing: Switch(
-                value: _smartDetection,
-                onChanged: (bool value) {
-                  setState(() {
-                    _smartDetection = value;
-                  });
-                }),
-          ),
+          _switchListTile(
+              icon: Icon(Icons.auto_awesome_mosaic, color: Colors.blueAccent),
+              title: "Smart detection",
+              onTap: () {
+                setState(() => _smartDetection = !_smartDetection);
+              },
+              value: _smartDetection,
+              disabled: false),
 
           /// Wifi setting
           SettingsInputField(
@@ -285,71 +230,66 @@ class _NotificationSettingState extends State<NotificationSetting> {
           SettingsSection(title: Text('When moving')),
 
           /// Move
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            title: Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Icon(Icons.directions_walk, color: Colors.amber),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "Allow notifications on the move",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ]),
-            onTap: () {
-              setState(() {
-                _onMove = !_onMove;
-                _commuting = _onMove;
-              });
-            },
-            trailing: Switch(
-                value: _onMove,
-                onChanged: (bool value) {
-                  setState(() {
-                    _onMove = value;
-                    _commuting = _onMove;
-                  });
-                }),
-          ),
+          _switchListTile(
+              icon: Icon(Icons.directions_walk, color: Colors.amber),
+              title: "Allow notifications on the move",
+              onTap: () {
+                setState(() {
+                  _onMove = !_onMove;
+                  _commuting = _onMove;
+                });
+              },
+              value: _onMove),
           Separator(),
 
           /// Commute
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            title: Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Icon(Icons.train, color: Colors.blueAccent),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "Allow notifications on commute",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ]),
+          _switchListTile(
+            icon: Icon(Icons.train, color: Colors.blueAccent),
+            title: "Allow notifications on commute",
             onTap: () {
               setState(() {
                 _commuting = !_commuting;
               });
             },
-            trailing: Switch(
-                value: _commuting,
-                onChanged: _onMove
-                    ? (bool value) {
-                        setState(() {
-                          _commuting = value;
-                        });
-                      }
-                    : null),
+            value: _commuting,
+            disabled: !_onMove,
           ),
         ]),
       ),
+    );
+  }
+
+  /// A switch list tile mimicking the ListTile provided by the package
+  /// The package contained state interally, which we could not modify
+  Widget _switchListTile(
+      {@required Icon icon,
+      @required String title,
+      @required void Function() onTap,
+      @required bool value,
+      bool disabled = false}) {
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      title: Row(children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: icon,
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ),
+      ]),
+      onTap: onTap,
+      trailing: Switch(
+          value: value,
+          onChanged: disabled == true ? null : (value) => onTap()),
     );
   }
 }
