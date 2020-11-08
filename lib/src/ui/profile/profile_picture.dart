@@ -8,11 +8,18 @@ import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 
-class ProfilePicture extends StatelessWidget {
+class ProfilePicture extends StatefulWidget {
   /// Whether picture is editable
   final bool isEdit;
 
   ProfilePicture(this.isEdit);
+
+  @override
+  State<StatefulWidget> createState() => new _ProfilePictureState();
+}
+
+class _ProfilePictureState extends State<ProfilePicture> {
+  bool pendingUpdate = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +41,7 @@ class ProfilePicture extends StatelessWidget {
           right: 0,
           bottom: 0,
           child: GestureDetector(
-            onTap: isEdit
+            onTap: widget.isEdit
                 ? () async {
                     ImageSource source = await showImgSrcPicker(context);
                     if (source == null) return;
@@ -60,17 +67,25 @@ class ProfilePicture extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                           ),
-                        if (!snapshot.hasData || isEdit)
+                        if (!snapshot.hasData || widget.isEdit)
                           ClipOval(
                             child: Container(
                               width: 120,
                               height: double.maxFinite,
                               decoration: BoxDecoration(color: Colors.black26),
-                              child: Icon(
-                                Icons.camera_alt,
-                                size: 40,
-                                color: Colors.black87,
-                              ),
+                              child: pendingUpdate
+                                  ? CircularProgressIndicator(
+                                      strokeWidth: 6,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .primary),
+                                    )
+                                  : Icon(
+                                      Icons.camera_alt,
+                                      size: 40,
+                                      color: Colors.black87,
+                                    ),
                             ),
                           ),
                       ],
@@ -100,8 +115,10 @@ class ProfilePicture extends StatelessWidget {
     }
 
     // Update image
+    setState(() => pendingUpdate = true);
     await Provider.of<UserProfileModel>(context, listen: false)
         .updateProfilePic(pickedFile.path)
         .catchError((err) => showErrSnackBar(context, err.toString()));
+    setState(() => pendingUpdate = false);
   }
 }
