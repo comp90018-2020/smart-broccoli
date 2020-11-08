@@ -1,6 +1,6 @@
 import { Op, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Group, Session, User, UserGroup } from "../models";
+import sequelize, { Group, Session, User, UserGroup, Quiz } from "../models";
 import {
     getGroupMemberTokens,
     sendGroupDeleteNotification,
@@ -493,11 +493,40 @@ export const deleteGroup = async (userId: number, groupId: number) => {
     // Get user tokens (otherwise cannot get when group is deleted!)
     const tokens = await getGroupMemberTokens(userId, groupId);
 
-    // Destroy group
-    const res = await Group.destroy({
-        where: { id: groupId, defaultGroup: false },
+    // Find group
+    // @ts-ignore
+    const group = await Group.findByPk(groupId, {
+        attributes: ["id"],
+        where: { defaultGroup: false },
+        include: [
+            {
+                model: Quiz,
+                required: false,
+                attributes: ["id"],
+                include: [
+                    {
+                        model: Session,
+                        required: false,
+                        where: { state: { [Op.or]: ["waiting", "active"] } },
+                        attributes: ["id"],
+                    },
+                ],
+            },
+        ],
     });
-    if (res != 1) throw new ErrorStatus("Cannot delete group", 400);
+    if (!group) {
+        throw new ErrorStatus("Group cannot be deleted", 400);
+    }
+    // If more than 1 session is active
+    if (group.Quizzes.map((quiz) => quiz.Sessions).flat().length > 0) {
+        throw new ErrorStatus(
+            "Group still has quizzes with active sessions",
+            400
+        );
+    }
+
+    // Destroy group
+    await group.destroy();
 
     // Send firebase notification
     if (process.env.NODE_ENV === "production") {

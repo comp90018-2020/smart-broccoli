@@ -438,9 +438,10 @@ export const deleteQuiz = async (userId: number, quizId: number) => {
                 // @ts-ignore
                 model: Session,
                 required: false,
-                where: { state: { [Op.or]: ["waiting", "active"] } }
-            }
-        ]
+                where: { state: { [Op.or]: ["waiting", "active"] } },
+                attributes: ["id"],
+            },
+        ],
     });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot delete quiz", 403);
