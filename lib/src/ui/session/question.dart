@@ -1,8 +1,8 @@
 import 'dart:io';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/data.dart';
@@ -211,7 +211,7 @@ class QuizQuestion extends StatelessWidget {
           )
         else if (model.role == GroupRole.MEMBER)
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

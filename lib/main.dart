@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/background/background_calendar.dart';
