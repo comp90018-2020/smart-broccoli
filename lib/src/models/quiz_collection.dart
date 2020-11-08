@@ -35,6 +35,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     PubSub().subscribe(PubSubTopic.QUIZ_CREATE, _handleQuizCreate);
     PubSub().subscribe(PubSubTopic.QUIZ_UPDATE, _handleQuizUpdate);
     PubSub().subscribe(PubSubTopic.QUIZ_DELETE, _handleQuizDelete);
+    PubSub().subscribe(PubSubTopic.SESSION_ACTIVATED, _handleSessionActivate);
   }
 
   /// get quizzes by rules
@@ -394,6 +395,18 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     _refreshQuiz(quizId).catchError((_) => null);
   }
 
+  // Firebase function to handle SESSION_ACTIVATED
+  void _handleSessionActivate(dynamic content) {
+    SessionActivatePayload payload =
+        SessionActivatePayload.fromJson(jsonDecode(content));
+    int quizId = payload.quizId;
+    // Quiz not loaded
+    if (!_availableQuizzes.containsKey(quizId) &&
+        !_createdQuizzes.containsKey(quizId)) return;
+    // Refresh quiz (and therefore sessions)
+    _refreshQuiz(quizId).catchError((_) => null);
+  }
+
   /// When the auth state is updated
   void authUpdated() {
     if (!_authStateModel.inSession) {
@@ -413,4 +426,16 @@ class QuizUpdatePayload {
   QuizUpdatePayload._internal(this.groupId, this.quizId);
   factory QuizUpdatePayload.fromJson(Map<String, dynamic> json) =>
       QuizUpdatePayload._internal(json['groupId'], json['quizId']);
+}
+
+/// Update payload from Firebase
+class SessionActivatePayload {
+  final int groupId;
+  final int quizId;
+  final int sessionId;
+
+  SessionActivatePayload._internal(this.sessionId, this.groupId, this.quizId);
+  factory SessionActivatePayload.fromJson(Map<String, dynamic> json) =>
+      SessionActivatePayload._internal(
+          json['sessionId'], json['groupId'], json['quizId']);
 }
