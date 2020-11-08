@@ -301,8 +301,8 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("Authentication failure");
-    } on GroupNotFoundException {
-      return Future.error("Group does not exist: $name");
+    } on GroupNotFoundException catch (e) {
+      return Future.error(e);
     } on AlreadyInGroupException {
       return Future.error("Already member of group: $name");
     } on ApiException catch (e) {
