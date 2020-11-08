@@ -433,9 +433,20 @@ export const getQuiz = async (userId: number, quizId: number) => {
 export const deleteQuiz = async (userId: number, quizId: number) => {
     const { quiz, role } = await getQuizAndRole(userId, quizId, {
         attributes: ["id", "groupId"],
+        include: [
+            {
+                // @ts-ignore
+                model: Session,
+                required: false,
+                where: { state: { [Op.or]: ["waiting", "active"] } }
+            }
+        ]
     });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot delete quiz", 403);
+    }
+    if (quiz.Sessions.length > 0) {
+        throw new ErrorStatus("Quiz still has active sessions", 400);
     }
 
     // Send firebase message
