@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/no_content_place_holder.dart';
 import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/tabbed_page.dart';
@@ -70,21 +71,11 @@ class _GroupListState extends State<GroupList> {
                       if (snapshot.hasError)
                         return Center(
                             child: Text("An error has occurred, cannot load"));
-                      if (snapshot.hasData && snapshot.data.length == 0)
-                        return Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(35.0),
-                              child: NoContentPlaceholder(
-                                text:
-                                    "Seems like you are not part of any group yet️",
-                              ),
-                            )
-                          ],
-                        );
                       if (snapshot.hasData)
                         return buildGroupList(
-                            snapshot.data, registry.getGroupMembers);
+                            snapshot.data,
+                            registry.getGroupMembers,
+                            "Seems like you are not part of any group yet️");
                       return Center(
                           child: LoadingIndicator(EdgeInsets.all(16)));
                     },
@@ -100,21 +91,9 @@ class _GroupListState extends State<GroupList> {
                           return Center(
                               child:
                                   Text("An error has occurred, cannot load"));
-                        // Should never happen
-                        if (snapshot.hasData && snapshot.data.length == 0)
-                          return Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(35.0),
-                                child: NoContentPlaceholder(
-                                  text: "No groups available",
-                                ),
-                              )
-                            ],
-                          );
                         if (snapshot.hasData)
-                          return buildGroupList(
-                              snapshot.data, registry.getGroupMembers);
+                          return buildGroupList(snapshot.data,
+                              registry.getGroupMembers, "No groups available");
                         return Center(
                             child: LoadingIndicator(EdgeInsets.all(16)));
                       },
@@ -148,42 +127,55 @@ class _GroupListState extends State<GroupList> {
   }
 
   // Builds a list of groups
-  Widget buildGroupList(List<Group> groups,
-          Future<List<User>> Function(int) getGroupMembers) =>
-      FractionallySizedBox(
-        widthFactor: 0.8,
-        child: ListView.builder(
-          itemCount: groups.length,
-          padding: EdgeInsets.symmetric(vertical: 16.0),
-          itemBuilder: (context, i) => Card(
-            child: ListTile(
-              dense: true,
-              onTap: () =>
-                  Navigator.of(context).pushNamed('/group/${groups[i].id}'),
-              title: Text(
-                groups[i].name,
-                style: TextStyle(fontSize: 16),
-              ),
-              subtitle: FutureBuilder(
-                  future: getGroupMembers(groups[i].id),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) return Container();
-                    return Row(
-                      children: [
-                        Icon(Icons.person),
-                        Text('${snapshot.data.length} member'
-                            '${snapshot.data.length > 1 ? "s" : ""}'),
-                        if (groups[i].defaultGroup) ...[
-                          Spacer(),
-                          Text('Default Group')
-                        ]
-                      ],
-                    );
-                  }),
+  Widget buildGroupList(
+      List<Group> groups,
+      Future<List<User>> Function(int) getGroupMembers,
+      String placeholderText) {
+    if (groups.length == 0)
+      return SingleChildScrollView(
+          child: Padding(
+        padding: const EdgeInsets.all(35.0),
+        child: NoContentPlaceholder(
+          text: placeholderText,
+        ),
+      ));
+
+    // The list
+    return FractionallySizedBox(
+      widthFactor: 0.8,
+      child: ListView.builder(
+        itemCount: groups.length,
+        padding: EdgeInsets.symmetric(vertical: 16.0),
+        itemBuilder: (context, i) => Card(
+          child: ListTile(
+            dense: true,
+            onTap: () =>
+                Navigator.of(context).pushNamed('/group/${groups[i].id}'),
+            title: Text(
+              groups[i].name,
+              style: TextStyle(fontSize: 16),
             ),
+            subtitle: FutureBuilder(
+                future: getGroupMembers(groups[i].id),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return Container();
+                  return Row(
+                    children: [
+                      Icon(Icons.person),
+                      Text('${snapshot.data.length} member'
+                          '${snapshot.data.length > 1 ? "s" : ""}'),
+                      if (groups[i].defaultGroup) ...[
+                        Spacer(),
+                        Text('Default Group')
+                      ]
+                    ],
+                  );
+                }),
           ),
         ),
-      );
+      ),
+    );
+  }
 
   /// The join group dialog
   Future<String> joinDialog() async {
@@ -222,9 +214,15 @@ class _GroupListState extends State<GroupList> {
     if (groupName == null) return;
 
     setState(() => _committed = true);
-    await Provider.of<GroupRegistryModel>(context, listen: false)
-        .joinGroup(name: groupName)
-        .catchError((value) => showErrSnackBar(context, value));
+    try {
+      await Provider.of<GroupRegistryModel>(context, listen: false)
+          .joinGroup(name: groupName);
+    } on GroupNotFoundException {
+      showBasicDialog(context,
+          "Cannot find group.\nNote that playground groups (the default group of a user) cannot be joined.");
+    } catch (e) {
+      showErrSnackBar(context, e.toString());
+    }
     setState(() => _committed = false);
   }
 }

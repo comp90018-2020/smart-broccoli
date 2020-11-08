@@ -20,7 +20,7 @@ class Group {
 
   /// Name with default group annotation
   String get nameWithDefaultGroup =>
-      defaultGroup ? "$name (Default group)" : name;
+      defaultGroup ? "$name (Playground group)" : name;
 
   factory Group.fromJson(Map<String, dynamic> json) => Group._internal(
         json['id'],
