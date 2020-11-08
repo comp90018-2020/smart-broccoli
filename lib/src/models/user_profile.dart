@@ -118,7 +118,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       return Future.error("Something went wrong");
     }
 
-    _refreshUser();
+    return _refreshUser();
   }
 
   /// Promotes user from joined to registered
@@ -135,7 +135,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       return Future.error("Something went wrong");
     }
 
-    _refreshUser();
+    return _refreshUser();
   }
 
   /// When the auth state is updated
