@@ -58,12 +58,13 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
           {int groupId, QuizType type}) =>
       filterQuizzesWhere(_createdQuizzes.values, groupId: groupId, type: type);
 
-  Future<Quiz> getQuiz(int id, {bool refresh = false}) async {
+  Future<Quiz> getQuiz(int id,
+      {bool refresh = false, bool withQuestionPictures = false}) async {
     // If can get from cache, get from cache
     if (!refresh &&
         (_createdQuizzes.containsKey(id) || _availableQuizzes.containsKey(id)))
       return _createdQuizzes[id] ?? _availableQuizzes[id];
-    return _refreshQuiz(id);
+    return _refreshQuiz(id, withQuestionPictures: withQuestionPictures);
   }
 
   /// Gets the specified quiz's picture from cache
