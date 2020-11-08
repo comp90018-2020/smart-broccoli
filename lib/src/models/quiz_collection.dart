@@ -239,7 +239,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       _createdQuizzes.remove(quizId);
       _availableQuizzes.remove(quizId);
       notifyListeners();
-      return null;
+      return Future.error("Quiz not found");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
