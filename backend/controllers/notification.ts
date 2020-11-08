@@ -11,7 +11,7 @@ import {
 import { Op } from "sequelize";
 import { firebaseTokenValid, sendMessage } from "../helpers/message";
 import ErrorStatus from "../helpers/error";
-import { buildSessionMessage } from "./notification_firebase";
+import { buildNotificationMessage } from "./notification_firebase";
 import { DateTime, Info } from "luxon";
 
 /**
@@ -231,20 +231,22 @@ export const sendSessionCreationNotification = async (
 
     // Generate messages
     const type = session.type === "live" ? "live" : "smart";
-    const dataMessage = buildSessionMessage(
+    const dataMessage = buildNotificationMessage(
         "SESSION_START",
         {
             quizId: session.quizId,
+            sessionId: session.id,
         },
         `${type == "live" ? "Live" : "Smart auto"} quiz session started`,
         `Join now! "${quiz.title}" is currently accepting participants`,
         dataTokens,
         false
     );
-    const notificationMessage = buildSessionMessage(
+    const notificationMessage = buildNotificationMessage(
         "SESSION_START",
         {
             quizId: session.quizId,
+            sessionId: session.id,
         },
         `${type == "live" ? "Live" : "Smart auto"} quiz session started`,
         `Join now! "${quiz.title}" is currently accepting participants`,

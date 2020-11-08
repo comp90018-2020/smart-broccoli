@@ -2,11 +2,23 @@
 import * as admin from "firebase-admin";
 
 /**
- * Builds a Firebase data message.
- * @param type The type of the message.
- * @param content Content of message.
+ * Builds
  */
-export const buildSessionMessage = (
+export const buildDataMessage = (
+    type: string,
+    content: any,
+    tokens: string[]
+): admin.messaging.MulticastMessage => {
+    return {
+        data: { type, data: JSON.stringify(content) },
+        tokens,
+    };
+};
+
+/**
+ * Builds a Firebase data message.
+ */
+export const buildNotificationMessage = (
     type: string,
     content: any,
     title: string,
