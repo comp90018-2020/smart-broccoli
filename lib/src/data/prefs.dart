@@ -26,6 +26,39 @@ class NotificationPrefs {
 
   /// SSID of work wifi
   bool workSSID;
+
+  NotificationPrefs.internal(
+      this.dayPrefs,
+      this.timezone,
+      this.maxPerDay,
+      this.minWindow,
+      this.allowOnTheMove,
+      this.allowOnCommute,
+      this.allowLiveIfCalendar,
+      this.allowSelfPacedIfCalendar,
+      this.workSSID);
+
+  factory NotificationPrefs.fromJson(Map<String, dynamic> json) =>
+      NotificationPrefs.internal(
+          DayPrefs(prefs: json['days']),
+          json['timezone'],
+          json['maxNotificationsPerDay'],
+          json['notificationWindow'],
+          json['onTheMove'],
+          json['onCommute'],
+          json['calendarLive'],
+          json['calendarSelfPaced'],
+          json['workSSID']);
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'days': dayPrefs.prefs,
+        'timezone': timezone,
+        'maxNotificationsPerDay': maxPerDay,
+        'notificationWindow': minWindow,
+        'calendarLive': allowLiveIfCalendar,
+        'calendarSelfPaced': allowSelfPacedIfCalendar,
+        'workSSID': workSSID
+      };
 }
 
 enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }
