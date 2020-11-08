@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/base/helper.dart';
 
@@ -156,6 +157,20 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
           await _userApi.getNotificationPrefs(_authStateModel.token);
       _keyValueStore.setString('prefs', json.encode((prefs).toJson()));
       return prefs;
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+  }
+
+  Future<void> setNotificationPrefs(NotificationPrefs prefs) async {
+    try {
+      await _userApi.setNotificationPrefs(_authStateModel.token, prefs);
+      _keyValueStore.setString('prefs', json.encode((prefs).toJson()));
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("Authentication failure");
