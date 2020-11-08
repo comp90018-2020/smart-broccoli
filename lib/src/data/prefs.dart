@@ -70,7 +70,7 @@ class NotificationPrefs {
           json['workSmart']);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'days': dayPrefs.prefs,
+        'days': dayPrefs._prefs,
         'timezone': timezone,
         'maxNotificationsPerDay': maxPerDay,
         'notificationWindow': minWindow,
@@ -109,19 +109,24 @@ class NotificationPrefs {
 enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }
 
 class DayPrefs {
-  final List<bool> prefs;
+  List<bool> _prefs;
 
   DayPrefs({List<bool> prefs})
-      : this.prefs = prefs ?? [false, false, false, false, false, false, false];
+      : this._prefs =
+            prefs ?? [false, false, false, false, false, false, false];
 
-  bool getPref(Day day) => prefs[day.index];
-  void setPref(Day day, bool pref) {
-    prefs[day.index] = pref;
+  void setPrefs(List<bool> prefs) {
+    this._prefs = prefs;
+  }
+
+  List<bool> getPrefs() {
+    return _prefs;
   }
 
   operator ==(Object other) {
-    return other is DayPrefs && ListEquality().equals(this.prefs, other.prefs);
+    return other is DayPrefs &&
+        ListEquality().equals(this._prefs, other._prefs);
   }
 
-  get hashCode => prefs.hashCode;
+  get hashCode => _prefs.hashCode;
 }
