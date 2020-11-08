@@ -57,9 +57,7 @@ class _GroupListState extends State<GroupList> {
               secondaryBackgroundColour: true,
               // Handle tab tap
               tabTap: (value) {
-                setState(() {
-                  tab = value;
-                });
+                setState(() => tab = value);
               },
               // Tabs
               tabViews: [
@@ -147,6 +145,7 @@ class _GroupListState extends State<GroupList> {
         itemCount: groups.length + 1,
         padding: EdgeInsets.symmetric(vertical: 16.0),
         itemBuilder: (context, i) => i == groups.length
+            // Hidden button for bottom padding
             ? Visibility(
                 maintainState: true,
                 maintainAnimation: true,
