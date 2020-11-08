@@ -35,7 +35,7 @@ class FirebaseNotification {
 
   /// Get firebase token
   Future<String> getToken() async {
-    return await FirebaseMessaging.instance.getToken();
+    return FirebaseMessaging.instance.getToken();
   }
 
   /// Request permissions. May not work on iOS
