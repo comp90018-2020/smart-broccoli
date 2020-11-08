@@ -32,14 +32,14 @@ class _MyHomePageState extends State<TiltQuestion> {
   double widthStart;
   double heightStart;
 
+  /// Do we respawn the ball after selection?
   bool ballRespawn;
+
+  /// Have we just answered a question and need to reset the ball?
   bool ballAnswered = false;
 
+  /// The number of things we answered in a single question
   int noAnswered = 0;
-
-  /// Used to determine if the user's ball is so what stationary
-  /// Therefore we can make selection
-  bool canSelect = false;
 
   /// x and y coordinates of the ball should be all positive
   List<double> cord = [0.0, 0.0];
@@ -126,13 +126,6 @@ class _MyHomePageState extends State<TiltQuestion> {
       nextCordy = yStart;
     }
 
-    /// The ball isn't moving too much, hence you can select an option
-    if ((cord[0] - nextCordx).abs() < 4 && (cord[1] - nextCordy).abs() < 4) {
-      canSelect = true;
-    } else {
-      canSelect = false;
-    }
-
     /// After all checks complete, assign next cords
     cord[0] = nextCordx;
     cord[1] = nextCordy;
@@ -184,13 +177,13 @@ class _MyHomePageState extends State<TiltQuestion> {
       }
 
       /// If it is the top left grid that
-      if (cord[0] <= xLimitHalfWay - 10) {
+      if (cord[0] <= xLimitHalfWay - 40) {
         selected[0] = true;
         //  print("Top Left");
       }
 
       /// If it is the top right grid
-      else if (cord[0] >= xLimitHalfWay + 10) {
+      else if (cord[0] >= xLimitHalfWay) {
         selected[1] = true;
         //  print("Top Right");
       }
@@ -211,7 +204,7 @@ class _MyHomePageState extends State<TiltQuestion> {
 
     /// left side
     else if (cord[1] <= yLimit && cord[0] <= xStart + 5) {
-      if (cord[1] <= yLimitHalfWay - 10) {
+      if (cord[1] <= yLimitHalfWay - 40) {
         /// CHeck if true false
         if (model.question is TFQuestion) {
           //   print("TRUE/ TOP RIGHT and TOP LEFT");
@@ -221,7 +214,7 @@ class _MyHomePageState extends State<TiltQuestion> {
         }
         selected[0] = true;
         //   print("Top Left");
-      } else if (cord[1] >= yLimitHalfWay + 10) {
+      } else if (cord[1] >= yLimitHalfWay) {
         if (model.question is TFQuestion) {
           model.selectAnswer(0);
           //     print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
@@ -260,10 +253,10 @@ class _MyHomePageState extends State<TiltQuestion> {
         }
       }
 
-      if (cord[0] <= xLimitHalfWay - 10) {
+      if (cord[0] <= xLimitHalfWay - 40) {
         selected[2] = true;
         //    print("Bottom Left");
-      } else if (cord[0] >= xLimitHalfWay + 10) {
+      } else if (cord[0] >= xLimitHalfWay) {
         selected[3] = true;
         //    print("Bottom Right");
       } else {
@@ -286,7 +279,7 @@ class _MyHomePageState extends State<TiltQuestion> {
     // Right Side
     else if (cord[0] >= xLimit - 5 && cord[1] <= yLimit) {
       /// If Top Right
-      if (cord[1] <= yLimitHalfWay - 10) {
+      if (cord[1] <= yLimitHalfWay - 40) {
         /// If True/False Question
         if (model.question is TFQuestion) {
           //     print("TRUE/ TOP RIGHT and TOP LEFT");
@@ -299,7 +292,7 @@ class _MyHomePageState extends State<TiltQuestion> {
         selected[1] = true;
 
         /// If Bottom Right
-      } else if (cord[1] >= yLimitHalfWay + 10) {
+      } else if (cord[1] >= yLimitHalfWay) {
         if (model.question is TFQuestion) {
           model.selectAnswer(0);
           //     print("FALSE/ BOTTOM RIGHT and BOTTOM LEFT");
@@ -351,7 +344,7 @@ class _MyHomePageState extends State<TiltQuestion> {
       timer = Timer.periodic(Duration(milliseconds: 50), (_) {
         /// Set ball position
         setPosition(event);
-        if (canSelect && model.role != GroupRole.OWNER) selectGrid(model);
+        selectGrid(model);
       });
     }
   }
