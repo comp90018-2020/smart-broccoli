@@ -69,7 +69,10 @@ class AcknowledgementsPage extends StatelessWidget {
 
     //License of packages: 'package_info', 'path_provider', 'sensors', 'shared_preferences', 'url_launcher'
     {'title': 'flutter/plugins', 'path': '$_license_dir/flutter_plugins'},
-    {'title': 'flutter/plugins', 'path': '$_license_dir/image_picker'},
+    {
+      'title': 'flutter/plugins/image_picker',
+      'path': '$_license_dir/image_picker'
+    },
     {
       'title': 'rikulo/socket.io-client-dart',
       'path': '$_license_dir/socket_io_client'
