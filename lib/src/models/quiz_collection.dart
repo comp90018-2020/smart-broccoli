@@ -1,6 +1,6 @@
 import 'dart:collection';
-import 'dart:io';
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/base/helper.dart';
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
@@ -176,7 +176,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     // Has quiz picture to save
     if (quiz.pendingPicturePath != null)
       futures.add(_quizApi.setQuizPicture(_authStateModel.token, updated.id,
-          await File(quiz.pendingPicturePath).readAsBytes()));
+          await loadFileAndBakeOrientation(quiz.pendingPicturePath)));
     // Has quiz question pictures to save
     for (var i = 0; i < quiz.questions.length; i++) {
       var question = quiz.questions[i];
@@ -187,7 +187,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
             _authStateModel.token,
             updated.id, // Updated quiz id
             questionUpdated.id, // Updated question id
-            await File(question.pendingPicturePath).readAsBytes()));
+            await loadFileAndBakeOrientation(question.pendingPicturePath)));
       }
     }
 

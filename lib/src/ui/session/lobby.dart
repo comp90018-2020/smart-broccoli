@@ -94,6 +94,13 @@ class QuizLobby extends StatelessWidget {
               ]),
             ),
 
+            // Padding from button to text describing (host only)
+            Consumer<GameSessionModel>(
+                builder: (context, model, child) => Padding(
+                    padding: model.role == GroupRole.OWNER
+                        ? const EdgeInsets.only(bottom: 10)
+                        : const EdgeInsets.all(0))),
+
             // Text describing status
             Consumer<GameSessionModel>(
               builder: (context, socketModel, child) => Padding(

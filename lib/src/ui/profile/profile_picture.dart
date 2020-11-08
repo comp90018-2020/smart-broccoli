@@ -101,7 +101,7 @@ class ProfilePicture extends StatelessWidget {
 
     // Update image
     await Provider.of<UserProfileModel>(context, listen: false)
-        .updateProfilePic(await pickedFile.readAsBytes())
+        .updateProfilePic(pickedFile.path)
         .catchError((err) => showErrSnackBar(context, err.toString()));
   }
 }
