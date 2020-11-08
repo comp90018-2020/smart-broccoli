@@ -11,7 +11,33 @@ import {
 import { Op } from "sequelize";
 import { sendMessage } from "../helpers/message";
 import { DateTime, Info } from "luxon";
-import { buildNotificationMessage } from "./notification_firebase";
+import {
+    buildDataMessage,
+    buildNotificationMessage,
+} from "./notification_firebase";
+import { getGroupMemberTokens } from "./notification_group";
+
+// Send session activation
+export const sendSessionActivateNotification = async (
+    sessionId: number,
+    groupId: number,
+    quizId: number
+) => {
+    // Get group member tokens
+    const tokens = await getGroupMemberTokens(null, groupId);
+
+    // Build and send
+    const dataMessage = buildDataMessage(
+        "SESSION_ACTIVATED",
+        {
+            groupId,
+            sessionId,
+            quizId,
+        },
+        tokens
+    );
+    await sendMessage(dataMessage);
+};
 
 /**
  * This function gets called on session creation for the purpose of notifying

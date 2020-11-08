@@ -1,6 +1,7 @@
 import { Op, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
 import sequelize, { Group, Session, User, UserGroup } from "../models";
+import { sendGroupUpdateNotification } from "./notification_group";
 
 /**
  * Ensure that user is group owner.
@@ -256,6 +257,17 @@ export const joinGroup = async (
         role: "member",
     });
 
+    // Send firebase notification
+    if (process.env.NODE_ENV === "production") {
+        sendGroupUpdateNotification(userId, group.id, "GROUP_MEMBER_UPDATE");
+    } else {
+        await sendGroupUpdateNotification(
+            userId,
+            group.id,
+            "GROUP_MEMBER_UPDATE"
+        );
+    }
+
     const groupJSON: any = group.toJSON();
     groupJSON.role = "member";
     delete groupJSON["Users"];
@@ -357,6 +369,17 @@ export const leaveGroup = async (groupId: number, userId: number) => {
         throw new ErrorStatus("Last owner of group cannot leave", 400);
     }
 
+    // Send firebase notification
+    if (process.env.NODE_ENV === "production") {
+        sendGroupUpdateNotification(userId, groupId, "GROUP_MEMBER_UPDATE");
+    } else {
+        await sendGroupUpdateNotification(
+            userId,
+            groupId,
+            "GROUP_MEMBER_UPDATE"
+        );
+    }
+
     // Destroy association
     return await userGroup.destroy();
 };
@@ -383,6 +406,17 @@ export const deleteMember = async (
     });
     if (res != 1) {
         throw new ErrorStatus("Cannot delete member", 400);
+    }
+
+    // Send firebase notification
+    if (process.env.NODE_ENV === "production") {
+        sendGroupUpdateNotification(userId, groupId, "GROUP_MEMBER_UPDATE");
+    } else {
+        await sendGroupUpdateNotification(
+            userId,
+            groupId,
+            "GROUP_MEMBER_UPDATE"
+        );
     }
 };
 
@@ -418,6 +452,14 @@ export const updateGroup = async (
     try {
         await group.save();
         const groupJSON: any = group.toJSON();
+
+        // Send firebase notification
+        if (process.env.NODE_ENV === "production") {
+            sendGroupUpdateNotification(userId, groupId, "GROUP_UPDATE");
+        } else {
+            await sendGroupUpdateNotification(userId, groupId, "GROUP_UPDATE");
+        }
+
         delete groupJSON["Users"];
         return groupJSON;
     } catch (err) {
@@ -449,6 +491,13 @@ export const deleteGroup = async (userId: number, groupId: number) => {
         where: { id: groupId, defaultGroup: false },
     });
     if (res != 1) throw new ErrorStatus("Cannot delete group", 400);
+
+    // Send firebase notification
+    if (process.env.NODE_ENV === "production") {
+        sendGroupUpdateNotification(userId, groupId, "GROUP_DELETE");
+    } else {
+        await sendGroupUpdateNotification(userId, groupId, "GROUP_DELETE");
+    }
 };
 
 /**

@@ -14,6 +14,7 @@ import { processQuestions } from "./question";
 import { deletePicture, insertPicture } from "./picture";
 import { assertGroupOwnership } from "./group";
 import { sessionTokenDecrypt } from "./session";
+import { sendQuizUpdateNotification } from "./notification_quiz";
 
 /**
  * Get quiz and permissions.
@@ -131,6 +132,23 @@ export const createQuiz = async (userId: number, info: any) => {
     return await sequelize.transaction(async (transaction) => {
         await quiz.save({ transaction: transaction });
 
+        // Send firebase message
+        if (process.env.NODE_ENV === "production") {
+            sendQuizUpdateNotification(
+                userId,
+                quiz.groupId,
+                quiz.id,
+                "QUIZ_CREATE"
+            );
+        } else {
+            await sendQuizUpdateNotification(
+                userId,
+                quiz.groupId,
+                quiz.id,
+                "QUIZ_CREATE"
+            );
+        }
+
         // Save questions
         const quizJSON: any = {
             ...quiz.toJSON(),
@@ -206,6 +224,23 @@ export const updateQuiz = async (userId: number, quizId: number, info: any) => {
                 info.questions
             );
             quizJSON.questions = updatedQuestions.map((q) => q.toJSON());
+        }
+
+        // Send firebase message
+        if (process.env.NODE_ENV === "production") {
+            sendQuizUpdateNotification(
+                userId,
+                quiz.groupId,
+                quizId,
+                "QUIZ_UPDATE"
+            );
+        } else {
+            await sendQuizUpdateNotification(
+                userId,
+                quiz.groupId,
+                quizId,
+                "QUIZ_UPDATE"
+            );
         }
         return quizJSON;
     });
@@ -397,10 +432,22 @@ export const getQuiz = async (userId: number, quizId: number) => {
  */
 export const deleteQuiz = async (userId: number, quizId: number) => {
     const { quiz, role } = await getQuizAndRole(userId, quizId, {
-        attributes: ["id"],
+        attributes: ["id", "groupId"],
     });
     if (role !== "owner") {
         throw new ErrorStatus("Cannot delete quiz", 403);
+    }
+
+    // Send firebase message
+    if (process.env.NODE_ENV === "production") {
+        sendQuizUpdateNotification(userId, quiz.groupId, quizId, "QUIZ_DELETE");
+    } else {
+        await sendQuizUpdateNotification(
+            userId,
+            quiz.groupId,
+            quizId,
+            "QUIZ_DELETE"
+        );
     }
 
     // Now destroy the quiz
@@ -437,6 +484,24 @@ export const updateQuizPicture = async (
         // Set picture
         quiz.pictureId = picture.id;
         await quiz.save({ transaction });
+
+        // Send firebase message
+        if (process.env.NODE_ENV === "production") {
+            sendQuizUpdateNotification(
+                userId,
+                quiz.groupId,
+                quizId,
+                "QUIZ_UPDATE"
+            );
+        } else {
+            await sendQuizUpdateNotification(
+                userId,
+                quiz.groupId,
+                quizId,
+                "QUIZ_UPDATE"
+            );
+        }
+
         return quiz;
     });
 };
