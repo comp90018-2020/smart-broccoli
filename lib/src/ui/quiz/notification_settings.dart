@@ -138,61 +138,25 @@ class _NotificationSettingState extends State<NotificationSetting> {
           ),
 
           ///Calendar live quiz
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            title: Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Icon(Icons.live_tv, color: Colors.blueAccent),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "Allow notifications for live quiz",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ]),
-            onTap: () {
-              setState(() => _liveQuizCalendar = !_liveQuizCalendar);
-            },
-            trailing: Switch(
-                value: _liveQuizCalendar,
-                onChanged: (bool value) {
-                  setState(() {
-                    _liveQuizCalendar = value;
-                  });
-                }),
-          ),
+          _switchListTile(
+              icon: Icon(Icons.live_tv, color: Colors.blueAccent),
+              title: "Allow notifications for live quiz",
+              onTap: () {
+                setState(() => _liveQuizCalendar = !_liveQuizCalendar);
+              },
+              value: _liveQuizCalendar,
+              disabled: false),
           Separator(),
 
           ///Calendar smart quiz
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            title: Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Icon(Icons.lightbulb_outline, color: Colors.orange),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "Allow notifications for smart quiz",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ]),
-            onTap: () {
-              setState(() => _smartQuizCalendar = !_smartQuizCalendar);
-            },
-            trailing: Switch(
-                value: _smartQuizCalendar,
-                onChanged: (bool value) {
-                  setState(() {
-                    _smartQuizCalendar = value;
-                  });
-                }),
-          ),
+          _switchListTile(
+              icon: Icon(Icons.lightbulb_outline, color: Colors.orange),
+              title: "Allow notifications for smart quiz",
+              onTap: () {
+                setState(() => _smartQuizCalendar = !_smartQuizCalendar);
+              },
+              value: _smartQuizCalendar,
+              disabled: true),
           Divider(height: 4, color: Colors.white),
 
           ///Work setting
@@ -201,33 +165,14 @@ class _NotificationSettingState extends State<NotificationSetting> {
           ),
 
           /// Smart detection
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            title: Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child:
-                    Icon(Icons.auto_awesome_mosaic, color: Colors.blueAccent),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "Smart detection",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ]),
-            onTap: () {
-              setState(() => _smartDetection = !_smartDetection);
-            },
-            trailing: Switch(
-                value: _smartDetection,
-                onChanged: (bool value) {
-                  setState(() {
-                    _smartDetection = value;
-                  });
-                }),
-          ),
+          _switchListTile(
+              icon: Icon(Icons.auto_awesome_mosaic, color: Colors.blueAccent),
+              title: "Smart detection",
+              onTap: () {
+                setState(() => _smartDetection = !_smartDetection);
+              },
+              value: _smartDetection,
+              disabled: false),
 
           /// Wifi setting
           SettingsInputField(
