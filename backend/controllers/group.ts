@@ -1,6 +1,6 @@
 import { Op, Transaction } from "sequelize";
 import ErrorStatus from "../helpers/error";
-import sequelize, { Group, Session, User, UserGroup } from "../models";
+import sequelize, { Group, Session, User, UserGroup, Quiz } from "../models";
 import {
     getGroupMemberTokens,
     sendGroupDeleteNotification,
