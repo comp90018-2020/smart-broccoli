@@ -277,10 +277,11 @@ class _QuizCreateState extends State<QuizCreate> {
                       // Add question
                       Center(
                         child: Padding(
-                          padding: EdgeInsets.all(20.0),
+                          padding: EdgeInsets.symmetric(vertical: 12),
                           child: RaisedButton(
                             shape: SmartBroccoliTheme.raisedButtonShape,
-                            padding: EdgeInsets.all(14.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 14.0, vertical: 12),
                             child: Wrap(
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 spacing: 3,

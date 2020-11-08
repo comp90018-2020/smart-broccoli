@@ -154,7 +154,7 @@ class BroccoliRouter {
     // Session question
     router.define(sessionQuestion, handler: Handler(
         handlerFunc: (BuildContext context, Map<String, List<String>> params) {
-      return QuizQuestion();
+      return TiltQuestion();
     }));
 
     // Session lobby
