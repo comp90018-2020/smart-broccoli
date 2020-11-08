@@ -19,6 +19,7 @@ class NameField extends TextFormField {
             labelText: "Name",
             prefixIcon: Icon(Icons.person),
             hintStyle: const TextStyle(color: Colors.black38),
+            contentPadding: EdgeInsets.zero,
             suffixIcon: IconButton(
               icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
               onPressed: _nameController.clear,
@@ -48,6 +49,7 @@ class EmailField extends TextFormField {
             labelText: "Email",
             prefixIcon: Icon(Icons.email),
             hintStyle: const TextStyle(color: Colors.black38),
+            contentPadding: EdgeInsets.zero,
             suffixIcon: IconButton(
               icon: isEdit ? const Icon(Icons.clear) : const Icon(null),
               onPressed: _emailController.clear,
@@ -94,6 +96,7 @@ class _PasswordFieldState extends State<PasswordField> {
         labelText: "Password",
         prefixIcon: Icon(Icons.lock),
         hintStyle: const TextStyle(color: Colors.black38),
+        contentPadding: EdgeInsets.zero,
         suffixIcon: IconButton(
           icon: Icon(
             _passwordVisible ? Icons.visibility : Icons.visibility_off,
