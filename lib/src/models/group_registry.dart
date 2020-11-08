@@ -316,6 +316,9 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     } catch (e) {
       return Future.error(e);
     }
+    _quizCollectionModel
+        .refreshAvailableQuizzes(refreshIfLoaded: true)
+        .catchError((_) => null);
   }
 
   /// Refreshes group members
