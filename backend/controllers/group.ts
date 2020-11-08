@@ -494,18 +494,17 @@ export const deleteGroup = async (userId: number, groupId: number) => {
     const tokens = await getGroupMemberTokens(userId, groupId);
 
     // Find group
+    // @ts-ignore
     const group = await Group.findByPk(groupId, {
         attributes: ["id"],
         where: { defaultGroup: false },
         include: [
             {
-                // @ts-ignore
                 model: Quiz,
                 required: false,
                 attributes: ["id"],
                 include: [
                     {
-                        // @ts-ignore
                         model: Session,
                         required: false,
                         where: { state: { [Op.or]: ["waiting", "active"] } },
