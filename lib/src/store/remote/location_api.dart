@@ -11,6 +11,12 @@ class LocationData {
   final double lat;
 
   LocationData({this.name, this.lon, this.lat});
+
+  factory LocationData.fromJson(Map<String, dynamic> json) =>
+      LocationData(name: json['name'], lat: json['lat'], lon: json['lon']);
+
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{'name': name, 'lat': lat, 'lon': lon};
 }
 
 class LocationAPI {
