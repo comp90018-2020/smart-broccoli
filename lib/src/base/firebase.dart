@@ -65,20 +65,26 @@ class FirebaseNotification {
           // data like quizId will be found in content.data, same as below
           PubSub().publish(PubSubTopic.SESSION_START, arg: content.data);
         else if (content.type == "SESSION_ACTIVATED")
-          // Group has been changed
+          // Session has been activated
           PubSub().publish(PubSubTopic.SESSION_ACTIVATED, arg: content.data);
-        else if (content.type == "SESSION_ACTIVATED")
-          // Quiz has been changed
-          PubSub().publish(PubSubTopic.GROUP_CHANGE, arg: content.data);
-        else if (content.type == "GROUP_MEMBER_CHANGE")
-          // General changes, this is for extension
-          PubSub().publish(PubSubTopic.GROUP_MEMBER_CHANGE, arg: content.data);
         else if (content.type == "QUIZ_UPDATE")
-          // General changes, this is for extension
+          // Quiz has been changed
           PubSub().publish(PubSubTopic.QUIZ_UPDATE, arg: content.data);
+        else if (content.type == "QUIZ_DELETE")
+          // Quiz has been deleted
+          PubSub().publish(PubSubTopic.QUIZ_DELETE, arg: content.data);
+        else if (content.type == "QUIZ_CREATE")
+          // Quiz has been created
+          PubSub().publish(PubSubTopic.QUIZ_CREATE, arg: content.data);
         else if (content.type == "GROUP_MEMBER_CHANGE")
-          // General changes, this is for extension
+          // Group members have changed
           PubSub().publish(PubSubTopic.GROUP_MEMBER_CHANGE, arg: content.data);
+        else if (content.type == "GROUP_UPDATE")
+          // Group has changed
+          PubSub().publish(PubSubTopic.GROUP_UPDATE, arg: content.data);
+        else if (content.type == "GROUP_DELETE")
+          // Group has been deleted
+          PubSub().publish(PubSubTopic.GROUP_DELETE, arg: content.data);
       }
 
       // When app is on foreground, this is needed to show notification

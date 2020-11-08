@@ -1,5 +1,7 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/base/pubsub.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
@@ -47,6 +49,12 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       this._authStateModel, this._userRepo, this._quizCollectionModel,
       {GroupApi groupApi}) {
     _groupApi = groupApi ?? GroupApi();
+
+    // Firebase subscriptions
+    PubSub().subscribe(PubSubTopic.GROUP_UPDATE, _handleGroupUpdate);
+    PubSub()
+        .subscribe(PubSubTopic.GROUP_MEMBER_CHANGE, _handleGroupMemberChange);
+    PubSub().subscribe(PubSubTopic.GROUP_DELETE, _handleGroupDelete);
   }
 
   Group getGroupFromCache(int id) {
@@ -120,6 +128,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       await _groupApi.leaveGroup(_authStateModel.token, group.id);
       _joinedGroups.remove(group.id);
       _createdGroups.remove(group.id);
+      _quizCollectionModel.deleteQuizzesOfGroup(group.id);
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("Authentication failure");
@@ -159,6 +168,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     try {
       await _groupApi.deleteGroup(_authStateModel.token, group.id);
       _createdGroups.remove(group.id);
+      _quizCollectionModel.deleteQuizzesOfGroup(group.id);
     } on ApiAuthException {
       _authStateModel.checkSession();
       return Future.error("Authentication failure");
@@ -337,6 +347,37 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     }
   }
 
+  // Firebase function to handle GROUP_UPDATE
+  void _handleGroupUpdate(String content) {
+    int groupId = GroupUpdatePayload.fromJson(jsonDecode(content)).groupId;
+    // If group is not loaded, do nothing
+    if (!_createdGroups.containsKey(groupId) &&
+        !_joinedGroups.containsKey(groupId)) return;
+    // refreshGroup notifies
+    refreshGroup(groupId).catchError((_) => null);
+  }
+
+  // Firebase function to handle GROUP_DELETE
+  void _handleGroupDelete(String content) {
+    int groupId = GroupUpdatePayload.fromJson(jsonDecode(content)).groupId;
+    // If group is not loaded, do nothing
+    if (!_createdGroups.containsKey(groupId) &&
+        !_joinedGroups.containsKey(groupId)) return;
+    _quizCollectionModel.deleteQuizzesOfGroup(groupId);
+    _createdGroups.remove(groupId);
+    _joinedGroups.remove(groupId);
+    notifyListeners();
+  }
+
+  // Firebase function to handle GROUP_MEMBER_CHANGE
+  void _handleGroupMemberChange(String content) {
+    int groupId = GroupUpdatePayload.fromJson(jsonDecode(content)).groupId;
+    // If members are not loaded, do nothing
+    if (!_groupMembers.containsKey(groupId)) return;
+    _refreshGroupMembers(groupId).catchError((_) => null);
+    notifyListeners();
+  }
+
   void authUpdated() {
     if (!_authStateModel.inSession) {
       _joinedGroupsLoaded = false;
@@ -347,4 +388,13 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       _groupMembers = {};
     }
   }
+}
+
+/// Update payload from Firebase
+class GroupUpdatePayload {
+  final int groupId;
+
+  GroupUpdatePayload._internal(this.groupId);
+  factory GroupUpdatePayload.fromJson(Map<String, dynamic> json) =>
+      GroupUpdatePayload._internal(json['groupId']);
 }
