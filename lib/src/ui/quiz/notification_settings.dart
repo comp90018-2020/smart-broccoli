@@ -156,7 +156,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                 setState(() => _smartQuizCalendar = !_smartQuizCalendar);
               },
               value: _smartQuizCalendar,
-              disabled: true),
+              disabled: false),
           Divider(height: 4, color: Colors.white),
 
           ///Work setting
