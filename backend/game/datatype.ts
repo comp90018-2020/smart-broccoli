@@ -153,3 +153,10 @@ export class Answer {
         }
     }
 }
+export class QuestionAnswered {
+    constructor(
+        public question: number,
+        public count: number,
+        public total: number
+    ) {}
+}

@@ -7,6 +7,7 @@ import {
     Answer,
     Role,
     RecordWithPlayerInfo,
+    Record,
 } from "./datatype";
 import { QuizAttributes } from "../models/quiz";
 import {
@@ -23,19 +24,21 @@ export class GameSession {
     // quiz from database
     public quiz: QuizAttributes;
     // game status
-    private status: GameStatus = GameStatus.Pending;
+    public status: GameStatus = GameStatus.Pending;
     // host info
     public host: Player = null;
     // players info, user id to map
     public playerMap: { [playerId: number]: Player } = {};
     public questionIndex: number = -1;
-    public QuestionReleaseAt: { [questionIndex: number]: number } = {};
+    // Queston release timestamp
+    public questionReleaseAt: { [questionIndex: number]: number } = {};
     public preQuestionReleasedAt: number = 0;
     public _isReadyForNextQuestion: boolean = true;
     public pointSys: PointSystem = new PointSystem();
     public activePlayersNum: number = 0;
     private invalidTokens: Set<String> = new Set([]);
     public boardReleased: Set<number> = new Set([]);
+    public boardPreparing: Set<number> = new Set([]);
     public questionReleased: Set<number> = new Set([]);
     public answerReleased: Set<number> = new Set([]);
     public totalQuestions: number = 0;
@@ -54,20 +57,19 @@ export class GameSession {
         this.totalQuestions = this.quiz.questions.length;
 
         if (isGroup) {
-            // "live", "self paced"
-            if (sessionType === "live") {
+            // If this is a group game
+            if (sessionType === "live")
+                // and is a "live" game
                 this.type = GameType.Live_Group;
-            } else {
-                this.type = GameType.SelfPaced_Group;
-            }
+            // or is a "self paced" game
+            else this.type = GameType.SelfPaced_Group;
         } else {
-            if (sessionType === "live") {
+            // Otherwise is not a group game
+            if (sessionType === "live")
+                // and is a "live" game
                 this.type = GameType.Live_NotGroup;
-            } else {
-                this.type = GameType.SelfPaced_NotGroup;
-                this.status = GameStatus.Running;
-                this.setToNextQuestion(0);
-            }
+            // or is a "self paced" game
+            else this.type = GameType.SelfPaced_NotGroup;
         }
     }
 
@@ -96,15 +98,26 @@ export class GameSession {
         return true;
     }
 
-    hostJoin(player: Player) {
-        this.host = player;
-        this.setPlayerState(player, PlayerState.Joined);
-    }
-
+    /**
+     * Player join this session and copy precious records if any
+     * @param player Player
+     */
     playerJoin(player: Player) {
+        if (player.role === Role.host) {
+            // If this is host
+            this.host = player;
+            // Set host's state to be joined
+            this.setPlayerState(player, PlayerState.Joined);
+            return;
+        }
+        // Otherwise, this is a player
         if (this.playerMap.hasOwnProperty(player.id))
+            // If there is existed player with the same id
+            // Copy records
             player.records = this.playerMap[player.id].records;
+        // Set player table with the new connection
         this.playerMap[player.id] = player;
+        // Set player state to be Joined
         this.setPlayerState(player, PlayerState.Joined);
     }
 
@@ -134,7 +147,7 @@ export class GameSession {
         );
     }
 
-    isSelfPacedNotGroupAndHasNotStart() {
+    isSelfPacedNotGroupAndHasNotStarted() {
         return (
             this.questionIndex === 0 &&
             this._isReadyForNextQuestion &&
@@ -153,10 +166,6 @@ export class GameSession {
 
     isSelfPacedGroup() {
         return this.type === GameType.SelfPaced_Group;
-    }
-
-    isSelfPacedNotGroup() {
-        return this.type === GameType.SelfPaced_NotGroup;
     }
 
     isReadyForNextQuestion() {
@@ -185,7 +194,7 @@ export class GameSession {
     }
 
     setQuestionReleaseTime(questionIndex: number, afterTime: number) {
-        this.QuestionReleaseAt[questionIndex] = Date.now() + afterTime;
+        this.questionReleaseAt[questionIndex] = Date.now() + afterTime;
     }
 
     setPlayerState(player: Player, state: PlayerState) {
@@ -205,13 +214,7 @@ export class GameSession {
         return player === undefined || player.role === Role.host;
     }
 
-    async setStatus(status: GameStatus) {
-        this.status = status;
-        if (status === GameStatus.Starting)
-            this.QuestionReleaseAt[0] = Date.now() + WAIT_TIME_BEFORE_START;
-    }
-
-    async endSession() {
+    endSession() {
         const rank = this.rankPlayers();
         // Pass players' records to contoller
         const progress = rank.map(({ player: { id } }) => ({
@@ -221,16 +224,12 @@ export class GameSession {
         }));
 
         if (process.env.SOCKET_MODE !== "debug") {
-            await endSessionInController(
+            endSessionInController(
                 this.id,
                 this.questionReleased.size === this.totalQuestions,
                 progress
             );
         }
-    }
-
-    getStatus() {
-        return this.status;
     }
 
     canStart(player: Player) {
@@ -244,28 +243,37 @@ export class GameSession {
         );
     }
 
-    canReleaseTheFirstQuestion() {
-        return (
-            this.QuestionReleaseAt.hasOwnProperty(0) &&
-            Date.now() > this.QuestionReleaseAt[0]
-        );
-    }
-
     isAnswerNoCorrect(answer: Answer) {
         return answer.question === this.questionIndex;
     }
 
-    canReleaseNextQuestion(player: Player, nextQuestionIndex: number) {
+    /**
+     * Whether can release the question or not
+     * @param questionIndex number, question index
+     * @param player Player || undefined
+     */
+    canReleaseQuestion(questionIndex: number, player?: Player) {
         return (
-            nextQuestionIndex < this.totalQuestions &&
-            !this.questionReleased.has(nextQuestionIndex) &&
-            this.questionIndex === nextQuestionIndex &&
-            this._isReadyForNextQuestion &&
+            // Question is running
             this.status === GameStatus.Running &&
-            // if no host or player is host
-            (this.type === GameType.SelfPaced_Group ||
+            // Question index is less than total questions
+            questionIndex < this.totalQuestions &&
+            // And question has not been released
+            !this.questionReleased.has(questionIndex) &&
+            // And the question try to release is the same in current memory
+            this.questionIndex === questionIndex &&
+            // And game is ready to move to next question
+            this._isReadyForNextQuestion &&
+            // And This call is from inner or this is a self-paced not group
+            // or the call is from the host
+            (player === undefined ||
                 this.type === GameType.SelfPaced_NotGroup ||
-                (player !== undefined && player.role === Role.host))
+                (player !== undefined && player.role === Role.host)) &&
+            // And current time is after the expected releasing time
+            // Or this self-paced not group || this is live game
+            (Date.now() >= this.questionReleaseAt[questionIndex] ||
+                this.type === GameType.Live_NotGroup ||
+                this.type === GameType.SelfPaced_NotGroup)
         );
     }
 
@@ -286,7 +294,7 @@ export class GameSession {
         );
     }
 
-    canShowBoard(player: Player) {
+    canShowBoard(player?: Player) {
         return (
             this.questionIndex !== -1 &&
             this._isReadyForNextQuestion &&
@@ -299,7 +307,7 @@ export class GameSession {
     canEmitStarting() {
         return (
             this.isSelfPacedGroupAndHasNotStarted() &&
-            !this.QuestionReleaseAt.hasOwnProperty(0)
+            !this.questionReleaseAt.hasOwnProperty(0)
         );
     }
 
@@ -387,7 +395,7 @@ export class GameSession {
             : this.questionIndex - 1;
     }
 
-    setToNextQuestion(nextQuestionIndex: number) {
+    setToQuestion(nextQuestionIndex: number) {
         if (
             0 <= nextQuestionIndex &&
             nextQuestionIndex <= this.totalQuestions
@@ -405,10 +413,28 @@ export class GameSession {
         const questionIndex = this.getQuestionIndex();
         // Make sure every user has record of current question
         playersArray.forEach((player, index) => {
-            const [record, hasAnswered] = player.genreateRecord(questionIndex);
-            if (!hasAnswered)
-                // Player didn't answer, generate a record for him
-                this.playerMap[player.id].records.push(record);
+            for (const player of playersArray) {
+                const [, hasAnswered] = player.genreateRecord(
+                    questionIndex
+                );
+                if (hasAnswered) continue;
+                const [
+                    hasLatestRecord,
+                    latestRecord,
+                ] = player.getLatestRecord();
+
+                if (hasLatestRecord) {
+                    // Player didn't answer, generate a record for him
+                    latestRecord.questionNo = questionIndex;
+                    latestRecord.bonusPoints = 0;
+                    latestRecord.streak = 0;
+                    this.playerMap[player.id].records.push(latestRecord);
+                    continue;
+                }
+                this.playerMap[player.id].records.push(
+                    new Record(questionIndex, null, null, 0, 0, 0)
+                );
+            }
         });
 
         // Every user should have record of current question now

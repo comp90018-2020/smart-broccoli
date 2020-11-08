@@ -7,11 +7,21 @@ import {
     formatQuestionOutcome,
 } from "./formatter";
 import { activateSession } from "../controllers/session";
-import { Event, Role, GameStatus, Player, Answer, GameType } from "./datatype";
+import {
+    Event,
+    Role,
+    GameStatus,
+    Player,
+    Answer,
+    GameType,
+    QuestionAnswered,
+} from "./datatype";
 import { QuizAttributes } from "models/quiz";
 import { _socketIO } from "./index";
 
 const WAIT_TIME_BEFORE_START = 10 * 1000;
+const WAIT_TIME_SELFPACED_GROUP = 60 * 1000;
+const RESET_SELFPACED_GROUP_TIME = 10 * 1000;
 const CORRECT_ANSWER_SHOW_TIME = 3 * 1000;
 const BOARD_SHOW_TIME = 5 * 1000;
 
@@ -34,7 +44,7 @@ export class GameHandler {
                 title: "Fruits Master",
                 active: true,
                 description: "Test Quiz",
-                type: "self paced",
+                type: "live",
                 isGroup: false,
                 timeLimit: 20,
                 groupId: 2,
@@ -152,11 +162,11 @@ export class GameHandler {
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.questionAnswered,
-                    {
-                        question: answer.question,
-                        count: Object.keys(session.pointSys.answers).length,
-                        total: Object.keys(session.playerMap).length,
-                    }
+                    new QuestionAnswered(
+                        answer.question,
+                        Object.keys(session.pointSys.answers).length,
+                        Object.keys(session.playerMap).length
+                    )
                 );
             }
         } catch (error) {
@@ -166,105 +176,233 @@ export class GameHandler {
 
     async welcome(socket: Socket, session: GameSession, player: Player) {
         try {
+            // Update the time this session be accessed
             session.updatingTime();
 
             if (!session.hasUser(player))
+                // If this player was not in this game
+                // emit a playerJoin event
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.playerJoin,
                     player.profile()
                 );
 
-            // add user to session
-            if (player.role === Role.host) {
-                if (session.type === GameType.SelfPaced_NotGroup) {
-                    this.disconnectOtherPlayersAndCopyRecords(session, player);
-                    session.playerJoin(player);
-                } else {
-                    this.disconnectPast(session, session.host, player);
-                    session.hostJoin(player);
-                }
-            } else {
-                this.disconnectPast(
-                    session,
-                    session.playerMap[player.id],
-                    player
-                );
-                if (session.type === GameType.SelfPaced_NotGroup)
-                    this.disconnectOtherPlayersAndCopyRecords(session, player);
-                session.playerJoin(player);
-            }
+            // Disconnect the existed player/host with the same player id if any
+            this.disconnectExistSocket(session, player);
+            // Player/host joins this game
+            // And also copy the previous records if any
+            session.playerJoin(player);
 
-            // add user to socket room
+            // Add player/host to the socket room of the role
             socket.join(whichRoom(session, player.role));
+            // Add player/host to the socket room of this game
             socket.join(whichRoom(session, Role.all));
 
-            // emit welcome event
+            // Emit welcome event
             emitToOne(
                 socket.id,
                 Event.welcome,
-                formatWelcome(
-                    player.role,
-                    session.getStatus(),
-                    session.playerMap
-                )
+                formatWelcome(player.role, session.status, session.playerMap)
             );
 
-            if (session.isSelfPacedGroupAndHasNotStarted()) {
-                // extends time
+            if (
+                // If this is a self-paced and group game
+                session.type === GameType.SelfPaced_Group &&
+                // And if game status is Pending
+                session.status === GameStatus.Pending
+            ) {
+                // Set game status to starting
+                session.status = GameStatus.Starting;
+                // Allow the first question to be released
+                session.setToQuestion(0);
+                // Set the timestamp that the first question will be released
+                session.setQuestionReleaseTime(0, WAIT_TIME_SELFPACED_GROUP);
+                // Emit starting event with WAIT_TIME_BEFORE_START microseconds
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.starting,
-                    WAIT_TIME_BEFORE_START.toString()
+                    WAIT_TIME_SELFPACED_GROUP.toString()
                 );
-
-                await session.setStatus(GameStatus.Starting);
                 setTimeout(
+                    // After timeout
                     async (session: GameSession) => {
+                        // Check whether the first question can be released
+                        // Because the releasomg time may be reset by new join
+                        session.status = GameStatus.Running;
                         if (
-                            session.is(GameStatus.Starting) &&
-                            session.canReleaseTheFirstQuestion()
+                            // And can release the first question
+                            session.canReleaseQuestion(0)
                         ) {
-                            await session.setStatus(GameStatus.Running);
-                            session.setToNextQuestion(0);
+                            // Set the status to be Running
+                            session.status = GameStatus.Running;
+                            // Allow to release the first question
+                            session.setToQuestion(0);
+                            // Release the first question
                             this.releaseQuestion(session, 0);
                         }
                     },
-                    WAIT_TIME_BEFORE_START,
+                    WAIT_TIME_SELFPACED_GROUP,
                     session
                 );
                 return;
-            } else if (session.isSelfPacedNotGroupAndHasNotStart()) {
+            }
+
+            if (
+                // If this is a self-paced & group game
+                session.type === GameType.SelfPaced_Group &&
+                // If game status is Starting
+                session.status === GameStatus.Starting
+            ) {
+                // Else if game is starting
+                // Get current time
+                const currentTime = Date.now();
+                // Get how much time from now to
+                // when the first question should be released
+                const timeDifference =
+                    session.questionReleaseAt[0] - currentTime;
+                if (
+                    // If the releasing time is in the future
+                    timeDifference > 0 &&
+                    // And is less than RESET_SELFPACED_GROUP_TIME ms
+                    timeDifference < RESET_SELFPACED_GROUP_TIME
+                ) {
+                    // Reset the timestamp that the first question will be released
+                    session.setQuestionReleaseTime(
+                        0,
+                        RESET_SELFPACED_GROUP_TIME
+                    );
+                    // Emit starting event with WAIT_TIME_BEFORE_START microseconds
+                    emitToRoom(
+                        whichRoom(session, Role.all),
+                        Event.starting,
+                        RESET_SELFPACED_GROUP_TIME.toString()
+                    );
+
+                    setTimeout(
+                        // After timeout
+                        async (session: GameSession) => {
+                            // Check if can release the first question
+                            // Because the time to release may be reset by new join
+                            session.status = GameStatus.Running;
+                            if (
+                                // And can release the first question
+                                session.canReleaseQuestion(0)
+                            ) {
+                                // Set the status to be Running
+                                session.status = GameStatus.Running;
+                                // Allow to release the first question
+                                session.setToQuestion(0);
+                                // Release the first question
+                                this.releaseQuestion(session, 0);
+                            }
+                        },
+                        WAIT_TIME_BEFORE_START,
+                        session
+                    );
+                } else {
+                    // Emit a starting event for this new join
+                    emitToOne(
+                        player.socketId,
+                        Event.starting,
+                        (session.questionReleaseAt[0] - Date.now()).toString()
+                    );
+                }
+                return;
+            }
+
+            if (
+                // If the game is self-paced and not group
+                session.type === GameType.SelfPaced_NotGroup &&
+                // If it is Pending
+                session.status === GameStatus.Pending
+            ) {
+                // Set game status to be running
+                session.status = GameStatus.Running;
+                // Set when first question will start
+                session.setQuestionReleaseTime(0, 0);
+                // Allow the first question to be released
+                session.setToQuestion(0);
                 this.releaseQuestion(session, 0);
                 return;
             }
+
+            // If this is self-paced game but has started
+            // Or this is live game
             if (session.is(GameStatus.Starting)) {
-                // if game is starting,
+                // If this game is starting
+                // Note, self-paced and not group game does not has starting status
+                // Thus, self-paced and not group game can not reach this block
+
+                // Emit a Starting event
                 emitToOne(
                     socket.id,
                     Event.starting,
-                    (session.QuestionReleaseAt[0] - Date.now()).toString()
+                    (session.questionReleaseAt[0] - Date.now()).toString()
                 );
                 return;
             }
+            // If this is self-paced game but has started or this is live game
             if (session.is(GameStatus.Running)) {
-                // if game is running, emit nextQuestion
+                // And this game is running
                 if (session.canSendQuesionAfterReconnection()) {
+                    // If can release the question after reconnection
+                    // Get current question index
+                    const questionIndex = session.visibleQuestionIndex();
+                    // Emit a nextQuestion event which carries the question
                     emitToOne(
                         player.socketId,
                         Event.nextQuestion,
                         formatQuestion(
-                            session.visibleQuestionIndex(),
+                            questionIndex,
                             session,
                             player.role === Role.host
                         )
                     );
-                    if (session.canEmitCorrectAnswer()) {
-                        const correctAnswer = session.getAnsOfQuestion(
-                            session.visibleQuestionIndex()
+
+                    if (!session.answerReleased.has(questionIndex))
+                        // If question is conducting
+                        // Emit a questionAnswered event
+                        emitToOne(
+                            player.socketId,
+                            Event.questionAnswered,
+                            new QuestionAnswered(
+                                questionIndex,
+                                Object.keys(session.pointSys.answers).length,
+                                Object.keys(session.playerMap).length
+                            )
                         );
-                        this.emitCorrectAnswer(player, correctAnswer);
-                    }
+
+                    if (!session.answerReleased.has(questionIndex)) return;
+                    // If the corrct answer has not been released
+                    // Get the correct answer
+                    const correctAnswer = session.getAnsOfQuestion(
+                        questionIndex
+                    );
+                    // Emit a correct answer event
+                    this.emitCorrectAnswer(player, correctAnswer);
+
+                    if (
+                        // If answer has released
+                        session.answerReleased.has(questionIndex) &&
+                        // And the board is not preparing by a delayed call
+                        !session.boardPreparing.has(questionIndex) &&
+                        // And if this is self-paced group game or
+                        // this is live game and the host released leaderboard
+                        (session.type === GameType.SelfPaced_Group ||
+                            (session.type === GameType.Live_NotGroup &&
+                                session.boardReleased.has(questionIndex)))
+                    )
+                        // Emit a questionOutcome event
+                        emitToOne(
+                            player.socketId,
+                            Event.questionOutcome,
+                            formatQuestionOutcome(
+                                session,
+                                player,
+                                questionIndex
+                            )
+                        );
                 }
             }
         } catch (error) {
@@ -272,27 +410,42 @@ export class GameHandler {
         }
     }
 
-    disconnectPast(session: GameSession, pastPlayer: Player, player: Player) {
+    /**
+     * Disconnect socket with the same player id if any
+     * @param session GameSession
+     * @param player Player
+     */
+    disconnectExistSocket(session: GameSession, player: Player) {
         if (
-            pastPlayer != null &&
-            pastPlayer.socketId != player.socketId &&
-            _socketIO.sockets.connected.hasOwnProperty(pastPlayer.socketId)
+            // If this is host
+            player.role === Role.host &&
+            // And there is a existed host
+            session.host !== null &&
+            // And that socket id is different from this one
+            session.host.socketId !== player.socketId &&
+            // And that socket id is connected
+            _socketIO.sockets.connected.hasOwnProperty(session.host.socketId)
         ) {
-            _socketIO.sockets.connected[pastPlayer.socketId].disconnect();
+            // Disconnect the existed one
+            _socketIO.sockets.connected[session.host.socketId].disconnect();
+            return;
         }
-    }
-
-    disconnectOtherPlayersAndCopyRecords(session: GameSession, player: Player) {
-        player.role = Role.player;
-        const players = Object.values(session.playerMap);
-
-        if (players.length > 0 && players[0].records.length > 0)
-            player.records = players[0].records;
-
-        for (const existedPlayer of Object.values(session.playerMap)) {
-            this.disconnectPast(session, existedPlayer, player);
+        if (
+            // If this is a player
+            // And if exists socket connection with same player id
+            session.playerMap[player.id] !== undefined &&
+            // And that socket is is different from this one
+            session.playerMap[player.id].socketId !== player.socketId &&
+            // And that socket id is connected
+            _socketIO.sockets.connected.hasOwnProperty(
+                session.playerMap[player.id].socketId
+            )
+        ) {
+            // Disconnect the existed one
+            _socketIO.sockets.connected[
+                session.playerMap[player.id].socketId
+            ].disconnect();
         }
-        session.playerMap = {};
     }
 
     async quit(socket: Socket, session: GameSession, player: Player) {
@@ -323,24 +476,40 @@ export class GameHandler {
 
     async start(session: GameSession, player: Player) {
         try {
+            // Update the time this session be accessed
             session.updatingTime();
+            // Check if this emit is valid to access this code block
             if (!session.isEmitValid(player)) return;
 
             if (session.canStart(player)) {
-                // set game status to starting
-                await session.setStatus(GameStatus.Starting);
-                // Broadcast that quiz will be started
-                session.setQuestionReleaseTime(0, WAIT_TIME_BEFORE_START);
+                // If the session can be started now
+                // Set game status to be Starting
+                session.status = GameStatus.Starting;
+
+                // Set the timestamp when the first question will be released
+                if (session.isSelfPacedGroup())
+                    // If this is self-paced group game
+                    session.setQuestionReleaseTime(
+                        0,
+                        WAIT_TIME_SELFPACED_GROUP
+                    );
+                // Otherwise
+                else session.setQuestionReleaseTime(0, WAIT_TIME_BEFORE_START);
+
+                // Emit starting event
                 emitToRoom(
                     whichRoom(session, Role.all),
                     Event.starting,
-                    (session.QuestionReleaseAt[0] - Date.now()).toString()
+                    (session.questionReleaseAt[0] - Date.now()).toString()
                 );
+
+                // Release the first question after timeout
                 setTimeout(async () => {
-                    // after time out
-                    await session.setStatus(GameStatus.Running);
-                    session.setToNextQuestion(0);
-                    // release the firt question
+                    // After time out, set game status to be Running
+                    session.status = GameStatus.Running;
+                    // Allow the first question to be released
+                    session.setToQuestion(0);
+                    // Release the firt question
                     this.releaseQuestion(session, 0, player);
                 }, WAIT_TIME_BEFORE_START);
             }
@@ -404,7 +573,7 @@ export class GameHandler {
         try {
             session.updatingTime();
             if (!session.isEmitValid(player)) return;
-            if (session.canReleaseNextQuestion(player, questionIndex)) {
+            if (session.canReleaseQuestion(questionIndex, player)) {
                 session.pointSys.playersCountInThisQuestion =
                     session.activePlayersNum;
                 session.setQuestionReleaseTime(
@@ -470,20 +639,28 @@ export class GameHandler {
         );
 
         session.answerReleased.add(questionIndex);
-        session.setToNextQuestion(questionIndex + 1);
+        session.setToQuestion(questionIndex + 1);
 
         if (session.isSelfPacedGroup()) {
-            if (!session.hasFinalBoardReleased())
+            if (!session.hasFinalBoardReleased()) {
                 setTimeout(() => {
                     this.showBoard(session);
                 }, CORRECT_ANSWER_SHOW_TIME);
+                // Put question in the set so that reconnected players
+                // can not get leaderboard immediately
+                session.boardPreparing.add(questionIndex);
+            }
+
             return;
         }
 
         if (
-            session.isSelfPacedNotGroup() &&
+            // If game is self-paced and not group game
+            session.type === GameType.SelfPaced_NotGroup &&
+            // And if this is the last question
             session.questionIndex === session.totalQuestions
         )
+            // End game
             this.abort(session);
     }
 
@@ -506,14 +683,24 @@ export class GameHandler {
                     whichRoom(session, Role.host),
                     Event.questionOutcome,
                     {
-                        question: session.questionIndex - 1,
+                        question: questionIndex,
                         leaderboard: session.rankedRecords.slice(0, 5),
                     }
                 );
-                session.boardReleased.add(session.questionIndex - 1);
+                // Remove question index from preparing so that reconnected user
+                // can get their board
+                session.boardPreparing.delete(questionIndex);
+                session.boardReleased.add(questionIndex);
                 if (session.isSelfPacedGroup()) {
+                    // If this is a self-paced and grouo game
                     if (!session.hasFinalBoardReleased()) {
+                        // Set when the next question will be released
+                        session.setQuestionReleaseTime(
+                            questionIndex + 1,
+                            BOARD_SHOW_TIME
+                        );
                         setTimeout(() => {
+                            // After timeout, release question
                             this.releaseQuestion(
                                 session,
                                 session.questionIndex
@@ -521,7 +708,7 @@ export class GameHandler {
                         }, BOARD_SHOW_TIME);
                     } else this.abort(session);
                 } else if (
-                    !session.isSelfPacedNotGroup() &&
+                    session.type !== GameType.SelfPaced_NotGroup &&
                     session.hasFinalBoardReleased()
                 ) {
                     this.abort(session);
