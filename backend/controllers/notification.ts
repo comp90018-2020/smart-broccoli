@@ -236,8 +236,8 @@ export const sendSessionCreationNotification = async (
         {
             quizId: session.quizId,
         },
-        `New ${type} quiz session started`,
-        `A new session for the quiz "${quiz.title}" has started, tap to join`,
+        `${type == "live" ? "Live" : "Smart auto"} quiz session started`,
+        `Join now! "${quiz.title}" is currently accepting participants`,
         dataTokens,
         false
     );
@@ -246,8 +246,8 @@ export const sendSessionCreationNotification = async (
         {
             quizId: session.quizId,
         },
-        `New ${type} quiz session started`,
-        `A new session for the quiz "${quiz.title}" has started, tap to join`,
+        `${type == "live" ? "Live" : "Smart auto"} quiz session started`,
+        `Join now! "${quiz.title}" is currently accepting participants`,
         notifyTokens,
         true
     );
