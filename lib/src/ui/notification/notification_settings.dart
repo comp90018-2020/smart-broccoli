@@ -76,9 +76,9 @@ class _NotificationSettingState extends State<NotificationSetting> {
           // Set radius
           _radius = _copy.workRadius == null ? 0 : _copy.workRadius / 10;
           // Set days
-          mapIndexed(_copy.dayPrefs.getPrefs(), (index, element) {
-            days[index].isSelected = element;
-          });
+          for (int i = 0; i < 7; i++) {
+            days[i].isSelected = _copy.dayPrefs.getPrefs()[i];
+          }
         }
 
         return WillPopScope(
@@ -175,8 +175,10 @@ class _NotificationSettingState extends State<NotificationSetting> {
                             backgroundColorNoSelected: Colors.grey[200],
                             backgroundColorSelected: Color(0xFFFEC12D),
                             onSelected: (List<day.SelectionItem> items) {
-                              _copy.dayPrefs.setPrefs(
-                                  days.map((e) => e.isSelected).toList());
+                              setState(() {
+                                _copy.dayPrefs.setPrefs(
+                                    days.map((e) => e.isSelected).toList());
+                              });
                             },
                             aligment: Alignment.center,
                           ),
