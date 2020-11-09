@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -14,7 +15,6 @@ import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/theme.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +37,7 @@ void main() async {
   /// Schedule the background task
   /// Default is 15 minutes per refresh
   Workmanager.registerPeriodicTask("1", "backgroundReading",
-      initialDelay: Duration(seconds: 5),
+      initialDelay: Duration(seconds: 10),
       constraints: Constraints(
         networkType: NetworkType.connected,
         requiresBatteryNotLow: true,

@@ -5,16 +5,17 @@ import 'package:sensors/sensors.dart';
 
 /// Gryoscope readings
 class Gyro {
-  static GyroscopeEvent globalGyroscopeEvent;
-
   static Future<GyroscopeEvent> getGyroEvent() async {
+    return await _getGyroEvent()
+        .timeout(Duration(seconds: 10))
+        .catchError((_) => null);
+  }
+
+  static Future<GyroscopeEvent> _getGyroEvent() async {
     try {
       var queue = new StreamQueue(gyroscopeEvents);
-      Duration duration = new Duration(seconds: 10);
-      GyroscopeEvent gyroscopeEvent =
-          await queue.next.timeout(duration, onTimeout: null);
+      GyroscopeEvent gyroscopeEvent = await queue.next;
       queue.cancel();
-      globalGyroscopeEvent = gyroscopeEvent;
       return gyroscopeEvent;
     } catch (e) {
       return Future.error("Gyroscope");

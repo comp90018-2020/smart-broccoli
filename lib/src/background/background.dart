@@ -67,12 +67,14 @@ void callbackDispatcher() {
               notificationPrefs.workSmart) {
             free = false;
           }
+
           log("Network Check Complete", name: "background");
 
           /// Check location sensitive issues
           if (free && !(await locationCheck(notificationPrefs))) {
             free = false;
           }
+
           log("Location Check complete token:" + token.toString(),
               name: "background");
 
@@ -104,23 +106,36 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
   Position position1 =
       await BackgroundLocation.getPosition().catchError((_) => null);
 
+  log("Start Positional Analysis", name: "Backend");
+
   /// If in Geofence
   if (position1 == null) return false;
-  if (notificationPrefs.workLocation != null &&
-      await BackgroundLocation.inGeoFence(notificationPrefs.workLocation,
-          position1, notificationPrefs.workRadius) &&
-      notificationPrefs.workSmart) {
-    log(
-        "Location Geofenced: " +
-            notificationPrefs.workLocation.name +
-            "lon" +
-            notificationPrefs.workLocation.lon.toString() +
-            "lat" +
-            notificationPrefs.workLocation.lat.toString(),
-        name: "Backend");
-    log("The user is in a geofence return 0", name: "Backend");
-    return false;
+
+  if (notificationPrefs.workLocation != null) {
+    /// WELCOME TO THE CODING DANGER ZONE
+    if (notificationPrefs.workSmart != null &&
+        notificationPrefs.workRadius != null &&
+        notificationPrefs.workLocation != null) {
+      if (await BackgroundLocation.inGeoFence(notificationPrefs.workLocation,
+              position1, notificationPrefs.workRadius) &&
+          notificationPrefs.workSmart) {
+        log(
+            "Location Geofenced: " +
+                notificationPrefs.workLocation.name +
+                "lon" +
+                notificationPrefs.workLocation.lon.toString() +
+                "lat" +
+                notificationPrefs.workLocation.lat.toString(),
+            name: "Backend");
+        log("The user is in a geofence return 0", name: "Backend");
+        return false;
+      }
+    }
+
+    /// End of the coding danger zone
   }
+
+  log("Start Positional Analysis 2", name: "Backend");
 
   /// Idle for 30 seconds
   Duration duration = new Duration(seconds: 30);
@@ -134,7 +149,12 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
   /// Check distance between the two
   double distance = Geolocator.distanceBetween(position1.latitude,
       position1.longitude, position2.latitude, position2.longitude);
-  log("Distance" + distance.toString(), name: "Backend");
+  log(
+      "Distance" +
+          distance.toString() +
+          "CHOOO CHOOOOO" +
+          notificationPrefs.allowOnCommute.toString(),
+      name: "Backend");
 
   /// Determine if the user has moved about 50 m in 30 + a few seconds
   /// Todo add perf logic
@@ -185,6 +205,7 @@ Future<bool> lightGyro() async {
   int lum = await LightSensor.getLightReading();
   log("Lum $lum", name: "Backend");
   if (lum == null) return false;
+
   // Todo you may want to change 20 to a config value
   if (lum > 10 /* && reading < 70 */) {
     log("Reason: high light, return 1", name: "Backend");
@@ -235,6 +256,7 @@ bool timeIsBetween(DateTime time, DateTime start, DateTime end) {
 Future<bool> checkGyro() async {
   // Check if the phone is stationary and not being used
   GyroscopeEvent gyroscopeEvent = await Gyro.getGyroEvent();
+
   if (gyroscopeEvent == null) return true;
   double x = gyroscopeEvent.x;
   double y = gyroscopeEvent.y;
