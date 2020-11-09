@@ -69,11 +69,13 @@ class FirebaseNotification {
         String data = message.data['data'];
 
         // Publish topics
-        if (type == "SESSION_START")
+        if (type == "SESSION_START") {
           // A quiz recommendation,
           // data like quizId will be found in data, same as below
-          PubSub().publish(PubSubTopic.SESSION_START, arg: data);
-        else if (type == "SESSION_ACTIVATED")
+          SessionStart start = SessionStart.fromJson(jsonDecode(data));
+          int quizId = start.quizId;
+          PubSub().publish(PubSubTopic.SESSION_START, arg: quizId);
+        } else if (type == "SESSION_ACTIVATED")
           // Session has been activated
           PubSub().publish(PubSubTopic.SESSION_ACTIVATED, arg: data);
         else if (type == "QUIZ_UPDATE")
