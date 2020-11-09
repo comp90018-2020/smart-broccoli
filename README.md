@@ -32,49 +32,53 @@ Please run ```flutter pub get``` in terminal every time update pubspec.yaml file
 Contains domain objects and Data Transfer Objects. Including: User, Quiz, Game, Group, Answer and Outcome. Please refer to the file for detailed attributes of each data type defined here.
 
 ### Backend ```smart-broccoli/backend```
-1. ```/.vscode```: 
-2. ```/controllers```: 
-3. ```/demo```: 
-4. ```/game```: 
-5. ```/helpers```: 
-6. ```/models```:
-7. ```/routers```: 
-8. ```/tests```: 
+* ```/.vscode```: 
+* ```/controllers```: 
+* ```/demo```: 
+* ```/game```: 
+* ```/helpers```: 
+* ```/models```:
+* ```/routers```: 
+* ```/tests```: 
 
 ### Frontend ```smart-broccoli/lib/src/ui```
 Note: these sub packages are rough grouping of the features for code separation. They do not have one-to-one correspondence with the features defined in our Requirement Document.
 
-1. ```/auth```: UI for making account associations
-2. ```/group``` and '''/groups''': UI of tap and group management, including UI of group creation and list of group. Also including quiz tap which allows for switching quiz type in take quiz page
-3. ```/profile```:  User profile UI and logic 
-4. ```/quiz``` and 'quiz_creator': Quiz card UI, including UI of quiz creation, quiz management, quiz picture and UI of question creation. Also including UI of quiz notification settings page
-5. ```/session```: Session UI pages. Contains waiting lobby page, question page, answer page, and leaderboard page
-6. ```/shared```: Custom components used by all UI pages
-7. ```/about```: Acknowledgement and LICENSE UI
+* ```/auth```: UI for making account associations
+* ```/group``` and ```/groups```: UI of tap and group management, including UI of group creation and list of group. Also including quiz tap which allows for switching quiz type in take quiz page
+* ```/profile```:  User profile UI and logic 
+* ```/quiz``` and ```quiz_creator```: Quiz card UI, including UI of quiz creation, quiz management, quiz picture and UI of question creation. Also including UI of quiz notification settings page
+* ```/session```: Session UI pages. Contains waiting lobby page, question page, answer page, and leaderboard page
+* ```/shared```: Custom components used by all UI pages
+* ```/about```: Acknowledgement and LICENSE UI
 
 ### Sensor ```smart-broccoli/lib/src/background```
-1. ```/background_calendar```: 
-2. ```/background_database```: 
-3. ```/background```: 
-4. ```/gyro```: 
-5. ```/light_sensor```: 
-6. ```/location```:
-7. ```/network```: 
+* ```/background_calendar```: 
+* ```/background_database```: 
+* ```/background```: 
+* ```/gyro```: 
+* ```/light_sensor```: 
+* ```/location```:
+* ```/network```: 
 
 ### Services 
-* ```smart-broccoli/lib/src/models```
-1. ```/auth_state```: 
-2. ```/group_registry```: 
-3. ```/model_change```: 
-4. ```/quiz_collection```: 
-5. ```/session_model```: 
-6. ```/session_tracker```:
-7. ```/user_profile```: 
-8. ```/user_repository```: 
+```
+smart-broccoli/lib/src/models
+```
+* ```/auth_state```: 
+* ```/group_registry```: 
+* ```/model_change```: 
+* ```/quiz_collection```: 
+* ```/session_model```: 
+* ```/session_tracker```:
+* ```/user_profile```: 
+* ```/user_repository```: 
 
-* ```smart-broccoli/lib/src/store```
-1. ```/local```: 
-2. ```/remote```: 
+```
+smart-broccoli/lib/src/store
+```
+* ```/local```: 
+* ```/remote```: 
 
 ## Building and Running
 ### With Android Studio
