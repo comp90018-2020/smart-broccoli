@@ -54,14 +54,13 @@ export const sendMessage = async (
         return;
     }
 
+    // Log the message
+    console.log(message);
+
     try {
         // Send the message with given tokens
         const messaging = admin.messaging();
-        const response = await messaging.sendMulticast(
-            message,
-            // dryrun
-            process.env.NODE_ENV !== "production"
-        );
+        const response = await messaging.sendMulticast(message);
 
         for (const [index, result] of response.responses.entries()) {
             // Remove token, if applicable
