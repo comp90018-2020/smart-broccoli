@@ -34,7 +34,7 @@ export const buildNotificationMessage = (
         },
         android: {
             ttl: ttlSeconds * 1000,
-            priority: "normal",
+            priority: "high",
         },
         apns: {
             payload: {
