@@ -68,7 +68,7 @@ export const formatQuestionOutcome = (
     questionIndex: number
 ) => {
     // This question has been answered
-    const [record] = player.genreateRecord(questionIndex);
+    const [record] = player.getOrGenerateRecord(questionIndex);
     const { newPos } = record;
 
     let recordOfPlayerAhead: any;

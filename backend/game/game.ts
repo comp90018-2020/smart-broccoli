@@ -44,8 +44,8 @@ export class GameHandler {
                 title: "Fruits Master",
                 active: true,
                 description: "Test Quiz",
-                type: "live",
-                isGroup: false,
+                type: "self paced",
+                isGroup: true,
                 timeLimit: 20,
                 groupId: 2,
                 pictureId: null,
@@ -617,7 +617,7 @@ export class GameHandler {
     }
 
     emitCorrectAnswer(player: Player, correctAnswer: Answer) {
-        const [record] = player.genreateRecord(correctAnswer.question);
+        const [record] = player.getOrGenerateRecord(correctAnswer.question);
         emitToOne(player.socketId, Event.correctAnswer, {
             answer: correctAnswer,
             record: record,
