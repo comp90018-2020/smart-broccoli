@@ -1,0 +1,42 @@
+################################################################################                     
+                    COMP90018 Programming Project Submission
+################################################################################
+
+Group No: #Group-W01/10-4
+
+Group Members:
+
+1: [Alan Ung, alanu@student.unimelb.edu.au] 
+2: [Eldar Kurmakaev, ekurmakaev@student.unimelb.edu.au] 
+3: [Haohai Liu, haohail@student.unimelb.edu.au] 
+4: [Min Zhao, min.zhao1@student.unimelb.edu.au] 
+5: [Qifan Deng, qifand@student.unimelb.edu.au] 
+6: [Steven Tang, stevent2@student.unimelb.edu.au]
+
+YouTube Link: 
+
+README:
+ 
+Prerequisite:
+ - Android Studio 4.1
+ - Android SDK which can be obtained when launch Android Studio first time. 
+   Version: >=2.7.0 && <3.0.0
+ - Flutter installation
+ - Dart installation : Dart will be automatically installed
+ - Android phone or emulator with API level 30 with google player services(for firebase)
+
+Building and Running: 
+
+IN Android Studio
+1. Clone this repository locally.
+2. Open Android Studio, select menu item File -> Open and open the root of 
+   your local repository.
+3. Before build and run, make sure the Android emulator is available. Select 
+   menu item Tool -> AVD manager. Click button if there is no Android virtual 
+   machine, then follow the guideline to complete the installation, this process 
+   may take a little bit of time. After that, select and launch one emulator 
+   in the list of Android Virtual Devices Manager window.
+4. To build and run the app, select menu item Run -> Run and then in the popup 
+   dialog, select smart broccoli app
+
+Please include details on how to compile and run your APP.
