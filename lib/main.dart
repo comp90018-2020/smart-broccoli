@@ -28,7 +28,7 @@ void main() async {
   /// Initialise background services
   Workmanager.initialize(
     callbackDispatcher,
-    isInDebugMode: false,
+    isInDebugMode: true,
   );
 
   // Cancel all ongoing background tasks upon running the app

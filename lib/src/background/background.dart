@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:light/light.dart';
 import 'package:sensors/sensors.dart';
 import 'package:smart_broccoli/src/background/background_database.dart';
 import 'package:smart_broccoli/src/background/light_sensor.dart';
@@ -107,25 +108,34 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
       await BackgroundLocation.getPosition().catchError((_) => null);
 
   log("Start Positional Analysis", name: "Backend");
-  log(notificationPrefs.workLocation.toString(), name: "Backend");
+  log(notificationPrefs.workLocation.toJson().toString(), name: "Backend");
+  log(notificationPrefs.workRadius.toString(), name: "Backend");
 
   /// If in Geofence
   if (position1 == null) return false;
-  if (notificationPrefs.workLocation != null &&
-      await BackgroundLocation.inGeoFence(notificationPrefs.workLocation,
-          position1, notificationPrefs.workRadius) &&
-      notificationPrefs.workSmart) {
-    log(
-        "Location Geofenced: " +
-            notificationPrefs.workLocation.name +
-            "lon" +
-            notificationPrefs.workLocation.lon.toString() +
-            "lat" +
-            notificationPrefs.workLocation.lat.toString(),
-        name: "Backend");
-    log("The user is in a geofence return 0", name: "Backend");
-    return false;
+
+  if (notificationPrefs.workLocation != null) {
+    /// WELCOME TO THE CODING DANGER ZONE
+    if (notificationPrefs.workSmart != null && notificationPrefs.workRadius != null && notificationPrefs.workLocation != null) {
+      if (await BackgroundLocation.inGeoFence(notificationPrefs.workLocation,
+              position1, notificationPrefs.workRadius) &&
+          notificationPrefs.workSmart) {
+        log(
+            "Location Geofenced: " +
+                notificationPrefs.workLocation.name +
+                "lon" +
+                notificationPrefs.workLocation.lon.toString() +
+                "lat" +
+                notificationPrefs.workLocation.lat.toString(),
+            name: "Backend");
+        log("The user is in a geofence return 0", name: "Backend");
+        return false;
+      }
+    }
+    /// End of the coding danger zone
   }
+
+  log("Start Positional Analysis 2", name: "Backend");
 
   /// Idle for 30 seconds
   Duration duration = new Duration(seconds: 30);
@@ -139,7 +149,12 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
   /// Check distance between the two
   double distance = Geolocator.distanceBetween(position1.latitude,
       position1.longitude, position2.latitude, position2.longitude);
-  log("Distance" + distance.toString(), name: "Backend");
+  log(
+      "Distance" +
+          distance.toString() +
+          "CHOOO CHOOOOO" +
+          notificationPrefs.allowOnCommute.toString(),
+      name: "Backend");
 
   /// Determine if the user has moved about 50 m in 30 + a few seconds
   /// Todo add perf logic
@@ -186,6 +201,7 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
 }
 
 int onTimeOutLight() {
+  LightSensor.close();
   return 0;
 }
 
@@ -245,6 +261,7 @@ bool timeIsBetween(DateTime time, DateTime start, DateTime end) {
 }
 
 GyroscopeEvent onTimeOutGyro() {
+  Gyro.cancel();
   return new GyroscopeEvent(0.0, 0.0, 0.0);
 }
 
