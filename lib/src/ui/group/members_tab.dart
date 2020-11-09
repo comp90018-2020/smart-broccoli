@@ -26,12 +26,13 @@ class MembersTab extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: Text("An error has occurred, cannot load"),
                   );
-                if (snapshot.hasData) {
-                  // To get into the members tab, the group must be loaded
-                  var group = registry.getGroupFromCache(groupId);
-                  // Members from future
-                  var members = snapshot.data;
 
+                // To get into the members tab, the group must be loaded
+                var group = registry.getGroupFromCache(groupId);
+                // Members from future
+                var members = registry.getGroupMembersCached(groupId);
+
+                if (snapshot.hasData && group != null && members != null) {
                   return ListView.builder(
                     padding: EdgeInsets.symmetric(vertical: 8),
                     itemCount: members.length,

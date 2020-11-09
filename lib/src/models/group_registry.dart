@@ -76,6 +76,10 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     return _userRepo.getUserPicture(id);
   }
 
+  List<User> getGroupMembersCached(int groupId) {
+    return _groupMembers[groupId];
+  }
+
   /// Get a group's members
   Future<List<User>> getGroupMembers(int groupId,
       {bool refresh = false}) async {

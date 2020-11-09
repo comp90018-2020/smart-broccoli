@@ -55,12 +55,7 @@ class _NamePromptState extends State<NamePrompt> {
               onChanged: (value) => setState(() => _nameEmpty = value.isEmpty),
               onSubmitted: (value) async {
                 if (value.isEmpty) return;
-                AuthStateModel auth =
-                    Provider.of<AuthStateModel>(context, listen: false);
-                UserProfileModel profile =
-                    Provider.of<UserProfileModel>(context, listen: false);
-                await auth.join();
-                profile.updateUser(name: _nameController.text);
+                _join(context);
               },
             ),
 
@@ -86,20 +81,12 @@ class _NamePromptState extends State<NamePrompt> {
     // Disable button
     setState(() => _joinButtonClicked = true);
 
-    Future<void> join() =>
-        Provider.of<AuthStateModel>(context, listen: false).join();
-    Future<void> setName() =>
-        Provider.of<UserProfileModel>(context, listen: false)
-            .updateUser(name: _nameController.text);
-
     // Join and set name
     try {
-      await join();
-      await setName();
+      await Provider.of<AuthStateModel>(context, listen: false)
+          .join(_nameController.text);
     } catch (err) {
       showErrSnackBar(context, err.toString());
-
-      // Enable button
       setState(() => _joinButtonClicked = false);
     }
   }
