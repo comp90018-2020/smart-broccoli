@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/base/firebase_messages.dart';
 import 'package:smart_broccoli/src/base/helper.dart';
 import 'package:smart_broccoli/src/base/pubsub.dart';
 import 'package:smart_broccoli/src/data.dart';
@@ -423,26 +424,4 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       _isCreatedQuizzesLoaded = false;
     }
   }
-}
-
-/// Update payload from Firebase
-class QuizUpdatePayload {
-  final int groupId;
-  final int quizId;
-
-  QuizUpdatePayload._internal(this.groupId, this.quizId);
-  factory QuizUpdatePayload.fromJson(Map<String, dynamic> json) =>
-      QuizUpdatePayload._internal(json['groupId'], json['quizId']);
-}
-
-/// Update payload from Firebase
-class SessionActivatePayload {
-  final int groupId;
-  final int quizId;
-  final int sessionId;
-
-  SessionActivatePayload._internal(this.sessionId, this.groupId, this.quizId);
-  factory SessionActivatePayload.fromJson(Map<String, dynamic> json) =>
-      SessionActivatePayload._internal(
-          json['sessionId'], json['groupId'], json['quizId']);
 }

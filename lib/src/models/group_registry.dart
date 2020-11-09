@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/base/firebase_messages.dart';
 import 'package:smart_broccoli/src/base/pubsub.dart';
 
 import 'package:smart_broccoli/src/data.dart';
@@ -395,13 +396,4 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       _groupMembers = {};
     }
   }
-}
-
-/// Update payload from Firebase
-class GroupUpdatePayload {
-  final int groupId;
-
-  GroupUpdatePayload._internal(this.groupId);
-  factory GroupUpdatePayload.fromJson(Map<String, dynamic> json) =>
-      GroupUpdatePayload._internal(json['groupId']);
 }
