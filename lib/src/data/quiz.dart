@@ -5,7 +5,7 @@ import 'package:smart_broccoli/src/store/remote/api_base.dart';
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
+enum QuizType { LIVE, SMART_LIVE, SELF_PACED }
 
 /// Stores a pending picture
 abstract class PendingPicture {
@@ -167,10 +167,12 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
     int thisType = this.type.index;
     int otherType = other.type.index;
 
-    if (thisType == otherType)
+    if (thisType == otherType) {
+      if (this.complete && !other.complete) return 1;
+      if (other.complete && !this.complete) return -1;
       return other.updatedTimestamp.compareTo(this.updatedTimestamp);
-    else
-      return otherType - thisType;
+    } else
+      return thisType - otherType;
   }
 
   /// Type of quiz
