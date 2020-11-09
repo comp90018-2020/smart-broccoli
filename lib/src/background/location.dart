@@ -7,8 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:smart_broccoli/src/remote.dart';
 import 'package:xml/xml.dart';
 
-import 'background_database.dart';
-
 class BackgroundLocation {
   // get GPS lon lat reading
   static Future<Position> getPosition() async {
@@ -18,7 +16,6 @@ class BackgroundLocation {
     } catch (err) {
       return Future.error(err.toString());
     }
-
   }
 
   // Placemark info
@@ -73,16 +70,16 @@ class BackgroundLocation {
 
   /// Check if a long lat is within 1km of a Geofence point
   /// 1 Km as that assumes for GPS errors and other inaccuracies
-  static Future<bool> inGeoFence(LocationData locationData,
-      Position userLocation, int distanceKM) async {
+  static Future<bool> inGeoFence(
+      LocationData locationData, Position userLocation, int distanceKM) async {
     if (locationData == null) {
       return false;
     }
-      var distance = Geolocator.distanceBetween(locationData.lat,
-          locationData.lon, userLocation.latitude, userLocation.longitude);
-      if (distance < distanceKM * 1000) {
-        return true;
-      }
+    var distance = Geolocator.distanceBetween(locationData.lat,
+        locationData.lon, userLocation.latitude, userLocation.longitude);
+    if (distance < distanceKM * 1000) {
+      return true;
+    }
 
     return false;
   }

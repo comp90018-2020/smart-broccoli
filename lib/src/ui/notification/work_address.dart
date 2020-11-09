@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_broccoli/src/store/remote/location_api.dart';
-import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/indicators.dart';
+import 'package:smart_broccoli/src/ui/shared/page.dart';
 
 ///Address selection page
 class MapSetting extends StatefulWidget {
