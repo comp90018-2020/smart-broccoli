@@ -34,27 +34,17 @@ void callbackDispatcher() {
             notificationPrefs =
                 NotificationPrefs.fromJson(json.decode(prefsAsJson));
           }
+
+          log("Background Reading", name: "background");
           if (token == null) {
+            log("Token is null", name: "background");
+
             break;
           }
           if (notificationPrefs == null) {
+            log("Perferences is null", name: "background");
             break;
           }
-
-          DateTime dateTime = new DateTime.now();
-
-          List<bool> dayPerfsList = notificationPrefs.dayPrefs.getPrefs();
-
-          if(!dayPerfsList[dateTime.weekday]){
-            log("User is busy today as mentioned in perfs",name:"background");
-            UserApi userApi = new UserApi();
-            userApi.setFree(token, false, false);
-            break;
-          }
-
-
-
-
 
           // todo if(notificationPrefs.dayPrefs)
 
@@ -66,6 +56,7 @@ void callbackDispatcher() {
           // Do not continue
 
           var db = await BackgroundDatabase.init();
+
           // load prefs
           var calendarFree = true;
           var free = true;
@@ -77,7 +68,7 @@ void callbackDispatcher() {
             if (!(await checkCalendar(db))) {
               calendarFree = false;
             }
-          } catch(e){
+          } catch (e) {
             calendarFree = true;
           }
 
@@ -85,15 +76,21 @@ void callbackDispatcher() {
 
           await db.closeDB();
 
+          log("Calendar Check Compelte", name: "background");
+
           // Check wifi
-          if (await Network.workWifiMatch(notificationPrefs.workSSID) && notificationPrefs.workSmart) {
+          if (await Network.workWifiMatch(notificationPrefs.workSSID) &&
+              notificationPrefs.workSmart) {
             free = false;
           }
+          log("Network Check Complete", name: "background");
 
           /// Check location sensitive issues
           if (free && !(await locationCheck(db, notificationPrefs))) {
             free = false;
           }
+          log("Location Check complete token:" + token.toString(),
+              name: "background");
 
           UserApi userApi = new UserApi();
           userApi.setFree(token, calendarFree, free);
@@ -103,6 +100,7 @@ void callbackDispatcher() {
           log("Reason: Phone is not stationary or asked not to be prompted or calendar is busy return 0",
               name: "Backend");
 
+          /// Double check if DB is calsed
           await db.closeDB();
           break;
       }
@@ -119,23 +117,28 @@ void callbackDispatcher() {
 /// returns true if the user is free
 Future<bool> locationCheck(
     BackgroundDatabase db, NotificationPrefs notificationPrefs) async {
-  await BackgroundDatabase.init();
-
-
-
   /// Get current long lat
   Position position1 =
       await BackgroundLocation.getPosition().catchError((_) => null);
-  List<GeoFence> geoFenceList = await db.getGeoFence();
 
   /// If in Geofence
   if (position1 == null) return false;
-  if (await BackgroundLocation.inGeoFence(geoFenceList, position1, notificationPrefs.workRadius)) {
-    log("The user is in a geofence return 1", name: "Backend");
-    return true;
-  }
+  if (notificationPrefs.workLocation != null &&
+      await BackgroundLocation.inGeoFence(notificationPrefs.workLocation,
+          position1, notificationPrefs.workRadius) &&
+      notificationPrefs.workSmart) {
+    log(
+        "Location Geofenced: " +
+            notificationPrefs.workLocation.name +
+            "lon" +
+            notificationPrefs.workLocation.lon.toString() +
+            "lat" +
+            notificationPrefs.workLocation.lat.toString(),
+        name: "Backend");
 
-  db.closeDB();
+    log("The user is in a geofence return 0", name: "Backend");
+    return false;
+  }
 
   /// Idle for 30 seconds
   Duration duration = new Duration(seconds: 30);
@@ -175,6 +178,7 @@ Future<bool> locationCheck(
 
   /// If the user is not moving
   else {
+    log("User is not moving", name: "Backend");
     String data = await BackgroundLocation.placeMarkType(position1)
         .catchError((_) => null);
 
@@ -216,7 +220,7 @@ Future<bool> lightGyro(NotificationPrefs notificationPrefs) async {
     // Check if the phone is stationary and not being used
     if (await checkGyro()) {
       // Send notifification
-      return false;
+      return true;
     }
   }
   return false;

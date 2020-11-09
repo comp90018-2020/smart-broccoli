@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_settings/models/settings_list_item.dart';
 import 'package:flutter_settings/widgets/Separator.dart';
 import 'package:flutter_settings/widgets/SettingsIcon.dart';
+import 'package:flutter_settings/widgets/SettingsInputField.dart';
+import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
 import 'package:flutter_settings/widgets/SettingsSection.dart';
 import 'package:flutter_settings/widgets/SettingsSelectionList.dart';
-import 'package:flutter_settings/models/settings_list_item.dart';
-import 'package:flutter_settings/widgets/SettingsInputField.dart';
 import 'package:flutter_settings/widgets/SettingsSlider.dart';
-import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
 import 'package:provider/provider.dart';
+import 'package:selection_picker/selection_item.dart' as day;
+import 'package:selection_picker/selectionpicker.dart';
 import 'package:smart_broccoli/src/data/prefs.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:smart_broccoli/src/ui/shared/indicators.dart';
+import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:toast/toast.dart';
-import 'package:selection_picker/selectionpicker.dart';
-import 'package:selection_picker/selection_item.dart' as day;
 
 /// Smart quiz page
 class NotificationSetting extends StatefulWidget {
@@ -106,7 +105,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                             icon: new SettingsIcon(
                                 icon: Icons.timer_off, color: Colors.blue),
                             onSelect: (value, index) {
-                              setState(() => _copy.minWindow = value);
+                              setState(() => _copy.minWindow =
+                                  _minWindowList[index].value);
                               _save(context);
                             },
                             context: context,
@@ -129,7 +129,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                               color: Colors.green,
                             ),
                             onSelect: (value, index) {
-                              setState(() => _copy.maxPerDay = value);
+                              setState(() => _copy.maxPerDay =
+                                  _maxNumberList[index].value);
                               _save(context);
                             },
                             context: context,
@@ -233,24 +234,25 @@ class _NotificationSettingState extends State<NotificationSetting> {
 
                       // Address setting
                       SettingsNavigatorButton(
-                          title: 'Work address',
-                          titleStyle: TextStyle(fontSize: 16),
-                          icon: new SettingsIcon(
-                            icon: Icons.location_on_outlined,
-                            color: Colors.orange,
-                          ),
-                          context: context,
-                          caption: _copy.workLocation == null
-                              ? "Not set"
-                              : _copy.workLocation,
-                          onPressed: () async {
-                            var location = await Navigator.of(context)
-                                .pushNamed("/work_address");
-                            if (location != null) {
-                              setState(() => _copy.workLocation = location);
-                              _save(context);
-                            }
-                          }),
+                        title: 'Work address',
+                        titleStyle: TextStyle(fontSize: 16),
+                        icon: new SettingsIcon(
+                          icon: Icons.location_on_outlined,
+                          color: Colors.orange,
+                        ),
+                        context: context,
+                        caption: _copy.workLocation == null
+                            ? "Not set"
+                            : _copy.workLocation.toString(),
+                        onPressed: () async {
+                          var location = await Navigator.of(context)
+                              .pushNamed("/work_address");
+                          if (location != null) {
+                            setState(() => _copy.workLocation = location);
+                            _save(context);
+                          }
+                        },
+                      ),
 
                       // Radius setting
                       SettingsSlider(

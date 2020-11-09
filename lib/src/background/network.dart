@@ -5,6 +5,11 @@ import 'package:wifi_info_plugin/wifi_info_plugin.dart';
 class Network {
   // Determines whether user is at work
   static Future<bool> workWifiMatch(String ssid) async {
+    if(ssid == null){
+      return false;
+    }
+
+
     var wifiInfo = await _getWifiInfo();
     if (wifiInfo == null || wifiInfo.ssid == null) return false;
 

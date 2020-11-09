@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/background/background_calendar.dart';
-import 'package:smart_broccoli/src/background/foreground.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/base/firebase.dart';
 import 'package:smart_broccoli/src/local.dart';
@@ -35,7 +34,7 @@ void main() async {
   /// Schedule the background task
   /// Default is 15 minutes per refresh
   Workmanager.registerPeriodicTask("1", "backgroundReading",
-      initialDelay: Duration(seconds: 60),
+      initialDelay: Duration(seconds: 10),
       constraints: Constraints(
         networkType: NetworkType.connected,
         requiresBatteryNotLow: true,
