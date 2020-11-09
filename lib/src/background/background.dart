@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:light/light.dart';
 import 'package:sensors/sensors.dart';
 import 'package:smart_broccoli/src/background/background_database.dart';
 import 'package:smart_broccoli/src/background/light_sensor.dart';
@@ -215,9 +214,10 @@ Future<bool> lightGyro() async {
   // If the time is at night
   DateTime dateTime = DateTime.now();
   if (dateTime.hour > 18 && dateTime.hour < 23) {
-    log("Reason: notif sent because time is at night, return 1",
-        name: "Backend");
-    return true;
+    // log("Reason: notif sent because time is at night, return 1",
+    //     name: "Backend");
+    // return true;
+    checkGyro();
   } else {
     // Check if the phone is stationary and not being used
     if (await checkGyro()) {
