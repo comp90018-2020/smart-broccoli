@@ -270,7 +270,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
           (await _quizApi.getQuizzes(_authStateModel.token))
               .where((quiz) => quiz.role == GroupRole.MEMBER),
           key: (quiz) => quiz.id);
-      print(_availableQuizzes);
       await Future.wait(_availableQuizzes.values
           .map((Quiz quiz) => _refreshQuizPicture(quiz)));
       _isAvailableQuizzesLoaded = true;
