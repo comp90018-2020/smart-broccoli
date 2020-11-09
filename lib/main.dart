@@ -118,6 +118,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub
         .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
+    widget.pubSub
+        .subscribe(PubSubTopic.SESSION_START, _handleNotificationSelection);
 
     // Refresh user sessions on startup
     Provider.of<GameSessionModel>(context, listen: false)
@@ -196,6 +198,15 @@ class _MyAppState extends State<MyApp> {
       },
       initialRoute: state.inSession ? '/take_quiz' : '/auth',
     );
+  }
+
+  // Handle when notification is clicked
+  void _handleNotificationSelection(dynamic content) {
+    Navigator.of(_mainNavigatorKey.currentContext)
+        .pushNamed("/session/start/quiz/$content")
+        .catchError((error) {
+      throw Exception(error);
+    });
   }
 }
 

@@ -161,7 +161,7 @@ class LocalNotification {
   }
 
   Future selectNotification(String payload) async {
-    // May use
+    PubSub().publish(PubSubTopic.SESSION_START, arg: payload);
   }
 
   void _askForApplePermissions() async {
