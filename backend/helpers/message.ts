@@ -31,7 +31,6 @@ export const firebaseTokenValid = async (token: string) => {
         if (process.env.NODE_ENV !== "production") {
             return true;
         }
-        await admin.auth().verifyIdToken(token, true);
         return true;
     } catch (err) {
         return false;

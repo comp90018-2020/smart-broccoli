@@ -44,11 +44,17 @@ class AuthStateModel extends ChangeNotifier {
     }
 
     // Push firebase token to server
+    await addToken().catchError((_) => null);
+  }
+
+  Future<void> addToken() async {
     try {
       await _authApi.addFirebaseToken(
           token, await FirebaseNotification().getToken());
-    } on Exception {
-      // Oh well, token cannot be added
+    } on ApiAuthException {
+      return Future.error("Auth failure");
+    } on Exception catch (e) {
+      return Future.error(e.toString());
     }
   }
 
@@ -80,12 +86,7 @@ class AuthStateModel extends ChangeNotifier {
     }
 
     // Push firebase token to server
-    try {
-      await _authApi.addFirebaseToken(
-          token, await FirebaseNotification().getToken());
-    } on Exception {
-      // Oh well, token cannot be added
-    }
+    await addToken().catchError((_) => null);
   }
 
   Future<void> checkSession() async {
