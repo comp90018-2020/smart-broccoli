@@ -463,7 +463,7 @@ export class GameHandler {
                 player.profile()
             );
             await session.playerLeave(player);
-            if (session.host === null && session.activePlayersNum === 0)
+            if (session.type === GameType.SelfPaced_NotGroup)
                 this.abort(session);
 
             session.deactivateToken(player.token);

@@ -20,9 +20,9 @@ smart-broccoli/pubspec.yaml
 Please run ```flutter pub get``` in terminal every time update pubspec.yaml file. 
 
 ## Code Structure
+* Backend ```smart-broccoli/backend```: see [README.md](https://github.com/comp90018-2020/smart-broccoli/blob/master/backend/README.md)
 * Base ```smart-broccoli/lib/src/base```: Contains supporting classes for the entire application
 * Data ```smart-broccoli/lib/src/data```: Contains domain objects and Data Transfer Objects. Including: User, Quiz, Game, Group, Answer and Outcome. Please refer to the file for detailed attributes of each data type defined here.
-* Backend ```smart-broccoli/backend```: see [README.md](https://github.com/comp90018-2020/smart-broccoli/blob/master/backend/README.md)
 * Frontend ```smart-broccoli/lib/src/ui```: Contains all the UI pages of this repository. These sub packages are rough grouping of the features for code separation. They do not have one-to-one correspondence with the features defined in our Requirement Document.
   * ```/auth```: UI for making account associations. Including login and sign up.
   * ```/group``` and ```/groups```: UI of group management, including group creation and list of groups. Also including quiz tap which allows for switching quiz type in take quiz page
@@ -34,7 +34,7 @@ Please run ```flutter pub get``` in terminal every time update pubspec.yaml file
 * Sensor ```smart-broccoli/lib/src/background```: Sensors implementation. 
 * Services 
   * ```smart-broccoli/lib/src/models```: Used for storing and updating logic state, and be as a middle layer service
-  * ```smart-broccoli/lib/src/store```: Contians APIs that used for data transfer between server and UI pages
+  * ```smart-broccoli/lib/src/store```: Contains APIs that used for data transfer between server and UI pages
 
 ## Building and Running
 ### With Android Studio

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_settings/models/settings_list_item.dart';
 import 'package:flutter_settings/widgets/Separator.dart';
 import 'package:flutter_settings/widgets/SettingsIcon.dart';
+import 'package:flutter_settings/widgets/SettingsInputField.dart';
+import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
 import 'package:flutter_settings/widgets/SettingsSection.dart';
 import 'package:flutter_settings/widgets/SettingsSelectionList.dart';
-import 'package:flutter_settings/models/settings_list_item.dart';
-import 'package:flutter_settings/widgets/SettingsInputField.dart';
 import 'package:flutter_settings/widgets/SettingsSlider.dart';
-import 'package:flutter_settings/widgets/SettingsNavigatorButton.dart';
 import 'package:provider/provider.dart';
+import 'package:selection_picker/selection_item.dart' as day;
+import 'package:selection_picker/selectionpicker.dart';
 import 'package:smart_broccoli/src/data/prefs.dart';
 import 'package:smart_broccoli/src/models.dart';
-import 'package:smart_broccoli/src/ui/shared/page.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/indicators.dart';
+import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:toast/toast.dart';
-import 'package:selection_picker/selectionpicker.dart';
-import 'package:selection_picker/selection_item.dart' as day;
 
 /// Smart quiz page
 class NotificationSetting extends StatefulWidget {
@@ -234,7 +234,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                       ),
 
                       // Address setting
-                      SettingsNavigatorButton(
+                      Builder(
+                        builder: (context) => SettingsNavigatorButton(
                           title: 'Work address',
                           titleStyle: TextStyle(fontSize: 16),
                           icon: new SettingsIcon(
@@ -244,7 +245,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                           context: context,
                           caption: _copy.workLocation == null
                               ? "Not set"
-                              : _copy.workLocation,
+                              : _copy.workLocation.name.toString(),
                           onPressed: () async {
                             var location = await Navigator.of(context)
                                 .pushNamed("/work_address");
@@ -252,7 +253,9 @@ class _NotificationSettingState extends State<NotificationSetting> {
                               setState(() => _copy.workLocation = location);
                               _save(context);
                             }
-                          }),
+                          },
+                        ),
+                      ),
 
                       // Radius setting
                       SettingsSlider(
@@ -316,10 +319,9 @@ class _NotificationSettingState extends State<NotificationSetting> {
 
   // Save settings
   void _save(BuildContext context) async {
-    await context
-        .read<UserProfileModel>()
+    await Provider.of<UserProfileModel>(context, listen: false)
         .setNotificationPrefs(_copy)
-        .catchError((err) => showErrSnackBar(context, err.toString()));
+        .catchError((err) => showBasicDialog(context, err.toString()));
   }
 
   /// A switch list tile mimicking the ListTile provided by the package

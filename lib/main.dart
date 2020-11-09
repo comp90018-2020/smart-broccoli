@@ -8,6 +8,7 @@ import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/background/background_calendar.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/base/firebase.dart';
+import 'package:smart_broccoli/src/base/firebase_session_handler.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
@@ -18,13 +19,16 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Location, calendar, storage locations
   await _checkPermissions();
-  await BackgroundCalendar.saveCalendarData();
+
+  // Save calendar (since calendar does not work in background)
+  BackgroundCalendar.saveCalendarData();
 
   /// Initialise background services
   Workmanager.initialize(
     callbackDispatcher,
-    isInDebugMode: true,
+    isInDebugMode: false,
   );
 
   // Cancel all ongoing background tasks upon running the app
@@ -33,7 +37,7 @@ void main() async {
   /// Schedule the background task
   /// Default is 15 minutes per refresh
   Workmanager.registerPeriodicTask("1", "backgroundReading",
-      initialDelay: Duration(seconds: 30),
+      initialDelay: Duration(seconds: 5),
       constraints: Constraints(
         networkType: NetworkType.connected,
         requiresBatteryNotLow: true,
@@ -55,8 +59,9 @@ void main() async {
   final GameSessionModel gameSessionModel =
       GameSessionModel(authStateModel, quizCollectionModel, userRepo);
 
+  final LocalNotification localNotification = LocalNotification();
   await Firebase.initializeApp();
-  FirebaseNotification();
+  FirebaseNotification.initialise(localNotification);
 
   runApp(
     MultiProvider(
@@ -118,6 +123,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub
         .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
+    widget.pubSub
+        .subscribe(PubSubTopic.SESSION_START, _handleNotificationSelection);
 
     // Refresh user sessions on startup
     Provider.of<GameSessionModel>(context, listen: false)
@@ -191,11 +198,34 @@ class _MyAppState extends State<MyApp> {
       theme: SmartBroccoliTheme.themeData,
       navigatorKey: _mainNavigatorKey,
       onGenerateRoute: router.generator,
-      onGenerateInitialRoutes: (route) {
+      onGenerateInitialRoutes: (String route) {
+        if (route.contains("session"))
+          return [
+            router.generator(RouteSettings(name: '/take_quiz')),
+            router.generator(RouteSettings(name: route))
+          ];
         return [router.generator(RouteSettings(name: route))];
       },
-      initialRoute: state.inSession ? '/take_quiz' : '/auth',
+      initialRoute: getInitialRoute(inSession),
     );
+  }
+
+  // Handles startup
+  String getInitialRoute(bool inSession) {
+    if (!inSession) return '/auth';
+    // If there the user has clicked on a notification
+    var startMessage = FirebaseSessionHandler().getSessionStartMessage();
+    if (startMessage == null) return '/take_quiz';
+    return '/session/start/quiz/${startMessage.quizId}';
+  }
+
+  // Handle when notification is clicked
+  void _handleNotificationSelection(dynamic content) {
+    Navigator.of(_mainNavigatorKey.currentContext)
+        .pushNamed("/session/start/quiz/$content")
+        .catchError((error) {
+      throw Exception(error);
+    });
   }
 }
 

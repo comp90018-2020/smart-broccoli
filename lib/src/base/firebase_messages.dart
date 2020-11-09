@@ -28,3 +28,12 @@ class SessionActivatePayload {
       SessionActivatePayload._internal(
           json['sessionId'], json['groupId'], json['quizId']);
 }
+
+class SessionStart {
+  final int quizId;
+  final int sessionId;
+
+  SessionStart._internal(this.sessionId, this.quizId);
+  factory SessionStart.fromJson(Map<String, dynamic> json) =>
+      SessionStart._internal(json['sessionId'], json['quizId']);
+}

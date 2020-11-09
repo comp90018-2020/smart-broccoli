@@ -36,6 +36,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     PubSub().subscribe(PubSubTopic.QUIZ_CREATE, _handleQuizCreate);
     PubSub().subscribe(PubSubTopic.QUIZ_UPDATE, _handleQuizUpdate);
     PubSub().subscribe(PubSubTopic.QUIZ_DELETE, _handleQuizDelete);
+    PubSub().subscribe(PubSubTopic.SESSION_START, _handleSessionStart);
     PubSub().subscribe(PubSubTopic.SESSION_ACTIVATED, _handleSessionActivate);
   }
 
@@ -408,6 +409,16 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     SessionActivatePayload payload =
         SessionActivatePayload.fromJson(jsonDecode(content));
     int quizId = payload.quizId;
+    // Quiz not loaded
+    if (!_availableQuizzes.containsKey(quizId) &&
+        !_createdQuizzes.containsKey(quizId)) return;
+    // Refresh quiz (and therefore sessions)
+    _refreshQuiz(quizId).catchError((_) => null);
+  }
+
+  // Firebase function to handle SESSION_ACTIVATED
+  void _handleSessionStart(dynamic content) {
+    int quizId = content;
     // Quiz not loaded
     if (!_availableQuizzes.containsKey(quizId) &&
         !_createdQuizzes.containsKey(quizId)) return;
