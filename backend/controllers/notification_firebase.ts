@@ -50,7 +50,6 @@ export const buildNotificationMessage = (
             title: title,
             body: body,
         };
-        message["android"]["notification"] = { clickAction: type };
     }
     return message;
 };
