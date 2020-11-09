@@ -214,10 +214,9 @@ Future<bool> lightGyro() async {
   // If the time is at night
   DateTime dateTime = DateTime.now();
   if (dateTime.hour > 18 && dateTime.hour < 23) {
-    // log("Reason: notif sent because time is at night, return 1",
-    //     name: "Backend");
-    // return true;
-    checkGyro();
+    log("Reason: notif sent because time is at night, return 1",
+        name: "Backend");
+    return true;
   } else {
     // Check if the phone is stationary and not being used
     if (await checkGyro()) {
