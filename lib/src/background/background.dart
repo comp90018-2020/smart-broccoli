@@ -67,12 +67,14 @@ void callbackDispatcher() {
               notificationPrefs.workSmart) {
             free = false;
           }
+
           log("Network Check Complete", name: "background");
 
           /// Check location sensitive issues
           if (free && !(await locationCheck(notificationPrefs))) {
             free = false;
           }
+
           log("Location Check complete token:" + token.toString(),
               name: "background");
 
@@ -80,7 +82,7 @@ void callbackDispatcher() {
           try {
             await userApi.setFree(token, calendarFree, free);
           } catch (e) {
-            log(e);
+            log(e.toString());
           }
 
           // Send status to API (API always needs status)
@@ -103,6 +105,9 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
   /// Get current long lat
   Position position1 =
       await BackgroundLocation.getPosition().catchError((_) => null);
+
+  log("Start Positional Analysis", name: "Backend");
+  log(notificationPrefs.workLocation.toString(), name: "Backend");
 
   /// If in Geofence
   if (position1 == null) return false;
@@ -180,11 +185,18 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
   }
 }
 
+int onTimeOutLight() {
+  return 0;
+}
+
 Future<bool> lightGyro() async {
   // Access Light sensor
-  int lum = await LightSensor.getLightReading();
+  Duration duration = new Duration(seconds: 10);
+  int lum = await LightSensor.getLightReading()
+      .timeout(duration, onTimeout: onTimeOutLight);
   log("Lum $lum", name: "Backend");
   if (lum == null) return false;
+
   // Todo you may want to change 20 to a config value
   if (lum > 10 /* && reading < 70 */) {
     log("Reason: high light, return 1", name: "Backend");
@@ -232,9 +244,16 @@ bool timeIsBetween(DateTime time, DateTime start, DateTime end) {
   return time.isAfter(start) && time.isBefore(end);
 }
 
+GyroscopeEvent onTimeOutGyro() {
+  return new GyroscopeEvent(0.0, 0.0, 0.0);
+}
+
 Future<bool> checkGyro() async {
   // Check if the phone is stationary and not being used
-  GyroscopeEvent gyroscopeEvent = await Gyro.getGyroEvent();
+  Duration duration = new Duration(seconds: 10);
+  GyroscopeEvent gyroscopeEvent =
+      await Gyro.getGyroEvent().timeout(duration, onTimeout: onTimeOutGyro);
+
   if (gyroscopeEvent == null) return true;
   double x = gyroscopeEvent.x;
   double y = gyroscopeEvent.y;
