@@ -149,12 +149,11 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
 
   Future<NotificationPrefs> getNotificationPrefs() async {
     final String prefsAsJson = _keyValueStore.getString('prefs');
-    if (prefsAsJson != null)
-      return NotificationPrefs.fromJson(json.decode(prefsAsJson));
+    print(prefsAsJson);
     try {
       final NotificationPrefs prefs =
           await _userApi.getNotificationPrefs(_authStateModel.token);
-      _keyValueStore.setString('prefs', json.encode((prefs).toJson()));
+      _keyValueStore.setString('prefs', json.encode(prefs.toJson()));
       return prefs;
     } on ApiAuthException {
       _authStateModel.checkSession();

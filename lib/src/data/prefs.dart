@@ -56,7 +56,8 @@ class NotificationPrefs {
 
   factory NotificationPrefs.fromJson(Map<String, dynamic> json) =>
       NotificationPrefs.internal(
-          DayPrefs(prefs: json['days']),
+          DayPrefs(
+              prefs: (json['days'] as List).map((d) => d as bool).toList()),
           json['timezone'],
           json['maxNotificationsPerDay'],
           json['notificationWindow'],
@@ -65,9 +66,11 @@ class NotificationPrefs {
           json['calendarLive'],
           json['calendarSelfPaced'],
           json['workSSID'],
-          LocationData.fromJson(json['workLocation']),
+          json['workLocation'] == null
+              ? null
+              : LocationData.fromJson(json['workLocation']),
           json['workRadius'],
-          json['workSmart']);
+          json['workSmart'] ?? false);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'days': dayPrefs._prefs,
@@ -77,9 +80,11 @@ class NotificationPrefs {
         'calendarLive': allowLiveIfCalendar,
         'calendarSelfPaced': allowSelfPacedIfCalendar,
         'workSSID': workSSID,
-        'workLocation': workLocation.toJson(),
+        'workLocation': workLocation == null ? null : workLocation.toJson(),
         'workRadius': workRadius,
-        'workSmart': workSmart
+        'workSmart': workSmart,
+        'onTheMove': allowOnTheMove,
+        'onCommute': allowOnCommute
       };
 
   operator ==(Object other) {
@@ -111,9 +116,7 @@ enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }
 class DayPrefs {
   List<bool> _prefs;
 
-  DayPrefs({List<bool> prefs})
-      : this._prefs =
-            prefs ?? [false, false, false, false, false, false, false];
+  DayPrefs({List<bool> prefs}) : this._prefs = prefs;
 
   void setPrefs(List<bool> prefs) {
     this._prefs = prefs;
