@@ -53,6 +53,9 @@ export const sendMessage = async (
         return;
     }
 
+    // Debug messages
+    console.log(message);
+
     try {
         // Send the message with given tokens
         const messaging = admin.messaging();
