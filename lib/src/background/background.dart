@@ -34,7 +34,6 @@ void callbackDispatcher() {
             notificationPrefs =
                 NotificationPrefs.fromJson(json.decode(prefsAsJson));
           }
-
           log("Background Reading", name: "background");
           if (token == null) {
             log("Token is null", name: "background");
@@ -45,22 +44,15 @@ void callbackDispatcher() {
             log("Perferences is null", name: "background");
             break;
           }
-
-          // todo if(notificationPrefs.dayPrefs)
-
           print(token);
           print(notificationPrefs);
-
           // If token or notificationPrefs is null
           // User is not logged in
           // Do not continue
-
           var db = await BackgroundDatabase.init();
-
           // load prefs
           var calendarFree = true;
           var free = true;
-
           // Check calendar
           // TODO: open db here and try catch
           // If catch fails, calendarFree = true
@@ -71,13 +63,9 @@ void callbackDispatcher() {
           } catch (e) {
             calendarFree = true;
           }
-
           // TODO: close db here
-
           await db.closeDB();
-
           log("Calendar Check Compelte", name: "background");
-
           // Check wifi
           if (await Network.workWifiMatch(notificationPrefs.workSSID) &&
               notificationPrefs.workSmart) {
@@ -91,10 +79,8 @@ void callbackDispatcher() {
           }
           log("Location Check complete token:" + token.toString(),
               name: "background");
-
           UserApi userApi = new UserApi();
           userApi.setFree(token, calendarFree, free);
-
           // Send status to API (API always needs status)
           log("calendarFree: $calendarFree, free: $free");
           log("Reason: Phone is not stationary or asked not to be prompted or calendar is busy return 0",
@@ -104,7 +90,6 @@ void callbackDispatcher() {
           await db.closeDB();
           break;
       }
-
       return Future.value(true);
     } on MissingPluginException catch (e) {
       print("You should probably implement some plugins" + e.toString());
@@ -135,7 +120,6 @@ Future<bool> locationCheck(
             "lat" +
             notificationPrefs.workLocation.lat.toString(),
         name: "Backend");
-
     log("The user is in a geofence return 0", name: "Backend");
     return false;
   }
@@ -203,13 +187,11 @@ Future<bool> lightGyro(NotificationPrefs notificationPrefs) async {
   int lum = await LightSensor.getLightReading();
   log("Lum $lum", name: "Backend");
   if (lum == null) return false;
-
   // Todo you may want to change 20 to a config value
   if (lum > 10 /* && reading < 70 */) {
     log("Reason: high light, return 1", name: "Backend");
     return true;
   }
-
   // If the time is at night
   DateTime dateTime = DateTime.now();
   if (dateTime.hour > 18 && dateTime.hour < 23) {
@@ -233,13 +215,11 @@ Future<bool> checkCalendar(BackgroundDatabase db) async {
     // Get event start/end in DateTime
     var eventStart = DateTime.fromMillisecondsSinceEpoch(calEvent[i].start);
     var eventEnd = DateTime.fromMillisecondsSinceEpoch(calEvent[i].end);
-
     // In middle of event right now
     if (timeIsBetween(time, eventStart, eventEnd)) {
       log("In middle of event", name: "Backend");
       return false;
     }
-
     // Event start in next 15 minutes
     if (timeIsBetween(eventStart, time, time.add(Duration(minutes: 15)))) {
       log("Event start in next 15 minutes", name: "Backend");
@@ -258,7 +238,6 @@ Future<bool> checkGyro() async {
   // Check if the phone is stationary and not being used
   GyroscopeEvent gyroscopeEvent = await Gyro.getGyroEvent();
   if (gyroscopeEvent == null) return true;
-
   double x = gyroscopeEvent.x;
   double y = gyroscopeEvent.y;
   double z = gyroscopeEvent.z;
