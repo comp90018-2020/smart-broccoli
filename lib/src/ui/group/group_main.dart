@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_broccoli/src/base/pubsub.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/models.dart';
@@ -23,6 +24,9 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
   // Main tab controller
   TabController _controller;
 
+  // Global key for scafffold
+  GlobalKey<ScaffoldState> _key = GlobalKey();
+
   @override
   void didChangeDependencies() {
     Provider.of<GroupRegistryModel>(context, listen: false)
@@ -30,13 +34,28 @@ class _GroupMain extends State<GroupMain> with TickerProviderStateMixin {
     super.didChangeDependencies();
   }
 
+  @override
   void initState() {
     super.initState();
     _controller = new TabController(length: 2, vsync: this);
+    PubSub().subscribe(PubSubTopic.GROUP_DELETE_ACTIVE, _handleGroupDelete);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    PubSub().unsubscribe(PubSubTopic.GROUP_DELETE_ACTIVE, _handleGroupDelete);
+  }
+
+  // Handle group deletion while on page
+  void _handleGroupDelete(dynamic content) {
+    int id = content;
+    if (id == widget.groupId) Navigator.of(_key.currentContext).pop();
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
+        key: _key,
         backgroundColor: Theme.of(context).colorScheme.background,
 
         appBar: AppBar(

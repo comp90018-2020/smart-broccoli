@@ -372,6 +372,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     _createdGroups.remove(groupId);
     _joinedGroups.remove(groupId);
     notifyListeners();
+    PubSub().publish(PubSubTopic.GROUP_DELETE_ACTIVE, arg: groupId);
   }
 
   // Firebase function to handle GROUP_MEMBER_CHANGE

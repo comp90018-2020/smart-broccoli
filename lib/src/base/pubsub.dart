@@ -13,7 +13,9 @@ enum PubSubTopic {
   GROUP_MEMBER_CHANGE,
   GROUP_DELETE,
   // For join page
-  NAME_CHANGE
+  NAME_CHANGE,
+  // For group deletion (while in group page)
+  GROUP_DELETE_ACTIVE
 }
 
 /// Base class for publish subscribe class
