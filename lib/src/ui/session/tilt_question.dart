@@ -444,19 +444,6 @@ class _MyHomePageState extends State<TiltQuestion> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: <Widget>[
-                  (!useAccel && model.role != GroupRole.OWNER)
-                      ? RaisedButton(
-                          child: Text('Ball Mode'),
-                          onPressed: () => {
-                            setState(() {
-                              useAccel = true;
-                            }),
-                            startAccel(model)
-                          },
-                          color: Theme.of(context).primaryColor,
-                          textColor: Colors.white,
-                        )
-                      : Container(),
                   Expanded(
                     flex: 5,
                     child: Column(
@@ -504,15 +491,40 @@ class _MyHomePageState extends State<TiltQuestion> {
                               initTime: model.time,
                               style: TextStyle(fontSize: 18)),
                         ),
-                        if (model.questionHint != null)
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(top: 4.0, bottom: 16.0),
-                            child: Text(model.questionHint,
-                                style: Theme.of(context).textTheme.subtitle1),
-                          )
-                        else
-                          Container(height: 16)
+
+                        Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            Container(
+                              alignment: Alignment.topCenter,
+                                child: model.questionHint != null
+                                    ? Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 4.0, bottom: 16.0),
+                                        child: Text(model.questionHint,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .subtitle1),
+                                      )
+                                    : Container(height: 16)),
+                            Container(
+                                alignment: Alignment.topRight,
+                              child: !useAccel && model.role != GroupRole.OWNER
+                                  ? RaisedButton(
+                                      child: Text('Ball Mode'),
+                                      onPressed: () => {
+                                        setState(() {
+                                          useAccel = true;
+                                        }),
+                                        startAccel(model)
+                                      },
+                                      color: Theme.of(context).primaryColor,
+                                      textColor: Colors.white,
+                                    )
+                                  : Container(),
+                            ),
+                          ],
+                        )
                       ],
                     ),
                   ),
