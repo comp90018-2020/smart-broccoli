@@ -62,7 +62,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     if (state == SessionState.PENDING)
       return role == GroupRole.MEMBER
           ? 'Waiting for host to start...'
-          : 'Tap to start for everyone';
+          : 'Invite others by PIN: ' + session.joinCode;
 
     if (state == SessionState.STARTING) return 'Quiz starting!';
 
