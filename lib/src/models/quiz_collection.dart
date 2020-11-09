@@ -137,10 +137,8 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     if (quiz == null || quiz.id == null) return;
     try {
       await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
-      if (quiz.role == GroupRole.MEMBER)
-        _availableQuizzes.remove(quiz.id);
-      else
-        _createdQuizzes.remove(quiz.id);
+      _availableQuizzes.remove(quiz.id);
+      _createdQuizzes.remove(quiz.id);
       notifyListeners();
     } on ApiAuthException {
       _authStateModel.checkSession();
@@ -254,6 +252,11 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       _availableQuizzes.remove(quizId);
       notifyListeners();
       return Future.error("Quiz not found");
+    } on QuizDeactivatedException {
+      _createdQuizzes.remove(quizId);
+      _availableQuizzes.remove(quizId);
+      notifyListeners();
+      return Future.error("Quiz deactivated");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -386,9 +389,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   void _handleQuizUpdate(dynamic content) {
     QuizUpdatePayload payload = QuizUpdatePayload.fromJson(jsonDecode(content));
     int quizId = payload.quizId;
-    // Quiz is not loaded, do nothing
-    if (!_availableQuizzes.containsKey(quizId) &&
-        !_createdQuizzes.containsKey(quizId)) return;
     // _refreshQuiz calls notify
     _refreshQuiz(quizId).catchError((_) => null);
   }

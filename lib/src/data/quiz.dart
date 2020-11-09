@@ -340,6 +340,10 @@ class QuizNotFoundException extends ApiException {
   QuizNotFoundException() : super("Quiz not found");
 }
 
+class QuizDeactivatedException extends ApiException {
+  QuizDeactivatedException() : super("Quiz deactivated");
+}
+
 /// Exception thrown when a question cannot be found by the server
 /// (thrown when setting a question picture)
 class QuestionNotFoundException extends ApiException {
