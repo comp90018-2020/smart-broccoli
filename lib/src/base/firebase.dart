@@ -112,6 +112,28 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp();
+
+  if (message.data != null) {
+    log(message.data.toString(), name: "Firebase");
+    String type = message.data['type'];
+    String data = message.data['data'];
+
+    // Publish topics
+    if (type == "SESSION_START") {
+      // A quiz recommendation,
+      // data like quizId will be found in data, same as below
+      SessionStart start = SessionStart.fromJson(jsonDecode(data));
+      int quizId = start.quizId;
+      PubSub().publish(PubSubTopic.SESSION_START, arg: quizId);
+    }
+  }
+
+  // When app is on foreground, this is needed to show notification
+  if (message.notification != null) {
+    LocalNotification _localNotification = LocalNotification();
+    _localNotification.displayNotification('${message.notification.title}',
+        message.notification.body, message.data['data']);
+  }
   // Notification will show automatically, do not have to use LocalNotification
   // However there might be an innegligible delay
 }
