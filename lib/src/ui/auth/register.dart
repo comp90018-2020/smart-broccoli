@@ -32,14 +32,6 @@ class _RegisterState extends State<Register> {
   // Whether register button is disabled
   bool _isRegisterButtonDisabled = false;
 
-  // Prevent setState error resulting from auth -> login transition
-  @override
-  void setState(fn) {
-    if (mounted) {
-      super.setState(fn);
-    }
-  }
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -165,10 +157,9 @@ class _RegisterState extends State<Register> {
         await login();
       } catch (err) {
         showErrSnackBar(context, err.toString());
+        // Enable button
+        setState(() => _isRegisterButtonDisabled = false);
       }
-
-      // Enable button
-      setState(() => _isRegisterButtonDisabled = false);
     } else {
       setState(() => _formSubmitted = true);
     }

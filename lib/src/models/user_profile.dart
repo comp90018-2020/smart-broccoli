@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/base/helper.dart';
+import 'package:smart_broccoli/src/base/pubsub.dart';
 
 import 'package:smart_broccoli/src/data.dart';
 import 'package:smart_broccoli/src/data/prefs.dart';
@@ -36,6 +37,15 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
     if (userJson != null) {
       _user = User.fromJson(json.decode(userJson));
     }
+
+    // Name change
+    PubSub().subscribe(PubSubTopic.NAME_CHANGE, _handleNameChange);
+  }
+
+  // Handles NAME_CHANGE (due to context issues arising from page push)
+  void _handleNameChange(dynamic content) {
+    String name = content;
+    updateUser(name: name).catchError((_) => null);
   }
 
   /// Function to get user
@@ -63,6 +73,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       _keyValueStore.setString('user', json.encode(_user.toJson()));
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -77,6 +88,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
         await _picStash.storePic(user.pictureId, picture);
       } on ApiAuthException {
         _authStateModel.checkSession();
+        return Future.error("Authentication failure");
       } on Exception {
         // Ignore
       }
@@ -97,6 +109,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       notifyListeners();
     } on ApiAuthException {
       await _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -113,6 +126,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
           _authStateModel.token, await loadFileAndBakeOrientation(path));
     } on ApiAuthException {
       await _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -130,6 +144,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       await _authStateModel.promote(email, password, name);
     } on ApiAuthException {
       await _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {

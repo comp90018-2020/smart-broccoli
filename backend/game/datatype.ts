@@ -64,7 +64,8 @@ export class RecordWithPlayerInfo {
 }
 
 export class Player extends PlayerBase {
-    public records: Record[] = [];
+    // Records map
+    public records: { [questionIndex: number]: Record } = {};
     public state: PlayerState = PlayerState.Joined;
     constructor(
         readonly id: number,
@@ -91,44 +92,45 @@ export class Player extends PlayerBase {
      */
     getRecordOfQuestion(questionIndex: number): [boolean, Record] {
         // Find record of the question
-        const record = this.records.find(
-            (record) => record.questionNo === questionIndex
-        );
+        if (this.records.hasOwnProperty(questionIndex))
+            // Find it
+            return [true, this.records[questionIndex]];
         // Did not find
-        if (record === undefined)
-            // Return initial record
-            return [false, new Record(questionIndex, null, null, 0, 0, 0)];
-        return [true, record];
+        return [false, null];
     }
 
     /**
-     * Get the latest record, boolean is false if cannot find
-     */
-    getLatestRecord(): [boolean, Record] {
-        if (this.records.length === 0) return [false, null];
-        return [true, this.records[this.records.length - 1]];
-    }
-
-    /**
-     * Genreate the record of a question
+     * Ger the record of a question
+     * If there is no record of this question, generate one
+     * Always return a record
      * @param questionIndex Question index
      */
-    genreateRecord(questionIndex: number): [Record, boolean] {
-        // Get record of this question
-        const [
-            didAnswerThisQuesion,
-            recordOfThisQuestion,
-        ] = this.getRecordOfQuestion(questionIndex);
-        // Did answer this question
-        if (didAnswerThisQuesion) return [recordOfThisQuestion, true];
-        // Get latest record
-        const [hasRecord, latestRecord] = this.getLatestRecord();
-        if (!hasRecord)
-            // If does not have record in history
+    getOrGenerateRecord(questionIndex: number): [Record, boolean] {
+        if (this.records.hasOwnProperty(questionIndex))
+            // Player has record for this question
+            return [this.records[questionIndex], true];
+        // Player does not have record for this question
+        // Get records of past questions
+        const recordsOfPastQuestions = Object.fromEntries(
+            Object.entries(this.records).filter(
+                ([k, record]) => record.questionNo < questionIndex
+            )
+        );
+        const recordsArray = Object.values(recordsOfPastQuestions);
+        if (recordsArray.length === 0)
+            // If there is no record of previous questions
+            // Return an initial one
             return [new Record(questionIndex, null, null, 0, 0, 0), false];
-        // Otherwise, generate a new record of this question
+
+        // If there is any, sort them desc
+        recordsArray.sort((recordA, recordB) => {
+            return recordA.questionNo < recordB.questionNo ? 1 : -1;
+        });
+        // Get the record which is cloest to current question
+        const laestRecord = recordsArray[0];
+        // Genretate the record of the query question
         return [
-            new Record(questionIndex, null, null, 0, latestRecord.points, 0),
+            new Record(questionIndex, null, null, 0, laestRecord.points, 0),
             false,
         ];
     }
@@ -137,7 +139,7 @@ export class Player extends PlayerBase {
      * Get record of question index and return as the protocol describes
      */
     formatRecordWithPlayerInfo(questionIndex: number): RecordWithPlayerInfo {
-        const [record] = this.genreateRecord(questionIndex);
+        const [record] = this.getOrGenerateRecord(questionIndex);
         return new RecordWithPlayerInfo(this, record);
     }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/base/firebase.dart';
+import 'package:smart_broccoli/src/base/pubsub.dart';
 
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
@@ -31,24 +32,33 @@ class AuthStateModel extends ChangeNotifier {
     _authApi = authApi ?? AuthApi();
   }
 
-  Future<void> join() async {
+  Future<void> join(String name) async {
     try {
       String token = await _authApi.join();
       this._token = token;
       await _keyValueStore.setString('token', token);
       notifyListeners();
+
+      // Push firebase token to server
+      await addToken().catchError((_) => null);
+
+      // Publish name change
+      PubSub().publish(PubSubTopic.NAME_CHANGE, arg: name);
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
       return Future.error("Something went wrong");
     }
+  }
 
-    // Push firebase token to server
+  Future<void> addToken() async {
     try {
       await _authApi.addFirebaseToken(
           token, await FirebaseNotification().getToken());
-    } catch (err) {
-      // Oh well, token cannot be added
+    } on ApiAuthException {
+      return Future.error("Auth failure");
+    } on Exception catch (e) {
+      return Future.error(e.toString());
     }
   }
 
@@ -80,12 +90,7 @@ class AuthStateModel extends ChangeNotifier {
     }
 
     // Push firebase token to server
-    try {
-      await _authApi.addFirebaseToken(
-          token, await FirebaseNotification().getToken());
-    } catch (err) {
-      // Oh well, token cannot be added
-    }
+    await addToken().catchError((_) => null);
   }
 
   Future<void> checkSession() async {

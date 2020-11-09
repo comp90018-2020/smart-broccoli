@@ -30,14 +30,6 @@ class _LoginState extends State<Login> {
   // Whether login button is disabled
   bool _isLoginButtonDisabled = false;
 
-  // Prevent setState error resulting from auth -> login transition
-  @override
-  void setState(fn) {
-    if (mounted) {
-      super.setState(fn);
-    }
-  }
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -140,14 +132,16 @@ class _LoginState extends State<Login> {
     // Request
     if (_formKey.currentState.validate()) {
       // Call
-      await Provider.of<AuthStateModel>(context, listen: false)
-          .login(_emailController.text, _passwordController.text)
-          .catchError((err) => showErrSnackBar(context, err.toString()));
+      try {
+        await Provider.of<AuthStateModel>(context, listen: false)
+            .login(_emailController.text, _passwordController.text);
+      } catch (err) {
+        showErrSnackBar(context, err.toString());
+        // Enable login button
+        setState(() => _isLoginButtonDisabled = false);
+      }
     } else {
       setState(() => _formSubmitted = true);
     }
-
-    // Enable login button
-    setState(() => _isLoginButtonDisabled = false);
   }
 }
