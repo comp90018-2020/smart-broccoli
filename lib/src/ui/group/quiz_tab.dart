@@ -37,7 +37,7 @@ class QuizTab extends StatelessWidget {
                   tabViews: [
                     // all quizzes
                     QuizContainer(
-                      snapshot.hasData
+                      snapshot.hasData && group != null
                           ? collection.getQuizzesWhere(groupId: group.id)
                           : null,
                       error: snapshot.hasError
@@ -50,7 +50,7 @@ class QuizTab extends StatelessWidget {
 
                     // live quizzes
                     QuizContainer(
-                      snapshot.hasData
+                      snapshot.hasData && group != null
                           ? collection.getQuizzesWhere(
                               groupId: group.id, type: QuizType.LIVE)
                           : null,
@@ -64,7 +64,7 @@ class QuizTab extends StatelessWidget {
 
                     // self-paced quizzes
                     QuizContainer(
-                      snapshot.hasData
+                      snapshot.hasData && group != null
                           ? collection.getQuizzesWhere(
                               groupId: group.id, type: QuizType.SELF_PACED)
                           : null,
@@ -78,14 +78,15 @@ class QuizTab extends StatelessWidget {
                   ],
                   hasDrawer: false,
                   primary: false,
-                  floatingActionButton: group.role == GroupRole.OWNER
-                      ? FloatingActionButton.extended(
-                          onPressed: () => Navigator.of(context)
-                              .pushNamed('/group/$groupId/quiz'),
-                          label: Text('CREATE QUIZ'),
-                          icon: Icon(Icons.add),
-                        )
-                      : null,
+                  floatingActionButton:
+                      group != null && group.role == GroupRole.OWNER
+                          ? FloatingActionButton.extended(
+                              onPressed: () => Navigator.of(context)
+                                  .pushNamed('/group/$groupId/quiz'),
+                              label: Text('CREATE QUIZ'),
+                              icon: Icon(Icons.add),
+                            )
+                          : null,
                 );
               });
         }),
