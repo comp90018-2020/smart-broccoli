@@ -86,7 +86,7 @@ void callbackDispatcher() {
           await db.closeDB();
 
           // Check wifi
-          if (await Network.workWifiMatch("HAHAHAHAHA") && notificationPrefs.workSmart && notificationPrefs.workSSID) {
+          if (await Network.workWifiMatch(notificationPrefs.workSSID) && notificationPrefs.workSmart) {
             free = false;
           }
 
