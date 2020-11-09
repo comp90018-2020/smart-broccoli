@@ -33,7 +33,6 @@ const _libs = [
     'title': 'ChangJoo-Park/flutter_foreground_plugin',
     'path': '$_license_dir/flutter_foreground_plugin'
   },
-
   {'title': 'brendan-duncan/image', 'path': '$_license_dir/image'},
   {'title': 'leisim/auto_size_text', 'path': '$_license_dir/auto_size_text'},
   {'title': 'dart-lang/collection', 'path': '$_license_dir/collection'},
