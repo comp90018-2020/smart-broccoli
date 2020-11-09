@@ -34,38 +34,34 @@ void callbackDispatcher() {
             notificationPrefs =
                 NotificationPrefs.fromJson(json.decode(prefsAsJson));
           }
+
           log("Background Reading", name: "background");
           if (token == null) {
             log("Token is null", name: "background");
-
             break;
           }
           if (notificationPrefs == null) {
             log("Perferences is null", name: "background");
             break;
           }
-          print(token);
-          print(notificationPrefs);
-          // If token or notificationPrefs is null
-          // User is not logged in
-          // Do not continue
-          var db = await BackgroundDatabase.init();
+
           // load prefs
           var calendarFree = true;
           var free = true;
+
           // Check calendar
-          // TODO: open db here and try catch
-          // If catch fails, calendarFree = true
           try {
+            var db = await BackgroundDatabase.init();
             if (!(await checkCalendar(db))) {
               calendarFree = false;
             }
+            await db.closeDB();
           } catch (e) {
             calendarFree = true;
           }
-          // TODO: close db here
-          await db.closeDB();
-          log("Calendar Check Compelte", name: "background");
+
+          log("Calendar Check Complete", name: "background");
+
           // Check wifi
           if (await Network.workWifiMatch(notificationPrefs.workSSID) &&
               notificationPrefs.workSmart) {
@@ -74,20 +70,19 @@ void callbackDispatcher() {
           log("Network Check Complete", name: "background");
 
           /// Check location sensitive issues
-          if (free && !(await locationCheck(db, notificationPrefs))) {
+          if (free && !(await locationCheck(notificationPrefs))) {
             free = false;
           }
           log("Location Check complete token:" + token.toString(),
               name: "background");
+
           UserApi userApi = new UserApi();
-          userApi.setFree(token, calendarFree, free);
+          await userApi.setFree(token, calendarFree, free);
+
           // Send status to API (API always needs status)
           log("calendarFree: $calendarFree, free: $free");
           log("Reason: Phone is not stationary or asked not to be prompted or calendar is busy return 0",
               name: "Backend");
-
-          /// Double check if DB is calsed
-          await db.closeDB();
           break;
       }
       return Future.value(true);
@@ -100,8 +95,7 @@ void callbackDispatcher() {
 
 /// Location sensitive functions
 /// returns true if the user is free
-Future<bool> locationCheck(
-    BackgroundDatabase db, NotificationPrefs notificationPrefs) async {
+Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
   /// Get current long lat
   Position position1 =
       await BackgroundLocation.getPosition().catchError((_) => null);
@@ -142,7 +136,7 @@ Future<bool> locationCheck(
   /// Todo add perf logic
   /// If the user is moving
   if (distance > 50) {
-    log("The user is Moving", name: "Backenk");
+    log("The user is Moving", name: "Backend");
     // Check if on train
     if ((await BackgroundLocation.onTrain(position2)) &&
         notificationPrefs.allowOnCommute) {
@@ -177,12 +171,12 @@ Future<bool> locationCheck(
       log("We are at a Do not send notif area", name: "Backend");
       return false;
     } else {
-      return lightGyro(notificationPrefs);
+      return lightGyro();
     }
   }
 }
 
-Future<bool> lightGyro(NotificationPrefs notificationPrefs) async {
+Future<bool> lightGyro() async {
   // Access Light sensor
   int lum = await LightSensor.getLightReading();
   log("Lum $lum", name: "Backend");

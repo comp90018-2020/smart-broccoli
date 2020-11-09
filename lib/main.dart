@@ -18,8 +18,9 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Location, calendar, storage locations
   await _checkPermissions();
-  // await startForegroundService();
+  // Save calendar (since calendar does not work in background)
   await BackgroundCalendar.saveCalendarData();
 
   /// Initialise background services

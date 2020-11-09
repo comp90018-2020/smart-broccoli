@@ -77,11 +77,7 @@ class BackgroundLocation {
     }
     var distance = Geolocator.distanceBetween(locationData.lat,
         locationData.lon, userLocation.latitude, userLocation.longitude);
-    if (distance < distanceKM * 1000) {
-      return true;
-    }
-
-    return false;
+    return distance < distanceKM * 1000;
   }
 
   /// Intermediate function to control the area which we scan for trains.
