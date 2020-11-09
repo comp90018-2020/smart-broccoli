@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/base/helper.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/data/prefs.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 import 'model_change.dart';
@@ -143,6 +144,42 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
     if (!_authStateModel.inSession) {
       this._user = null;
       this._picStash.clear();
+    }
+  }
+
+  Future<NotificationPrefs> getNotificationPrefs() async {
+    final String prefsAsJson = _keyValueStore.getString('prefs');
+    if (prefsAsJson != null) {
+      return NotificationPrefs.fromJson(json.decode(prefsAsJson));
+    }
+
+    try {
+      final NotificationPrefs prefs =
+          await _userApi.getNotificationPrefs(_authStateModel.token);
+      _keyValueStore.setString('prefs', json.encode(prefs.toJson()));
+      return prefs;
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+  }
+
+  Future<void> setNotificationPrefs(NotificationPrefs prefs) async {
+    try {
+      prefs.timezone = DateTime.now().timeZoneName;
+      await _userApi.setNotificationPrefs(_authStateModel.token, prefs);
+      _keyValueStore.setString('prefs', json.encode((prefs).toJson()));
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
     }
   }
 }

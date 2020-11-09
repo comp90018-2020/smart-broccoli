@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
+import 'package:smart_broccoli/src/data/prefs.dart';
 
 import 'package:smart_broccoli/src/data/user.dart';
 
@@ -132,5 +133,41 @@ class UserApi {
     if (response.statusCode == 403) throw ForbiddenRequestException();
     throw ApiException(
         'Unable to delete user profile pic: unknown error occurred');
+  }
+
+  Future<NotificationPrefs> getNotificationPrefs(String token) async {
+    final http.Response response = await _http.get('$USER_URL/notification',
+        headers: ApiBase.headers(authToken: token));
+
+    if (response.statusCode == 200)
+      return NotificationPrefs.fromJson(json.decode(response.body));
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw ApiException(
+        'Unable to get notification preferences: unknown error occurred');
+  }
+
+  Future<void> setNotificationPrefs(
+      String token, NotificationPrefs prefs) async {
+    final http.Response response = await _http.put('$USER_URL/notification',
+        headers: ApiBase.headers(authToken: token),
+        body: json.encode(prefs.toJson()));
+
+    if (response.statusCode == 200) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw ApiException(
+        'Unable to set notification preferences: unknown error occurred');
+  }
+
+  Future<void> setFree(String token, bool calendarFree, bool free) async {
+    final http.Response response = await _http.put('$USER_URL/state',
+        headers: ApiBase.headers(authToken: token),
+        body: {'free': free, 'calendarFree': calendarFree});
+    if (response.statusCode == 200) return;
+    if (response.statusCode == 401) throw UnauthorisedRequestException();
+    if (response.statusCode == 403) throw ForbiddenRequestException();
+    throw ApiException(
+        'Unable to set notification state: unknown error occurred');
   }
 }
