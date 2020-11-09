@@ -36,6 +36,10 @@ void callbackDispatcher() {
           print(token);
           print(notificationPrefs);
 
+          // If token or notificationPrefs is null
+          // User is not logged in
+          // Do not continue
+
           var db = await BackgroundDatabase.init();
           // load prefs
           var calendarFree = true;
