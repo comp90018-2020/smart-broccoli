@@ -11,7 +11,10 @@ import sequelize, {
 import ErrorStatus from "../helpers/error";
 import { jwtSign, jwtVerify } from "../helpers/jwt";
 import { handler } from "../game/index";
-import { sendSessionCreationNotification } from "./notification_session";
+import {
+    sendSessionActivateNotification,
+    sendSessionCreationNotification,
+} from "./notification_session";
 
 // Represents a session token
 export interface TokenInfo {
@@ -454,11 +457,35 @@ export const joinSession = async (userId: number, code: string) => {
  * @param sessionId
  */
 export const activateSession = async (sessionId: number) => {
-    const session = await Session.update(
-        { state: "active" },
-        { where: { id: sessionId } }
-    );
-    return session[0] === 1;
+    let res;
+    try {
+        res = await Session.update(
+            { state: "active" },
+            { where: { id: sessionId }, returning: true }
+        );
+    } catch (err) {
+        // Game server calls function, game server should not be responsible
+        // for handling errors
+    }
+
+    const session = res[1][0];
+
+    // push notifications
+    if (process.env.NODE_ENV === "production") {
+        sendSessionActivateNotification(
+            sessionId,
+            session.groupId,
+            session.quizId
+        );
+    } else {
+        await sendSessionActivateNotification(
+            sessionId,
+            session.groupId,
+            session.quizId
+        );
+    }
+
+    return res[0] === 1;
 };
 
 /**

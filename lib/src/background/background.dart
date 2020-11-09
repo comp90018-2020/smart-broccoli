@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -8,6 +9,8 @@ import 'package:sensors/sensors.dart';
 import 'package:smart_broccoli/src/background/background_database.dart';
 import 'package:smart_broccoli/src/background/light_sensor.dart';
 import 'package:smart_broccoli/src/background/network.dart';
+import 'package:smart_broccoli/src/data/prefs.dart';
+import 'package:smart_broccoli/src/local.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'gyro.dart';
@@ -20,15 +23,35 @@ void callbackDispatcher() {
 
       switch (task) {
         case "backgroundReading":
-          var db = await BackgroundDatabase.init();
+          // User preferences
+          final KeyValueStore keyValueStore =
+              await SharedPrefsKeyValueStore.create();
+          final String token = keyValueStore.getString('token');
+          final String prefsAsJson = keyValueStore.getString('prefs');
+          NotificationPrefs notificationPrefs;
+          if (prefsAsJson != null) {
+            notificationPrefs =
+                NotificationPrefs.fromJson(json.decode(prefsAsJson));
+          }
+          print(token);
+          print(notificationPrefs);
 
+          // If token or notificationPrefs is null
+          // User is not logged in
+          // Do not continue
+
+          var db = await BackgroundDatabase.init();
+          // load prefs
           var calendarFree = true;
           var free = true;
 
           // Check calendar
+          // TODO: open db here and try catch
+          // If catch fails, calendarFree = true
           if (!(await checkCalendar(db))) {
             calendarFree = false;
           }
+          // TODO: close db here
 
           // Check wifi
           if (await Network.workWifiMatch("blabh blah")) {

@@ -5,7 +5,7 @@ import 'package:smart_broccoli/src/store/remote/api_base.dart';
 import 'game.dart';
 import 'group.dart';
 
-enum QuizType { SMART_LIVE, LIVE, SELF_PACED }
+enum QuizType { LIVE, SMART_LIVE, SELF_PACED }
 
 /// Stores a pending picture
 abstract class PendingPicture {
@@ -59,6 +59,9 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
 
   /// Sessions
   final List<GameSession> sessions;
+
+  /// Has sessions?
+  bool get hasSessions => this.sessions.length > 0;
 
   /// Whether quiz is complete
   final bool complete;
@@ -164,10 +167,12 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
     int thisType = this.type.index;
     int otherType = other.type.index;
 
-    if (thisType == otherType)
+    if (thisType == otherType) {
+      if (this.complete && !other.complete) return 1;
+      if (other.complete && !this.complete) return -1;
       return other.updatedTimestamp.compareTo(this.updatedTimestamp);
-    else
-      return otherType - thisType;
+    } else
+      return thisType - otherType;
   }
 
   /// Type of quiz
@@ -333,6 +338,10 @@ class QuestionOption {
 /// Exception thrown when a quiz cannot be found by the server
 class QuizNotFoundException extends ApiException {
   QuizNotFoundException() : super("Quiz not found");
+}
+
+class QuizDeactivatedException extends ApiException {
+  QuizDeactivatedException() : super("Quiz deactivated");
 }
 
 /// Exception thrown when a question cannot be found by the server

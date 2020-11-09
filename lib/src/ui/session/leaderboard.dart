@@ -90,6 +90,7 @@ class QuizLeaderboard extends StatelessWidget {
                                 UserAvatar(snapshot.data, maxRadius: 75),
                           ),
                           bold: true,
+                          maxLines: 1,
                         ),
                       if (model.outcome.leaderboard.length > 2)
                         Padding(
@@ -199,7 +200,7 @@ String _nameFromSnapshot(AsyncSnapshot<User> snapshot) =>
 // Creates user image and name
 Widget _topThreeUsers(
     BuildContext context, String text, double dimensions, Widget inner,
-    {bool bold = false}) {
+    {bool bold = false, int maxLines = 2}) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: <Widget>[
@@ -223,7 +224,7 @@ Widget _topThreeUsers(
             ),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
-            maxLines: 2,
+            maxLines: maxLines,
           ),
         ),
       ),

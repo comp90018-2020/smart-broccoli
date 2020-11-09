@@ -62,7 +62,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     if (state == SessionState.PENDING)
       return role == GroupRole.MEMBER
           ? 'Waiting for host to start...'
-          : 'Tap to start for everyone';
+          : 'Invite others by PIN: ' + session.joinCode;
 
     if (state == SessionState.STARTING) return 'Quiz starting!';
 
@@ -129,6 +129,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       }
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -146,6 +147,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       _connect(session.token);
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error("Cannot start session: ${e.toString()}");
     } on Exception {
@@ -171,8 +173,9 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       notifyListeners();
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on SessionNotFoundException catch (e) {
-      throw e;
+      return Future.error(e);
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -194,9 +197,10 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
           session.state != GameSessionState.ENDED));
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on SessionNotFoundException {
       _quizCollectionModel
-          .refreshAvailableQuizzes(refreshIfLoaded: true)
+          .getQuiz(quiz.id, refresh: true)
           .catchError((_) => null);
       return Future.error("Session no longer exists, refreshing...");
     } on ApiException catch (e) {
@@ -218,6 +222,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       await _userRepo.getUserBy(session.token, userId);
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -305,6 +310,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
             token: session.token);
       } on ApiAuthException {
         _authStateModel.checkSession();
+        return Future.error("Authentication failure");
       } catch (_) {
         // Do nothing, picture is not loaded
       }

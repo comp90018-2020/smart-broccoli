@@ -11,7 +11,39 @@ import {
 import { Op } from "sequelize";
 import { sendMessage } from "../helpers/message";
 import { DateTime, Info } from "luxon";
-import { buildNotificationMessage } from "./notification_firebase";
+import {
+    buildDataMessage,
+    buildNotificationMessage,
+} from "./notification_firebase";
+import { getGroupMemberTokens } from "./notification_group";
+
+// Send session activation
+export const sendSessionActivateNotification = async (
+    sessionId: number,
+    groupId: number,
+    quizId: number
+) => {
+    // Get group member tokens
+    let tokens;
+    try {
+        tokens = await getGroupMemberTokens(null, groupId);
+    } catch (err) {
+        console.error(err);
+        return;
+    }
+
+    // Build and send
+    const dataMessage = buildDataMessage(
+        "SESSION_ACTIVATED",
+        {
+            groupId,
+            sessionId,
+            quizId,
+        },
+        tokens
+    );
+    await sendMessage(dataMessage);
+};
 
 /**
  * This function gets called on session creation for the purpose of notifying
@@ -32,42 +64,48 @@ export const sendSessionCreationNotification = async (
     const groupId = session.groupId;
 
     // Query for group users
-    // @ts-ignore
-    const group = await Group.findByPk(groupId, {
-        attributes: ["id"],
-        include: [
-            {
-                model: User,
-                attributes: ["id"],
-                required: false,
-                // Is member
-                through: { where: { role: "member" } },
-                // Cannot be initiator
-                where: {
-                    id: { [Op.not]: initiatorId },
+    let group;
+    try {
+        // @ts-ignore
+        group = await Group.findByPk(groupId, {
+            attributes: ["id"],
+            include: [
+                {
+                    model: User,
+                    attributes: ["id"],
+                    required: false,
+                    // Is member
+                    through: { where: { role: "member" } },
+                    // Cannot be initiator
+                    where: {
+                        id: { [Op.not]: initiatorId },
+                    },
+                    include: [
+                        // Current user state
+                        {
+                            model: UserState,
+                            required: false,
+                        },
+                        // User's notification settings
+                        {
+                            model: NotificationSettings,
+                            required: false,
+                        },
+                        // User tokens
+                        {
+                            model: Token,
+                            require: false,
+                            where: { scope: "firebase" },
+                            attributes: ["token"],
+                        },
+                    ],
                 },
-                include: [
-                    // Current user state
-                    {
-                        model: UserState,
-                        required: false,
-                    },
-                    // User's notification settings
-                    {
-                        model: NotificationSettings,
-                        required: false,
-                    },
-                    // User tokens
-                    {
-                        model: Token,
-                        require: false,
-                        where: { scope: "firebase" },
-                        attributes: ["token"],
-                    },
-                ],
-            },
-        ],
-    });
+            ],
+        });
+    } catch (err) {
+        console.error(err);
+        return;
+    }
 
     // Get list of users
     const allUsers = group.Users.filter((user) => user.Tokens.length > 0);

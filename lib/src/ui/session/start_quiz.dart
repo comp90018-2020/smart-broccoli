@@ -39,139 +39,135 @@ class StartQuiz extends StatelessWidget {
           future: Provider.of<QuizCollectionModel>(context, listen: false)
               .getQuiz(quizId),
           builder: (BuildContext context, AsyncSnapshot<Quiz> snapshot) =>
-              snapshot.hasData && snapshot.data != null
-                  ? Column(
-                      children: [
-                        QuizCard(
-                          snapshot.data,
-                          aspectRatio: 2.3,
-                          optionsEnabled: false,
-                        ),
+              Consumer<QuizCollectionModel>(
+            builder: (context, collection, child) {
+              // Get the quiz
+              var quiz = collection.getQuizFromCache(quizId);
 
-                        // text and group/solo buttons
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                          child: Center(
-                            child: Text(
-                              "Choose how to take this quiz",
-                              style: TextStyle(fontSize: 16),
-                            ),
+              if (snapshot.hasData && quiz != null)
+                return Column(
+                  children: [
+                    QuizCard(
+                      quiz,
+                      aspectRatio: 2.3,
+                      optionsEnabled: false,
+                    ),
+
+                    // Join buttons
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                      child: Center(
+                        child: Text(
+                          "Choose how to take this quiz",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    _joinButtons(context, quiz.hasSessions),
+
+                    // text and existing session list
+                    if (quiz.hasSessions)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0, bottom: 4.0),
+                        child: Align(
+                          child: Text(
+                            'or join an existing session',
+                            style: TextStyle(fontSize: 16),
                           ),
                         ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: RaisedButton(
-                                onPressed: () async {
-                                  try {
-                                    await Provider.of<GameSessionModel>(context,
-                                            listen: false)
-                                        .createSession(
-                                            quizId, GameSessionType.GROUP);
-                                  } catch (_) {
-                                    showBasicDialog(
-                                        context, "Cannot start session");
-                                  }
-                                },
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      Icons.people,
-                                      size: _sessions(context, snapshot.data)
-                                              .isEmpty
-                                          ? 48
-                                          : 26,
-                                    ),
-                                    Text(
-                                      'With others',
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: RaisedButton(
-                                onPressed: () async {
-                                  await Provider.of<GameSessionModel>(context,
-                                          listen: false)
-                                      .createSession(
-                                          quizId, GameSessionType.INDIVIDUAL)
-                                      .catchError((e) => showErrSnackBar(
-                                          context, e.toString()));
-                                },
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      Icons.person,
-                                      size: _sessions(context, snapshot.data)
-                                              .isEmpty
-                                          ? 48
-                                          : 26,
-                                    ),
-                                    Text(
-                                      'Solo',
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // text and existing session list
-                        if (_sessions(context, snapshot.data).isNotEmpty)
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(top: 20.0, bottom: 4.0),
-                            child: Align(
-                              child: Text(
-                                'or join an existing session',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ),
-                          ),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: _sessions(context, snapshot.data).length,
-                            itemBuilder: (context, i) => Card(
-                              elevation: 1.5,
-                              child: ListTile(
-                                title: Text(
-                                  'Session ' +
-                                      _sessions(context, snapshot.data)[i]
-                                          .joinCode,
-                                ),
-                                // session's unique coloured dot
-                                trailing: Icon(
-                                  Icons.lens,
-                                  color: Provider.of<GameSessionModel>(context,
-                                          listen: false)
-                                      .getSessionColour(
-                                          _sessions(context, snapshot.data)[i]),
-                                ),
-                                onTap: () => Provider.of<GameSessionModel>(
-                                        context,
+                      ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: quiz.sessions.length,
+                        itemBuilder: (context, i) => Card(
+                          elevation: 1.5,
+                          child: ListTile(
+                              title:
+                                  Text('Session ' + quiz.sessions[i].joinCode),
+                              // session's unique coloured dot
+                              trailing: Icon(
+                                Icons.lens,
+                                color: Provider.of<GameSessionModel>(context,
                                         listen: false)
-                                    .joinSessionByPin(
-                                        _sessions(context, snapshot.data)[i]
-                                            .joinCode),
+                                    .getSessionColour(quiz.sessions[i]),
                               ),
-                            ),
-                          ),
+                              onTap: () {
+                                try {
+                                  Provider.of<GameSessionModel>(context,
+                                          listen: false)
+                                      .joinSessionByPin(
+                                          quiz.sessions[i].joinCode);
+                                } on SessionNotFoundException {
+                                  showBasicDialog(
+                                      context, "Session is no longer active");
+                                } catch (err) {
+                                  showErrSnackBar(context, err.toString());
+                                }
+                              }),
                         ),
-                      ],
-                    )
-                  : Container(),
+                      ),
+                    ),
+                  ],
+                );
+              return Container();
+            },
+          ),
         ),
       ),
     );
   }
 
-  List<GameSession> _sessions(BuildContext context, Quiz quiz) =>
-      Provider.of<GameSessionModel>(context, listen: false)
-          .getGroupSessions(quiz);
+  // text and group/solo buttons
+  Widget _joinButtons(BuildContext context, bool noSessions) {
+    return Row(
+      children: [
+        Expanded(
+          child: RaisedButton(
+            onPressed: () async {
+              try {
+                await Provider.of<GameSessionModel>(context, listen: false)
+                    .createSession(quizId, GameSessionType.GROUP);
+              } catch (_) {
+                showBasicDialog(context, "Cannot start session");
+              }
+            },
+            child: Column(
+              children: [
+                Icon(
+                  Icons.people,
+                  size: noSessions ? 48 : 26,
+                ),
+                Text(
+                  'With others',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: RaisedButton(
+            onPressed: () async {
+              await Provider.of<GameSessionModel>(context, listen: false)
+                  .createSession(quizId, GameSessionType.INDIVIDUAL)
+                  .catchError((e) => showErrSnackBar(context, e.toString()));
+            },
+            child: Column(
+              children: [
+                Icon(
+                  Icons.person,
+                  size: noSessions ? 48 : 26,
+                ),
+                Text(
+                  'Solo',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

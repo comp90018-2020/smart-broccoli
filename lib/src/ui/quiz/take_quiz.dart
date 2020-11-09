@@ -48,11 +48,12 @@ class _TakeQuizState extends State<TakeQuiz> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<QuizCollectionModel>(builder: (context, collection, child) {
-      return FutureBuilder(
-          future: Provider.of<QuizCollectionModel>(context, listen: false)
-              .refreshCreatedQuizzes(),
-          builder: (context, snapshot) {
+    return FutureBuilder(
+        future: Provider.of<QuizCollectionModel>(context, listen: false)
+            .refreshAvailableQuizzes(),
+        builder: (context, snapshot) {
+          return Consumer<QuizCollectionModel>(
+              builder: (context, collection, child) {
             log("Joined quiz future ${snapshot.toString()}");
 
             return CustomTabbedPage(
@@ -128,6 +129,6 @@ class _TakeQuizState extends State<TakeQuiz> {
               secondaryBackgroundColour: true,
             );
           });
-    });
+        });
   }
 }

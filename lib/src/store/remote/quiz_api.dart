@@ -61,7 +61,11 @@ class QuizApi {
       return Quiz.fromJson(json.decode(response.body));
 
     if (response.statusCode == 401) throw UnauthorisedRequestException();
-    if (response.statusCode == 403) throw ForbiddenRequestException();
+    if (response.statusCode == 403) {
+      if (response.body.contains("Quiz is not active"))
+        throw QuizDeactivatedException();
+      throw ForbiddenRequestException();
+    }
     if (response.statusCode == 404) throw QuizNotFoundException();
     throw ApiException('Unable to get specified quiz: unknown error occurred');
   }

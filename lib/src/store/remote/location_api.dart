@@ -4,6 +4,7 @@ import 'dart:developer';
 
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
+import 'package:quiver/core.dart';
 
 class LocationData {
   final String name;
@@ -11,6 +12,21 @@ class LocationData {
   final double lat;
 
   LocationData({this.name, this.lon, this.lat});
+
+  factory LocationData.fromJson(Map<String, dynamic> json) =>
+      LocationData(name: json['name'], lat: json['lat'], lon: json['lon']);
+
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{'name': name, 'lat': lat, 'lon': lon};
+
+  operator ==(Object other) {
+    return other is LocationData &&
+        name == other.name &&
+        lat == other.lat &&
+        lon == other.lon;
+  }
+
+  int get hashCode => hash3(name.hashCode, lat.hashCode, lon.hashCode);
 }
 
 class LocationAPI {

@@ -3,12 +3,17 @@
 enum PubSubTopic {
   ROUTE,
   TIMER,
+  // From Firebase
   SESSION_START,
   SESSION_ACTIVATED,
-  GROUP_CHANGE,
-  GROUP_MEMBER_CHANGE,
   QUIZ_UPDATE,
-  GENERAL_CHANGE
+  QUIZ_DELETE,
+  QUIZ_CREATE,
+  GROUP_UPDATE,
+  GROUP_MEMBER_CHANGE,
+  GROUP_DELETE,
+  // For join page
+  NAME_CHANGE
 }
 
 /// Base class for publish subscribe class

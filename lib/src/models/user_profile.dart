@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:smart_broccoli/src/base/helper.dart';
+import 'package:smart_broccoli/src/base/pubsub.dart';
 
 import 'package:smart_broccoli/src/data.dart';
+import 'package:smart_broccoli/src/data/prefs.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
 import 'model_change.dart';
@@ -35,6 +37,15 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
     if (userJson != null) {
       _user = User.fromJson(json.decode(userJson));
     }
+
+    // Name change
+    PubSub().subscribe(PubSubTopic.NAME_CHANGE, _handleNameChange);
+  }
+
+  // Handles NAME_CHANGE (due to context issues arising from page push)
+  void _handleNameChange(dynamic content) {
+    String name = content;
+    updateUser(name: name).catchError((_) => null);
   }
 
   /// Function to get user
@@ -62,6 +73,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       _keyValueStore.setString('user', json.encode(_user.toJson()));
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -76,6 +88,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
         await _picStash.storePic(user.pictureId, picture);
       } on ApiAuthException {
         _authStateModel.checkSession();
+        return Future.error("Authentication failure");
       } on Exception {
         // Ignore
       }
@@ -96,6 +109,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       notifyListeners();
     } on ApiAuthException {
       await _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -112,13 +126,14 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
           _authStateModel.token, await loadFileAndBakeOrientation(path));
     } on ApiAuthException {
       await _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
       return Future.error("Something went wrong");
     }
 
-    _refreshUser();
+    return _refreshUser();
   }
 
   /// Promotes user from joined to registered
@@ -129,13 +144,14 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       await _authStateModel.promote(email, password, name);
     } on ApiAuthException {
       await _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
       return Future.error("Something went wrong");
     }
 
-    _refreshUser();
+    return _refreshUser();
   }
 
   /// When the auth state is updated
@@ -143,6 +159,44 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
     if (!_authStateModel.inSession) {
       this._user = null;
       this._picStash.clear();
+    } else {
+      getNotificationPrefs();
+    }
+  }
+
+  Future<NotificationPrefs> getNotificationPrefs() async {
+    final String prefsAsJson = _keyValueStore.getString('prefs');
+    if (prefsAsJson != null) {
+      return NotificationPrefs.fromJson(json.decode(prefsAsJson));
+    }
+
+    try {
+      final NotificationPrefs prefs =
+          await _userApi.getNotificationPrefs(_authStateModel.token);
+      _keyValueStore.setString('prefs', json.encode(prefs.toJson()));
+      return prefs;
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
+    }
+  }
+
+  Future<void> setNotificationPrefs(NotificationPrefs prefs) async {
+    try {
+      prefs.timezone = DateTime.now().timeZoneName;
+      await _userApi.setNotificationPrefs(_authStateModel.token, prefs);
+      _keyValueStore.setString('prefs', json.encode((prefs).toJson()));
+    } on ApiAuthException {
+      _authStateModel.checkSession();
+      return Future.error("Authentication failure");
+    } on ApiException catch (e) {
+      return Future.error(e.toString());
+    } on Exception {
+      return Future.error("Something went wrong");
     }
   }
 }
