@@ -115,7 +115,7 @@ class AuthApi {
         http.Request('DELETE', Uri.parse('$AUTH_URL/firebase'));
     request.bodyFields = {'token': firebaseToken};
     final http.StreamedResponse res = await _http.send(request);
-    if (res.statusCode == 200) return;
+    if (res.statusCode == 204) return;
     return ApiException("Cannot delete token");
   }
 }

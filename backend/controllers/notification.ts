@@ -19,6 +19,9 @@ export const addToken = async (
 
     try {
         if (!oldToken) {
+            // Delete token (if in db)
+            await Token.destroy({ where: { scope: "firebase", token } });
+
             // New token
             const [created] = await Token.upsert({
                 token: token,
