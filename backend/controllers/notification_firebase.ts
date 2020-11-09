@@ -34,7 +34,7 @@ export const buildNotificationMessage = (
         },
         android: {
             ttl: ttlSeconds * 1000,
-            priority: "normal",
+            priority: "high",
         },
         apns: {
             payload: {
@@ -50,7 +50,6 @@ export const buildNotificationMessage = (
             title: title,
             body: body,
         };
-        message["android"]["notification"] = { clickAction: type };
     }
     return message;
 };

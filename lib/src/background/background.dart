@@ -80,7 +80,7 @@ void callbackDispatcher() {
           try {
             await userApi.setFree(token, calendarFree, free);
           } catch (e) {
-            log(e);
+            log(e.toString());
           }
 
           // Send status to API (API always needs status)

@@ -20,6 +20,9 @@ jobs:
       with:
         channel: 'stable'
 
+    - run: zip -r source.zip .
+      if: github.ref == 'refs/heads/master'
+
     - name: Check formatting
       run: flutter format lib/ && git diff --exit-code
 
@@ -30,22 +33,26 @@ jobs:
     - run: flutter build apk 2>&1 | tee compile.txt
       if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dependabot/gradle/android')
 
-    - run: sudo apt-get install -y pango1.0
-      if: github.ref == 'refs/heads/master'
-
-    - run: pango-view --font=mono -qo compile.png compile.txt
-      if: github.ref == 'refs/heads/master'
+    - if: github.ref == 'refs/heads/master'
+      run: |
+        sudo apt-get install -y pango1.0
+        pango-view --font=mono -qo compile.png compile.txt
 
     - run: git log > commit_logs.txt
+      if: github.ref == 'refs/heads/master'
+
+    - run: cp build/app/outputs/apk/release/app-release.apk app.apk
       if: github.ref == 'refs/heads/master'
 
     - name: Save artifacts
       uses: actions/upload-artifact@v2
       if: github.ref == 'refs/heads/master'
       with:
-        name: build_output
+        name: "Group W01_10-4 Programming Project Submission"
         path: |
-          build/app/outputs/apk/*/app-release.apk
+          app.apk
           compile.png
           commit_logs.txt
-
+          submission.txt
+          contributions.pdf
+          source.zip
