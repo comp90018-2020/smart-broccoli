@@ -379,8 +379,9 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     int groupId = GroupUpdatePayload.fromJson(jsonDecode(content)).groupId;
     // If members are not loaded, do nothing
     if (!_groupMembers.containsKey(groupId)) return;
-    _refreshGroupMembers(groupId).catchError((_) => null);
-    notifyListeners();
+    _refreshGroupMembers(groupId).then((_) {
+      notifyListeners();
+    }).catchError((_) => null);
   }
 
   void authUpdated() {
