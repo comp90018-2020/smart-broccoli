@@ -8,6 +8,7 @@ import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/background/background_calendar.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/base/firebase.dart';
+import 'package:smart_broccoli/src/base/firebase_session_handler.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
@@ -55,8 +56,9 @@ void main() async {
   final GameSessionModel gameSessionModel =
       GameSessionModel(authStateModel, quizCollectionModel, userRepo);
 
+  final LocalNotification localNotification = LocalNotification();
   await Firebase.initializeApp();
-  FirebaseNotification();
+  FirebaseNotification.initialise(localNotification);
 
   runApp(
     MultiProvider(
@@ -118,6 +120,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     widget.pubSub
         .subscribe(PubSubTopic.ROUTE, (routeArgs) => navigate(routeArgs));
+    widget.pubSub
+        .subscribe(PubSubTopic.SESSION_START, _handleNotificationSelection);
 
     // Refresh user sessions on startup
     Provider.of<GameSessionModel>(context, listen: false)
@@ -191,11 +195,34 @@ class _MyAppState extends State<MyApp> {
       theme: SmartBroccoliTheme.themeData,
       navigatorKey: _mainNavigatorKey,
       onGenerateRoute: router.generator,
-      onGenerateInitialRoutes: (route) {
+      onGenerateInitialRoutes: (String route) {
+        if (route.contains("session"))
+          return [
+            router.generator(RouteSettings(name: '/take_quiz')),
+            router.generator(RouteSettings(name: route))
+          ];
         return [router.generator(RouteSettings(name: route))];
       },
-      initialRoute: state.inSession ? '/take_quiz' : '/auth',
+      initialRoute: getInitialRoute(inSession),
     );
+  }
+
+  // Handles startup
+  String getInitialRoute(bool inSession) {
+    if (!inSession) return '/auth';
+    // If there the user has clicked on a notification
+    var startMessage = FirebaseSessionHandler().getSessionStartMessage();
+    if (startMessage == null) return '/take_quiz';
+    return '/session/start/quiz/${startMessage.quizId}';
+  }
+
+  // Handle when notification is clicked
+  void _handleNotificationSelection(dynamic content) {
+    Navigator.of(_mainNavigatorKey.currentContext)
+        .pushNamed("/session/start/quiz/$content")
+        .catchError((error) {
+      throw Exception(error);
+    });
   }
 }
 

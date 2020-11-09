@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:smart_broccoli/src/base/firebase_messages.dart';
+import 'package:smart_broccoli/src/base/firebase_session_handler.dart';
 import 'package:smart_broccoli/src/base/pubsub.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -17,12 +20,9 @@ class FirebaseNotification {
   // Firebase messaging instance
   FirebaseMessaging _messaging = FirebaseMessaging.instance;
   // Instanse used to show the notification when app is foreground
-  LocalNotification localNotification = LocalNotification();
+  LocalNotification localNotification;
 
-  static final FirebaseNotification _singleton =
-      FirebaseNotification._internal();
-
-  FirebaseNotification._internal() {
+  FirebaseNotification._internal(LocalNotification localNotification) {
     // Request notification permissions
     _requestPermission();
     // Listen on notification when app is in foreground
@@ -31,7 +31,14 @@ class FirebaseNotification {
     _onBackgroudMessage();
   }
 
+  static FirebaseNotification _singleton;
+
+  static initialise(LocalNotification localNotification) async {
+    _singleton = FirebaseNotification._internal(localNotification);
+  }
+
   factory FirebaseNotification() {
+    if (_singleton == null) throw Exception("Not initialised");
     return _singleton;
   }
 
@@ -62,11 +69,13 @@ class FirebaseNotification {
         String data = message.data['data'];
 
         // Publish topics
-        if (type == "SESSION_START")
+        if (type == "SESSION_START") {
           // A quiz recommendation,
           // data like quizId will be found in data, same as below
-          PubSub().publish(PubSubTopic.SESSION_START, arg: data);
-        else if (type == "SESSION_ACTIVATED")
+          SessionStart start = SessionStart.fromJson(jsonDecode(data));
+          int quizId = start.quizId;
+          PubSub().publish(PubSubTopic.SESSION_START, arg: quizId);
+        } else if (type == "SESSION_ACTIVATED")
           // Session has been activated
           PubSub().publish(PubSubTopic.SESSION_ACTIVATED, arg: data);
         else if (type == "QUIZ_UPDATE")
@@ -91,8 +100,8 @@ class FirebaseNotification {
 
       // When app is on foreground, this is needed to show notification
       if (message.notification != null) {
-        localNotification.displayNotification(
-            '${message.notification.title}', message.notification.body);
+        localNotification.displayNotification('${message.notification.title}',
+            message.notification.body, message.data['data']);
       }
     });
   }
@@ -114,7 +123,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class LocalNotification {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-
   static const CHANNEL_ID = 'SmartBroccoliChannelID';
   static const CHANNEL_NAME = 'SmartBroccoliChannel';
   static const CHANNEL_DESC = 'Notification channel of SmartBroccoli';
@@ -160,8 +168,11 @@ class LocalNotification {
     // Required in documentation
   }
 
-  Future selectNotification(String payload) async {
-    // May use
+  Future selectNotification(String data) async {
+    SessionStart start = SessionStart.fromJson(jsonDecode(data));
+    int quizId = start.quizId;
+    FirebaseSessionHandler().setSessionStartMessage(start);
+    PubSub().publish(PubSubTopic.SESSION_START, arg: quizId);
   }
 
   void _askForApplePermissions() async {
@@ -186,7 +197,7 @@ class LocalNotification {
         );
   }
 
-  void displayNotification(String title, String body) async {
+  void displayNotification(String title, String body, String data) async {
     // Set notificaiton
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(CHANNEL_ID, CHANNEL_NAME, CHANNEL_DESC,
@@ -197,6 +208,6 @@ class LocalNotification {
         NotificationDetails(android: androidPlatformChannelSpecifics);
     // Show notication
     await _flutterLocalNotificationsPlugin
-        .show(0, title, body, platformChannelSpecifics, payload: 'item x');
+        .show(0, title, body, platformChannelSpecifics, payload: data);
   }
 }

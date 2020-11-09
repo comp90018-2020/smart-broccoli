@@ -357,7 +357,7 @@ export const joinSession = async (userId: number, code: string) => {
     // Find session with code
     // @ts-ignore
     const session = await Session.findOne({
-        where: { code, state: { [Op.not]: "ended" } },
+        where: { code, state: { [Op.or]: ["waiting", "active"] } },
         include: [
             // Get group
             {
@@ -396,7 +396,11 @@ export const joinSession = async (userId: number, code: string) => {
     }
 
     // Update SessionParticipant
-    if (session.Users.length > 0 && session.state != "complete") {
+    if (
+        session.Users.length > 0 &&
+        session.state !== "complete" &&
+        session.state !== "lost"
+    ) {
         // Let user rejoin (as they regret leaving...)
         await session.Users[0].SessionParticipant.update({
             state: "joined",
