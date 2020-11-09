@@ -108,15 +108,15 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
       await BackgroundLocation.getPosition().catchError((_) => null);
 
   log("Start Positional Analysis", name: "Backend");
-  log(notificationPrefs.workLocation.toJson().toString(), name: "Backend");
-  log(notificationPrefs.workRadius.toString(), name: "Backend");
 
   /// If in Geofence
   if (position1 == null) return false;
 
   if (notificationPrefs.workLocation != null) {
     /// WELCOME TO THE CODING DANGER ZONE
-    if (notificationPrefs.workSmart != null && notificationPrefs.workRadius != null && notificationPrefs.workLocation != null) {
+    if (notificationPrefs.workSmart != null &&
+        notificationPrefs.workRadius != null &&
+        notificationPrefs.workLocation != null) {
       if (await BackgroundLocation.inGeoFence(notificationPrefs.workLocation,
               position1, notificationPrefs.workRadius) &&
           notificationPrefs.workSmart) {
@@ -132,6 +132,7 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
         return false;
       }
     }
+
     /// End of the coding danger zone
   }
 
@@ -200,16 +201,9 @@ Future<bool> locationCheck(NotificationPrefs notificationPrefs) async {
   }
 }
 
-int onTimeOutLight() {
-  LightSensor.close();
-  return 0;
-}
-
 Future<bool> lightGyro() async {
   // Access Light sensor
-  Duration duration = new Duration(seconds: 10);
-  int lum = await LightSensor.getLightReading()
-      .timeout(duration, onTimeout: onTimeOutLight);
+  int lum = await LightSensor.getLightReading();
   log("Lum $lum", name: "Backend");
   if (lum == null) return false;
 
@@ -260,16 +254,9 @@ bool timeIsBetween(DateTime time, DateTime start, DateTime end) {
   return time.isAfter(start) && time.isBefore(end);
 }
 
-GyroscopeEvent onTimeOutGyro() {
-  Gyro.cancel();
-  return new GyroscopeEvent(0.0, 0.0, 0.0);
-}
-
 Future<bool> checkGyro() async {
   // Check if the phone is stationary and not being used
-  Duration duration = new Duration(seconds: 10);
-  GyroscopeEvent gyroscopeEvent =
-      await Gyro.getGyroEvent().timeout(duration, onTimeout: onTimeOutGyro);
+  GyroscopeEvent gyroscopeEvent = await Gyro.getGyroEvent();
 
   if (gyroscopeEvent == null) return true;
   double x = gyroscopeEvent.x;

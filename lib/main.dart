@@ -37,7 +37,7 @@ void main() async {
   /// Schedule the background task
   /// Default is 15 minutes per refresh
   Workmanager.registerPeriodicTask("1", "backgroundReading",
-      initialDelay: Duration(seconds: 5),
+      initialDelay: Duration(seconds: 10),
       constraints: Constraints(
         networkType: NetworkType.connected,
         requiresBatteryNotLow: true,
