@@ -163,8 +163,7 @@ class UserApi {
   Future<void> setFree(String token, bool calendarFree, bool free) async {
     final http.Response response = await _http.put('$USER_URL/state',
         headers: ApiBase.headers(authToken: token),
-        body:
-            json.encode("{'free': '$free', 'calendarFree': '$calendarFree'}"));
+        body: json.encode({'calendarFree': calendarFree, 'free': free}));
     if (response.statusCode == 200) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();

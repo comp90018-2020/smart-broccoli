@@ -77,7 +77,11 @@ void callbackDispatcher() {
               name: "background");
 
           UserApi userApi = new UserApi();
-          await userApi.setFree(token, calendarFree, free);
+          try {
+            await userApi.setFree(token, calendarFree, free);
+          } catch (e) {
+            log(e);
+          }
 
           // Send status to API (API always needs status)
           log("calendarFree: $calendarFree, free: $free");
