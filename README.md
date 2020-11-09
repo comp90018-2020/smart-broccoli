@@ -22,23 +22,15 @@ smart-broccoli/pubspec.yaml
 Please run ```flutter pub get``` in terminal every time update pubspec.yaml file. 
 
 ## Code Structure
-### Base ```smart-broccoli/lib/src/base```
-* ```/firebase```: 
-* ```/helper```: 
-* ```/pubsub```: 
+### Base 
+```smart-broccoli/lib/src/base``` 
 
-### Data ```smart-broccoli/lib/src/data```
-Contains domain objects and Data Transfer Objects. Including: User, Quiz, Game, Group, Answer and Outcome. Please refer to the file for detailed attributes of each data type defined here.
+### Data 
+```smart-broccoli/lib/src/data```: Contains domain objects and Data Transfer Objects. Including: User, Quiz, Game, Group, Answer and Outcome. Please refer to the file for detailed attributes of each data type defined here.
 
-### Backend ```smart-broccoli/backend```
-* ```/.vscode```: 
-* ```/controllers```: 
-* ```/demo```: 
-* ```/game```: 
-* ```/helpers```: 
-* ```/models```:
-* ```/routers```: 
-* ```/tests```: 
+### Backend 
+```smart-broccoli/backend```: see [README.md](https://github.com/comp90018-2020/smart-broccoli/blob/master/backend/README.md)
+
 
 ### Frontend ```smart-broccoli/lib/src/ui```
 Note: these sub packages are rough grouping of the features for code separation. They do not have one-to-one correspondence with the features defined in our Requirement Document.
@@ -51,33 +43,12 @@ Note: these sub packages are rough grouping of the features for code separation.
 * ```/shared```: Custom components used by all UI pages
 * ```/about```: Acknowledgement and LICENSE UI
 
-### Sensor ```smart-broccoli/lib/src/background```
-* ```/background_calendar```: 
-* ```/background_database```: 
-* ```/background```: 
-* ```/gyro```: 
-* ```/light_sensor```: 
-* ```/location```:
-* ```/network```: 
-
+### Sensor 
+```smart-broccoli/lib/src/background```: Sensors implementation. 
 ### Services 
-```
-smart-broccoli/lib/src/models
-```
-* ```/auth_state```: 
-* ```/group_registry```: 
-* ```/model_change```: 
-* ```/quiz_collection```: 
-* ```/session_model```: 
-* ```/session_tracker```:
-* ```/user_profile```: 
-* ```/user_repository```: 
+```smart-broccoli/lib/src/models```: Used for storing and updating logic state, and be as a middle layer service
+```smart-broccoli/lib/src/store```: Contians APIs that used for data transfer between server and UI pages
 
-```
-smart-broccoli/lib/src/store
-```
-* ```/local```: 
-* ```/remote```: 
 
 ## Building and Running
 ### With Android Studio
