@@ -20,7 +20,7 @@ jobs:
       with:
         channel: 'stable'
 
-    - run: zip -r source.zip .
+    - run: zip -9 -r source.zip .
       if: github.ref == 'refs/heads/master'
 
     - name: Check formatting
