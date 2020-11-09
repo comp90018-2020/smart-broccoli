@@ -58,10 +58,17 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
   List<Question> questions;
 
   /// Sessions
-  final List<GameSession> sessions;
+  final List<GameSession> _sessions;
+
+  /// Active/waiting sessions
+  List<GameSession> get sessions => _sessions
+      .where((session) =>
+          session.state == GameSessionState.ACTIVE ||
+          session.state == GameSessionState.WAITING)
+      .toList();
 
   /// Has sessions?
-  bool get hasSessions => this.sessions.length > 0;
+  bool get hasSessions => this._sessions.length > 0;
 
   /// Whether quiz is complete
   final bool complete;
@@ -100,7 +107,7 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
     this.isActive,
     this.timeLimit,
     this.questions,
-    this.sessions,
+    this._sessions,
     this.complete,
   );
 
@@ -180,7 +187,7 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
     // Live quiz
     if (this._type == QuizType.LIVE) return QuizType.LIVE;
     // Determine if smart session exists (a self-paced quiz with session)
-    var smartSession = this.sessions?.firstWhere(
+    var smartSession = this._sessions?.firstWhere(
         (session) =>
             session.quizType == QuizType.SELF_PACED &&
             session.state != GameSessionState.ENDED &&

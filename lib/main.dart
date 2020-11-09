@@ -59,9 +59,8 @@ void main() async {
   final GameSessionModel gameSessionModel =
       GameSessionModel(authStateModel, quizCollectionModel, userRepo);
 
-  final LocalNotification localNotification = LocalNotification();
   await Firebase.initializeApp();
-  FirebaseNotification.initialise(localNotification);
+  FirebaseNotification();
 
   runApp(
     MultiProvider(
