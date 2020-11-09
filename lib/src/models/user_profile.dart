@@ -144,6 +144,8 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
     if (!_authStateModel.inSession) {
       this._user = null;
       this._picStash.clear();
+    } else {
+      getNotificationPrefs();
     }
   }
 

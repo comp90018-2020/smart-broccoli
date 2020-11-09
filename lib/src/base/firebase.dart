@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:smart_broccoli/src/base/pubsub.dart';
@@ -55,6 +57,7 @@ class FirebaseNotification {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       // If notification contains data
       if (message.data != null) {
+        log(message.data.toString(), name: "Firebase");
         String type = message.data['type'];
         String data = message.data['data'];
 
