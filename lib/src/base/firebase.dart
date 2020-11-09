@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:smart_broccoli/src/base/firebase_messages.dart';
+import 'package:smart_broccoli/src/base/firebase_session_handler.dart';
 import 'package:smart_broccoli/src/base/pubsub.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -166,7 +167,9 @@ class LocalNotification {
   }
 
   Future selectNotification(String data) async {
-    int quizId = SessionStart.fromJson(jsonDecode(data)).quizId;
+    SessionStart start = SessionStart.fromJson(jsonDecode(data));
+    int quizId = start.quizId;
+    FirebaseSessionHandler().setSessionStartMessage(start);
     PubSub().publish(PubSubTopic.SESSION_START, arg: quizId);
   }
 

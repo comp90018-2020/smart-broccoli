@@ -8,6 +8,7 @@ import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/background/background_calendar.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/base/firebase.dart';
+import 'package:smart_broccoli/src/base/firebase_session_handler.dart';
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/models.dart';
 import 'package:smart_broccoli/src/ui/shared/dialog.dart';
@@ -194,11 +195,23 @@ class _MyAppState extends State<MyApp> {
       theme: SmartBroccoliTheme.themeData,
       navigatorKey: _mainNavigatorKey,
       onGenerateRoute: router.generator,
-      onGenerateInitialRoutes: (route) {
+      onGenerateInitialRoutes: (String route) {
+        if (route.contains("session"))
+          return [
+            router.generator(RouteSettings(name: '/take_quiz')),
+            router.generator(RouteSettings(name: route))
+          ];
         return [router.generator(RouteSettings(name: route))];
       },
-      initialRoute: state.inSession ? '/take_quiz' : '/auth',
+      initialRoute: getInitialRoute(inSession),
     );
+  }
+
+  String getInitialRoute(bool inSession) {
+    if (!inSession) return '/auth';
+    var startMessage = FirebaseSessionHandler().getSessionStartMessage();
+    if (startMessage == null) return '/take_quiz';
+    return '/session/start/quiz/${startMessage.quizId}';
   }
 
   // Handle when notification is clicked
