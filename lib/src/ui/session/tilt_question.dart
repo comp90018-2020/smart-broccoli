@@ -496,7 +496,7 @@ class _MyHomePageState extends State<TiltQuestion> {
                           alignment: Alignment.bottomCenter,
                           children: [
                             Container(
-                              alignment: Alignment.topCenter,
+                                alignment: Alignment.topCenter,
                                 child: model.questionHint != null
                                     ? Padding(
                                         padding: const EdgeInsets.only(
@@ -508,7 +508,7 @@ class _MyHomePageState extends State<TiltQuestion> {
                                       )
                                     : Container(height: 16)),
                             Container(
-                                alignment: Alignment.topRight,
+                              alignment: Alignment.topRight,
                               child: !useAccel && model.role != GroupRole.OWNER
                                   ? RaisedButton(
                                       child: Text('Ball Mode'),
