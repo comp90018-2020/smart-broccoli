@@ -21,10 +21,7 @@ class FirebaseNotification {
   // Instanse used to show the notification when app is foreground
   LocalNotification localNotification;
 
-  static final FirebaseNotification _singleton =
-      FirebaseNotification._internal();
-
-  FirebaseNotification._internal() {
+  FirebaseNotification._internal(LocalNotification localNotification) {
     // Request notification permissions
     _requestPermission();
     // Listen on notification when app is in foreground
@@ -33,12 +30,15 @@ class FirebaseNotification {
     _onBackgroudMessage();
   }
 
-  factory FirebaseNotification() {
-    return _singleton;
+  static FirebaseNotification _singleton;
+
+  static initialise(LocalNotification localNotification) async {
+    _singleton = FirebaseNotification._internal(localNotification);
   }
 
-  void initialise(LocalNotification localNotification) {
-    this.localNotification = localNotification;
+  factory FirebaseNotification() {
+    if (_singleton == null) throw Exception("Not initialised");
+    return _singleton;
   }
 
   /// Get firebase token
