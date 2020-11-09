@@ -2,7 +2,7 @@
 
 Fun quiz app for school lecturers and students to interact with each other in and after class. Multiple sensors are used in the app, such as Gyroscope, GPS, Calendar, Wifi and Ambient Light Sensor. 
 
-Please note that this repository was made for educational purposes, as part of assessment for the subject Mobile Computing System Programming (COMP90018). It is not intended for use in production environments.
+Please note that this repository was made for educational purposes, as part of assessment for the subject [Mobile Computing System Programming (COMP90018)](https://handbook.unimelb.edu.au/2020/subjects/comp90018). It is not intended for use in production environments.
 
 ## Prerequisite
 * [Android Studio 4.1](https://developer.android.com/studio)
