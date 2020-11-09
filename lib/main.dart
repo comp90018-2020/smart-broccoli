@@ -207,8 +207,10 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  // Handles startup
   String getInitialRoute(bool inSession) {
     if (!inSession) return '/auth';
+    // If there the user has clicked on a notification
     var startMessage = FirebaseSessionHandler().getSessionStartMessage();
     if (startMessage == null) return '/take_quiz';
     return '/session/start/quiz/${startMessage.quizId}';
