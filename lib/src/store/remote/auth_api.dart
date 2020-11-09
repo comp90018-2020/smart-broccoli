@@ -103,7 +103,8 @@ class AuthApi {
   /// Adds a firebase token to the user
   Future<void> addFirebaseToken(String token, String firebaseToken) async {
     final http.Response res = await _http.post(AUTH_URL + '/firebase',
-        headers: ApiBase.headers(authToken: token));
+        headers: ApiBase.headers(authToken: token),
+        body: jsonEncode(<String, String>{'token': firebaseToken}));
     if (res.statusCode == 200) return;
     return ApiException("Cannot add token");
   }
@@ -114,7 +115,7 @@ class AuthApi {
         http.Request('DELETE', Uri.parse('$AUTH_URL/firebase'));
     request.bodyFields = {'token': firebaseToken};
     final http.StreamedResponse res = await _http.send(request);
-    if (res.statusCode == 200) return;
+    if (res.statusCode == 204) return;
     return ApiException("Cannot delete token");
   }
 }

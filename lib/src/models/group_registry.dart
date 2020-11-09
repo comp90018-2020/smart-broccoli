@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/base/firebase_messages.dart';
 import 'package:smart_broccoli/src/base/pubsub.dart';
 
 import 'package:smart_broccoli/src/data.dart';
@@ -74,6 +75,10 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
   /// Gets a group member's picture.
   Future<String> getGroupMemberPicture(int id) {
     return _userRepo.getUserPicture(id);
+  }
+
+  List<User> getGroupMembersCached(int groupId) {
+    return _groupMembers[groupId];
   }
 
   /// Get a group's members
@@ -368,6 +373,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     _createdGroups.remove(groupId);
     _joinedGroups.remove(groupId);
     notifyListeners();
+    PubSub().publish(PubSubTopic.GROUP_DELETE_ACTIVE, arg: groupId);
   }
 
   // Firebase function to handle GROUP_MEMBER_CHANGE
@@ -375,8 +381,9 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     int groupId = GroupUpdatePayload.fromJson(jsonDecode(content)).groupId;
     // If members are not loaded, do nothing
     if (!_groupMembers.containsKey(groupId)) return;
-    _refreshGroupMembers(groupId).catchError((_) => null);
-    notifyListeners();
+    _refreshGroupMembers(groupId).then((_) {
+      notifyListeners();
+    }).catchError((_) => null);
   }
 
   void authUpdated() {
@@ -389,13 +396,4 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
       _groupMembers = {};
     }
   }
-}
-
-/// Update payload from Firebase
-class GroupUpdatePayload {
-  final int groupId;
-
-  GroupUpdatePayload._internal(this.groupId);
-  factory GroupUpdatePayload.fromJson(Map<String, dynamic> json) =>
-      GroupUpdatePayload._internal(json['groupId']);
 }

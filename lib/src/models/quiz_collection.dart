@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/base/firebase_messages.dart';
 import 'package:smart_broccoli/src/base/helper.dart';
 import 'package:smart_broccoli/src/base/pubsub.dart';
 import 'package:smart_broccoli/src/data.dart';
@@ -114,6 +115,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       }
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on QuizNotFoundException {
       _createdQuizzes.remove(quiz.id);
       _availableQuizzes.remove(quiz.id);
@@ -136,13 +138,12 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
     if (quiz == null || quiz.id == null) return;
     try {
       await _quizApi.deleteQuiz(_authStateModel.token, quiz.id);
-      if (quiz.role == GroupRole.MEMBER)
-        _availableQuizzes.remove(quiz.id);
-      else
-        _createdQuizzes.remove(quiz.id);
+      _availableQuizzes.remove(quiz.id);
+      _createdQuizzes.remove(quiz.id);
       notifyListeners();
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on QuizNotFoundException catch (e) {
       _createdQuizzes.remove(quiz.id);
       _availableQuizzes.remove(quiz.id);
@@ -208,6 +209,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       if (futures.length > 0) await Future.wait(futures);
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on QuizNotFoundException catch (e) {
       _createdQuizzes.remove(quiz.id);
       _availableQuizzes.remove(quiz.id);
@@ -251,6 +253,11 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       _availableQuizzes.remove(quizId);
       notifyListeners();
       return Future.error("Quiz not found");
+    } on QuizDeactivatedException {
+      _createdQuizzes.remove(quizId);
+      _availableQuizzes.remove(quizId);
+      notifyListeners();
+      return Future.error("Quiz deactivated");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -383,9 +390,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
   void _handleQuizUpdate(dynamic content) {
     QuizUpdatePayload payload = QuizUpdatePayload.fromJson(jsonDecode(content));
     int quizId = payload.quizId;
-    // Quiz is not loaded, do nothing
-    if (!_availableQuizzes.containsKey(quizId) &&
-        !_createdQuizzes.containsKey(quizId)) return;
     // _refreshQuiz calls notify
     _refreshQuiz(quizId).catchError((_) => null);
   }
@@ -420,26 +424,4 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       _isCreatedQuizzesLoaded = false;
     }
   }
-}
-
-/// Update payload from Firebase
-class QuizUpdatePayload {
-  final int groupId;
-  final int quizId;
-
-  QuizUpdatePayload._internal(this.groupId, this.quizId);
-  factory QuizUpdatePayload.fromJson(Map<String, dynamic> json) =>
-      QuizUpdatePayload._internal(json['groupId'], json['quizId']);
-}
-
-/// Update payload from Firebase
-class SessionActivatePayload {
-  final int groupId;
-  final int quizId;
-  final int sessionId;
-
-  SessionActivatePayload._internal(this.sessionId, this.groupId, this.quizId);
-  factory SessionActivatePayload.fromJson(Map<String, dynamic> json) =>
-      SessionActivatePayload._internal(
-          json['sessionId'], json['groupId'], json['quizId']);
 }

@@ -78,7 +78,7 @@ class FirebaseNotification {
         else if (type == "QUIZ_CREATE")
           // Quiz has been created
           PubSub().publish(PubSubTopic.QUIZ_CREATE, arg: data);
-        else if (type == "GROUP_MEMBER_CHANGE")
+        else if (type == "GROUP_MEMBER_UPDATE")
           // Group members have changed
           PubSub().publish(PubSubTopic.GROUP_MEMBER_CHANGE, arg: data);
         else if (type == "GROUP_UPDATE")

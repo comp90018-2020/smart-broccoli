@@ -11,7 +11,11 @@ enum PubSubTopic {
   QUIZ_CREATE,
   GROUP_UPDATE,
   GROUP_MEMBER_CHANGE,
-  GROUP_DELETE
+  GROUP_DELETE,
+  // For join page
+  NAME_CHANGE,
+  // For group deletion (while in group page)
+  GROUP_DELETE_ACTIVE
 }
 
 /// Base class for publish subscribe class
