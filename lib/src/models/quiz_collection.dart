@@ -114,6 +114,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       }
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on QuizNotFoundException {
       _createdQuizzes.remove(quiz.id);
       _availableQuizzes.remove(quiz.id);
@@ -143,6 +144,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       notifyListeners();
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on QuizNotFoundException catch (e) {
       _createdQuizzes.remove(quiz.id);
       _availableQuizzes.remove(quiz.id);
@@ -208,6 +210,7 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
       if (futures.length > 0) await Future.wait(futures);
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on QuizNotFoundException catch (e) {
       _createdQuizzes.remove(quiz.id);
       _availableQuizzes.remove(quiz.id);

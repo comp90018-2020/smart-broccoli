@@ -63,6 +63,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       _keyValueStore.setString('user', json.encode(_user.toJson()));
     } on ApiAuthException {
       _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -77,6 +78,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
         await _picStash.storePic(user.pictureId, picture);
       } on ApiAuthException {
         _authStateModel.checkSession();
+        return Future.error("Authentication failure");
       } on Exception {
         // Ignore
       }
@@ -97,6 +99,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       notifyListeners();
     } on ApiAuthException {
       await _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -113,6 +116,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
           _authStateModel.token, await loadFileAndBakeOrientation(path));
     } on ApiAuthException {
       await _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -130,6 +134,7 @@ class UserProfileModel extends ChangeNotifier implements AuthChange {
       await _authStateModel.promote(email, password, name);
     } on ApiAuthException {
       await _authStateModel.checkSession();
+      return Future.error("Authentication failure");
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
