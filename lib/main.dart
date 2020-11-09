@@ -54,7 +54,6 @@ void main() async {
       GroupRegistryModel(authStateModel, userRepo, quizCollectionModel);
   final GameSessionModel gameSessionModel =
       GameSessionModel(authStateModel, quizCollectionModel, userRepo);
-
   await Firebase.initializeApp();
   FirebaseNotification();
 

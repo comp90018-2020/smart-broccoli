@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:smart_broccoli/src/base/firebase_messages.dart';
 import 'package:smart_broccoli/src/base/pubsub.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -17,7 +19,7 @@ class FirebaseNotification {
   // Firebase messaging instance
   FirebaseMessaging _messaging = FirebaseMessaging.instance;
   // Instanse used to show the notification when app is foreground
-  LocalNotification localNotification = LocalNotification();
+  LocalNotification localNotification;
 
   static final FirebaseNotification _singleton =
       FirebaseNotification._internal();
@@ -33,6 +35,10 @@ class FirebaseNotification {
 
   factory FirebaseNotification() {
     return _singleton;
+  }
+
+  void initialise(LocalNotification localNotification) {
+    this.localNotification = localNotification;
   }
 
   /// Get firebase token
@@ -91,8 +97,8 @@ class FirebaseNotification {
 
       // When app is on foreground, this is needed to show notification
       if (message.notification != null) {
-        localNotification.displayNotification(
-            '${message.notification.title}', message.notification.body);
+        localNotification.displayNotification('${message.notification.title}',
+            message.notification.body, message.data['data']);
       }
     });
   }
@@ -114,7 +120,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class LocalNotification {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-
   static const CHANNEL_ID = 'SmartBroccoliChannelID';
   static const CHANNEL_NAME = 'SmartBroccoliChannel';
   static const CHANNEL_DESC = 'Notification channel of SmartBroccoli';
@@ -160,8 +165,9 @@ class LocalNotification {
     // Required in documentation
   }
 
-  Future selectNotification(String payload) async {
-    PubSub().publish(PubSubTopic.SESSION_START, arg: payload);
+  Future selectNotification(String data) async {
+    int quizId = SessionStart.fromJson(jsonDecode(data)).quizId;
+    PubSub().publish(PubSubTopic.SESSION_START, arg: quizId);
   }
 
   void _askForApplePermissions() async {
@@ -186,7 +192,7 @@ class LocalNotification {
         );
   }
 
-  void displayNotification(String title, String body) async {
+  void displayNotification(String title, String body, String data) async {
     // Set notificaiton
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(CHANNEL_ID, CHANNEL_NAME, CHANNEL_DESC,
@@ -197,6 +203,6 @@ class LocalNotification {
         NotificationDetails(android: androidPlatformChannelSpecifics);
     // Show notication
     await _flutterLocalNotificationsPlugin
-        .show(0, title, body, platformChannelSpecifics, payload: 'item x');
+        .show(0, title, body, platformChannelSpecifics, payload: data);
   }
 }
