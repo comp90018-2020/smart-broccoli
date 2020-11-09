@@ -24,9 +24,9 @@ Please run ```flutter pub get``` in terminal every time update pubspec.yaml file
 
 ## Code Structure
 ### Base ```smart-broccoli/lib/src/base```
-1. ```/firebase```: 
-2. ```/helper```: 
-3. ```/pubsub```: 
+* ```/firebase```: 
+* ```/helper```: 
+* ```/pubsub```: 
 
 ### Data ```smart-broccoli/lib/src/data```
 Contains domain objects and Data Transfer Objects. Including: User, Quiz, Game, Group, Answer and Outcome. Please refer to the file for detailed attributes of each data type defined here.
