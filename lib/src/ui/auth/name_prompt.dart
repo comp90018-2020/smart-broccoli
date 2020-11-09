@@ -27,14 +27,6 @@ class _NamePromptState extends State<NamePrompt> {
     super.dispose();
   }
 
-  // Prevent setState error resulting from auth -> login transition
-  @override
-  void setState(fn) {
-    if (mounted) {
-      super.setState(fn);
-    }
-  }
-
   @override
   Widget build(BuildContext context) => CenteredPage(
         title: "Join",
@@ -106,9 +98,9 @@ class _NamePromptState extends State<NamePrompt> {
       await setName();
     } catch (err) {
       showErrSnackBar(context, err.toString());
-    }
 
-    // Enable button
-    setState(() => _joinButtonClicked = false);
+      // Enable button
+      setState(() => _joinButtonClicked = false);
+    }
   }
 }
