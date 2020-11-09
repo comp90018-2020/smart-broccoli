@@ -55,6 +55,7 @@ class FirebaseNotification {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       // If notification contains data
       if (message.data != null) {
+        print(message.data);
         String type = message.data['type'];
         String data = message.data['data'];
 
