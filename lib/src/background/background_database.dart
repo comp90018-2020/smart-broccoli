@@ -96,6 +96,7 @@ class BackgroundDatabase {
     } catch (e) {
       print(e);
     }
+    return null;
   }
 
   // A method that retrieves all the events from the events table.
