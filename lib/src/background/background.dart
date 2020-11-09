@@ -11,6 +11,7 @@ import 'package:smart_broccoli/src/background/light_sensor.dart';
 import 'package:smart_broccoli/src/background/network.dart';
 import 'package:smart_broccoli/src/data/prefs.dart';
 import 'package:smart_broccoli/src/local.dart';
+import 'package:smart_broccoli/src/remote.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'gyro.dart';
@@ -33,6 +34,30 @@ void callbackDispatcher() {
             notificationPrefs =
                 NotificationPrefs.fromJson(json.decode(prefsAsJson));
           }
+          if (token == null) {
+            break;
+          }
+          if (notificationPrefs == null) {
+            break;
+          }
+
+          DateTime dateTime = new DateTime.now();
+
+          List<bool> dayPerfsList = notificationPrefs.dayPrefs.getPrefs();
+
+          if(!dayPerfsList[dateTime.weekday]){
+            log("User is busy today as mentioned in perfs",name:"background");
+            UserApi userApi = new UserApi();
+            userApi.setFree(token, false, false);
+            break;
+          }
+
+
+
+
+
+          // todo if(notificationPrefs.dayPrefs)
+
           print(token);
           print(notificationPrefs);
 
@@ -48,20 +73,30 @@ void callbackDispatcher() {
           // Check calendar
           // TODO: open db here and try catch
           // If catch fails, calendarFree = true
-          if (!(await checkCalendar(db))) {
-            calendarFree = false;
+          try {
+            if (!(await checkCalendar(db))) {
+              calendarFree = false;
+            }
+          } catch(e){
+            calendarFree = true;
           }
+
           // TODO: close db here
 
+          await db.closeDB();
+
           // Check wifi
-          if (await Network.workWifiMatch("blabh blah")) {
+          if (await Network.workWifiMatch("HAHAHAHAHA") && notificationPrefs.workSmart && notificationPrefs.workSSID) {
             free = false;
           }
 
           /// Check location sensitive issues
-          if (free && !(await locationCheck(db))) {
+          if (free && !(await locationCheck(db, notificationPrefs))) {
             free = false;
           }
+
+          UserApi userApi = new UserApi();
+          userApi.setFree(token, calendarFree, free);
 
           // Send status to API (API always needs status)
           log("calendarFree: $calendarFree, free: $free");
@@ -81,7 +116,13 @@ void callbackDispatcher() {
 }
 
 /// Location sensitive functions
-Future<bool> locationCheck(BackgroundDatabase db) async {
+/// returns true if the user is free
+Future<bool> locationCheck(
+    BackgroundDatabase db, NotificationPrefs notificationPrefs) async {
+  await BackgroundDatabase.init();
+
+
+
   /// Get current long lat
   Position position1 =
       await BackgroundLocation.getPosition().catchError((_) => null);
@@ -89,15 +130,12 @@ Future<bool> locationCheck(BackgroundDatabase db) async {
 
   /// If in Geofence
   if (position1 == null) return false;
-  if (await BackgroundLocation.inGeoFence(geoFenceList, position1, 1)) {
+  if (await BackgroundLocation.inGeoFence(geoFenceList, position1, notificationPrefs.workRadius)) {
     log("The user is in a geofence return 1", name: "Backend");
     return true;
   }
 
-  // /// Foreground test code
-  // LocationAPI fl = new LocationAPI();
-  // await fl.queryLonLat(position1.longitude, position1.latitude);
-  // await fl.queryString("Melbourne");
+  db.closeDB();
 
   /// Idle for 30 seconds
   Duration duration = new Duration(seconds: 30);
@@ -113,24 +151,25 @@ Future<bool> locationCheck(BackgroundDatabase db) async {
       position1.longitude, position2.latitude, position2.longitude);
   log("Distance" + distance.toString(), name: "Backend");
 
-  /// Determine if the user has moved about 100 m in 30 + a few seconds
+  /// Determine if the user has moved about 50 m in 30 + a few seconds
   /// Todo add perf logic
   /// If the user is moving
-  if (distance > 100) {
-    log("The user is on a train", name: "Backend TODO");
+  if (distance > 50) {
+    log("The user is Moving", name: "Backenk");
     // Check if on train
-    if ((await BackgroundLocation.onTrain(position2))) {
-      log("The user is on a train", name: "Backend TODO");
+    if ((await BackgroundLocation.onTrain(position2)) &&
+        notificationPrefs.allowOnCommute) {
+      log("The user is on a train send notif", name: "Backend");
 
       /// If allow prompts on move or not logic here
-      return false;
+      return true;
     }
 
     /// Not on train and moving
     /// Check if allow prompts on the move
     else {
-      log("Not on a train and moving", name: "Backend TODO");
-      return false;
+      log("Not on a train and moving", name: "Backend");
+      return notificationPrefs.allowOnTheMove;
     }
   }
 
@@ -143,21 +182,21 @@ Future<bool> locationCheck(BackgroundDatabase db) async {
     if (data != null &&
         (data.contains("office") ||
             data.contains("commercial") ||
-            data.contains("gym") ||
+            data.contains("fitness") ||
             data.contains("park"))) {
       // Return 0
       log("The defult location is GOOGLE HQ", name: "Backend-NOTE");
       log("We are at a Do not send notif area", name: "Backend");
       return false;
     } else {
-      return lightGyro();
+      return lightGyro(notificationPrefs);
     }
   }
 }
 
-Future<bool> lightGyro() async {
+Future<bool> lightGyro(NotificationPrefs notificationPrefs) async {
   // Access Light sensor
-  int lum = await LightSensor.getLightReading().catchError((_) => null);
+  int lum = await LightSensor.getLightReading();
   log("Lum $lum", name: "Backend");
   if (lum == null) return false;
 
@@ -213,9 +252,7 @@ bool timeIsBetween(DateTime time, DateTime start, DateTime end) {
 
 Future<bool> checkGyro() async {
   // Check if the phone is stationary and not being used
-  GyroscopeEvent gyroscopeEvent =
-      await Gyro.getGyroEvent().catchError((_) => null);
-  log("Gyro Data Raw: " + gyroscopeEvent.toString(), name: "Backend");
+  GyroscopeEvent gyroscopeEvent = await Gyro.getGyroEvent();
   if (gyroscopeEvent == null) return true;
 
   double x = gyroscopeEvent.x;

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_broccoli/router.dart';
 import 'package:smart_broccoli/src/background/background.dart';
 import 'package:smart_broccoli/src/background/background_calendar.dart';
+import 'package:smart_broccoli/src/background/foreground.dart';
 import 'package:smart_broccoli/src/base.dart';
 import 'package:smart_broccoli/src/base/firebase.dart';
 import 'package:smart_broccoli/src/local.dart';
@@ -19,6 +20,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await _checkPermissions();
+  // await startForegroundService();
   await BackgroundCalendar.saveCalendarData();
 
   /// Initialise background services

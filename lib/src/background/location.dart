@@ -17,6 +17,7 @@ class BackgroundLocation {
     } catch (err) {
       return Future.error(err.toString());
     }
+
   }
 
   // Placemark info
