@@ -20,13 +20,14 @@ void main() async {
 
   // Location, calendar, storage locations
   await _checkPermissions();
+
   // Save calendar (since calendar does not work in background)
-  await BackgroundCalendar.saveCalendarData();
+  BackgroundCalendar.saveCalendarData();
 
   /// Initialise background services
   Workmanager.initialize(
     callbackDispatcher,
-    isInDebugMode: true,
+    isInDebugMode: false,
   );
 
   // Cancel all ongoing background tasks upon running the app
@@ -35,7 +36,7 @@ void main() async {
   /// Schedule the background task
   /// Default is 15 minutes per refresh
   Workmanager.registerPeriodicTask("1", "backgroundReading",
-      initialDelay: Duration(seconds: 10),
+      initialDelay: Duration(seconds: 60),
       constraints: Constraints(
         networkType: NetworkType.connected,
         requiresBatteryNotLow: true,
