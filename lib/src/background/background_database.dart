@@ -12,12 +12,12 @@ class BackgroundDatabase {
   BackgroundDatabase._internal(this.db);
 
   Future<void> closeDB() async {
-    if(db == null){
+    if (db == null) {
       print("Null database");
       return;
     }
 
-    if(!db.isOpen) {
+    if (!db.isOpen) {
       await db.close();
     }
   }
@@ -93,7 +93,7 @@ class BackgroundDatabase {
           end: maps[i]['end'],
         );
       });
-    } catch(e){
+    } catch (e) {
       print(e);
     }
   }
