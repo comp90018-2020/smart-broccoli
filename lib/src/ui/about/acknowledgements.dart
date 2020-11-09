@@ -29,6 +29,10 @@ const _libs = [
     'title': 'flutter/plugins/image_picker',
     'path': '$_license_dir/image_picker'
   },
+  {
+    'title': 'ChangJoo-Park/flutter_foreground_plugin',
+    'path': '$_license_dir/flutter_foreground_plugin'
+  },
 
   {'title': 'brendan-duncan/image', 'path': '$_license_dir/image'},
   {'title': 'leisim/auto_size_text', 'path': '$_license_dir/auto_size_text'},
