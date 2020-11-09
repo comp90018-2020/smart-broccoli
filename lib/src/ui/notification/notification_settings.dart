@@ -106,7 +106,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                             icon: new SettingsIcon(
                                 icon: Icons.timer_off, color: Colors.blue),
                             onSelect: (value, index) {
-                              setState(() => _copy.minWindow = value);
+                              setState(() => _copy.minWindow =
+                                  _minWindowList[index].value);
                               _save(context);
                             },
                             context: context,
@@ -129,7 +130,8 @@ class _NotificationSettingState extends State<NotificationSetting> {
                               color: Colors.green,
                             ),
                             onSelect: (value, index) {
-                              setState(() => _copy.maxPerDay = value);
+                              setState(() => _copy.maxPerDay =
+                                  _maxNumberList[index].value);
                               _save(context);
                             },
                             context: context,
