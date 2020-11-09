@@ -62,7 +62,7 @@ Note: these sub packages are rough grouping of the features for code separation.
 7. ```/network```: 
 
 ### Services 
-####```smart-broccoli/lib/src/models```
+* ```smart-broccoli/lib/src/models```
 1. ```/auth_state```: 
 2. ```/group_registry```: 
 3. ```/model_change```: 
@@ -72,7 +72,7 @@ Note: these sub packages are rough grouping of the features for code separation.
 7. ```/user_profile```: 
 8. ```/user_repository```: 
 
-####```smart-broccoli/lib/src/store```
+* ```smart-broccoli/lib/src/store```
 1. ```/local```: 
 2. ```/remote```: 
 
