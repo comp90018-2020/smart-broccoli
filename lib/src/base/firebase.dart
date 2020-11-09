@@ -20,9 +20,10 @@ class FirebaseNotification {
   // Firebase messaging instance
   FirebaseMessaging _messaging = FirebaseMessaging.instance;
   // Instanse used to show the notification when app is foreground
-  LocalNotification localNotification;
+  LocalNotification _localNotification;
 
   FirebaseNotification._internal(LocalNotification localNotification) {
+    _localNotification = localNotification;
     // Request notification permissions
     _requestPermission();
     // Listen on notification when app is in foreground
@@ -100,7 +101,7 @@ class FirebaseNotification {
 
       // When app is on foreground, this is needed to show notification
       if (message.notification != null) {
-        localNotification.displayNotification('${message.notification.title}',
+        _localNotification.displayNotification('${message.notification.title}',
             message.notification.body, message.data['data']);
       }
     });
