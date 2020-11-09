@@ -77,6 +77,7 @@ export default class CustomStorage implements multer.StorageEngine {
         callback: (error: Error) => void
     ) {
         const filePath = file.path;
+        if (!filePath) return;
 
         delete file.destination;
         delete file.filename;
