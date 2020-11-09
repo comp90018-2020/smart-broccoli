@@ -19,13 +19,16 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Location, calendar, storage locations
   await _checkPermissions();
-  await BackgroundCalendar.saveCalendarData();
+
+  // Save calendar (since calendar does not work in background)
+  BackgroundCalendar.saveCalendarData();
 
   /// Initialise background services
   Workmanager.initialize(
     callbackDispatcher,
-    isInDebugMode: true,
+    isInDebugMode: false,
   );
 
   // Cancel all ongoing background tasks upon running the app
@@ -34,7 +37,7 @@ void main() async {
   /// Schedule the background task
   /// Default is 15 minutes per refresh
   Workmanager.registerPeriodicTask("1", "backgroundReading",
-      initialDelay: Duration(seconds: 30),
+      initialDelay: Duration(seconds: 5),
       constraints: Constraints(
         networkType: NetworkType.connected,
         requiresBatteryNotLow: true,

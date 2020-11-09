@@ -29,7 +29,7 @@ class NotificationPrefs {
   bool allowSelfPacedIfCalendar;
 
   /// SSID of work wifi
-  bool workSSID;
+  String workSSID;
 
   /// Lat/long (and possibly name) of work
   LocationData workLocation;

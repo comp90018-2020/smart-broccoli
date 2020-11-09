@@ -12,7 +12,14 @@ class BackgroundDatabase {
   BackgroundDatabase._internal(this.db);
 
   Future<void> closeDB() async {
-    await db.close();
+    if (db == null) {
+      print("Null database");
+      return;
+    }
+
+    if (!db.isOpen) {
+      await db.close();
+    }
   }
 
   // Initialise the database
@@ -74,17 +81,22 @@ class BackgroundDatabase {
 
   // A method that retrieves all the  Calendar events from the events table.
   Future<List<CalEvent>> getEvents() async {
-    // Query the table for all The events.
-    final List<Map<String, dynamic>> maps = await db.query('events');
+    try {
+      // Query the table for all The events.
+      final List<Map<String, dynamic>> maps = await db.query('events');
 
-    // Convert the List<Map<String, dynamic> into a List<CalEvents>.
-    return List.generate(maps.length, (i) {
-      return CalEvent(
-        id: maps[i]['id'],
-        start: maps[i]['start'],
-        end: maps[i]['end'],
-      );
-    });
+      // Convert the List<Map<String, dynamic> into a List<CalEvents>.
+      return List.generate(maps.length, (i) {
+        return CalEvent(
+          id: maps[i]['id'],
+          start: maps[i]['start'],
+          end: maps[i]['end'],
+        );
+      });
+    } catch (e) {
+      print(e);
+    }
+    return null;
   }
 
   // A method that retrieves all the events from the events table.

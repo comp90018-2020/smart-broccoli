@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'package:smart_broccoli/src/data/prefs.dart';
-
 import 'package:smart_broccoli/src/data/user.dart';
 
 import 'api_base.dart';
@@ -163,7 +163,7 @@ class UserApi {
   Future<void> setFree(String token, bool calendarFree, bool free) async {
     final http.Response response = await _http.put('$USER_URL/state',
         headers: ApiBase.headers(authToken: token),
-        body: {'free': free, 'calendarFree': calendarFree});
+        body: json.encode({'calendarFree': calendarFree, 'free': free}));
     if (response.statusCode == 200) return;
     if (response.statusCode == 401) throw UnauthorisedRequestException();
     if (response.statusCode == 403) throw ForbiddenRequestException();
