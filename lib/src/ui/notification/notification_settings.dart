@@ -12,6 +12,7 @@ import 'package:selection_picker/selection_item.dart' as day;
 import 'package:selection_picker/selectionpicker.dart';
 import 'package:smart_broccoli/src/data/prefs.dart';
 import 'package:smart_broccoli/src/models.dart';
+import 'package:smart_broccoli/src/ui/shared/dialog.dart';
 import 'package:smart_broccoli/src/ui/shared/indicators.dart';
 import 'package:smart_broccoli/src/ui/shared/page.dart';
 import 'package:toast/toast.dart';
@@ -233,25 +234,27 @@ class _NotificationSettingState extends State<NotificationSetting> {
                       ),
 
                       // Address setting
-                      SettingsNavigatorButton(
-                        title: 'Work address',
-                        titleStyle: TextStyle(fontSize: 16),
-                        icon: new SettingsIcon(
-                          icon: Icons.location_on_outlined,
-                          color: Colors.orange,
+                      Builder(
+                        builder: (context) => SettingsNavigatorButton(
+                          title: 'Work address',
+                          titleStyle: TextStyle(fontSize: 16),
+                          icon: new SettingsIcon(
+                            icon: Icons.location_on_outlined,
+                            color: Colors.orange,
+                          ),
+                          context: context,
+                          caption: _copy.workLocation == null
+                              ? "Not set"
+                              : _copy.workLocation.name.toString(),
+                          onPressed: () async {
+                            var location = await Navigator.of(context)
+                                .pushNamed("/work_address");
+                            if (location != null) {
+                              setState(() => _copy.workLocation = location);
+                              _save(context);
+                            }
+                          },
                         ),
-                        context: context,
-                        caption: _copy.workLocation == null
-                            ? "Not set"
-                            : _copy.workLocation.name.toString(),
-                        onPressed: () async {
-                          var location = await Navigator.of(context)
-                              .pushNamed("/work_address");
-                          if (location != null) {
-                            setState(() => _copy.workLocation = location);
-                            _save(context);
-                          }
-                        },
                       ),
 
                       // Radius setting
@@ -316,10 +319,9 @@ class _NotificationSettingState extends State<NotificationSetting> {
 
   // Save settings
   void _save(BuildContext context) async {
-    await context
-        .read<UserProfileModel>()
+    await Provider.of<UserProfileModel>(context, listen: false)
         .setNotificationPrefs(_copy)
-        .catchError((err) => showErrSnackBar(context, err.toString()));
+        .catchError((err) => showBasicDialog(context, err.toString()));
   }
 
   /// A switch list tile mimicking the ListTile provided by the package
