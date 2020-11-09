@@ -243,7 +243,7 @@ class _NotificationSettingState extends State<NotificationSetting> {
                         context: context,
                         caption: _copy.workLocation == null
                             ? "Not set"
-                            : _copy.workLocation.toString(),
+                            : _copy.workLocation.name.toString(),
                         onPressed: () async {
                           var location = await Navigator.of(context)
                               .pushNamed("/work_address");
