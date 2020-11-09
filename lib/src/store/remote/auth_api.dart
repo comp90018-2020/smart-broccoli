@@ -103,7 +103,8 @@ class AuthApi {
   /// Adds a firebase token to the user
   Future<void> addFirebaseToken(String token, String firebaseToken) async {
     final http.Response res = await _http.post(AUTH_URL + '/firebase',
-        headers: ApiBase.headers(authToken: token));
+        headers: ApiBase.headers(authToken: token),
+        body: jsonEncode(<String, String>{'token': firebaseToken}));
     if (res.statusCode == 200) return;
     return ApiException("Cannot add token");
   }

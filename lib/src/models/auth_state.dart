@@ -47,7 +47,7 @@ class AuthStateModel extends ChangeNotifier {
     try {
       await _authApi.addFirebaseToken(
           token, await FirebaseNotification().getToken());
-    } catch (err) {
+    } on Exception {
       // Oh well, token cannot be added
     }
   }
@@ -83,7 +83,7 @@ class AuthStateModel extends ChangeNotifier {
     try {
       await _authApi.addFirebaseToken(
           token, await FirebaseNotification().getToken());
-    } catch (err) {
+    } on Exception {
       // Oh well, token cannot be added
     }
   }
