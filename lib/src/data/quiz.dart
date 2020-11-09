@@ -169,7 +169,7 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
 
     if (thisType == otherType) {
       if (this.complete && !other.complete) return 1;
-      if (other.complete && !this.complete) return 0;
+      if (other.complete && !this.complete) return -1;
       return other.updatedTimestamp.compareTo(this.updatedTimestamp);
     } else
       return thisType - otherType;
