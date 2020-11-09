@@ -16,6 +16,7 @@ dependencies:
   firebase_core: ^0.5.1
   firebase_messaging: ^8.0.0-dev.5
   fluro: ^1.7.3
+  flutter_foreground_plugin: ^0.5.0
   flutter_local_notifications: ^3.0.1+2
   flutter_settings:
     git:
