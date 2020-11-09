@@ -260,7 +260,6 @@ class QuizCollectionModel extends ChangeNotifier implements AuthChange {
 
   /// Refreshes list of available quizzes
   Future<bool> refreshAvailableQuizzes({bool refreshIfLoaded = false}) async {
-    print(await _quizApi.getQuizzes(_authStateModel.token));
     // Do not force refresh on start
     if (!_isAvailableQuizzesLoaded && refreshIfLoaded) return true;
     // Get from cache
