@@ -328,6 +328,7 @@ class GroupRegistryModel extends ChangeNotifier implements AuthChange {
     }
     _quizCollectionModel
         .refreshAvailableQuizzes(refreshIfLoaded: true)
+        .then((value) => null)
         .catchError((_) => null);
   }
 

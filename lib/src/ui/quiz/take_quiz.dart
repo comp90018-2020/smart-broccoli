@@ -50,7 +50,7 @@ class _TakeQuizState extends State<TakeQuiz> {
   Widget build(BuildContext context) {
     return FutureBuilder(
         future: Provider.of<QuizCollectionModel>(context, listen: false)
-            .refreshCreatedQuizzes(),
+            .refreshAvailableQuizzes(),
         builder: (context, snapshot) {
           return Consumer<QuizCollectionModel>(
               builder: (context, collection, child) {
