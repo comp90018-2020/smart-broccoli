@@ -60,6 +60,9 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
   /// Sessions
   final List<GameSession> sessions;
 
+  /// Has sessions?
+  bool get hasSessions => this.sessions.length > 0;
+
   /// Whether quiz is complete
   final bool complete;
 

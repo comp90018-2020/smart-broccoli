@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:smart_broccoli/src/base/firebase.dart';
 
 import 'package:smart_broccoli/src/local.dart';
 import 'package:smart_broccoli/src/remote.dart';
@@ -41,6 +42,14 @@ class AuthStateModel extends ChangeNotifier {
     } on Exception {
       return Future.error("Something went wrong");
     }
+
+    // Push firebase token to server
+    try {
+      await _authApi.addFirebaseToken(
+          token, await FirebaseNotification().getToken());
+    } catch (err) {
+      // Oh well, token cannot be added
+    }
   }
 
   Future<void> register(String email, String password, String name) async {
@@ -69,6 +78,14 @@ class AuthStateModel extends ChangeNotifier {
     } on Exception {
       return Future.error("Something went wrong");
     }
+
+    // Push firebase token to server
+    try {
+      await _authApi.addFirebaseToken(
+          token, await FirebaseNotification().getToken());
+    } catch (err) {
+      // Oh well, token cannot be added
+    }
   }
 
   Future<void> checkSession() async {
@@ -90,6 +107,13 @@ class AuthStateModel extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    try {
+      await _authApi.deleteFirebaseToken(
+          token, await FirebaseNotification().getToken());
+    } catch (err) {
+      // Oh well, token cannot be deleted
+    }
+
     try {
       await _authApi.logout(_token);
     } catch (_) {

@@ -99,4 +99,22 @@ class AuthApi {
         headers: ApiBase.headers(authToken: token));
     return res.statusCode == 200;
   }
+
+  /// Adds a firebase token to the user
+  Future<void> addFirebaseToken(String token, String firebaseToken) async {
+    final http.Response res = await _http.post(AUTH_URL + '/firebase',
+        headers: ApiBase.headers(authToken: token));
+    if (res.statusCode == 200) return;
+    return ApiException("Cannot add token");
+  }
+
+  /// Delete firebase token
+  Future<void> deleteFirebaseToken(String token, String firebaseToken) async {
+    http.Request request =
+        http.Request('DELETE', Uri.parse('$AUTH_URL/firebase'));
+    request.bodyFields = {'token': firebaseToken};
+    final http.StreamedResponse res = await _http.send(request);
+    if (res.statusCode == 200) return;
+    return ApiException("Cannot delete token");
+  }
 }

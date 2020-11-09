@@ -172,7 +172,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
     } on ApiAuthException {
       _authStateModel.checkSession();
     } on SessionNotFoundException catch (e) {
-      throw e;
+      return Future.error(e);
     } on ApiException catch (e) {
       return Future.error(e.toString());
     } on Exception {
@@ -196,7 +196,7 @@ class GameSessionModel extends ChangeNotifier implements AuthChange {
       _authStateModel.checkSession();
     } on SessionNotFoundException {
       _quizCollectionModel
-          .refreshAvailableQuizzes(refreshIfLoaded: true)
+          .getQuiz(quiz.id, refresh: true)
           .catchError((_) => null);
       return Future.error("Session no longer exists, refreshing...");
     } on ApiException catch (e) {
