@@ -61,7 +61,7 @@ class Quiz with PendingPicture implements Comparable<Quiz> {
   final List<GameSession> _sessions;
 
   /// Active/waiting sessions
-  List<GameSession> get sessions => sessions
+  List<GameSession> get sessions => _sessions
       .where((session) =>
           session.state == GameSessionState.ACTIVE ||
           session.state == GameSessionState.WAITING)
