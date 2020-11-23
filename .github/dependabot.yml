@@ -4,11 +4,14 @@ updates:
     directory: "/backend"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 0
   - package-ecosystem: "docker"
     directory: "/backend"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 0
   - package-ecosystem: "gradle"
     directory: "/android"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 0
