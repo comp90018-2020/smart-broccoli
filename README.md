@@ -51,6 +51,6 @@ flutter run
 ```
 
 ### Youtube Demo
-<a href="https://youtu.be/FaRWcm23kP4">
+<a href="https://youtu.be/7rVinZTbrKI">
   <img src="screenshot.png" alt="Smart Broccoli" style="max-width:100%;">
 </a>
