@@ -407,7 +407,7 @@ const mkdirp = (path: string) => {
     return new Promise((resolve, reject) => {
         fs.mkdir(path, { recursive: true }, (err) => {
             if (err) return reject(err);
-            return resolve();
+            return resolve(null);
         });
     });
 };

@@ -5,7 +5,7 @@ import fs from "fs";
 const rmdir = (path: string) => {
     return new Promise((resolve) => {
         fs.rmdir(path, { recursive: true }, () => {
-            return resolve();
+            return resolve(null);
         });
     });
 };
