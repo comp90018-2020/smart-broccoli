@@ -13,7 +13,7 @@
   "author": "w01/10-4",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "express": "^4.17.1",
     "express-validator": "^6.6.1",
     "firebase-admin": "^9.2.0",
